@@ -19,6 +19,10 @@ export function displayScore(number: number) {
     });
   }
 
+  if (0.001 > number) {
+    return number.toExponential(precision);
+  }
+
   return number.toPrecision(precision);
 }
 

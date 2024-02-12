@@ -11,9 +11,9 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../helpers/Types";
 import { Transaction } from "../../../../../entities/ITransaction";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { MEMES_CONTRACT } from "../../../../../constants";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
+import { NextGenCollection } from "../../../../../entities/INextgen";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",
@@ -164,7 +164,6 @@ export default function UserPageStatsActivityWallet({
     queryKey: [
       QueryKey.PROFILE_TRANSACTIONS,
       {
-        contract: MEMES_CONTRACT,
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
         wallet: walletsParam,
@@ -173,7 +172,6 @@ export default function UserPageStatsActivityWallet({
     ],
     queryFn: async () => {
       const params: Record<string, string> = {
-        contract: MEMES_CONTRACT,
         wallet: walletsParam,
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
@@ -221,6 +219,21 @@ export default function UserPageStatsActivityWallet({
     },
   });
 
+  const { data: nextgenCollections } = useQuery({
+    queryKey: [QueryKey.NEXTGEN_COLLECTIONS],
+    queryFn: async () => {
+      const nextgenCollectionsResponse = await commonApiFetch<{
+        count: number;
+        page: number;
+        next: any;
+        data: NextGenCollection[];
+      }>({
+        endpoint: "nextgen/collections",
+      });
+      return nextgenCollectionsResponse.data;
+    },
+  });
+
   return (
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
@@ -233,6 +246,7 @@ export default function UserPageStatsActivityWallet({
         profile={profile}
         transactions={data?.data ?? []}
         memes={memes ?? []}
+        nextgenCollections={nextgenCollections ?? []}
         totalPages={totalPages}
         page={pageFilter}
         isFirstLoading={isFirstLoading || isFirstLoadingMemes}

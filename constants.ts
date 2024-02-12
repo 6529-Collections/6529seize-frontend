@@ -40,3 +40,6 @@ export const OPENSEA_STORE_FRONT_CONTRACT =
   "0x495f947276749ce646f68ac8c248420045cb7b5e";
 
 export const OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER = `0x5b3256965e7c3cf26e11fcaf296dfc8807c01073`;
+
+export const NEXTGEN_MEDIA_BASE_URL =
+  "https://media.generator.seize.io/mainnet";

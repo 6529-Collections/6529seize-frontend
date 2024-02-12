@@ -74,6 +74,18 @@ export default function UserPageStatsTags({
     if (!props) {
       return result;
     }
+
+    if (props.nextgen_balance) {
+      result.push({
+        id: "nextgen",
+        title: `NextGen x${formatNumberWithCommasOrDash(
+          props.nextgen_balance
+        )}`,
+        classes:
+          "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
+      });
+    }
+
     if (props.memes_cards_sets) {
       result.push({
         id: "memes_sets",

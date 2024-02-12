@@ -37,6 +37,7 @@ export enum QueryKey {
   WALLET_MINTING_DELEGATIONS = "WALLET_MINTING_DELEGATIONS",
   COLLECTION_ALLOWLIST_PHASES = "COLLECTION_ALLOWLIST_PHASES",
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
+  NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -481,8 +482,7 @@ export default function ReactQueryWrapper({
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,
-      }}
-    >
+      }}>
       {children}
     </ReactQueryWrapperContext.Provider>
   );

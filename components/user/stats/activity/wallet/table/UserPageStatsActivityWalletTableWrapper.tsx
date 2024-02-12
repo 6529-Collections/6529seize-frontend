@@ -7,12 +7,14 @@ import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import CommonCardSkeleton from "../../../../../utils/animation/CommonCardSkeleton";
 import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
+import { NextGenCollection } from "../../../../../../entities/INextgen";
 
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
   profile,
   transactions,
   memes,
+  nextgenCollections,
   totalPages,
   page,
   isFirstLoading,
@@ -24,6 +26,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   readonly profile: IProfileAndConsolidations;
   readonly transactions: Transaction[];
   readonly memes: MemeLite[];
+  readonly nextgenCollections: NextGenCollection[];
   readonly totalPages: number;
   readonly page: number;
   readonly isFirstLoading: boolean;
@@ -70,6 +73,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
               transactions={transactions}
               profile={profile}
               memes={memes}
+              nextgenCollections={nextgenCollections}
             />
             {totalPages > 1 && (
               <CommonTablePagination

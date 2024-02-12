@@ -1,3 +1,4 @@
+import { NextGenCollection } from "../../../../../../entities/INextgen";
 import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
 import { Transaction } from "../../../../../../entities/ITransaction";
 import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
@@ -7,10 +8,12 @@ export default function UserPageStatsActivityWalletTable({
   transactions,
   profile,
   memes,
+  nextgenCollections,
 }: {
   readonly transactions: Transaction[];
   readonly profile: IProfileAndConsolidations;
   readonly memes: MemeLite[];
+  readonly nextgenCollections: NextGenCollection[];
 }) {
   return (
     <div className="tw-px-4 sm:tw-px-6 tw-mt-2 tw-pb-2 tw-inline-block tw-min-w-full tw-align-middle">
@@ -22,6 +25,7 @@ export default function UserPageStatsActivityWalletTable({
               transaction={transaction}
               profile={profile}
               memes={memes}
+              nextgenCollections={nextgenCollections}
             />
           ))}
         </tbody>
