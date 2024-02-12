@@ -4,6 +4,8 @@ import CommonTimeAgo from "../../../../../../utils/CommonTimeAgo";
 import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
 import {
   areEqualAddresses,
+  isGradientsContract,
+  isMemesContract,
   isNextgenContract,
 } from "../../../../../../../helpers/Helpers";
 import {
@@ -195,7 +197,9 @@ export default function UserPageStatsActivityWalletTableRow({
 
   const type = getType();
 
-  const meme = memes.find((m) => m.id === transaction.token_id);
+  const meme = isMemesContract(transaction.contract)
+    ? memes.find((m) => m.id === transaction.token_id)
+    : null;
   const showAnotherSide = [
     TransactionType.PURCHASE,
     TransactionType.SALE,
@@ -225,13 +229,16 @@ export default function UserPageStatsActivityWalletTableRow({
   };
 
   const getLinkContent = () => {
-    let name = meme?.name || "";
+    let name = meme?.name ?? "";
     if (isNextgenContract(transaction.contract)) {
       const normalizedToken = normalizeNextgenTokenID(transaction.token_id);
       const collectionName =
         nextgenCollections.find((c) => c.id === normalizedToken.collection_id)
-          ?.name || `NextGen #${normalizedToken.collection_id}`;
+          ?.name ?? `NextGen #${normalizedToken.collection_id}`;
       name = `${collectionName} #${normalizedToken.token_id}`;
+    }
+    if (isGradientsContract(transaction.contract)) {
+      name = `6529 Gradient #${transaction.token_id}`;
     }
 
     return name;

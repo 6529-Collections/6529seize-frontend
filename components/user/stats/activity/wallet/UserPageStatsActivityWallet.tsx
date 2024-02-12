@@ -169,7 +169,6 @@ export default function UserPageStatsActivityWallet({
     queryKey: [
       QueryKey.PROFILE_TRANSACTIONS,
       {
-        contract: [MEMES_CONTRACT, NEXTGEN_CORE[NEXTGEN_CHAIN_ID]],
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
         wallet: walletsParam,
@@ -178,7 +177,6 @@ export default function UserPageStatsActivityWallet({
     ],
     queryFn: async () => {
       const params: Record<string, string> = {
-        contract: [MEMES_CONTRACT, NEXTGEN_CORE[NEXTGEN_CHAIN_ID]].join(","),
         wallet: walletsParam,
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
