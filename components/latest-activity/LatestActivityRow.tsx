@@ -262,23 +262,21 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <>NextGen #{normalized.collection_id}</>
     );
     const tokenInfo = (
-      <>
-        <a
-          href={`/nextgen/token/${props.tr.token_id}/provenance`}
-          target="_blank"
-          rel="noreferrer">
-          {collectionName} #{normalized.token_id}
-          &nbsp;
-          <Image
-            width={0}
-            height={0}
-            style={{ height: "40px", width: "auto" }}
-            src={`${NEXTGEN_MEDIA_BASE_URL}/png/${props.tr.token_id}`}
-            alt={props.tr.token_id.toString()}
-            className={styles.nftImage}
-          />
-        </a>
-      </>
+      <a
+        href={`/nextgen/token/${props.tr.token_id}/provenance`}
+        target="_blank"
+        rel="noreferrer">
+        {collectionName} #{normalized.token_id}
+        &nbsp;
+        <Image
+          width={0}
+          height={0}
+          style={{ height: "40px", width: "auto" }}
+          src={`${NEXTGEN_MEDIA_BASE_URL}/png/${props.tr.token_id}`}
+          alt={props.tr.token_id.toString()}
+          className={styles.nftImage}
+        />
+      </a>
     );
 
     if (isNullAddress(props.tr.from_address)) {
