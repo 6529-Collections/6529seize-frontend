@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import CommonTimeAgo from "../../../../../../utils/CommonTimeAgo";
 import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
-import { areEqualAddresses } from "../../../../../../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  isNextgenContract,
+} from "../../../../../../../helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
   MANIFOLD,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
+  NEXTGEN_MEDIA_BASE_URL,
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
 } from "../../../../../../../constants";
@@ -19,6 +23,8 @@ import Link from "next/link";
 import EtherscanIcon from "../../../../../utils/icons/EtherscanIcon";
 import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivityWalletTableRowRoyalties";
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
+import { NextGenCollection } from "../../../../../../../entities/INextgen";
+import { normalizeNextgenTokenID } from "../../../../../../nextGen/nextgen_helpers";
 
 export enum TransactionType {
   AIRDROPPED = "AIRDROPPED",
@@ -55,10 +61,12 @@ export default function UserPageStatsActivityWalletTableRow({
   transaction,
   profile,
   memes,
+  nextgenCollections,
 }: {
   readonly transaction: Transaction;
   readonly profile: IProfileAndConsolidations;
   readonly memes: MemeLite[];
+  readonly nextgenCollections: NextGenCollection[];
 }) {
   const getShowRoyalties = (): boolean => {
     if (!transaction.value) {
@@ -210,7 +218,31 @@ export default function UserPageStatsActivityWalletTableRow({
     if (areEqualAddresses(MEMELAB_CONTRACT, transaction.contract)) {
       return `/meme-lab/${transaction.token_id}`;
     }
+    if (isNextgenContract(transaction.contract)) {
+      return `/nextgen/tokens/${transaction.token_id}`;
+    }
     return "";
+  };
+
+  const getLinkContent = () => {
+    let name = meme?.name || "";
+    if (isNextgenContract(transaction.contract)) {
+      const normalizedToken = normalizeNextgenTokenID(transaction.token_id);
+      const collectionName =
+        nextgenCollections.find((c) => c.id === normalizedToken.collection_id)
+          ?.name || `NextGen #${normalizedToken.collection_id}`;
+      name = `${collectionName} #${normalizedToken.token_id}`;
+    }
+
+    return name;
+  };
+
+  const getImageSrc = () => {
+    let src = meme?.icon || "";
+    if (isNextgenContract(transaction.contract)) {
+      src = `${NEXTGEN_MEDIA_BASE_URL}/png/${transaction.token_id}`;
+    }
+    return src;
   };
 
   const showValue = (): boolean => {
@@ -257,14 +289,13 @@ export default function UserPageStatsActivityWalletTableRow({
           <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium">
             <Link
               className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-              href={getPath()}
-            >
-              {meme?.name} (#{transaction.token_id})
+              href={getPath()}>
+              {getLinkContent()}
             </Link>
           </span>
           <img
             className="tw-mx-0.5 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
-            src={meme?.icon ?? ""}
+            src={getImageSrc()}
             alt={meme?.name ?? ""}
           />
           <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-medium">
@@ -285,8 +316,7 @@ export default function UserPageStatsActivityWalletTableRow({
                   aria-label="ethereum"
                   enableBackground="new 0 0 1920 1920"
                   viewBox="0 0 1920 1920"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                  xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="m959.8 80.7-539.7 895.6 539.7-245.3z"
                     fill="#8a92b2"
@@ -330,8 +360,7 @@ export default function UserPageStatsActivityWalletTableRow({
             title="Go to etherscan"
             aria-label="Go to etherscan"
             rel="noopener noreferrer"
-            className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-          >
+            className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
             <span className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
               <EtherscanIcon />
             </span>

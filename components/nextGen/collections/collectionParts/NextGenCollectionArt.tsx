@@ -152,7 +152,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             The Art{" "}
             {totalResultsSet ? (
               <span className="font-color-h font-smaller">
-                (x{totalResults})
+                (x{totalResults.toLocaleString()})
               </span>
             ) : (
               <DotLoader />

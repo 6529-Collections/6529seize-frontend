@@ -1,6 +1,12 @@
 import Link from "next/link";
-import { CollectedCard } from "../../../../entities/IProfile";
-import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
+import {
+  CollectedCard,
+  CollectedCollectionType,
+} from "../../../../entities/IProfile";
+import {
+  formatNumberWithCommasOrDash,
+  isMemeLabContract,
+} from "../../../../helpers/Helpers";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
 export default function UserPageCollectedCard({
@@ -56,13 +62,19 @@ export default function UserPageCollectedCard({
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
                   <span className="tw-text-iron-400">TDH</span>
                   <span className="tw-ml-1 tw-text-iron-50">
-                    {formatNumberWithCommasOrDash(+(card.tdh ?? 0).toFixed(0))}
+                    {card.collection === CollectedCollectionType.MEMELAB
+                      ? "N/A"
+                      : formatNumberWithCommasOrDash(
+                          +(card.tdh ?? 0).toFixed(0)
+                        )}
                   </span>
                 </span>
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
                   <span className="tw-text-iron-400">Rank</span>
                   <span className="tw-ml-1 tw-text-iron-50">
-                    {formatNumberWithCommasOrDash(card.rank ?? 0)}
+                    {card.collection === CollectedCollectionType.MEMELAB
+                      ? "N/A"
+                      : formatNumberWithCommasOrDash(card.rank ?? 0)}
                   </span>
                 </span>
               </div>

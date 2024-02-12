@@ -396,3 +396,13 @@ h5 {
 .horizontal-menu-scrollable-x {
   -webkit-overflow-scrolling: touch; /* For momentum scroll on iOS */
 }
+
+.table-scroll-container {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}

@@ -258,7 +258,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           </span>
         </Col>
       </Row>
-      <Row>
+      <Row className="table-scroll-container">
         <Col>
           <Table className={styles.logsTable}>
             <thead>

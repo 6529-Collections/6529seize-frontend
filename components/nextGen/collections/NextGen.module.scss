@@ -276,12 +276,13 @@
   button {
     font-size: larger !important;
     font-weight: bolder !important;
-    cursor: copy;
     padding: 0;
     background-color: transparent !important;
     border-color: transparent !important;
-    &::after {
-      margin-top: 0.8rem;
+    @media only screen and (max-width: 800px) {
+      &::after {
+        margin-top: 0.5rem;
+      }
     }
   }
 }

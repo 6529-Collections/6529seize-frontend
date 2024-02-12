@@ -33,9 +33,9 @@ export default function PdfViewer(props: Readonly<Props>) {
   const isLoading = renderedPageNumber !== pageNumber;
 
   return (
-    <Container className="no-padding">
+    <Container className="no-padding" ref={containerRef}>
       <Row>
-        <Col ref={containerRef}>
+        <Col>
           <Document file={props.file} onLoadSuccess={onDocumentLoadSuccess}>
             {isLoading && renderedPageNumber ? (
               <Page
