@@ -1,7 +1,14 @@
 import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { Resolution } from "./NextGenTokenDownload";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+
+export enum ZoomAction {
+  IN = "in",
+  OUT = "out",
+  RESET = "reset",
+}
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -13,8 +20,13 @@ export function NextGenTokenImage(
     resolution?: Resolution;
     show_rarity_score?: boolean;
     show_statistical_score?: boolean;
+    isLoading?(loading: boolean): void;
+    zoom?: ZoomAction;
+    onZoomActionEnd?(): void;
   }>
 ) {
+  const [loading, setLoading] = useState(true);
+
   const src = useMemo(() => {
     let srcValue = props.token.image_url;
     if (props.resolution) {
@@ -26,23 +38,72 @@ export function NextGenTokenImage(
     return srcValue;
   }, [props.token.image_url, props.resolution]);
 
+  useEffect(() => {
+    setLoading(true);
+  }, [src]);
+
+  useEffect(() => {
+    if (props.isLoading) {
+      props.isLoading(loading);
+    }
+  }, [loading]);
+
+  const actionRef: any = useRef(null);
+
+  useEffect(() => {
+    if (props.zoom) {
+      if (actionRef.current) {
+        switch (props.zoom) {
+          case ZoomAction.IN:
+            actionRef.current.zoomIn();
+            break;
+          case ZoomAction.OUT:
+            actionRef.current.zoomOut();
+            break;
+          case ZoomAction.RESET:
+            actionRef.current.resetTransform();
+            break;
+        }
+      }
+      if (props.onZoomActionEnd) {
+        props.onZoomActionEnd();
+      }
+    }
+  }, [props.zoom]);
+
   function getImage() {
     return (
       <>
         <span className="d-flex flex-column align-items-center">
-          <img
-            style={{
-              height: props.is_fullscreen ? "100vh" : "auto",
-              width: "auto",
-              maxHeight: "90vh",
-              maxWidth: "100%",
+          <TransformWrapper
+            initialScale={1}
+            initialPositionX={0}
+            initialPositionY={0}
+            maxScale={20}>
+            {({ zoomIn, zoomOut, resetTransform }) => {
+              actionRef.current = { zoomIn, zoomOut, resetTransform };
+              return (
+                <TransformComponent>
+                  <img
+                    style={{
+                      height: props.is_fullscreen ? "100vh" : "auto",
+                      width: "auto",
+                      maxHeight: "90vh",
+                      maxWidth: "100%",
+                    }}
+                    src={src}
+                    alt={props.token.name}
+                    onLoad={() => {
+                      setLoading(false);
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.src = "/pebbles-loading.jpeg";
+                    }}
+                  />
+                </TransformComponent>
+              );
             }}
-            src={src}
-            alt={props.token.name}
-            onError={(e) => {
-              e.currentTarget.src = "/pebbles-loading.jpeg";
-            }}
-          />
+          </TransformWrapper>
         </span>
         {!props.hide_info && (
           <span className="pt-1 d-flex justify-content-around align-items-center">

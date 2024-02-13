@@ -2,7 +2,7 @@ import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage } from "./NextGenTokenImage";
+import { NextGenTokenImage, ZoomAction } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
@@ -24,37 +24,46 @@ enum Mode {
   IMAGE = "Image",
 }
 
-export function NextGenTokenArtImage(
-  props: Readonly<{
-    token: NextGenToken;
-    mode: Mode;
-    is_fullscreen: boolean;
-    resolution: Resolution;
-  }>
-) {
-  return (
-    <NextGenTokenImage
-      token={props.token}
-      hide_info={true}
-      hide_link={true}
-      show_animation={props.mode !== Mode.IMAGE}
-      is_fullscreen={props.is_fullscreen}
-      resolution={props.resolution}
-    />
-  );
-}
-
 export default function NextGenToken(props: Readonly<Props>) {
   const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
+  const [resolutionLoading, setResolutionLoading] = useState<boolean>(true);
+
   const tokenImageRef = useRef(null);
 
-  const [resolution, setResolution] = useState<Resolution>(Resolution["4K"]);
+  const [imageZoomAction, setImageZoomAction] = useState<ZoomAction>();
+
+  const [resolution, setResolution] = useState<Resolution>(Resolution["2K"]);
 
   const downloader = useDownloader({});
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  function checkMobile() {
+    const screenSize = window.innerWidth;
+    if (screenSize <= 800) {
+      setIsMobile(true);
+    } else {
+      setIsMobile(false);
+    }
+  }
+
+  useEffect(() => {
+    checkMobile();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => checkMobile();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    setResolutionLoading(true);
+  }, [resolution]);
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -113,7 +122,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             <Dropdown drop={"down-centered"} className="d-flex">
               <Dropdown.Toggle
                 className={styles.resolutionBtn}
-                disabled={mode !== Mode.IMAGE}>
+                disabled={mode !== Mode.IMAGE || resolutionLoading}>
                 <Tippy
                   content="Select Resolution"
                   hideOnClick={true}
@@ -124,7 +133,8 @@ export default function NextGenToken(props: Readonly<Props>) {
                     className={
                       mode === Mode.IMAGE ? "font-color" : "font-color-h"
                     }>
-                    Resolution: {resolution}
+                    {resolutionLoading ? "Rendering" : "Resolution"}:{" "}
+                    {resolution}
                   </span>
                 </Tippy>
               </Dropdown.Toggle>
@@ -166,6 +176,48 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Tippy>
         </span>
         <span className="d-flex gap-3">
+          <Tippy
+            content="Zoom In"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={100}>
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.IMAGE)}
+              onClick={() => {
+                setImageZoomAction(ZoomAction.IN);
+              }}
+              icon="magnifying-glass-plus"
+            />
+          </Tippy>
+          <Tippy
+            content="Zoom Out"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={100}>
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.IMAGE)}
+              onClick={() => {
+                setImageZoomAction(ZoomAction.OUT);
+              }}
+              icon="magnifying-glass-minus"
+            />
+          </Tippy>
+          <Tippy
+            content="Reset"
+            hideOnClick={true}
+            placement="bottom"
+            theme="light"
+            delay={100}>
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.IMAGE)}
+              onClick={() => {
+                setImageZoomAction(ZoomAction.RESET);
+              }}
+              icon="refresh"
+            />
+          </Tippy>
           <Lightbulb
             mode="black"
             className={styles.modeIcon}
@@ -268,11 +320,16 @@ export default function NextGenToken(props: Readonly<Props>) {
                         : "col pt-3"
                     }
                     ref={tokenImageRef}>
-                    <NextGenTokenArtImage
+                    <NextGenTokenImage
                       token={props.token}
-                      mode={mode}
+                      hide_info={true}
+                      hide_link={true}
+                      show_animation={mode !== Mode.IMAGE}
                       is_fullscreen={isFullScreen}
                       resolution={resolution}
+                      isLoading={setResolutionLoading}
+                      zoom={imageZoomAction}
+                      onZoomActionEnd={() => setImageZoomAction(undefined)}
                     />
                   </div>
                 </div>
@@ -285,7 +342,10 @@ export default function NextGenToken(props: Readonly<Props>) {
         <Col>
           <Container className={styles.modeRow}>
             <Row>
-              <Col className="pt-4 pb-3 d-flex align-items-center justify-content-between">
+              <Col
+                className={`pt-4 pb-3 d-flex align-items-center justify-content-between ${
+                  isMobile ? "flex-column gap-3" : ""
+                }`}>
                 {printModeIcons()}
               </Col>
             </Row>
