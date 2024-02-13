@@ -79,32 +79,34 @@ function TraitAccordion(
                 </Col>
               </Row>
               <hr className="mb-1 mt-0" />
-              {props.traits.map((t) => (
-                <Row
-                  className="pt-2 pb-2"
-                  key={`trait-${t.trait.replaceAll(
-                    " ",
-                    "-"
-                  )}-${t.value.replaceAll(" ", "-")}`}>
-                  <Col xs={5}>
-                    <span className="font-color-h">{t.trait}:</span>{" "}
-                    <a
-                      href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}>
-                      {t.value}
-                    </a>
-                  </Col>
-                  <Col xs={2} className="text-center">
-                    {t.value_count} (
-                    {((t.value_count / props.token_count) * 100).toFixed(1)}%)
-                  </Col>
-                  <Col xs={2} className="text-center">
-                    {t.rank}/{t.trait_count}
-                  </Col>
-                  <Col xs={2} className="text-center">
-                    {displayScore(t.score)}
-                  </Col>
-                </Row>
-              ))}
+              {props.traits
+                .filter((t) => t.score !== -1)
+                .map((t) => (
+                  <Row
+                    className="pt-2 pb-2"
+                    key={`trait-${t.trait.replaceAll(
+                      " ",
+                      "-"
+                    )}-${t.value.replaceAll(" ", "-")}`}>
+                    <Col xs={5}>
+                      <span className="font-color-h">{t.trait}:</span>{" "}
+                      <a
+                        href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}>
+                        {t.value}
+                      </a>
+                    </Col>
+                    <Col xs={2} className="text-center">
+                      {t.value_count} (
+                      {((t.value_count / props.token_count) * 100).toFixed(1)}%)
+                    </Col>
+                    <Col xs={2} className="text-center">
+                      {t.rank}/{t.trait_count}
+                    </Col>
+                    <Col xs={2} className="text-center">
+                      {displayScore(t.score)}
+                    </Col>
+                  </Row>
+                ))}
             </Container>
           </Accordion.Body>
         )}
