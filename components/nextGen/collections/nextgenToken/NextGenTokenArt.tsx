@@ -12,6 +12,7 @@ import {
   Resolution,
   getUrl,
 } from "./NextGenTokenDownload";
+import { Spinner } from "../../../dotLoader/DotLoader";
 
 interface Props {
   collection: NextGenCollection;
@@ -28,6 +29,7 @@ export function NextGenTokenArtImage(
     token: NextGenToken;
     mode: Mode;
     is_fullscreen: boolean;
+    resolution: Resolution;
   }>
 ) {
   return (
@@ -37,6 +39,7 @@ export function NextGenTokenArtImage(
       hide_link={true}
       show_animation={props.mode !== Mode.IMAGE}
       is_fullscreen={props.is_fullscreen}
+      resolution={props.resolution}
     />
   );
 }
@@ -48,6 +51,8 @@ export default function NextGenToken(props: Readonly<Props>) {
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
   const tokenImageRef = useRef(null);
+
+  const [resolution, setResolution] = useState<Resolution>(Resolution["4K"]);
 
   const downloader = useDownloader({});
 
@@ -94,13 +99,51 @@ export default function NextGenToken(props: Readonly<Props>) {
     if (mode === Mode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
-    return props.token.image_url;
+    return props.token.image_url.replaceAll(
+      "/png/",
+      `/png${resolution.toLowerCase()}/`
+    );
   }
 
   function printModeIcons() {
     return (
       <>
         <span className="d-flex gap-3">
+          <span className="d-flex gap-1">
+            {/* <span
+              className={mode === Mode.IMAGE ? "font-color" : "font-color-h"}>
+              Resolution:
+            </span> */}
+            <Dropdown drop={"down-centered"} className="d-flex">
+              <Dropdown.Toggle
+                className={styles.resolutionBtn}
+                disabled={mode !== Mode.IMAGE}>
+                <Tippy
+                  content="Select Resolution"
+                  hideOnClick={true}
+                  placement="bottom"
+                  theme="light"
+                  delay={100}>
+                  <span
+                    className={
+                      mode === Mode.IMAGE ? "font-color" : "font-color-h"
+                    }>
+                    Resolution: {resolution}
+                  </span>
+                </Tippy>
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {Object.values(Resolution).map((resolution) => (
+                  <NextGenTokenDownloadDropdownItem
+                    resolution={resolution}
+                    setResolution={setResolution}
+                    token={props.token}
+                    key={resolution}
+                  />
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </span>
           <Tippy
             content="Image"
             hideOnClick={true}
@@ -137,37 +180,27 @@ export default function NextGenToken(props: Readonly<Props>) {
             className={styles.modeIcon}
             onClick={() => setShowLightbox(true)}
           />
-          <Dropdown drop={"down-centered"} className="d-flex">
-            <Dropdown.Toggle className={styles.downloadBtn}>
-              <Tippy
-                content="Download"
-                hideOnClick={true}
-                placement="bottom"
-                theme="light"
-                delay={100}>
-                <FontAwesomeIcon className={styles.modeIcon} icon="download" />
-              </Tippy>
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {Object.values(Resolution).map((resolution) => (
-                <NextGenTokenDownloadDropdownItem
-                  resolution={resolution}
-                  token={props.token}
-                  key={resolution}
-                />
-                // <Dropdown.Item
-                //   key={resolution}
-                //   onClick={() => {
-                //     downloader.download(
-                //       getUrl(props.token, resolution),
-                //       `${props.token.id}_${resolution.toUpperCase()}`
-                //     );
-                //   }}>
-                //   {resolution}
-                // </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
+          {downloader.isInProgress ? (
+            <Spinner />
+          ) : (
+            <Tippy
+              content="Download"
+              hideOnClick={true}
+              placement="bottom"
+              theme="light"
+              delay={100}>
+              <FontAwesomeIcon
+                className={styles.modeIcon}
+                icon="download"
+                onClick={() => {
+                  downloader.download(
+                    getUrl(props.token, resolution),
+                    `${props.token.id}_${resolution.toUpperCase()}.png`
+                  );
+                }}
+              />
+            </Tippy>
+          )}
           <Tippy
             content="Open in new tab"
             hideOnClick={true}
@@ -243,6 +276,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
+                      resolution={resolution}
                     />
                   </div>
                 </div>

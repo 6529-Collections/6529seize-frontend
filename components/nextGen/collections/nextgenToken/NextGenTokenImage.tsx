@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
+import { Resolution } from "./NextGenTokenDownload";
+import { useMemo } from "react";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -9,26 +11,34 @@ export function NextGenTokenImage(
     hide_info?: boolean;
     show_animation?: boolean;
     is_fullscreen?: boolean;
+    resolution?: Resolution;
     show_rarity_score?: boolean;
     show_statistical_score?: boolean;
   }>
 ) {
+  const src = useMemo(() => {
+    let srcValue = props.token.image_url;
+    if (props.resolution) {
+      srcValue = props.token.image_url.replace(
+        "/png/",
+        `/png${props.resolution.toLowerCase()}/`
+      );
+    }
+    return srcValue;
+  }, [props.token.image_url, props.resolution]);
+
   function getImage() {
     return (
       <>
         <span className="d-flex flex-column align-items-center">
-          <Image
-            priority
-            loading={"eager"}
-            width="0"
-            height="0"
+          <img
             style={{
               height: props.is_fullscreen ? "100vh" : "auto",
               width: "auto",
               maxHeight: "90vh",
               maxWidth: "100%",
             }}
-            src={props.token.image_url}
+            src={src}
             alt={props.token.name}
             onError={(e) => {
               e.currentTarget.src = "/pebbles-loading.jpeg";
@@ -77,14 +87,13 @@ export function NextGenTokenImage(
   }
 
   if (props.hide_link) {
-    return getContent();
-  } else {
-    return (
-      <a
-        href={`/nextgen/token/${props.token.id}`}
-        className="decoration-none scale-hover unselectable">
-        {getContent()}
-      </a>
-    );
+    return <>{getContent()}</>;
   }
+  return (
+    <a
+      href={`/nextgen/token/${props.token.id}`}
+      className="decoration-none scale-hover unselectable">
+      {getContent()}
+    </a>
+  );
 }

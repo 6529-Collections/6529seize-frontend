@@ -254,18 +254,25 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                               x{tr.values.length}
                             </span>
                           </Accordion.Button>
-                          {tr.values.map((v) => (
+                          {tr.value_counts.map((v) => (
                             <Accordion.Body
-                              key={`trait-${v.replaceAll(" ", "-")}`}
+                              key={`trait-${v.key.replaceAll(" ", "-")}`}
                               className={styles.traitsAccordionBody}>
                               <Form.Check
                                 type="checkbox"
-                                label={v}
-                                id={`trait-${v.replaceAll(" ", "-")}`}
+                                label={
+                                  <>
+                                    {v.key}{" "}
+                                    <span className="font-color-h">
+                                      x{v.count}
+                                    </span>
+                                  </>
+                                }
+                                id={`trait-${v.key.replaceAll(" ", "-")}`}
                                 checked={selectedTraitValues.some(
                                   (t) =>
                                     areEqualAddresses(t.trait, tr.trait) &&
-                                    areEqualAddresses(t.value, v)
+                                    areEqualAddresses(t.value, v.key)
                                 )}
                                 className="pt-1 pb-1"
                                 onChange={() => {
@@ -292,7 +299,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                                       ...selectedTraitValues,
                                       {
                                         trait: tr.trait,
-                                        value: v,
+                                        value: v.key,
                                       },
                                     ]);
                                   }
