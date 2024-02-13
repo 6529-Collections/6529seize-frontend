@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { Resolution } from "./NextGenTokenDownload";

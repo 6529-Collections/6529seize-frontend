@@ -110,10 +110,6 @@ export default function NextGenToken(props: Readonly<Props>) {
       <>
         <span className="d-flex gap-3">
           <span className="d-flex gap-1">
-            {/* <span
-              className={mode === Mode.IMAGE ? "font-color" : "font-color-h"}>
-              Resolution:
-            </span> */}
             <Dropdown drop={"down-centered"} className="d-flex">
               <Dropdown.Toggle
                 className={styles.resolutionBtn}

@@ -137,13 +137,11 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 </span>
               </a>
             ) : (
-              <a href={`/${ownerENS ? ownerENS : props.token.owner}`}>
+              <a href={`/${ownerENS || props.token.owner}`}>
                 <span>
-                  {ownerProfileHandle
-                    ? ownerProfileHandle
-                    : ownerENS
-                    ? ownerENS
-                    : formatAddress(props.token.owner)}
+                  {ownerProfileHandle ||
+                    ownerENS ||
+                    formatAddress(props.token.owner)}
                 </span>
               </a>
             )}
