@@ -244,7 +244,7 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
               </a>
             </span>
             <span className="font-color-h">
-              {t.value_count}/{t.token_count}
+              {t.value_count.toLocaleString()}/{t.token_count.toLocaleString()}
             </span>
           </Col>
         </Row>
