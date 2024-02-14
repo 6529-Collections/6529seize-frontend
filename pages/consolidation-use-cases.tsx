@@ -64,7 +64,10 @@ export default function ConsolidationUseCases() {
               <Container className="pt-4">
                 <Row>
                   <Col>
-                    <h1>Consolidation Use Cases</h1>
+                    <h1>
+                      <span className="font-lightest">Consolidation</span> Use
+                      Cases
+                    </h1>
                   </Col>
                 </Row>
                 <Row className="pt-3 pb-3">

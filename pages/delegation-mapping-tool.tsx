@@ -77,7 +77,8 @@ export default function DelegationMappingToolPage() {
                     md={{ span: 10, offset: 1 }}
                     lg={{ span: 8, offset: 2 }}>
                     <h1 className="float-none text-center">
-                      Delegation Mapping Tool
+                      <span className="font-lightest">Delegation</span> Mapping
+                      Tool
                     </h1>
                   </Col>
                 </Row>

@@ -97,7 +97,7 @@ export default function Gas() {
   return (
     <>
       <GasRoyaltiesHeader
-        title="Meme Gas"
+        title="Gas"
         results_count={gas.length}
         focus={collectionFocus}
         setDateSelection={(date_selection) => {

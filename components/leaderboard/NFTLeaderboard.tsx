@@ -77,7 +77,9 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
       <Row>
         <Col>
-          <h1>Community -</h1>
+          <h1>
+            <span className="font-lightest">Community</span>
+          </h1>
           <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
         <Col className={`d-flex justify-content-center align-items-center`}>

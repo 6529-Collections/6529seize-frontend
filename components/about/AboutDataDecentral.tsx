@@ -6,7 +6,9 @@ export default function AboutDataDecentral() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">Data Decentralization</h1>
+            <h1 className="float-none">
+              <span className="font-lightest">Data</span> Decentralization
+            </h1>
           </Col>
         </Row>
         <Row className="pt-3 pb-3">

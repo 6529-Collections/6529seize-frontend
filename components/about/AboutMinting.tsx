@@ -6,7 +6,9 @@ export default function AboutMinting() {
       <Container>
         <Row>
           <Col className="text-center">
-            <h1 className="float-none">Minting Meme Cards</h1>
+            <h1 className="float-none">
+              <span className="font-lightest">Minting</span> Meme Cards
+            </h1>
           </Col>
         </Row>
         <Row className="pt-3 pb-3">

@@ -1,7 +1,9 @@
 export default function DistributionPlanToolNotConnected() {
   return (
     <div className="tw-flex tw-flex-col">
-      <h1 className="tw-text-white">Connect Your Wallet</h1>
+      <h1 className="tw-text-white">
+        <span className="font-lightest">Connect</span> Your Wallet
+      </h1>
       <div className="tw-mb-6 lg:tw-max-w-2xl">
         <p className="tw-text-justify tw-mb-0 tw-mt-2 tw-text-base tw-leading-[1.6] tw-font-normal tw-text-neutral-300">
           Connect with an address from within your consolidated account to
