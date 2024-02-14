@@ -96,7 +96,7 @@ function TraitAccordion(
                       </a>
                     </Col>
                     <Col xs={2} className="text-center">
-                      {t.value_count} (
+                      {t.value_count.toLocaleString()} (
                       {((t.value_count / props.token_count) * 100).toFixed(1)}%)
                     </Col>
                     <Col xs={2} className="text-center">
