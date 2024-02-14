@@ -24,7 +24,7 @@ export default function UserPageCollectedCard({
     if (card.collection === CollectedCollectionType.MEMELAB) {
       return "N/A";
     } else {
-      return formatNumberWithCommasOrDash(card.tdh ?? 0);
+      return formatNumberWithCommasOrDash(+(card.tdh ?? 0).toFixed(0));
     }
   };
 
