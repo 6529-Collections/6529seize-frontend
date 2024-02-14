@@ -148,11 +148,11 @@
 }
 
 .addNewDelegationBtn {
+  font-weight: 600;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 15px;
   background-color: $blue;
   color: white;
   width: fit-content;
@@ -631,9 +631,12 @@
 }
 
 .addNewDelegationWrapper {
+  height: 160px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 @media only screen and (max-width: 1400px) {
@@ -645,6 +648,4 @@
 
 .subDelegationSubHeading {
   font-size: smaller;
-  position: absolute;
-  bottom: 3px;
 }
