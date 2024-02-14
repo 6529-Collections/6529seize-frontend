@@ -175,10 +175,17 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                       DelegationCenterSection.REGISTER_SUB_DELEGATION
                     );
                   }}>
-                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-                  Register Delegation Manager
-                  <span className={styles.subDelegationSubHeading}>
-                    (Sub-Delegation)
+                  <span className="d-flex flex-column">
+                    <span>
+                      <FontAwesomeIcon
+                        icon="plus"
+                        className={styles.buttonIcon}
+                      />
+                      Register Delegation Manager
+                    </span>
+                    <span className={styles.subDelegationSubHeading}>
+                      (Sub-Delegation)
+                    </span>
                   </span>
                 </span>
               </Col>
