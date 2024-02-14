@@ -5,24 +5,28 @@ import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   areEqualAddresses,
+  cicToType,
+  formatAddress,
   isNullAddress,
   numberWithCommas,
   printMintDate,
 } from "../../../../helpers/Helpers";
-import Address from "../../../address/Address";
 import { useState, useEffect } from "react";
 import { useAccount, useEnsName, mainnet } from "wagmi";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import {
+  CICType,
+  IProfileAndConsolidations,
+} from "../../../../entities/IProfile";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
-import { Time } from "../../../../helpers/time";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { displayScore } from "./NextGenTokenProperties";
+import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 
 interface Props {
   collection: NextGenCollection;
@@ -33,7 +37,9 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   const account = useAccount();
   const [ownerENS, setOwnerENS] = useState<string>();
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
-
+  const [level, setLevel] = useState(-1);
+  const [cicType, setCicType] = useState<CICType>();
+  const [ownerTdh, setOwnerTdh] = useState<number>(0);
   const [tdh, setTdh] = useState<number>(0);
 
   useEffect(() => {
@@ -42,6 +48,9 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
     }).then((profile) => {
       if (profile.profile?.handle) {
         setOwnerProfileHandle(profile.profile.handle);
+        setCicType(cicToType(profile.cic.cic_rating));
+        setOwnerTdh(profile.consolidation.tdh);
+        setLevel(profile.level);
       }
     });
   }, [props.token.owner]);
@@ -109,8 +118,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </Col>
       </Row>
       <Row>
-        <Col className="pb-3 d-flex gap-1">
-          <span className="font-color-h">Owner:</span>
+        <Col className="pb-3 d-flex gap-2">
+          <span className="font-color-h">Collector:</span>
           <span className="d-flex gap-1 align-items-center">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
               <Tippy content={"Burnt"} theme={"light"} delay={100}>
@@ -120,13 +129,35 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 />
               </Tippy>
             )}
-            <Address
-              wallets={[props.token.owner as `0x${string}`]}
-              display={ownerProfileHandle ?? ownerENS}
-            />
+            {cicType && level > -1 ? (
+              <a
+                href={`/${ownerProfileHandle}`}
+                className="d-flex gap-2 decoration-hover-underline align-items-center">
+                <UserCICAndLevel level={level} cicType={cicType} />
+                <span className="decoration-underline">
+                  {ownerProfileHandle}
+                </span>
+              </a>
+            ) : (
+              <a href={`/${ownerENS ?? props.token.owner}`}>
+                <span>
+                  {ownerProfileHandle ??
+                    ownerENS ??
+                    formatAddress(props.token.owner)}
+                </span>
+              </a>
+            )}
             {areEqualAddresses(props.token.owner, account.address) && (
               <span>(you)</span>
             )}
+          </span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-2">
+          <span className="font-color-h">Collector TDH:</span>
+          <span className="d-flex gap-1 align-items-center">
+            {numberWithCommas(Math.round(ownerTdh * 100) / 100)}
           </span>
         </Col>
       </Row>
