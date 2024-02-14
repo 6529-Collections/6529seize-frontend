@@ -13,7 +13,7 @@ interface Props {
   token_id: number;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 25;
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
   const scrollTarget = useRef<HTMLImageElement>(null);
@@ -70,7 +70,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   }, [page]);
 
   useEffect(() => {
-    fetchLogsResults(page);
+    fetchLogsResults(logsPage);
   }, [logsPage]);
 
   return (
