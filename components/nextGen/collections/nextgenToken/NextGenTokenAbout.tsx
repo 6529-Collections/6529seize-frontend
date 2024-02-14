@@ -39,6 +39,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
   const [level, setLevel] = useState(-1);
   const [cicType, setCicType] = useState<CICType>();
+  const [ownerTdh, setOwnerTdh] = useState<number>(0);
   const [tdh, setTdh] = useState<number>(0);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       if (profile.profile?.handle) {
         setOwnerProfileHandle(profile.profile.handle);
         setCicType(cicToType(profile.cic.cic_rating));
+        setOwnerTdh(profile.consolidation.tdh);
         setLevel(profile.level);
       }
     });
@@ -117,7 +119,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       </Row>
       <Row>
         <Col className="pb-3 d-flex gap-2">
-          <span className="font-color-h">Owner:</span>
+          <span className="font-color-h">Collector:</span>
           <span className="d-flex gap-1 align-items-center">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
               <Tippy content={"Burnt"} theme={"light"} delay={100}>
@@ -137,10 +139,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 </span>
               </a>
             ) : (
-              <a href={`/${ownerENS || props.token.owner}`}>
+              <a href={`/${ownerENS ?? props.token.owner}`}>
                 <span>
-                  {ownerProfileHandle ||
-                    ownerENS ||
+                  {ownerProfileHandle ??
+                    ownerENS ??
                     formatAddress(props.token.owner)}
                 </span>
               </a>
@@ -148,6 +150,14 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {areEqualAddresses(props.token.owner, account.address) && (
               <span>(you)</span>
             )}
+          </span>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="pb-3 d-flex gap-2">
+          <span className="font-color-h">Collector TDH:</span>
+          <span className="d-flex gap-1 align-items-center">
+            {numberWithCommas(Math.round(ownerTdh * 100) / 100)}
           </span>
         </Col>
       </Row>

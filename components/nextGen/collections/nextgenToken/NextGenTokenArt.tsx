@@ -4,7 +4,6 @@ import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { NextGenTokenImage } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
 import {
