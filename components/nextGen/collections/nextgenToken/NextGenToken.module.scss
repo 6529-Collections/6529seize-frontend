@@ -87,14 +87,16 @@
   }
 }
 
-.downloadBtn {
+.resolutionBtn {
   padding: 0;
   background-color: transparent !important;
   border: none !important;
-  display: flex;
+  padding-right: 0.5rem;
 
-  &::after {
-    display: none !important;
+  @media only screen and (max-width: 800px) {
+    &::after {
+      margin-top: 0.5rem;
+    }
   }
 }
 

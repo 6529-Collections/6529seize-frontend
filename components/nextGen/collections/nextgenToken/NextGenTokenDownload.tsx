@@ -26,6 +26,7 @@ export function getUrl(token: NextGenToken, resolution: Resolution) {
 type NextGenTokenProps = Readonly<{
   token: NextGenToken;
   resolution: Resolution;
+  setResolution(resolution: Resolution): void;
 }>;
 
 function useImageChecker(token: NextGenToken, resolution: Resolution) {
@@ -58,7 +59,6 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
     props.token,
     props.resolution
   );
-  const downloader = useDownloader();
 
   return (
     <Dropdown.Item
@@ -66,10 +66,7 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
       disabled={!imageExists}
       onClick={() => {
         if (imageExists) {
-          downloader.download(
-            getUrl(props.token, props.resolution),
-            `${props.token.id}_${props.resolution.toUpperCase()}.png`
-          );
+          props.setResolution(props.resolution);
         }
       }}>
       {props.resolution}

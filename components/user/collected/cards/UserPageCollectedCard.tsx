@@ -20,6 +20,22 @@ export default function UserPageCollectedCard({
     COLLECTED_COLLECTIONS_META[card.collection].dataRows.seizedCount &&
     !!card.seized_count;
 
+  const getTdhDisplay = () => {
+    if (card.collection === CollectedCollectionType.MEMELAB) {
+      return "N/A";
+    } else {
+      return formatNumberWithCommasOrDash(card.tdh ?? 0);
+    }
+  };
+
+  const getRankDisplay = () => {
+    if (card.collection === CollectedCollectionType.MEMELAB) {
+      return "N/A";
+    } else {
+      return card.tdh ? formatNumberWithCommasOrDash(card.rank ?? 0) : "-";
+    }
+  };
+
   return (
     <Link href={path} className="tw-no-underline">
       <div className="tw-cursor-pointer tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10 tw-transition-opacity tw-duration-500 tw-ease-out">
@@ -59,19 +75,13 @@ export default function UserPageCollectedCard({
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
                   <span className="tw-text-iron-400">TDH</span>
                   <span className="tw-ml-1 tw-text-iron-50">
-                    {card.collection === CollectedCollectionType.MEMELAB
-                      ? "N/A"
-                      : formatNumberWithCommasOrDash(
-                          +(card.tdh ?? 0).toFixed(0)
-                        )}
+                    {getTdhDisplay()}
                   </span>
                 </span>
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
                   <span className="tw-text-iron-400">Rank</span>
                   <span className="tw-ml-1 tw-text-iron-50">
-                    {card.collection === CollectedCollectionType.MEMELAB
-                      ? "N/A"
-                      : formatNumberWithCommasOrDash(card.rank ?? 0)}
+                    {getRankDisplay()}
                   </span>
                 </span>
               </div>

@@ -92,6 +92,10 @@ export interface NextGenTrait {
 export interface TraitValues {
   trait: string;
   values: string[];
+  value_counts: {
+    key: string;
+    count: number;
+  }[];
 }
 
 export interface TraitValuePair {
