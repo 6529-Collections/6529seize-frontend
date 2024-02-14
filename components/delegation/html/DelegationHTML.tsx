@@ -5,11 +5,21 @@ import Image from "next/image";
 
 interface Props {
   path?: string;
+  title?: string;
 }
 
 export default function DelegationHTML(props: Readonly<Props>) {
   const [html, setHtml] = useState("");
   const [error, setError] = useState(false);
+
+  let titleLighter = "";
+  let titleDarker = props.title;
+
+  if (props.title?.includes(" ")) {
+    const [firstWord, ...rest] = props.title.split(" ");
+    titleLighter = firstWord;
+    titleDarker = rest.join(" ");
+  }
 
   useEffect(() => {
     if (props.path) {
@@ -45,7 +55,19 @@ export default function DelegationHTML(props: Readonly<Props>) {
   } else {
     return (
       <Container className="pt-2">
-        <Row>
+        {props.title && (
+          <Row>
+            <Col>
+              <h1>
+                {titleLighter && (
+                  <span className="font-lightest">{titleLighter}</span>
+                )}{" "}
+                {titleDarker}
+              </h1>
+            </Col>
+          </Row>
+        )}
+        <Row className="pt-3">
           <Col
             className={styles.htmlContainer}
             dangerouslySetInnerHTML={{

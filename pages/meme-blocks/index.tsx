@@ -221,7 +221,10 @@ export default function BlockPicker() {
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-          <div className="tw-w-full tw-flex tw-gap-x-4 tw-gap-y-5">
+          <h1 className="tw-text-white pb-4">
+            <span className="font-lighter">Meme</span> Blocks
+          </h1>
+          <div className="tw-w-full tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-5">
             <div className="tw-w-1/2">
               <BlockPickerDateSelect
                 date={date}

@@ -108,7 +108,7 @@ export default function About(props: any) {
       case AboutSection.GRADIENTS:
         return <AboutGradients />;
       case AboutSection.FAQ:
-        return <AboutHTML html={pageProps.faqText} />;
+        return <AboutHTML title="FAQ" html={pageProps.faqText} />;
       case AboutSection.MINTING:
         return <AboutMinting />;
       case AboutSection.LICENSE:
@@ -132,7 +132,7 @@ export default function About(props: any) {
       case AboutSection.NFT_DELEGATION:
         return <AboutNFTDelegation />;
       case AboutSection.ENS:
-        return <AboutHTML html={pageProps.ensText} />;
+        return <AboutHTML title="ENS" html={pageProps.ensText} />;
     }
   }
 
@@ -178,8 +178,7 @@ export default function About(props: any) {
                             section === AboutSection.MEMES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           The Memes
                         </Col>
                       </Row>
@@ -192,8 +191,7 @@ export default function About(props: any) {
                             section === AboutSection.MEMES_CALENDAR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Memes Calendar
                         </Col>
                       </Row>
@@ -204,8 +202,7 @@ export default function About(props: any) {
                             section === AboutSection.MEME_LAB
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Meme Lab
                         </Col>
                       </Row>
@@ -216,8 +213,7 @@ export default function About(props: any) {
                             section === AboutSection.GRADIENTS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Gradient
                         </Col>
                       </Row>
@@ -233,8 +229,7 @@ export default function About(props: any) {
                             section === AboutSection.GDRC1
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           GDRC1
                         </Col>
                       </Row>
@@ -252,8 +247,7 @@ export default function About(props: any) {
                             section === AboutSection.NFT_DELEGATION
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           NFT Delegation
                         </Col>
                       </Row>
@@ -269,8 +263,7 @@ export default function About(props: any) {
                             section === AboutSection.FAQ
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           FAQ
                         </Col>
                       </Row>
@@ -281,8 +274,7 @@ export default function About(props: any) {
                             section === AboutSection.ENS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           ENS
                         </Col>
                       </Row>
@@ -293,8 +285,7 @@ export default function About(props: any) {
                             section === AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Minting
                         </Col>
                       </Row>
@@ -305,8 +296,7 @@ export default function About(props: any) {
                             section === AboutSection.LICENSE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           License
                         </Col>
                       </Row>
@@ -322,8 +312,7 @@ export default function About(props: any) {
                             section === AboutSection.APPLY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Apply
                         </Col>
                       </Row>
@@ -334,8 +323,7 @@ export default function About(props: any) {
                             section === AboutSection.CONTACT_US
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Contact Us
                         </Col>
                       </Row>
@@ -348,8 +336,7 @@ export default function About(props: any) {
                             section === AboutSection.RELEASE_NOTES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Release Notes
                         </Col>
                       </Row>
@@ -362,8 +349,7 @@ export default function About(props: any) {
                             section === AboutSection.DATA_DECENTR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Data Decentralization
                         </Col>
                       </Row>
@@ -381,8 +367,7 @@ export default function About(props: any) {
                             section === AboutSection.TERMS_OF_SERVICE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Terms of Service
                         </Col>
                       </Row>
@@ -395,8 +380,7 @@ export default function About(props: any) {
                             section === AboutSection.PRIVACY_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Privacy Policy
                         </Col>
                       </Row>
@@ -409,8 +393,7 @@ export default function About(props: any) {
                             section === AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Cookie Policy
                         </Col>
                       </Row>
@@ -437,8 +420,7 @@ export default function About(props: any) {
                             section === AboutSection.MEMES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           The Memes
                         </Col>
                       </Row>
@@ -451,8 +433,7 @@ export default function About(props: any) {
                             section === AboutSection.MEMES_CALENDAR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Memes Calendar
                         </Col>
                       </Row>
@@ -463,8 +444,7 @@ export default function About(props: any) {
                             section === AboutSection.MEME_LAB
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           MemeLab
                         </Col>
                       </Row>
@@ -475,8 +455,7 @@ export default function About(props: any) {
                             section === AboutSection.GRADIENTS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Gradient
                         </Col>
                       </Row>
@@ -492,8 +471,7 @@ export default function About(props: any) {
                             section === AboutSection.GDRC1
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           GDRC1
                         </Col>
                       </Row>
@@ -511,8 +489,7 @@ export default function About(props: any) {
                             section === AboutSection.NFT_DELEGATION
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           NFT Delegation
                         </Col>
                       </Row>
@@ -528,8 +505,7 @@ export default function About(props: any) {
                             section === AboutSection.FAQ
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           FAQ
                         </Col>
                       </Row>
@@ -540,8 +516,7 @@ export default function About(props: any) {
                             section === AboutSection.ENS
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           ENS
                         </Col>
                       </Row>
@@ -552,8 +527,7 @@ export default function About(props: any) {
                             section === AboutSection.MINTING
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Minting
                         </Col>
                       </Row>
@@ -564,8 +538,7 @@ export default function About(props: any) {
                             section === AboutSection.LICENSE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           License
                         </Col>
                       </Row>
@@ -581,8 +554,7 @@ export default function About(props: any) {
                             section === AboutSection.APPLY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Apply
                         </Col>
                       </Row>
@@ -593,8 +565,7 @@ export default function About(props: any) {
                             section === AboutSection.CONTACT_US
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Contact Us
                         </Col>
                       </Row>
@@ -607,8 +578,7 @@ export default function About(props: any) {
                             section === AboutSection.RELEASE_NOTES
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Release Notes
                         </Col>
                       </Row>
@@ -621,8 +591,7 @@ export default function About(props: any) {
                             section === AboutSection.DATA_DECENTR
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Data Decentralization
                         </Col>
                       </Row>
@@ -640,8 +609,7 @@ export default function About(props: any) {
                             section === AboutSection.TERMS_OF_SERVICE
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Terms of Service
                         </Col>
                       </Row>
@@ -654,8 +622,7 @@ export default function About(props: any) {
                             section === AboutSection.PRIVACY_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Privacy Policy
                         </Col>
                       </Row>
@@ -668,8 +635,7 @@ export default function About(props: any) {
                             section === AboutSection.COOKIE_POLICY
                               ? menuStyles.aboutMenuLeftItemActive
                               : ""
-                          }`}
-                        >
+                          }`}>
                           Cookie Policy
                         </Col>
                       </Row>
