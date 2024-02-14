@@ -4,13 +4,11 @@ import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { NextGenTokenImage } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useDownloader from "react-use-downloader";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
 import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
-  getUrl,
 } from "./NextGenTokenDownload";
 
 interface Props {
@@ -48,8 +46,6 @@ export default function NextGenToken(props: Readonly<Props>) {
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
   const tokenImageRef = useRef(null);
-
-  const downloader = useDownloader({});
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -155,16 +151,6 @@ export default function NextGenToken(props: Readonly<Props>) {
                   token={props.token}
                   key={resolution}
                 />
-                // <Dropdown.Item
-                //   key={resolution}
-                //   onClick={() => {
-                //     downloader.download(
-                //       getUrl(props.token, resolution),
-                //       `${props.token.id}_${resolution.toUpperCase()}`
-                //     );
-                //   }}>
-                //   {resolution}
-                // </Dropdown.Item>
               ))}
             </Dropdown.Menu>
           </Dropdown>

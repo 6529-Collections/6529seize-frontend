@@ -38,10 +38,6 @@ export default function NextGenToken(props: Readonly<Props>) {
     props.view ?? ContentView.ABOUT
   );
 
-  const tokenTraits = props.traits.filter(
-    (trait) => trait.trait !== "Collection Name"
-  );
-
   useEffect(() => {
     const basePath = `/nextgen/token/${props.token.id}`;
     if (view && view !== ContentView.ABOUT) {
@@ -81,7 +77,9 @@ export default function NextGenToken(props: Readonly<Props>) {
                 <NextgenTokenTraits
                   collection_id={props.collection.id}
                   token={props.token}
-                  traits={tokenTraits}
+                  traits={props.traits.filter(
+                    (trait) => trait.trait !== "Collection Name"
+                  )}
                   tokenCount={props.tokenCount}
                 />
               </Col>
@@ -105,7 +103,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               <NextgenTokenRarity
                 collection_id={props.collection.id}
                 token={props.token}
-                traits={tokenTraits}
+                traits={props.traits}
                 tokenCount={props.tokenCount}
               />
             </Col>
