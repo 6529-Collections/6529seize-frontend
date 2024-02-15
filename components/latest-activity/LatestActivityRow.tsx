@@ -267,13 +267,17 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         target="_blank"
         rel="noreferrer">
         {collectionName} #{normalized.token_id}
-        &nbsp;
         <Image
           width={0}
           height={0}
-          style={{ height: "40px", width: "auto" }}
+          style={{
+            height: "40px",
+            width: "auto",
+            marginLeft: "8px",
+            marginRight: "8px",
+          }}
           src={`${NEXTGEN_MEDIA_BASE_URL}/png/${props.tr.token_id}`}
-          alt={props.tr.token_id.toString()}
+          alt={`#${props.tr.token_id.toString()}`}
           className={styles.nftImage}
         />
       </a>
