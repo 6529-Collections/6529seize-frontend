@@ -671,7 +671,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     const sectionTitle = section.toUpperCase().replaceAll("-", " ");
 
     const gdrc1Request = await fetch(
-      `https://digitalrightscharter-bucket.s3.eu-west-1.amazonaws.com/index.html`
+      `https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/about/gdrc1.html`
     );
     const gdrc1Text =
       gdrc1Request.status === 200 ? await gdrc1Request.text() : "";
