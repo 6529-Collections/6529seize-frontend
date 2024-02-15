@@ -223,7 +223,7 @@ export default function UserPageStatsActivityWalletTableRow({
       return `/meme-lab/${transaction.token_id}`;
     }
     if (isNextgenContract(transaction.contract)) {
-      return `/nextgen/tokens/${transaction.token_id}`;
+      return `/nextgen/token/${transaction.token_id}`;
     }
     return "";
   };

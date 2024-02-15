@@ -240,7 +240,9 @@ export default function CommunityStats() {
     <Container>
       <Row>
         <Col sm={12} md={8} className="pt-4">
-          <h1 className="mb-0">Community Stats</h1>
+          <h1 className="mb-0">
+            <span className="font-lightest">Community</span> Stats
+          </h1>
         </Col>
         {/* <Col
           sm={12}

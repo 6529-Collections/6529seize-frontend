@@ -77,7 +77,9 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
           <Container className="pt-4">
             <Row>
               <Col>
-                <h1>{props.title} Downloads</h1>
+                <h1>
+                  <span className="font-lightest">{props.title}</span> Downloads
+                </h1>
               </Col>
             </Row>
             {downloads && downloads.length > 0 && (
