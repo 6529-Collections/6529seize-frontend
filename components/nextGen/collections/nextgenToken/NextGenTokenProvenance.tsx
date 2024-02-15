@@ -5,11 +5,11 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import Pagination from "../../../pagination/Pagination";
 import { Transaction } from "../../../../entities/ITransaction";
 import LatestActivityRow from "../../../latest-activity/LatestActivityRow";
-import { NextGenLog } from "../../../../entities/INextgen";
+import { NextGenCollection, NextGenLog } from "../../../../entities/INextgen";
 import { NextGenCollectionProvenanceRow } from "../collectionParts/NextGenCollectionProvenance";
 
 interface Props {
-  collection_id: number;
+  collection: NextGenCollection;
   token_id: number;
 }
 
@@ -57,7 +57,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
       next: any;
       data: NextGenLog[];
     }>({
-      endpoint: `nextgen/collections/${props.collection_id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
+      endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
     }).then((response) => {
       setLogsTotalResults(response.count);
       setLogs(response.data.filter((log) => !log.log.startsWith("Mint of")));
@@ -126,8 +126,10 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
               <tbody>
                 {logs.map((log) => (
                   <NextGenCollectionProvenanceRow
+                    collection={props.collection}
                     log={log}
                     key={`${log.block}-${log.transaction}`}
+                    disable_link={true}
                   />
                 ))}
               </tbody>

@@ -10,6 +10,8 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Pagination from "../../../pagination/Pagination";
+import Image from "next/image";
+import { NEXTGEN_MEDIA_BASE_URL } from "../../../../constants";
 
 interface Props {
   collection: NextGenCollection;
@@ -87,6 +89,7 @@ export function NextGenCollectionProvenanceRow(
   props: Readonly<{
     collection: NextGenCollection;
     log: NextGenLog;
+    disable_link?: boolean;
   }>
 ) {
   const log = props.log;
@@ -104,17 +107,49 @@ export function NextGenCollectionProvenanceRow(
         const startIndex = match.index;
         const endIndex = startIndex + match[1].length;
         const beforeMatch = log.log.substring(0, startIndex);
-        const afterMatch = log.log.substring(endIndex);
+        let afterMatch = log.log.substring(endIndex);
+        if (afterMatch.startsWith(" ")) {
+          afterMatch = afterMatch.substring(1);
+        }
         const normalisedTokenId = parseInt(match[2], 10); // Ensure base 10 is used for parsing
         const tokenId = props.collection.id * 10000000000 + normalisedTokenId;
 
-        return (
+        const content = (
           <>
-            {beforeMatch}
-            <a href={`/nextgen/token/${tokenId}`}>{match[1]}</a>
-            {afterMatch}
+            {match[1]}
+            <Image
+              width={0}
+              height={0}
+              style={{
+                height: "40px",
+                width: "auto",
+                marginLeft: "8px",
+                marginRight: "8px",
+              }}
+              src={`${NEXTGEN_MEDIA_BASE_URL}/png/${tokenId}`}
+              alt={`#${tokenId.toString()}`}
+              className={styles.nftImage}
+            />
           </>
         );
+
+        if (props.disable_link) {
+          return (
+            <>
+              {beforeMatch}
+              {content}
+              {afterMatch}
+            </>
+          );
+        } else {
+          return (
+            <>
+              {beforeMatch}
+              <a href={`/nextgen/token/${tokenId}`}>{content}</a>
+              {afterMatch}
+            </>
+          );
+        }
       }
     } catch (e) {
       console.error("Error processing log:", e);
