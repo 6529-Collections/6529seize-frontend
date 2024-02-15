@@ -50,15 +50,32 @@ export interface NextGenToken {
   pending: boolean;
   burnt: boolean;
   burnt_date?: string;
+  hodl_rate: number;
+  mint_data: string;
   rarity_score: number;
-  rarity_score_normalised: number;
-  statistical_score: number;
   rarity_score_rank: number;
+  rarity_score_normalised: number;
   rarity_score_normalised_rank: number;
+  rarity_score_trait_count: number;
+  rarity_score_trait_count_rank: number;
+  rarity_score_trait_count_normalised: number;
+  rarity_score_trait_count_normalised_rank: number;
+  statistical_score: number;
   statistical_score_rank: number;
+  statistical_score_normalised: number;
+  statistical_score_normalised_rank: number;
+  statistical_score_trait_count: number;
+  statistical_score_trait_count_rank: number;
+  statistical_score_trait_count_normalised: number;
+  statistical_score_trait_count_normalised_rank: number;
   single_trait_rarity_score: number;
   single_trait_rarity_score_rank: number;
-  hodl_rate: number;
+  single_trait_rarity_score_normalised: number;
+  single_trait_rarity_score_normalised_rank: number;
+  single_trait_rarity_score_trait_count: number;
+  single_trait_rarity_score_trait_count_rank: number;
+  single_trait_rarity_score_trait_count_normalised: number;
+  single_trait_rarity_score_trait_count_normalised_rank: number;
 }
 
 export interface NextGenLog {
@@ -79,12 +96,18 @@ export interface NextGenTrait {
   collection_id: number;
   trait: string;
   value: string;
-  statistical_rarity: number;
-  statistical_rarity_rank: number;
   rarity_score: number;
   rarity_score_rank: number;
   rarity_score_normalised: number;
   rarity_score_normalised_rank: number;
+  rarity_score_trait_count_normalised: number;
+  rarity_score_trait_count_normalised_rank: number;
+  statistical_rarity: number;
+  statistical_rarity_rank: number;
+  statistical_rarity_normalised: number;
+  statistical_rarity_normalised_rank: number;
+  single_trait_rarity_score_normalised: number;
+  single_trait_rarity_score_normalised_rank: number;
   token_count: number;
   trait_count: number;
   value_count: number;

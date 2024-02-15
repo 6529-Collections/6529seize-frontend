@@ -3,6 +3,9 @@ import styles from "./NextGenToken.module.scss";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { NextGenToken, NextGenTrait } from "../../../../entities/INextgen";
 
+import Toggle from "react-toggle";
+import { useState } from "react";
+
 interface Props {
   collection_id: number;
   token: NextGenToken;
@@ -116,7 +119,8 @@ function TraitAccordion(
 }
 
 export default function NextgenTokenRarity(props: Readonly<Props>) {
-  // const [showNormalised, setShowNormalised] = useState(false);
+  const [showNormalised, setShowNormalised] = useState(false);
+  const [showTraitCount, setShowTraitCount] = useState(false);
 
   return (
     <Container className="no-padding">
@@ -136,9 +140,33 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
           </p>
         </Col>
       </Row>
-      <Row className="pt-4 pb-2">
+      <Row className="pt-3 pb-3">
+        <Col className="font-larger font-bolder">{props.token.name}</Col>
+      </Row>
+      <Row className="pt-2 pb-2">
         <Col className="d-flex justify-content-between align-items-center">
-          <span className="font-larger font-bolder">{props.token.name}</span>
+          <span className="d-flex gap-3">
+            <span className="d-flex align-items-center gap-1">
+              <Toggle
+                id="normalization-toggle"
+                defaultChecked={showNormalised}
+                onChange={() => setShowNormalised(!showNormalised)}
+              />
+              <label htmlFor="normalization-toggle">
+                <b>Trait Normalization</b>
+              </label>
+            </span>
+            <span className="d-flex align-items-center gap-1">
+              <Toggle
+                id="trait-count-toggle"
+                defaultChecked={showTraitCount}
+                onChange={() => setShowTraitCount(!showTraitCount)}
+              />
+              <label htmlFor="trait-count-toggle">
+                <b>Trait Count</b>
+              </label>
+            </span>
+          </span>
           <span>Token Count: {props.tokenCount.toLocaleString()}</span>
         </Col>
       </Row>
@@ -146,37 +174,46 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Rarity"}
-            score={props.token.rarity_score}
-            rank={props.token.rarity_score_rank}
+            score={
+              showNormalised && showTraitCount
+                ? props.token.rarity_score_trait_count_normalised
+                : showNormalised
+                ? props.token.rarity_score_normalised
+                : showTraitCount
+                ? props.token.rarity_score_trait_count
+                : props.token.rarity_score
+            }
+            rank={
+              showNormalised && showTraitCount
+                ? props.token.rarity_score_trait_count_normalised_rank
+                : showNormalised
+                ? props.token.rarity_score_normalised_rank
+                : showTraitCount
+                ? props.token.rarity_score_trait_count_rank
+                : props.token.rarity_score_rank
+            }
             collection_id={props.collection_id}
             token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: t.rarity_score,
-              rank: t.rarity_score_rank,
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))}
-          />
-        </Col>
-      </Row>
-      <Row className="pt-2 pb-2">
-        <Col>
-          <TraitAccordion
-            title={"Rarity with Trait Normalization"}
-            score={props.token.rarity_score_normalised}
-            rank={props.token.rarity_score_normalised_rank}
-            collection_id={props.collection_id}
-            token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: t.rarity_score_normalised,
-              rank: t.rarity_score_normalised_rank,
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))}
+            traits={props.traits
+              .map((t) => ({
+                trait: t.trait,
+                value: t.value,
+                score:
+                  showNormalised && showTraitCount
+                    ? t.rarity_score_trait_count_normalised
+                    : showNormalised
+                    ? t.rarity_score_normalised
+                    : t.rarity_score,
+                rank:
+                  showNormalised && showTraitCount
+                    ? t.rarity_score_trait_count_normalised_rank
+                    : showNormalised
+                    ? t.rarity_score_normalised_rank
+                    : t.rarity_score_rank,
+                trait_count: t.trait_count,
+                value_count: t.value_count,
+              }))
+              .sort((a, b) => b.score - a.score)}
           />
         </Col>
       </Row>
@@ -184,18 +221,40 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Statistical Rarity"}
-            score={props.token.statistical_score}
-            rank={props.token.statistical_score_rank}
+            score={
+              showNormalised && showTraitCount
+                ? props.token.statistical_score_trait_count_normalised
+                : showNormalised
+                ? props.token.statistical_score_normalised
+                : showTraitCount
+                ? props.token.statistical_score_trait_count
+                : props.token.statistical_score
+            }
+            rank={
+              showNormalised && showTraitCount
+                ? props.token.statistical_score_trait_count_normalised_rank
+                : showNormalised
+                ? props.token.statistical_score_normalised_rank
+                : showTraitCount
+                ? props.token.statistical_score_trait_count_rank
+                : props.token.statistical_score_rank
+            }
             collection_id={props.collection_id}
             token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: t.statistical_rarity,
-              rank: t.statistical_rarity_rank,
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))}
+            traits={props.traits
+              .map((t) => ({
+                trait: t.trait,
+                value: t.value,
+                score: showNormalised
+                  ? t.statistical_rarity_normalised
+                  : t.statistical_rarity,
+                rank: showNormalised
+                  ? t.statistical_rarity_normalised_rank
+                  : t.statistical_rarity_rank,
+                trait_count: t.trait_count,
+                value_count: t.value_count,
+              }))
+              .sort((a, b) => b.score - a.score)}
           />
         </Col>
       </Row>
@@ -203,15 +262,36 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Single Trait Rarity"}
-            score={props.token.single_trait_rarity_score}
-            rank={props.token.single_trait_rarity_score_rank}
+            score={
+              showNormalised && showTraitCount
+                ? props.token.single_trait_rarity_score_trait_count_normalised
+                : showNormalised
+                ? props.token.single_trait_rarity_score_normalised
+                : showTraitCount
+                ? props.token.single_trait_rarity_score_trait_count
+                : props.token.single_trait_rarity_score
+            }
+            rank={
+              showNormalised && showTraitCount
+                ? props.token
+                    .single_trait_rarity_score_trait_count_normalised_rank
+                : showNormalised
+                ? props.token.single_trait_rarity_score_normalised_rank
+                : showTraitCount
+                ? props.token.single_trait_rarity_score_trait_count_rank
+                : props.token.single_trait_rarity_score_rank
+            }
             collection_id={props.collection_id}
             token_count={props.tokenCount}
             traits={props.traits.map((t) => ({
               trait: t.trait,
               value: t.value,
-              score: t.statistical_rarity,
-              rank: t.statistical_rarity_rank,
+              score: showNormalised
+                ? t.single_trait_rarity_score_normalised
+                : t.statistical_rarity,
+              rank: showNormalised
+                ? t.single_trait_rarity_score_normalised_rank
+                : t.statistical_rarity_rank,
               trait_count: t.trait_count,
               value_count: t.value_count,
             }))}
