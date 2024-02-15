@@ -358,7 +358,9 @@ export default function GradientPage(props: Readonly<Props>) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>6529 Gradient</h1>
+                  <h1>
+                    <span className="font-lightest">6529</span> Gradient
+                  </h1>
                 </Col>
               </Row>
               <Row className="pt-2">

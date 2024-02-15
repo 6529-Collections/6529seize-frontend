@@ -124,7 +124,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
     <Container>
       <Row className="pb-2">
         <Col>
-          <h1>Delegation Center</h1>
+          <h1>
+            <span className="font-lightest">Delegation</span> Center
+          </h1>
         </Col>
       </Row>
       <Row>

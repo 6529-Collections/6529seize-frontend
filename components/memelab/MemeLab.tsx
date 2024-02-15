@@ -538,7 +538,9 @@ export default function MemeLabComponent(props: Readonly<Props>) {
             <>
               <Row>
                 <Col>
-                  <h1>Meme Lab</h1>
+                  <h1>
+                    <span className="font-lightest">Meme</span> Lab
+                  </h1>
                 </Col>
               </Row>
               <Row className="pt-2">

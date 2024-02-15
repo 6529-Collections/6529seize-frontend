@@ -963,7 +963,9 @@ export default function NextGenAdmin() {
     <Container>
       <Row className="pt-4">
         <Col>
-          <h1>NextGen Admin</h1>
+          <h1>
+            <span className="font-lightest">NextGen</span> Admin
+          </h1>
         </Col>
       </Row>
       <Row className="pt-3">

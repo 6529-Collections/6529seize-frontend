@@ -314,6 +314,13 @@ export default function WalletCheckerComponent(props: Readonly<Props>) {
     <Container className="pt-3 pb-3">
       <Row>
         <Col>
+          <h1>
+            <span className="font-lightest">Wallet</span> Checker
+          </h1>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
           <Form
             onSubmit={(e) => {
               e.preventDefault();
