@@ -608,7 +608,9 @@ export default function TheMemesComponent(props: Readonly<Props>) {
             <>
               <Row>
                 <Col className="d-flex align-items-center justify-content-start">
-                  <h1>The Memes</h1>
+                  <h1>
+                    <span className="font-lightest">The</span> Memes
+                  </h1>
                 </Col>
                 <Col className="d-flex align-items-center justify-content-end">
                   <SeasonsDropdown

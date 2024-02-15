@@ -435,7 +435,9 @@ export default function RememePage(props: Readonly<Props>) {
     return (
       <Row className="pt-4">
         <Col xs={12}>
-          <h1>The Memes References</h1>
+          <h1>
+            <span className="font-lightest">The Memes</span> References
+          </h1>
         </Col>
         {memes.map((nft) => (
           <Col

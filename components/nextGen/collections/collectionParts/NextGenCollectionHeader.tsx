@@ -43,7 +43,9 @@ export function NextGenBackToCollectionPageLink(
 ) {
   return (
     <a
-      href={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
+      href={`/nextgen/collection/${formatNameForUrl(
+        props.collection.name
+      )}/art`}
       className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
       <FontAwesomeIcon icon="arrow-circle-left" className={styles.backIcon} />
       Back to collection Page

@@ -157,7 +157,9 @@ export default function Home({
             <Container className={`pt-4 ${styles.mainContainer}`}>
               <Row>
                 <Col>
-                  <h1>Latest Drop</h1>
+                  <h1>
+                    <span className="font-lightest">Latest</span> Drop
+                  </h1>
                 </Col>
               </Row>
               <Row>
@@ -387,7 +389,8 @@ export default function Home({
                   <Row>
                     <Col>
                       <h1>
-                        Discover NextGen - {pageProps.nextGenFeatured.name}{" "}
+                        <span className="font-lightest">Discover</span> NextGen
+                        - {pageProps.nextGenFeatured.name}{" "}
                         <a
                           href={`/nextgen/collection/${formatNameForUrl(
                             pageProps.nextGenFeatured.name
@@ -413,7 +416,7 @@ export default function Home({
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}>
                   <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
-                    Community Activity{" "}
+                    <span className="font-lightest">Community</span> Activity{" "}
                     <a
                       href="/community-activity"
                       className={styles.viewAllLink}>

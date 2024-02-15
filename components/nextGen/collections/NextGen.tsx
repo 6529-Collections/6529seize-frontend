@@ -115,7 +115,8 @@ export default function NextGen(props: Readonly<Props>) {
         <Row>
           <Col>
             <h1>
-              Explore {props.collection.name}{" "}
+              <span className="font-lightest">Explore</span>{" "}
+              {props.collection.name}{" "}
               <a
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
@@ -135,7 +136,9 @@ export default function NextGen(props: Readonly<Props>) {
       <Container className="pt-5 pb-5">
         <Row>
           <Col>
-            <h1>Featured Artist</h1>
+            <h1>
+              <span className="font-lightest">Featured</span> Artist
+            </h1>
           </Col>
         </Row>
         <Row>

@@ -5,7 +5,9 @@ export default function NextGenAbout() {
     <Container className="no-padding pt-4">
       <Row className="pb-3">
         <Col>
-          <h1>About NextGen</h1>
+          <h1>
+            <span className="font-lightest">About</span> NextGen
+          </h1>
         </Col>
       </Row>
       <Row className="pb-3">
