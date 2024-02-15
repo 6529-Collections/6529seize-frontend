@@ -90,9 +90,8 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                       key={`nextgen-carousel-${token.id}`}
                       className="pt-2 pb-5 unselectable">
                       <NextGenTokenImage
-                        hide_link={currentSlide !== index}
                         token={token}
-                        hide_info={currentSlide !== index}
+                        info_class="font-smaller"
                       />
                     </SwiperSlide>
                   ))}
