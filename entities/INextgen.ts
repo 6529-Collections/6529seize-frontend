@@ -25,6 +25,7 @@ export interface NextGenCollection {
   public_start: number;
   public_end: number;
   merkle_root: string;
+  opensea_link: string;
 }
 
 export interface NextGenToken {
