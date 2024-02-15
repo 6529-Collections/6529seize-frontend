@@ -7,6 +7,7 @@ export function NextGenTokenImage(
     token: NextGenToken;
     hide_link?: boolean;
     hide_info?: boolean;
+    info_class?: string;
     show_animation?: boolean;
     is_fullscreen?: boolean;
     show_rarity_score?: boolean;
@@ -37,7 +38,9 @@ export function NextGenTokenImage(
         </span>
         {!props.hide_info && (
           <span className="pt-1 d-flex justify-content-around align-items-center">
-            <span>#{props.token.normalised_id}</span>
+            <span className={props.info_class ?? ""}>
+              #{props.token.normalised_id}
+            </span>
             {props.show_rarity_score && (
               <TraitScore
                 trait="Rarity"

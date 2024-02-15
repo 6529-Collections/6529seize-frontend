@@ -89,7 +89,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             <Col className="pt-4 pb-4">
               <NextGenTokenProvenance
                 token_id={props.token.id}
-                collection_id={props.collection.id}
+                collection={props.collection}
               />
             </Col>
           )}

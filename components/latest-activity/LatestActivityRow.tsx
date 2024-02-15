@@ -277,7 +277,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             marginRight: "8px",
           }}
           src={`${NEXTGEN_MEDIA_BASE_URL}/png/${props.tr.token_id}`}
-          alt={props.tr.token_id.toString()}
+          alt={`#${props.tr.token_id.toString()}`}
           className={styles.nftImage}
         />
       </a>
