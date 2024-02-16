@@ -13,6 +13,9 @@ import DotLoader from "../dotLoader/DotLoader";
 import { commonApiFetch } from "../../services/api/common-api";
 import { NextGenCollection } from "../../entities/INextgen";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../constants";
+import { NEXTGEN_CORE, NEXTGEN_CHAIN_ID } from "../nextGen/nextgen_contracts";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
 
 interface Props {
   page: number;
@@ -29,7 +32,15 @@ export enum TypeFilter {
   BURNS = "Burns",
 }
 
+enum ContractFilter {
+  ALL = "All",
+  MEMES = "Memes",
+  NEXTGEN = "NextGen",
+  GRADIENTS = "Gradients",
+}
+
 export default function LatestActivity(props: Readonly<Props>) {
+  const isMobile = useIsMobileScreen();
   const [activity, setActivity] = useState<Transaction[]>([]);
   const [page, setPage] = useState(props.page);
   const [showViewAll, setShowViewAll] = useState(false);
@@ -45,6 +56,9 @@ export default function LatestActivity(props: Readonly<Props>) {
   >([]);
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL);
+  const [selectedContract, setSelectedContract] = useState<ContractFilter>(
+    ContractFilter.ALL
+  );
   const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
@@ -67,12 +81,23 @@ export default function LatestActivity(props: Readonly<Props>) {
         url += `&filter=burns`;
         break;
     }
+    switch (selectedContract) {
+      case ContractFilter.MEMES:
+        url += `&contract=${MEMES_CONTRACT}`;
+        break;
+      case ContractFilter.NEXTGEN:
+        url += `&contract=${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
+        break;
+      case ContractFilter.GRADIENTS:
+        url += `&contract=${GRADIENT_CONTRACT}`;
+        break;
+    }
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setActivity(response.data);
       setFetching(false);
     });
-  }, [page, typeFilter]);
+  }, [page, typeFilter, selectedContract]);
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/memes_lite`).then(
@@ -103,7 +128,10 @@ export default function LatestActivity(props: Readonly<Props>) {
   return (
     <Container className={`no-padding pt-4`}>
       <Row className="d-flex align-items-center">
-        <Col className="d-flex align-items-center justify-content-between">
+        <Col
+          sm={12}
+          md={6}
+          className="d-flex align-items-center justify-content-between">
           <span className="d-flex flex-wrap align-items-center gap-2">
             <h1>
               <span className="font-lightest">NFT</span> Activity{" "}
@@ -116,23 +144,43 @@ export default function LatestActivity(props: Readonly<Props>) {
               )}
             </h1>
           </span>
-          <span>
-            <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
-              <Dropdown.Toggle>Filter: {typeFilter}</Dropdown.Toggle>
-              <Dropdown.Menu>
-                {Object.values(TypeFilter).map((filter) => (
-                  <Dropdown.Item
-                    key={filter}
-                    onClick={() => {
-                      setPage(1);
-                      setTypeFilter(filter);
-                    }}>
-                    {filter}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-          </span>
+        </Col>
+        <Col
+          sm={12}
+          md={6}
+          className={`d-flex align-items-center gap-4 ${
+            isMobile ? "justify-content-center" : "justify-content-end"
+          }`}>
+          <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
+            <Dropdown.Toggle>Collection: {selectedContract}</Dropdown.Toggle>
+            <Dropdown.Menu>
+              {Object.values(ContractFilter).map((contract) => (
+                <Dropdown.Item
+                  key={contract}
+                  onClick={() => {
+                    setPage(1);
+                    setSelectedContract(contract);
+                  }}>
+                  {contract}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+          <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
+            <Dropdown.Toggle>Filter: {typeFilter}</Dropdown.Toggle>
+            <Dropdown.Menu>
+              {Object.values(TypeFilter).map((filter) => (
+                <Dropdown.Item
+                  key={filter}
+                  onClick={() => {
+                    setPage(1);
+                    setTypeFilter(filter);
+                  }}>
+                  {filter}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
         </Col>
       </Row>
       {fetching && showViewAll && <DotLoader />}

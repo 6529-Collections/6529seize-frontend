@@ -1,4 +1,7 @@
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import {
+  CollectedCollectionType,
+  IProfileAndConsolidations,
+} from "../../../../../entities/IProfile";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,6 +17,11 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
 import { NextGenCollection } from "../../../../../entities/INextgen";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "../../../../../constants";
+import {
+  NEXTGEN_CORE,
+  NEXTGEN_CHAIN_ID,
+} from "../../../../nextGen/nextgen_contracts";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",
@@ -77,6 +85,9 @@ export default function UserPageStatsActivityWallet({
     useState<UserPageStatsActivityWalletFilterType>(
       UserPageStatsActivityWalletFilterType.ALL
     );
+
+  const [selectedCollection, setSelectedCollection] =
+    useState<CollectedCollectionType | null>(null);
 
   const [pageFilter, setPageFilter] = useState(
     page && !isNaN(+page) ? +page : 1
@@ -168,6 +179,7 @@ export default function UserPageStatsActivityWallet({
         page: `${pageFilter}`,
         wallet: walletsParam,
         filter: activeFilter,
+        selectedCollection: selectedCollection,
       },
     ],
     queryFn: async () => {
@@ -179,6 +191,18 @@ export default function UserPageStatsActivityWallet({
 
       if (activeFilter) {
         params.filter = FILTER_TO_PARAM[activeFilter];
+      }
+
+      switch (selectedCollection) {
+        case CollectedCollectionType.MEMES:
+          params.contract = MEMES_CONTRACT;
+          break;
+        case CollectedCollectionType.NEXTGEN:
+          params.contract = NEXTGEN_CORE[NEXTGEN_CHAIN_ID];
+          break;
+        case CollectedCollectionType.GRADIENTS:
+          params.contract = GRADIENT_CONTRACT;
+          break;
       }
 
       return await commonApiFetch<Page<Transaction>>({
@@ -253,6 +277,8 @@ export default function UserPageStatsActivityWallet({
         loading={isFetching}
         setPage={onPageFilter}
         onActiveFilter={onActiveFilter}
+        selectedCollection={selectedCollection}
+        setSelectedCollection={setSelectedCollection}
       />
     </div>
   );
