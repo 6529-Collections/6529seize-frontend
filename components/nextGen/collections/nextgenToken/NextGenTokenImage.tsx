@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
+import { NextGenTokenRarityType } from "../../nextgen_helpers";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -10,10 +11,24 @@ export function NextGenTokenImage(
     info_class?: string;
     show_animation?: boolean;
     is_fullscreen?: boolean;
-    show_rarity_score?: boolean;
-    show_statistical_score?: boolean;
+    rarity_type?: NextGenTokenRarityType;
   }>
 ) {
+  function getTraitScore() {
+    if (props.rarity_type) {
+      const rarityType = props.rarity_type.toLowerCase();
+      const score = rarityType as keyof NextGenToken;
+      const rank = `${rarityType}_rank` as keyof NextGenToken;
+
+      return (
+        <TraitScore
+          score={props.token[score] as number}
+          rank={props.token[rank] as number}
+        />
+      );
+    }
+    return <></>;
+  }
   function getImage() {
     return (
       <>
@@ -37,24 +52,16 @@ export function NextGenTokenImage(
           />
         </span>
         {!props.hide_info && (
-          <span className="pt-1 d-flex justify-content-around align-items-center">
+          <span
+            className={`pt-1 d-flex align-items-center ${
+              props.rarity_type
+                ? "justify-content-between"
+                : "justify-content-center"
+            }`}>
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
-            {props.show_rarity_score && (
-              <TraitScore
-                trait="Rarity"
-                score={props.token.rarity_score}
-                rank={props.token.rarity_score_rank}
-              />
-            )}
-            {props.show_statistical_score && (
-              <TraitScore
-                trait="Statistical Rarity"
-                score={props.token.statistical_score}
-                rank={props.token.statistical_score_rank}
-              />
-            )}
+            {getTraitScore()}
           </span>
         )}
       </>

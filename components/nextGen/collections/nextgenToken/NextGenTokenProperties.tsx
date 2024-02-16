@@ -119,8 +119,8 @@ function TraitAccordion(
 }
 
 export default function NextgenTokenRarity(props: Readonly<Props>) {
-  const [showNormalised, setShowNormalised] = useState(false);
-  const [showTraitCount, setShowTraitCount] = useState(false);
+  const [showNormalised, setShowNormalised] = useState(true);
+  const [showTraitCount, setShowTraitCount] = useState(true);
 
   return (
     <Container className="no-padding">
@@ -147,24 +147,18 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col className="d-flex justify-content-between align-items-center">
           <span className="d-flex gap-3">
             <span className="d-flex align-items-center gap-1">
-              <Toggle
-                id="normalization-toggle"
-                defaultChecked={showNormalised}
-                onChange={() => setShowNormalised(!showNormalised)}
+              <NextgenRarityToggle
+                title={"Trait Normalization"}
+                show={showNormalised}
+                setShow={setShowNormalised}
               />
-              <label htmlFor="normalization-toggle">
-                <b>Trait Normalization</b>
-              </label>
             </span>
             <span className="d-flex align-items-center gap-1">
-              <Toggle
-                id="trait-count-toggle"
-                defaultChecked={showTraitCount}
-                onChange={() => setShowTraitCount(!showTraitCount)}
+              <NextgenRarityToggle
+                title={"Trait Count"}
+                show={showTraitCount}
+                setShow={setShowTraitCount}
               />
-              <label htmlFor="trait-count-toggle">
-                <b>Trait Count</b>
-              </label>
             </span>
           </span>
           <span>Token Count: {props.tokenCount.toLocaleString()}</span>
@@ -330,5 +324,31 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
         </Row>
       ))}
     </Container>
+  );
+}
+
+export function NextgenRarityToggle(
+  props: Readonly<{
+    title: string;
+    show: boolean;
+    disabled?: boolean;
+    setShow?: (show: boolean) => void;
+  }>
+) {
+  const label = props.title.replaceAll(" ", "-").toLowerCase();
+  return (
+    <>
+      <Toggle
+        disabled={props.disabled}
+        id={label}
+        checked={props.show}
+        onChange={() => props.setShow?.(!props.show)}
+      />
+      <label
+        htmlFor={label}
+        className={props.disabled ? "font-color-h" : "font-color"}>
+        <b>{props.title}</b>
+      </label>
+    </>
   );
 }

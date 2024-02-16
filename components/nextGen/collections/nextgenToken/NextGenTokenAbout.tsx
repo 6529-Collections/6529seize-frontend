@@ -255,7 +255,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
 
 export function TraitScore(
   props: Readonly<{
-    trait: string;
     score: number;
     rank: number;
     places?: number;
@@ -263,11 +262,16 @@ export function TraitScore(
 ) {
   return (
     <span className="d-flex flex-column">
-      <span className="font-color-h">{props.trait}</span>
-      <span className="d-flex gap-3">
-        <span>Score {displayScore(props.score)}</span>
-        <span>|</span>
-        <span>Rank #{props.rank.toLocaleString()}</span>
+      <span className="d-flex gap-2">
+        <span className="no-wrap">
+          <span className="font-smaller font-color-h">Score</span>{" "}
+          {displayScore(props.score)}
+        </span>
+        <span className="font-color-h">|</span>
+        <span className="no-wrap">
+          <span className="font-smaller font-color-h">Rank</span> #
+          {props.rank.toLocaleString()}
+        </span>
       </span>
     </span>
   );
