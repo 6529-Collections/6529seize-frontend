@@ -9,11 +9,9 @@ type SelectedType = CollectedCollectionType | null;
 export default function UserPageCollectedFiltersCollection({
   selected,
   setSelected,
-  hideMemeLab = false,
 }: {
   readonly selected: SelectedType;
   readonly setSelected: (selected: SelectedType) => void;
-  readonly hideMemeLab?: boolean;
 }) {
   const items: CommonSelectItem<SelectedType>[] = [
     {
@@ -22,18 +20,11 @@ export default function UserPageCollectedFiltersCollection({
       value: null,
       key: "all",
     },
-    ...Object.values(CollectedCollectionType)
-      .filter((c) => {
-        if (hideMemeLab) {
-          return c !== CollectedCollectionType.MEMELAB;
-        }
-        return true;
-      })
-      .map((collection) => ({
-        label: COLLECTED_COLLECTIONS_META[collection].label,
-        value: collection,
-        key: collection,
-      })),
+    ...Object.values(CollectedCollectionType).map((collection) => ({
+      label: COLLECTED_COLLECTIONS_META[collection].label,
+      value: collection,
+      key: collection,
+    })),
   ];
 
   return (

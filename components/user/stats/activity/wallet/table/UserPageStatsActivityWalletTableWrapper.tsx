@@ -1,8 +1,5 @@
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
-import {
-  CollectedCollectionType,
-  IProfileAndConsolidations,
-} from "../../../../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
 import { Transaction } from "../../../../../../entities/ITransaction";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 import CommonTablePagination from "../../../../../utils/CommonTablePagination";
@@ -11,7 +8,6 @@ import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWa
 import CommonCardSkeleton from "../../../../../utils/animation/CommonCardSkeleton";
 import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
 import { NextGenCollection } from "../../../../../../entities/INextgen";
-import UserPageCollectedFiltersCollection from "../../../../collected/filters/UserPageCollectedFiltersCollection";
 
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
@@ -25,8 +21,6 @@ export default function UserPageStatsActivityWalletTableWrapper({
   loading,
   setPage,
   onActiveFilter,
-  selectedCollection,
-  setSelectedCollection,
 }: {
   readonly filter: UserPageStatsActivityWalletFilterType;
   readonly profile: IProfileAndConsolidations;
@@ -40,10 +34,6 @@ export default function UserPageStatsActivityWalletTableWrapper({
   readonly setPage: (page: number) => void;
   readonly onActiveFilter: (
     filter: UserPageStatsActivityWalletFilterType
-  ) => void;
-  readonly selectedCollection: CollectedCollectionType | null;
-  readonly setSelectedCollection: (
-    selectedCollection: CollectedCollectionType | null
   ) => void;
 }) {
   const FILTER_TO_NO_DATA: Record<
@@ -70,17 +60,10 @@ export default function UserPageStatsActivityWalletTableWrapper({
   return (
     <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
       <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-4 tw-items-center tw-px-4 sm:tw-px-6 tw-mt-6">
-        <div className="tw-w-full tw-inline-flex tw-space-x-4">
-          <UserPageCollectedFiltersCollection
-            selected={selectedCollection}
-            setSelected={setSelectedCollection}
-            hideMemeLab={true}
-          />
-          <UserPageStatsActivityWalletFilter
-            activeFilter={filter}
-            setActiveFilter={onActiveFilter}
-          />
-        </div>
+        <UserPageStatsActivityWalletFilter
+          activeFilter={filter}
+          setActiveFilter={onActiveFilter}
+        />
         {loading && <CircleLoader />}
       </div>
       <div>
