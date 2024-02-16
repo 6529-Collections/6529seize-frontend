@@ -122,6 +122,132 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
   const [showNormalised, setShowNormalised] = useState(true);
   const [showTraitCount, setShowTraitCount] = useState(true);
 
+  function getRarityScore() {
+    if (showNormalised && showTraitCount) {
+      return props.token.rarity_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return props.token.rarity_score_normalised;
+    }
+    if (showTraitCount) {
+      return props.token.rarity_score_trait_count;
+    }
+    return props.token.rarity_score;
+  }
+
+  function getStatisticalScore() {
+    if (showNormalised && showTraitCount) {
+      return props.token.statistical_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return props.token.statistical_score_normalised;
+    }
+    if (showTraitCount) {
+      return props.token.statistical_score_trait_count;
+    }
+    return props.token.statistical_score;
+  }
+
+  function getSingleTraitRarityScore() {
+    if (showNormalised && showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return props.token.single_trait_rarity_score_normalised;
+    }
+    if (showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count;
+    }
+    return props.token.single_trait_rarity_score;
+  }
+
+  function getRarityRank() {
+    if (showNormalised && showTraitCount) {
+      return props.token.rarity_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return props.token.rarity_score_normalised_rank;
+    }
+    if (showTraitCount) {
+      return props.token.rarity_score_trait_count_rank;
+    }
+    return props.token.rarity_score_rank;
+  }
+
+  function getStatisticalRank() {
+    if (showNormalised && showTraitCount) {
+      return props.token.statistical_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return props.token.statistical_score_normalised_rank;
+    }
+    if (showTraitCount) {
+      return props.token.statistical_score_trait_count_rank;
+    }
+    return props.token.statistical_score_rank;
+  }
+
+  function getSingleTraitRarityRank() {
+    if (showNormalised && showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return props.token.single_trait_rarity_score_normalised_rank;
+    }
+    if (showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count_rank;
+    }
+    return props.token.single_trait_rarity_score_rank;
+  }
+
+  function getTraitRarityScore(t: NextGenTrait) {
+    if (showNormalised && showTraitCount) {
+      return t.rarity_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return t.rarity_score_normalised;
+    }
+    return t.rarity_score;
+  }
+
+  function getTraitRarityRank(t: NextGenTrait) {
+    if (showNormalised && showTraitCount) {
+      return t.rarity_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return t.rarity_score_normalised_rank;
+    }
+    return t.rarity_score_rank;
+  }
+
+  function getTraitStatisticalScore(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.statistical_rarity_normalised;
+    }
+    return t.statistical_rarity;
+  }
+
+  function getTraitStatisticalRank(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.statistical_rarity_normalised_rank;
+    }
+    return t.statistical_rarity_rank;
+  }
+
+  function getTraitSingleRarityScore(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.single_trait_rarity_score_normalised;
+    }
+    return t.statistical_rarity;
+  }
+
+  function getTraitSingleRarityRank(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.single_trait_rarity_score_normalised_rank;
+    }
+    return t.statistical_rarity_rank;
+  }
+
   return (
     <Container className="no-padding">
       <Row>
@@ -168,42 +294,16 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Rarity"}
-            score={
-              showNormalised && showTraitCount
-                ? props.token.rarity_score_trait_count_normalised
-                : showNormalised
-                ? props.token.rarity_score_normalised
-                : showTraitCount
-                ? props.token.rarity_score_trait_count
-                : props.token.rarity_score
-            }
-            rank={
-              showNormalised && showTraitCount
-                ? props.token.rarity_score_trait_count_normalised_rank
-                : showNormalised
-                ? props.token.rarity_score_normalised_rank
-                : showTraitCount
-                ? props.token.rarity_score_trait_count_rank
-                : props.token.rarity_score_rank
-            }
+            score={getRarityScore()}
+            rank={getRarityRank()}
             collection_id={props.collection_id}
             token_count={props.tokenCount}
             traits={props.traits
               .map((t) => ({
                 trait: t.trait,
                 value: t.value,
-                score:
-                  showNormalised && showTraitCount
-                    ? t.rarity_score_trait_count_normalised
-                    : showNormalised
-                    ? t.rarity_score_normalised
-                    : t.rarity_score,
-                rank:
-                  showNormalised && showTraitCount
-                    ? t.rarity_score_trait_count_normalised_rank
-                    : showNormalised
-                    ? t.rarity_score_normalised_rank
-                    : t.rarity_score_rank,
+                score: getTraitRarityScore(t),
+                rank: getTraitRarityRank(t),
                 trait_count: t.trait_count,
                 value_count: t.value_count,
               }))
@@ -215,36 +315,16 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Statistical Rarity"}
-            score={
-              showNormalised && showTraitCount
-                ? props.token.statistical_score_trait_count_normalised
-                : showNormalised
-                ? props.token.statistical_score_normalised
-                : showTraitCount
-                ? props.token.statistical_score_trait_count
-                : props.token.statistical_score
-            }
-            rank={
-              showNormalised && showTraitCount
-                ? props.token.statistical_score_trait_count_normalised_rank
-                : showNormalised
-                ? props.token.statistical_score_normalised_rank
-                : showTraitCount
-                ? props.token.statistical_score_trait_count_rank
-                : props.token.statistical_score_rank
-            }
+            score={getStatisticalScore()}
+            rank={getStatisticalRank()}
             collection_id={props.collection_id}
             token_count={props.tokenCount}
             traits={props.traits
               .map((t) => ({
                 trait: t.trait,
                 value: t.value,
-                score: showNormalised
-                  ? t.statistical_rarity_normalised
-                  : t.statistical_rarity,
-                rank: showNormalised
-                  ? t.statistical_rarity_normalised_rank
-                  : t.statistical_rarity_rank,
+                score: getTraitStatisticalScore(t),
+                rank: getTraitStatisticalRank(t),
                 trait_count: t.trait_count,
                 value_count: t.value_count,
               }))
@@ -256,36 +336,15 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Single Trait Rarity"}
-            score={
-              showNormalised && showTraitCount
-                ? props.token.single_trait_rarity_score_trait_count_normalised
-                : showNormalised
-                ? props.token.single_trait_rarity_score_normalised
-                : showTraitCount
-                ? props.token.single_trait_rarity_score_trait_count
-                : props.token.single_trait_rarity_score
-            }
-            rank={
-              showNormalised && showTraitCount
-                ? props.token
-                    .single_trait_rarity_score_trait_count_normalised_rank
-                : showNormalised
-                ? props.token.single_trait_rarity_score_normalised_rank
-                : showTraitCount
-                ? props.token.single_trait_rarity_score_trait_count_rank
-                : props.token.single_trait_rarity_score_rank
-            }
+            score={getSingleTraitRarityScore()}
+            rank={getSingleTraitRarityRank()}
             collection_id={props.collection_id}
             token_count={props.tokenCount}
             traits={props.traits.map((t) => ({
               trait: t.trait,
               value: t.value,
-              score: showNormalised
-                ? t.single_trait_rarity_score_normalised
-                : t.statistical_rarity,
-              rank: showNormalised
-                ? t.single_trait_rarity_score_normalised_rank
-                : t.statistical_rarity_rank,
+              score: getTraitSingleRarityScore(t),
+              rank: getTraitSingleRarityRank(t),
               trait_count: t.trait_count,
               value_count: t.value_count,
             }))}
