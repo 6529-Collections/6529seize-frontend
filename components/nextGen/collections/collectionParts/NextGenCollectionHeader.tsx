@@ -41,14 +41,21 @@ interface PhaseProps {
 export function NextGenBackToCollectionPageLink(
   props: Readonly<{ collection: NextGenCollection }>
 ) {
+  const isArtPage = window?.location.pathname.endsWith("/art") ?? false;
+  const content = isArtPage
+    ? "Back to collection page"
+    : "Back to collection art";
+
+  const link = `/nextgen/collection/${formatNameForUrl(props.collection.name)}${
+    isArtPage ? "" : "/art"
+  }`;
+
   return (
     <a
-      href={`/nextgen/collection/${formatNameForUrl(
-        props.collection.name
-      )}/art`}
+      href={link}
       className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
       <FontAwesomeIcon icon="arrow-circle-left" className={styles.backIcon} />
-      Back to collection Page
+      {content}
     </a>
   );
 }
