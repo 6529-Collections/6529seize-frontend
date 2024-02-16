@@ -17,7 +17,7 @@ export default function Breadcrumb(props: Readonly<Props>) {
         <Col>
           <Container>
             <Row>
-              <Col className={`${styles.headerLeft}`}>
+              <Col className={`${styles.ellipsis}`}>
                 {props.breadcrumbs.map((crumb, index) => {
                   const crumbAnchor = crumb.href ? (
                     <a
