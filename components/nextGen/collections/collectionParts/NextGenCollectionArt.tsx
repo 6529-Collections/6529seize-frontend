@@ -58,7 +58,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const [showNormalised, setShowNormalised] = useState(true);
   const [showTraitCount, setShowTraitCount] = useState(true);
 
-  const [showFilters, setShowFilters] = useState(isMobile ? false : true);
+  const [showFilters, setShowFilters] = useState(isMobile);
 
   function setTraitsQuery(q: string) {
     if (q) {
