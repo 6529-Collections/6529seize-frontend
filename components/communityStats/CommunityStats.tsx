@@ -240,7 +240,9 @@ export default function CommunityStats() {
     <Container>
       <Row>
         <Col sm={12} md={8} className="pt-4">
-          <h1 className="mb-0">COMMUNITY STATS</h1>
+          <h1 className="mb-0">
+            <span className="font-lightest">Community</span> Stats
+          </h1>
         </Col>
         {/* <Col
           sm={12}
@@ -265,7 +267,7 @@ export default function CommunityStats() {
       {tdhHistory.length > 0 && (
         <>
           <Row className="pt-4 pb-4 font-bolder">
-            <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Col>
               <Container className="no-padding">
                 <Row>
                   <Col
@@ -332,49 +334,57 @@ export default function CommunityStats() {
             </Col>
           </Row>
           <Row className="pt-4 pb-4">
-            <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Col>
               <Container className="no-padding">
                 <Row>
                   <h2 className="mb-0 font-color">Total TDH</h2>
                 </Row>
                 <Row className="pt-4">
-                  <Col>{printTotalTDH()}</Col>
+                  <Col className="d-flex justify-content-center">
+                    {printTotalTDH()}
+                  </Col>
                 </Row>
               </Container>
             </Col>
           </Row>
           <Row className="pt-4 pb-4">
-            <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Col>
               <Container className="no-padding">
                 <Row>
                   <h2 className="mb-0 font-color">Net TDH Daily Change</h2>
                 </Row>
                 <Row className="pt-4">
-                  <Col>{printNetTDH()}</Col>
+                  <Col className="d-flex justify-content-center">
+                    {printNetTDH()}
+                  </Col>
                 </Row>
               </Container>
             </Col>
           </Row>
           <Row className="pt-4 pb-4">
-            <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Col>
               <Container className="no-padding">
                 <Row>
                   <h2 className="mb-0 font-color">Created TDH Daily Change</h2>
                 </Row>
                 <Row className="pt-4">
-                  <Col>{printCreatedTDH()}</Col>
+                  <Col className="d-flex justify-content-center">
+                    {printCreatedTDH()}
+                  </Col>
                 </Row>
               </Container>
             </Col>
           </Row>
           <Row className="pt-4 pb-4">
-            <Col sm={12} md={{ span: 10, offset: 1 }}>
+            <Col>
               <Container className="no-padding">
                 <Row>
                   <h2 className="mb-0 font-color">Destroyed TDH Change</h2>
                 </Row>
                 <Row className="pt-4">
-                  <Col>{printDestroyedTDH()}</Col>
+                  <Col className="d-flex justify-content-center">
+                    {printDestroyedTDH()}
+                  </Col>
                 </Row>
               </Container>
             </Col>

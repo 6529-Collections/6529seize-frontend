@@ -30,17 +30,6 @@
   color: $raspberry;
 }
 
-.viewAllLink {
-  white-space: nowrap;
-  font-size: 15px !important;
-  font-family: $main-font;
-  font-weight: lighter;
-
-  @media only screen and (max-width: 800px) {
-    font-size: 12px !important;
-  }
-}
-
 .iconEnabled {
   cursor: pointer;
 }
@@ -84,7 +73,6 @@
   text-align: center;
   background-color: transparent;
   border: none;
-  width: 100%;
   padding-right: 15px;
   a {
     line-height: 30px;

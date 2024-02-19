@@ -23,7 +23,7 @@ export default function CreatePlan() {
         `/allowlists/${id}`
       );
       if (!data.success) {
-        router.push("/distribution-plan-tool");
+        router.push("/emma");
         return;
       }
       setState(data.data);

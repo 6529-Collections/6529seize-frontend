@@ -24,7 +24,7 @@ enum Sort {
   card_balance = "balance",
 }
 
-export default function MemeLabLeaderboard(props: Props) {
+export default function MemeLabLeaderboard(props: Readonly<Props>) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
@@ -84,8 +84,10 @@ export default function MemeLabLeaderboard(props: Props) {
     <Container className={`no-padding`} id={`leaderboard-${props.nftId}`}>
       <Row>
         <Col>
-          <h1>COMMUNITY -</h1>
-          <h1>&nbsp;CARD {props.nftId}</h1>
+          <h1>
+            <span className="font-lightest">Community</span>
+          </h1>
+          <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
         {/* {lastTDH && (
           <Col className={`text-right ${styles.lastTDH}`}>

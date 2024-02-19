@@ -56,7 +56,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function MemePage(props: Props) {
+export default function MemePage(props: Readonly<Props>) {
   const router = useRouter();
 
   const [nftId, setNftId] = useState<string>();
@@ -357,7 +357,9 @@ export default function MemePage(props: Props) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>THE MEMES</h1>
+                  <h1>
+                    <span className="font-lightest">The</span> Memes
+                  </h1>
                 </Col>
                 {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">

@@ -22,13 +22,6 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
 
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export default function UserPageHeader({
   profile,
   mainAddress,
@@ -89,7 +82,7 @@ export default function UserPageHeader({
   }, [aboutStatement, canEdit, isFetched]);
 
   return (
-    <div className={`tailwind-scope ${inter.className}`}>
+    <div className="tailwind-scope">
       <section className="tw-pb-6 md:tw-pb-8">
         <UserPageHeaderBanner
           profile={profile}
@@ -97,7 +90,7 @@ export default function UserPageHeader({
           defaultBanner2={DEFAULT_BANNER_2}
           canEdit={canEdit}
         />
-        <div className="tw-relative tw-px-6 min-[1100px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] min-[1800px]:tw-max-w-[1750px] min-[2000px]:tw-max-w-[1950px] tw-mx-auto">
+        <div className="tw-relative tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-flex tw-flex-col">
             <div className="-tw-mt-20 sm:-tw-mt-24 tw-w-min">
               <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>

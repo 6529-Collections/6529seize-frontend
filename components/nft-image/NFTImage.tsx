@@ -18,7 +18,7 @@ interface Props {
   onLoad?: () => void;
 }
 
-export default function NFTImage(props: Props) {
+export default function NFTImage(props: Readonly<Props>) {
   const [showBalance, setShowBalance] = useState(true);
   useEffect(() => {
     if (props.onLoad) {

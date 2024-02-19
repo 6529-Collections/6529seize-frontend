@@ -41,7 +41,7 @@ interface Props {
   setActiveSection(section: DelegationCenterSection): any;
 }
 
-export default function DelegationCenterMenu(props: Props) {
+export default function DelegationCenterMenu(props: Readonly<Props>) {
   const accountResolution = useAccount();
   const ensResolution = useEnsName({
     address: accountResolution.address,
@@ -151,11 +151,21 @@ export default function DelegationCenterMenu(props: Props) {
           />
         );
       case DelegationCenterSection.WALLET_ARCHITECTURE:
-        return <DelegationHTML path="reference-overview-wallet-architecture" />;
+        return (
+          <DelegationHTML
+            title="Wallet Architecture"
+            path="reference-overview-wallet-architecture"
+          />
+        );
       case DelegationCenterSection.FAQ:
-        return <DelegationHTML path="delegation-faq" />;
+        return <DelegationHTML title="Delegation FAQ" path="delegation-faq" />;
       case DelegationCenterSection.CONSOLIDATION_USE_CASES:
-        return <DelegationHTML path="consolidation-use-cases" />;
+        return (
+          <DelegationHTML
+            title="Consolidation Use Cases"
+            path="consolidation-use-cases"
+          />
+        );
       case DelegationCenterSection.HTML:
         return (
           <DelegationHTML

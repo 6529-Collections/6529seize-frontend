@@ -72,7 +72,7 @@
   }
 
   button {
-    font-weight: bolder;
+    font-weight: bold;
   }
 }
 
@@ -148,11 +148,11 @@
 }
 
 .addNewDelegationBtn {
+  font-weight: 600;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 15px;
   background-color: $blue;
   color: white;
   width: fit-content;
@@ -370,7 +370,7 @@
 .delegationsTableUseCaseHeader {
   padding-top: 1rem !important;
   padding-bottom: 0.2rem !important;
-  font-weight: bolder;
+  font-weight: bold;
 }
 
 .delegationsTableScrollContainer {
@@ -532,13 +532,13 @@
 }
 
 .delegationContractLinksHeader {
-  font-weight: bolder;
+  font-weight: bold;
   color: $font-color-h;
   text-align: center;
 }
 
 .hint {
-  font-weight: bolder;
+  font-weight: bold;
 }
 
 .registerHeading {
@@ -631,9 +631,12 @@
 }
 
 .addNewDelegationWrapper {
+  height: 160px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 @media only screen and (max-width: 1400px) {
@@ -645,6 +648,4 @@
 
 .subDelegationSubHeading {
   font-size: smaller;
-  position: absolute;
-  bottom: 3px;
 }

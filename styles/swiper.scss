@@ -1,0 +1,48 @@
+@import "./variables.scss";
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
+@import "swiper/css/scrollbar";
+@import "swiper/css/autoplay";
+
+.swiper {
+  position: relative;
+  .swiper-slide-active {
+    scale: 1.05;
+  }
+  .swiper-pagination {
+    position: static;
+    text-align: center;
+
+    .swiper-pagination-bullet-active {
+      background: $off-white;
+    }
+  }
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    color: $off-white;
+    position: absolute;
+    top: auto;
+    bottom: -10px;
+
+    &::after {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  }
+
+  .swiper-button-prev {
+    left: calc(50% - 120px);
+    &::after {
+      content: "\2190";
+    }
+  }
+
+  .swiper-button-next {
+    right: calc(50% - 120px);
+    &::after {
+      content: "\2192";
+    }
+  }
+}

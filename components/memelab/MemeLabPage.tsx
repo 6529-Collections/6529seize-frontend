@@ -60,7 +60,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function LabPage(props: Props) {
+export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
@@ -336,7 +336,9 @@ export default function LabPage(props: Props) {
       <>
         <Row className="pt-3">
           <Col>
-            <h1>THE MEMES</h1>
+            <h1>
+              <span className="font-lightest">The</span> Memes
+            </h1>
           </Col>
         </Row>
         <Row className="pt-2 pb-2">
@@ -1330,7 +1332,9 @@ export default function LabPage(props: Props) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>MEME LAB</h1>
+                  <h1>
+                    <span className="font-lightest">Meme</span> Lab
+                  </h1>
                 </Col>
                 {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">

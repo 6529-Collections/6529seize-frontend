@@ -26,7 +26,6 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     const queryParams = new URLSearchParams(param.params);
     url += `?${queryParams.toString()}`;
   }
-
   const res = await fetch(url, {
     headers: getHeaders(param.headers),
   });

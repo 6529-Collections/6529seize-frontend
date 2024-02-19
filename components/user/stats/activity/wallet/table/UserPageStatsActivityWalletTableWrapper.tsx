@@ -7,12 +7,14 @@ import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import CommonCardSkeleton from "../../../../../utils/animation/CommonCardSkeleton";
 import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
+import { NextGenCollection } from "../../../../../../entities/INextgen";
 
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
   profile,
   transactions,
   memes,
+  nextgenCollections,
   totalPages,
   page,
   isFirstLoading,
@@ -24,6 +26,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   readonly profile: IProfileAndConsolidations;
   readonly transactions: Transaction[];
   readonly memes: MemeLite[];
+  readonly nextgenCollections: NextGenCollection[];
   readonly totalPages: number;
   readonly page: number;
   readonly isFirstLoading: boolean;
@@ -63,31 +66,30 @@ export default function UserPageStatsActivityWalletTableWrapper({
         />
         {loading && <CircleLoader />}
       </div>
-      <div className="tw-scroll-py-3 tw-overflow-auto">
-        <div>
-          {transactions.length && memes?.length ? (
-            <div className="tw-flow-root">
-              <UserPageStatsActivityWalletTable
-                transactions={transactions}
-                profile={profile}
-                memes={memes}
+      <div>
+        {transactions.length && memes?.length ? (
+          <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
+            <UserPageStatsActivityWalletTable
+              transactions={transactions}
+              profile={profile}
+              memes={memes}
+              nextgenCollections={nextgenCollections}
+            />
+            {totalPages > 1 && (
+              <CommonTablePagination
+                currentPage={page}
+                setCurrentPage={setPage}
+                totalPages={totalPages}
+                small={true}
+                loading={loading}
               />
-              {totalPages > 1 && (
-                <CommonTablePagination
-                  currentPage={page}
-                  setCurrentPage={setPage}
-                  totalPages={totalPages}
-                  small={true}
-                  loading={loading}
-                />
-              )}
-            </div>
-          ) : (
-            <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-              {FILTER_TO_NO_DATA[filter]}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+            {FILTER_TO_NO_DATA[filter]}
+          </div>
+        )}
       </div>
     </div>
   );

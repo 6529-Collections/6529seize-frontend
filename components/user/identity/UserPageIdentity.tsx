@@ -23,7 +23,7 @@ export default function UserPageIdentity({
       <UserPageIdentityHeader profile={profile} />
       <UserPageIdentityStatements profile={profile} />
 
-      <div className="tw-mt-6 lg:tw-mt-10 xl:tw-flex tw-items-stretch tw-gap-y-8 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
+      <div className="tw-mt-6 lg:tw-mt-10 xl:tw-flex xl:tw-items-stretch tw-space-y-8 lg:tw-space-y-10 xl:tw-space-y-0 tw-gap-x-8">
         <ProfileRatersTableWrapper initialParams={initialCICGivenParams} />
         <ProfileRatersTableWrapper initialParams={initialCICReceivedParams} />
       </div>

@@ -67,7 +67,7 @@
   line-height: 75px;
   color: lightblue;
   font-size: larger;
-  font-weight: bolder;
+  font-weight: bold;
   padding-left: 20px;
 }
 
@@ -145,12 +145,27 @@
 }
 
 .viewAllLink {
-  white-space: nowrap;
-  font-size: 15px !important;
-  font-family: $main-font;
-  font-weight: lighter;
+  position: relative;
+  span {
+    bottom: 10px;
+    @media only screen and (max-width: 1200px) {
+      bottom: 4px;
+    }
+    position: absolute;
+    white-space: nowrap;
+    font-size: $font-smaller;
+    font-weight: 700;
+    margin-left: 10px;
+    border-bottom: 3px solid $font-color;
 
-  @media only screen and (max-width: 800px) {
-    font-size: 12px !important;
+    &:hover {
+      color: darken($color: $font-color, $amount: $darken-percentage);
+      border-bottom: 3px solid
+        darken($color: $font-color, $amount: $darken-percentage);
+    }
+
+    @media only screen and (max-width: 800px) {
+      font-size: 12px !important;
+    }
   }
 }

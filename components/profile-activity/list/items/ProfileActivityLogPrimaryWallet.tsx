@@ -13,7 +13,7 @@ export default function ProfileActivityLogPrimaryWallet({
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
 
-      <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300 tw-font-medium">
+      <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
         primary wallet
       </span>
       {!isAdded && (

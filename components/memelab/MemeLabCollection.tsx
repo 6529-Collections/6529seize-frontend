@@ -35,7 +35,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function LabCollection(props: Props) {
+export default function LabCollection(props: Readonly<Props>) {
   const router = useRouter();
   const [collectionName, setCollectionName] = useState<string>();
   const [website, setWebsite] = useState<string>();
@@ -485,7 +485,9 @@ export default function LabCollection(props: Props) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>MEME LAB COLLECTIONS</h1>
+                  <h1>
+                    <span className="font-lightest">Meme</span> Lab Collections
+                  </h1>
                 </Col>
               </Row>
               <Row className="pt-3">

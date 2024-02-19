@@ -17,7 +17,7 @@ interface Props {
   onSetWallets?(wallets: string[]): any;
 }
 
-export default function Header(props: Props) {
+export default function Header(props: Readonly<Props>) {
   const router = useRouter();
   const account = useAccount();
 
@@ -198,11 +198,24 @@ export default function Header(props: Props) {
                     </a>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
                 <Row className="pt-3">
                   <Col>
                     <a href="/nextgen">
-                      <h3>NextGen</h3>
+                      <h3>
+                        <span>NextGen</span>&nbsp;
+                        <span className={styles.new}>new</span>
+                      </h3>
                     </a>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
                   </Col>
                 </Row>
                 <Row className="pt-3">
@@ -362,7 +375,7 @@ export default function Header(props: Props) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/distribution-plan-tool">
+                    <a href="/emma">
                       <h3>EMMA</h3>
                     </a>
                   </Col>
@@ -610,14 +623,14 @@ export default function Header(props: Props) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
-                  <Container>
+                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}>
+                  <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
                         className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}>
-                          <UserSetUpProfileCta/>
+                          <UserSetUpProfileCta />
                           <SearchProfileButton />
                           <Image
                             loading="eager"
@@ -664,13 +677,16 @@ export default function Header(props: Props) {
                                 }>
                                 Gradient
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
                                   (window.location.href = "/nextgen")
                                 }>
-                                NextGen
+                                <span>NextGen</span>&nbsp;
+                                <span className={styles.new}>new</span>
                               </NavDropdown.Item>
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
@@ -750,8 +766,7 @@ export default function Header(props: Props) {
                               <NavDropdown.Item
                                 className={styles.dropdownItem}
                                 onClick={() =>
-                                  (window.location.href =
-                                    "/distribution-plan-tool")
+                                  (window.location.href = "/emma")
                                 }>
                                 EMMA
                               </NavDropdown.Item>
@@ -912,7 +927,7 @@ export default function Header(props: Props) {
                               </NavDropdown.Item>
                             </NavDropdown>
                             {printHeaderConnect()}
-                            <UserSetUpProfileCta/>
+                            <UserSetUpProfileCta />
                             <SearchProfileButton />
                           </Nav>
                         </Navbar>
@@ -925,7 +940,7 @@ export default function Header(props: Props) {
                             height: "auto",
                             width: "auto",
                             maxHeight: "42px",
-                            paddingLeft: "35px",
+                            paddingLeft: "15px",
                           }}
                           className={`d-none ${styles.dMdBlock}`}
                           src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"

@@ -39,7 +39,7 @@ interface Props {
   onSetToast(toast: any): any;
 }
 
-export default function NewConsolidationComponent(props: Props) {
+export default function NewConsolidationComponent(props: Readonly<Props>) {
   const orignalDelegatorEnsResolution = useEnsName({
     address: props.subdelegation
       ? (props.subdelegation.originalDelegator as `0x${string}`)

@@ -10,14 +10,14 @@ interface Props {
   breadcrumbs: Crumb[];
 }
 
-export default function Breadcrumb(props: Props) {
+export default function Breadcrumb(props: Readonly<Props>) {
   return (
     <Container fluid className={styles.breadcrumb}>
       <Row className={styles.headerRow}>
         <Col>
           <Container>
             <Row>
-              <Col className={`${styles.headerLeft}`}>
+              <Col className={`${styles.ellipsis}`}>
                 {props.breadcrumbs.map((crumb, index) => {
                   const crumbAnchor = crumb.href ? (
                     <a

@@ -35,7 +35,9 @@ export default function Seize404() {
         <Container>
           <Row className="pt-4 pb-4">
             <Col>
-              <h1>DISPUTE RESOLUTION</h1>
+              <h1>
+                <span className="font-lightest">Dispute</span> Resolution
+              </h1>
             </Col>
           </Row>
           <Row>

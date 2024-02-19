@@ -220,8 +220,11 @@ export default function BlockPicker() {
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
-        <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1150px] min-[1300px]:tw-max-w-[1250px] min-[1400px]:tw-max-w-[1350px] min-[1500px]:tw-max-w-[1450px] min-[1600px]:tw-max-w-[1550px] tw-mx-auto">
-          <div className="tw-w-full tw-flex tw-gap-x-4 tw-gap-y-5">
+        <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+          <h1 className="tw-text-white pb-4">
+            <span className="font-lightest">Meme</span> Blocks
+          </h1>
+          <div className="tw-w-full tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-5">
             <div className="tw-w-1/2">
               <BlockPickerDateSelect
                 date={date}
@@ -247,8 +250,7 @@ export default function BlockPicker() {
               <button
                 type="button"
                 className="tw-w-[5.25rem] tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
-                onClick={onSubmit}
-              >
+                onClick={onSubmit}>
                 {!loading ? "Submit" : <AllowlistToolLoader />}
               </button>
             </div>

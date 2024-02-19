@@ -20,7 +20,7 @@ interface Props {
   setSection(section: DelegationCenterSection): any;
 }
 
-export default function DelegationCenterComponent(props: Props) {
+export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const accountResolution = useAccount();
   const web3Modal = useWeb3Modal();
@@ -124,7 +124,9 @@ export default function DelegationCenterComponent(props: Props) {
     <Container>
       <Row className="pb-2">
         <Col>
-          <h1>DELEGATION CENTER</h1>
+          <h1>
+            <span className="font-lightest">Delegation</span> Center
+          </h1>
         </Col>
       </Row>
       <Row>
@@ -175,10 +177,17 @@ export default function DelegationCenterComponent(props: Props) {
                       DelegationCenterSection.REGISTER_SUB_DELEGATION
                     );
                   }}>
-                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
-                  Register Delegation Manager
-                  <span className={styles.subDelegationSubHeading}>
-                    (Sub-Delegation)
+                  <span className="d-flex flex-column">
+                    <span>
+                      <FontAwesomeIcon
+                        icon="plus"
+                        className={styles.buttonIcon}
+                      />
+                      Register Delegation Manager
+                    </span>
+                    <span className={styles.subDelegationSubHeading}>
+                      (Sub-Delegation)
+                    </span>
                   </span>
                 </span>
               </Col>

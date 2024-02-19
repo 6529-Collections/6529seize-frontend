@@ -49,7 +49,6 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
       return "Null Address";
     }
     if (!wallet) {
-      console.log(transaction);
       return "unknown";
     }
     return wallet.wallet.ens ?? formatAddress(wallet.wallet.address);
@@ -58,8 +57,8 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
   const walletDisplay = getWalletDisplay();
 
   return (
-    <div className="tw-text-sm tw-text-iron-100 tw-font-medium">
+    <span className="tw-text-sm tw-text-iron-100 tw-font-medium">
       {walletDisplay}
-    </div>
+    </span>
   );
 }

@@ -362,3 +362,46 @@ export type ApiCreateOrUpdateProfileCicStatement = Omit<
   CicStatement,
   "id" | "crated_at" | "updated_at" | "profile_id"
 >;
+
+export enum CollectedCollectionType {
+  MEMES = "MEMES",
+  NEXTGEN = "NEXTGEN",
+  GRADIENTS = "GRADIENTS",
+  MEMELAB = "MEMELAB",
+}
+
+export enum CollectionSeized {
+  SEIZED = "SEIZED",
+  NOT_SEIZED = "NOT_SEIZED",
+}
+
+export enum CollectionSort {
+  TOKEN_ID = "TOKEN_ID",
+  TDH = "TDH",
+  RANK = "RANK",
+}
+
+export interface CollectedCard {
+  readonly collection: CollectedCollectionType;
+  readonly token_id: number;
+  readonly token_name: string;
+  readonly img: string;
+  readonly tdh: number | null;
+  readonly rank: number | null;
+  readonly seized_count: number | null;
+  readonly szn: number | null;
+}
+
+export interface WalletDelegation {
+  readonly created_at: Date;
+  readonly block: number;
+  readonly from_address: string;
+  readonly to_address: string;
+  readonly collection: string; //"0x8888888888888888888888888888888888888888" = any collection
+  readonly use_case: number;
+  readonly expiry: number;
+  readonly all_tokens: number;
+  readonly token_id: number;
+  readonly from_display: string | null;
+  readonly to_display: string | null;
+}

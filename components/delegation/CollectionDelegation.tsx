@@ -158,7 +158,7 @@ function getConsolidationReadParams(
   return null;
 }
 
-export default function CollectionDelegationComponent(props: Props) {
+export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const toastRef = useRef<HTMLDivElement>(null);
   const accountResolution = useAccount();
   const networkResolution = useNetwork();
@@ -826,7 +826,7 @@ export default function CollectionDelegationComponent(props: Props) {
     return (
       <>
         <h5 className="float-none pt-5 pb-1">
-        Use A Delegation Manager (For Delegations or Consolidations)
+          Use A Delegation Manager (For Delegations or Consolidations)
         </h5>
         <Accordion
           alwaysOpen
@@ -1586,7 +1586,7 @@ export default function CollectionDelegationComponent(props: Props) {
             <Container>
               <Row className="pb-2">
                 <Col>
-                  <h1>{props.collection.title.toUpperCase()}</h1>
+                  <h1>{props.collection.title}</h1>
                 </Col>
               </Row>
               {!showUpdateDelegation &&

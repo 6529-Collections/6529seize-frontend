@@ -8,7 +8,6 @@ import { GRADIENT_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 import { NFT } from "../../entities/INFT";
 import {
-  getDateDisplay,
   areEqualAddresses,
   enterArtFullScreen,
   fullScreenSupported,
@@ -28,7 +27,7 @@ interface Props {
   wallets: string[];
 }
 
-export default function GradientPage(props: Props) {
+export default function GradientPage(props: Readonly<Props>) {
   const router = useRouter();
 
   const [nftId, setNftId] = useState<string>();
@@ -359,24 +358,10 @@ export default function GradientPage(props: Props) {
             <Container className="pt-4 pb-4">
               <Row>
                 <Col>
-                  <h1>6529 GRADIENT</h1>
+                  <h1>
+                    <span className="font-lightest">6529</span> Gradient
+                  </h1>
                 </Col>
-                {/* {nft && (
-                  <Col className="d-flex align-items-center justify-content-end">
-                    <TwitterShareButton
-                      className="twitter-share-button"
-                      url={window.location.href.split("?")[0]}
-                      title={`${nft.name}\n#6529SEIZE\n\n`}>
-                      <TwitterIcon
-                        size={30}
-                        round
-                        iconFillColor="white"
-                        bgStyle={{ fill: "transparent" }}
-                      />
-                      Tweet
-                    </TwitterShareButton>
-                  </Col>
-                )} */}
               </Row>
               <Row className="pt-2">
                 <Col>

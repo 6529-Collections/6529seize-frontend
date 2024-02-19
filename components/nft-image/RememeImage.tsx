@@ -10,7 +10,7 @@ interface Props {
   height: 300 | 650;
 }
 
-export default function RememeImage(props: Props) {
+export default function RememeImage(props: Readonly<Props>) {
   const imageFallbackUrls = getImageFallbackUrls();
   const videoFallbackUrls = getVideoFallbackUrls();
 
@@ -25,13 +25,15 @@ export default function RememeImage(props: Props) {
     if (props.nft.s3_image_original) {
       urls.push(props.nft.s3_image_original);
     }
-    urls.push(parseIpfsUrlToGateway(props.nft.image));
-    urls.push(parseIpfsUrl(props.nft.image));
-    if (props.nft.metadata.image) {
-      urls.push(parseIpfsUrlToGateway(props.nft.metadata.image));
-      urls.push(parseIpfsUrl(props.nft.metadata.image));
+    if (!props.nft.image.toLowerCase().startsWith("data")) {
+      urls.push(parseIpfsUrlToGateway(props.nft.image));
+      urls.push(parseIpfsUrl(props.nft.image));
+      if (props.nft.metadata.image) {
+        urls.push(parseIpfsUrlToGateway(props.nft.metadata.image));
+        urls.push(parseIpfsUrl(props.nft.metadata.image));
+      }
+      urls.push(props.nft.contract_opensea_data.imageUrl);
     }
-    urls.push(props.nft.contract_opensea_data.imageUrl);
     return urls;
   }
 
