@@ -39,6 +39,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     if (screenSize <= 750) {
       setShowFilters(false);
       setIsMobile(true);
+    } else {
+      setShowFilters(true);
+      setIsMobile(false);
     }
   }, []);
 
@@ -58,7 +61,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const [showNormalised, setShowNormalised] = useState(true);
   const [showTraitCount, setShowTraitCount] = useState(true);
 
-  const [showFilters, setShowFilters] = useState(isMobile ? false : true);
+  const [showFilters, setShowFilters] = useState(true);
 
   function setTraitsQuery(q: string) {
     if (q) {
