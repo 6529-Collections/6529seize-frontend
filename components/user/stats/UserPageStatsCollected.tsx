@@ -11,6 +11,11 @@ export default function UserPageStatsCollected({
 }: {
   readonly tdh: UserPageStatsTDHType;
 }) {
+  function getRankDisplay(balance: number, rank: number, ties: number) {
+    if (balance === 0 || 0 >= rank) return "-";
+    return `#${formatNumberWithCommasOrDash(rank)}${ties > 1 ? " (tie)" : ""}`;
+  }
+
   const getAllCards = (
     props: UserPageStatsTDHType
   ): UserPageStatsTableItemData[] => {
@@ -38,33 +43,51 @@ export default function UserPageStatsCollected({
         isMain: false,
         isLast: true,
         tooltip: null,
-        total: `#${formatNumberWithCommasOrDash(props.dense_rank_balance)}${
-          props.dense_rank_balance__ties > 1 ? " (tie)" : ""
-        }`,
-        memes: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes
-        )}${props.dense_rank_balance_memes__ties > 1 ? " (tie)" : ""}`,
-        gradient: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_gradients
-        )}${props.dense_rank_balance_gradients__ties > 1 ? " (tie)" : ""}`,
-        SZN1: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes_season1
-        )}${props.dense_rank_balance_memes_season1__ties > 1 ? " (tie)" : ""}`,
-        SZN2: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes_season2
-        )}${props.dense_rank_balance_memes_season2__ties > 1 ? " (tie)" : ""}`,
-        SZN3: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes_season3
-        )}${props.dense_rank_balance_memes_season3__ties > 1 ? " (tie)" : ""}`,
-        SZN4: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes_season4
-        )}${props.dense_rank_balance_memes_season4__ties > 1 ? " (tie)" : ""}`,
-        SZN5: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes_season5
-        )}${props.dense_rank_balance_memes_season5__ties > 1 ? " (tie)" : ""}`,
-        SZN6: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_memes_season6
-        )}${props.dense_rank_balance_memes_season6__ties > 1 ? " (tie)" : ""}`,
+        total: getRankDisplay(
+          props.balance,
+          props.dense_rank_balance,
+          props.dense_rank_balance__ties
+        ),
+        memes: getRankDisplay(
+          props.memes_balance,
+          props.dense_rank_balance_memes,
+          props.dense_rank_balance_memes__ties
+        ),
+        gradient: getRankDisplay(
+          props.gradients_balance,
+          props.dense_rank_balance_gradients,
+          props.dense_rank_balance_gradients__ties
+        ),
+        SZN1: getRankDisplay(
+          props.memes_balance_season1,
+          props.dense_rank_balance_memes_season1,
+          props.dense_rank_balance_memes_season1__ties
+        ),
+        SZN2: getRankDisplay(
+          props.memes_balance_season2,
+          props.dense_rank_balance_memes_season2,
+          props.dense_rank_balance_memes_season2__ties
+        ),
+        SZN3: getRankDisplay(
+          props.memes_balance_season3,
+          props.dense_rank_balance_memes_season3,
+          props.dense_rank_balance_memes_season3__ties
+        ),
+        SZN4: getRankDisplay(
+          props.memes_balance_season4,
+          props.dense_rank_balance_memes_season4,
+          props.dense_rank_balance_memes_season4__ties
+        ),
+        SZN5: getRankDisplay(
+          props.memes_balance_season5,
+          props.dense_rank_balance_memes_season5,
+          props.dense_rank_balance_memes_season5__ties
+        ),
+        SZN6: getRankDisplay(
+          props.memes_balance_season6,
+          props.dense_rank_balance_memes_season6,
+          props.dense_rank_balance_memes_season6__ties
+        ),
       },
     ];
   };
@@ -96,36 +119,59 @@ export default function UserPageStatsCollected({
         isMain: false,
         isLast: true,
         tooltip: null,
-        total: `#${formatNumberWithCommasOrDash(props.dense_rank_unique)}${
-          props.dense_rank_unique__ties > 1 ? " (tie)" : ""
-        }`,
-        memes: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes
-        )}${props.dense_rank_unique_memes__ties > 1 ? " (tie)" : ""}`,
-        gradient: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_balance_gradients
-        )}${props.dense_rank_balance_gradients__ties > 1 ? " (tie)" : ""}`,
-        SZN1: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes_season1
-        )}${props.dense_rank_unique_memes_season1__ties > 1 ? " (tie)" : ""}`,
-        SZN2: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes_season2
-        )}${props.dense_rank_unique_memes_season2__ties > 1 ? " (tie)" : ""}`,
-        SZN3: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes_season3
-        )}${props.dense_rank_unique_memes_season3__ties > 1 ? " (tie)" : ""}`,
-        SZN4: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes_season4
-        )}${props.dense_rank_unique_memes_season4__ties > 1 ? " (tie)" : ""}`,
-        SZN5: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes_season5
-        )}${props.dense_rank_unique_memes_season5__ties > 1 ? " (tie)" : ""}`,
-        SZN6: `#${formatNumberWithCommasOrDash(
-          props.dense_rank_unique_memes_season6
-        )}${props.dense_rank_unique_memes_season6__ties > 1 ? " (tie)" : ""}`,
+        total: getRankDisplay(
+          props.unique_memes + props.gradients_balance,
+          props.dense_rank_unique,
+          props.dense_rank_unique__ties
+        ),
+        memes: getRankDisplay(
+          props.unique_memes,
+          props.dense_rank_unique_memes,
+          props.dense_rank_unique_memes__ties
+        ),
+        gradient: getRankDisplay(
+          props.gradients_balance,
+          props.dense_rank_balance_gradients,
+          props.dense_rank_balance_gradients__ties
+        ),
+        SZN1: getRankDisplay(
+          props.unique_memes_szn1,
+          props.dense_rank_unique_memes_season1,
+          props.dense_rank_unique_memes_season1__ties
+        ),
+        SZN2: getRankDisplay(
+          props.unique_memes_szn2,
+          props.dense_rank_unique_memes_season2,
+          props.dense_rank_unique_memes_season2__ties
+        ),
+        SZN3: getRankDisplay(
+          props.unique_memes_szn3,
+          props.dense_rank_unique_memes_season3,
+          props.dense_rank_unique_memes_season3__ties
+        ),
+        SZN4: getRankDisplay(
+          props.unique_memes_szn4,
+          props.dense_rank_unique_memes_season4,
+          props.dense_rank_unique_memes_season4__ties
+        ),
+        SZN5: getRankDisplay(
+          props.unique_memes_szn5,
+          props.dense_rank_unique_memes_season5,
+          props.dense_rank_unique_memes_season5__ties
+        ),
+        SZN6: getRankDisplay(
+          props.unique_memes_szn6,
+          props.dense_rank_unique_memes_season6,
+          props.dense_rank_unique_memes_season6__ties
+        ),
       },
     ];
   };
+
+  function getTDHRank(rank: number) {
+    if (0 > rank) return "-";
+    return `#${formatNumberWithCommasOrDash(rank)}`;
+  }
 
   const getTDH = (
     props: UserPageStatsTDHType
@@ -168,15 +214,15 @@ export default function UserPageStatsCollected({
         isMain: false,
         isLast: true,
         tooltip: null,
-        total: `#${formatNumberWithCommasOrDash(props.tdh_rank)}`,
-        memes: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes)}`,
-        gradient: `#${formatNumberWithCommasOrDash(props.tdh_rank_gradients)}`,
-        SZN1: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes_szn1)}`,
-        SZN2: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes_szn2)}`,
-        SZN3: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes_szn3)}`,
-        SZN4: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes_szn4)}`,
-        SZN5: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes_szn5)}`,
-        SZN6: `#${formatNumberWithCommasOrDash(props.tdh_rank_memes_szn6)}`,
+        total: getTDHRank(props.tdh_rank),
+        memes: getTDHRank(props.tdh_rank_memes),
+        gradient: getTDHRank(props.tdh_rank_gradients),
+        SZN1: getTDHRank(props.tdh_rank_memes_szn1),
+        SZN2: getTDHRank(props.tdh_rank_memes_szn2),
+        SZN3: getTDHRank(props.tdh_rank_memes_szn3),
+        SZN4: getTDHRank(props.tdh_rank_memes_szn4),
+        SZN5: getTDHRank(props.tdh_rank_memes_szn5),
+        SZN6: getTDHRank(props.tdh_rank_memes_szn6),
       },
     ];
   };

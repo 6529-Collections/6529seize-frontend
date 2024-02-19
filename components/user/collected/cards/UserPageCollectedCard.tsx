@@ -66,7 +66,7 @@ export default function UserPageCollectedCard({
               </span>
               {showSeizedCount && (
                 <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-normal tw-text-iron-400">
-                  {card.seized_count}x
+                  {formatNumberWithCommasOrDash(card.seized_count)}x
                 </span>
               )}
             </div>
