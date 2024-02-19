@@ -3,6 +3,9 @@ import styles from "./NextGenToken.module.scss";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { NextGenToken, NextGenTrait } from "../../../../entities/INextgen";
 
+import Toggle from "react-toggle";
+import { useState } from "react";
+
 interface Props {
   collection_id: number;
   token: NextGenToken;
@@ -116,7 +119,134 @@ function TraitAccordion(
 }
 
 export default function NextgenTokenRarity(props: Readonly<Props>) {
-  // const [showNormalised, setShowNormalised] = useState(false);
+  const [showNormalised, setShowNormalised] = useState(true);
+  const [showTraitCount, setShowTraitCount] = useState(true);
+
+  function getRarityScore() {
+    if (showNormalised && showTraitCount) {
+      return props.token.rarity_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return props.token.rarity_score_normalised;
+    }
+    if (showTraitCount) {
+      return props.token.rarity_score_trait_count;
+    }
+    return props.token.rarity_score;
+  }
+
+  function getStatisticalScore() {
+    if (showNormalised && showTraitCount) {
+      return props.token.statistical_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return props.token.statistical_score_normalised;
+    }
+    if (showTraitCount) {
+      return props.token.statistical_score_trait_count;
+    }
+    return props.token.statistical_score;
+  }
+
+  function getSingleTraitRarityScore() {
+    if (showNormalised && showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return props.token.single_trait_rarity_score_normalised;
+    }
+    if (showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count;
+    }
+    return props.token.single_trait_rarity_score;
+  }
+
+  function getRarityRank() {
+    if (showNormalised && showTraitCount) {
+      return props.token.rarity_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return props.token.rarity_score_normalised_rank;
+    }
+    if (showTraitCount) {
+      return props.token.rarity_score_trait_count_rank;
+    }
+    return props.token.rarity_score_rank;
+  }
+
+  function getStatisticalRank() {
+    if (showNormalised && showTraitCount) {
+      return props.token.statistical_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return props.token.statistical_score_normalised_rank;
+    }
+    if (showTraitCount) {
+      return props.token.statistical_score_trait_count_rank;
+    }
+    return props.token.statistical_score_rank;
+  }
+
+  function getSingleTraitRarityRank() {
+    if (showNormalised && showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return props.token.single_trait_rarity_score_normalised_rank;
+    }
+    if (showTraitCount) {
+      return props.token.single_trait_rarity_score_trait_count_rank;
+    }
+    return props.token.single_trait_rarity_score_rank;
+  }
+
+  function getTraitRarityScore(t: NextGenTrait) {
+    if (showNormalised && showTraitCount) {
+      return t.rarity_score_trait_count_normalised;
+    }
+    if (showNormalised) {
+      return t.rarity_score_normalised;
+    }
+    return t.rarity_score;
+  }
+
+  function getTraitRarityRank(t: NextGenTrait) {
+    if (showNormalised && showTraitCount) {
+      return t.rarity_score_trait_count_normalised_rank;
+    }
+    if (showNormalised) {
+      return t.rarity_score_normalised_rank;
+    }
+    return t.rarity_score_rank;
+  }
+
+  function getTraitStatisticalScore(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.statistical_rarity_normalised;
+    }
+    return t.statistical_rarity;
+  }
+
+  function getTraitStatisticalRank(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.statistical_rarity_normalised_rank;
+    }
+    return t.statistical_rarity_rank;
+  }
+
+  function getTraitSingleRarityScore(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.single_trait_rarity_score_normalised;
+    }
+    return t.statistical_rarity;
+  }
+
+  function getTraitSingleRarityRank(t: NextGenTrait) {
+    if (showNormalised) {
+      return t.single_trait_rarity_score_normalised_rank;
+    }
+    return t.statistical_rarity_rank;
+  }
 
   return (
     <Container className="no-padding">
@@ -136,9 +266,27 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
           </p>
         </Col>
       </Row>
-      <Row className="pt-4 pb-2">
+      <Row className="pt-3 pb-3">
+        <Col className="font-larger font-bolder">{props.token.name}</Col>
+      </Row>
+      <Row className="pt-2 pb-2">
         <Col className="d-flex justify-content-between align-items-center">
-          <span className="font-larger font-bolder">{props.token.name}</span>
+          <span className="d-flex gap-3">
+            <span className="d-flex align-items-center gap-1">
+              <NextgenRarityToggle
+                title={"Trait Normalization"}
+                show={showNormalised}
+                setShow={setShowNormalised}
+              />
+            </span>
+            <span className="d-flex align-items-center gap-1">
+              <NextgenRarityToggle
+                title={"Trait Count"}
+                show={showTraitCount}
+                setShow={setShowTraitCount}
+              />
+            </span>
+          </span>
           <span>Token Count: {props.tokenCount.toLocaleString()}</span>
         </Col>
       </Row>
@@ -146,37 +294,20 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Rarity"}
-            score={props.token.rarity_score}
-            rank={props.token.rarity_score_rank}
+            score={getRarityScore()}
+            rank={getRarityRank()}
             collection_id={props.collection_id}
             token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: t.rarity_score,
-              rank: t.rarity_score_rank,
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))}
-          />
-        </Col>
-      </Row>
-      <Row className="pt-2 pb-2">
-        <Col>
-          <TraitAccordion
-            title={"Rarity with Trait Normalization"}
-            score={props.token.rarity_score_normalised}
-            rank={props.token.rarity_score_normalised_rank}
-            collection_id={props.collection_id}
-            token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: t.rarity_score_normalised,
-              rank: t.rarity_score_normalised_rank,
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))}
+            traits={props.traits
+              .map((t) => ({
+                trait: t.trait,
+                value: t.value,
+                score: getTraitRarityScore(t),
+                rank: getTraitRarityRank(t),
+                trait_count: t.trait_count,
+                value_count: t.value_count,
+              }))
+              .sort((a, b) => b.score - a.score)}
           />
         </Col>
       </Row>
@@ -184,18 +315,20 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Statistical Rarity"}
-            score={props.token.statistical_score}
-            rank={props.token.statistical_score_rank}
+            score={getStatisticalScore()}
+            rank={getStatisticalRank()}
             collection_id={props.collection_id}
             token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: t.statistical_rarity,
-              rank: t.statistical_rarity_rank,
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))}
+            traits={props.traits
+              .map((t) => ({
+                trait: t.trait,
+                value: t.value,
+                score: getTraitStatisticalScore(t),
+                rank: getTraitStatisticalRank(t),
+                trait_count: t.trait_count,
+                value_count: t.value_count,
+              }))
+              .sort((a, b) => b.score - a.score)}
           />
         </Col>
       </Row>
@@ -203,15 +336,15 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         <Col>
           <TraitAccordion
             title={"Single Trait Rarity"}
-            score={props.token.single_trait_rarity_score}
-            rank={props.token.single_trait_rarity_score_rank}
+            score={getSingleTraitRarityScore()}
+            rank={getSingleTraitRarityRank()}
             collection_id={props.collection_id}
             token_count={props.tokenCount}
             traits={props.traits.map((t) => ({
               trait: t.trait,
               value: t.value,
-              score: t.statistical_rarity,
-              rank: t.statistical_rarity_rank,
+              score: getTraitSingleRarityScore(t),
+              rank: getTraitSingleRarityRank(t),
               trait_count: t.trait_count,
               value_count: t.value_count,
             }))}
@@ -250,5 +383,31 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
         </Row>
       ))}
     </Container>
+  );
+}
+
+export function NextgenRarityToggle(
+  props: Readonly<{
+    title: string;
+    show: boolean;
+    disabled?: boolean;
+    setShow?: (show: boolean) => void;
+  }>
+) {
+  const label = props.title.replaceAll(" ", "-").toLowerCase();
+  return (
+    <>
+      <Toggle
+        disabled={props.disabled}
+        id={label}
+        checked={props.show}
+        onChange={() => props.setShow?.(!props.show)}
+      />
+      <label
+        htmlFor={label}
+        className={props.disabled ? "font-color-h" : "font-color"}>
+        <b>{props.title}</b>
+      </label>
+    </>
   );
 }

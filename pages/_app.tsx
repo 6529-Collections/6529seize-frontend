@@ -87,6 +87,8 @@ import {
   faPlayCircle,
   faPauseCircle,
   faSpinner,
+  faFilter,
+  faFilterCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -165,7 +167,9 @@ library.add(
   faMaximize,
   faPlayCircle,
   faPauseCircle,
-  faSpinner
+  faSpinner,
+  faFilter,
+  faFilterCircleXmark
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
