@@ -316,7 +316,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     return {
       props: {
         section,
-        addressQuery: addressQuery ? addressQuery : null,
+        addressQuery: addressQuery ?? null,
       },
     };
   } else {
