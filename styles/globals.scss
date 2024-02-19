@@ -414,3 +414,8 @@ h5 {
     display: none; /* Safari and Chrome */
   }
 }
+
+.react-toggle--checked .react-toggle-thumb,
+.react-toggle--focus .react-toggle-thumb {
+  box-shadow: none;
+}
