@@ -50,30 +50,33 @@ export interface NFT extends BaseNFT {
   hodl_rate: number;
 }
 
-export interface MemesExtendedData {
+export interface ExtendedDataBase {
   id: number;
   created_at: Date;
-  season: number;
-  meme: number;
-  meme_name: string;
   collection_size: number;
   edition_size: number;
   edition_size_rank: number;
   museum_holdings: number;
   museum_holdings_rank: number;
-  burnt: number;
-  edition_size_not_burnt: number;
-  edition_size_not_burnt_rank: number;
   edition_size_cleaned: number;
   edition_size_cleaned_rank: number;
   hodlers: number;
   hodlers_rank: number;
   percent_unique: number;
   percent_unique_rank: number;
-  percent_unique_not_burnt: number;
-  percent_unique_not_burnt_rank: number;
   percent_unique_cleaned: number;
   percent_unique_cleaned_rank: number;
+  burnt: number;
+  edition_size_not_burnt: number;
+  edition_size_not_burnt_rank: number;
+  percent_unique_not_burnt: number;
+  percent_unique_not_burnt_rank: number;
+}
+
+export interface MemesExtendedData extends ExtendedDataBase {
+  season: number;
+  meme: number;
+  meme_name: string;
 }
 
 export interface NftRank {
@@ -92,25 +95,10 @@ export interface NftTDH {
   tdh__raw: number;
 }
 
-export interface LabExtendedData {
-  id: number;
-  created_at: Date;
-  name: string;
+export interface LabExtendedData extends ExtendedDataBase {
   meme_references: number[];
-  collection_size: number;
-  edition_size: number;
-  edition_size_rank: number;
-  museum_holdings: number;
-  museum_holdings_rank: number;
-  edition_size_cleaned: number;
-  edition_size_cleaned_rank: number;
-  hodlers: number;
-  hodlers_rank: number;
-  percent_unique: number;
-  percent_unique_rank: number;
-  percent_unique_cleaned: number;
-  percent_unique_cleaned_rank: number;
   metadata_collection: string;
+  name: string;
   website: string;
 }
 
