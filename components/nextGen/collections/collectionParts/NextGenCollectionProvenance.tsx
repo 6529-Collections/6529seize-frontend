@@ -111,7 +111,7 @@ export function NextGenCollectionProvenanceRow(
         if (afterMatch.startsWith(" ")) {
           afterMatch = afterMatch.substring(1);
         }
-        const normalisedTokenId = parseInt(match[2], 10); // Ensure base 10 is used for parsing
+        const normalisedTokenId = parseInt(match[2], 10);
         const tokenId = props.collection.id * 10000000000 + normalisedTokenId;
 
         const content = (

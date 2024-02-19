@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import Pagination from "../../pagination/Pagination";
 import { commonApiFetch } from "../../../services/api/common-api";
 import DotLoader from "../../dotLoader/DotLoader";
-import { NextGenListFilters } from "../nextgen_helpers";
+import { NextGenListFilters, NextGenTokenRarityType } from "../nextgen_helpers";
 import { SortDirection } from "../../../entities/ISort";
 
 interface Props {
@@ -18,6 +18,8 @@ interface Props {
   sort?: NextGenListFilters;
   sort_direction?: SortDirection;
   selected_traits?: TraitValuePair[];
+  show_normalised?: boolean;
+  show_trait_count?: boolean;
   setTotalResults?: (totalResults: number) => void;
   show_pagination?: boolean;
 }
@@ -29,6 +31,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   const [tokensLoaded, setTokensLoaded] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
+  const [rarityType, setRarityType] = useState<NextGenTokenRarityType>();
 
   function fetchResults(mypage: number) {
     setTokensLoaded(false);
@@ -38,6 +41,12 @@ export default function NextGenTokenList(props: Readonly<Props>) {
         .map((t) => `${t.trait}:${t.value}`)
         .join(",");
       endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
+    }
+    if (props.show_normalised) {
+      endpoint += `&show_normalised=true`;
+    }
+    if (props.show_trait_count) {
+      endpoint += `&show_trait_count=true`;
     }
     if (props.sort) {
       endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
@@ -70,11 +79,61 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     } else {
       setPage(1);
     }
-  }, [props.selected_traits, props.sort, props.sort_direction]);
+  }, [
+    props.selected_traits,
+    props.sort,
+    props.sort_direction,
+    props.show_normalised,
+    props.show_trait_count,
+  ]);
 
   useEffect(() => {
     fetchResults(page);
   }, [page]);
+
+  function getRarityType(
+    baseType:
+      | NextGenTokenRarityType.RARITY_SCORE
+      | NextGenTokenRarityType.STATISTICAL_SCORE
+      | NextGenTokenRarityType.SINGLE_TRAIT_RARITY_SCORE,
+    show_normalised?: boolean,
+    show_trait_count?: boolean
+  ): NextGenTokenRarityType {
+    return NextGenTokenRarityType[
+      `${baseType}${show_trait_count ? "_TRAIT_COUNT" : ""}${
+        show_normalised ? "_NORMALISED" : ""
+      }`
+    ] as NextGenTokenRarityType;
+  }
+
+  useEffect(() => {
+    const { sort, show_normalised, show_trait_count } = props;
+    let newRarityType = undefined;
+    switch (sort) {
+      case NextGenListFilters.RARITY_SCORE:
+        newRarityType = getRarityType(
+          NextGenTokenRarityType.RARITY_SCORE,
+          show_normalised,
+          show_trait_count
+        );
+        break;
+      case NextGenListFilters.STATISTICAL_SCORE:
+        newRarityType = getRarityType(
+          NextGenTokenRarityType.STATISTICAL_SCORE,
+          show_normalised,
+          show_trait_count
+        );
+        break;
+      case NextGenListFilters.SINGLE_TRAIT_RARITY:
+        newRarityType = getRarityType(
+          NextGenTokenRarityType.SINGLE_TRAIT_RARITY_SCORE,
+          show_normalised,
+          show_trait_count
+        );
+        break;
+    }
+    setRarityType(newRarityType);
+  }, [props.sort, props.show_normalised, props.show_trait_count]);
 
   return (
     <Container className="no-padding">
@@ -89,15 +148,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                   md={4}
                   key={`collection-${props.collection.id}-token-list-${t.id}`}
                   className="pt-2 pb-2">
-                  <NextGenTokenImage
-                    token={t}
-                    show_rarity_score={
-                      props.sort === NextGenListFilters.RARITY_SCORE
-                    }
-                    show_statistical_score={
-                      props.sort === NextGenListFilters.STATISTICAL_SCORE
-                    }
-                  />
+                  <NextGenTokenImage token={t} rarity_type={rarityType} />
                 </Col>
               ));
             } else {

@@ -21,6 +21,8 @@ import DotLoader from "../../../dotLoader/DotLoader";
 import { areEqualAddresses } from "../../../../helpers/Helpers";
 import { SortDirection } from "../../../../entities/ISort";
 import { NextGenListFilters, formatNameForUrl } from "../../nextgen_helpers";
+import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
+import Tippy from "@tippyjs/react";
 
 interface Props {
   collection: NextGenCollection;
@@ -29,6 +31,17 @@ interface Props {
 
 export default function NextGenCollectionArt(props: Readonly<Props>) {
   const router = useRouter();
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const screenSize = window.innerWidth;
+    if (screenSize <= 750) {
+      setShowFilters(false);
+      setIsMobile(true);
+    }
+  }, []);
+
   const [traits, setTraits] = useState<TraitValues[]>([]);
   const [traitsLoaded, setTraitsLoaded] = useState(false);
   const [routerLoaded, setRouterLoaded] = useState(false);
@@ -41,6 +54,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     props.show_view_all ? SortDirection.ASC : SortDirection.DESC
   );
   const [sort, setSort] = useState(NextGenListFilters.ID);
+
+  const [showNormalised, setShowNormalised] = useState(true);
+  const [showTraitCount, setShowTraitCount] = useState(true);
+
+  const [showFilters, setShowFilters] = useState(isMobile);
 
   function setTraitsQuery(q: string) {
     if (q) {
@@ -75,11 +93,19 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       setTraitsQuery(router.query.traits as string);
       if (router.query.sort) {
         const sortQuery = router.query.sort as string;
-        setSort(
+        const newSort =
           NextGenListFilters[
             sortQuery?.toUpperCase() as keyof typeof NextGenListFilters
-          ] || NextGenListFilters.ID
-        );
+          ] || NextGenListFilters.ID;
+        setSort(newSort);
+        if (newSort !== NextGenListFilters.ID) {
+          if (router.query.show_normalised) {
+            setShowNormalised(router.query.show_normalised === "true");
+          }
+          if (router.query.show_trait_count) {
+            setShowTraitCount(router.query.show_trait_count === "true");
+          }
+        }
       }
       if (router.query.sort_direction) {
         const sortDirQuery = router.query.sort_direction as string;
@@ -105,7 +131,6 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   useEffect(() => {
     if (!props.show_view_all && routerLoaded) {
       let query = "";
-
       if (selectedTraitValues.length > 0) {
         const traitsQ = selectedTraitValues
           .map((t) => `${t.trait}:${t.value}`)
@@ -118,6 +143,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       if (sortDir) {
         query += `&sort_direction=${sortDir.toLowerCase()}`;
       }
+      if (sort !== NextGenListFilters.ID) {
+        if (!showNormalised) {
+          query += `&show_normalised=false`;
+        }
+        if (!showTraitCount) {
+          query += `&show_trait_count=false`;
+        }
+      }
       router.push(
         `/nextgen/collection/${formatNameForUrl(props.collection.name)}/art${
           query ? `?${query}` : ""
@@ -126,7 +159,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         { shallow: true }
       );
     }
-  }, [routerLoaded, selectedTraitValues, sort, sortDir]);
+  }, [
+    routerLoaded,
+    selectedTraitValues,
+    sort,
+    sortDir,
+    showNormalised,
+    showTraitCount,
+  ]);
 
   useEffect(() => {
     if (totalResultsSet) {
@@ -145,9 +185,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding pt-4">
+    <Container className="no-padding pt-2">
       <Row>
-        <Col className="d-flex align-items-center justify-content-between">
+        <Col
+          sm={12}
+          md={6}
+          className="d-flex align-items-center justify-content-between no-wrap">
           <h3 className="mb-0">
             The Art{" "}
             {totalResultsSet ? (
@@ -158,6 +201,13 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <DotLoader />
             )}
           </h3>
+        </Col>
+        <Col
+          sm={12}
+          md={6}
+          className={`d-flex align-items-center ${
+            isMobile ? "pt-3 justify-content-between" : "justify-content-end"
+          }`}>
           {props.show_view_all ? (
             <a
               href={`/nextgen/collection/${formatNameForUrl(
@@ -173,7 +223,27 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               </h5>
             </a>
           ) : (
-            <span className="d-flex gap-2 align-items-center">
+            <>
+              <Tippy
+                content={`${showFilters ? "Hide" : "Show"} Filters${
+                  selectedTraitValues.length > 0
+                    ? ` (${selectedTraitValues.length} selected)`
+                    : ""
+                }`}
+                hideOnClick={true}
+                placement="bottom"
+                theme="light"
+                delay={250}>
+                <FontAwesomeIcon
+                  icon={showFilters ? "filter-circle-xmark" : "filter"}
+                  style={{
+                    cursor: "pointer",
+                    height: "22px",
+                    color: selectedTraitValues.length > 0 ? "#00dd00" : "white",
+                  }}
+                  onClick={() => setShowFilters(!showFilters)}
+                />
+              </Tippy>
               <Dropdown className={styles.rarityDropdown}>
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
@@ -184,33 +254,64 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                       {lf}
                     </Dropdown.Item>
                   ))}
+                  <Dropdown.Divider />
+                  <Dropdown.Item
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (sort !== NextGenListFilters.ID) {
+                        setShowNormalised(!showNormalised);
+                      }
+                    }}
+                    className="px-2 d-flex align-items-center gap-2">
+                    <NextgenRarityToggle
+                      disabled={sort === NextGenListFilters.ID}
+                      title={"Trait Normalization"}
+                      show={showNormalised}
+                    />
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (sort !== NextGenListFilters.ID) {
+                        setShowTraitCount(!showTraitCount);
+                      }
+                    }}
+                    className="px-2 d-flex align-items-center gap-2">
+                    <NextgenRarityToggle
+                      title={"Trait Count"}
+                      show={showTraitCount}
+                      disabled={sort === NextGenListFilters.ID}
+                    />
+                  </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
-              <FontAwesomeIcon
-                icon="chevron-circle-up"
-                style={{
-                  cursor: "pointer",
-                  height: "22px",
-                  color: sortDir === SortDirection.ASC ? "white" : "#9a9a9a",
-                }}
-                onClick={() => setSortDir(SortDirection.ASC)}
-              />
-              <FontAwesomeIcon
-                icon="chevron-circle-down"
-                style={{
-                  cursor: "pointer",
-                  height: "22px",
-                  color: sortDir === SortDirection.DESC ? "white" : "#9a9a9a",
-                }}
-                onClick={() => setSortDir(SortDirection.DESC)}
-              />
-            </span>
+              <span className="d-flex align-items-center gap-2">
+                <FontAwesomeIcon
+                  icon="chevron-circle-up"
+                  style={{
+                    cursor: "pointer",
+                    height: "22px",
+                    color: sortDir === SortDirection.ASC ? "white" : "#9a9a9a",
+                  }}
+                  onClick={() => setSortDir(SortDirection.ASC)}
+                />
+                <FontAwesomeIcon
+                  icon="chevron-circle-down"
+                  style={{
+                    cursor: "pointer",
+                    height: "22px",
+                    color: sortDir === SortDirection.DESC ? "white" : "#9a9a9a",
+                  }}
+                  onClick={() => setSortDir(SortDirection.DESC)}
+                />
+              </span>
+            </>
           )}
         </Col>
       </Row>
       <hr />
       <Row>
-        {!props.show_view_all && (
+        {!props.show_view_all && showFilters && (
           <Col sm={12} md={3}>
             <Container>
               <Row>
@@ -317,13 +418,15 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           </Col>
         )}
         {(routerLoaded || totalResultsSet) && (
-          <Col sm={12} md={props.show_view_all ? 12 : 9}>
+          <Col sm={12} md={props.show_view_all || !showFilters ? 12 : 9}>
             <NextGenTokenList
               limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}
               sort={props.show_view_all ? undefined : sort}
               sort_direction={props.show_view_all ? undefined : sortDir}
               selected_traits={selectedTraitValues}
+              show_normalised={showNormalised}
+              show_trait_count={showTraitCount}
               setTotalResults={(totalResults: number) => {
                 setTotalResults(totalResults);
                 setTotalResultsSet(true);
