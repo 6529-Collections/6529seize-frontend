@@ -1,5 +1,6 @@
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import styles from "./Breadcrumb.module.scss";
-import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 
 export interface Crumb {
   display: string;
@@ -21,22 +22,17 @@ export default function Breadcrumb(props: Readonly<Props>) {
                 {props.breadcrumbs.map((crumb, index) => {
                   const crumbAnchor = crumb.href ? (
                     <a
-                      key={`${index}-${crumb.display}`}
+                      key={getRandomObjectId()}
                       className={styles.breadcrumbLink}
-                      href={crumb.href}
-                      dangerouslySetInnerHTML={{ __html: crumb.display }}></a>
+                      href={crumb.href}>
+                      {crumb.display}
+                    </a>
                   ) : (
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: crumb.display,
-                      }}></span>
+                    <span>{crumb.display}</span>
                   );
                   if (index > 0) {
                     return (
-                      <span key={`${index}-${crumb.display}-span`}>
-                        {" "}
-                        | {crumbAnchor}
-                      </span>
+                      <span key={getRandomObjectId()}> | {crumbAnchor}</span>
                     );
                   }
                   return crumbAnchor;
