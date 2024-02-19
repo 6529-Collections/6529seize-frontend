@@ -173,6 +173,9 @@ export default function DelegationsDocumentation(props: any) {
   const [activeSection, setActiveSection] = useState<DelegationCenterSection>(
     pageProps.section
   );
+  const [addressQuery, setAddressQuery] = useState<string>(
+    pageProps.addressQuery
+  );
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
@@ -180,7 +183,7 @@ export default function DelegationsDocumentation(props: any) {
   ]);
 
   useEffect(() => {
-    const mySection = router.asPath.replace("/delegation/", "");
+    const mySection = router.query.section?.[0];
     if (
       Object.values(DelegationCenterSection).includes(
         mySection as DelegationCenterSection
@@ -195,7 +198,7 @@ export default function DelegationsDocumentation(props: any) {
         setActiveSection(DelegationCenterSection.HTML);
       }
     }
-  }, [router.asPath]);
+  }, [router.query.section]);
 
   useEffect(() => {
     if (activeSection) {
@@ -228,9 +231,16 @@ export default function DelegationsDocumentation(props: any) {
           ...sectionTitle,
         ]);
       } else {
+        let queryParam;
+        if (addressQuery && activeSection === DelegationCenterSection.CHECKER) {
+          queryParam = { address: addressQuery };
+        } else {
+          setAddressQuery("");
+        }
         router.push(
           {
             pathname: `${activeSection}`,
+            query: queryParam,
           },
           undefined,
           { shallow: true }
@@ -250,7 +260,7 @@ export default function DelegationsDocumentation(props: any) {
       }
       window.scrollTo(0, 0);
     }
-  }, [activeSection]);
+  }, [activeSection, addressQuery]);
 
   return (
     <>
@@ -279,6 +289,10 @@ export default function DelegationsDocumentation(props: any) {
           setActiveSection={(section: DelegationCenterSection) => {
             setActiveSection(section);
           }}
+          address_query={addressQuery}
+          setAddressQuery={(address: string) => {
+            setAddressQuery(address);
+          }}
         />
       </main>
     </>
@@ -287,8 +301,10 @@ export default function DelegationsDocumentation(props: any) {
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const sectionPath = req.query.section;
-
   const mySection = sectionPath.length > 1 ? sectionPath : sectionPath[0];
+
+  const addressQuery = req.query.address;
+
   if (
     mySection &&
     Object.values(DelegationCenterSection).includes(
@@ -300,6 +316,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     return {
       props: {
         section,
+        addressQuery: addressQuery ?? null,
       },
     };
   } else {

@@ -27,6 +27,23 @@
   }
 }
 
+.clearBtn {
+  background-color: transparent;
+  border: 1px solid white !important;
+  border-radius: 0;
+  color: white;
+  padding: 10px 15px;
+
+  &:hover {
+    background-color: $dark-grey;
+  }
+
+  &:active,
+  &:disabled {
+    background-color: $dark-grey;
+  }
+}
+
 .error {
   font-size: 1em;
   color: $raspberry;

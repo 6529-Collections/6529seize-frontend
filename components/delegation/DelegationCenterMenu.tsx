@@ -39,6 +39,8 @@ interface Props {
   section: DelegationCenterSection;
   path?: string[];
   setActiveSection(section: DelegationCenterSection): any;
+  address_query: string;
+  setAddressQuery(address: string): any;
 }
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
@@ -173,7 +175,12 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           />
         );
       case DelegationCenterSection.CHECKER:
-        return <WalletCheckerComponent />;
+        return (
+          <WalletCheckerComponent
+            address_query={props.address_query}
+            setAddressQuery={props.setAddressQuery}
+          />
+        );
     }
   }
 
