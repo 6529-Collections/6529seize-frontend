@@ -31,12 +31,17 @@ interface ConsolidationDisplay {
   to_display: string | undefined;
 }
 
-export default function WalletCheckerComponent(props: Readonly<Props>) {
+export default function WalletCheckerComponent(
+  props: Readonly<{
+    address_query: string;
+    setAddressQuery(address: string): any;
+  }>
+) {
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
-  const [walletInput, setWalletInput] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
+  const [walletInput, setWalletInput] = useState(props.address_query);
+  const [walletAddress, setWalletAddress] = useState(props.address_query);
 
-  const [checking, setChecking] = useState(false);
+  const [checking, setChecking] = useState(props.address_query ? true : false);
   const [addressError, setAddressError] = useState(false);
 
   const [delegations, setDelegations] = useState<Delegation[]>([]);
@@ -283,6 +288,7 @@ export default function WalletCheckerComponent(props: Readonly<Props>) {
         setChecking(false);
         return;
       } else {
+        props.setAddressQuery(walletAddress);
         setAddressError(false);
         setActiveDelegation(undefined);
         setFetchedAddress(walletAddress);
@@ -334,7 +340,7 @@ export default function WalletCheckerComponent(props: Readonly<Props>) {
               </Form.Label>
               <Col sm={12}>
                 <Form.Control
-                  disabled={checking}
+                  disabled={delegationsLoaded || consolidationsLoaded}
                   autoFocus
                   placeholder={"0x... or ENS"}
                   className={`${styles.formInput}`}
@@ -354,7 +360,23 @@ export default function WalletCheckerComponent(props: Readonly<Props>) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pt-3 text-center">
-              <Col sm={12}>
+              <Col
+                sm={12}
+                className="d-flex align-items-center justify-content-center gap-3">
+                <Button
+                  onClick={() => {
+                    setWalletInput("");
+                    setWalletAddress("");
+                    setDelegationsLoaded(false);
+                    setDelegations([]);
+                    setConsolidationsLoaded(false);
+                    setConsolidations([]);
+                    setChecking(false);
+                    props.setAddressQuery("");
+                  }}
+                  className={styles.clearBtn}>
+                  Clear
+                </Button>
                 <Button
                   disabled={formDisabled}
                   onClick={() => setChecking(true)}
