@@ -8,6 +8,7 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { goerli, sepolia } from "viem/chains";
 import Tippy from "@tippyjs/react";
 import { DistributionLink } from "../NextGen";
+import NextGenCollectorSets from "./NextGenCollectorSets";
 
 interface CollectionProps {
   collection: NextGenCollection;
@@ -325,6 +326,8 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     return <NextGenCollectionProvenance collection={props.collection} />;
   } else if (props.view === ContentView.OVERVIEW) {
     return <NextGenCollectionDetailsOverview collection={props.collection} />;
+  } else if (props.view === ContentView.COLLECTOR_SETS) {
+    return <NextGenCollectorSets collection={props.collection} />;
   } else {
     return <NextGenCollectionDetailsAbout collection={props.collection} />;
   }

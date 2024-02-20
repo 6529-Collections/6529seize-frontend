@@ -64,6 +64,17 @@ export default function NextGenCollection(props: any) {
   );
 }
 
+function getCollectionView(view: string): ContentView {
+  const normalizedView = view.toLowerCase();
+  const entries = Object.entries(ContentView).find(
+    ([, value]) => value.toLowerCase() === normalizedView
+  );
+
+  return entries
+    ? ContentView[entries[0] as keyof typeof ContentView]
+    : ContentView.OVERVIEW;
+}
+
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const collectionId: string = req.query.collection;
   const parsedCollectionId = encodeURIComponent(
@@ -88,13 +99,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let collectionView: ContentView = ContentView.OVERVIEW;
   if (view) {
     view = view[0].toLowerCase();
-    if (view === ContentView.PROVENANCE.toLowerCase()) {
-      collectionView = ContentView.PROVENANCE;
-    } else if (view == ContentView.OVERVIEW.toLowerCase()) {
-      collectionView = ContentView.OVERVIEW;
-    } else if (view == ContentView.ABOUT.toLowerCase()) {
-      collectionView = ContentView.ABOUT;
-    }
+    collectionView = getCollectionView(view);
   }
 
   return {
