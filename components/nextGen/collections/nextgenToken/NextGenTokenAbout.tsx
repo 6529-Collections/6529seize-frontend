@@ -188,6 +188,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   </Container>
                 }
                 theme={"light"}
+                placement="right"
                 delay={250}>
                 <a
                   href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
