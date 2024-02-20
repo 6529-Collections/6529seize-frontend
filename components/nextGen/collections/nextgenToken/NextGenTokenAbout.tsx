@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   areEqualAddresses,
   cicToType,
-  displayDecimal,
   formatAddress,
   getRoyaltyImage,
   isNullAddress,
@@ -38,7 +37,7 @@ interface Props {
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
   const account = useAccount();
-  const [ownerENS, setOwnerENS] = useState<string>();
+  const [ownerDisplay, setOwnerDisplay] = useState<string>();
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
   const [level, setLevel] = useState(-1);
   const [cicType, setCicType] = useState<CICType>();
@@ -49,12 +48,11 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
     commonApiFetch<IProfileAndConsolidations>({
       endpoint: `profiles/${props.token.owner}`,
     }).then((profile) => {
-      if (profile.profile?.handle) {
-        setOwnerProfileHandle(profile.profile.handle);
-        setCicType(cicToType(profile.cic.cic_rating));
-        setOwnerTdh(profile.consolidation.tdh);
-        setLevel(profile.level);
-      }
+      setOwnerProfileHandle(profile.profile?.handle);
+      setCicType(cicToType(profile.cic.cic_rating));
+      setOwnerTdh(profile.consolidation.tdh);
+      setLevel(profile.level);
+      setOwnerDisplay(profile.consolidation.consolidation_display);
     });
   }, [props.token.owner]);
 
@@ -67,16 +65,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       }
     });
   }, [props.token.owner]);
-
-  useEnsName({
-    address: props.token.owner as `0x${string}`,
-    chainId: mainnet.id,
-    onSettled(data: any, error: any) {
-      if (data) {
-        setOwnerENS(data);
-      }
-    },
-  });
 
   return (
     <Container className="no-padding">
@@ -134,18 +122,22 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
             {cicType && level > -1 ? (
               <a
-                href={`/${ownerProfileHandle}`}
+                href={`/${
+                  ownerProfileHandle ?? ownerDisplay ?? props.token.owner
+                }`}
                 className="d-flex gap-2 decoration-hover-underline align-items-center">
                 <UserCICAndLevel level={level} cicType={cicType} />
                 <span className="decoration-underline">
-                  {ownerProfileHandle}
+                  {ownerProfileHandle ??
+                    ownerDisplay ??
+                    formatAddress(props.token.owner)}
                 </span>
               </a>
             ) : (
-              <a href={`/${ownerENS ?? props.token.owner}`}>
+              <a href={`/${ownerDisplay ?? props.token.owner}`}>
                 <span>
                   {ownerProfileHandle ??
-                    ownerENS ??
+                    ownerDisplay ??
                     formatAddress(props.token.owner)}
                 </span>
               </a>
