@@ -12,6 +12,7 @@ import {
   isMemesContract,
   isNullAddress,
   numberWithCommas,
+  getRoyaltyImage,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MANIFOLD, NEXTGEN_MEDIA_BASE_URL } from "../../constants";
@@ -29,8 +30,6 @@ interface Props {
   tr: Transaction;
   hideNextgenTokenId?: boolean;
 }
-
-const ROYALTIES_PERCENTAGE = 0.069;
 
 export default function LatestActivityRow(props: Readonly<Props>) {
   function getNftImageSrc(nft?: NFTLite, src?: string) {
@@ -54,12 +53,6 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function calculateRoyaltiesPercentage() {
     return Math.round((props.tr.royalties / props.tr.value) * 10000) / 10000;
-  }
-
-  function getRoyaltyImage(royaltiesPercentage: number) {
-    return royaltiesPercentage >= ROYALTIES_PERCENTAGE
-      ? "pepe-xglasses.png"
-      : "pepe-smile.png";
   }
 
   function printRoyalties() {
