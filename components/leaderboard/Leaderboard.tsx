@@ -298,7 +298,7 @@ export default function Leaderboard(props: Readonly<Props>) {
     let url = `${process.env.API_ENDPOINT}/api/${
       view === VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
     }`;
-    let mysort = sort.sort === Sort.level ? Sort.boosted_tdh : sort.sort;
+    let mysort = sort.sort;
     if (mysort == Sort.day_change && view == VIEW.WALLET) {
       mysort = Sort.total_balance;
       setSort({ sort: mysort, sort_direction: sort.sort_direction });
