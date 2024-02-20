@@ -37,7 +37,7 @@ interface Props {
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
   const account = useAccount();
-  const [ownerDisplay, setOwnerDisplay] = useState<string>();
+  const [ownerDisplay, setOwnerDisplay] = useState<string | null>();
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
   const [level, setLevel] = useState(-1);
   const [cicType, setCicType] = useState<CICType>();
@@ -52,7 +52,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       setCicType(cicToType(profile.cic.cic_rating));
       setOwnerTdh(profile.consolidation.tdh);
       setLevel(profile.level);
-      setOwnerDisplay(profile.consolidation.consolidation_display);
+      setOwnerDisplay(profile.consolidation?.consolidation_display);
     });
   }, [props.token.owner]);
 
