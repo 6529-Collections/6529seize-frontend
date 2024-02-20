@@ -37,11 +37,6 @@ interface Props {
   showDownload?: boolean;
 }
 
-enum VIEW {
-  CONSOLIDATION,
-  WALLET,
-}
-
 enum Sort {
   tdh_rank = "tdh_rank",
   boosted_tdh = "boosted_tdh",
@@ -201,7 +196,6 @@ export interface LeaderboardTDH extends BaseTDHMetrics {
 export default function Leaderboard(props: Readonly<Props>) {
   const router = useRouter();
 
-  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [content, setContent] = useState<Content>(Content.ALL);
   const [ownerTagFilter, setOwnerTagFilter] = useState<OwnerTagFilter>(
     OwnerTagFilter.ALL
@@ -244,10 +238,8 @@ export default function Leaderboard(props: Readonly<Props>) {
   }
 
   function getFileName(page?: number) {
-    const isConsolidationView = view === VIEW.CONSOLIDATION;
-    const consolidationPrefix = isConsolidationView ? "consolidated-" : "";
     const tdhBlockSuffix = lastTDH ? `-${lastTDH.block}` : "";
-    const csvFileName = `${consolidationPrefix}community-download${tdhBlockSuffix}`;
+    const csvFileName = `consolidated-community-download${tdhBlockSuffix}`;
     if (page) {
       return `${csvFileName}-page${page}.csv`;
     }
@@ -295,14 +287,8 @@ export default function Leaderboard(props: Readonly<Props>) {
     if (searchWallets && searchWallets.length > 0) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
-    let url = `${process.env.API_ENDPOINT}/api/${
-      view === VIEW.WALLET ? "owner_metrics" : "consolidated_owner_metrics"
-    }`;
+    let url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics`;
     let mysort = sort.sort;
-    if (mysort == Sort.day_change && view == VIEW.WALLET) {
-      mysort = Sort.total_balance;
-      setSort({ sort: mysort, sort_direction: sort.sort_direction });
-    }
     url = `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${mysort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`;
     setMyFetchUrl(url);
     fetchUrl(url).then((response: DBResponse) => {
@@ -327,8 +313,7 @@ export default function Leaderboard(props: Readonly<Props>) {
     content,
     hideMuseum,
     hideTeam,
-    searchWallets,
-    view,
+    searchWallets
   ]);
 
   useEffect(() => {
@@ -1417,15 +1402,6 @@ export default function Leaderboard(props: Readonly<Props>) {
             )}
           </h1>
         </Col>
-        <Col
-          className={`d-flex justify-content-center align-items-center d-none ${styles.dMdFlex}`}
-          xs={4}>
-          <ConsolidationSwitch
-            view={view}
-            onSetView={(v) => setView(v)}
-            plural={true}
-          />
-        </Col>
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
@@ -1444,15 +1420,6 @@ export default function Leaderboard(props: Readonly<Props>) {
             <span id="next-tdh-div-1">{nextTdh()}</span> */}
           </Col>
         )}
-        <Col
-          className={`pt-2 d-flex justify-content-center align-items-center d-block ${styles.dMdNone}`}
-          xs={12}>
-          <ConsolidationSwitch
-            view={view}
-            onSetView={(v) => setView(v)}
-            plural={true}
-          />
-        </Col>
       </Row>
       {!showViewAll && (
         <>
@@ -2091,137 +2058,48 @@ export default function Leaderboard(props: Readonly<Props>) {
                           </span>
                         </span>
                       </th>
-                      {view == VIEW.CONSOLIDATION ? (
-                        <>
-                          <th className={styles.tdhSub}>
-                            <span className="d-flex align-items-center justify-content-center">
-                              Daily Change&nbsp; &nbsp;
-                              <span className="d-flex flex-column">
-                                <FontAwesomeIcon
-                                  icon="square-caret-up"
-                                  onClick={() =>
-                                    setSort({
-                                      sort: Sort.day_change,
-                                      sort_direction: SortDirection.ASC,
-                                    })
-                                  }
-                                  className={`${styles.caret} ${
-                                    sort.sort_direction != SortDirection.ASC ||
-                                    sort.sort != Sort.day_change
-                                      ? styles.disabled
-                                      : ""
-                                  }`}
-                                />
-                                <FontAwesomeIcon
-                                  icon="square-caret-down"
-                                  onClick={() =>
-                                    setSort({
-                                      sort: Sort.day_change,
-                                      sort_direction: SortDirection.DESC,
-                                    })
-                                  }
-                                  className={`${styles.caret} ${
-                                    sort.sort_direction != SortDirection.DESC ||
-                                    sort.sort != Sort.day_change
-                                      ? styles.disabled
-                                      : ""
-                                  }`}
-                                />
-                              </span>
-                            </span>
-                          </th>
-                          <th className={styles.tdhSub}>
-                            <span className="d-flex align-items-center justify-content-center">
-                              vs Community&nbsp; &nbsp;
-                            </span>
-                          </th>
-                        </>
-                      ) : (
-                        <>
-                          <th className={styles.tdhSub}>
-                            <span className="d-flex align-items-center justify-content-center">
-                              TDH&nbsp;
-                              <span className={styles.tdhSubNote}>
-                                (unboosted)
-                              </span>
-                              &nbsp;
-                              <span className="d-flex flex-column">
-                                <FontAwesomeIcon
-                                  icon="square-caret-up"
-                                  onClick={() =>
-                                    setSort({
-                                      sort: getTdhSort(),
-                                      sort_direction: SortDirection.ASC,
-                                    })
-                                  }
-                                  className={`${styles.caret} ${
-                                    sort.sort_direction != SortDirection.ASC ||
-                                    sort.sort != getTdhSort()
-                                      ? styles.disabled
-                                      : ""
-                                  }`}
-                                />
-                                <FontAwesomeIcon
-                                  icon="square-caret-down"
-                                  onClick={() =>
-                                    setSort({
-                                      sort: getTdhSort(),
-                                      sort_direction: SortDirection.DESC,
-                                    })
-                                  }
-                                  className={`${styles.caret} ${
-                                    sort.sort_direction != SortDirection.DESC ||
-                                    sort.sort != getTdhSort()
-                                      ? styles.disabled
-                                      : ""
-                                  }`}
-                                />
-                              </span>
-                            </span>
-                          </th>
-                          <th className={styles.tdhSub}>
-                            <span className="d-flex align-items-center justify-content-center">
-                              TDH&nbsp;
-                              <span className={styles.tdhSubNote}>
-                                (unweighted)
-                              </span>
-                              &nbsp;
-                              <span className="d-flex flex-column">
-                                <FontAwesomeIcon
-                                  icon="square-caret-up"
-                                  onClick={() =>
-                                    setSort({
-                                      sort: getTdhRawSort(),
-                                      sort_direction: SortDirection.ASC,
-                                    })
-                                  }
-                                  className={`${styles.caret} ${
-                                    sort.sort_direction != SortDirection.ASC ||
-                                    sort.sort != getTdhRawSort()
-                                      ? styles.disabled
-                                      : ""
-                                  }`}
-                                />
-                                <FontAwesomeIcon
-                                  icon="square-caret-down"
-                                  onClick={() =>
-                                    setSort({
-                                      sort: getTdhRawSort(),
-                                      sort_direction: SortDirection.DESC,
-                                    })
-                                  }
-                                  className={`${styles.caret} ${
-                                    sort.sort_direction != SortDirection.DESC ||
-                                    sort.sort != getTdhRawSort()
-                                      ? styles.disabled
-                                      : ""
-                                  }`}
-                                />
-                              </span>
-                            </span>
-                          </th>
-                        </>
-                      )}
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          Daily Change&nbsp; &nbsp;
+                          <span className="d-flex flex-column">
+                            <FontAwesomeIcon
+                              icon="square-caret-up"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.day_change,
+                                  sort_direction: SortDirection.ASC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.ASC ||
+                                sort.sort != Sort.day_change
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                            <FontAwesomeIcon
+                              icon="square-caret-down"
+                              onClick={() =>
+                                setSort({
+                                  sort: Sort.day_change,
+                                  sort_direction: SortDirection.DESC,
+                                })
+                              }
+                              className={`${styles.caret} ${
+                                sort.sort_direction != SortDirection.DESC ||
+                                sort.sort != Sort.day_change
+                                  ? styles.disabled
+                                  : ""
+                              }`}
+                            />
+                          </span>
+                        </span>
+                      </th>
+                      <th className={styles.tdhSub}>
+                        <span className="d-flex align-items-center justify-content-center">
+                          vs Community&nbsp; &nbsp;
+                        </span>
+                      </th>
                     </>
                   )}
                   {focus === Focus.SETS && (
@@ -2521,7 +2399,7 @@ export default function Leaderboard(props: Readonly<Props>) {
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,
                                 }}
-                                setLinkQueryAddress={view === VIEW.WALLET}
+                                setLinkQueryAddress={false}
                               />
                             </div>
                           </td>
@@ -2566,48 +2444,26 @@ export default function Leaderboard(props: Readonly<Props>) {
                                   Math.round(getDaysHodledTdhBoosted(lead))
                                 )}
                               </td>
-                              {view == VIEW.CONSOLIDATION ? (
-                                <>
-                                  <td className={styles.tdhSub}>
-                                    {showLoader && !lead.day_change ? (
-                                      "..."
-                                    ) : (
-                                      <>
-                                        {lead.day_change > 0 ? `+` : ``}
-                                        {numberWithCommas(lead.day_change)}
-                                        {lead.day_change != 0 && (
-                                          <span className={styles.tdhBoost}>
-                                            {getTDHChange(lead)}
-                                          </span>
-                                        )}
-                                      </>
-                                    )}
-                                  </td>
-                                  <td className={styles.tdhSub}>
-                                    {showLoader && !lead.day_change
-                                      ? "..."
-                                      : `${calculateTdhVsCommunity(lead)}`}
-                                  </td>
-                                </>
-                              ) : (
-                                <>
-                                  <td className={styles.tdhSub}>
-                                    {numberWithCommas(
-                                      Math.round(getDaysHodledTdh(lead))
-                                    )}
-                                    {lead.boost && (
+                              <td className={styles.tdhSub}>
+                                {showLoader && !lead.day_change ? (
+                                  "..."
+                                ) : (
+                                  <>
+                                    {lead.day_change > 0 ? `+` : ``}
+                                    {numberWithCommas(lead.day_change)}
+                                    {lead.day_change != 0 && (
                                       <span className={styles.tdhBoost}>
-                                        &nbsp;(x{lead.boost})
+                                        {getTDHChange(lead)}
                                       </span>
                                     )}
-                                  </td>
-                                  <td className={styles.tdhSub}>
-                                    {numberWithCommas(
-                                      Math.round(getDaysHodledTdhRaw(lead))
-                                    )}
-                                  </td>
-                                </>
-                              )}
+                                  </>
+                                )}
+                              </td>
+                              <td className={styles.tdhSub}>
+                                {showLoader && !lead.day_change
+                                  ? "..."
+                                  : `${calculateTdhVsCommunity(lead)}`}
+                              </td>
                             </>
                           )}
                           {focus === Focus.SETS && (
@@ -2687,20 +2543,12 @@ export default function Leaderboard(props: Readonly<Props>) {
             <DownloadUrlWidget
               preview="Page"
               name={getFileName(pageProps.page)}
-              url={`${myFetchUrl}${
-                view === VIEW.CONSOLIDATION
-                  ? `&include_primary_wallet=true`
-                  : ""
-              }&download_page=true`}
+              url={`${myFetchUrl}&include_primary_wallet=true&download_page=true`}
             />
             <DownloadUrlWidget
               preview="All Pages"
               name={getFileName()}
-              url={`${myFetchUrl}${
-                view === VIEW.CONSOLIDATION
-                  ? `&include_primary_wallet=true`
-                  : ""
-              }&download_all=true`}
+              url={`${myFetchUrl}&include_primary_wallet=true&download_all=true`}
             />
           </Col>
           {props.showMore && totalResults > pageProps.pageSize && (
