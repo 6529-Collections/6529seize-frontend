@@ -156,13 +156,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   let nextgenView: NextGenView | null = null;
   if (view) {
     view = view[0].toLowerCase();
-    if (view === NextGenView.COLLECTIONS.toLowerCase()) {
-      nextgenView = NextGenView.COLLECTIONS;
-    } else if (view == NextGenView.ARTISTS.toLowerCase()) {
-      nextgenView = NextGenView.ARTISTS;
-    } else if (view == NextGenView.ABOUT.toLowerCase()) {
-      nextgenView = NextGenView.ABOUT;
-    }
+    nextgenView = getNextGenView(view);
   }
 
   return {
@@ -171,4 +165,15 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       view: nextgenView,
     },
   };
+}
+
+function getNextGenView(view: string): NextGenView | undefined {
+  const normalizedView = view.toLowerCase();
+  const entries = Object.entries(NextGenView).find(
+    ([, value]) => value.toLowerCase() === normalizedView
+  );
+
+  return entries
+    ? NextGenView[entries[0] as keyof typeof NextGenView]
+    : undefined;
 }
