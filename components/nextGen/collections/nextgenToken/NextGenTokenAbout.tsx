@@ -6,7 +6,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   areEqualAddresses,
   cicToType,
+  displayDecimal,
   formatAddress,
+  getRoyaltyImage,
   isNullAddress,
   numberWithCommas,
   printMintDate,
@@ -27,6 +29,7 @@ import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { displayScore } from "./NextGenTokenProperties";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
+import { ETHEREUM_ICON_TEXT } from "../../../../constants";
 
 interface Props {
   collection: NextGenCollection;
@@ -105,7 +108,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           <span className="font-color-h">Mint Price:</span>
           <span>
             {props.token.mint_price ? (
-              <span className="d-flex align-items-center gap-1">
+              <span className="d-flex align-items-center">
                 {props.token.mint_price}
                 <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                   <EthereumIcon />
@@ -162,15 +165,35 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </Col>
       </Row>
       <Row>
-        <Col className="pb-3 d-flex gap-1 align-items-end">
-          <span className="font-color-h">Marketplaces:</span>
+        <Col className="pb-3 d-flex flex-column">
+          <span className="font-color-h">Listed:</span>
           <span className="d-flex align-items-center gap-2 pt-1">
             <span>
-              <Tippy content={"Opensea"} theme={"light"} delay={250}>
+              <Tippy
+                content={
+                  <Container>
+                    <Row>
+                      <Col>
+                        Opensea -{" "}
+                        {props.token.opensea_price > 0
+                          ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                          : "Not Listed"}
+                      </Col>
+                    </Row>
+                    {props.token.opensea_price > 0 && (
+                      <Row>
+                        <Col>Royalties: {props.token.opensea_royalty}%</Col>
+                      </Row>
+                    )}
+                  </Container>
+                }
+                theme={"light"}
+                delay={250}>
                 <a
                   href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                   target="_blank"
-                  rel="noreferrer">
+                  rel="noreferrer"
+                  className="d-flex gap-2 align-items-center decoration-none">
                   <Image
                     className={styles.marketplace}
                     src="/opensea.png"
@@ -178,6 +201,30 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     width={24}
                     height={24}
                   />
+                  {props.token.opensea_price > 0 ? (
+                    <span className="d-flex gap-2 align-items-center">
+                      <span className="d-flex align-items-center">
+                        <span>{props.token.opensea_price}</span>
+                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                          <EthereumIcon />
+                        </div>
+                      </span>
+                      {props.token.opensea_royalty > 0 && (
+                        <Image
+                          width={0}
+                          height={0}
+                          style={{ height: "25px", width: "auto" }}
+                          src={`/${getRoyaltyImage(
+                            props.token.opensea_royalty / 100
+                          )}`}
+                          alt={"pepe"}
+                          className="cursor-pointer"
+                        />
+                      )}
+                    </span>
+                  ) : (
+                    "No"
+                  )}
                 </a>
               </Tippy>
             </span>
