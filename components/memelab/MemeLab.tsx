@@ -425,11 +425,12 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                   (sort === Sort.AGE || sort === Sort.ARTISTS) &&
                   printMintDate(nft.mint_date)}
                 {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
-                {sort === Sort.EDITION_SIZE && `Edition Size: ${nft.supply}`}
+                {sort === Sort.EDITION_SIZE &&
+                  `Edition Size: ${numberWithCommas(nft.supply)}`}
                 {sort === Sort.HODLERS &&
-                  `Collectors: ${
-                    nftMetas.find((nftm) => nftm.id === nft.id)?.hodlers
-                  }`}
+                  `Collectors: ${numberWithCommas(
+                    nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
+                  )}`}
                 {sort === Sort.UNIQUE_PERCENT &&
                   `Unique: ${
                     Math.round(

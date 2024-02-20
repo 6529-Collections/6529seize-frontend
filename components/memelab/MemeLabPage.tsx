@@ -512,22 +512,57 @@ export default function LabPage(props: Readonly<Props>) {
                   <tbody>
                     <tr>
                       <td>Edition Size</td>
-                      <td className="text-right">{nftMeta.edition_size}</td>
+                      <td className="text-right">
+                        {numberWithCommas(nftMeta.edition_size)}
+                      </td>
                       <td className="text-right">
                         {nftMeta.edition_size_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
+                    {nftMeta.burnt > 0 && (
+                      <>
+                        <tr>
+                          <td>
+                            <span className="d-flex align-items-center gap-2">
+                              <span>Burnt</span>
+                              <FontAwesomeIcon
+                                icon="fire"
+                                style={{ height: "22px", color: "#c51d34" }}
+                              />
+                            </span>
+                          </td>
+                          <td className="text-right">
+                            {numberWithCommas(nftMeta.burnt)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Edition Size ex. Burnt</td>
+                          <td className="text-right">
+                            {numberWithCommas(nftMeta.edition_size_not_burnt)}
+                          </td>
+                          <td className="text-right">
+                            {nftMeta.edition_size_not_burnt_rank}/
+                            {nftMeta.collection_size}
+                          </td>
+                        </tr>
+                      </>
+                    )}
                     <tr>
                       <td>6529 Museum</td>
-                      <td className="text-right">{nftMeta.museum_holdings}</td>
+                      <td className="text-right">
+                        {numberWithCommas(nftMeta.museum_holdings)}
+                      </td>
                       <td className="text-right">
                         {nftMeta.museum_holdings_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
                     <tr>
-                      <td>Edition Size ex. 6529 Museum</td>
+                      <td>
+                        Edition Size ex.
+                        {nftMeta.burnt > 0 && " Burnt and"} 6529 Museum
+                      </td>
                       <td className="text-right">
-                        {nftMeta.edition_size_cleaned}
+                        {numberWithCommas(nftMeta.edition_size_cleaned)}
                       </td>
                       <td className="text-right">
                         {nftMeta.edition_size_cleaned_rank}/
@@ -536,7 +571,9 @@ export default function LabPage(props: Readonly<Props>) {
                     </tr>
                     <tr>
                       <td>Collectors</td>
-                      <td className="text-right">{nftMeta.hodlers}</td>
+                      <td className="text-right">
+                        {numberWithCommas(nftMeta.hodlers)}
+                      </td>
                       <td className="text-right">
                         {nftMeta.hodlers_rank}/{nftMeta.collection_size}
                       </td>
@@ -550,8 +587,26 @@ export default function LabPage(props: Readonly<Props>) {
                         {nftMeta.percent_unique_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
+                    {nftMeta.burnt > 0 && (
+                      <tr>
+                        <td>% Unique ex. Burnt</td>
+                        <td className="text-right">
+                          {Math.round(
+                            nftMeta.percent_unique_not_burnt * 100 * 10
+                          ) / 10}
+                          %
+                        </td>
+                        <td className="text-right">
+                          {nftMeta.percent_unique_not_burnt_rank}/
+                          {nftMeta.collection_size}
+                        </td>
+                      </tr>
+                    )}
                     <tr>
-                      <td>% Unique ex. 6529 Museum</td>
+                      <td>
+                        % Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529
+                        Museum
+                      </td>
                       <td className="text-right">
                         {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) /
                           10}
