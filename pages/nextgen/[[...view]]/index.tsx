@@ -39,6 +39,11 @@ const NextgenAboutComponent = dynamic(
   { ssr: false }
 );
 
+const NextgenCollectorsComponent = dynamic(
+  () => import("../../../components/nextGen/collections/NextGenCollectors"),
+  { ssr: false }
+);
+
 export default function NextGen(props: any) {
   const router = useRouter();
   const collection: NextGenCollection = props.pageProps.collection;
@@ -167,13 +172,11 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   };
 }
 
-function getNextGenView(view: string): NextGenView | undefined {
+function getNextGenView(view: string): NextGenView | null {
   const normalizedView = view.toLowerCase();
   const entries = Object.entries(NextGenView).find(
     ([, value]) => value.toLowerCase() === normalizedView
   );
 
-  return entries
-    ? NextGenView[entries[0] as keyof typeof NextGenView]
-    : undefined;
+  return entries ? NextGenView[entries[0] as keyof typeof NextGenView] : null;
 }

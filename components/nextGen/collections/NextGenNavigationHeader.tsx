@@ -8,7 +8,6 @@ export enum NextGenView {
   COLLECTIONS = "Collections",
   ARTISTS = "Artists",
   ABOUT = "About",
-  COLLECTORS = "Collectors",
 }
 
 export default function NextGenNavigationHeader(
@@ -109,9 +108,9 @@ export default function NextGenNavigationHeader(
               : "justify-content-end"
           }`}>
           <span className="d-flex gap-4">
+            {printView(undefined)}
             {printView(NextGenView.COLLECTIONS)}
             {printView(NextGenView.ARTISTS)}
-            {printView(NextGenView.COLLECTORS)}
             {printView(NextGenView.ABOUT)}
           </span>
         </div>

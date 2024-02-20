@@ -156,3 +156,15 @@ export interface NextgenAllowlist {
   wallet_display?: string;
   phase?: string;
 }
+
+export interface NextgenTraitSet {
+  owner: string;
+  normalised_handle: string;
+  handle: string;
+  level: number;
+  tdh: number;
+  rep_score: number;
+  distinct_values_count: number;
+  token_ids: number[];
+  distinct_values: string[];
+}
