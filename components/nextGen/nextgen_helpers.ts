@@ -581,6 +581,9 @@ export function useCollectionMintCount(
 
 export enum NextGenListFilters {
   ID = "ID",
+  LISTED_PRICE = "Listed Price",
+  LAST_SALE = "Last Sale",
+  HIGHEST_SALE = "Highest Sale",
   RARITY_SCORE = "Rarity Score",
   STATISTICAL_SCORE = "Statistical Score",
   SINGLE_TRAIT_RARITY = "Single Trait Rarity",
@@ -625,4 +628,10 @@ export enum NextGenTokenRarityType {
   SINGLE_TRAIT_RARITY_SCORE_NORMALISED = "SINGLE_TRAIT_RARITY_SCORE_NORMALISED",
   SINGLE_TRAIT_RARITY_SCORE_TRAIT_COUNT = "SINGLE_TRAIT_RARITY_SCORE_TRAIT_COUNT",
   SINGLE_TRAIT_RARITY_SCORE_TRAIT_COUNT_NORMALISED = "SINGLE_TRAIT_RARITY_SCORE_TRAIT_COUNT_NORMALISED",
+}
+
+export enum NextGenTokenListedType {
+  ALL = "All",
+  LISTED = "Yes",
+  NOT_LISTED = "No",
 }

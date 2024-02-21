@@ -9,8 +9,13 @@ import { useEffect, useState } from "react";
 import Pagination from "../../pagination/Pagination";
 import { commonApiFetch } from "../../../services/api/common-api";
 import DotLoader from "../../dotLoader/DotLoader";
-import { NextGenListFilters, NextGenTokenRarityType } from "../nextgen_helpers";
+import {
+  NextGenListFilters,
+  NextGenTokenListedType,
+  NextGenTokenRarityType,
+} from "../nextgen_helpers";
 import { SortDirection } from "../../../entities/ISort";
+import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -20,6 +25,7 @@ interface Props {
   selected_traits?: TraitValuePair[];
   show_normalised?: boolean;
   show_trait_count?: boolean;
+  listed_type?: NextGenTokenListedType;
   setTotalResults?: (totalResults: number) => void;
   show_pagination?: boolean;
 }
@@ -47,6 +53,11 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     }
     if (props.show_trait_count) {
       endpoint += `&show_trait_count=true`;
+    }
+    if (props.listed_type === NextGenTokenListedType.LISTED) {
+      endpoint += `&listed=true`;
+    } else if (props.listed_type === NextGenTokenListedType.NOT_LISTED) {
+      endpoint += `&listed=false`;
     }
     if (props.sort) {
       endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
@@ -85,6 +96,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     props.sort_direction,
     props.show_normalised,
     props.show_trait_count,
+    props.listed_type,
   ]);
 
   useEffect(() => {
@@ -146,9 +158,20 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                   xs={6}
                   sm={4}
                   md={4}
-                  key={`collection-${props.collection.id}-token-list-${t.id}`}
-                  className="pt-2 pb-2">
-                  <NextGenTokenImage token={t} rarity_type={rarityType} />
+                  key={getRandomObjectId()}
+                  className="pt-3 pb-3">
+                  <NextGenTokenImage
+                    token={t}
+                    rarity_type={rarityType}
+                    show_listing={
+                      props.sort === NextGenListFilters.LISTED_PRICE ||
+                      props.listed_type === NextGenTokenListedType.LISTED
+                    }
+                    show_max_sale={
+                      props.sort === NextGenListFilters.HIGHEST_SALE
+                    }
+                    show_last_sale={props.sort === NextGenListFilters.LAST_SALE}
+                  />
                 </Col>
               ));
             } else {
