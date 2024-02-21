@@ -308,13 +308,13 @@ export function TraitScore(
   return (
     <span className="d-flex flex-column">
       <span className="d-flex gap-2">
-        <span className="no-wrap">
-          <span className="font-smaller font-color-h">Score</span>{" "}
+        <span className="no-wrap d-flex align-items-center">
+          <span className="font-smaller font-color-h">Score</span>&nbsp;
           {displayScore(props.score)}
         </span>
         <span className="font-color-h">|</span>
-        <span className="no-wrap">
-          <span className="font-smaller font-color-h">Rank</span> #
+        <span className="no-wrap d-flex align-items-center">
+          <span className="font-smaller font-color-h">Rank</span>&nbsp;#
           {props.rank.toLocaleString()}
         </span>
       </span>

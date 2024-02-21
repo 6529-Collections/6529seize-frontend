@@ -64,7 +64,7 @@ export function NextGenTokenImage(
             <span className="d-flex align-items-center">
               {props.token.opensea_price > 0 ? (
                 <>
-                  <span className="font-smaller font-color-h">Listed for:</span>
+                  <span className="font-smaller font-color-h">Listed for</span>
                   &nbsp;
                   {props.token.opensea_price} {ETHEREUM_ICON_TEXT}
                 </>
