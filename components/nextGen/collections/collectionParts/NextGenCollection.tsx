@@ -23,6 +23,7 @@ export enum ContentView {
   DISPLAY_CENTER = "Display Center",
   RARITY = "Rarity",
   OVERVIEW = "Overview",
+  COLLECTOR_SETS = "Collector Sets",
 }
 
 export function printViewButton(
@@ -56,7 +57,8 @@ export default function NextGenCollection(props: Readonly<Props>) {
   const [view, setView] = useState<ContentView>(props.view);
 
   useEffect(() => {
-    const path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
+    let path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
+    path = path.replaceAll(" ", "-");
     router.push(
       `/nextgen/collection/${formatNameForUrl(props.collection.name)}${path}`,
       undefined,
@@ -92,6 +94,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
               {printViewButton(view, ContentView.OVERVIEW, setView)}
               {printViewButton(view, ContentView.ABOUT, setView)}
               {printViewButton(view, ContentView.PROVENANCE, setView)}
+              {printViewButton(view, ContentView.COLLECTOR_SETS, setView)}
             </Col>
           </Row>
           <Row className="pt-4 pb-4">
