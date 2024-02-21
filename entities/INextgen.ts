@@ -76,6 +76,12 @@ export interface NextGenToken {
   single_trait_rarity_score_trait_count_rank: number;
   single_trait_rarity_score_trait_count_normalised: number;
   single_trait_rarity_score_trait_count_normalised_rank: number;
+  opensea_price: number;
+  opensea_royalty: number;
+  last_sale_value: number;
+  last_sale_date: Date;
+  max_sale_value: number;
+  max_sale_date: Date;
 }
 
 export interface NextGenLog {

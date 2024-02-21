@@ -14,15 +14,20 @@ import {
   TraitValuePair,
   TraitValues,
 } from "../../../../entities/INextgen";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
 import DotLoader from "../../../dotLoader/DotLoader";
 import { areEqualAddresses } from "../../../../helpers/Helpers";
 import { SortDirection } from "../../../../entities/ISort";
-import { NextGenListFilters, formatNameForUrl } from "../../nextgen_helpers";
+import {
+  NextGenListFilters,
+  NextGenTokenListedType,
+  formatNameForUrl,
+} from "../../nextgen_helpers";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
 import Tippy from "@tippyjs/react";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -63,6 +68,16 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   const [showFilters, setShowFilters] = useState(true);
 
+  const [listedType, setListedType] = useState(NextGenTokenListedType.ALL);
+
+  function isRaritySort(s: NextGenListFilters) {
+    return [
+      NextGenListFilters.RARITY_SCORE,
+      NextGenListFilters.STATISTICAL_SCORE,
+      NextGenListFilters.SINGLE_TRAIT_RARITY,
+    ].includes(s);
+  }
+
   function setTraitsQuery(q: string) {
     if (q) {
       const traitsQuery = router.query.traits as string;
@@ -101,7 +116,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             sortQuery?.toUpperCase() as keyof typeof NextGenListFilters
           ] || NextGenListFilters.ID;
         setSort(newSort);
-        if (newSort !== NextGenListFilters.ID) {
+        if (isRaritySort(newSort)) {
           if (router.query.show_normalised) {
             setShowNormalised(router.query.show_normalised === "true");
           }
@@ -116,6 +131,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           SortDirection[
             sortDirQuery?.toUpperCase() as keyof typeof SortDirection
           ] || SortDirection.DESC
+        );
+      }
+      if (router.query.listed) {
+        const listedQuery = router.query.listed as string;
+        setListedType(
+          listedQuery === "true"
+            ? NextGenTokenListedType.LISTED
+            : NextGenTokenListedType.NOT_LISTED
         );
       }
       setRouterLoaded(true);
@@ -146,13 +169,16 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       if (sortDir) {
         query += `&sort_direction=${sortDir.toLowerCase()}`;
       }
-      if (sort !== NextGenListFilters.ID) {
+      if (isRaritySort(sort)) {
         if (!showNormalised) {
           query += `&show_normalised=false`;
         }
         if (!showTraitCount) {
           query += `&show_trait_count=false`;
         }
+      }
+      if (listedType !== NextGenTokenListedType.ALL) {
+        query += `&listed=${listedType === NextGenTokenListedType.LISTED}`;
       }
       router.push(
         `/nextgen/collection/${formatNameForUrl(props.collection.name)}/art${
@@ -169,6 +195,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     sortDir,
     showNormalised,
     showTraitCount,
+    listedType,
   ]);
 
   useEffect(() => {
@@ -247,27 +274,32 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   onClick={() => setShowFilters(!showFilters)}
                 />
               </Tippy>
-              <Dropdown className={styles.rarityDropdown}>
+              <Dropdown className={styles.rarityDropdown} drop="down-centered">
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenListFilters).map((lf) => (
-                    <Dropdown.Item
-                      key={`sort-${lf}`}
-                      onClick={() => setSort(lf)}>
-                      {lf}
-                    </Dropdown.Item>
+                    <Fragment key={getRandomObjectId()}>
+                      <Dropdown.Item
+                        key={getRandomObjectId()}
+                        onClick={() => setSort(lf)}>
+                        {lf}
+                      </Dropdown.Item>
+                      {(lf === NextGenListFilters.ID ||
+                        lf === NextGenListFilters.HIGHEST_SALE) && (
+                        <Dropdown.Divider />
+                      )}
+                    </Fragment>
                   ))}
-                  <Dropdown.Divider />
                   <Dropdown.Item
                     onClick={(event) => {
                       event.stopPropagation();
-                      if (sort !== NextGenListFilters.ID) {
+                      if (isRaritySort(sort)) {
                         setShowNormalised(!showNormalised);
                       }
                     }}
                     className="px-2 d-flex align-items-center gap-2">
                     <NextgenRarityToggle
-                      disabled={sort === NextGenListFilters.ID}
+                      disabled={!isRaritySort(sort)}
                       title={"Trait Normalization"}
                       show={showNormalised}
                     />
@@ -275,7 +307,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   <Dropdown.Item
                     onClick={(event) => {
                       event.stopPropagation();
-                      if (sort !== NextGenListFilters.ID) {
+                      if (isRaritySort(sort)) {
                         setShowTraitCount(!showTraitCount);
                       }
                     }}
@@ -283,7 +315,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     <NextgenRarityToggle
                       title={"Trait Count"}
                       show={showTraitCount}
-                      disabled={sort === NextGenListFilters.ID}
+                      disabled={!isRaritySort(sort)}
                     />
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -341,11 +373,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 </Col>
               </Row>
               <Row>
-                <Col className="d-flex flex-column pt-2 pb-2 no-padding">
+                <Col className="d-flex flex-column pt-2 no-padding">
                   {routerLoaded &&
                     traits.map((tr, index) => (
                       <Accordion
-                        key={`trait-${tr.trait.replaceAll(" ", "-")}`}
+                        key={getRandomObjectId()}
                         className={styles.traitsAccordion}
                         defaultActiveKey={getDefaultActiveKeys()}>
                         <Accordion.Item
@@ -360,7 +392,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                           </Accordion.Button>
                           {tr.value_counts.map((v) => (
                             <Accordion.Body
-                              key={`trait-${v.key.replaceAll(" ", "-")}`}
+                              key={getRandomObjectId()}
                               className={styles.traitsAccordionBody}>
                               <Form.Check
                                 type="checkbox"
@@ -417,6 +449,43 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     ))}
                 </Col>
               </Row>
+              {routerLoaded && traitsLoaded && (
+                <Row>
+                  <Col className="d-flex flex-column pb-2 no-padding">
+                    <Accordion
+                      className={styles.traitsAccordion}
+                      defaultActiveKey={
+                        listedType === NextGenTokenListedType.ALL
+                          ? undefined
+                          : "0"
+                      }>
+                      <Accordion.Item
+                        defaultChecked={true}
+                        className={styles.traitsAccordionItem}
+                        eventKey={"0"}>
+                        <Accordion.Button className="d-flex">
+                          <span>Listed</span>&nbsp;&nbsp;
+                          <span className="font-color-h">x3</span>
+                        </Accordion.Button>
+                        <Accordion.Body
+                          className={`${styles.traitsAccordionBody} d-flex gap-3 flex-wrap`}>
+                          {Object.values(NextGenTokenListedType).map((l) => (
+                            <Form.Check
+                              key={getRandomObjectId()}
+                              checked={listedType === l}
+                              className="pt-1 pb-1"
+                              type="radio"
+                              label={l}
+                              name="listedRadio"
+                              onChange={() => setListedType(l)}
+                            />
+                          ))}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    </Accordion>
+                  </Col>
+                </Row>
+              )}
             </Container>
           </Col>
         )}
@@ -430,6 +499,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               selected_traits={selectedTraitValues}
               show_normalised={showNormalised}
               show_trait_count={showTraitCount}
+              listed_type={listedType}
               setTotalResults={(totalResults: number) => {
                 setTotalResults(totalResults);
                 setTotalResultsSet(true);
