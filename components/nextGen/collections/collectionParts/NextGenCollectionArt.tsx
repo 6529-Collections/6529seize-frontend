@@ -284,7 +284,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                         {lf}
                       </Dropdown.Item>
                       {(lf === NextGenListFilters.ID ||
-                        lf === NextGenListFilters.MAX_SALE) && (
+                        lf === NextGenListFilters.HIGHEST_SALE) && (
                         <Dropdown.Divider />
                       )}
                     </>
