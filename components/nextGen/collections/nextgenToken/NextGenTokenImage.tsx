@@ -3,7 +3,6 @@ import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { NextGenTokenRarityType } from "../../nextgen_helpers";
 import { getRoyaltyImage } from "../../../../helpers/Helpers";
-import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { ETHEREUM_ICON_TEXT } from "../../../../constants";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";

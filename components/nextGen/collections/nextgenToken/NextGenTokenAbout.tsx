@@ -13,7 +13,7 @@ import {
   printMintDate,
 } from "../../../../helpers/Helpers";
 import { useState, useEffect } from "react";
-import { useAccount, useEnsName, mainnet } from "wagmi";
+import { useAccount } from "wagmi";
 import {
   CICType,
   IProfileAndConsolidations,
