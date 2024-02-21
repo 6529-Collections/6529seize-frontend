@@ -273,7 +273,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   onClick={() => setShowFilters(!showFilters)}
                 />
               </Tippy>
-              <Dropdown className={styles.rarityDropdown}>
+              <Dropdown className={styles.rarityDropdown} drop="down-centered">
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenListFilters).map((lf) => (
@@ -283,7 +283,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                         onClick={() => setSort(lf)}>
                         {lf}
                       </Dropdown.Item>
-                      {lf === NextGenListFilters.LISTED_PRICE && (
+                      {(lf === NextGenListFilters.ID ||
+                        lf === NextGenListFilters.MAX_SALE) && (
                         <Dropdown.Divider />
                       )}
                     </>
