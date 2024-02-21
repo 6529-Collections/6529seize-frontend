@@ -165,6 +165,10 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                     show_listing={
                       props.sort === NextGenListFilters.LISTED_PRICE
                     }
+                    show_max_sale={
+                      props.sort === NextGenListFilters.HIGHEST_SALE
+                    }
+                    show_last_sale={props.sort === NextGenListFilters.LAST_SALE}
                   />
                 </Col>
               ));

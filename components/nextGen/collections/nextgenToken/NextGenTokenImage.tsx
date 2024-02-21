@@ -18,6 +18,8 @@ export function NextGenTokenImage(
     is_fullscreen?: boolean;
     rarity_type?: NextGenTokenRarityType;
     show_listing?: boolean;
+    show_max_sale?: boolean;
+    show_last_sale?: boolean;
   }>
 ) {
   function getTraitScore() {
@@ -35,53 +37,65 @@ export function NextGenTokenImage(
       />
     );
   }
-  function getListing() {
-    if (!props.show_listing) {
-      return <></>;
-    }
-    return (
-      <Tippy
-        content={
-          <Container>
-            <Row>
-              <Col>
-                Opensea -{" "}
-                {props.token.opensea_price > 0
-                  ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                  : "Not Listed"}
-              </Col>
-            </Row>
-            {props.token.opensea_price > 0 && (
+  function getInfo() {
+    if (props.show_listing) {
+      return (
+        <Tippy
+          content={
+            <Container>
               <Row>
-                <Col>Royalties: {props.token.opensea_royalty}%</Col>
+                <Col>
+                  Opensea -{" "}
+                  {props.token.opensea_price > 0
+                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
               </Row>
-            )}
-          </Container>
-        }
-        theme={"light"}
-        placement="right"
-        delay={250}>
-        <span className="d-flex align-items-center gap-2">
-          <span>
-            {props.token.opensea_price > 0 ? (
-              `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-            ) : (
-              <span className="font-smaller">Not Listed</span>
+              {props.token.opensea_price > 0 && (
+                <Row>
+                  <Col>Royalties: {props.token.opensea_royalty}%</Col>
+                </Row>
+              )}
+            </Container>
+          }
+          theme={"light"}
+          placement="right"
+          delay={250}>
+          <span className="d-flex align-items-center gap-2">
+            <span>
+              {props.token.opensea_price > 0
+                ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                : "Not Listed"}
+            </span>
+            {props.token.opensea_royalty > 0 && (
+              <Image
+                width={0}
+                height={0}
+                style={{ height: "20px", width: "auto" }}
+                src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
+                alt={"pepe"}
+                className="cursor-pointer"
+              />
             )}
           </span>
-          {props.token.opensea_royalty > 0 && (
-            <Image
-              width={0}
-              height={0}
-              style={{ height: "20px", width: "auto" }}
-              src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
-              alt={"pepe"}
-              className="cursor-pointer"
-            />
-          )}
+        </Tippy>
+      );
+    }
+    if (props.show_max_sale || props.show_last_sale) {
+      const value = props.show_max_sale
+        ? props.token.max_sale_value
+        : props.token.last_sale_value;
+      const date = props.show_max_sale
+        ? props.token.max_sale_date
+        : props.token.last_sale_date;
+
+      return (
+        <span>
+          {value} {ETHEREUM_ICON_TEXT} - {new Date(date).toLocaleDateString()}
         </span>
-      </Tippy>
-    );
+      );
+    }
+    return <></>;
   }
   function getImage() {
     return (
@@ -108,7 +122,10 @@ export function NextGenTokenImage(
         {!props.hide_info && (
           <span
             className={`pt-1 d-flex align-items-center ${
-              props.rarity_type || props.show_listing
+              props.rarity_type ||
+              props.show_listing ||
+              props.show_max_sale ||
+              props.show_last_sale
                 ? "justify-content-between"
                 : "justify-content-center"
             }`}>
@@ -116,7 +133,7 @@ export function NextGenTokenImage(
               #{props.token.normalised_id}
             </span>
             {getTraitScore()}
-            {getListing()}
+            {getInfo()}
           </span>
         )}
       </>
