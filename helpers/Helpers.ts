@@ -5,6 +5,7 @@ import {
   MEMES_CONTRACT,
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
+  ROYALTIES_PERCENTAGE,
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
@@ -637,4 +638,10 @@ export function isNullAddress(address: string) {
 
 export function capitalizeFirstChar(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function getRoyaltyImage(royaltiesPercentage: number) {
+  return royaltiesPercentage >= ROYALTIES_PERCENTAGE
+    ? "pepe-xglasses.png"
+    : "pepe-smile.png";
 }
