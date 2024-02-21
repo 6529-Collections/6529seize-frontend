@@ -8,7 +8,7 @@ import {
   TraitValues,
 } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { formatAddress } from "../../../../helpers/Helpers";
+import { formatAddress, getRandomColor } from "../../../../helpers/Helpers";
 import Pagination from "../../../pagination/Pagination";
 import DotLoader from "../../../dotLoader/DotLoader";
 import Image from "next/image";
@@ -132,6 +132,7 @@ export default function NextGenCollectorSets(
         <Col>
           {sets.map((s) => (
             <TraitSetAccordion
+              key={`collector-sets-${s.owner}`}
               collection={props.collection}
               trait={selectedTrait}
               set={s}
@@ -217,7 +218,9 @@ function TraitSetAccordion(
         <Accordion.Body className={styles.collectorSetAccordionBody}>
           <Container>
             {props.set.token_values.map((tv) => (
-              <Row className="pt-3 pb-3">
+              <Row
+                className="pt-3 pb-3"
+                key={`accordion-${props.trait}-${tv.value}`}>
                 <Col className="d-flex flex-wrap align-items-center gap-3">
                   <span className="d-flex align-items-center gap-3">
                     <FontAwesomeIcon
@@ -236,6 +239,7 @@ function TraitSetAccordion(
                   <span className="d-flex flex-wrap">
                     {tv.tokens.map((t) => (
                       <a
+                        key={`accordion-${props.trait}-${tv.value}-${t}`}
                         href={`/nextgen/token/${t}`}
                         target="_blank"
                         rel="noreferrer">
