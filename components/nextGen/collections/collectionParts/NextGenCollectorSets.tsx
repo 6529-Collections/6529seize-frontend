@@ -16,6 +16,7 @@ import { NEXTGEN_MEDIA_BASE_URL } from "../../../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { normalizeNextgenTokenID } from "../../nextgen_helpers";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 const PAGE_SIZE = 10;
 
@@ -89,6 +90,7 @@ export default function NextGenCollectorSets(
   function printTraitPill(t: string) {
     return (
       <button
+        key={getRandomObjectId()}
         className={`${styles.collectorSetPill} ${
           t === selectedTrait ? styles.collectorSetPillSelected : ""
         }`}
