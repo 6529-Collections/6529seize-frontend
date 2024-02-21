@@ -2,6 +2,10 @@ import Image from "next/image";
 import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { NextGenTokenRarityType } from "../../nextgen_helpers";
+import { getRoyaltyImage } from "../../../../helpers/Helpers";
+import { ETHEREUM_ICON_TEXT } from "../../../../constants";
+import Tippy from "@tippyjs/react";
+import { Container, Row, Col } from "react-bootstrap";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -12,22 +16,111 @@ export function NextGenTokenImage(
     show_animation?: boolean;
     is_fullscreen?: boolean;
     rarity_type?: NextGenTokenRarityType;
+    show_listing?: boolean;
+    show_max_sale?: boolean;
+    show_last_sale?: boolean;
   }>
 ) {
-  function getTraitScore() {
+  function getInfo() {
+    let rarityDisplay;
     if (props.rarity_type) {
       const rarityType = props.rarity_type.toLowerCase();
       const score = rarityType as keyof NextGenToken;
       const rank = `${rarityType}_rank` as keyof NextGenToken;
 
-      return (
+      rarityDisplay = (
         <TraitScore
           score={props.token[score] as number}
           rank={props.token[rank] as number}
         />
       );
     }
-    return <></>;
+
+    let listingDisplay;
+    if (props.show_listing) {
+      listingDisplay = (
+        <Tippy
+          content={
+            <Container>
+              <Row>
+                <Col>
+                  Opensea -{" "}
+                  {props.token.opensea_price > 0
+                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
+              {props.token.opensea_price > 0 && (
+                <Row>
+                  <Col>Royalties: {props.token.opensea_royalty}%</Col>
+                </Row>
+              )}
+            </Container>
+          }
+          theme={"light"}
+          placement="right"
+          delay={250}>
+          <span className="d-flex align-items-center gap-2">
+            <span className="d-flex align-items-center">
+              {props.token.opensea_price > 0 ? (
+                <>
+                  <span className="font-smaller font-color-h">Listed for</span>
+                  &nbsp;
+                  {props.token.opensea_price} {ETHEREUM_ICON_TEXT}
+                </>
+              ) : (
+                "Not Listed"
+              )}
+            </span>
+            {props.token.opensea_royalty > 0 && (
+              <Image
+                width={0}
+                height={0}
+                style={{ height: "20px", width: "auto" }}
+                src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
+                alt={"pepe"}
+                className="cursor-pointer"
+              />
+            )}
+          </span>
+        </Tippy>
+      );
+    }
+
+    let saleDisplay;
+    if (props.show_max_sale || props.show_last_sale) {
+      const display = props.show_max_sale ? "Max sale" : "Last sale";
+      const value = props.show_max_sale
+        ? props.token.max_sale_value
+        : props.token.last_sale_value;
+      const date = props.show_max_sale
+        ? props.token.max_sale_date
+        : props.token.last_sale_date;
+
+      if (value && date) {
+        saleDisplay = (
+          <span className="d-flex align-items-center">
+            <span className="font-color-h font-smaller">{display}</span>&nbsp;
+            <span className="d-flex gap-2">
+              <span>
+                {parseFloat(value.toFixed(5)).toLocaleString()}{" "}
+                {ETHEREUM_ICON_TEXT}
+              </span>
+              <span>{new Date(date).toLocaleDateString()}</span>
+            </span>
+          </span>
+        );
+      } else {
+        saleDisplay = <span>Not Sold</span>;
+      }
+    }
+    return (
+      <span className="d-flex flex-column align-items-end gap-1">
+        {rarityDisplay}
+        {saleDisplay}
+        {listingDisplay}
+      </span>
+    );
   }
   function getImage() {
     return (
@@ -54,14 +147,17 @@ export function NextGenTokenImage(
         {!props.hide_info && (
           <span
             className={`pt-1 d-flex align-items-center ${
-              props.rarity_type
+              props.rarity_type ||
+              props.show_listing ||
+              props.show_max_sale ||
+              props.show_last_sale
                 ? "justify-content-between"
                 : "justify-content-center"
             }`}>
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
-            {getTraitScore()}
+            {getInfo()}
           </span>
         )}
       </>
