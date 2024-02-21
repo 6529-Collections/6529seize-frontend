@@ -173,5 +173,8 @@ export interface NextgenTraitSet {
   rep_score: number;
   distinct_values_count: number;
   token_ids: number[];
-  distinct_values: string[];
+  token_values: {
+    value: string;
+    tokens: number[];
+  }[];
 }

@@ -534,3 +534,32 @@
     color: black;
   }
 }
+
+.collectorSetPill {
+  background-color: transparent;
+  color: white;
+  font-weight: bold;
+  font-size: larger;
+  border: 1px solid white;
+  width: 25%;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $off-white;
+    color: black;
+  }
+}
+
+.collectorSetPillSelected {
+  background-color: white;
+  color: black;
+  pointer-events: none;
+}
+
+.collectorSetAccordionBody {
+  color: white;
+  background-color: $nextgen-grey;
+}

@@ -96,9 +96,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   }
 
   let view = req.query.view as string;
+
   let collectionView: ContentView = ContentView.OVERVIEW;
   if (view) {
-    view = view[0].toLowerCase();
+    view = view[0].replaceAll("-", " ").toLowerCase();
     collectionView = getCollectionView(view);
   }
 

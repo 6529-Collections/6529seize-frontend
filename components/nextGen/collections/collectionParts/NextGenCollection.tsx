@@ -57,7 +57,8 @@ export default function NextGenCollection(props: Readonly<Props>) {
   const [view, setView] = useState<ContentView>(props.view);
 
   useEffect(() => {
-    const path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
+    let path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
+    path = path.replaceAll(" ", "-");
     router.push(
       `/nextgen/collection/${formatNameForUrl(props.collection.name)}${path}`,
       undefined,
