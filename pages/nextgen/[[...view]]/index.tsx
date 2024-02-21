@@ -39,11 +39,6 @@ const NextgenAboutComponent = dynamic(
   { ssr: false }
 );
 
-const NextgenCollectorsComponent = dynamic(
-  () => import("../../../components/nextGen/collections/NextGenCollectors"),
-  { ssr: false }
-);
-
 export default function NextGen(props: any) {
   const router = useRouter();
   const collection: NextGenCollection = props.pageProps.collection;

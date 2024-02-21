@@ -93,7 +93,9 @@ export default function NextGenCollectorSets(
                       target="_blank"
                       rel="noreferrer"
                       className="decoration-hover-underline">
-                      {set.normalised_handle ?? formatAddress(set.owner)}
+                      {set.normalised_handle ??
+                        set.consolidation_display ??
+                        formatAddress(set.owner)}
                     </a>
                   </td>
                   <td className="text-center">{set.distinct_values_count}</td>

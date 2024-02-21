@@ -163,6 +163,7 @@ export interface NextgenTraitSet {
   handle: string;
   level: number;
   tdh: number;
+  consolidation_display: string;
   rep_score: number;
   distinct_values_count: number;
   token_ids: number[];
