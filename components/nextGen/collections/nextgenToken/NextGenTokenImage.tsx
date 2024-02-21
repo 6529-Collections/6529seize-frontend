@@ -64,7 +64,7 @@ export function NextGenTokenImage(
             <span className="d-flex align-items-center">
               {props.token.opensea_price > 0 ? (
                 <>
-                  <span className="font-smaller font-color-h">Listed for:</span>
+                  <span className="font-smaller font-color-h">Listed for</span>
                   &nbsp;
                   {props.token.opensea_price} {ETHEREUM_ICON_TEXT}
                 </>
@@ -100,7 +100,7 @@ export function NextGenTokenImage(
       if (value && date) {
         saleDisplay = (
           <span className="d-flex align-items-center">
-            <span className="font-color-h font-smaller">{display}:</span>&nbsp;
+            <span className="font-color-h font-smaller">{display}</span>&nbsp;
             <span className="d-flex gap-2">
               <span>
                 {parseFloat(value.toFixed(5)).toLocaleString()}{" "}
