@@ -14,7 +14,7 @@ import {
   TraitValuePair,
   TraitValues,
 } from "../../../../entities/INextgen";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
 import DotLoader from "../../../dotLoader/DotLoader";
@@ -27,6 +27,7 @@ import {
 } from "../../nextgen_helpers";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
 import Tippy from "@tippyjs/react";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -277,9 +278,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenListFilters).map((lf) => (
-                    <>
+                    <Fragment key={getRandomObjectId()}>
                       <Dropdown.Item
-                        key={`sort-${lf}`}
+                        key={getRandomObjectId()}
                         onClick={() => setSort(lf)}>
                         {lf}
                       </Dropdown.Item>
@@ -287,7 +288,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                         lf === NextGenListFilters.HIGHEST_SALE) && (
                         <Dropdown.Divider />
                       )}
-                    </>
+                    </Fragment>
                   ))}
                   <Dropdown.Item
                     onClick={(event) => {
@@ -376,7 +377,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   {routerLoaded &&
                     traits.map((tr, index) => (
                       <Accordion
-                        key={`trait-${tr.trait.replaceAll(" ", "-")}`}
+                        key={getRandomObjectId()}
                         className={styles.traitsAccordion}
                         defaultActiveKey={getDefaultActiveKeys()}>
                         <Accordion.Item
@@ -391,7 +392,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                           </Accordion.Button>
                           {tr.value_counts.map((v) => (
                             <Accordion.Body
-                              key={`trait-${v.key.replaceAll(" ", "-")}`}
+                              key={getRandomObjectId()}
                               className={styles.traitsAccordionBody}>
                               <Form.Check
                                 type="checkbox"
@@ -470,7 +471,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                           className={`${styles.traitsAccordionBody} d-flex gap-3 flex-wrap`}>
                           {Object.values(NextGenTokenListedType).map((l) => (
                             <Form.Check
-                              key={`listed-${l}`}
+                              key={getRandomObjectId()}
                               checked={listedType === l}
                               className="pt-1 pb-1"
                               type="radio"

@@ -15,6 +15,7 @@ import {
   NextGenTokenRarityType,
 } from "../nextgen_helpers";
 import { SortDirection } from "../../../entities/ISort";
+import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -157,13 +158,14 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                   xs={6}
                   sm={4}
                   md={4}
-                  key={`collection-${props.collection.id}-token-list-${t.id}`}
-                  className="pt-2 pb-2">
+                  key={getRandomObjectId()}
+                  className="pt-3 pb-3">
                   <NextGenTokenImage
                     token={t}
                     rarity_type={rarityType}
                     show_listing={
-                      props.sort === NextGenListFilters.LISTED_PRICE
+                      props.sort === NextGenListFilters.LISTED_PRICE ||
+                      props.listed_type === NextGenTokenListedType.LISTED
                     }
                     show_max_sale={
                       props.sort === NextGenListFilters.HIGHEST_SALE

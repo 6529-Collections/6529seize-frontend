@@ -52,7 +52,12 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       setCicType(cicToType(profile.cic.cic_rating));
       setOwnerTdh(profile.consolidation.tdh);
       setLevel(profile.level);
-      setOwnerDisplay(profile.consolidation?.consolidation_display);
+      if (
+        profile.consolidation?.consolidation_display?.includes(".eth") ||
+        profile.consolidation?.consolidation_display?.includes("-")
+      ) {
+        setOwnerDisplay(profile.consolidation?.consolidation_display);
+      }
     });
   }, [props.token.owner]);
 
