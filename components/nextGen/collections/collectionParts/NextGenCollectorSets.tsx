@@ -8,7 +8,11 @@ import {
   TraitValues,
 } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { formatAddress, getRandomColor } from "../../../../helpers/Helpers";
+import {
+  capitalizeEveryWord,
+  cicToType,
+  formatAddress,
+} from "../../../../helpers/Helpers";
 import Pagination from "../../../pagination/Pagination";
 import DotLoader from "../../../dotLoader/DotLoader";
 import Image from "next/image";
@@ -17,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { normalizeNextgenTokenID } from "../../nextgen_helpers";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 
 const PAGE_SIZE = 10;
 
@@ -24,6 +29,8 @@ const TRAITS: Record<number, string[]> = {
   1: ["Palette", "Size", "Traced"],
   2: ["Border", "Color"],
 };
+
+const ULTIMATE = "Ultimate";
 
 export default function NextGenCollectorSets(
   props: Readonly<{
@@ -58,9 +65,18 @@ export default function NextGenCollectorSets(
 
   function fetchResults(mypage: number, mytrait: string) {
     setSetsLoaded(false);
-    let url = `nextgen/collections/${props.collection.id}/trait_sets/${mytrait}?page_size=${PAGE_SIZE}&page=${mypage}`;
+    let path;
+    if (selectedTrait === ULTIMATE) {
+      path = `nextgen/collections/${
+        props.collection.id
+      }/ultimate_trait_set?trait=${availableTraits.join(
+        ","
+      )}&page_size=${PAGE_SIZE}&page=${mypage}`;
+    } else {
+      path = `nextgen/collections/${props.collection.id}/trait_sets/${mytrait}?&page_size=${PAGE_SIZE}&page=${mypage}`;
+    }
     commonApiFetch<DBResponse>({
-      endpoint: url,
+      endpoint: path,
     }).then((response) => {
       setTotalResults(response.count);
       setSets(response.data);
@@ -71,7 +87,7 @@ export default function NextGenCollectorSets(
   useEffect(() => {
     if (selectedTrait && traitsLoaded) {
       setSelectedTraitValues(
-        traits.find((t) => t.trait === selectedTrait)?.values || []
+        traits.find((t) => t.trait === selectedTrait)?.values ?? []
       );
       if (page === 1) {
         fetchResults(page, selectedTrait);
@@ -89,15 +105,43 @@ export default function NextGenCollectorSets(
 
   function printTraitPill(t: string) {
     return (
-      <button
-        key={getRandomObjectId()}
-        className={`${styles.collectorSetPill} ${
-          t === selectedTrait ? styles.collectorSetPillSelected : ""
-        }`}
-        onClick={() => setSelectedTrait(t)}>
-        {t}
-      </button>
+      <Col xs={12 / (availableTraits.length + 1)} className="no-padding">
+        <button
+          key={getRandomObjectId()}
+          className={`${styles.collectorSetPill} ${
+            t === selectedTrait ? styles.collectorSetPillSelected : ""
+          }`}
+          onClick={() => {
+            if (selectedTrait === ULTIMATE || t === ULTIMATE) {
+              setSets([]);
+              setTotalResults(0);
+            }
+            setSelectedTrait(t);
+          }}>
+          {t}
+        </button>
+      </Col>
     );
+  }
+
+  function printUltimate() {
+    let content;
+    if (!setsLoaded) {
+      content = (
+        <Col>
+          <DotLoader />
+        </Col>
+      );
+    } else if (totalResults == 0) {
+      content = <Col>None!</Col>;
+    } else {
+      content = sets.map((s) => (
+        <Col xs={12} key={getRandomObjectId()}>
+          <UltimateOwner set={s} />
+        </Col>
+      ));
+    }
+    return <Row className="pt-3">{content}</Row>;
   }
 
   return (
@@ -110,39 +154,56 @@ export default function NextGenCollectorSets(
         </Col>
       </Row>
       <Row className="pt-3">
-        <Col className="d-flex align-items-center justify-content-between">
-          {availableTraits.map((trait) => printTraitPill(trait))}
-          {printTraitPill("Ultimate")}
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className="d-flex align-items-center justify-content-between">
-          <span>
-            {!setsLoaded ? (
-              <DotLoader />
-            ) : (
-              <>
-                Unique values for <b>{selectedTrait}</b> trait: x
-                {selectedTraitValues.length.toLocaleString()}
-              </>
-            )}
-          </span>
-          <span>Collectors Count: {totalResults.toLocaleString()}</span>
-        </Col>
-      </Row>
-      <Row className="pt-3">
         <Col>
-          {sets.map((s) => (
-            <TraitSetAccordion
-              key={`collector-sets-${s.owner}`}
-              collection={props.collection}
-              trait={selectedTrait}
-              set={s}
-              values={selectedTraitValues}
-            />
-          ))}
+          <Container>
+            <Row>
+              {availableTraits.map((trait) => printTraitPill(trait))}
+              {printTraitPill(ULTIMATE)}
+            </Row>
+          </Container>
         </Col>
       </Row>
+      {selectedTrait !== ULTIMATE && (
+        <Row className="pt-4">
+          <Col className="d-flex align-items-center justify-content-between">
+            <span>
+              {!setsLoaded ? (
+                <DotLoader />
+              ) : (
+                <>
+                  Unique values for <b>{selectedTrait}</b> trait: x
+                  {selectedTraitValues.length.toLocaleString()}
+                </>
+              )}
+            </span>
+            <span>Collectors Count: {totalResults.toLocaleString()}</span>
+          </Col>
+        </Row>
+      )}
+      {selectedTrait === ULTIMATE && (
+        <Row className="pt-4">
+          <Col xs={12} className="font-larger font-bolder">
+            <u>{ULTIMATE} Set</u>
+          </Col>
+          <Col xs={12}>{`All ${availableTraits.join(", All ")} Types`}</Col>
+        </Row>
+      )}
+      {selectedTrait !== ULTIMATE && (
+        <Row className="pt-3">
+          <Col>
+            {sets.map((s) => (
+              <TraitSetAccordion
+                key={`collector-sets-${s.owner}`}
+                collection={props.collection}
+                trait={selectedTrait}
+                set={s}
+                values={selectedTraitValues}
+              />
+            ))}
+          </Col>
+        </Row>
+      )}
+      {selectedTrait === ULTIMATE && printUltimate()}
       {totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
         <Row className="text-center pt-2 pb-3">
           <Pagination
@@ -159,6 +220,72 @@ export default function NextGenCollectorSets(
   );
 }
 
+function UltimateOwner(props: Readonly<{ set: NextgenTraitSet }>) {
+  const set = props.set;
+  const keys = Object.entries(set)
+    .filter(([key]) => key.endsWith("_sets"))
+    .map(([key, value]) => {
+      return {
+        key: capitalizeEveryWord(key.replace("_sets", "")),
+        count: value,
+      };
+    });
+
+  return (
+    <Accordion className="pt-1 pb-1">
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button
+          className={styles.collectorSetAccordionButtonUltimate}>
+          <Container>
+            <Row>
+              <Col className="d-flex aling-items-center justify-content-between">
+                <span>
+                  <Owner set={set} />
+                </span>
+                <span className="d-flex gap-3">
+                  {keys.map((k) => (
+                    <span key={getRandomObjectId()}>
+                      <b>{k.key}</b> Sets: {k.count}
+                    </span>
+                  ))}
+                </span>
+              </Col>
+            </Row>
+          </Container>
+        </Accordion.Button>
+      </Accordion.Item>
+    </Accordion>
+  );
+}
+
+function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
+  function getOwnerDisplay() {
+    if (props.set.normalised_handle) {
+      return props.set.normalised_handle;
+    }
+    if (
+      props.set.consolidation_display?.includes("-") ||
+      props.set.consolidation_display?.includes(".eth")
+    ) {
+      return props.set.consolidation_display;
+    }
+
+    return formatAddress(props.set.owner);
+  }
+
+  return (
+    <a
+      className="d-flex gap-2 decoration-hover-underline"
+      onClick={(e) => e.stopPropagation()}
+      href={`/${props.set.handle ?? props.set.owner}`}>
+      <UserCICAndLevel
+        level={props.set.level}
+        cicType={cicToType(props.set.tdh + props.set.rep_score)}
+      />{" "}
+      {getOwnerDisplay()}
+    </a>
+  );
+}
 function TraitSetAccordion(
   props: Readonly<{
     collection: NextGenCollection;
@@ -170,22 +297,8 @@ function TraitSetAccordion(
   const set = props.set;
 
   const missingValues = props.values.filter(
-    (v) => !set.token_values.map((tv) => tv.value).includes(v)
+    (v) => !set.token_values?.map((tv) => tv.value).includes(v)
   );
-
-  function getOwnerDisplay() {
-    if (set.normalised_handle) {
-      return set.normalised_handle;
-    }
-    if (
-      set.consolidation_display?.includes("-") ||
-      set.consolidation_display?.includes(".eth")
-    ) {
-      return set.consolidation_display;
-    }
-
-    return formatAddress(set.owner);
-  }
 
   return (
     <Accordion className="pt-1 pb-1">
@@ -198,7 +311,9 @@ function TraitSetAccordion(
                   <b>{set.distinct_values_count}</b>
                 </span>
                 <span>-</span>
-                <span>{getOwnerDisplay()}</span>
+                <span>
+                  <Owner set={set} />
+                </span>
                 {missingValues.length === 0 && (
                   <Tippy
                     theme="light"
@@ -219,7 +334,7 @@ function TraitSetAccordion(
         </Accordion.Button>
         <Accordion.Body className={styles.collectorSetAccordionBody}>
           <Container>
-            {props.set.token_values.map((tv) => (
+            {props.set.token_values?.map((tv) => (
               <Row
                 className="pt-3 pb-3"
                 key={`accordion-${props.trait}-${tv.value}`}>
