@@ -6,10 +6,7 @@ import { NextGenCollection } from "../../../../entities/INextgen";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import { useShallowRedirect } from "./[[...view]]";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
-import {
-  formatNameForUrl,
-  getCollectionBaseBreadcrums,
-} from "../../../../components/nextGen/nextgen_helpers";
+import { getCollectionBaseBreadcrums } from "../../../../components/nextGen/nextgen_helpers";
 import {
   NextGenCollectionHead,
   getServerSideCollection,
