@@ -145,7 +145,7 @@ export default function NextGenCollectorSets(
   }
 
   return (
-    <Container className="no-padding pt-4">
+    <Container className="no-padding pt-2">
       <Row>
         <Col>
           <h1>
