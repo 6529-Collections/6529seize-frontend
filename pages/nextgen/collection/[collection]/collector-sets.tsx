@@ -8,23 +8,35 @@ import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
+import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
+import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const NextGenCollectionTokenListComponent = dynamic(
+const NextGenCollectorSets = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage"
+      "../../../../components/nextGen/collections/collectionParts/NextGenCollectorSets"
     ),
   { ssr: false }
 );
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Art | ${collection.name}`;
+  const pagenameFull = `Collector Sets | ${collection.name}`;
+
+  const crumbs = [
+    { display: "Home", href: "/" },
+    { display: "NextGen", href: "/nextgen" },
+    {
+      display: `${collection.name}`,
+      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
+    },
+    { display: `Collector Sets` },
+  ];
 
   return (
     <>
@@ -50,7 +62,9 @@ export default function NextGenCollectionTokensPage(props: any) {
 
       <main className={styles.main}>
         <Header />
-        <NextGenCollectionTokenListComponent collection={collection} />
+        <Breadcrumb breadcrumbs={crumbs} />
+        <NextGenNavigationHeader />
+        <NextGenCollectorSets collection={collection} />
       </main>
     </>
   );

@@ -326,8 +326,8 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     return <NextGenCollectionProvenance collection={props.collection} />;
   } else if (props.view === ContentView.OVERVIEW) {
     return <NextGenCollectionDetailsOverview collection={props.collection} />;
-  } else if (props.view === ContentView.COLLECTOR_SETS) {
-    return <NextGenCollectorSets collection={props.collection} />;
+  } else if (props.view === ContentView.TOP_COLLECTOR_SETS) {
+    return <NextGenCollectorSets preview collection={props.collection} />;
   } else {
     return <NextGenCollectionDetailsAbout collection={props.collection} />;
   }

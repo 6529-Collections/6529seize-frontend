@@ -8,6 +8,7 @@ import { isEmptyObject } from "../../../../helpers/Helpers";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useShallowRedirect } from "./[[...view]]";
+import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -37,7 +38,9 @@ export default function NextGenCollectionMintPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${collection.id}`}
+          content={`${
+            process.env.BASE_ENDPOINT
+          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
         />
         <meta property="og:title" content={pagenameFull} />
         <meta property="og:image" content={collection.image} />

@@ -41,7 +41,12 @@ interface PhaseProps {
 export function NextGenBackToCollectionPageLink(
   props: Readonly<{ collection: NextGenCollection }>
 ) {
-  const isArtPage = window?.location.pathname.endsWith("/art") ?? false;
+  const pathname = window?.location.pathname;
+  const isArtPage =
+    (pathname.endsWith("/art") ||
+      pathname.endsWith("/collector-sets") ||
+      pathname.endsWith("/distribution-plan")) ??
+    false;
   const content = isArtPage
     ? "Back to collection page"
     : "Back to collection art";

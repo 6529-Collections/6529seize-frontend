@@ -44,7 +44,9 @@ export default function NextGenCollection(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${collection.id}`}
+          content={`${
+            process.env.BASE_ENDPOINT
+          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
         />
         <meta property="og:title" content={pagenameFull} />
         <meta property="og:image" content={collection.image} />
@@ -67,7 +69,7 @@ export default function NextGenCollection(props: any) {
 function getCollectionView(view: string): ContentView {
   const normalizedView = view.toLowerCase();
   const entries = Object.entries(ContentView).find(
-    ([, value]) => value.toLowerCase() === normalizedView
+    ([key]) => key.toLowerCase() === normalizedView
   );
 
   return entries
@@ -99,7 +101,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
 
   let collectionView: ContentView = ContentView.OVERVIEW;
   if (view) {
-    view = view[0].replaceAll("-", " ").toLowerCase();
+    view = view[0].replaceAll("-", "_").toLowerCase();
     collectionView = getCollectionView(view);
   }
 

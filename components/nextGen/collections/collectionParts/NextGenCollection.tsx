@@ -11,6 +11,7 @@ import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import router from "next/router";
 import { formatNameForUrl } from "../../nextgen_helpers";
+import { Content } from "next/font/google";
 
 interface Props {
   collection: NextGenCollection;
@@ -23,7 +24,16 @@ export enum ContentView {
   DISPLAY_CENTER = "Display Center",
   RARITY = "Rarity",
   OVERVIEW = "Overview",
-  COLLECTOR_SETS = "Collector Sets",
+  TOP_COLLECTOR_SETS = "Collector Sets",
+}
+
+export function getContentViewKeyByValue(value: string): string {
+  for (const [key, val] of Object.entries(ContentView)) {
+    if (val === value) {
+      return key;
+    }
+  }
+  return ContentView.OVERVIEW;
 }
 
 export function printViewButton(
@@ -57,8 +67,11 @@ export default function NextGenCollection(props: Readonly<Props>) {
   const [view, setView] = useState<ContentView>(props.view);
 
   useEffect(() => {
-    let path = view === ContentView.OVERVIEW ? "/" : `/${view.toLowerCase()}`;
-    path = path.replaceAll(" ", "-");
+    let path =
+      view === ContentView.OVERVIEW
+        ? "/"
+        : `/${getContentViewKeyByValue(view).toLowerCase()}`;
+    path = path.replaceAll(" ", "-").replaceAll("_", "-");
     router.push(
       `/nextgen/collection/${formatNameForUrl(props.collection.name)}${path}`,
       undefined,
@@ -94,7 +107,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
               {printViewButton(view, ContentView.OVERVIEW, setView)}
               {printViewButton(view, ContentView.ABOUT, setView)}
               {printViewButton(view, ContentView.PROVENANCE, setView)}
-              {printViewButton(view, ContentView.COLLECTOR_SETS, setView)}
+              {printViewButton(view, ContentView.TOP_COLLECTOR_SETS, setView)}
             </Col>
           </Row>
           <Row className="pt-4 pb-4">

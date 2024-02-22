@@ -19,11 +19,14 @@ import Image from "next/image";
 import { NEXTGEN_MEDIA_BASE_URL } from "../../../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { normalizeNextgenTokenID } from "../../nextgen_helpers";
+import {
+  formatNameForUrl,
+  normalizeNextgenTokenID,
+} from "../../nextgen_helpers";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-
-const PAGE_SIZE = 10;
+import NextGenCollectionHeader from "./NextGenCollectionHeader";
+import SearchModal from "../../../searchModal/SearchModal";
 
 const TRAITS: Record<number, string[]> = {
   1: ["Palette", "Size", "Traced"],
@@ -35,9 +38,12 @@ const ULTIMATE = "Ultimate";
 export default function NextGenCollectorSets(
   props: Readonly<{
     collection: NextGenCollection;
+    preview?: boolean;
   }>
 ) {
   const [page, setPage] = useState(1);
+
+  const PAGE_SIZE = props.preview ? 10 : 25;
 
   const availableTraits: string[] = TRAITS[props.collection.id];
 
@@ -53,6 +59,9 @@ export default function NextGenCollectorSets(
 
   const [traits, setTraits] = useState<TraitValues[]>([]);
   const [traitsLoaded, setTraitsLoaded] = useState(false);
+
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   useEffect(() => {
     commonApiFetch<TraitValues[]>({
@@ -73,7 +82,11 @@ export default function NextGenCollectorSets(
         ","
       )}&page_size=${PAGE_SIZE}&page=${mypage}`;
     } else {
-      path = `nextgen/collections/${props.collection.id}/trait_sets/${mytrait}?&page_size=${PAGE_SIZE}&page=${mypage}`;
+      let filters = "";
+      if (searchWallets.length > 0) {
+        filters += `&search=${searchWallets.join(",")}`;
+      }
+      path = `nextgen/collections/${props.collection.id}/trait_sets/${mytrait}?&page_size=${PAGE_SIZE}&page=${mypage}${filters}`;
     }
     commonApiFetch<DBResponse>({
       endpoint: path,
@@ -95,7 +108,7 @@ export default function NextGenCollectorSets(
         setPage(1);
       }
     }
-  }, [selectedTrait, traitsLoaded]);
+  }, [selectedTrait, traitsLoaded, searchWallets]);
 
   useEffect(() => {
     if (selectedTrait) {
@@ -145,12 +158,95 @@ export default function NextGenCollectorSets(
   }
 
   return (
-    <Container className="no-padding pt-2">
+    <Container className="no-padding pt-2 pb-5">
+      {!props.preview && (
+        <Row className="pb-4">
+          <Col>
+            <NextGenCollectionHeader
+              collection={props.collection}
+              collection_link={true}
+            />
+          </Col>
+        </Row>
+      )}
       <Row>
-        <Col>
-          <h1>
+        <Col className="d-flex align-items-center justify-content-between gap-3">
+          <h1 className="no-wrap">
             <span className="font-lightest">Collector</span> Sets
           </h1>
+          {props.preview && (
+            <a
+              href={`/nextgen/collection/${formatNameForUrl(
+                props.collection.name
+              )}/collector-sets`}
+              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
+              <h5 className="mb-0 font-color d-flex align-items-center gap-2">
+                View All
+                <FontAwesomeIcon
+                  icon="arrow-circle-right"
+                  className={styles.viewAllIcon}
+                />
+              </h5>
+            </a>
+          )}
+          {!props.preview && (
+            <span className="d-flex flex-wrap align-items-center">
+              {searchWallets.length > 0 &&
+                searchWallets.map((sw) => (
+                  <span className={styles.searchWalletDisplayWrapper} key={sw}>
+                    <Tippy
+                      delay={250}
+                      content={"Clear"}
+                      placement={"top"}
+                      theme={"light"}>
+                      <button
+                        disabled={selectedTrait === ULTIMATE}
+                        className={`btn-link ${styles.searchWalletDisplayBtn}`}
+                        onClick={() =>
+                          setSearchWallets((sr) => sr.filter((s) => s != sw))
+                        }>
+                        x
+                      </button>
+                    </Tippy>
+                    <span className={styles.searchWalletDisplay}>
+                      {sw.endsWith(".eth") ? sw : formatAddress(sw)}
+                    </span>
+                  </span>
+                ))}
+              {searchWallets.length > 0 && (
+                <Tippy
+                  disabled={selectedTrait === ULTIMATE}
+                  delay={250}
+                  content={"Clear All"}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    onClick={() => setSearchWallets([])}
+                    className={styles.clearSearchBtnIcon}
+                    style={{
+                      color: selectedTrait === ULTIMATE ? "#9a9a9a" : "inherit",
+                      cursor:
+                        selectedTrait === ULTIMATE ? "not-allowed" : "pointer",
+                    }}
+                    icon="times-circle"></FontAwesomeIcon>
+                </Tippy>
+              )}
+              <button
+                disabled={selectedTrait === ULTIMATE}
+                onClick={() => setShowSearchModal(true)}
+                className={`btn-link ${styles.searchBtn} ${
+                  searchWallets.length > 0 ? styles.searchBtnActive : ""
+                } d-inline-flex align-items-center justify-content-center`}>
+                <FontAwesomeIcon
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    color: "#000",
+                  }}
+                  icon="search"></FontAwesomeIcon>
+              </button>
+            </span>
+          )}
         </Col>
       </Row>
       <Row className="pt-3">
@@ -167,16 +263,16 @@ export default function NextGenCollectorSets(
         <Row className="pt-4">
           <Col className="d-flex align-items-center justify-content-between">
             <span>
+              Unique values for <b>{selectedTrait}</b> trait: x
+              {selectedTraitValues.length.toLocaleString()}
+            </span>
+            <span>
               {!setsLoaded ? (
                 <DotLoader />
               ) : (
-                <>
-                  Unique values for <b>{selectedTrait}</b> trait: x
-                  {selectedTraitValues.length.toLocaleString()}
-                </>
+                <>Collectors Count: {totalResults.toLocaleString()}</>
               )}
             </span>
-            <span>Collectors Count: {totalResults.toLocaleString()}</span>
           </Col>
         </Row>
       )}
@@ -203,8 +299,11 @@ export default function NextGenCollectorSets(
           </Col>
         </Row>
       )}
+      {selectedTrait !== ULTIMATE && setsLoaded && sets.length === 0 && (
+        <>No results found</>
+      )}
       {selectedTrait === ULTIMATE && printUltimate()}
-      {totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
+      {!props.preview && totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
         <Row className="text-center pt-2 pb-3">
           <Pagination
             page={page}
@@ -215,6 +314,24 @@ export default function NextGenCollectorSets(
             }}
           />
         </Row>
+      )}
+      {!props.preview && (
+        <SearchModal
+          show={showSearchModal}
+          searchWallets={searchWallets}
+          setShow={function (show: boolean) {
+            setShowSearchModal(show);
+          }}
+          addSearchWallet={function (newW: string) {
+            setSearchWallets((searchWallets) => [...searchWallets, newW]);
+          }}
+          removeSearchWallet={function (removeW: string) {
+            setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
+          }}
+          clearSearchWallets={function () {
+            setSearchWallets([]);
+          }}
+        />
       )}
     </Container>
   );
@@ -314,7 +431,7 @@ function TraitSetAccordion(
                 <span>
                   <Owner set={set} />
                 </span>
-                {missingValues.length === 0 && (
+                {props.values.length > 0 && missingValues.length === 0 && (
                   <Tippy
                     theme="light"
                     delay={250}
@@ -334,59 +451,62 @@ function TraitSetAccordion(
         </Accordion.Button>
         <Accordion.Body className={styles.collectorSetAccordionBody}>
           <Container>
-            {props.set.token_values?.map((tv) => (
-              <Row
-                className="pt-3 pb-3"
-                key={`accordion-${props.trait}-${tv.value}`}>
-                <Col className="d-flex flex-wrap align-items-center gap-3">
-                  <span className="d-flex align-items-center gap-3">
-                    <FontAwesomeIcon
-                      style={{ height: "1.5em", color: "#00aa00" }}
-                      icon="check-circle"></FontAwesomeIcon>
-                    <b>
-                      <a
-                        href={`/nextgen/collection/${props.collection.name}/art?traits=${props.trait}:${tv.value}`}
-                        className="decoration-hover-underline"
-                        target="_blank"
-                        rel="noreferrer">
-                        {tv.value}
-                      </a>
-                    </b>
-                  </span>
-                  <span className="d-flex flex-wrap">
-                    {tv.tokens.map((t) => (
-                      <a
-                        key={`accordion-${props.trait}-${tv.value}-${t}`}
-                        href={`/nextgen/token/${t}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Tippy
-                          theme="light"
-                          delay={250}
-                          content={`${props.collection.name} #${
-                            normalizeNextgenTokenID(t).token_id
-                          }`}>
-                          <Image
-                            priority
-                            loading="eager"
-                            width={0}
-                            height={0}
-                            style={{
-                              height: "50px",
-                              width: "auto",
-                              marginLeft: "5px",
-                              marginRight: "5px",
-                            }}
-                            src={`${NEXTGEN_MEDIA_BASE_URL}/png/${t}`}
-                            alt={`#${t.toString()}`}
-                          />
-                        </Tippy>
-                      </a>
-                    ))}
-                  </span>
-                </Col>
-              </Row>
-            ))}
+            {props.values.length > 0 &&
+              props.set.token_values?.map((tv) => (
+                <Row
+                  className="pt-3 pb-3"
+                  key={`accordion-${props.trait}-${tv.value}`}>
+                  <Col className="d-flex flex-wrap align-items-center gap-3">
+                    <span className="d-flex align-items-center gap-3">
+                      <FontAwesomeIcon
+                        style={{ height: "1.5em", color: "#00aa00" }}
+                        icon="check-circle"></FontAwesomeIcon>
+                      <b>
+                        <a
+                          href={`/nextgen/collection/${formatNameForUrl(
+                            props.collection.name
+                          )}/art?traits=${props.trait}:${tv.value}`}
+                          className="decoration-hover-underline"
+                          target="_blank"
+                          rel="noreferrer">
+                          {tv.value}
+                        </a>
+                      </b>
+                    </span>
+                    <span className="d-flex flex-wrap">
+                      {tv.tokens.map((t) => (
+                        <a
+                          key={`accordion-${props.trait}-${tv.value}-${t}`}
+                          href={`/nextgen/token/${t}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Tippy
+                            theme="light"
+                            delay={250}
+                            content={`${props.collection.name} #${
+                              normalizeNextgenTokenID(t).token_id
+                            }`}>
+                            <Image
+                              priority
+                              loading="eager"
+                              width={0}
+                              height={0}
+                              style={{
+                                height: "50px",
+                                width: "auto",
+                                marginLeft: "5px",
+                                marginRight: "5px",
+                              }}
+                              src={`${NEXTGEN_MEDIA_BASE_URL}/png/${t}`}
+                              alt={`#${t.toString()}`}
+                            />
+                          </Tippy>
+                        </a>
+                      ))}
+                    </span>
+                  </Col>
+                </Row>
+              ))}
             <Row className="pt-4">
               <Col>
                 {missingValues.length > 0 ? (
@@ -395,7 +515,9 @@ function TraitSetAccordion(
                     {missingValues.map((mv, index) => (
                       <Fragment key={mv}>
                         <a
-                          href={`/nextgen/collection/${props.collection.name}/art?traits=${props.trait}:${mv}`}
+                          href={`/nextgen/collection/${formatNameForUrl(
+                            props.collection.name
+                          )}/art?traits=${props.trait}:${mv}`}
                           className="decoration-hover-underline"
                           target="_blank"
                           rel="noreferrer">

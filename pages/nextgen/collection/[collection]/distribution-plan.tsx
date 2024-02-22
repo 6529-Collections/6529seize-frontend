@@ -10,6 +10,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import { useShallowRedirect } from "./[[...view]]";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
+import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -34,7 +35,7 @@ export default function NextGenCollectionTokensPage(props: any) {
     { display: "NextGen", href: "/nextgen" },
     {
       display: `${collection.name}`,
-      href: `/nextgen/collection/${collection.id}`,
+      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
     },
     { display: `Distribution Plan` },
   ];
@@ -52,7 +53,9 @@ export default function NextGenCollectionTokensPage(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${collection.id}`}
+          content={`${
+            process.env.BASE_ENDPOINT
+          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
         />
         <meta property="og:title" content={pagenameFull} />
         <meta property="og:image" content={collection.image} />
