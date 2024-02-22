@@ -6,7 +6,10 @@ import { NextGenCollection } from "../../../../entities/INextgen";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import { useShallowRedirect } from "./[[...view]]";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
-import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
+import {
+  formatNameForUrl,
+  getCollectionBaseBreadcrums,
+} from "../../../../components/nextGen/nextgen_helpers";
 import {
   NextGenCollectionHead,
   getServerSideCollection,
@@ -30,22 +33,18 @@ export default function NextGenCollectionTokensPage(props: any) {
   useShallowRedirect(collection.name, "/distribution-plan");
   const pagenameFull = `Distribution Plan | ${collection.name}`;
 
-  const crumbs = [
-    { display: "Home", href: "/" },
-    { display: "NextGen", href: "/nextgen" },
-    {
-      display: `${collection.name}`,
-      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
-    },
-    { display: `Distribution Plan` },
-  ];
   return (
     <>
       <NextGenCollectionHead collection={collection} name={pagenameFull} />
 
       <main className={styles.main}>
         <Header />
-        <Breadcrumb breadcrumbs={crumbs} />
+        <Breadcrumb
+          breadcrumbs={getCollectionBaseBreadcrums(
+            collection,
+            "Distribution Plan"
+          )}
+        />
         <NextGenNavigationHeader />
         <NextGenCollectionMintingPlanComponent collection={collection} />
       </main>
