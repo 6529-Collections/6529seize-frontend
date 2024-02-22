@@ -1,15 +1,15 @@
-import Head from "next/head";
 import styles from "../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import { isEmptyObject } from "../../../../helpers/Helpers";
-import { getCommonHeaders } from "../../../../helpers/server.helpers";
-import { commonApiFetch } from "../../../../services/api/common-api";
 import { formatNameForUrl } from "../../../../components/nextGen/nextgen_helpers";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
+import {
+  NextGenCollectionHead,
+  getServerSideCollection,
+} from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 
 const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
@@ -40,25 +40,7 @@ export default function NextGenCollectionTokensPage(props: any) {
 
   return (
     <>
-      <Head>
-        <title>{pagenameFull}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pagenameFull} />
-        <meta
-          property="og:url"
-          content={`${
-            process.env.BASE_ENDPOINT
-          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
-        />
-        <meta property="og:title" content={pagenameFull} />
-        <meta property="og:image" content={collection.image} />
-        <meta property="og:description" content="NEXTGEN | 6529 SEIZE" />
-        <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={pagenameFull} />
-        <meta name="twitter:title" content={pagenameFull} />
-        <meta name="twitter:description" content="NEXTGEN | 6529 SEIZE" />
-        <meta name="twitter:image" content={collection.image} />
-      </Head>
+      <NextGenCollectionHead collection={collection} name={pagenameFull} />
 
       <main className={styles.main}>
         <Header />
@@ -71,23 +53,5 @@ export default function NextGenCollectionTokensPage(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  const collectionId = req.query.collection;
-  const headers = getCommonHeaders(req);
-  const collection = await commonApiFetch<NextGenCollection>({
-    endpoint: `nextgen/collections/${collectionId}`,
-    headers: headers,
-  });
-
-  if (isEmptyObject(collection)) {
-    return {
-      notFound: true,
-      props: {},
-    };
-  }
-
-  return {
-    props: {
-      collection: collection,
-    },
-  };
+  return await getServerSideCollection(req);
 }
