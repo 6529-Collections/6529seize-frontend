@@ -313,7 +313,7 @@ export default function Leaderboard(props: Readonly<Props>) {
     content,
     hideMuseum,
     hideTeam,
-    searchWallets
+    searchWallets,
   ]);
 
   useEffect(() => {

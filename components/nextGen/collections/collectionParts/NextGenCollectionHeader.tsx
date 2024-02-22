@@ -20,8 +20,11 @@ import {
   getStatusFromDates,
   useCollectionMintCount,
 } from "../../nextgen_helpers";
-import { numberWithCommas } from "../../../../helpers/Helpers";
+import { isEmptyObject, numberWithCommas } from "../../../../helpers/Helpers";
 import { DistributionLink } from "../NextGen";
+import Head from "next/head";
+import { getCommonHeaders } from "../../../../helpers/server.helpers";
+import { commonApiFetch } from "../../../../services/api/common-api";
 
 interface Props {
   collection: NextGenCollection;
@@ -41,7 +44,12 @@ interface PhaseProps {
 export function NextGenBackToCollectionPageLink(
   props: Readonly<{ collection: NextGenCollection }>
 ) {
-  const isArtPage = window?.location.pathname.endsWith("/art") ?? false;
+  const pathname = window?.location.pathname;
+  const isArtPage =
+    (pathname.endsWith("/art") ||
+      pathname.endsWith("/collector-sets") ||
+      pathname.endsWith("/distribution-plan")) ??
+    false;
   const content = isArtPage
     ? "Back to collection page"
     : "Back to collection art";
@@ -334,4 +342,52 @@ export function NextGenMintCounts(
       )}
     </span>
   );
+}
+
+export function NextGenCollectionHead(
+  props: Readonly<{ collection: NextGenCollection; name: string }>
+) {
+  return (
+    <Head>
+      <title>{props.name}</title>
+      <link rel="icon" href="/favicon.ico" />
+      <meta name="description" content={props.name} />
+      <meta
+        property="og:url"
+        content={`${
+          process.env.BASE_ENDPOINT
+        }/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
+      />
+      <meta property="og:title" content={props.name} />
+      <meta property="og:image" content={props.collection.image} />
+      <meta property="og:description" content="NEXTGEN | 6529 SEIZE" />
+      <meta name="twitter:card" content={props.name} />
+      <meta name="twitter:image:alt" content={props.name} />
+      <meta name="twitter:title" content={props.name} />
+      <meta name="twitter:description" content="NEXTGEN | 6529 SEIZE" />
+      <meta name="twitter:image" content={props.collection.image} />
+    </Head>
+  );
+}
+
+export async function getServerSideCollection(req: any) {
+  const collectionId = req.query.collection;
+  const headers = getCommonHeaders(req);
+  const collection = await commonApiFetch<NextGenCollection>({
+    endpoint: `nextgen/collections/${collectionId}`,
+    headers: headers,
+  });
+
+  if (isEmptyObject(collection)) {
+    return {
+      notFound: true,
+      props: {},
+    };
+  }
+
+  return {
+    props: {
+      collection: collection,
+    },
+  };
 }

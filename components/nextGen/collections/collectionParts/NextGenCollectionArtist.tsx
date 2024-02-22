@@ -8,6 +8,7 @@ import {
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { STATEMENT_TYPE } from "../../../../helpers/Types";
 import Image from "next/image";
+import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -92,7 +93,9 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       {index > 0 && ", "}
                       <a
                         key={`link-collection-${c.id}`}
-                        href={`/nextgen/collection/${c.id}`}>
+                        href={`/nextgen/collection/${formatNameForUrl(
+                          c.name
+                        )}`}>
                         {c.name}
                       </a>
                     </>

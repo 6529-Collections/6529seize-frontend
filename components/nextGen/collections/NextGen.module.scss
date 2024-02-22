@@ -474,6 +474,11 @@
   &:hover {
     background-color: $off-white;
   }
+
+  &:disabled {
+    background-color: $lightest-grey !important;
+    cursor: not-allowed;
+  }
 }
 
 .searchBtnActive {
@@ -505,6 +510,11 @@
 
   &:hover {
     background-color: $lighter-grey;
+  }
+
+  &:disabled {
+    background-color: $lightest-grey !important;
+    cursor: not-allowed;
   }
 }
 
@@ -541,7 +551,7 @@
   font-weight: bold;
   font-size: larger;
   border: 1px solid white;
-  width: 25%;
+  width: 100%;
   text-align: center;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -562,4 +572,10 @@
 .collectorSetAccordionBody {
   color: white;
   background-color: $nextgen-grey;
+}
+
+.collectorSetAccordionButtonUltimate {
+  &::after {
+    display: none;
+  }
 }
