@@ -10,37 +10,277 @@ import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
+import { NextGenTokenImageMode } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
+  mode: NextGenTokenImageMode;
+  setMode: (mode: NextGenTokenImageMode) => void;
 }
 
-enum Mode {
-  LIVE = "Live",
-  IMAGE = "Image",
+export function NextGenTokenArtImageCanvas1(
+  props: Readonly<{ token: NextGenToken }>
+) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageSrc = props.token.image_url;
+  const settingImageSrc = "/nextgen/settings/pebble-museum.jpeg";
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+
+    if (canvas && context) {
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      const settingImage = new Image();
+      settingImage.src = settingImageSrc;
+      settingImage.onload = () => {
+        canvas.width = settingImage.width;
+        canvas.height = settingImage.height;
+
+        context.drawImage(settingImage, 0, 0);
+
+        const tokenImage = new Image();
+        tokenImage.src = imageSrc;
+        tokenImage.onload = () => {
+          const imageWidth = canvas.width * 0.2377;
+          const aspectRatio = tokenImage.width / tokenImage.height;
+          const imageHeight = imageWidth / aspectRatio;
+
+          const xPosition = canvas.width * 0.4163;
+          const yPosition = canvas.height * 0.176;
+
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
+          context.drawImage(
+            tokenImage,
+            xPosition,
+            yPosition,
+            imageWidth,
+            imageHeight
+          );
+        };
+      };
+    }
+  }, [imageSrc, settingImageSrc]);
+
+  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
+}
+
+export function NextGenTokenArtImageCanvas2(
+  props: Readonly<{ token: NextGenToken }>
+) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageSrc = props.token.image_url;
+  const settingImageSrc = "/nextgen/settings/grand-lobby.jpeg";
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+
+    if (canvas && context) {
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      const settingImage = new Image();
+      settingImage.src = settingImageSrc;
+      settingImage.onload = () => {
+        canvas.width = settingImage.width;
+        canvas.height = settingImage.height;
+
+        context.drawImage(settingImage, 0, 0);
+
+        const tokenImage = new Image();
+        tokenImage.src = imageSrc;
+        tokenImage.onload = () => {
+          const imageWidth = canvas.width * 0.2004;
+          const aspectRatio = tokenImage.width / tokenImage.height;
+          const imageHeight = imageWidth / aspectRatio;
+
+          const xPosition = canvas.width * 0.4065;
+          const yPosition = canvas.height * 0.211;
+
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
+
+          // const borderWidth = 1.5;
+          // context.strokeStyle = "black";
+          // context.lineWidth = borderWidth;
+          // context.strokeRect(
+          //   xPosition - borderWidth / 2,
+          //   yPosition - borderWidth / 2,
+          //   imageWidth + borderWidth,
+          //   imageHeight + borderWidth
+          // );
+          context.drawImage(
+            tokenImage,
+            xPosition,
+            yPosition,
+            imageWidth,
+            imageHeight
+          );
+        };
+      };
+    }
+  }, [imageSrc, settingImageSrc]);
+
+  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
+}
+
+export function NextGenTokenArtImageCanvas3(
+  props: Readonly<{ token: NextGenToken }>
+) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageSrc = props.token.image_url;
+  const settingImageSrc = "/nextgen/settings/nyc-loft.jpeg";
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+
+    if (canvas && context) {
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      const settingImage = new Image();
+      settingImage.src = settingImageSrc;
+      settingImage.onload = () => {
+        canvas.width = settingImage.width;
+        canvas.height = settingImage.height;
+
+        context.drawImage(settingImage, 0, 0);
+
+        const tokenImage = new Image();
+        tokenImage.src = imageSrc;
+        tokenImage.onload = () => {
+          const imageWidth = canvas.width * 0.135;
+          const aspectRatio = tokenImage.width / tokenImage.height;
+          const imageHeight = imageWidth / aspectRatio;
+
+          const xPosition = canvas.width * 0.588;
+          const yPosition = canvas.height * 0.321;
+
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
+
+          const borderWidth = 1.5;
+          context.strokeStyle = "black";
+          context.lineWidth = borderWidth;
+          context.strokeRect(
+            xPosition - borderWidth / 2,
+            yPosition - borderWidth / 2,
+            imageWidth + borderWidth,
+            imageHeight + borderWidth
+          );
+
+          context.drawImage(
+            tokenImage,
+            xPosition,
+            yPosition,
+            imageWidth,
+            imageHeight
+          );
+        };
+      };
+    }
+  }, [imageSrc, settingImageSrc]);
+
+  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
+}
+
+export function NextGenTokenArtImageCanvas4(
+  props: Readonly<{ token: NextGenToken }>
+) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageSrc = props.token.image_url;
+  const settingImageSrc = "/nextgen/settings/ghetto-alley.jpeg";
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+
+    if (canvas && context) {
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      const settingImage = new Image();
+      settingImage.src = settingImageSrc;
+      settingImage.onload = () => {
+        canvas.width = settingImage.width;
+        canvas.height = settingImage.height;
+
+        context.drawImage(settingImage, 0, 0);
+
+        const tokenImage = new Image();
+        tokenImage.src = imageSrc;
+        tokenImage.onload = () => {
+          const imageWidth = canvas.width * 0.2621;
+          const aspectRatio = tokenImage.width / tokenImage.height;
+          const imageHeight = imageWidth / aspectRatio;
+
+          const xPosition = canvas.width * 0.379;
+          const yPosition = canvas.height * 0.11;
+
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
+
+          // const borderWidth = 1.5;
+          // context.strokeStyle = "black";
+          // context.lineWidth = borderWidth;
+          // context.strokeRect(
+          //   xPosition - borderWidth / 2,
+          //   yPosition - borderWidth / 2,
+          //   imageWidth + borderWidth,
+          //   imageHeight + borderWidth
+          // );
+
+          context.drawImage(
+            tokenImage,
+            xPosition,
+            yPosition,
+            imageWidth,
+            imageHeight
+          );
+        };
+      };
+    }
+  }, [imageSrc, settingImageSrc]);
+
+  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
 }
 
 export function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
-    mode: Mode;
+    mode: NextGenTokenImageMode;
     is_fullscreen: boolean;
   }>
 ) {
+  if (props.mode === NextGenTokenImageMode.PEBBLE_MUSEUM) {
+    return <NextGenTokenArtImageCanvas1 token={props.token} />;
+  } else if (props.mode === NextGenTokenImageMode.GRAND_LOBBY) {
+    return <NextGenTokenArtImageCanvas2 token={props.token} />;
+  } else if (props.mode === NextGenTokenImageMode.NYC_LOFT) {
+    return <NextGenTokenArtImageCanvas3 token={props.token} />;
+  } else if (props.mode === NextGenTokenImageMode.URBAN_ALLEY) {
+    return <NextGenTokenArtImageCanvas4 token={props.token} />;
+  }
+
   return (
     <NextGenTokenImage
       token={props.token}
       hide_info={true}
       hide_link={true}
-      show_animation={props.mode !== Mode.IMAGE}
+      show_animation={props.mode !== NextGenTokenImageMode.IMAGE}
       is_fullscreen={props.is_fullscreen}
     />
   );
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
-  const [mode, setMode] = useState<Mode>(Mode.IMAGE);
+  const mode = props.mode;
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
@@ -78,7 +318,7 @@ export default function NextGenToken(props: Readonly<Props>) {
     };
   }, []);
 
-  function getModeStyle(m: Mode) {
+  function getModeStyle(m: NextGenTokenImageMode) {
     let s = `${styles.modeIcon}`;
     if (m === mode) {
       s += ` ${styles.modeIconSelected}`;
@@ -87,7 +327,7 @@ export default function NextGenToken(props: Readonly<Props>) {
   }
 
   function getCurrentHref() {
-    if (mode === Mode.LIVE) {
+    if (mode === NextGenTokenImageMode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
     return props.token.image_url;
@@ -104,8 +344,8 @@ export default function NextGenToken(props: Readonly<Props>) {
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.IMAGE)}
-              onClick={() => setMode(Mode.IMAGE)}
+              className={getModeStyle(NextGenTokenImageMode.IMAGE)}
+              onClick={() => props.setMode(NextGenTokenImageMode.IMAGE)}
               icon="image"
             />
           </Tippy>
@@ -116,11 +356,15 @@ export default function NextGenToken(props: Readonly<Props>) {
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.LIVE)}
-              onClick={() => setMode(Mode.LIVE)}
+              className={getModeStyle(NextGenTokenImageMode.LIVE)}
+              onClick={() => props.setMode(NextGenTokenImageMode.LIVE)}
               icon="play-circle"
             />
           </Tippy>
+          {props.mode !== NextGenTokenImageMode.IMAGE &&
+            props.mode !== NextGenTokenImageMode.LIVE && (
+              <span>Scene: {props.mode}</span>
+            )}
         </span>
         <span className="d-flex gap-3">
           <Lightbulb
@@ -222,7 +466,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                     className={
                       showLightbox || showBlackbox
                         ? styles.lightBoxContent
-                        : "col pt-3"
+                        : "col pt-3 text-center"
                     }
                     ref={tokenImageRef}>
                     <NextGenTokenArtImage
@@ -248,7 +492,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
-      {mode === Mode.LIVE && (
+      {mode === NextGenTokenImageMode.LIVE && (
         <Row className="pt-2 font-color-h font-smaller">
           <Col>
             * Live view generates the image dynamically from scratch in your

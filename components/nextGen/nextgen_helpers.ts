@@ -635,3 +635,12 @@ export enum NextGenTokenListedType {
   LISTED = "Yes",
   NOT_LISTED = "No",
 }
+
+export enum NextGenTokenImageMode {
+  LIVE = "Live",
+  IMAGE = "Image",
+  PEBBLE_MUSEUM = "Pebble Museum",
+  NYC_LOFT = "NYC Loft",
+  URBAN_ALLEY = "Urban Alley",
+  GRAND_LOBBY = "Grand Lobby",
+}

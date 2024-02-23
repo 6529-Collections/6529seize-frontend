@@ -22,6 +22,7 @@ import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
+import { NextGenTokenImageMode } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -33,6 +34,10 @@ interface Props {
 
 export default function NextGenToken(props: Readonly<Props>) {
   const router = useRouter();
+
+  const [mode, setMode] = useState<NextGenTokenImageMode>(
+    NextGenTokenImageMode.IMAGE
+  );
 
   const [view, setView] = useState<ContentView>(
     props.view ?? ContentView.ABOUT
@@ -95,7 +100,12 @@ export default function NextGenToken(props: Readonly<Props>) {
           )}
           {view === ContentView.DISPLAY_CENTER && (
             <Col className="pt-4 pb-4">
-              <NextGenTokenRenderCenter />
+              <NextGenTokenRenderCenter
+                token={props.token}
+                collection={props.collection}
+                mode={mode}
+                setMode={setMode}
+              />
             </Col>
           )}
           {view === ContentView.RARITY && (
@@ -216,6 +226,8 @@ export default function NextGenToken(props: Readonly<Props>) {
               <NextGenTokenArt
                 token={props.token}
                 collection={props.collection}
+                mode={mode}
+                setMode={setMode}
               />
             </Col>
           </Row>
