@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { numberWithCommas } from "../../../../helpers/Helpers";
 
 export enum Resolution {
+  "Thumbnail" = "Thumbnail",
+  "0.5K" = "0.5K",
   "1K" = "1K",
   "2K" = "2K",
   "4K" = "4K",
@@ -17,7 +19,12 @@ export enum Resolution {
 
 export function getUrl(token: NextGenToken, resolution: Resolution) {
   let u = token.image_url;
-  if (resolution !== Resolution["1K"]) {
+  if (resolution == Resolution["1K"]) {
+    return u;
+  }
+  if (resolution === Resolution["Thumbnail"]) {
+    u = u.replace("/png/", `/thumbnail/`);
+  } else {
     u = u.replace("/png/", `/png${resolution.toLowerCase()}/`);
   }
   return u;
