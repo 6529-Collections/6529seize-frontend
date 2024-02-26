@@ -175,7 +175,7 @@ export default function NextGenTraitSets(
       <Row>
         <Col className="d-flex align-items-center justify-content-between gap-3">
           <h1 className="no-wrap">
-            <span className="font-lightest">Collector</span> Sets
+            <span className="font-lightest">Trait</span> Sets
           </h1>
           {props.preview && (
             <a
