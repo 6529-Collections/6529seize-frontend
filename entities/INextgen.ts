@@ -40,6 +40,8 @@ export interface NextGenToken {
   mint_price: number;
   metadata_url: string;
   image_url: string;
+  icon_url?: string;
+  thumbnail_url: string;
   animation_url: string;
   generator?: {
     html: string;
