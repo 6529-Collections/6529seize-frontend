@@ -149,13 +149,25 @@ export default function NextGenTraitSets(
         </Col>
       );
     } else if (totalResults == 0) {
-      content = <Col>None!</Col>;
-    } else {
-      content = sets.map((s) => (
-        <Col xs={12} key={getRandomObjectId()}>
-          <UltimateOwner set={s} />
+      content = (
+        <Col
+          style={{
+            minHeight: "50vh",
+          }}>
+          None!
         </Col>
-      ));
+      );
+    } else {
+      content = (
+        <Col
+          style={{
+            minHeight: "50vh",
+          }}>
+          {sets.map((s) => (
+            <UltimateOwner key={getRandomObjectId()} set={s} />
+          ))}
+        </Col>
+      );
     }
     return <Row className="pt-3">{content}</Row>;
   }
@@ -203,7 +215,6 @@ export default function NextGenTraitSets(
                       placement={"top"}
                       theme={"light"}>
                       <button
-                        disabled={selectedTrait === ULTIMATE}
                         className={`btn-link ${styles.searchWalletDisplayBtn}`}
                         onClick={() =>
                           setSearchWallets((sr) => sr.filter((s) => s != sw))
@@ -218,7 +229,6 @@ export default function NextGenTraitSets(
                 ))}
               {searchWallets.length > 0 && (
                 <Tippy
-                  disabled={selectedTrait === ULTIMATE}
                   delay={250}
                   content={"Clear All"}
                   placement={"top"}
@@ -226,16 +236,10 @@ export default function NextGenTraitSets(
                   <FontAwesomeIcon
                     onClick={() => setSearchWallets([])}
                     className={styles.clearSearchBtnIcon}
-                    style={{
-                      color: selectedTrait === ULTIMATE ? "#9a9a9a" : "inherit",
-                      cursor:
-                        selectedTrait === ULTIMATE ? "not-allowed" : "pointer",
-                    }}
                     icon="times-circle"></FontAwesomeIcon>
                 </Tippy>
               )}
               <button
-                disabled={selectedTrait === ULTIMATE}
                 onClick={() => setShowSearchModal(true)}
                 className={`btn-link ${styles.searchBtn} ${
                   searchWallets.length > 0 ? styles.searchBtnActive : ""
@@ -266,8 +270,14 @@ export default function NextGenTraitSets(
         <Row className="pt-4">
           <Col className="d-flex align-items-center justify-content-between">
             <span>
-              Unique values for <b>{selectedTrait}</b> trait: x
-              {selectedTraitValues.length.toLocaleString()}
+              {traitsLoaded ? (
+                <>
+                  Unique values for <b>{selectedTrait}</b> trait: x
+                  {selectedTraitValues.length.toLocaleString()}
+                </>
+              ) : (
+                <DotLoader />
+              )}
             </span>
             <span>
               {!setsLoaded ? (
@@ -289,16 +299,23 @@ export default function NextGenTraitSets(
       )}
       {selectedTrait !== ULTIMATE && (
         <Row className="pt-3">
-          <Col>
-            {sets.map((s) => (
-              <TraitSetAccordion
-                key={`collector-sets-${s.owner}`}
-                collection={props.collection}
-                trait={selectedTrait}
-                set={s}
-                values={selectedTraitValues}
-              />
-            ))}
+          <Col
+            style={{
+              minHeight: "50vh",
+            }}>
+            {!setsLoaded ? (
+              <DotLoader />
+            ) : (
+              sets.map((s) => (
+                <TraitSetAccordion
+                  key={`collector-sets-${s.owner}`}
+                  collection={props.collection}
+                  trait={selectedTrait}
+                  set={s}
+                  values={selectedTraitValues}
+                />
+              ))
+            )}
           </Col>
         </Row>
       )}
@@ -306,19 +323,22 @@ export default function NextGenTraitSets(
         <>No results found</>
       )}
       {selectedTrait === ULTIMATE && printUltimate()}
-      {!props.preview && totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
-        <Row className="text-center pt-2 pb-3">
-          <Pagination
-            page={page}
-            pageSize={PAGE_SIZE}
-            totalResults={totalResults}
-            setPage={function (newPage: number) {
-              setPage(newPage);
-            }}
-          />
-        </Row>
-      )}
-      {!props.preview && (
+      {!props.preview &&
+        totalResults > 0 &&
+        totalResults / PAGE_SIZE > 1 &&
+        setsLoaded && (
+          <Row className="text-center pt-2 pb-3">
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              totalResults={totalResults}
+              setPage={function (newPage: number) {
+                setPage(newPage);
+              }}
+            />
+          </Row>
+        )}
+      {!props.preview ? (
         <SearchModal
           show={showSearchModal}
           searchWallets={searchWallets}
@@ -335,6 +355,24 @@ export default function NextGenTraitSets(
             setSearchWallets([]);
           }}
         />
+      ) : (
+        <Row className="pt-3">
+          <Col>
+            <a
+              href={`/nextgen/collection/${formatNameForUrl(
+                props.collection.name
+              )}/trait-sets`}
+              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens} justify-content-center`}>
+              <h5 className="mb-0 font-color d-flex align-items-center gap-2">
+                View All Trait Sets
+                <FontAwesomeIcon
+                  icon="arrow-circle-right"
+                  className={styles.viewAllIcon}
+                />
+              </h5>
+            </a>
+          </Col>
+        </Row>
       )}
     </Container>
   );
@@ -521,7 +559,7 @@ function TraitSetAccordion(
               <Col>
                 {missingValues.length > 0 ? (
                   <>
-                    Missing Values:{" "}
+                    Not Seized:{" "}
                     {missingValues.map((mv, index) => (
                       <Fragment key={mv}>
                         <a
