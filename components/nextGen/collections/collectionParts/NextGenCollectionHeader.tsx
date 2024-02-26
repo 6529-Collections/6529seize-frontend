@@ -47,7 +47,7 @@ export function NextGenBackToCollectionPageLink(
   const pathname = window?.location.pathname;
   const isArtPage =
     (pathname.endsWith("/art") ||
-      pathname.endsWith("/collector-sets") ||
+      pathname.endsWith("/trait-sets") ||
       pathname.endsWith("/distribution-plan")) ??
     false;
   const content = isArtPage
