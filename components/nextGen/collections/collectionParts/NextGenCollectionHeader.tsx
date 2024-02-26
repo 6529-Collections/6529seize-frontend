@@ -119,7 +119,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
 
   return (
     <>
-      {alStatus != Status.UPCOMING &&
+      {alStatus == Status.UPCOMING &&
         printCountdown("Allowlist Starting", props.collection.allowlist_start)}
       {alStatus == Status.LIVE &&
         printCountdown("Allowlist Ending", props.collection.allowlist_end)}

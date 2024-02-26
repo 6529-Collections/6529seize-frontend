@@ -11,6 +11,11 @@ import {
   Resolution,
 } from "./NextGenTokenDownload";
 import { NextGenTokenImageMode } from "../../nextgen_helpers";
+import {
+  NextGenTokenArtImageCanvas,
+  getNextGenTokenScene,
+} from "./NextGenTokenScene";
+import useDownloader from "react-use-downloader";
 
 interface Props {
   collection: NextGenCollection;
@@ -19,253 +24,24 @@ interface Props {
   setMode: (mode: NextGenTokenImageMode) => void;
 }
 
-export function NextGenTokenArtImageCanvas1(
-  props: Readonly<{ token: NextGenToken }>
-) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageSrc = props.token.image_url;
-  const settingImageSrc = "/nextgen/settings/pebble-museum.jpeg";
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-
-    if (canvas && context) {
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-
-      const settingImage = new Image();
-      settingImage.src = settingImageSrc;
-      settingImage.onload = () => {
-        canvas.width = settingImage.width;
-        canvas.height = settingImage.height;
-
-        context.drawImage(settingImage, 0, 0);
-
-        const tokenImage = new Image();
-        tokenImage.src = imageSrc;
-        tokenImage.onload = () => {
-          const imageWidth = canvas.width * 0.2377;
-          const aspectRatio = tokenImage.width / tokenImage.height;
-          const imageHeight = imageWidth / aspectRatio;
-
-          const xPosition = canvas.width * 0.4163;
-          const yPosition = canvas.height * 0.176;
-
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
-          context.drawImage(
-            tokenImage,
-            xPosition,
-            yPosition,
-            imageWidth,
-            imageHeight
-          );
-        };
-      };
-    }
-  }, [imageSrc, settingImageSrc]);
-
-  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
-}
-
-export function NextGenTokenArtImageCanvas2(
-  props: Readonly<{ token: NextGenToken }>
-) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageSrc = props.token.image_url;
-  const settingImageSrc = "/nextgen/settings/grand-lobby.jpeg";
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-
-    if (canvas && context) {
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-
-      const settingImage = new Image();
-      settingImage.src = settingImageSrc;
-      settingImage.onload = () => {
-        canvas.width = settingImage.width;
-        canvas.height = settingImage.height;
-
-        context.drawImage(settingImage, 0, 0);
-
-        const tokenImage = new Image();
-        tokenImage.src = imageSrc;
-        tokenImage.onload = () => {
-          const imageWidth = canvas.width * 0.2004;
-          const aspectRatio = tokenImage.width / tokenImage.height;
-          const imageHeight = imageWidth / aspectRatio;
-
-          const xPosition = canvas.width * 0.4065;
-          const yPosition = canvas.height * 0.211;
-
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
-
-          // const borderWidth = 1.5;
-          // context.strokeStyle = "black";
-          // context.lineWidth = borderWidth;
-          // context.strokeRect(
-          //   xPosition - borderWidth / 2,
-          //   yPosition - borderWidth / 2,
-          //   imageWidth + borderWidth,
-          //   imageHeight + borderWidth
-          // );
-          context.drawImage(
-            tokenImage,
-            xPosition,
-            yPosition,
-            imageWidth,
-            imageHeight
-          );
-        };
-      };
-    }
-  }, [imageSrc, settingImageSrc]);
-
-  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
-}
-
-export function NextGenTokenArtImageCanvas3(
-  props: Readonly<{ token: NextGenToken }>
-) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageSrc = props.token.image_url;
-  const settingImageSrc = "/nextgen/settings/nyc-loft.jpeg";
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-
-    if (canvas && context) {
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-
-      const settingImage = new Image();
-      settingImage.src = settingImageSrc;
-      settingImage.onload = () => {
-        canvas.width = settingImage.width;
-        canvas.height = settingImage.height;
-
-        context.drawImage(settingImage, 0, 0);
-
-        const tokenImage = new Image();
-        tokenImage.src = imageSrc;
-        tokenImage.onload = () => {
-          const imageWidth = canvas.width * 0.1345;
-          const aspectRatio = tokenImage.width / tokenImage.height;
-          const imageHeight = imageWidth / aspectRatio;
-
-          const xPosition = canvas.width * 0.589;
-          const yPosition = canvas.height * 0.295;
-
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
-
-          const borderWidth = 1.5;
-          context.strokeStyle = "black";
-          context.lineWidth = borderWidth;
-          context.strokeRect(
-            xPosition - borderWidth / 2,
-            yPosition - borderWidth / 2,
-            imageWidth + borderWidth,
-            imageHeight + borderWidth
-          );
-
-          context.drawImage(
-            tokenImage,
-            xPosition,
-            yPosition,
-            imageWidth,
-            imageHeight
-          );
-        };
-      };
-    }
-  }, [imageSrc, settingImageSrc]);
-
-  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
-}
-
-export function NextGenTokenArtImageCanvas4(
-  props: Readonly<{ token: NextGenToken }>
-) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageSrc = props.token.image_url;
-  const settingImageSrc = "/nextgen/settings/ghetto-alley.jpeg";
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-
-    if (canvas && context) {
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-
-      const settingImage = new Image();
-      settingImage.src = settingImageSrc;
-      settingImage.onload = () => {
-        canvas.width = settingImage.width;
-        canvas.height = settingImage.height;
-
-        context.drawImage(settingImage, 0, 0);
-
-        const tokenImage = new Image();
-        tokenImage.src = imageSrc;
-        tokenImage.onload = () => {
-          const imageWidth = canvas.width * 0.2621;
-          const aspectRatio = tokenImage.width / tokenImage.height;
-          const imageHeight = imageWidth / aspectRatio;
-
-          const xPosition = canvas.width * 0.379;
-          const yPosition = canvas.height * 0.11;
-
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
-
-          // const borderWidth = 1.5;
-          // context.strokeStyle = "black";
-          // context.lineWidth = borderWidth;
-          // context.strokeRect(
-          //   xPosition - borderWidth / 2,
-          //   yPosition - borderWidth / 2,
-          //   imageWidth + borderWidth,
-          //   imageHeight + borderWidth
-          // );
-
-          context.drawImage(
-            tokenImage,
-            xPosition,
-            yPosition,
-            imageWidth,
-            imageHeight
-          );
-        };
-      };
-    }
-  }, [imageSrc, settingImageSrc]);
-
-  return <canvas ref={canvasRef} style={{ width: "100%" }} />;
-}
-
 export function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
     mode: NextGenTokenImageMode;
     is_fullscreen: boolean;
+    setCanvasUrl: (url: string) => void;
   }>
 ) {
-  if (props.mode === NextGenTokenImageMode.PEBBLE_MUSEUM) {
-    return <NextGenTokenArtImageCanvas1 token={props.token} />;
-  } else if (props.mode === NextGenTokenImageMode.GRAND_LOBBY) {
-    return <NextGenTokenArtImageCanvas2 token={props.token} />;
-  } else if (props.mode === NextGenTokenImageMode.NYC_LOFT) {
-    return <NextGenTokenArtImageCanvas3 token={props.token} />;
-  } else if (props.mode === NextGenTokenImageMode.URBAN_ALLEY) {
-    return <NextGenTokenArtImageCanvas4 token={props.token} />;
+  const scene = getNextGenTokenScene(props.mode);
+  if (scene) {
+    return (
+      <NextGenTokenArtImageCanvas
+        scene={scene}
+        token={props.token}
+        is_fullscreen={props.is_fullscreen}
+        setCanvasUrl={props.setCanvasUrl}
+      />
+    );
   }
 
   return (
@@ -281,12 +57,20 @@ export function NextGenTokenArtImage(
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
+  const downloader = useDownloader();
+
   const mode = props.mode;
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
   const tokenImageRef = useRef(null);
+
+  const [canvasUrl, setCanvasUrl] = useState<string>("");
+
+  useEffect(() => {
+    setCanvasUrl("");
+  }, [mode]);
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -330,6 +114,9 @@ export default function NextGenToken(props: Readonly<Props>) {
   function getCurrentHref() {
     if (mode === NextGenTokenImageMode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
+    }
+    if (canvasUrl) {
+      return canvasUrl;
     }
     return props.token.image_url;
   }
@@ -390,6 +177,17 @@ export default function NextGenToken(props: Readonly<Props>) {
               </Tippy>
             </Dropdown.Toggle>
             <Dropdown.Menu>
+              {canvasUrl && (
+                <Dropdown.Item
+                  onClick={() => {
+                    downloader.download(
+                      canvasUrl,
+                      `${props.token.name} - ${mode}.jpeg`
+                    );
+                  }}>
+                  Scene
+                </Dropdown.Item>
+              )}
               {Object.values(Resolution).map((resolution) => (
                 <NextGenTokenDownloadDropdownItem
                   resolution={resolution}
@@ -400,7 +198,9 @@ export default function NextGenToken(props: Readonly<Props>) {
             </Dropdown.Menu>
           </Dropdown>
           <Tippy
-            content="Open in new tab"
+            content={`Open in new tab${
+              canvasUrl ? " (Not Supported for Scenes)" : ""
+            }`}
             hideOnClick={true}
             placement="bottom"
             theme="light"
@@ -408,6 +208,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             <FontAwesomeIcon
               className={styles.modeIcon}
               onClick={() => {
+                if (canvasUrl) return;
                 const href = getCurrentHref();
                 window.open(href, "_blank");
               }}
@@ -474,6 +275,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
+                      setCanvasUrl={setCanvasUrl}
                     />
                   </div>
                 </div>

@@ -3,6 +3,8 @@ import { Col, Container, Row } from "react-bootstrap";
 import { NextGenTokenImageMode } from "../../nextgen_helpers";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { NEXTGEN_TOKEN_SCENES } from "./NextGenTokenScene";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function NextgenTokenRenderCenter(
   props: Readonly<{
@@ -23,26 +25,14 @@ export default function NextgenTokenRenderCenter(
         <Col sm={12} md={6} className="pb-3 d-flex flex-column gap-2">
           <span className="font-color-h font-larger">Scenes:</span>
           <span className="d-flex flex-wrap gap-3">
-            <SceneButton
-              mode={NextGenTokenImageMode.PEBBLE_MUSEUM}
-              selecedMode={props.mode}
-              setMode={props.setMode}
-            />
-            <SceneButton
-              mode={NextGenTokenImageMode.NYC_LOFT}
-              selecedMode={props.mode}
-              setMode={props.setMode}
-            />
-            <SceneButton
-              mode={NextGenTokenImageMode.URBAN_ALLEY}
-              selecedMode={props.mode}
-              setMode={props.setMode}
-            />
-            <SceneButton
-              mode={NextGenTokenImageMode.GRAND_LOBBY}
-              selecedMode={props.mode}
-              setMode={props.setMode}
-            />
+            {NEXTGEN_TOKEN_SCENES.map((scene) => (
+              <SceneButton
+                key={getRandomObjectId()}
+                mode={scene.mode}
+                selecedMode={props.mode}
+                setMode={props.setMode}
+              />
+            ))}
           </span>
         </Col>
         <Col sm={12} md={6} className="pb-3 d-flex flex-column gap-2">

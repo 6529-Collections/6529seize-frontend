@@ -30,24 +30,40 @@ interface Props {
   traits: NextGenTrait[];
   tokenCount: number;
   view: ContentView;
+  mode: NextGenTokenImageMode;
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
   const router = useRouter();
 
   const [mode, setMode] = useState<NextGenTokenImageMode>(
-    NextGenTokenImageMode.IMAGE
+    props.mode ?? NextGenTokenImageMode.IMAGE
   );
 
   const [view, setView] = useState<ContentView>(
     props.view ?? ContentView.ABOUT
   );
 
+  function getModeQuery() {
+    if (
+      mode === NextGenTokenImageMode.IMAGE ||
+      mode === NextGenTokenImageMode.LIVE
+    ) {
+      return undefined;
+    }
+
+    return mode.replaceAll(/ /g, "-").toLowerCase();
+  }
+
   useEffect(() => {
     const basePath = `/nextgen/token/${props.token.id}`;
+    const modeQuery = getModeQuery();
     if (view && view !== ContentView.ABOUT) {
       router.push(
-        `${basePath}/${view.toLowerCase().replaceAll(/ /g, "-")}`,
+        {
+          pathname: `${basePath}/${view.toLowerCase().replaceAll(/ /g, "-")}`,
+          query: modeQuery ? { scene: modeQuery } : undefined,
+        },
         undefined,
         {
           shallow: true,
@@ -56,7 +72,7 @@ export default function NextGenToken(props: Readonly<Props>) {
     } else {
       router.push(basePath, undefined, { shallow: true });
     }
-  }, [view]);
+  }, [view, mode]);
 
   function printDetails() {
     return (
