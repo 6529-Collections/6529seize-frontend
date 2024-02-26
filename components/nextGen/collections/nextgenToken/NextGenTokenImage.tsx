@@ -3,7 +3,10 @@ import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { NextGenTokenRarityType } from "../../nextgen_helpers";
 import { getRoyaltyImage } from "../../../../helpers/Helpers";
-import { ETHEREUM_ICON_TEXT } from "../../../../constants";
+import {
+  ETHEREUM_ICON_TEXT,
+  NEXTGEN_MEDIA_BASE_URL,
+} from "../../../../constants";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
 
@@ -14,6 +17,7 @@ export function NextGenTokenImage(
     hide_info?: boolean;
     info_class?: string;
     show_animation?: boolean;
+    show_original?: boolean;
     is_fullscreen?: boolean;
     rarity_type?: NextGenTokenRarityType;
     show_listing?: boolean;
@@ -21,6 +25,12 @@ export function NextGenTokenImage(
     show_last_sale?: boolean;
   }>
 ) {
+  function getImageUrl() {
+    if (props.show_original) {
+      return props.token.image_url;
+    }
+    return props.token.thumbnail_url ?? props.token.image_url;
+  }
   function getInfo() {
     let rarityDisplay;
     if (props.rarity_type) {
@@ -137,7 +147,7 @@ export function NextGenTokenImage(
               maxHeight: "90vh",
               maxWidth: "100%",
             }}
-            src={props.token.image_url}
+            src={getImageUrl()}
             alt={props.token.name}
             onError={(e) => {
               e.currentTarget.src = "/pebbles-loading.jpeg";
@@ -193,4 +203,16 @@ export function NextGenTokenImage(
       </a>
     );
   }
+}
+
+export function getNextGenImageUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png/${tokenId}`;
+}
+
+export function getNextGenThumbnailUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png0.5k/${tokenId}`;
+}
+
+export function getNextGenIconUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/thumbnail/${tokenId}`;
 }

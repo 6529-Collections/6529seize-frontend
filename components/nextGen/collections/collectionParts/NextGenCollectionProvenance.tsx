@@ -11,7 +11,10 @@ import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Pagination from "../../../pagination/Pagination";
 import Image from "next/image";
-import { NEXTGEN_MEDIA_BASE_URL } from "../../../../constants";
+import {
+  getNextGenIconUrl,
+  getNextGenImageUrl,
+} from "../nextgenToken/NextGenTokenImage";
 
 interface Props {
   collection: NextGenCollection;
@@ -126,9 +129,14 @@ export function NextGenCollectionProvenanceRow(
                 marginLeft: "8px",
                 marginRight: "8px",
               }}
-              src={`${NEXTGEN_MEDIA_BASE_URL}/png/${tokenId}`}
+              src={getNextGenIconUrl(tokenId)}
               alt={`#${tokenId.toString()}`}
               className={styles.nftImage}
+              onError={({ currentTarget }) => {
+                if (currentTarget.src === getNextGenIconUrl(tokenId)) {
+                  currentTarget.src = getNextGenImageUrl(tokenId);
+                }
+              }}
             />
           </>
         );
