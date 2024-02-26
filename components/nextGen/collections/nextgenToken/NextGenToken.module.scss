@@ -102,3 +102,18 @@
   color: white;
   background-color: $nextgen-grey;
 }
+
+.sceneBtn {
+  background-color: transparent;
+  border: 2px solid white !important;
+
+  &:hover {
+    background-color: white;
+    color: black;
+  }
+}
+
+.sceneBtnSelected {
+  background-color: white;
+  color: black;
+}

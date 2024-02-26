@@ -10,43 +10,67 @@ import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
+import { NextGenTokenImageMode } from "../../nextgen_helpers";
+import {
+  NextGenTokenArtImageCanvas,
+  getNextGenTokenScene,
+} from "./NextGenTokenScene";
+import useDownloader from "react-use-downloader";
 
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
-}
-
-enum Mode {
-  LIVE = "Live",
-  IMAGE = "Image",
+  mode: NextGenTokenImageMode;
+  setMode: (mode: NextGenTokenImageMode) => void;
 }
 
 export function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
-    mode: Mode;
+    mode: NextGenTokenImageMode;
     is_fullscreen: boolean;
+    setCanvasUrl: (url: string) => void;
   }>
 ) {
+  const scene = getNextGenTokenScene(props.mode);
+  if (scene) {
+    return (
+      <NextGenTokenArtImageCanvas
+        scene={scene}
+        token={props.token}
+        is_fullscreen={props.is_fullscreen}
+        setCanvasUrl={props.setCanvasUrl}
+      />
+    );
+  }
+
   return (
     <NextGenTokenImage
       token={props.token}
       show_original
       hide_info={true}
       hide_link={true}
-      show_animation={props.mode !== Mode.IMAGE}
+      show_animation={props.mode !== NextGenTokenImageMode.IMAGE}
       is_fullscreen={props.is_fullscreen}
     />
   );
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
-  const [mode, setMode] = useState<Mode>(Mode.IMAGE);
+  const downloader = useDownloader();
+
+  const mode = props.mode;
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
   const tokenImageRef = useRef(null);
+
+  const [canvasUrl, setCanvasUrl] = useState<string>("");
+
+  useEffect(() => {
+    setCanvasUrl("");
+  }, [mode]);
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -79,7 +103,7 @@ export default function NextGenToken(props: Readonly<Props>) {
     };
   }, []);
 
-  function getModeStyle(m: Mode) {
+  function getModeStyle(m: NextGenTokenImageMode) {
     let s = `${styles.modeIcon}`;
     if (m === mode) {
       s += ` ${styles.modeIconSelected}`;
@@ -88,8 +112,11 @@ export default function NextGenToken(props: Readonly<Props>) {
   }
 
   function getCurrentHref() {
-    if (mode === Mode.LIVE) {
+    if (mode === NextGenTokenImageMode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
+    }
+    if (canvasUrl) {
+      return canvasUrl;
     }
     return props.token.image_url;
   }
@@ -105,8 +132,8 @@ export default function NextGenToken(props: Readonly<Props>) {
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.IMAGE)}
-              onClick={() => setMode(Mode.IMAGE)}
+              className={getModeStyle(NextGenTokenImageMode.IMAGE)}
+              onClick={() => props.setMode(NextGenTokenImageMode.IMAGE)}
               icon="image"
             />
           </Tippy>
@@ -117,11 +144,15 @@ export default function NextGenToken(props: Readonly<Props>) {
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.LIVE)}
-              onClick={() => setMode(Mode.LIVE)}
+              className={getModeStyle(NextGenTokenImageMode.LIVE)}
+              onClick={() => props.setMode(NextGenTokenImageMode.LIVE)}
               icon="play-circle"
             />
           </Tippy>
+          {props.mode !== NextGenTokenImageMode.IMAGE &&
+            props.mode !== NextGenTokenImageMode.LIVE && (
+              <span>Scene: {props.mode}</span>
+            )}
         </span>
         <span className="d-flex gap-3">
           <Lightbulb
@@ -146,6 +177,17 @@ export default function NextGenToken(props: Readonly<Props>) {
               </Tippy>
             </Dropdown.Toggle>
             <Dropdown.Menu>
+              {canvasUrl && (
+                <Dropdown.Item
+                  onClick={() => {
+                    downloader.download(
+                      canvasUrl,
+                      `${props.token.name} - ${mode}.jpeg`
+                    );
+                  }}>
+                  Scene
+                </Dropdown.Item>
+              )}
               {Object.values(Resolution).map((resolution) => (
                 <NextGenTokenDownloadDropdownItem
                   resolution={resolution}
@@ -156,7 +198,9 @@ export default function NextGenToken(props: Readonly<Props>) {
             </Dropdown.Menu>
           </Dropdown>
           <Tippy
-            content="Open in new tab"
+            content={`Open in new tab${
+              canvasUrl ? " (Not Supported for Scenes)" : ""
+            }`}
             hideOnClick={true}
             placement="bottom"
             theme="light"
@@ -164,6 +208,7 @@ export default function NextGenToken(props: Readonly<Props>) {
             <FontAwesomeIcon
               className={styles.modeIcon}
               onClick={() => {
+                if (canvasUrl) return;
                 const href = getCurrentHref();
                 window.open(href, "_blank");
               }}
@@ -223,13 +268,14 @@ export default function NextGenToken(props: Readonly<Props>) {
                     className={
                       showLightbox || showBlackbox
                         ? styles.lightBoxContent
-                        : "col pt-3"
+                        : "col pt-3 text-center"
                     }
                     ref={tokenImageRef}>
                     <NextGenTokenArtImage
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
+                      setCanvasUrl={setCanvasUrl}
                     />
                   </div>
                 </div>
@@ -249,7 +295,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
-      {mode === Mode.LIVE && (
+      {mode === NextGenTokenImageMode.LIVE && (
         <Row className="pt-2 font-color-h font-smaller">
           <Col>
             * Live view generates the image dynamically from scratch in your

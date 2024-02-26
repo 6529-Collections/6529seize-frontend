@@ -653,3 +653,15 @@ export function getCollectionBaseBreadcrums(
 
   return crumbs;
 }
+
+export enum NextGenTokenImageMode {
+  LIVE = "Live",
+  IMAGE = "Image",
+  // SCENE = "Scene",
+  BOHO_CHICK_LIVINGROOM = "Boho Chick Livingroom",
+  MODERN_BLACK_LIVINGROOM = "Modern Black Livingroom",
+  PEBBLE_MUSEUM = "Pebble Museum",
+  NYC_LOFT = "NYC Loft",
+  URBAN_ALLEY = "Urban Alley",
+  GRAND_LOBBY = "Grand Lobby",
+}
