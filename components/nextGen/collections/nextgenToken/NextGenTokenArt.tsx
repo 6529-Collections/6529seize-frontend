@@ -271,6 +271,7 @@ export function NextGenTokenArtImage(
   return (
     <NextGenTokenImage
       token={props.token}
+      show_original
       hide_info={true}
       hide_link={true}
       show_animation={props.mode !== NextGenTokenImageMode.IMAGE}
