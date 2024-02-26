@@ -15,7 +15,7 @@ import {
   getRoyaltyImage,
 } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MANIFOLD, NEXTGEN_MEDIA_BASE_URL } from "../../constants";
+import { MANIFOLD } from "../../constants";
 import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
 import Tippy from "@tippyjs/react";
@@ -23,6 +23,10 @@ import { Container, Row, Col } from "react-bootstrap";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
 import { NextGenCollection } from "../../entities/INextgen";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+import {
+  getNextGenIconUrl,
+  getNextGenImageUrl,
+} from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 
 interface Props {
   nft?: NFTLite;
@@ -269,9 +273,14 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             marginLeft: "8px",
             marginRight: "8px",
           }}
-          src={`${NEXTGEN_MEDIA_BASE_URL}/png/${props.tr.token_id}`}
+          src={getNextGenIconUrl(props.tr.token_id)}
           alt={`#${props.tr.token_id.toString()}`}
           className={styles.nftImage}
+          onError={({ currentTarget }) => {
+            if (currentTarget.src === getNextGenIconUrl(props.tr.token_id)) {
+              currentTarget.src = getNextGenImageUrl(props.tr.token_id);
+            }
+          }}
         />
       </a>
     );

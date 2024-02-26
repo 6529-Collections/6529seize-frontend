@@ -13,7 +13,6 @@ import {
   MANIFOLD,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
-  NEXTGEN_MEDIA_BASE_URL,
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
 } from "../../../../../../../constants";
@@ -27,6 +26,7 @@ import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivit
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
 import { NextGenCollection } from "../../../../../../../entities/INextgen";
 import { normalizeNextgenTokenID } from "../../../../../../nextGen/nextgen_helpers";
+import { getNextGenIconUrl } from "../../../../../../nextGen/collections/nextgenToken/NextGenTokenImage";
 
 export enum TransactionType {
   AIRDROPPED = "AIRDROPPED",
@@ -247,7 +247,7 @@ export default function UserPageStatsActivityWalletTableRow({
   const getImageSrc = () => {
     let src = meme?.icon ?? "";
     if (isNextgenContract(transaction.contract)) {
-      src = `${NEXTGEN_MEDIA_BASE_URL}/png/${transaction.token_id}`;
+      src = getNextGenIconUrl(transaction.token_id);
     }
     return src;
   };
