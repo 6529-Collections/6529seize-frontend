@@ -3,7 +3,10 @@ import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { NextGenTokenRarityType } from "../../nextgen_helpers";
 import { getRoyaltyImage } from "../../../../helpers/Helpers";
-import { ETHEREUM_ICON_TEXT } from "../../../../constants";
+import {
+  ETHEREUM_ICON_TEXT,
+  NEXTGEN_MEDIA_BASE_URL,
+} from "../../../../constants";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
 
@@ -200,4 +203,16 @@ export function NextGenTokenImage(
       </a>
     );
   }
+}
+
+export function getNextGenImageUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png/${tokenId}`;
+}
+
+export function getNextGenThumbnailUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png0.5k/${tokenId}`;
+}
+
+export function getNextGenIconUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/thumbnail/${tokenId}`;
 }
