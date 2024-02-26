@@ -1,6 +1,6 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { addProtocol, formatAddress } from "../../../../helpers/Helpers";
+import { formatAddress } from "../../../../helpers/Helpers";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
 import { ContentView } from "./NextGenCollection";
@@ -8,7 +8,7 @@ import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../../nextgen_contracts";
 import { goerli, sepolia } from "viem/chains";
 import Tippy from "@tippyjs/react";
 import { DistributionLink } from "../NextGen";
-import NextGenCollectorSets from "./NextGenCollectorSets";
+import NextGenTraitSets from "./NextGenTraitSets";
 
 interface CollectionProps {
   collection: NextGenCollection;
@@ -326,8 +326,8 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
     return <NextGenCollectionProvenance collection={props.collection} />;
   } else if (props.view === ContentView.OVERVIEW) {
     return <NextGenCollectionDetailsOverview collection={props.collection} />;
-  } else if (props.view === ContentView.TOP_COLLECTOR_SETS) {
-    return <NextGenCollectorSets preview collection={props.collection} />;
+  } else if (props.view === ContentView.TOP_TRAIT_SETS) {
+    return <NextGenTraitSets preview collection={props.collection} />;
   } else {
     return <NextGenCollectionDetailsAbout collection={props.collection} />;
   }

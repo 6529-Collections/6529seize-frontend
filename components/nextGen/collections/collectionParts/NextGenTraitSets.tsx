@@ -38,7 +38,7 @@ const TRAITS: Record<number, string[]> = {
 
 const ULTIMATE = "Ultimate";
 
-export default function NextGenCollectorSets(
+export default function NextGenTraitSets(
   props: Readonly<{
     collection: NextGenCollection;
     preview?: boolean;
@@ -181,7 +181,7 @@ export default function NextGenCollectorSets(
             <a
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
-              )}/collector-sets`}
+              )}/trait-sets`}
               className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
