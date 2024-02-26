@@ -14,6 +14,7 @@ export function NextGenTokenImage(
     hide_info?: boolean;
     info_class?: string;
     show_animation?: boolean;
+    show_original?: boolean;
     is_fullscreen?: boolean;
     rarity_type?: NextGenTokenRarityType;
     show_listing?: boolean;
@@ -21,6 +22,12 @@ export function NextGenTokenImage(
     show_last_sale?: boolean;
   }>
 ) {
+  function getImageUrl() {
+    if (props.show_original) {
+      return props.token.image_url;
+    }
+    return props.token.thumbnail_url ?? props.token.image_url;
+  }
   function getInfo() {
     let rarityDisplay;
     if (props.rarity_type) {
@@ -137,7 +144,7 @@ export function NextGenTokenImage(
               maxHeight: "90vh",
               maxWidth: "100%",
             }}
-            src={props.token.image_url}
+            src={getImageUrl()}
             alt={props.token.name}
             onError={(e) => {
               e.currentTarget.src = "/pebbles-loading.jpeg";
