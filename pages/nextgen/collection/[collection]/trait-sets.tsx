@@ -16,17 +16,17 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const NextGenCollectorSets = dynamic(
+const NextGenTraitSets = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collectionParts/NextGenCollectorSets"
+      "../../../../components/nextGen/collections/collectionParts/NextGenTraitSets"
     ),
   { ssr: false }
 );
 
-export default function NextGenCollectionTokensPage(props: any) {
+export default function NextGenCollectionTraitSetsPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Collector Sets | ${collection.name}`;
+  const pagenameFull = `Trait Sets | ${collection.name}`;
 
   return (
     <>
@@ -35,13 +35,10 @@ export default function NextGenCollectionTokensPage(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb
-          breadcrumbs={getCollectionBaseBreadcrums(
-            collection,
-            "Collector Sets"
-          )}
+          breadcrumbs={getCollectionBaseBreadcrums(collection, "Trait Sets")}
         />
         <NextGenNavigationHeader />
-        <NextGenCollectorSets collection={collection} />
+        <NextGenTraitSets collection={collection} />
       </main>
     </>
   );

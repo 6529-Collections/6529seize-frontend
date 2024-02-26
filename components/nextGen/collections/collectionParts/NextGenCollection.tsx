@@ -23,7 +23,7 @@ export enum ContentView {
   DISPLAY_CENTER = "Display Center",
   RARITY = "Rarity",
   OVERVIEW = "Overview",
-  TOP_COLLECTOR_SETS = "Collector Sets",
+  TOP_TRAIT_SETS = "Trait Sets",
 }
 
 export function getContentViewKeyByValue(value: string): string {
@@ -106,7 +106,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
               {printViewButton(view, ContentView.OVERVIEW, setView)}
               {printViewButton(view, ContentView.ABOUT, setView)}
               {printViewButton(view, ContentView.PROVENANCE, setView)}
-              {printViewButton(view, ContentView.TOP_COLLECTOR_SETS, setView)}
+              {printViewButton(view, ContentView.TOP_TRAIT_SETS, setView)}
             </Col>
           </Row>
           <Row className="pt-4 pb-4">

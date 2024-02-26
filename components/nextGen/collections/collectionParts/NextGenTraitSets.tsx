@@ -38,7 +38,7 @@ const TRAITS: Record<number, string[]> = {
 
 const ULTIMATE = "Ultimate";
 
-export default function NextGenCollectorSets(
+export default function NextGenTraitSets(
   props: Readonly<{
     collection: NextGenCollection;
     preview?: boolean;
