@@ -155,12 +155,12 @@ export function NextGenTokenArtImageCanvas3(
         const tokenImage = new Image();
         tokenImage.src = imageSrc;
         tokenImage.onload = () => {
-          const imageWidth = canvas.width * 0.135;
+          const imageWidth = canvas.width * 0.1345;
           const aspectRatio = tokenImage.width / tokenImage.height;
           const imageHeight = imageWidth / aspectRatio;
 
-          const xPosition = canvas.width * 0.588;
-          const yPosition = canvas.height * 0.321;
+          const xPosition = canvas.width * 0.589;
+          const yPosition = canvas.height * 0.295;
 
           context.imageSmoothingEnabled = true;
           context.imageSmoothingQuality = "high";
