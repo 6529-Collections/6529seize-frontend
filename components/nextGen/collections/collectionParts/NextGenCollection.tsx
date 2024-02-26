@@ -11,7 +11,6 @@ import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import router from "next/router";
 import { formatNameForUrl } from "../../nextgen_helpers";
-import { Content } from "next/font/google";
 
 interface Props {
   collection: NextGenCollection;

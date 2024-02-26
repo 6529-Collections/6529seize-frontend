@@ -3,10 +3,7 @@ import styles from "../../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import {
-  formatNameForUrl,
-  getCollectionBaseBreadcrums,
-} from "../../../../components/nextGen/nextgen_helpers";
+import { getCollectionBaseBreadcrums } from "../../../../components/nextGen/nextgen_helpers";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import {

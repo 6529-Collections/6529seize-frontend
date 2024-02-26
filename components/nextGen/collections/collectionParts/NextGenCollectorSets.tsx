@@ -16,7 +16,6 @@ import {
 import Pagination from "../../../pagination/Pagination";
 import DotLoader from "../../../dotLoader/DotLoader";
 import Image from "next/image";
-import { NEXTGEN_MEDIA_BASE_URL } from "../../../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import {
@@ -27,6 +26,10 @@ import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import SearchModal from "../../../searchModal/SearchModal";
+import {
+  getNextGenIconUrl,
+  getNextGenImageUrl,
+} from "../nextgenToken/NextGenTokenImage";
 
 const TRAITS: Record<number, string[]> = {
   1: ["Palette", "Size", "Traced"],
@@ -497,8 +500,15 @@ function TraitSetAccordion(
                                 marginLeft: "5px",
                                 marginRight: "5px",
                               }}
-                              src={`${NEXTGEN_MEDIA_BASE_URL}/png/${t}`}
+                              src={getNextGenIconUrl(t)}
                               alt={`#${t.toString()}`}
+                              onError={({ currentTarget }) => {
+                                if (
+                                  currentTarget.src === getNextGenIconUrl(t)
+                                ) {
+                                  currentTarget.src = getNextGenImageUrl(t);
+                                }
+                              }}
                             />
                           </Tippy>
                         </a>
