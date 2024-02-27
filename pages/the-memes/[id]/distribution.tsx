@@ -3,7 +3,7 @@ import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { MEMES_CONTRACT } from "../../../constants";
+import { MEMES_CONTRACT, MEMES_MINTING_HREF } from "../../../constants";
 import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 
@@ -49,7 +49,7 @@ export default function MemeDistributionPage(props: any) {
           header="The Memes"
           contract={MEMES_CONTRACT}
           link="/the-memes"
-          minting_link="https://thememes.seize.io"
+          minting_link={MEMES_MINTING_HREF}
         />
       </main>
     </>
