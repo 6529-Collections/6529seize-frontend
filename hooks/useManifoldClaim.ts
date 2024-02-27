@@ -26,7 +26,11 @@ export interface ManifoldClaim {
   phase: ManifoldPhase;
 }
 
-export default function useManifoldClaim(contract: string, tokenId: number) {
+export default function useManifoldClaim(
+  contract: string,
+  tokenId: number,
+  disable?: boolean
+) {
   const [claim, setClaim] = useState<ManifoldClaim>();
 
   function getStatus(start: number, end: number) {
@@ -42,7 +46,7 @@ export default function useManifoldClaim(contract: string, tokenId: number) {
   useContractRead({
     address: MANIFOLD_PROXY,
     abi: MANIFOLD_PROXY_ABI,
-    enabled: !!contract && tokenId >= 0,
+    enabled: !!contract && tokenId >= 0 && !disable,
     chainId: 1,
     watch: true,
     functionName: "getClaimForToken",

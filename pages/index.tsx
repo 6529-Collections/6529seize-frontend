@@ -90,7 +90,18 @@ export default function Home({
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
 
-  const manifoldClaim = useManifoldClaim(MEMES_CONTRACT, nft?.id ?? -1);
+  const [disableClaim, setDisableClaim] = useState(false);
+  const manifoldClaim = useManifoldClaim(
+    MEMES_CONTRACT,
+    nft?.id ?? -1,
+    disableClaim
+  );
+
+  useEffect(() => {
+    if (manifoldClaim) {
+      setDisableClaim(manifoldClaim.total === manifoldClaim.totalMax);
+    }
+  }, [manifoldClaim]);
 
   useEffect(() => {
     fetchUrl(
