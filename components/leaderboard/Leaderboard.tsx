@@ -23,7 +23,10 @@ import { MemesExtendedData } from "../../entities/INFT";
 import Tippy from "@tippyjs/react";
 import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
-import SearchModal from "../searchModal/SearchModal";
+import SearchModal, {
+  SearchModalDisplay,
+  SearchWalletsDisplay,
+} from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
@@ -1520,59 +1523,11 @@ export default function Leaderboard(props: Readonly<Props>) {
               sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 8 }}>
-              <>
-                <span>
-                  {searchWallets.length > 0 &&
-                    searchWallets.map((sw) => (
-                      <span
-                        className={styles.searchWalletDisplayWrapper}
-                        key={sw}>
-                        <Tippy
-                          delay={250}
-                          content={"Clear"}
-                          placement={"top"}
-                          theme={"dark"}>
-                          <span
-                            className={styles.searchWalletDisplayBtn}
-                            onClick={() =>
-                              setSearchWallets((sr) =>
-                                sr.filter((s) => s != sw)
-                              )
-                            }>
-                            x
-                          </span>
-                        </Tippy>
-                        <span className={styles.searchWalletDisplay}>
-                          {sw.endsWith(".eth") ? sw : formatAddress(sw)}
-                        </span>
-                      </span>
-                    ))}
-                </span>
-                {searchWallets.length > 0 && (
-                  <Tippy
-                    delay={250}
-                    content={"Clear All"}
-                    placement={"top"}
-                    theme={"dark"}>
-                    <span>
-                      <FontAwesomeIcon
-                        onClick={() => setSearchWallets([])}
-                        className={styles.clearSearchBtnIcon}
-                        icon="times-circle"></FontAwesomeIcon>
-                    </span>
-                  </Tippy>
-                )}
-                <span
-                  onClick={() => setShowSearchModal(true)}
-                  className={`${styles.searchBtn} ${
-                    searchWallets.length > 0 ? styles.searchBtnActive : ""
-                  } d-inline-flex align-items-center justify-content-center`}>
-                  {" "}
-                  <FontAwesomeIcon
-                    className={styles.searchBtnIcon}
-                    icon="search"></FontAwesomeIcon>
-                </span>
-              </>
+              <SearchWalletsDisplay
+                searchWallets={searchWallets}
+                setSearchWallets={setSearchWallets}
+                setShowSearchModal={setShowSearchModal}
+              />
             </Col>
           </Row>
         </>
@@ -2569,21 +2524,11 @@ export default function Leaderboard(props: Readonly<Props>) {
           )}
         </Row>
       )}
-      <SearchModal
+      <SearchModalDisplay
         show={showSearchModal}
+        setShow={setShowSearchModal}
         searchWallets={searchWallets}
-        setShow={function (show: boolean) {
-          setShowSearchModal(show);
-        }}
-        addSearchWallet={function (newW: string) {
-          setSearchWallets((searchWallets) => [...searchWallets, newW]);
-        }}
-        removeSearchWallet={function (removeW: string) {
-          setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
-        }}
-        clearSearchWallets={function () {
-          setSearchWallets([]);
-        }}
+        setSearchWallets={setSearchWallets}
       />
     </Container>
   );
