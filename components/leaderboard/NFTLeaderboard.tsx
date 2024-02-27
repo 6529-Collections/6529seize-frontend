@@ -10,6 +10,7 @@ import { fetchUrl } from "../../services/6529api";
 import Address from "../address/Address";
 import { BaseTDHMetrics } from "../../entities/ITDH";
 import { getDisplay, getDisplayEns } from "./LeaderboardHelpers";
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 interface Props {
   contract: string;
@@ -337,7 +338,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     );
                     if (thisCard)
                       return (
-                        <tr key={`display-${index}`}>
+                        <tr key={getRandomObjectId()}>
                           <td className={styles.rank}>
                             {/* {lead.tdh_rank} */}
                             {index +
