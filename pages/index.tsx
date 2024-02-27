@@ -33,6 +33,7 @@ import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
 import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
 import useManifoldClaim, {
+  ManifoldClaim,
   ManifoldClaimStatus,
 } from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
@@ -123,6 +124,37 @@ export default function Home({
       setNftBalance(0);
     }
   }, [connectedWallets, nft]);
+
+  const renderManifoldClaimEditionSize = () => {
+    if (manifoldClaim) {
+      if (manifoldClaim.total === manifoldClaim.totalMax) {
+        return <>{numberWithCommas(manifoldClaim.total!)}</>;
+      } else {
+        return (
+          <>
+            {numberWithCommas(manifoldClaim.total!)} /{" "}
+            {numberWithCommas(manifoldClaim.totalMax!)}
+          </>
+        );
+      }
+    } else {
+      return <DotLoader />;
+    }
+  };
+
+  const renderManifoldClaimCost = () => {
+    if (manifoldClaim) {
+      if (manifoldClaim.cost > 0) {
+        return `${numberWithCommas(
+          Math.round(fromGWEI(manifoldClaim.cost) * 100000) / 100000
+        )} ETH`;
+      } else {
+        return `N/A`;
+      }
+    } else {
+      return <DotLoader />;
+    }
+  };
 
   return (
     <>
@@ -227,26 +259,7 @@ export default function Home({
                             <tbody>
                               <tr>
                                 <td>Edition Size</td>
-                                <td>
-                                  {manifoldClaim ? (
-                                    manifoldClaim.total ===
-                                    manifoldClaim.totalMax ? (
-                                      <>
-                                        {numberWithCommas(manifoldClaim.total)}
-                                      </>
-                                    ) : (
-                                      <>
-                                        {numberWithCommas(manifoldClaim.total)}{" "}
-                                        /{" "}
-                                        {numberWithCommas(
-                                          manifoldClaim.totalMax
-                                        )}
-                                      </>
-                                    )
-                                  ) : (
-                                    <DotLoader />
-                                  )}
-                                </td>
+                                <td>{renderManifoldClaimEditionSize()}</td>
                               </tr>
                               <tr>
                                 <td>Collection</td>
@@ -332,49 +345,8 @@ export default function Home({
                           </a>
                         </Col>
                       </Row>
-                      {/* <Row>
-                        <Col>
-                          <a
-                            href={
-                              `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
-                            }
-                            target="_blank"
-                            rel="noreferrer">
-                            Allowlist
-                          </a>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <a
-                            href={
-                              `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
-                            }
-                            target="_blank"
-                            rel="noreferrer">
-                            Randomization
-                          </a>
-                        </Col>
-                      </Row> */}
                       <Row className="pt-3">
-                        <Col>
-                          Mint price:{" "}
-                          {manifoldClaim ? (
-                            manifoldClaim.cost > 0 ? (
-                              `${numberWithCommas(
-                                Math.round(
-                                  fromGWEI(manifoldClaim.cost) * 100000
-                                ) / 100000
-                              )} ETH`
-                            ) : (
-                              `N/A`
-                            )
-                          ) : (
-                            <DotLoader />
-                          )}
-                        </Col>
+                        <Col>Mint price: {renderManifoldClaimCost()}</Col>
                       </Row>
                       <Row>
                         <Col>
