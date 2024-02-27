@@ -147,7 +147,10 @@ export default function NextGenTraitSets(
     let content;
     if (!setsLoaded) {
       content = (
-        <Col>
+        <Col
+          style={{
+            minHeight: "50vh",
+          }}>
           <DotLoader />
         </Col>
       );
@@ -321,23 +324,25 @@ export default function NextGenTraitSets(
           setSearchWallets={setSearchWallets}
         />
       ) : (
-        <Row className="pt-3">
-          <Col>
-            <a
-              href={`/nextgen/collection/${formatNameForUrl(
-                props.collection.name
-              )}/trait-sets`}
-              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens} justify-content-center`}>
-              <h5 className="mb-0 font-color d-flex align-items-center gap-2">
-                View All Trait Sets
-                <FontAwesomeIcon
-                  icon="arrow-circle-right"
-                  className={styles.viewAllIcon}
-                />
-              </h5>
-            </a>
-          </Col>
-        </Row>
+        setsLoaded && (
+          <Row className="pt-3">
+            <Col>
+              <a
+                href={`/nextgen/collection/${formatNameForUrl(
+                  props.collection.name
+                )}/trait-sets`}
+                className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens} justify-content-center`}>
+                <h5 className="mb-0 font-color d-flex align-items-center gap-2">
+                  View All Trait Sets
+                  <FontAwesomeIcon
+                    icon="arrow-circle-right"
+                    className={styles.viewAllIcon}
+                  />
+                </h5>
+              </a>
+            </Col>
+          </Row>
+        )
       )}
     </Container>
   );
