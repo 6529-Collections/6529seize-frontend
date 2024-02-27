@@ -10,14 +10,12 @@ import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { Time } from "../../../../../helpers/time";
 import { getJsonData } from "./NextGenMintWidget";
-import {
-  areEqualAddresses,
-  formatAddress,
-} from "../../../../../helpers/Helpers";
+import { areEqualAddresses } from "../../../../../helpers/Helpers";
 import Pagination from "../../../../pagination/Pagination";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import SearchModal from "../../../../searchModal/SearchModal";
+import {
+  SearchModalDisplay,
+  SearchWalletsDisplay,
+} from "../../../../searchModal/SearchModal";
 import PdfViewer from "../../../../pdfViewer/PdfViewer";
 
 interface Props {
@@ -212,50 +210,11 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
               ))}
             </Dropdown.Menu>
           </Dropdown>
-          <span className="d-flex flex-wrap align-items-center">
-            {searchWallets.length > 0 &&
-              searchWallets.map((sw) => (
-                <span className={styles.searchWalletDisplayWrapper} key={sw}>
-                  <Tippy
-                    delay={250}
-                    content={"Clear"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <button
-                      className={`btn-link ${styles.searchWalletDisplayBtn}`}
-                      onClick={() =>
-                        setSearchWallets((sr) => sr.filter((s) => s != sw))
-                      }>
-                      x
-                    </button>
-                  </Tippy>
-                  <span className={styles.searchWalletDisplay}>
-                    {sw.endsWith(".eth") ? sw : formatAddress(sw)}
-                  </span>
-                </span>
-              ))}
-            {searchWallets.length > 0 && (
-              <Tippy
-                delay={250}
-                content={"Clear All"}
-                placement={"top"}
-                theme={"light"}>
-                <FontAwesomeIcon
-                  onClick={() => setSearchWallets([])}
-                  className={styles.clearSearchBtnIcon}
-                  icon="times-circle"></FontAwesomeIcon>
-              </Tippy>
-            )}
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className={`btn-link ${styles.searchBtn} ${
-                searchWallets.length > 0 ? styles.searchBtnActive : ""
-              } d-inline-flex align-items-center justify-content-center`}>
-              <FontAwesomeIcon
-                style={{ width: "20px", height: "20px", cursor: "pointer" }}
-                icon="search"></FontAwesomeIcon>
-            </button>
-          </span>
+          <SearchWalletsDisplay
+            searchWallets={searchWallets}
+            setSearchWallets={setSearchWallets}
+            setShowSearchModal={setShowSearchModal}
+          />
         </Col>
       </Row>
       <Row className="table-scroll-container">
@@ -312,21 +271,11 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           />
         </Row>
       )}
-      <SearchModal
+      <SearchModalDisplay
         show={showSearchModal}
+        setShow={setShowSearchModal}
         searchWallets={searchWallets}
-        setShow={function (show: boolean) {
-          setShowSearchModal(show);
-        }}
-        addSearchWallet={function (newW: string) {
-          setSearchWallets((searchWallets) => [...searchWallets, newW]);
-        }}
-        removeSearchWallet={function (removeW: string) {
-          setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
-        }}
-        clearSearchWallets={function () {
-          setSearchWallets([]);
-        }}
+        setSearchWallets={setSearchWallets}
       />
     </Container>
   );

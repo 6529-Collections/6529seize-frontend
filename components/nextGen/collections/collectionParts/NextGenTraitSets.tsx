@@ -25,7 +25,10 @@ import {
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
-import SearchModal from "../../../searchModal/SearchModal";
+import {
+  SearchModalDisplay,
+  SearchWalletsDisplay,
+} from "../../../searchModal/SearchModal";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
@@ -205,54 +208,11 @@ export default function NextGenTraitSets(
             </a>
           )}
           {!props.preview && (
-            <span className="d-flex flex-wrap align-items-center">
-              {searchWallets.length > 0 &&
-                searchWallets.map((sw) => (
-                  <span className={styles.searchWalletDisplayWrapper} key={sw}>
-                    <Tippy
-                      delay={250}
-                      content={"Clear"}
-                      placement={"top"}
-                      theme={"light"}>
-                      <button
-                        className={`btn-link ${styles.searchWalletDisplayBtn}`}
-                        onClick={() =>
-                          setSearchWallets((sr) => sr.filter((s) => s != sw))
-                        }>
-                        x
-                      </button>
-                    </Tippy>
-                    <span className={styles.searchWalletDisplay}>
-                      {sw.endsWith(".eth") ? sw : formatAddress(sw)}
-                    </span>
-                  </span>
-                ))}
-              {searchWallets.length > 0 && (
-                <Tippy
-                  delay={250}
-                  content={"Clear All"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    onClick={() => setSearchWallets([])}
-                    className={styles.clearSearchBtnIcon}
-                    icon="times-circle"></FontAwesomeIcon>
-                </Tippy>
-              )}
-              <button
-                onClick={() => setShowSearchModal(true)}
-                className={`btn-link ${styles.searchBtn} ${
-                  searchWallets.length > 0 ? styles.searchBtnActive : ""
-                } d-inline-flex align-items-center justify-content-center`}>
-                <FontAwesomeIcon
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    color: "#000",
-                  }}
-                  icon="search"></FontAwesomeIcon>
-              </button>
-            </span>
+            <SearchWalletsDisplay
+              searchWallets={searchWallets}
+              setSearchWallets={setSearchWallets}
+              setShowSearchModal={setShowSearchModal}
+            />
           )}
         </Col>
       </Row>
@@ -339,21 +299,11 @@ export default function NextGenTraitSets(
           </Row>
         )}
       {!props.preview ? (
-        <SearchModal
+        <SearchModalDisplay
           show={showSearchModal}
+          setShow={setShowSearchModal}
           searchWallets={searchWallets}
-          setShow={function (show: boolean) {
-            setShowSearchModal(show);
-          }}
-          addSearchWallet={function (newW: string) {
-            setSearchWallets((searchWallets) => [...searchWallets, newW]);
-          }}
-          removeSearchWallet={function (removeW: string) {
-            setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
-          }}
-          clearSearchWallets={function () {
-            setSearchWallets([]);
-          }}
+          setSearchWallets={setSearchWallets}
         />
       ) : (
         <Row className="pt-3">
