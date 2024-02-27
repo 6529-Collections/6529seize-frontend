@@ -9,9 +9,6 @@ import { SortDirection } from "../../entities/ISort";
 import { fetchUrl } from "../../services/6529api";
 import Address from "../address/Address";
 import { BaseTDHMetrics } from "../../entities/ITDH";
-import ConsolidationSwitch, {
-  VIEW,
-} from "../consolidation-switch/ConsolidationSwitch";
 import { getDisplay, getDisplayEns } from "./LeaderboardHelpers";
 
 interface Props {
@@ -31,7 +28,6 @@ enum Sort {
 }
 
 export default function NFTLeaderboard(props: Readonly<Props>) {
-  const [view, setView] = useState<VIEW>(VIEW.CONSOLIDATION);
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<BaseTDHMetrics[]>();
@@ -42,9 +38,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   }>({ sort: Sort.card_tdh, sort_direction: SortDirection.DESC });
 
   async function fetchResults() {
-    const url = `${process.env.API_ENDPOINT}/api/${
-      view === VIEW.WALLET ? "tdh" : "consolidated_tdh"
-    }`;
+    const url = `${process.env.API_ENDPOINT}/api/consolidated_tdh`;
     fetchUrl(
       `${url}/${props.contract}/${props.nftId}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`
     ).then((response: DBResponse) => {
@@ -60,7 +54,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     } else {
       setPageProps({ ...pageProps, page: 1 });
     }
-  }, [sort, view]);
+  }, [sort]);
 
   useEffect(() => {
     fetchResults();
@@ -81,13 +75,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             <span className="font-lightest">Community</span>
           </h1>
           <h1>&nbsp;Card {props.nftId}</h1>
-        </Col>
-        <Col className={`d-flex justify-content-center align-items-center`}>
-          <ConsolidationSwitch
-            view={view}
-            onSetView={(v) => setView(v)}
-            plural={true}
-          />
         </Col>
       </Row>
       {leaderboard && leaderboard.length > 0 && (
@@ -350,7 +337,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     );
                     if (thisCard)
                       return (
-                        <tr key={`display-${index}-${view}`}>
+                        <tr key={`display-${index}`}>
                           <td className={styles.rank}>
                             {/* {lead.tdh_rank} */}
                             {index +
@@ -375,7 +362,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                                   gradientsBalance: lead.gradients_balance,
                                   genesis: lead.genesis,
                                 }}
-                                setLinkQueryAddress={view === VIEW.WALLET}
                               />
                             </div>
                           </td>

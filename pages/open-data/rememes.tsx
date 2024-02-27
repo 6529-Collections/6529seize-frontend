@@ -19,7 +19,7 @@ const CommunityDownloadsRememes = dynamic(
 export default function RememesDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Downloads", href: "/downloads" },
+    { display: "Open Data", href: "/open-data" },
     { display: "Rememes" },
   ];
 
@@ -31,7 +31,7 @@ export default function RememesDownloads() {
         <meta name="description" content="Rememes Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/rememes`}
+          content={`${process.env.BASE_ENDPOINT}/open-data/rememes`}
         />
         <meta property="og:title" content={`Rememes Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
