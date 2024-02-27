@@ -19,7 +19,7 @@ const CommunityDownloadsTeam = dynamic(
 export default function TeamDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Downloads", href: "/downloads" },
+    { display: "Open Data", href: "/open-data" },
     { display: "Team" },
   ];
 
@@ -31,7 +31,7 @@ export default function TeamDownloads() {
         <meta name="description" content="Team Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/team`}
+          content={`${process.env.BASE_ENDPOINT}/open-data/team`}
         />
         <meta property="og:title" content={`Team Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />

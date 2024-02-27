@@ -20,7 +20,7 @@ const CommunityDownloadsRoyalties = dynamic(
 export default function RoyaltiesDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Downloads", href: "/downloads" },
+    { display: "Open Data", href: "/open-data" },
     { display: "Royalties" },
   ];
 
@@ -32,7 +32,7 @@ export default function RoyaltiesDownloads() {
         <meta name="description" content="Royalties Downloads | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/royalties`}
+          content={`${process.env.BASE_ENDPOINT}/open-data/royalties`}
         />
         <meta property="og:title" content={`Royalties Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
