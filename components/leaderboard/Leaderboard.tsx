@@ -21,7 +21,6 @@ import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
 import Tippy from "@tippyjs/react";
-import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
 import SearchModal from "../searchModal/SearchModal";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
@@ -1390,9 +1389,7 @@ export default function Leaderboard(props: Readonly<Props>) {
         <Col
           className={`d-flex align-items-center`}
           xs={{ span: showViewAll ? 12 : 6 }}
-          sm={{ span: 6 }}
-          md={{ span: 4 }}
-          lg={{ span: 4 }}>
+          sm={{ span: 6 }}>
           <h1>
             Community{" "}
             {showViewAll && (
@@ -1405,10 +1402,7 @@ export default function Leaderboard(props: Readonly<Props>) {
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
-            xs={{ span: 6 }}
-            sm={{ span: 6 }}
-            md={{ span: 4 }}
-            lg={{ span: 4 }}>
+            xs={{ span: 6 }}>
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
