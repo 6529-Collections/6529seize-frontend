@@ -1387,9 +1387,7 @@ export default function Leaderboard(props: Readonly<Props>) {
         <Col
           className={`d-flex align-items-center`}
           xs={{ span: showViewAll ? 12 : 6 }}
-          sm={{ span: 6 }}
-          md={{ span: 4 }}
-          lg={{ span: 4 }}>
+          sm={{ span: 6 }}>
           <h1>
             Community{" "}
             {showViewAll && (
@@ -1402,10 +1400,7 @@ export default function Leaderboard(props: Readonly<Props>) {
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
-            xs={{ span: 6 }}
-            sm={{ span: 6 }}
-            md={{ span: 4 }}
-            lg={{ span: 4 }}>
+            xs={{ span: 6 }}>
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}

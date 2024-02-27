@@ -3,7 +3,7 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { VIEW } from "../../components/consolidation-switch/ConsolidationSwitch";
+import { VIEW } from "../../components/communityDownloads/CommunityDownloadsTDH";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -20,7 +20,7 @@ const CommunityDownloadsTDH = dynamic(
 export default function CommunityMetricsDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Downloads", href: "/downloads" },
+    { display: "Open Data", href: "/open-data" },
     { display: "Community Metrics" },
   ];
 
@@ -35,7 +35,7 @@ export default function CommunityMetricsDownloads() {
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/downloads/community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/open-data/community-metrics`}
         />
         <meta property="og:title" content={`Community Metrics Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
