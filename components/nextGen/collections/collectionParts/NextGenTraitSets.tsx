@@ -154,10 +154,25 @@ export default function NextGenTraitSets(
     } else if (totalResults == 0) {
       content = (
         <Col
+          className="d-flex flex-column gap-2"
           style={{
             minHeight: "50vh",
           }}>
-          None!
+          <span>None!</span>
+          <span>
+            <Image
+              priority
+              loading="eager"
+              width={0}
+              height={0}
+              style={{
+                height: "60vh",
+                width: "auto",
+              }}
+              src="/nextgen/none-ultimate.jpeg"
+              alt="None Balloon"
+            />
+          </span>
         </Col>
       );
     } else {
