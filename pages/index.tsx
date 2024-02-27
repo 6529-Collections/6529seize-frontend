@@ -427,18 +427,18 @@ export default function Home({
               !isEmptyObject(pageProps.nextGenFeatured) && (
                 <Container className="pt-3 pb-5">
                   <Row>
-                    <Col>
+                    <Col className="d-flex align-items-center gap-3">
                       <h1>
                         <span className="font-lightest">Discover</span> NextGen
                         - {pageProps.nextGenFeatured.name}{" "}
-                        <a
-                          href={`/nextgen/collection/${formatNameForUrl(
-                            pageProps.nextGenFeatured.name
-                          )}`}
-                          className={styles.viewAllLink}>
-                          <span>View All</span>
-                        </a>
                       </h1>
+                      <a
+                        href={`/nextgen/collection/${formatNameForUrl(
+                          pageProps.nextGenFeatured.name
+                        )}`}
+                        className={styles.viewAllLink}>
+                        <span>View All</span>
+                      </a>
                     </Col>
                   </Row>
                   <Row className="pt-3">
@@ -455,14 +455,16 @@ export default function Home({
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}>
-                  <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
-                    <span className="font-lightest">Community</span> Activity{" "}
+                  <span className="d-flex align-items-center gap-3">
+                    <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
+                      <span className="font-lightest">Community</span> Activity{" "}
+                    </h1>
                     <a
                       href="/community-activity"
                       className={styles.viewAllLink}>
                       <span>View All</span>
                     </a>
-                  </h1>
+                  </span>
                 </ProfileActivityLogs>
               </div>
             </div>

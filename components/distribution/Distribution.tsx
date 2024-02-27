@@ -13,16 +13,13 @@ import {
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-import {
-  capitalizeEveryWord,
-  formatAddress,
-  numberWithCommas,
-} from "../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { capitalizeEveryWord, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
-import Tippy from "@tippyjs/react";
-import SearchModal from "../searchModal/SearchModal";
+import {
+  SearchModalDisplay,
+  SearchWalletsDisplay,
+} from "../searchModal/SearchModal";
 import DotLoader from "../dotLoader/DotLoader";
 import Address from "../address/Address";
 
@@ -184,57 +181,11 @@ export default function Distribution(props: Readonly<Props>) {
         <Container className="pt-5 pb-3" id={`distribution-table`}>
           <Row>
             <Col className={`d-flex justify-content-end align-items-center`}>
-              <>
-                <span>
-                  {searchWallets.length > 0 &&
-                    searchWallets.map((sw) => (
-                      <span
-                        className={styles.searchWalletDisplayWrapper}
-                        key={sw}>
-                        <Tippy
-                          delay={250}
-                          content={"Clear"}
-                          placement={"top"}
-                          theme={"dark"}>
-                          <span
-                            className={styles.searchWalletDisplayBtn}
-                            onClick={() =>
-                              setSearchWallets((sr) =>
-                                sr.filter((s) => s != sw)
-                              )
-                            }>
-                            x
-                          </span>
-                        </Tippy>
-                        <span className={styles.searchWalletDisplay}>
-                          {sw.endsWith(".eth") ? sw : formatAddress(sw)}
-                        </span>
-                      </span>
-                    ))}
-                </span>
-                {searchWallets.length > 0 && (
-                  <Tippy
-                    delay={250}
-                    content={"Clear All"}
-                    placement={"top"}
-                    theme={"dark"}>
-                    <FontAwesomeIcon
-                      onClick={() => setSearchWallets([])}
-                      className={styles.clearSearchBtnIcon}
-                      icon="times-circle"></FontAwesomeIcon>
-                  </Tippy>
-                )}
-                <span
-                  onClick={() => setShowSearchModal(true)}
-                  className={`${styles.searchBtn} ${
-                    searchWallets.length > 0 ? styles.searchBtnActive : ""
-                  } d-inline-flex align-items-center justify-content-center`}>
-                  {" "}
-                  <FontAwesomeIcon
-                    className={styles.searchBtnIcon}
-                    icon="search"></FontAwesomeIcon>
-                </span>
-              </>
+              <SearchWalletsDisplay
+                searchWallets={searchWallets}
+                setSearchWallets={setSearchWallets}
+                setShowSearchModal={setShowSearchModal}
+              />
             </Col>
           </Row>
         </Container>
@@ -375,21 +326,11 @@ export default function Distribution(props: Readonly<Props>) {
           </Row>
         )}
       </Container>
-      <SearchModal
+      <SearchModalDisplay
         show={showSearchModal}
+        setShow={setShowSearchModal}
         searchWallets={searchWallets}
-        setShow={function (show: boolean) {
-          setShowSearchModal(show);
-        }}
-        addSearchWallet={function (newW: string) {
-          setSearchWallets((searchWallets) => [...searchWallets, newW]);
-        }}
-        removeSearchWallet={function (removeW: string) {
-          setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
-        }}
-        clearSearchWallets={function () {
-          setSearchWallets([]);
-        }}
+        setSearchWallets={setSearchWallets}
       />
     </>
   );

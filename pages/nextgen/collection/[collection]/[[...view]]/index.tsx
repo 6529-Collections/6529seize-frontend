@@ -44,7 +44,9 @@ export default function NextGenCollection(props: any) {
         <meta name="description" content={pagenameFull} />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/collection/${collection.id}`}
+          content={`${
+            process.env.BASE_ENDPOINT
+          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
         />
         <meta property="og:title" content={pagenameFull} />
         <meta property="og:image" content={collection.image} />
@@ -62,6 +64,17 @@ export default function NextGenCollection(props: any) {
       </main>
     </>
   );
+}
+
+function getCollectionView(view: string): ContentView {
+  const normalizedView = view.toLowerCase();
+  const entries = Object.entries(ContentView).find(
+    ([key]) => key.toLowerCase() === normalizedView
+  );
+
+  return entries
+    ? ContentView[entries[0] as keyof typeof ContentView]
+    : ContentView.OVERVIEW;
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
@@ -85,16 +98,11 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   }
 
   let view = req.query.view as string;
+
   let collectionView: ContentView = ContentView.OVERVIEW;
   if (view) {
-    view = view[0].toLowerCase();
-    if (view === ContentView.PROVENANCE.toLowerCase()) {
-      collectionView = ContentView.PROVENANCE;
-    } else if (view == ContentView.OVERVIEW.toLowerCase()) {
-      collectionView = ContentView.OVERVIEW;
-    } else if (view == ContentView.ABOUT.toLowerCase()) {
-      collectionView = ContentView.ABOUT;
-    }
+    view = view[0].replaceAll("-", "_").toLowerCase();
+    collectionView = getCollectionView(view);
   }
 
   return {
