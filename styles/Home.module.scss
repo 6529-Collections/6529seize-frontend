@@ -145,17 +145,11 @@
 }
 
 .viewAllLink {
-  position: relative;
+  text-decoration: none;
   span {
-    bottom: 10px;
-    @media only screen and (max-width: 1200px) {
-      bottom: 4px;
-    }
-    position: absolute;
     white-space: nowrap;
     font-size: $font-smaller;
     font-weight: 700;
-    margin-left: 10px;
     border-bottom: 3px solid $font-color;
 
     &:hover {
