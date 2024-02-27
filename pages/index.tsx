@@ -33,8 +33,8 @@ import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
 import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
 import useManifoldClaim, {
-  ManifoldClaim,
   ManifoldClaimStatus,
+  ManifoldPhase,
 } from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 export interface IndexPageProps {
@@ -300,11 +300,6 @@ export default function Home({
                           </Table>
                         </Col>
                       </Row>
-                      <Row>
-                        <Col>
-                          <h3>Minting Approach</h3>
-                        </Col>
-                      </Row>
                       {manifoldClaim &&
                         manifoldClaim.status !==
                           ManifoldClaimStatus.EXPIRED && (
@@ -314,8 +309,8 @@ export default function Home({
                                 title={
                                   manifoldClaim.status ===
                                   ManifoldClaimStatus.UPCOMING
-                                    ? `Starts In`
-                                    : `Ends In`
+                                    ? `${manifoldClaim.phase} Starts In`
+                                    : `${manifoldClaim.phase} Ends In`
                                 }
                                 date={
                                   manifoldClaim.status ===
@@ -327,10 +322,26 @@ export default function Home({
                                 btn_label="MINT NOW"
                                 mint_link={MEMES_MINTING_HREF}
                                 new_tab={true}
+                                additional_elements={
+                                  manifoldClaim.phase ===
+                                    ManifoldPhase.ALLOWLIST && (
+                                    <span className="font-smaller pt-1">
+                                      * The timer above displays the current
+                                      time remaining for a specific phase of the
+                                      drop. Please refer to the distribution
+                                      plan to check if you are in the allowlist.
+                                    </span>
+                                  )
+                                }
                               />
                             </Col>
                           </Row>
                         )}
+                      <Row>
+                        <Col>
+                          <h3>Minting Approach</h3>
+                        </Col>
+                      </Row>
                       <Row>
                         <Col>
                           <a

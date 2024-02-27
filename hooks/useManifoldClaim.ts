@@ -1,12 +1,18 @@
 import { useContractRead } from "wagmi";
 import { MANIFOLD_PROXY_ABI } from "../abis";
-import { MANIFOLD_PROXY } from "../constants";
+import { MANIFOLD_PROXY, NULL_MERKLE } from "../constants";
 import { useState } from "react";
+import { areEqualAddresses } from "../helpers/Helpers";
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",
   ACTIVE = "active",
   EXPIRED = "expired",
+}
+
+export enum ManifoldPhase {
+  ALLOWLIST = "Allowlist",
+  PUBLIC = "Public Phase",
 }
 
 export interface ManifoldClaim {
@@ -17,6 +23,7 @@ export interface ManifoldClaim {
   startDate: number;
   endDate: number;
   status: ManifoldClaimStatus;
+  phase: ManifoldPhase;
 }
 
 export default function useManifoldClaim(contract: string, tokenId: number) {
@@ -45,6 +52,7 @@ export default function useManifoldClaim(contract: string, tokenId: number) {
         const instanceId = Number(data[0]);
         const claim = data[1];
         const status = getStatus(claim.startDate, claim.endDate);
+        const publicMerkle = areEqualAddresses(NULL_MERKLE, claim.merkleRoot);
         setClaim({
           instanceId: instanceId,
           total: Number(claim.total),
@@ -53,6 +61,7 @@ export default function useManifoldClaim(contract: string, tokenId: number) {
           startDate: Number(claim.startDate),
           endDate: Number(claim.endDate),
           status: status,
+          phase: publicMerkle ? ManifoldPhase.PUBLIC : ManifoldPhase.ALLOWLIST,
         });
       }
     },
