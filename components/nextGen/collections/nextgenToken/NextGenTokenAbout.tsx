@@ -127,9 +127,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
             {cicType && level > -1 ? (
               <a
-                href={`/${
-                  ownerProfileHandle ?? ownerDisplay ?? props.token.owner
-                }`}
+                href={`/${ownerProfileHandle ?? props.token.owner}`}
                 className="d-flex gap-2 decoration-hover-underline align-items-center">
                 <UserCICAndLevel level={level} cicType={cicType} />
                 <span className="decoration-underline">

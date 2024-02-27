@@ -7,6 +7,7 @@ import { NextGenTokenImage } from "../nextgenToken/NextGenTokenImage";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -87,7 +88,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   {tokens.length > 1 && <SwiperAutoplayButton />}
                   {tokens.map((token, index) => (
                     <SwiperSlide
-                      key={`nextgen-carousel-${token.id}`}
+                      key={getRandomObjectId()}
                       className="pt-2 pb-5 unselectable">
                       <NextGenTokenImage
                         token={token}

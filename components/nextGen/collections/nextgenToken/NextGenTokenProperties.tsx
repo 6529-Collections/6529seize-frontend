@@ -1,13 +1,18 @@
 import styles from "./NextGenToken.module.scss";
 
 import { Accordion, Col, Container, Row } from "react-bootstrap";
-import { NextGenToken, NextGenTrait } from "../../../../entities/INextgen";
+import {
+  NextGenCollection,
+  NextGenToken,
+  NextGenTrait,
+} from "../../../../entities/INextgen";
 
 import Toggle from "react-toggle";
 import { useState } from "react";
+import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
-  collection_id: number;
+  collection: NextGenCollection;
   token: NextGenToken;
   traits: NextGenTrait[];
   tokenCount: number;
@@ -35,7 +40,7 @@ function TraitAccordion(
     score: number;
     rank: number;
     token_count: number;
-    collection_id: number;
+    collection: NextGenCollection;
     traits?: {
       trait: string;
       value: string;
@@ -94,7 +99,9 @@ function TraitAccordion(
                     <Col xs={5}>
                       <span className="font-color-h">{t.trait}:</span>{" "}
                       <a
-                        href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}>
+                        href={`/nextgen/collection/${formatNameForUrl(
+                          props.collection.name
+                        )}/art?traits=${t.trait}:${t.value}`}>
                         {t.value}
                       </a>
                     </Col>
@@ -296,7 +303,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
             title={"Rarity"}
             score={getRarityScore()}
             rank={getRarityRank()}
-            collection_id={props.collection_id}
+            collection={props.collection}
             token_count={props.tokenCount}
             traits={props.traits
               .map((t) => ({
@@ -317,7 +324,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
             title={"Statistical Rarity"}
             score={getStatisticalScore()}
             rank={getStatisticalRank()}
-            collection_id={props.collection_id}
+            collection={props.collection}
             token_count={props.tokenCount}
             traits={props.traits
               .map((t) => ({
@@ -338,7 +345,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
             title={"Single Trait Rarity"}
             score={getSingleTraitRarityScore()}
             rank={getSingleTraitRarityRank()}
-            collection_id={props.collection_id}
+            collection={props.collection}
             token_count={props.tokenCount}
             traits={props.traits.map((t) => ({
               trait: t.trait,
@@ -372,7 +379,9 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
             <span className="font-color-h">{t.trait}:</span>
             <span>
               <a
-                href={`/nextgen/collection/${props.collection_id}/art?traits=${t.trait}:${t.value}`}>
+                href={`/nextgen/collection/${formatNameForUrl(
+                  props.collection.name
+                )}/art?traits=${t.trait}:${t.value}`}>
                 {t.value}
               </a>
             </span>

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Modal, InputGroup, Form, Button } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
+import { formatAddress } from "../../helpers/Helpers";
 
 interface Props {
   show: boolean;
@@ -94,5 +95,93 @@ export default function SearchModal(props: Readonly<Props>) {
         </Button>
       </Modal.Body>
     </Modal>
+  );
+}
+
+export function SearchWalletsDisplay(
+  props: Readonly<{
+    searchWallets: string[];
+    setSearchWallets(wallets: string[]): void;
+    setShowSearchModal(show: boolean): void;
+  }>
+) {
+  const { searchWallets, setSearchWallets, setShowSearchModal } = props;
+  return (
+    <span className="d-flex flex-wrap align-items-center">
+      {searchWallets.length > 0 &&
+        searchWallets.map((sw) => (
+          <span className={styles.searchWalletDisplayWrapper} key={sw}>
+            <Tippy
+              delay={250}
+              content={"Clear"}
+              placement={"top"}
+              theme={"light"}>
+              <button
+                className={`btn-link ${styles.searchWalletDisplayBtn}`}
+                onClick={() =>
+                  setSearchWallets(searchWallets.filter((s) => s != sw))
+                }>
+                x
+              </button>
+            </Tippy>
+            <span className={styles.searchWalletDisplay}>
+              {sw.endsWith(".eth") ? sw : formatAddress(sw)}
+            </span>
+          </span>
+        ))}
+      {searchWallets.length > 0 && (
+        <Tippy
+          delay={250}
+          content={"Clear All"}
+          placement={"top"}
+          theme={"light"}>
+          <FontAwesomeIcon
+            onClick={() => setSearchWallets([])}
+            className={styles.clearSearchBtnIcon}
+            icon="times-circle"></FontAwesomeIcon>
+        </Tippy>
+      )}
+      <button
+        onClick={() => setShowSearchModal(true)}
+        className={`btn-link ${styles.searchBtn} ${
+          searchWallets.length > 0 ? styles.searchBtnActive : ""
+        } d-inline-flex align-items-center justify-content-center`}>
+        <FontAwesomeIcon
+          style={{
+            width: "20px",
+            height: "20px",
+            color: "#000",
+          }}
+          icon="search"></FontAwesomeIcon>
+      </button>
+    </span>
+  );
+}
+
+export function SearchModalDisplay(
+  props: Readonly<{
+    show: boolean;
+    setShow(show: boolean): void;
+    searchWallets: string[];
+    setSearchWallets(wallets: string[]): void;
+  }>
+) {
+  const { show, setShow, searchWallets, setSearchWallets } = props;
+
+  return (
+    <SearchModal
+      show={show}
+      searchWallets={searchWallets}
+      setShow={setShow}
+      addSearchWallet={function (newW: string) {
+        setSearchWallets([...searchWallets, newW]);
+      }}
+      removeSearchWallet={function (removeW: string) {
+        setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
+      }}
+      clearSearchWallets={function () {
+        setSearchWallets([]);
+      }}
+    />
   );
 }

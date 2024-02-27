@@ -169,7 +169,8 @@ library.add(
   faPauseCircle,
   faSpinner,
   faFilter,
-  faFilterCircleXmark
+  faFilterCircleXmark,
+  faCheckCircle
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];

@@ -3,6 +3,9 @@ import styles from "../../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { NextGenCollection } from "../../../../entities/INextgen";
+import { getCollectionBaseBreadcrums } from "../../../../components/nextGen/nextgen_helpers";
+import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
+import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import {
   NextGenCollectionHead,
   getServerSideCollection,
@@ -13,17 +16,17 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const NextGenCollectionTokenListComponent = dynamic(
+const NextGenTraitSets = dynamic(
   () =>
     import(
-      "../../../../components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage"
+      "../../../../components/nextGen/collections/collectionParts/NextGenTraitSets"
     ),
   { ssr: false }
 );
 
-export default function NextGenCollectionTokensPage(props: any) {
+export default function NextGenCollectionTraitSetsPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Art | ${collection.name}`;
+  const pagenameFull = `Trait Sets | ${collection.name}`;
 
   return (
     <>
@@ -31,7 +34,11 @@ export default function NextGenCollectionTokensPage(props: any) {
 
       <main className={styles.main}>
         <Header />
-        <NextGenCollectionTokenListComponent collection={collection} />
+        <Breadcrumb
+          breadcrumbs={getCollectionBaseBreadcrums(collection, "Trait Sets")}
+        />
+        <NextGenNavigationHeader />
+        <NextGenTraitSets collection={collection} />
       </main>
     </>
   );
