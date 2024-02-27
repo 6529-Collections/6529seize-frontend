@@ -32,9 +32,9 @@ import NextGenCollectionSlideshow from "../components/nextGen/collections/collec
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
 import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
-import useManiofoldClaim, {
+import useManifoldClaim, {
   ManifoldClaimStatus,
-} from "../hooks/useManiofoldClaim";
+} from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 export interface IndexPageProps {
   readonly logsPage: Page<ProfileActivityLog>;
@@ -89,7 +89,7 @@ export default function Home({
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
 
-  const manifoldClaim = useManiofoldClaim(MEMES_CONTRACT, nft?.id ?? -1);
+  const manifoldClaim = useManifoldClaim(MEMES_CONTRACT, nft?.id ?? -1);
 
   useEffect(() => {
     fetchUrl(

@@ -1,7 +1,7 @@
 import { useContractRead } from "wagmi";
 import { MANIFOLD_PROXY_ABI } from "../abis";
 import { MANIFOLD_PROXY } from "../constants";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",
@@ -19,7 +19,7 @@ export interface ManifoldClaim {
   status: ManifoldClaimStatus;
 }
 
-export default function useManiofoldClaim(contract: string, tokenId: number) {
+export default function useManifoldClaim(contract: string, tokenId: number) {
   const [claim, setClaim] = useState<ManifoldClaim>();
 
   function getStatus(start: number, end: number) {
@@ -57,12 +57,6 @@ export default function useManiofoldClaim(contract: string, tokenId: number) {
       }
     },
   });
-
-  useEffect(() => {
-    if (claim) {
-      console.log("i am claim", claim);
-    }
-  }, [claim]);
 
   return claim;
 }
