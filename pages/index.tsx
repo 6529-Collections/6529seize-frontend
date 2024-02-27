@@ -312,8 +312,8 @@ export default function Home({
                         </Col>
                       </Row>
                       {manifoldClaim &&
-                        manifoldClaim.status !==
-                          ManifoldClaimStatus.EXPIRED && (
+                        manifoldClaim.status !== ManifoldClaimStatus.EXPIRED &&
+                        !disableClaim && (
                           <Row className="pb-3">
                             <Col sm={12} md={11}>
                               <MintCountdown
