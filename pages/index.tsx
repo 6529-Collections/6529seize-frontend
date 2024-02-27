@@ -3,12 +3,13 @@ import styles from "../styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
-import { MEMES_CONTRACT } from "../constants";
+import { MEMES_CONTRACT, MEMES_MINTING_HREF } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
-import { NFT, MemesExtendedData, LabNFT } from "../entities/INFT";
+import { NFT, MemesExtendedData } from "../entities/INFT";
 
 import dynamic from "next/dynamic";
 import {
+  fromGWEI,
   isEmptyObject,
   numberWithCommas,
   printMintDate,
@@ -25,13 +26,16 @@ import ProfileActivityLogs, {
   ActivityLogParams,
   convertActivityLogParams,
 } from "../components/profile-activity/ProfileActivityLogs";
-import { Inter } from "next/font/google";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
 import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
 import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
+import useManiofoldClaim, {
+  ManifoldClaimStatus,
+} from "../hooks/useManiofoldClaim";
+import DotLoader from "../components/dotLoader/DotLoader";
 export interface IndexPageProps {
   readonly logsPage: Page<ProfileActivityLog>;
   readonly nextGenFeatured: NextGenCollection;
@@ -46,13 +50,6 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   handleOrWallet: null,
 };
 
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -64,6 +61,11 @@ const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {
 
 const LatestActivity = dynamic(
   () => import("../components/latest-activity/LatestActivity"),
+  { ssr: false }
+);
+
+const MintCountdown = dynamic(
+  () => import("../components/mintCountdownBox/MintCountdownBox"),
   { ssr: false }
 );
 
@@ -84,9 +86,10 @@ export default function Home({
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   const [nft, setNFT] = useState<NFT>();
-  const [labNft, setLabNft] = useState<LabNFT>();
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
+
+  const manifoldClaim = useManiofoldClaim(MEMES_CONTRACT, nft?.id ?? -1);
 
   useEffect(() => {
     fetchUrl(
@@ -102,15 +105,6 @@ export default function Home({
       });
     });
   }, []);
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/nfts_memelab?page_size=1`).then(
-      (response: DBResponse) => {
-        const labNft = response.data[0];
-        setLabNft(labNft);
-      }
-    );
-  }, [nft]);
 
   useEffect(() => {
     if (connectedWallets && connectedWallets.length > 0 && nft && nft.id) {
@@ -233,7 +227,26 @@ export default function Home({
                             <tbody>
                               <tr>
                                 <td>Edition Size</td>
-                                <td>{nft.supply}</td>
+                                <td>
+                                  {manifoldClaim ? (
+                                    manifoldClaim.total ===
+                                    manifoldClaim.totalMax ? (
+                                      <>
+                                        {numberWithCommas(manifoldClaim.total)}
+                                      </>
+                                    ) : (
+                                      <>
+                                        {numberWithCommas(manifoldClaim.total)}{" "}
+                                        /{" "}
+                                        {numberWithCommas(
+                                          manifoldClaim.totalMax
+                                        )}
+                                      </>
+                                    )
+                                  ) : (
+                                    <DotLoader />
+                                  )}
+                                </td>
                               </tr>
                               <tr>
                                 <td>Collection</td>
@@ -279,6 +292,32 @@ export default function Home({
                           <h3>Minting Approach</h3>
                         </Col>
                       </Row>
+                      {manifoldClaim &&
+                        manifoldClaim.status !==
+                          ManifoldClaimStatus.EXPIRED && (
+                          <Row className="pb-3">
+                            <Col sm={12} md={11}>
+                              <MintCountdown
+                                title={
+                                  manifoldClaim.status ===
+                                  ManifoldClaimStatus.UPCOMING
+                                    ? `Starts In`
+                                    : `Ends In`
+                                }
+                                date={
+                                  manifoldClaim.status ===
+                                  ManifoldClaimStatus.UPCOMING
+                                    ? manifoldClaim.startDate
+                                    : manifoldClaim.endDate
+                                }
+                                hide_mint_btn={false}
+                                btn_label="MINT NOW"
+                                mint_link={MEMES_MINTING_HREF}
+                                new_tab={true}
+                              />
+                            </Col>
+                          </Row>
+                        )}
                       <Row>
                         <Col>
                           <a
@@ -322,11 +361,19 @@ export default function Home({
                       <Row className="pt-3">
                         <Col>
                           Mint price:{" "}
-                          {nft.mint_price > 0
-                            ? `${numberWithCommas(
-                                Math.round(nft.mint_price * 100000) / 100000
+                          {manifoldClaim ? (
+                            manifoldClaim.cost > 0 ? (
+                              `${numberWithCommas(
+                                Math.round(
+                                  fromGWEI(manifoldClaim.cost) * 100000
+                                ) / 100000
                               )} ETH`
-                            : `N/A`}
+                            ) : (
+                              `N/A`
+                            )
+                          ) : (
+                            <DotLoader />
+                          )}
                         </Col>
                       </Row>
                       <Row>
@@ -363,7 +410,6 @@ export default function Home({
                               height={40}
                             />
                           </a>
-
                           <a
                             href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
                             target="_blank"
