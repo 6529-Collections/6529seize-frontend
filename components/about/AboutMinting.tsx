@@ -1,4 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
+import { MEMES_MINTING_HREF } from "../../constants";
 
 export default function AboutMinting() {
   return (
@@ -28,11 +29,8 @@ export default function AboutMinting() {
             <br />
             <li>
               The minting website for The Memes is:{" "}
-              <a
-                href="https://thememes.seize.io"
-                target="_blank"
-                rel="noreferrer">
-                https://thememes.seize.io
+              <a href={MEMES_MINTING_HREF} target="_blank" rel="noreferrer">
+                {MEMES_MINTING_HREF}
               </a>
             </li>
             <br />
