@@ -573,8 +573,8 @@ export default function AboutMinting() {
             <li>
               On a daily basis, we publish to Arweave the statistics we use to
               create our own allowlists. You can find them here:{" "}
-              <a href="/downloads" target="_blank" rel="noreferrer">
-                seize.io/downloads
+              <a href="/open-data" target="_blank" rel="noreferrer">
+                seize.io/open-data
               </a>
             </li>
             <br />
