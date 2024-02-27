@@ -32,9 +32,10 @@ import NextGenCollectionSlideshow from "../components/nextGen/collections/collec
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
 import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
-import useManiofoldClaim, {
+import useManifoldClaim, {
   ManifoldClaimStatus,
-} from "../hooks/useManiofoldClaim";
+  ManifoldPhase,
+} from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 export interface IndexPageProps {
   readonly logsPage: Page<ProfileActivityLog>;
@@ -89,7 +90,7 @@ export default function Home({
   const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
 
-  const manifoldClaim = useManiofoldClaim(MEMES_CONTRACT, nft?.id ?? -1);
+  const manifoldClaim = useManifoldClaim(MEMES_CONTRACT, nft?.id ?? -1);
 
   useEffect(() => {
     fetchUrl(
@@ -123,6 +124,37 @@ export default function Home({
       setNftBalance(0);
     }
   }, [connectedWallets, nft]);
+
+  const renderManifoldClaimEditionSize = () => {
+    if (manifoldClaim) {
+      if (manifoldClaim.total === manifoldClaim.totalMax) {
+        return <>{numberWithCommas(manifoldClaim.total!)}</>;
+      } else {
+        return (
+          <>
+            {numberWithCommas(manifoldClaim.total!)} /{" "}
+            {numberWithCommas(manifoldClaim.totalMax!)}
+          </>
+        );
+      }
+    } else {
+      return <DotLoader />;
+    }
+  };
+
+  const renderManifoldClaimCost = () => {
+    if (manifoldClaim) {
+      if (manifoldClaim.cost > 0) {
+        return `${numberWithCommas(
+          Math.round(fromGWEI(manifoldClaim.cost) * 100000) / 100000
+        )} ETH`;
+      } else {
+        return `N/A`;
+      }
+    } else {
+      return <DotLoader />;
+    }
+  };
 
   return (
     <>
@@ -227,26 +259,7 @@ export default function Home({
                             <tbody>
                               <tr>
                                 <td>Edition Size</td>
-                                <td>
-                                  {manifoldClaim ? (
-                                    manifoldClaim.total ===
-                                    manifoldClaim.totalMax ? (
-                                      <>
-                                        {numberWithCommas(manifoldClaim.total)}
-                                      </>
-                                    ) : (
-                                      <>
-                                        {numberWithCommas(manifoldClaim.total)}{" "}
-                                        /{" "}
-                                        {numberWithCommas(
-                                          manifoldClaim.totalMax
-                                        )}
-                                      </>
-                                    )
-                                  ) : (
-                                    <DotLoader />
-                                  )}
-                                </td>
+                                <td>{renderManifoldClaimEditionSize()}</td>
                               </tr>
                               <tr>
                                 <td>Collection</td>
@@ -287,11 +300,6 @@ export default function Home({
                           </Table>
                         </Col>
                       </Row>
-                      <Row>
-                        <Col>
-                          <h3>Minting Approach</h3>
-                        </Col>
-                      </Row>
                       {manifoldClaim &&
                         manifoldClaim.status !==
                           ManifoldClaimStatus.EXPIRED && (
@@ -301,8 +309,8 @@ export default function Home({
                                 title={
                                   manifoldClaim.status ===
                                   ManifoldClaimStatus.UPCOMING
-                                    ? `Starts In`
-                                    : `Ends In`
+                                    ? `${manifoldClaim.phase} Starts In`
+                                    : `${manifoldClaim.phase} Ends In`
                                 }
                                 date={
                                   manifoldClaim.status ===
@@ -314,10 +322,26 @@ export default function Home({
                                 btn_label="MINT NOW"
                                 mint_link={MEMES_MINTING_HREF}
                                 new_tab={true}
+                                additional_elements={
+                                  manifoldClaim.phase ===
+                                    ManifoldPhase.ALLOWLIST && (
+                                    <span className="font-smaller pt-1">
+                                      * The timer above displays the current
+                                      time remaining for a specific phase of the
+                                      drop. Please refer to the distribution
+                                      plan to check if you are in the allowlist.
+                                    </span>
+                                  )
+                                }
                               />
                             </Col>
                           </Row>
                         )}
+                      <Row>
+                        <Col>
+                          <h3>Minting Approach</h3>
+                        </Col>
+                      </Row>
                       <Row>
                         <Col>
                           <a
@@ -332,49 +356,8 @@ export default function Home({
                           </a>
                         </Col>
                       </Row>
-                      {/* <Row>
-                        <Col>
-                          <a
-                            href={
-                              `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
-                            }
-                            target="_blank"
-                            rel="noreferrer">
-                            Allowlist
-                          </a>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <a
-                            href={
-                              `https://github.com/6529-Collections/thememecards/tree/main/card` +
-                              nft.id
-                            }
-                            target="_blank"
-                            rel="noreferrer">
-                            Randomization
-                          </a>
-                        </Col>
-                      </Row> */}
                       <Row className="pt-3">
-                        <Col>
-                          Mint price:{" "}
-                          {manifoldClaim ? (
-                            manifoldClaim.cost > 0 ? (
-                              `${numberWithCommas(
-                                Math.round(
-                                  fromGWEI(manifoldClaim.cost) * 100000
-                                ) / 100000
-                              )} ETH`
-                            ) : (
-                              `N/A`
-                            )
-                          ) : (
-                            <DotLoader />
-                          )}
-                        </Col>
+                        <Col>Mint price: {renderManifoldClaimCost()}</Col>
                       </Row>
                       <Row>
                         <Col>
