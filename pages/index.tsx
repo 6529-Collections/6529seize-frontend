@@ -138,12 +138,12 @@ export default function Home({
 
   const renderManifoldClaimEditionSize = () => {
     if (manifoldClaim) {
-      if (manifoldClaim.total === manifoldClaim.totalMax) {
-        return <>{numberWithCommas(manifoldClaim.total!)}</>;
+      if (disableClaim) {
+        return <>{numberWithCommas(manifoldClaim.total)}</>;
       } else {
         return (
           <>
-            {numberWithCommas(manifoldClaim.total!)} /{" "}
+            {numberWithCommas(manifoldClaim.total)} /{" "}
             {numberWithCommas(manifoldClaim.totalMax!)}
           </>
         );
