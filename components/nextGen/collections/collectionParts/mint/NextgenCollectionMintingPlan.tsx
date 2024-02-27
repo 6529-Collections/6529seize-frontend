@@ -10,14 +10,9 @@ import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { Time } from "../../../../../helpers/time";
 import { getJsonData } from "./NextGenMintWidget";
-import {
-  areEqualAddresses,
-  formatAddress,
-} from "../../../../../helpers/Helpers";
+import { areEqualAddresses } from "../../../../../helpers/Helpers";
 import Pagination from "../../../../pagination/Pagination";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import SearchModal, {
+import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../../../../searchModal/SearchModal";

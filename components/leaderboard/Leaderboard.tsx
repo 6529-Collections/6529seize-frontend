@@ -9,21 +9,15 @@ import {
 } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  formatAddress,
-  nextTdh,
-  numberWithCommas,
-} from "../../helpers/Helpers";
+import { nextTdh, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
-import Tippy from "@tippyjs/react";
-import ConsolidationSwitch from "../consolidation-switch/ConsolidationSwitch";
 import Address from "../address/Address";
-import SearchModal, {
+import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";

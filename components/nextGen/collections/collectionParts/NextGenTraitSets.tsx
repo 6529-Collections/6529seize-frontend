@@ -25,7 +25,7 @@ import {
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
-import SearchModal, {
+import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../../../searchModal/SearchModal";

@@ -13,16 +13,10 @@ import {
   IDistributionPhoto,
 } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-import {
-  capitalizeEveryWord,
-  formatAddress,
-  numberWithCommas,
-} from "../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { capitalizeEveryWord, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
-import Tippy from "@tippyjs/react";
-import SearchModal, {
+import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
