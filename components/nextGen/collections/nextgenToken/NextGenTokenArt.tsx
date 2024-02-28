@@ -56,7 +56,7 @@ export function NextGenTokenArtImage(
   );
 }
 
-export default function NextGenToken(props: Readonly<Props>) {
+export default function NextGenTokenArt(props: Readonly<Props>) {
   const downloader = useDownloader();
 
   const mode = props.mode;
