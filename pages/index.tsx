@@ -37,6 +37,7 @@ import useManifoldClaim, {
   ManifoldPhase,
 } from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
+import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -69,11 +70,6 @@ const LatestActivity = dynamic(
 
 const MintCountdown = dynamic(
   () => import("../components/mintCountdownBox/MintCountdownBox"),
-  { ssr: false }
-);
-
-const ArtistProfileHandle = dynamic(
-  () => import("../components/the-memes/ArtistProfileHandle"),
   { ssr: false }
 );
 
@@ -133,7 +129,7 @@ export default function Home({
         return (
           <>
             {numberWithCommas(manifoldClaim.total)} /{" "}
-            {numberWithCommas(manifoldClaim.totalMax!)}
+            {numberWithCommas(manifoldClaim.totalMax)}
           </>
         );
       }
