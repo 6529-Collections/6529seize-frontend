@@ -141,7 +141,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
         </Col>
       </Row>
       <Row>
-        <Col className="d-flex gap-4">
+        <Col className="d-flex flex-wrap gap-2">
           <Dropdown
             drop={"down-centered"}
             className={`${styles.customRenderDropdown} d-flex align-items-center gap-2`}>
