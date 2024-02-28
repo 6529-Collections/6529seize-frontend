@@ -437,7 +437,7 @@ export default function Home({
                           pageProps.nextGenFeatured.name
                         )}`}
                         className={styles.viewAllLink}>
-                        <span>View All</span>
+                        <span>View Collection</span>
                       </a>
                     </Col>
                   </Row>

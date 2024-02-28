@@ -8,6 +8,7 @@ import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -73,6 +74,23 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
         <Col>
           <Container className="pt-3 pb-3">
             <Row>
+              <Col className="d-flex align-items-center justify-content-end">
+                <a
+                  href={`/nextgen/collection/${formatNameForUrl(
+                    props.collection.name
+                  )}/art`}
+                  className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
+                  <h5 className="mb-0 font-color d-flex align-items-center gap-2">
+                    View All
+                    <FontAwesomeIcon
+                      icon="arrow-circle-right"
+                      className={styles.viewAllIcon}
+                    />
+                  </h5>
+                </a>
+              </Col>
+            </Row>
+            <Row>
               <Col>
                 <Swiper
                   modules={[Navigation, A11y, Autoplay]}
@@ -89,7 +107,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   {tokens.map((token, index) => (
                     <SwiperSlide
                       key={getRandomObjectId()}
-                      className="pt-2 pb-5 unselectable">
+                      className="pt-4 pb-4 unselectable">
                       <NextGenTokenImage
                         token={token}
                         info_class="font-smaller"
@@ -122,7 +140,7 @@ function SwiperAutoplayButton() {
   return (
     <div className="text-center">
       <FontAwesomeIcon
-        style={{ height: "22px", cursor: "pointer" }}
+        style={{ height: "24px", cursor: "pointer" }}
         onClick={() => {
           setPaused(!paused);
         }}
