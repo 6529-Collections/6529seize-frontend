@@ -38,6 +38,8 @@ import useManifoldClaim, {
 } from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 export interface IndexPageProps {
+  readonly nft: NFT;
+  readonly nftExtended: MemesExtendedData;
   readonly logsPage: Page<ProfileActivityLog>;
   readonly nextGenFeatured: NextGenCollection;
 }
@@ -70,6 +72,11 @@ const MintCountdown = dynamic(
   { ssr: false }
 );
 
+const ArtistProfileHandle = dynamic(
+  () => import("../components/the-memes/ArtistProfileHandle"),
+  { ssr: false }
+);
+
 export default function Home({
   pageProps,
 }: {
@@ -83,17 +90,14 @@ export default function Home({
     },
   });
   const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
-  const [isNftImageLoaded, setIsNftImageLoaded] = useState(false);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
-  const [nft, setNFT] = useState<NFT>();
-  const [nftExtended, setnftExtended] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
 
   const [disableClaim, setDisableClaim] = useState(false);
   const manifoldClaim = useManifoldClaim(
     MEMES_CONTRACT,
-    nft?.id ?? -1,
+    pageProps.nft.id,
     disableClaim
   );
 
@@ -104,26 +108,11 @@ export default function Home({
   }, [manifoldClaim]);
 
   useEffect(() => {
-    fetchUrl(
-      `${process.env.API_ENDPOINT}/api/memes_extended_data?page_size=1`
-    ).then((response: DBResponse) => {
-      const nftExtended = response.data[0];
-      fetchUrl(
-        `${process.env.API_ENDPOINT}/api/nfts?id=${nftExtended.id}&contract=${MEMES_CONTRACT}`
-      ).then((response: DBResponse) => {
-        const nft = response.data[0];
-        setNFT(nft);
-        setnftExtended(nftExtended);
-      });
-    });
-  }, []);
-
-  useEffect(() => {
-    if (connectedWallets && connectedWallets.length > 0 && nft && nft.id) {
+    if (connectedWallets && connectedWallets.length > 0 && pageProps.nft) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/owners?contract=${
-          nft.contract
-        }&wallet=${connectedWallets.join(",")}&id=${nft.id}`
+          pageProps.nft.contract
+        }&wallet=${connectedWallets.join(",")}&id=${pageProps.nft.id}`
       ).then((response: DBResponse) => {
         let balance = 0;
         response.data.map((d) => {
@@ -134,7 +123,7 @@ export default function Home({
     } else {
       setNftBalance(0);
     }
-  }, [connectedWallets, nft]);
+  }, [connectedWallets, pageProps.nft]);
 
   const renderManifoldClaimEditionSize = () => {
     if (manifoldClaim) {
@@ -189,7 +178,7 @@ export default function Home({
             setIsHeaderLoaded(true);
           }}
         />
-        {isHeaderLoaded && nft && nftExtended && (
+        {isHeaderLoaded && (
           <>
             <Container className={`pt-4 ${styles.mainContainer}`}>
               <Row>
@@ -208,36 +197,30 @@ export default function Home({
                   lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
-                      {nft.animation ? (
+                      {pageProps.nft.animation ? (
                         <span
                           className={
                             connectedWallets && styles.nftImagePadding
                           }>
                           <NFTImage
-                            nft={nft}
+                            nft={pageProps.nft}
                             animation={true}
                             height={650}
                             balance={nftBalance}
-                            onLoad={() => {
-                              setIsNftImageLoaded(true);
-                            }}
                             showUnseized={connectedWallets.length > 0}
                           />
                         </span>
                       ) : (
                         <a
-                          href={`/the-memes/${nft.id}`}
+                          href={`/the-memes/${pageProps.nft.id}`}
                           className={
                             connectedWallets && styles.nftImagePadding
                           }>
                           <NFTImage
-                            nft={nft}
+                            nft={pageProps.nft}
                             animation={true}
                             height={650}
                             balance={nftBalance}
-                            onLoad={() => {
-                              setIsNftImageLoaded(true);
-                            }}
                             showUnseized={connectedWallets.length > 0}
                           />
                         </a>
@@ -245,182 +228,195 @@ export default function Home({
                     </Row>
                   </Container>
                 </Col>
-                {isNftImageLoaded && (
-                  <Col
-                    className="pt-3 pb-3"
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 6 }}
-                    lg={{ span: 6 }}>
-                    <Container>
-                      <Row>
-                        <Col>
-                          <u>
-                            <h3>
-                              <a href={`/the-memes/${nft.id}`}>
-                                Card {nft.id} - {nft.name}
-                              </a>
-                            </h3>
-                          </u>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <Table bordered={false}>
-                            <tbody>
-                              <tr>
-                                <td>Edition Size</td>
-                                <td>{renderManifoldClaimEditionSize()}</td>
-                              </tr>
-                              <tr>
-                                <td>Collection</td>
-                                <td>{nft.collection}</td>
-                              </tr>
-                              <tr>
-                                <td>Season</td>
-                                <td>{nftExtended.season}</td>
-                              </tr>
-                              <tr>
-                                <td>Meme</td>
-                                <td>{nftExtended.meme_name}</td>
-                              </tr>
-                              <tr>
-                                <td>Artist</td>
-                                <td>{nft.artist}</td>
-                              </tr>
-                              <tr>
-                                <td>Mint Date</td>
-                                <td>{printMintDate(nft.mint_date)}</td>
-                              </tr>
-                              <tr>
-                                <td>File Type</td>
-                                <td>
-                                  {nft.animation
-                                    ? nft.metadata.animation_details?.format
-                                    : nft.metadata.image_details.format}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Dimensions</td>
-                                <td>
-                                  {nft.metadata.image_details.width} x{" "}
-                                  {nft.metadata.image_details.height}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </Col>
-                      </Row>
-                      {manifoldClaim &&
-                        manifoldClaim.status !== ManifoldClaimStatus.EXPIRED &&
-                        !disableClaim && (
-                          <Row className="pb-3">
-                            <Col sm={12} md={11}>
-                              <MintCountdown
-                                title={
-                                  manifoldClaim.status ===
-                                  ManifoldClaimStatus.UPCOMING
-                                    ? `${manifoldClaim.phase} Starts In`
-                                    : `${manifoldClaim.phase} Ends In`
-                                }
-                                date={
-                                  manifoldClaim.status ===
-                                  ManifoldClaimStatus.UPCOMING
-                                    ? manifoldClaim.startDate
-                                    : manifoldClaim.endDate
-                                }
-                                hide_mint_btn={false}
-                                btn_label="MINT NOW"
-                                mint_link={MEMES_MINTING_HREF}
-                                new_tab={true}
-                                additional_elements={
-                                  manifoldClaim.phase ===
-                                    ManifoldPhase.ALLOWLIST && (
-                                    <span className="font-smaller pt-1">
-                                      * The timer above displays the current
-                                      time remaining for a specific phase of the
-                                      drop. Please refer to the distribution
-                                      plan to check if you are in the allowlist.
-                                    </span>
-                                  )
-                                }
-                              />
-                            </Col>
-                          </Row>
-                        )}
-                      <Row>
-                        <Col>
-                          <h3>Minting Approach</h3>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <a
-                            href={
-                              nft.has_distribution
-                                ? `/the-memes/${nft.id}/distribution`
-                                : `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`
-                            }
-                            target={nft.has_distribution ? "_self" : "_blank"}
-                            rel="noreferrer">
-                            Distribution Plan
-                          </a>
-                        </Col>
-                      </Row>
-                      <Row className="pt-3">
-                        <Col>Mint price: {renderManifoldClaimCost()}</Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          Floor Price:{" "}
-                          {nft.floor_price > 0
-                            ? `${numberWithCommas(
-                                Math.round(nft.floor_price * 100) / 100
-                              )} ETH`
-                            : `N/A`}
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          Market Cap:{" "}
-                          {nft.market_cap > 0
-                            ? `${numberWithCommas(
-                                Math.round(nft.market_cap * 100) / 100
-                              )} ETH`
-                            : `N/A`}
-                        </Col>
-                      </Row>
-                      <Row className="pt-3">
-                        <Col>
-                          <a
-                            href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${nft.id}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            <Image
-                              className={styles.marketplace}
-                              src="/opensea.png"
-                              alt="opensea"
-                              width={40}
-                              height={40}
+
+                <Col
+                  className="pt-3 pb-3"
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 6 }}
+                  lg={{ span: 6 }}>
+                  <Container>
+                    <Row>
+                      <Col>
+                        <u>
+                          <h3>
+                            <a href={`/the-memes/${pageProps.nft.id}`}>
+                              Card {pageProps.nft.id} - {pageProps.nft.name}
+                            </a>
+                          </h3>
+                        </u>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <Table bordered={false}>
+                          <tbody>
+                            <tr>
+                              <td>Edition Size</td>
+                              <td>{renderManifoldClaimEditionSize()}</td>
+                            </tr>
+                            <tr>
+                              <td>Collection</td>
+                              <td>{pageProps.nft.collection}</td>
+                            </tr>
+                            <tr>
+                              <td>Season</td>
+                              <td>{pageProps.nftExtended.season}</td>
+                            </tr>
+                            <tr>
+                              <td>Meme</td>
+                              <td>{pageProps.nftExtended.meme_name}</td>
+                            </tr>
+                            <tr>
+                              <td>Artist Name</td>
+                              <td>{pageProps.nft.artist}</td>
+                            </tr>
+                            <tr>
+                              <td>Artist Profile</td>
+                              <td>
+                                <ArtistProfileHandle nft={pageProps.nft} />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>Mint Date</td>
+                              <td>{printMintDate(pageProps.nft.mint_date)}</td>
+                            </tr>
+                            <tr>
+                              <td>File Type</td>
+                              <td>
+                                {pageProps.nft.animation
+                                  ? pageProps.nft.metadata.animation_details
+                                      ?.format
+                                  : pageProps.nft.metadata.image_details.format}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>Dimensions</td>
+                              <td>
+                                {numberWithCommas(
+                                  pageProps.nft.metadata.image_details.width
+                                )}{" "}
+                                x{" "}
+                                {numberWithCommas(
+                                  pageProps.nft.metadata.image_details.height
+                                )}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </Table>
+                      </Col>
+                    </Row>
+                    {manifoldClaim &&
+                      manifoldClaim.status !== ManifoldClaimStatus.EXPIRED &&
+                      !disableClaim && (
+                        <Row className="pb-3">
+                          <Col sm={12} md={11}>
+                            <MintCountdown
+                              title={
+                                manifoldClaim.status ===
+                                ManifoldClaimStatus.UPCOMING
+                                  ? `${manifoldClaim.phase} Starts In`
+                                  : `${manifoldClaim.phase} Ends In`
+                              }
+                              date={
+                                manifoldClaim.status ===
+                                ManifoldClaimStatus.UPCOMING
+                                  ? manifoldClaim.startDate
+                                  : manifoldClaim.endDate
+                              }
+                              hide_mint_btn={false}
+                              btn_label="MINT NOW"
+                              mint_link={MEMES_MINTING_HREF}
+                              new_tab={true}
+                              additional_elements={
+                                manifoldClaim.phase ===
+                                  ManifoldPhase.ALLOWLIST && (
+                                  <span className="font-smaller pt-1">
+                                    * The timer above displays the current time
+                                    remaining for a specific phase of the drop.
+                                    Please refer to the distribution plan to
+                                    check if you are in the allowlist.
+                                  </span>
+                                )
+                              }
                             />
-                          </a>
-                          <a
-                            href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${nft.id}`}
-                            target="_blank"
-                            rel="noreferrer">
-                            <Image
-                              className={styles.marketplace}
-                              src="/x2y2.png"
-                              alt="x2y2"
-                              width={40}
-                              height={40}
-                            />
-                          </a>
-                        </Col>
-                      </Row>
-                    </Container>
-                  </Col>
-                )}
+                          </Col>
+                        </Row>
+                      )}
+                    <Row>
+                      <Col>
+                        <h3>Minting Approach</h3>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <a
+                          href={
+                            pageProps.nft.has_distribution
+                              ? `/the-memes/${pageProps.nft.id}/distribution`
+                              : `https://github.com/6529-Collections/thememecards/tree/main/card${pageProps.nft.id}`
+                          }
+                          target={
+                            pageProps.nft.has_distribution ? "_self" : "_blank"
+                          }
+                          rel="noreferrer">
+                          Distribution Plan
+                        </a>
+                      </Col>
+                    </Row>
+                    <Row className="pt-3">
+                      <Col>Mint price: {renderManifoldClaimCost()}</Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        Floor Price:{" "}
+                        {pageProps.nft.floor_price > 0
+                          ? `${numberWithCommas(
+                              Math.round(pageProps.nft.floor_price * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        Market Cap:{" "}
+                        {pageProps.nft.market_cap > 0
+                          ? `${numberWithCommas(
+                              Math.round(pageProps.nft.market_cap * 100) / 100
+                            )} ETH`
+                          : `N/A`}
+                      </Col>
+                    </Row>
+                    <Row className="pt-3">
+                      <Col>
+                        <a
+                          href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${pageProps.nft.id}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.marketplace}
+                            src="/opensea.png"
+                            alt="opensea"
+                            width={40}
+                            height={40}
+                          />
+                        </a>
+                        <a
+                          href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${pageProps.nft.id}`}
+                          target="_blank"
+                          rel="noreferrer">
+                          <Image
+                            className={styles.marketplace}
+                            src="/x2y2.png"
+                            alt="x2y2"
+                            width={40}
+                            height={40}
+                          />
+                        </a>
+                      </Col>
+                    </Row>
+                  </Container>
+                </Col>
               </Row>
             </Container>
             {pageProps.nextGenFeatured &&
@@ -468,15 +464,13 @@ export default function Home({
                 </ProfileActivityLogs>
               </div>
             </div>
-            {isNftImageLoaded && (
-              <Container className={styles.mainContainer}>
-                <Row className="pt-3">
-                  <Col xs={12} sm={12} md={12} lg={12}>
-                    <LatestActivity page={1} pageSize={12} showMore={false} />
-                  </Col>
-                </Row>
-              </Container>
-            )}
+            <Container className={styles.mainContainer}>
+              <Row className="pt-3">
+                <Col xs={12} sm={12} md={12} lg={12}>
+                  <LatestActivity page={1} pageSize={12} showMore={false} />
+                </Col>
+              </Row>
+            </Container>
           </>
         )}
       </main>
@@ -493,6 +487,26 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
+    const { nft, nftExtended } = await commonApiFetch<{
+      data: MemesExtendedData[];
+    }>({
+      endpoint: `memes_extended_data?page_size=1`,
+      headers: headers,
+    }).then(async (responseExtended) => {
+      const nftExtended = responseExtended.data[0];
+      return await commonApiFetch<{
+        data: NFT[];
+      }>({
+        endpoint: `nfts?id=${nftExtended.id}&contract=${MEMES_CONTRACT}`,
+        headers: headers,
+      }).then((responseNft) => {
+        const nft = responseNft.data[0];
+        return {
+          nft: nft,
+          nftExtended: nftExtended,
+        };
+      });
+    });
     const logsPage = await getUserProfileActivityLogs({
       headers,
       params: convertActivityLogParams(INITIAL_ACTIVITY_LOGS_PARAMS),
@@ -503,6 +517,8 @@ export async function getServerSideProps(
     });
     return {
       props: {
+        nft,
+        nftExtended,
         logsPage,
         nextGenFeatured,
       },
