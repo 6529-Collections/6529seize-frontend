@@ -94,14 +94,6 @@ export default function NextGenCollection(props: Readonly<Props>) {
             show_links={true}
           />
           <Row className="pt-5">
-            <Col>
-              <NextGenCollectionArt
-                collection={props.collection}
-                show_view_all={true}
-              />
-            </Col>
-          </Row>
-          <Row className="pt-5">
             <Col className="d-flex gap-4">
               {printViewButton(view, ContentView.OVERVIEW, setView)}
               {printViewButton(view, ContentView.ABOUT, setView)}
@@ -109,7 +101,7 @@ export default function NextGenCollection(props: Readonly<Props>) {
               {printViewButton(view, ContentView.TOP_TRAIT_SETS, setView)}
             </Col>
           </Row>
-          <Row className="pt-4 pb-4">
+          <Row className="pt-3">
             <Col>
               <NextGenCollectionDetails
                 collection={props.collection}
@@ -117,9 +109,17 @@ export default function NextGenCollection(props: Readonly<Props>) {
               />
             </Col>
           </Row>
+          <Row className="pt-4">
+            <Col>
+              <NextGenCollectionArt
+                collection={props.collection}
+                show_view_all={true}
+              />
+            </Col>
+          </Row>
         </>
       </Container>
-      <Container className="pt-2 pb-4">
+      <Container className="pt-4 pb-4">
         <Row>
           <Col>
             <h4>About the Artist</h4>
