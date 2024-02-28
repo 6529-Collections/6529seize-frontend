@@ -199,6 +199,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
                   <span>Custom Height (pixels):</span>
                   <input
                     type="number"
+                    placeholder="enter height"
                     className={styles.customRenderInput}
                     value={height ?? ""}
                     onChange={(e) => {
