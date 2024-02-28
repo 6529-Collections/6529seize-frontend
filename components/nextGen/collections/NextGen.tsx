@@ -71,6 +71,21 @@ export default function NextGen(props: Readonly<Props>) {
                         <NextGenMintCounts collection={props.collection} />
                       </Col>
                     </Row>
+                    <Row className="pt-3">
+                      <Col>
+                        <a
+                          href={`/nextgen/collection/${formatNameForUrl(
+                            props.collection.name
+                          )}`}>
+                          <button
+                            className={`font-larger pt-2 pb-2 seize-btn no-wrap ${styles.exploreBtn}`}>
+                            <span className="font-larger">
+                              Explore Collection
+                            </span>
+                          </button>
+                        </a>
+                      </Col>
+                    </Row>
                     <Row className="pt-4 pb-2">
                       <Col>
                         <NextGenCountdown collection={props.collection} />
@@ -117,13 +132,6 @@ export default function NextGen(props: Readonly<Props>) {
             <h1>
               <span className="font-lightest">Explore</span>{" "}
               {props.collection.name}{" "}
-              <a
-                href={`/nextgen/collection/${formatNameForUrl(
-                  props.collection.name
-                )}/art`}
-                className={homeStyles.viewAllLink}>
-                <span>View All</span>
-              </a>
             </h1>
           </Col>
         </Row>
