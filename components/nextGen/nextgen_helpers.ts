@@ -27,6 +27,7 @@ import { NEVER_DATE } from "../../constants";
 import { useState } from "react";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import { goerli, mainnet, sepolia } from "viem/chains";
+import { NextGenCollection } from "../../entities/INextgen";
 
 export function useGlobalAdmin(address: string) {
   return useContractRead({
@@ -646,4 +647,21 @@ export enum NextGenTokenImageMode {
   NYC_LOFT = "NYC Loft",
   URBAN_ALLEY = "Urban Alley",
   GRAND_LOBBY = "Grand Lobby",
+}
+
+export function getCollectionBaseBreadcrums(
+  collection: NextGenCollection,
+  page: string
+) {
+  const crumbs = [
+    { display: "Home", href: "/" },
+    { display: "NextGen", href: "/nextgen" },
+    {
+      display: `${collection.name}`,
+      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
+    },
+    { display: page },
+  ];
+
+  return crumbs;
 }

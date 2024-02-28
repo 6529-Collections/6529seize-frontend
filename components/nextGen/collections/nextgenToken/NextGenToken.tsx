@@ -96,7 +96,7 @@ export default function NextGenToken(props: Readonly<Props>) {
               </Col>
               <Col sm={12} md={6} className="pt-4 pb-4">
                 <NextgenTokenTraits
-                  collection_id={props.collection.id}
+                  collection={props.collection}
                   token={props.token}
                   traits={props.traits.filter(
                     (trait) => trait.trait !== "Collection Name"
@@ -127,7 +127,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           {view === ContentView.RARITY && (
             <Col className="pt-4 pb-4">
               <NextgenTokenRarity
-                collection_id={props.collection.id}
+                collection={props.collection}
                 token={props.token}
                 traits={props.traits}
                 tokenCount={props.tokenCount}

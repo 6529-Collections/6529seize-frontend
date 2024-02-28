@@ -15,6 +15,7 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { getNextGenTokenScene } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenScene";
+import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -58,7 +59,7 @@ export default function NextGenCollectionToken(props: any) {
     { display: "NextGen", href: "/nextgen" },
     {
       display: collection.name,
-      href: `/nextgen/collection/${collection.id}`,
+      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
     },
     {
       display: token

@@ -132,17 +132,17 @@ export default function LatestActivity(props: Readonly<Props>) {
           sm={12}
           md={6}
           className="d-flex align-items-center justify-content-between">
-          <span className="d-flex flex-wrap align-items-center gap-2">
+          <span className="d-flex flex-wrap align-items-center gap-3">
             <h1>
               <span className="font-lightest">NFT</span> Activity{" "}
-              {showViewAll ? (
-                <a href="/nft-activity" className={homeStyles.viewAllLink}>
-                  <span>View All</span>
-                </a>
-              ) : (
-                fetching && <DotLoader />
-              )}
             </h1>
+            {showViewAll ? (
+              <a href="/nft-activity" className={homeStyles.viewAllLink}>
+                <span>View All</span>
+              </a>
+            ) : (
+              fetching && <DotLoader />
+            )}
           </span>
         </Col>
         <Col

@@ -127,9 +127,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
             {cicType && level > -1 ? (
               <a
-                href={`/${
-                  ownerProfileHandle ?? ownerDisplay ?? props.token.owner
-                }`}
+                href={`/${ownerProfileHandle ?? props.token.owner}`}
                 className="d-flex gap-2 decoration-hover-underline align-items-center">
                 <UserCICAndLevel level={level} cicType={cicType} />
                 <span className="decoration-underline">
@@ -267,31 +265,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <Col className="pb-3 d-flex gap-1">
           <span className="font-color-h">Image Licence:</span>
           <span>{props.collection.licence}</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex flex-column gap-2">
-          <span className="font-color-h">Rendered Versions:</span>
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["1K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["2K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["4K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["8K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["16K"]}
-          />
         </Col>
       </Row>
       <Row>

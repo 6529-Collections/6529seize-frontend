@@ -4,6 +4,7 @@ export const PROJECT_NAME = "6529SEIZE";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
 export const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
+export const MANIFOLD_PROXY = "0x26bbea7803dcac346d5f5f135b57cf2c752a02be";
 export const GRADIENT_CONTRACT = "0x0C58Ef43fF3032005e472cB5709f8908aCb00205";
 export const MEMELAB_CONTRACT = "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb";
 export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -44,6 +45,10 @@ export const OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER = `0x5b3256965e7c3cf26e11fcaf
 export const NEXTGEN_MEDIA_BASE_URL =
   "https://media.generator.seize.io/mainnet";
 
+export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
+
 export const ROYALTIES_PERCENTAGE = 0.069;
 
 export const ETHEREUM_ICON_TEXT = "Ξ";
+
+export const MEMES_MINTING_HREF = "https://thememes.seize.io";
