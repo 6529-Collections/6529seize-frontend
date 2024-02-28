@@ -144,7 +144,7 @@ export function NextGenTokenImage(
             style={{
               height: props.is_fullscreen ? "100vh" : "auto",
               width: "auto",
-              maxHeight: "90vh",
+              maxHeight: "85vh",
               maxWidth: "100%",
             }}
             src={getImageUrl()}

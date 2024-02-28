@@ -269,31 +269,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       </Row>
       <Row>
         <Col className="pb-3 d-flex flex-column gap-2">
-          <span className="font-color-h">Rendered Versions:</span>
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["1K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["2K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["4K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["8K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["16K"]}
-          />
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex flex-column gap-2">
           <span className="font-color-h">For Thumbnail Use Only :</span>
           <NextGenTokenDownload
             token={props.token}
