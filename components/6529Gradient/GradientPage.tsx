@@ -22,6 +22,7 @@ import { Owner } from "../../entities/IOwner";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
+import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 
 interface Props {
   wallets: string[];
@@ -199,6 +200,12 @@ export default function GradientPage(props: Readonly<Props>) {
                         <tr>
                           <td>Mint Date</td>
                           <td>{printMintDate(nft.mint_date)}</td>
+                        </tr>
+                        <tr>
+                          <td>Artist</td>
+                          <td>
+                            <ArtistProfileHandle nft={nft} />
+                          </td>
                         </tr>
                         <tr>
                           <td>TDH Rate</td>

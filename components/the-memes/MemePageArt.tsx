@@ -12,6 +12,7 @@ import NFTImage from "../nft-image/NFTImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import Download from "../download/Download";
+import ArtistProfileHandle from "./ArtistProfileHandle";
 
 export function MemePageArt(props: {
   show: boolean;
@@ -220,8 +221,14 @@ export function MemePageArt(props: {
                           <td>{props.nftMeta.meme_name}</td>
                         </tr>
                         <tr>
-                          <td>Artist</td>
+                          <td>Artist Name</td>
                           <td>{props.nft.artist}</td>
+                        </tr>
+                        <tr>
+                          <td>Artist Profile</td>
+                          <td>
+                            <ArtistProfileHandle nft={props.nft} />
+                          </td>
                         </tr>
                         <tr>
                           <td>Mint Date</td>
