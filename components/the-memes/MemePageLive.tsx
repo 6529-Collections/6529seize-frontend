@@ -18,6 +18,7 @@ import Pagination from "../pagination/Pagination";
 import { RememeSort } from "../rememes/Rememes";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ArtistProfileHandle from "./ArtistProfileHandle";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -174,8 +175,14 @@ export function MemePageLiveRightMenu(props: {
               <Table bordered={false}>
                 <tbody>
                   <tr>
-                    <td>Artist</td>
+                    <td>Artist Name</td>
                     <td>{props.nft.artist}</td>
+                  </tr>
+                  <tr>
+                    <td>Artist Profile</td>
+                    <td>
+                      <ArtistProfileHandle nft={props.nft} />
+                    </td>
                   </tr>
                   <tr>
                     <td>Mint Date</td>

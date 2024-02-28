@@ -10,6 +10,7 @@ export interface BaseNFT {
   token_type: string;
   description: string;
   artist: string;
+  artist_seize_handle: string;
   uri: string;
   icon: string;
   thumbnail: string;

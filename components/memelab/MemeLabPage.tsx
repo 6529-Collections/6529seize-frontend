@@ -19,7 +19,6 @@ import {
 import { DBResponse } from "../../entities/IDBResponse";
 import { LabNFT, LabExtendedData, NFT, NFTHistory } from "../../entities/INFT";
 import {
-  getDateDisplay,
   areEqualAddresses,
   enterArtFullScreen,
   fullScreenSupported,
@@ -39,6 +38,7 @@ import { TypeFilter } from "../latest-activity/LatestActivity";
 import NFTImage from "../nft-image/NFTImage";
 import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 import Timeline from "../timeline/Timeline";
+import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -384,7 +384,12 @@ export default function LabPage(props: Readonly<Props>) {
                           </Row>
                           <Row>
                             <Col className="text-center pt-2">
-                              Artist: {nft.artist}
+                              Artist Name: {nft.artist}
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col className="text-center pt-2">
+                              Artist Profile: <ArtistProfileHandle nft={nft} />
                             </Col>
                           </Row>
                         </Container>
@@ -431,8 +436,14 @@ export default function LabPage(props: Readonly<Props>) {
                 <Table bordered={false}>
                   <tbody>
                     <tr>
-                      <td>Artist</td>
+                      <td>Artist Name</td>
                       <td>{nft.artist}</td>
+                    </tr>
+                    <tr>
+                      <td>Artist Profile</td>
+                      <td>
+                        <ArtistProfileHandle nft={nft} />
+                      </td>
                     </tr>
                     <tr>
                       <td>Collection</td>
@@ -1068,8 +1079,14 @@ export default function LabPage(props: Readonly<Props>) {
                             <td>{nft.collection}</td>
                           </tr>
                           <tr>
-                            <td>Artist</td>
+                            <td>Artist Name</td>
                             <td>{nft.artist}</td>
+                          </tr>
+                          <tr>
+                            <td>Artist Profile</td>
+                            <td>
+                              <ArtistProfileHandle nft={nft} />
+                            </td>
                           </tr>
                           <tr>
                             <td>Mint Date</td>

@@ -1,5 +1,4 @@
 import styles from "./NextGen.module.scss";
-import homeStyles from "../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { NextGenCollection } from "../../../entities/INextgen";
 import {
