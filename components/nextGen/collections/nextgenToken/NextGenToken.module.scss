@@ -102,3 +102,24 @@
   color: white;
   background-color: $nextgen-grey;
 }
+
+.imageResolutionBtn {
+  font-weight: bolder;
+  font-size: smaller !important;
+  padding: 0;
+  background-color: $font-color-h;
+  border: none !important;
+  color: black;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 2px;
+  min-width: 35px;
+
+  &:hover {
+    background-color: white;
+  }
+}
+
+.imageResolutionBtnSelected {
+  background-color: white;
+}
