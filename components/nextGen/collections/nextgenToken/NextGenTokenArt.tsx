@@ -10,6 +10,8 @@ import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface Props {
   collection: NextGenCollection;
@@ -19,7 +21,7 @@ interface Props {
 enum Mode {
   LIVE = "Live",
   IMAGE = "Image",
-  S16K = "16K",
+  HIGH_RES = "High Res",
 }
 
 export function NextGenTokenArtImage(
@@ -44,6 +46,7 @@ export function NextGenTokenArtImage(
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
+  const isMobileDevice = useIsMobileDevice();
   const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
@@ -94,7 +97,7 @@ export default function NextGenToken(props: Readonly<Props>) {
     if (mode === Mode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
-    if (mode === Mode.S16K) {
+    if (mode === Mode.HIGH_RES) {
       return get16KUrl(props.token.id);
     }
     return props.token.image_url;
@@ -113,10 +116,10 @@ export default function NextGenToken(props: Readonly<Props>) {
           </button>
           <button
             className={`${styles.imageResolutionBtn} ${
-              mode === Mode.S16K ? styles.imageResolutionBtnSelected : ""
+              mode === Mode.HIGH_RES ? styles.imageResolutionBtnSelected : ""
             }`}
-            onClick={() => setMode(Mode.S16K)}>
-            16K
+            onClick={() => setMode(Mode.HIGH_RES)}>
+            {isMobileDevice ? "8K" : "16K"}
           </button>
           <Tippy
             content="Live"
@@ -238,7 +241,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
-                      is_zoom={mode === Mode.S16K}
+                      is_zoom={mode === Mode.HIGH_RES}
                     />
                   </div>
                 </div>
