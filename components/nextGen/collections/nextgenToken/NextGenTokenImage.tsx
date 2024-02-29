@@ -9,6 +9,90 @@ import {
 } from "../../../../constants";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
+import { useRef, useState } from "react";
+import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import { Spinner } from "../../../dotLoader/DotLoader";
+
+export function ZoomableImage(
+  props: Readonly<{
+    token: NextGenToken;
+    is_fullscreen?: boolean;
+  }>
+) {
+  const [isZoomed, setIsZoomed] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [loading, setLoading] = useState(true);
+
+  function updateObjectPosition(e: any) {
+    const img = imgRef.current;
+    if (!img) return;
+
+    const { left, top, width, height } = img.getBoundingClientRect();
+    const pageXOffset = window.scrollX;
+    const pageYOffset = window.scrollY;
+    const x = ((e.pageX - left - pageXOffset) / width) * 100;
+    const y = ((e.pageY - top - pageYOffset) / height) * 100;
+    setObjectPosition(`${x}% ${y}%`);
+  }
+
+  const handleImageClick = (e: any) => {
+    updateObjectPosition(e);
+    setIsZoomed(!isZoomed);
+  };
+
+  const [objectPosition, setObjectPosition] = useState<string>();
+
+  const handleMouseMove = (e: any) => {
+    if (!isZoomed) return;
+    updateObjectPosition(e);
+  };
+
+  function getImageUrl() {
+    return get16KUrl(props.token.id);
+  }
+
+  return (
+    <span
+      className="d-flex align-items-center justify-content-center"
+      style={{
+        height: props.is_fullscreen ? "100vh" : "90vh",
+        width: "auto",
+        maxHeight: props.is_fullscreen ? "100vh" : "90vh",
+        maxWidth: "100%",
+        overflow: "hidden",
+      }}>
+      {loading && (
+        <span className="font-larger">
+          <Spinner dimension={36} />
+        </span>
+      )}
+      <Image
+        ref={imgRef}
+        priority
+        loading={"eager"}
+        width="0"
+        height="0"
+        style={{
+          display: loading ? "none" : "initial",
+          height: "100%",
+          width: "auto",
+          transition: "transform 0.2s ease-out",
+          objectFit: isZoomed ? "none" : "contain",
+          objectPosition: isZoomed ? objectPosition : "center",
+          cursor: isZoomed ? "zoom-out" : "zoom-in",
+        }}
+        onLoad={() => setLoading(false)}
+        onClick={handleImageClick}
+        onMouseMove={handleMouseMove}
+        src={getImageUrl()}
+        alt={props.token.name}
+        onError={(e) => {
+          e.currentTarget.src = "/pebbles-loading.jpeg";
+        }}
+      />
+    </span>
+  );
+}
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -23,8 +107,12 @@ export function NextGenTokenImage(
     show_listing?: boolean;
     show_max_sale?: boolean;
     show_last_sale?: boolean;
+    is_zoom?: boolean;
   }>
 ) {
+  // if (props.is_fullscreen) {
+  //   alert("is_fullscreen is deprecated");
+  // }
   function getImageUrl() {
     if (props.show_original) {
       return props.token.image_url;
@@ -136,23 +224,30 @@ export function NextGenTokenImage(
     return (
       <>
         <span className="d-flex flex-column align-items-center">
-          <Image
-            priority
-            loading={"eager"}
-            width="0"
-            height="0"
-            style={{
-              height: props.is_fullscreen ? "100vh" : "auto",
-              width: "auto",
-              maxHeight: "85vh",
-              maxWidth: "100%",
-            }}
-            src={getImageUrl()}
-            alt={props.token.name}
-            onError={(e) => {
-              e.currentTarget.src = "/pebbles-loading.jpeg";
-            }}
-          />
+          {props.is_zoom ? (
+            <ZoomableImage
+              token={props.token}
+              is_fullscreen={props.is_fullscreen}
+            />
+          ) : (
+            <Image
+              priority
+              loading={"eager"}
+              width="0"
+              height="0"
+              style={{
+                height: props.is_fullscreen ? "100vh" : "auto",
+                width: "auto",
+                maxHeight: "90vh",
+                maxWidth: "100%",
+              }}
+              src={getImageUrl()}
+              alt={props.token.name}
+              onError={(e) => {
+                e.currentTarget.src = "/pebbles-loading.jpeg";
+              }}
+            />
+          )}
         </span>
         {!props.hide_info && (
           <span
@@ -215,4 +310,8 @@ export function getNextGenThumbnailUrl(tokenId: number) {
 
 export function getNextGenIconUrl(tokenId: number) {
   return `${NEXTGEN_MEDIA_BASE_URL}/thumbnail/${tokenId}`;
+}
+
+export function get16KUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png16k/${tokenId}`;
 }

@@ -2,7 +2,7 @@ import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage } from "./NextGenTokenImage";
+import { NextGenTokenImage, get16KUrl } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
@@ -30,6 +30,7 @@ export function NextGenTokenArtImage(
     mode: NextGenTokenImageMode;
     is_fullscreen: boolean;
     setCanvasUrl: (url: string) => void;
+    is_zoom: boolean;
   }>
 ) {
   const scene = getNextGenTokenScene(props.mode);
@@ -50,8 +51,9 @@ export function NextGenTokenArtImage(
       show_original
       hide_info={true}
       hide_link={true}
-      show_animation={props.mode !== NextGenTokenImageMode.IMAGE}
+      show_animation={props.mode === NextGenTokenImageMode.LIVE}
       is_fullscreen={props.is_fullscreen}
+      is_zoom={props.is_zoom}
     />
   );
 }
@@ -118,6 +120,10 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     if (canvasUrl) {
       return canvasUrl;
     }
+
+    if (mode === NextGenTokenImageMode.S16K) {
+      return get16KUrl(props.token.id);
+    }
     return props.token.image_url;
   }
 
@@ -149,8 +155,16 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               icon="play-circle"
             />
           </Tippy>
+          <button
+            className={`${styles.btn16k} ${
+              mode === NextGenTokenImageMode.S16K ? styles.btn16kselected : ""
+            }`}
+            onClick={() => props.setMode(NextGenTokenImageMode.S16K)}>
+            16K
+          </button>
           {props.mode !== NextGenTokenImageMode.IMAGE &&
-            props.mode !== NextGenTokenImageMode.LIVE && (
+            props.mode !== NextGenTokenImageMode.LIVE &&
+            props.mode !== NextGenTokenImageMode.S16K && (
               <span>Scene: {props.mode}</span>
             )}
         </span>
@@ -276,6 +290,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                       mode={mode}
                       is_fullscreen={isFullScreen}
                       setCanvasUrl={setCanvasUrl}
+                      is_zoom={mode === NextGenTokenImageMode.S16K}
                     />
                   </div>
                 </div>

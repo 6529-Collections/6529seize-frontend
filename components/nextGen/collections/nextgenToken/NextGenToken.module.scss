@@ -146,3 +146,23 @@
   color: black;
   width: fit-content;
 }
+
+.btn16k {
+  font-weight: bolder;
+  font-size: smaller !important;
+  padding: 0;
+  background-color: $font-color-h;
+  border: none !important;
+  color: black;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 2px;
+
+  &:hover {
+    background-color: white;
+  }
+}
+
+.btn16kselected {
+  background-color: white;
+}

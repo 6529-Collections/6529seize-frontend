@@ -11,6 +11,20 @@ export default function DotLoader() {
   );
 }
 
-export function Spinner() {
-  return <FontAwesomeIcon icon="spinner" className={styles.spinner} />;
+export function Spinner(
+  props: Readonly<{
+    dimension?: number;
+  }>
+) {
+  return (
+    <FontAwesomeIcon
+      icon="spinner"
+      className={styles.spinner}
+      style={
+        props.dimension
+          ? { height: props.dimension, width: props.dimension }
+          : {}
+      }
+    />
+  );
 }
