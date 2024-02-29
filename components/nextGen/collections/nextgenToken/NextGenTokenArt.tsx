@@ -104,18 +104,20 @@ export default function NextGenToken(props: Readonly<Props>) {
     return (
       <>
         <span className="d-flex gap-3">
-          <Tippy
-            content="Image"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={getModeStyle(Mode.IMAGE)}
-              onClick={() => setMode(Mode.IMAGE)}
-              icon="image"
-            />
-          </Tippy>
+          <button
+            className={`${styles.imageResolutionBtn} ${
+              mode === Mode.IMAGE ? styles.imageResolutionBtnSelected : ""
+            }`}
+            onClick={() => setMode(Mode.IMAGE)}>
+            2K
+          </button>
+          <button
+            className={`${styles.imageResolutionBtn} ${
+              mode === Mode.S16K ? styles.imageResolutionBtnSelected : ""
+            }`}
+            onClick={() => setMode(Mode.S16K)}>
+            16K
+          </button>
           <Tippy
             content="Live"
             hideOnClick={true}
@@ -128,13 +130,6 @@ export default function NextGenToken(props: Readonly<Props>) {
               icon="play-circle"
             />
           </Tippy>
-          <button
-            className={`${styles.btn16k} ${
-              mode === Mode.S16K ? styles.btn16kselected : ""
-            }`}
-            onClick={() => setMode(Mode.S16K)}>
-            16K
-          </button>
         </span>
         <span className="d-flex gap-3">
           <Lightbulb
