@@ -9,6 +9,99 @@ import {
 } from "../../../../constants";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
+import { useRef, useState } from "react";
+import { Spinner } from "../../../dotLoader/DotLoader";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+
+export function ZoomableImage(
+  props: Readonly<{
+    token: NextGenToken;
+    is_fullscreen?: boolean;
+  }>
+) {
+  const isMobile = useIsMobileScreen();
+  const [isZoomed, setIsZoomed] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [loading, setLoading] = useState(true);
+
+  function updateObjectPosition(e: any) {
+    const img = imgRef.current;
+    if (!img) return;
+
+    const { left, top, width, height } = img.getBoundingClientRect();
+    const pageXOffset = window.scrollX;
+    const pageYOffset = window.scrollY;
+    const x = ((e.pageX - left - pageXOffset) / width) * 100;
+    const y = ((e.pageY - top - pageYOffset) / height) * 100;
+    setObjectPosition(`${x}% ${y}%`);
+  }
+
+  const handleImageClick = (e: any) => {
+    updateObjectPosition(e);
+    setIsZoomed(!isZoomed);
+  };
+
+  const [objectPosition, setObjectPosition] = useState<string>();
+
+  const handleMouseMove = (e: any) => {
+    if (!isZoomed) return;
+    updateObjectPosition(e);
+  };
+
+  function getImageUrl() {
+    return get16KUrl(props.token.id);
+  }
+
+  return (
+    <span
+      className="d-flex align-items-center justify-content-center"
+      style={{
+        height: props.is_fullscreen ? "100vh" : isMobile ? "55vh" : "85vh",
+        width: "auto",
+        maxHeight: props.is_fullscreen ? "100vh" : "85vh",
+        maxWidth: "100%",
+        overflow: "hidden",
+      }}>
+      {loading && (
+        <span className="d-flex flex-column gap-3 align-items-center">
+          <span className="d-flex flex-wrap text-cennter">
+            16K Pebbles are very large
+          </span>
+          <span className="d-flex flex-wrap text-cennter">
+            Chill while we download you into the Pebbles multiverse
+          </span>
+          <span className="font-larger">
+            <Spinner dimension={36} />
+          </span>
+        </span>
+      )}
+      <Image
+        ref={imgRef}
+        priority
+        loading={"eager"}
+        width="0"
+        height="0"
+        style={{
+          display: loading ? "none" : "initial",
+          height: "100%",
+          width: "auto",
+          transition: "transform 0.2s ease-out",
+          objectFit: isZoomed ? "none" : "contain",
+          objectPosition: isZoomed ? objectPosition : "center",
+          cursor: isZoomed ? "zoom-out" : "zoom-in",
+        }}
+        onLoad={() => setLoading(false)}
+        onClick={handleImageClick}
+        onMouseMove={handleMouseMove}
+        src={getImageUrl()}
+        alt={props.token.name}
+        onError={(e) => {
+          e.currentTarget.src = "/pebbles-loading.jpeg";
+        }}
+      />
+    </span>
+  );
+}
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -23,8 +116,10 @@ export function NextGenTokenImage(
     show_listing?: boolean;
     show_max_sale?: boolean;
     show_last_sale?: boolean;
+    is_zoom?: boolean;
   }>
 ) {
+  const isMobile = useIsMobileScreen();
   function getImageUrl() {
     if (props.show_original) {
       return props.token.image_url;
@@ -136,23 +231,30 @@ export function NextGenTokenImage(
     return (
       <>
         <span className="d-flex flex-column align-items-center">
-          <Image
-            priority
-            loading={"eager"}
-            width="0"
-            height="0"
-            style={{
-              height: props.is_fullscreen ? "100vh" : "auto",
-              width: "auto",
-              maxHeight: "90vh",
-              maxWidth: "100%",
-            }}
-            src={getImageUrl()}
-            alt={props.token.name}
-            onError={(e) => {
-              e.currentTarget.src = "/pebbles-loading.jpeg";
-            }}
-          />
+          {props.is_zoom ? (
+            <ZoomableImage
+              token={props.token}
+              is_fullscreen={props.is_fullscreen}
+            />
+          ) : (
+            <Image
+              priority
+              loading={"eager"}
+              width="0"
+              height="0"
+              style={{
+                height: props.is_fullscreen ? "100vh" : "auto",
+                width: "auto",
+                maxHeight: props.is_fullscreen ? "100vh" : "85vh",
+                maxWidth: "100%",
+              }}
+              src={getImageUrl()}
+              alt={props.token.name}
+              onError={(e) => {
+                e.currentTarget.src = "/pebbles-loading.jpeg";
+              }}
+            />
+          )}
         </span>
         {!props.hide_info && (
           <span
@@ -180,7 +282,7 @@ export function NextGenTokenImage(
         <iframe
           style={{
             width: "100%",
-            height: props.is_fullscreen ? "100vh" : "90vh",
+            height: props.is_fullscreen ? "100vh" : isMobile ? "55vh" : "85vh",
             marginBottom: "-8px",
           }}
           src={props.token.animation_url ?? props.token.generator?.html}
@@ -215,4 +317,8 @@ export function getNextGenThumbnailUrl(tokenId: number) {
 
 export function getNextGenIconUrl(tokenId: number) {
   return `${NEXTGEN_MEDIA_BASE_URL}/thumbnail/${tokenId}`;
+}
+
+export function get16KUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png16k/${tokenId}`;
 }
