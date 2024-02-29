@@ -2,7 +2,7 @@ import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage } from "./NextGenTokenImage";
+import { NextGenTokenImage, get16KUrl } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
@@ -19,6 +19,7 @@ interface Props {
 enum Mode {
   LIVE = "Live",
   IMAGE = "Image",
+  S16K = "16K",
 }
 
 export function NextGenTokenArtImage(
@@ -26,6 +27,7 @@ export function NextGenTokenArtImage(
     token: NextGenToken;
     mode: Mode;
     is_fullscreen: boolean;
+    is_zoom: boolean;
   }>
 ) {
   return (
@@ -34,8 +36,9 @@ export function NextGenTokenArtImage(
       show_original
       hide_info={true}
       hide_link={true}
-      show_animation={props.mode !== Mode.IMAGE}
+      show_animation={props.mode === Mode.LIVE}
       is_fullscreen={props.is_fullscreen}
+      is_zoom={props.is_zoom}
     />
   );
 }
@@ -91,6 +94,9 @@ export default function NextGenToken(props: Readonly<Props>) {
     if (mode === Mode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
+    if (mode === Mode.S16K) {
+      return get16KUrl(props.token.id);
+    }
     return props.token.image_url;
   }
 
@@ -122,6 +128,13 @@ export default function NextGenToken(props: Readonly<Props>) {
               icon="play-circle"
             />
           </Tippy>
+          <button
+            className={`${styles.btn16k} ${
+              mode === Mode.S16K ? styles.btn16kselected : ""
+            }`}
+            onClick={() => setMode(Mode.S16K)}>
+            16K
+          </button>
         </span>
         <span className="d-flex gap-3">
           <Lightbulb
@@ -230,6 +243,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
+                      is_zoom={mode === Mode.S16K}
                     />
                   </div>
                 </div>
