@@ -55,15 +55,21 @@ export function ZoomableImage(
     <span
       className="d-flex align-items-center justify-content-center"
       style={{
-        height: props.is_fullscreen ? "100vh" : "90vh",
+        height: props.is_fullscreen ? "100vh" : "85vh",
         width: "auto",
-        maxHeight: props.is_fullscreen ? "100vh" : "90vh",
+        maxHeight: props.is_fullscreen ? "100vh" : "85vh",
         maxWidth: "100%",
         overflow: "hidden",
       }}>
       {loading && (
-        <span className="font-larger">
-          <Spinner dimension={36} />
+        <span className="d-flex flex-column gap-3 align-items-center">
+          <span className="d-flex flex-wrap">16K Pebbles are very large</span>
+          <span className="d-flex flex-wrap">
+            Chill while we download you into the Pebbles multiverse
+          </span>
+          <span className="font-larger">
+            <Spinner dimension={36} />
+          </span>
         </span>
       )}
       <Image
@@ -238,7 +244,7 @@ export function NextGenTokenImage(
               style={{
                 height: props.is_fullscreen ? "100vh" : "auto",
                 width: "auto",
-                maxHeight: "90vh",
+                maxHeight: props.is_fullscreen ? "100vh" : "85vh",
                 maxWidth: "100%",
               }}
               src={getImageUrl()}
@@ -275,7 +281,7 @@ export function NextGenTokenImage(
         <iframe
           style={{
             width: "100%",
-            height: props.is_fullscreen ? "100vh" : "90vh",
+            height: props.is_fullscreen ? "100vh" : "85vh",
             marginBottom: "-8px",
           }}
           src={props.token.animation_url ?? props.token.generator?.html}

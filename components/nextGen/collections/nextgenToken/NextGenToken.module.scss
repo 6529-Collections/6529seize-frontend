@@ -147,7 +147,7 @@
   width: fit-content;
 }
 
-.btn16k {
+.imageResolutionBtn {
   font-weight: bolder;
   font-size: smaller !important;
   padding: 0;
@@ -157,12 +157,13 @@
   padding-left: 5px;
   padding-right: 5px;
   border-radius: 2px;
+  min-width: 35px;
 
   &:hover {
     background-color: white;
   }
 }
 
-.btn16kselected {
+.imageResolutionBtnSelected {
   background-color: white;
 }

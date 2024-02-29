@@ -131,18 +131,24 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     return (
       <>
         <span className="d-flex gap-3">
-          <Tippy
-            content="Image"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={getModeStyle(NextGenTokenImageMode.IMAGE)}
-              onClick={() => props.setMode(NextGenTokenImageMode.IMAGE)}
-              icon="image"
-            />
-          </Tippy>
+          <button
+            className={`${styles.imageResolutionBtn} ${
+              mode === NextGenTokenImageMode.IMAGE
+                ? styles.imageResolutionBtnSelected
+                : ""
+            }`}
+            onClick={() => props.setMode(NextGenTokenImageMode.IMAGE)}>
+            2K
+          </button>
+          <button
+            className={`${styles.imageResolutionBtn} ${
+              mode === NextGenTokenImageMode.S16K
+                ? styles.imageResolutionBtnSelected
+                : ""
+            }`}
+            onClick={() => props.setMode(NextGenTokenImageMode.S16K)}>
+            16K
+          </button>
           <Tippy
             content="Live"
             hideOnClick={true}
@@ -155,13 +161,6 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               icon="play-circle"
             />
           </Tippy>
-          <button
-            className={`${styles.btn16k} ${
-              mode === NextGenTokenImageMode.S16K ? styles.btn16kselected : ""
-            }`}
-            onClick={() => props.setMode(NextGenTokenImageMode.S16K)}>
-            16K
-          </button>
           {props.mode !== NextGenTokenImageMode.IMAGE &&
             props.mode !== NextGenTokenImageMode.LIVE &&
             props.mode !== NextGenTokenImageMode.S16K && (
