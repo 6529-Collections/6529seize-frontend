@@ -10,7 +10,6 @@ import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface Props {
