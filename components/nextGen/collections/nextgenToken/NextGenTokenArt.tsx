@@ -16,7 +16,6 @@ import {
   getNextGenTokenScene,
 } from "./NextGenTokenScene";
 import useDownloader from "react-use-downloader";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface Props {

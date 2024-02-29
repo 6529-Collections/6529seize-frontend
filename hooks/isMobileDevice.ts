@@ -6,11 +6,9 @@ export default function useIsMobileDevice() {
   useEffect(() => {
     const userAgent =
       typeof navigator === "undefined" ? "" : navigator.userAgent;
-    const mobile = Boolean(
-      userAgent.match(
-        /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
-      )
-    );
+    const regex =
+      /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i;
+    const mobile = regex.exec(userAgent) !== null;
     setIsMobile(mobile);
   }, []);
 
