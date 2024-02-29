@@ -2,7 +2,7 @@ import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage, get16KUrl } from "./NextGenTokenImage";
+import { NextGenTokenImage, get16KUrl, get8KUrl } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
@@ -98,6 +98,9 @@ export default function NextGenToken(props: Readonly<Props>) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
     if (mode === Mode.HIGH_RES) {
+      if (isMobileDevice) {
+        return get8KUrl(props.token.id);
+      }
       return get16KUrl(props.token.id);
     }
     return props.token.image_url;
