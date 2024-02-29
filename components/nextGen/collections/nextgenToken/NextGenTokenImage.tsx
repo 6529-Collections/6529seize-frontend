@@ -10,7 +10,6 @@ import {
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useRef, useState } from "react";
-import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { Spinner } from "../../../dotLoader/DotLoader";
 
 export function ZoomableImage(
@@ -116,9 +115,6 @@ export function NextGenTokenImage(
     is_zoom?: boolean;
   }>
 ) {
-  // if (props.is_fullscreen) {
-  //   alert("is_fullscreen is deprecated");
-  // }
   function getImageUrl() {
     if (props.show_original) {
       return props.token.image_url;
