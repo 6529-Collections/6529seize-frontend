@@ -1,19 +1,14 @@
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import UserSettingsImgSelectMeme, { MemeLite } from "../../settings/UserSettingsImgSelectMeme";
+import {FormEvent, useContext, useEffect, useRef, useState} from "react";
+import {IProfileAndConsolidations} from "../../../../entities/IProfile";
+import {useClickAway, useKeyPressEvent} from "react-use";
+import UserSettingsImgSelectMeme, {MemeLite} from "../../settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectFile from "../../settings/UserSettingsImgSelectFile";
 import UserSettingsSave from "../../settings/UserSettingsSave";
-import { AuthContext } from "../../../auth/Auth";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiFetch,
-  commonApiPostForm,
-} from "../../../../services/api/common-api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {AuthContext} from "../../../auth/Auth";
+import {QueryKey, ReactQueryWrapperContext,} from "../../../react-query-wrapper/ReactQueryWrapper";
+import {commonApiFetch, commonApiPostForm,} from "../../../../services/api/common-api";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {getScaledImageUri, ImageScale} from "../../../../helpers/image.helpers";
 
 export default function UserPageHeaderEditPfp({
   profile,
@@ -45,7 +40,7 @@ export default function UserPageHeaderEditPfp({
   });
 
   const [imageToShow, setImageToShow] = useState<string | null>(
-    profile.profile?.pfp_url ?? null
+      (profile.profile?.pfp_url ? getScaledImageUri(profile.profile.pfp_url, ImageScale.W_200_H_200) : null)
   );
 
   const [selectedMeme, setSelectedMeme] = useState<MemeLite | null>(null);

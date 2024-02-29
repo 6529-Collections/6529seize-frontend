@@ -1,5 +1,6 @@
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import Image from "next/image";
+import {getScaledImageUri, ImageScale} from "../../../../helpers/image.helpers";
 
 export default function UserPageHeaderPfp({
   profile,
@@ -15,7 +16,7 @@ export default function UserPageHeaderPfp({
   if (profile.profile?.pfp_url) {
     return (
       <Image
-        src={profile.profile.pfp_url}
+        src={getScaledImageUri(profile.profile.pfp_url, ImageScale.W_200_H_200)}
         alt="Profile picture"
         width="176"
         height="176"
