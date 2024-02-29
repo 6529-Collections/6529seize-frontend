@@ -657,7 +657,7 @@ export function getCollectionBaseBreadcrums(
 export enum NextGenTokenImageMode {
   LIVE = "Live",
   IMAGE = "Image",
-  S16K = "16K",
+  HIGH_RES = "High Res",
   // SCENE = "Scene",
   BOHO_CHICK_LIVINGROOM = "Boho Chick Livingroom",
   MODERN_BLACK_LIVINGROOM = "Modern Black Livingroom",

@@ -2,7 +2,7 @@ import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage, get16KUrl } from "./NextGenTokenImage";
+import { NextGenTokenImage, get16KUrl, get8KUrl } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
@@ -16,6 +16,8 @@ import {
   getNextGenTokenScene,
 } from "./NextGenTokenScene";
 import useDownloader from "react-use-downloader";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface Props {
   collection: NextGenCollection;
@@ -60,8 +62,8 @@ export function NextGenTokenArtImage(
 
 export default function NextGenTokenArt(props: Readonly<Props>) {
   const downloader = useDownloader();
-
   const mode = props.mode;
+  const isMobileDevice = useIsMobileDevice();
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
@@ -121,7 +123,10 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
       return canvasUrl;
     }
 
-    if (mode === NextGenTokenImageMode.S16K) {
+    if (mode === NextGenTokenImageMode.HIGH_RES) {
+      if (isMobileDevice) {
+        return get8KUrl(props.token.id);
+      }
       return get16KUrl(props.token.id);
     }
     return props.token.image_url;
@@ -142,12 +147,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           </button>
           <button
             className={`${styles.imageResolutionBtn} ${
-              mode === NextGenTokenImageMode.S16K
+              mode === NextGenTokenImageMode.HIGH_RES
                 ? styles.imageResolutionBtnSelected
                 : ""
             }`}
-            onClick={() => props.setMode(NextGenTokenImageMode.S16K)}>
-            16K
+            onClick={() => props.setMode(NextGenTokenImageMode.HIGH_RES)}>
+            {isMobileDevice ? "8K" : "16K"}
           </button>
           <Tippy
             content="Live"
@@ -163,7 +168,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           </Tippy>
           {props.mode !== NextGenTokenImageMode.IMAGE &&
             props.mode !== NextGenTokenImageMode.LIVE &&
-            props.mode !== NextGenTokenImageMode.S16K && (
+            props.mode !== NextGenTokenImageMode.HIGH_RES && (
               <span>Scene: {props.mode}</span>
             )}
         </span>
@@ -289,7 +294,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                       mode={mode}
                       is_fullscreen={isFullScreen}
                       setCanvasUrl={setCanvasUrl}
-                      is_zoom={mode === NextGenTokenImageMode.S16K}
+                      is_zoom={mode === NextGenTokenImageMode.HIGH_RES}
                     />
                   </div>
                 </div>

@@ -12,6 +12,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { useRef, useState } from "react";
 import { Spinner } from "../../../dotLoader/DotLoader";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 export function ZoomableImage(
   props: Readonly<{
@@ -19,7 +20,9 @@ export function ZoomableImage(
     is_fullscreen?: boolean;
   }>
 ) {
-  const isMobile = useIsMobileScreen();
+  const isMobileScreen = useIsMobileScreen();
+  const isMobileDevice = useIsMobileDevice();
+
   const [isZoomed, setIsZoomed] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +52,9 @@ export function ZoomableImage(
   };
 
   function getImageUrl() {
+    if (isMobileDevice) {
+      return get8KUrl(props.token.id);
+    }
     return get16KUrl(props.token.id);
   }
 
@@ -56,7 +62,11 @@ export function ZoomableImage(
     <span
       className="d-flex align-items-center justify-content-center"
       style={{
-        height: props.is_fullscreen ? "100vh" : isMobile ? "55vh" : "85vh",
+        height: props.is_fullscreen
+          ? "100vh"
+          : isMobileScreen
+          ? "60vh"
+          : "85vh",
         width: "auto",
         maxHeight: props.is_fullscreen ? "100vh" : "85vh",
         maxWidth: "100%",
@@ -65,7 +75,7 @@ export function ZoomableImage(
       {loading && (
         <span className="d-flex flex-column gap-3 align-items-center">
           <span className="d-flex flex-wrap text-cennter">
-            16K Pebbles are very large
+            {isMobileDevice ? "8K" : "16K"} Pebbles are very large
           </span>
           <span className="d-flex flex-wrap text-cennter">
             Chill while we download you into the Pebbles multiverse
@@ -119,7 +129,7 @@ export function NextGenTokenImage(
     is_zoom?: boolean;
   }>
 ) {
-  const isMobile = useIsMobileScreen();
+  const isMobileScreen = useIsMobileScreen();
   function getImageUrl() {
     if (props.show_original) {
       return props.token.image_url;
@@ -282,7 +292,11 @@ export function NextGenTokenImage(
         <iframe
           style={{
             width: "100%",
-            height: props.is_fullscreen ? "100vh" : isMobile ? "55vh" : "85vh",
+            height: props.is_fullscreen
+              ? "100vh"
+              : isMobileScreen
+              ? "60vh"
+              : "85vh",
             marginBottom: "-8px",
           }}
           src={props.token.animation_url ?? props.token.generator?.html}
@@ -317,6 +331,10 @@ export function getNextGenThumbnailUrl(tokenId: number) {
 
 export function getNextGenIconUrl(tokenId: number) {
   return `${NEXTGEN_MEDIA_BASE_URL}/thumbnail/${tokenId}`;
+}
+
+export function get8KUrl(tokenId: number) {
+  return `${NEXTGEN_MEDIA_BASE_URL}/png8k/${tokenId}`;
 }
 
 export function get16KUrl(tokenId: number) {
