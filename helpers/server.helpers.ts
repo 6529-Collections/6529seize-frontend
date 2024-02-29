@@ -3,6 +3,7 @@ import { OwnerLite } from "../entities/IOwner";
 import {
   ApiProfileRepRatesState,
   CicStatement,
+  CommunityMemberOverview,
   IProfileAndConsolidations,
   ProfileActivityLog,
   RateMatter,
@@ -20,6 +21,7 @@ import {
   ProfileRatersParamsOrderBy,
 } from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { SortDirection } from "../entities/ISort";
+import { CommunityMembersQuery } from "../pages/community";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -133,6 +135,32 @@ export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
   try {
     return await commonApiFetch<Page<T>, ActivityLogParamsConverted>({
       endpoint: `profile-logs`,
+      params,
+      headers,
+    });
+  } catch {
+    return {
+      count: 0,
+      page: 1,
+      next: false,
+      data: [],
+    };
+  }
+};
+
+export const getCommunityMembers = async ({
+  headers,
+  params,
+}: {
+  headers: Record<string, string>;
+  params: CommunityMembersQuery;
+}): Promise<Page<CommunityMemberOverview>> => {
+  try {
+    return await commonApiFetch<
+      Page<CommunityMemberOverview>,
+      CommunityMembersQuery
+    >({
+      endpoint: `community-members/top`,
       params,
       headers,
     });

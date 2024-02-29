@@ -2,6 +2,7 @@ import { createContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ApiProfileRepRatesState,
+  CommunityMemberOverview,
   IProfileAndConsolidations,
   ProfileActivityLog,
   ProfileActivityLogRatingEdit,
@@ -15,6 +16,7 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { CommunityMembersQuery } from "../../pages/community";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -38,6 +40,7 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PHASES = "COLLECTION_ALLOWLIST_PHASES",
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
+  COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -65,6 +68,11 @@ export interface InitProfileRatersParamsAndData {
 export interface InitProfileActivityLogsParams {
   readonly params: ActivityLogParams;
   readonly data: Page<ProfileActivityLog>;
+}
+
+export interface InitCommunityMembersParams {
+  readonly params: CommunityMembersQuery;
+  readonly data: Page<CommunityMemberOverview>;
 }
 
 export interface InitProfileRepPageParams {
@@ -121,7 +129,8 @@ type ReactQueryWrapperContextType = {
     activityLogs,
   }: {
     activityLogs: InitProfileActivityLogsParams;
-  }) => void;
+    }) => void;
+  initCommunityMembers: (params: InitCommunityMembersParams) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -135,7 +144,8 @@ export const ReactQueryWrapperContext =
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
-    initCommunityActivityPage: () => {},
+    initCommunityActivityPage: () => { },
+    initCommunityMembers: () => { },
   });
 
 export default function ReactQueryWrapper({
@@ -426,6 +436,16 @@ export default function ReactQueryWrapper({
     );
   };
 
+  const initCommunityMembers = ({
+    params,
+    data,
+  }: InitCommunityMembersParams) => {
+    queryClient.setQueryData(
+      [QueryKey.COMMUNITY_MEMBERS_TOP, params],
+      data
+    );
+  }
+
   const initProfileRepPage = ({
     profile,
     repRates,
@@ -482,6 +502,7 @@ export default function ReactQueryWrapper({
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,
+        initCommunityMembers,
       }}>
       {children}
     </ReactQueryWrapperContext.Provider>
