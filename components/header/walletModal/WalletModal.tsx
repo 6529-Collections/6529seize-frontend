@@ -1,17 +1,18 @@
-import { Col, Container, Modal, Row } from "react-bootstrap";
+import {Col, Container, Modal, Row} from "react-bootstrap";
 import styles from "./WalletModal.module.scss";
-import { disconnect } from "@wagmi/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {disconnect} from "@wagmi/core";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { ENS } from "../../../entities/IENS";
-import { numberWithCommas } from "../../../helpers/Helpers";
+import {useEffect, useState} from "react";
+import {ENS} from "../../../entities/IENS";
+import {numberWithCommas} from "../../../helpers/Helpers";
 import Address from "../../address/Address";
-import { useAccount } from "wagmi";
-import { useQuery } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../services/api/common-api";
+import {useAccount} from "wagmi";
+import {useQuery} from "@tanstack/react-query";
+import {IProfileAndConsolidations} from "../../../entities/IProfile";
+import {QueryKey} from "../../react-query-wrapper/ReactQueryWrapper";
+import {commonApiFetch} from "../../../services/api/common-api";
+import {getScaledImageUri, ImageScale} from "../../../helpers/image.helpers";
 
 interface Props {
   readonly wallet: `0x${string}`;
@@ -94,11 +95,11 @@ export default function WalletModal(props: Readonly<Props>) {
             background: `linear-gradient(45deg, ${ens.banner_1} 0%, ${ens.banner_2} 100%)`,
           }}>
           <Image
-            src={ens.pfp}
+              style={{ border: '4px solid black', marginTop: '10px', width: '100px', height: 'auto'}}
+            src={getScaledImageUri(ens.pfp, ImageScale.W_100_H_AUTO)}
             alt="Profile Picture"
             width={0}
             height={0}
-            className={styles.pfp}
           />
         </div>
       )}
