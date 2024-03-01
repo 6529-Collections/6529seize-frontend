@@ -1,7 +1,7 @@
 export default function CommonTableWrapper({
   children,
 }: {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }) {
   return (
     <div className="tailwind-scope tw-mt-2 lg:tw-mt-4 tw-flow-root">

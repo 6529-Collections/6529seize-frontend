@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import { SortDirection } from "../entities/ISort";
 import { FullPageRequest } from "../helpers/Types";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import Head from "next/head";

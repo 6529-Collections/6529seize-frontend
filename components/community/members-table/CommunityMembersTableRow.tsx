@@ -2,11 +2,13 @@ import {
   CommunityMemberOverview,
   CIC_TO_TEXT,
 } from "../../../entities/IProfile";
-import { formatNumberWithCommasOrDash } from "../../../helpers/Helpers";
+import {
+  formatNumberWithCommasOrDash,
+  cicToType,
+} from "../../../helpers/Helpers";
 import UserLevel from "../../user/utils/level/UserLevel";
 import Tippy from "@tippyjs/react";
 import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
-import { cicToType } from "../../../helpers/Helpers";
 import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
 import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
 import CommonTimeAgo from "../../utils/CommonTimeAgo";

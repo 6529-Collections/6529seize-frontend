@@ -3,7 +3,6 @@ import { OwnerLite } from "../entities/IOwner";
 import {
   ApiProfileRepRatesState,
   CicStatement,
-  CommunityMemberOverview,
   IProfileAndConsolidations,
   ProfileActivityLog,
   RateMatter,
@@ -21,7 +20,6 @@ import {
   ProfileRatersParamsOrderBy,
 } from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { SortDirection } from "../entities/ISort";
-import { CommunityMembersQuery } from "../pages/community";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;

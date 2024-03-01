@@ -2,7 +2,6 @@ import { createContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ApiProfileRepRatesState,
-  CommunityMemberOverview,
   IProfileAndConsolidations,
   ProfileActivityLog,
   ProfileActivityLogRatingEdit,
@@ -16,7 +15,6 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { CommunityMembersQuery } from "../../pages/community";
 
 export enum QueryKey {
   PROFILE = "PROFILE",

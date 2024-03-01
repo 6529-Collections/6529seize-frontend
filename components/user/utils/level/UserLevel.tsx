@@ -10,8 +10,8 @@ export default function UserLevel({
   level,
   size = "base",
 }: {
-  level: number;
-  size?: "sm" | "base";
+  readonly level: number;
+  readonly size?: "sm" | "base";
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
@@ -24,13 +24,11 @@ export default function UserLevel({
   };
 
   return (
-    <div>
-      <span
-        onClick={openLevelsPage}
-        className={`tw-cursor-pointer tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
-      >
-        Level {level}
-      </span>
-    </div>
+    <button
+      onClick={openLevelsPage}
+      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
+    >
+      Level {level}
+    </button>
   );
 }
