@@ -2,7 +2,7 @@ import {
   CLASSIFICATIONS,
   IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
-import UserCICTypeIcon from "../../utils/user-cic-type/UserCICTypeIcon";
+import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 
@@ -42,7 +42,7 @@ export default function UserPageHeaderName({
         </UserPageHeaderNameWrapper>
         {profile.profile?.handle && (
           <div className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-self-center tw-h-6 tw-w-6">
-            <UserCICTypeIcon profile={profile} />
+            <UserCICTypeIconWrapper profile={profile} />
           </div>
         )}
       </div>
