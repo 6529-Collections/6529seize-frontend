@@ -160,14 +160,14 @@ export default function CommunityMembers() {
     isFetching,
     data: members,
   } = useQuery<Page<CommunityMemberOverview>>({
-    queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, debouncedParams],
+    queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, params],
     queryFn: async () =>
       await commonApiFetch<
         Page<CommunityMemberOverview>,
         CommunityMembersQuery
       >({
         endpoint: `community-members/top`,
-        params: debouncedParams,
+        params: params,
       }),
     placeholderData: keepPreviousData,
   });
