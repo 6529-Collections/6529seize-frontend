@@ -29,6 +29,25 @@ export default function NextGenZoomableImage(
   const [objectPosition, setObjectPosition] = useState<string>("50% 50%");
 
   useEffect(() => {
+    const preventDefault = (e: Event) => e.preventDefault();
+    if (dragStart !== null) {
+      window.addEventListener("wheel", preventDefault, { passive: false });
+      window.addEventListener("touchmove", preventDefault, { passive: false });
+      document.body.style.overflow = "hidden";
+    } else {
+      window.removeEventListener("wheel", preventDefault);
+      window.removeEventListener("touchmove", preventDefault);
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      window.removeEventListener("wheel", preventDefault);
+      window.removeEventListener("touchmove", preventDefault);
+      document.body.style.overflow = "";
+    };
+  }, [dragStart]);
+
+  useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const imgElement = imgRef.current;
