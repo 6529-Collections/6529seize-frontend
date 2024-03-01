@@ -298,8 +298,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                 </Dropdown.Item>
               )}
               {Object.values(Resolution)
-                .filter((r) =>
-                  [Resolution["0.5K"], Resolution.Thumbnail].includes(r)
+                .filter(
+                  (r) => ![Resolution["0.5K"], Resolution.Thumbnail].includes(r)
                 )
                 .map((resolution) => (
                   <NextGenTokenDownloadDropdownItem
