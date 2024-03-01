@@ -237,5 +237,5 @@ export function get8KUrl(tokenId: number) {
 }
 
 export function get16KUrl(tokenId: number) {
-  return `${NEXTGEN_MEDIA_BASE_URL}/png4k/${tokenId}`;
+  return `${NEXTGEN_MEDIA_BASE_URL}/png16k/${tokenId}`;
 }
