@@ -139,11 +139,13 @@ export function NextGenTokenImage(
   function getImage() {
     let height = "auto";
     if (props.token_art) {
-      height = "85vh";
+      if (isMobileScreen) {
+        height = "60vh";
+      } else {
+        height = "85vh";
+      }
     } else if (props.is_fullscreen) {
       height = "100vh";
-    } else if (isMobileScreen) {
-      height = "60vh";
     }
 
     return (
