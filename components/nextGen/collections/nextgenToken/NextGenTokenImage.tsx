@@ -23,7 +23,10 @@ export function ZoomableImage(
   const isMobileScreen = useIsMobileScreen();
   const isMobileDevice = useIsMobileDevice();
 
+  const MAX_ZOOM_SCALE = 20;
+
   const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
   const imgRef = useRef<HTMLImageElement>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +44,17 @@ export function ZoomableImage(
 
   const handleImageClick = (e: any) => {
     updateObjectPosition(e);
-    setIsZoomed(!isZoomed);
+    if (isZoomed) {
+      if (zoomScale === MAX_ZOOM_SCALE) {
+        setIsZoomed(false);
+        setZoomScale(1);
+      } else {
+        setZoomScale(zoomScale + 1);
+      }
+    } else {
+      setIsZoomed(true);
+      setZoomScale(2);
+    }
   };
 
   const [objectPosition, setObjectPosition] = useState<string>();
@@ -96,9 +109,12 @@ export function ZoomableImage(
           height: "100%",
           width: "auto",
           transition: "transform 0.2s ease-out",
-          objectFit: isZoomed ? "none" : "contain",
-          objectPosition: isZoomed ? objectPosition : "center",
-          cursor: isZoomed ? "zoom-out" : "zoom-in",
+          objectFit: "contain",
+          objectPosition: "center",
+          cursor:
+            isZoomed && zoomScale === MAX_ZOOM_SCALE ? "zoom-out" : "zoom-in",
+          transform: `scale(${zoomScale})`,
+          transformOrigin: objectPosition,
         }}
         onLoad={() => setLoading(false)}
         onClick={handleImageClick}
@@ -253,7 +269,7 @@ export function NextGenTokenImage(
               width="0"
               height="0"
               style={{
-                height: props.is_fullscreen ? "100vh" : "auto",
+                height: props.is_fullscreen ? "100vh" : "85vh",
                 width: "auto",
                 maxHeight: props.is_fullscreen ? "100vh" : "85vh",
                 maxWidth: "100%",
