@@ -158,6 +158,12 @@ export default function CommunityMembers({
                     isActive={params.sort === CommunityMembersSortOption.CIC}
                   />
                 </th>
+                <th
+                  scope="col"
+                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-md tw-font-medium tw-text-iron-400"
+                >
+                  <span>Active</span>
+                </th>
               </tr>
             </thead>
             <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">

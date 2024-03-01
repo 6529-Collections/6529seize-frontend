@@ -24,7 +24,7 @@ export default function CommunityMembersTableRow({
   const textColorClass = isProfile ? "tw-text-iron-50" : "tw-text-iron-400";
   return (
     <tr className="even:tw-bg-iron-900 tw-cursor-pointer hover:tw-bg-iron-700  tw-transition tw-duration-300 tw-ease-out">
-      <td className="tw-px-4 sm:tw-pl-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-500">
+      <td className="tw-px-4 sm:tw-pl-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
         {rank}
       </td>
       <td
@@ -40,7 +40,7 @@ export default function CommunityMembersTableRow({
           ) : (
             <div className="tw-h-8 tw-w-8 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800"></div>
           )}
-          <div>{member.display}</div>
+          <div className="tw-truncate tw-max-w-xs">{member.display}</div>
         </div>
       </td>
       <td
@@ -75,6 +75,9 @@ export default function CommunityMembersTableRow({
             </div>
           </Tippy>
         </div>
+      </td>
+      <td className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
+        2 m ago
       </td>
     </tr>
   );
