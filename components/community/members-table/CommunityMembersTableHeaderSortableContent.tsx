@@ -10,11 +10,13 @@ export default function CommunityMembersTableHeaderSortableContent({
   sort,
   activeSort,
   sortDirection,
+  hoveringOption,
   isLoading,
 }: {
   readonly sort: CommunityMembersSortOption;
   readonly activeSort: CommunityMembersSortOption;
   readonly sortDirection: SortDirection;
+  readonly hoveringOption: CommunityMembersSortOption | null;
   readonly isLoading: boolean;
 }) {
   const isActive = sort === activeSort;
@@ -29,12 +31,13 @@ export default function CommunityMembersTableHeaderSortableContent({
 
   const [rotate, setRotate] = useState<boolean>(false);
   useEffect(() => setRotate(false), [sortDirection]);
+  useEffect(
+    () => setRotate(isActive && hoveringOption === sort),
+    [hoveringOption]
+  );
   const showLoader = isLoading && isActive;
   return (
-    <div
-      onMouseEnter={() => setRotate(isActive)}
-      onMouseLeave={() => setRotate(false)}
-    >
+    <>
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
@@ -53,6 +56,6 @@ export default function CommunityMembersTableHeaderSortableContent({
           shouldRotate={rotate}
         />
       )}
-    </div>
+    </>
   );
 }
