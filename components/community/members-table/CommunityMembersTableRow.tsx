@@ -15,10 +15,7 @@ export default function CommunityMembersTableRow({
   readonly member: CommunityMemberOverview;
   readonly rank: number;
 }) {
-  const isNotProfile =
-    member.display.includes(".eth") ||
-    isEthereumAddress(member.display) ||
-    member.display.includes(" ");
+  const isNotProfile = isEthereumAddress(member.detail_view_key);
   const isProfile = !isNotProfile;
 
   const textColorClass = isProfile ? "tw-text-iron-50" : "tw-text-iron-400";
@@ -31,9 +28,9 @@ export default function CommunityMembersTableRow({
         className={`tw-pr-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium ${textColorClass}`}
       >
         <div className="tw-flex tw-items-center tw-gap-x-4">
-          {isProfile ? (
+          {member.pfp ? (
             <img
-              src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+              src={member.pfp}
               alt="Community Table Profile Picture"
               className="tw-h-8 tw-w-8 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800"
             />

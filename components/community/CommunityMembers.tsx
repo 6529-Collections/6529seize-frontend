@@ -14,6 +14,7 @@ import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useDebounce } from "react-use";
+import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -85,16 +86,6 @@ export default function CommunityMembers() {
     return searchParamsStr.toString();
   };
 
-  const updateFields = async (
-    updateItems: QueryUpdateInput[]
-  ): Promise<void> => {
-    const queryString = createQueryString(updateItems);
-    const path = queryString ? pathname + "?" + queryString : pathname;
-    await router.replace(path, undefined, {
-      shallow: true,
-    });
-  };
-
   const [params, setParams] = useState(getParamsFromUrl());
   useEffect(() => setParams(getParamsFromUrl()), [searchParams]);
 
@@ -116,6 +107,51 @@ export default function CommunityMembers() {
     return defaultSortDirection;
   };
 
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [debouncedParams, setDebouncedParams] =
+    useState<CommunityMembersQuery>(params);
+
+  useDebounce(() => setDebouncedParams(params), 200, [params]);
+
+  const {
+    isLoading,
+    isFetching,
+    data: members,
+  } = useQuery<Page<CommunityMemberOverview>>({
+    queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, debouncedParams],
+    queryFn: async () =>
+      await commonApiFetch<
+        Page<CommunityMemberOverview>,
+        CommunityMembersQuery
+      >({
+        endpoint: `community-members/top`,
+        params: debouncedParams,
+      }),
+    placeholderData: keepPreviousData,
+  });
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!members?.count) {
+      setPage(1);
+      setTotalPages(1);
+      return;
+    }
+    const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
+    if (pagesCount < debouncedParams.page) setPage(pagesCount);
+    setTotalPages(pagesCount);
+  }, [members?.count, isLoading]);
+
+  const updateFields = async (
+    updateItems: QueryUpdateInput[]
+  ): Promise<void> => {
+    const queryString = createQueryString(updateItems);
+    const path = queryString ? pathname + "?" + queryString : pathname;
+    await router.replace(path, undefined, {
+      shallow: true,
+    });
+  };
+
   const setSortBy = async (
     sortBy: CommunityMembersSortOption
   ): Promise<void> => {
@@ -128,8 +164,8 @@ export default function CommunityMembers() {
         name: "sortDirection",
         value: calculateSortDirection({
           newSortBy: sortBy,
-          currentSortBy: params.sort,
-          currentSortDirection: params.sort_direction,
+          currentSortBy: debouncedParams.sort,
+          currentSortDirection: debouncedParams.sort_direction,
         }),
       },
       {
@@ -150,39 +186,12 @@ export default function CommunityMembers() {
     await updateFields(items);
   };
 
-  const [totalPages, setTotalPages] = useState<number>(1);
-
-  const [debouncedParams, setDebouncedParams] = useState(params);
-  useDebounce(() => setDebouncedParams(params), 100, [params]);
-
-  const {
-    isLoading,
-    isFetching,
-    data: members,
-  } = useQuery<Page<CommunityMemberOverview>>({
-    queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, params],
-    queryFn: async () =>
-      await commonApiFetch<
-        Page<CommunityMemberOverview>,
-        CommunityMembersQuery
-      >({
-        endpoint: `community-members/top`,
-        params: params,
-      }),
-    placeholderData: keepPreviousData,
-  });
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!members?.count) {
-      setPage(1);
-      setTotalPages(1);
-      return;
-    }
-    setTotalPages(Math.ceil(members.count / params.page_size));
-  }, [members?.count, isLoading]);
-
-  if (!members) return null;
+  if (!members)
+    return (
+      <div className="tw-h-screen tw-w-full">
+        <CommonCardSkeleton />
+      </div>
+    );
 
   return (
     <div className="tw-scroll-py-3 tw-overflow-auto">
