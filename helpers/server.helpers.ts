@@ -148,32 +148,6 @@ export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
   }
 };
 
-export const getCommunityMembers = async ({
-  headers,
-  params,
-}: {
-  headers: Record<string, string>;
-  params: CommunityMembersQuery;
-}): Promise<Page<CommunityMemberOverview>> => {
-  try {
-    return await commonApiFetch<
-      Page<CommunityMemberOverview>,
-      CommunityMembersQuery
-    >({
-      endpoint: `community-members/top`,
-      params,
-      headers,
-    });
-  } catch {
-    return {
-      count: 0,
-      page: 1,
-      next: false,
-      data: [],
-    };
-  }
-};
-
 export const getUserProfileIdentityStatements = async ({
   user,
   headers,

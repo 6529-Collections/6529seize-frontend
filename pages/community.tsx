@@ -1,26 +1,15 @@
 import dynamic from "next/dynamic";
-import { CommunityMemberOverview } from "../entities/IProfile";
 import { SortDirection } from "../entities/ISort";
-import { FullPageRequest, Page } from "../helpers/Types";
-import {
-  getCommonHeaders,
-  getCommunityMembers,
-} from "../helpers/server.helpers";
+import { FullPageRequest } from "../helpers/Types";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import Head from "next/head";
 import CommunityMembers from "../components/community/CommunityMembers";
-import { useContext } from "react";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
-
-interface CommunityPageProps {
-  readonly members: Page<CommunityMemberOverview>;
-}
 
 export enum CommunityMembersSortOption {
   DISPLAY = "display",
@@ -32,27 +21,13 @@ export enum CommunityMembersSortOption {
 
 export type CommunityMembersQuery = FullPageRequest<CommunityMembersSortOption>;
 
-const INITIAL_PARAMS: CommunityMembersQuery = {
-  page: 1,
-  page_size: 20,
-  sort_direction: SortDirection.DESC,
-  sort: CommunityMembersSortOption.LEVEL,
-};
 
-export default function CommunityPage({
-  pageProps,
-}: {
-  readonly pageProps: CommunityPageProps;
-}) {
+export default function CommunityPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Community" },
   ];
-  const { initCommunityMembers } = useContext(ReactQueryWrapperContext);
-  initCommunityMembers({
-    params: INITIAL_PARAMS,
-    data: pageProps.members,
-  });
+
   return (
     <>
       <Head>
@@ -76,40 +51,9 @@ export default function CommunityPage({
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <h1 className="tw-block tw-float-none">Community</h1>
-          <CommunityMembers initialParams={INITIAL_PARAMS} />
+          <CommunityMembers />
         </div>
       </main>
     </>
   );
-}
-
-export async function getServerSideProps(
-  req: any,
-  res: any,
-  resolvedUrl: any
-): Promise<{
-  props: CommunityPageProps;
-}> {
-  try {
-    const headers = getCommonHeaders(req);
-    return {
-      props: {
-        members: await getCommunityMembers({
-          headers,
-          params: INITIAL_PARAMS,
-        }),
-      },
-    };
-  } catch (error) {
-    return {
-      props: {
-        members: {
-          count: 0,
-          page: 1,
-          next: false,
-          data: [],
-        },
-      },
-    };
-  }
 }

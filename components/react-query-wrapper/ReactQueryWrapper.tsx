@@ -70,11 +70,6 @@ export interface InitProfileActivityLogsParams {
   readonly data: Page<ProfileActivityLog>;
 }
 
-export interface InitCommunityMembersParams {
-  readonly params: CommunityMembersQuery;
-  readonly data: Page<CommunityMemberOverview>;
-}
-
 export interface InitProfileRepPageParams {
   readonly profile: IProfileAndConsolidations;
   readonly repRates: UserPageRepPropsRepRates;
@@ -130,7 +125,6 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
     }) => void;
-  initCommunityMembers: (params: InitCommunityMembersParams) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -145,7 +139,6 @@ export const ReactQueryWrapperContext =
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => { },
-    initCommunityMembers: () => { },
   });
 
 export default function ReactQueryWrapper({
@@ -436,16 +429,6 @@ export default function ReactQueryWrapper({
     );
   };
 
-  const initCommunityMembers = ({
-    params,
-    data,
-  }: InitCommunityMembersParams) => {
-    queryClient.setQueryData(
-      [QueryKey.COMMUNITY_MEMBERS_TOP, params],
-      data
-    );
-  }
-
   const initProfileRepPage = ({
     profile,
     repRates,
@@ -502,7 +485,6 @@ export default function ReactQueryWrapper({
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,
-        initCommunityMembers,
       }}>
       {children}
     </ReactQueryWrapperContext.Provider>
