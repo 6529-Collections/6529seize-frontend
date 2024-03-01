@@ -10,8 +10,7 @@ import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import CommonTablePagination from "../utils/table/CommonTablePagination";
 import { SortDirection } from "../../entities/ISort";
-import CommonTableSortIcon from "../user/utils/icons/CommonTableSortIcon";
-import CommunityMembersTableRow from "./members-table/CommunityMembersTableRow";
+import CommunityMembersTable from "./members-table/CommunityMembersTable";
 
 export default function CommunityMembers({
   initialParams,
@@ -21,7 +20,11 @@ export default function CommunityMembers({
   const [params, setParams] = useState<CommunityMembersQuery>(initialParams);
 
   const [totalPages, setTotalPages] = useState<number>(1);
-  const { isLoading, data: members } = useQuery<Page<CommunityMemberOverview>>({
+  const {
+    isLoading,
+    isFetching,
+    data: members,
+  } = useQuery<Page<CommunityMemberOverview>>({
     queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, params],
     queryFn: async () =>
       await commonApiFetch<
@@ -42,7 +45,7 @@ export default function CommunityMembers({
       return;
     }
     setTotalPages(Math.ceil(members.count / initialParams.page_size));
-  }, [members?.count, members?.page, isLoading]);
+  }, [members?.count, isLoading]);
 
   const onPage = (page: number) =>
     setParams((prev) => ({ ...prev, page: page }));
@@ -63,119 +66,15 @@ export default function CommunityMembers({
     <div className="tw-scroll-py-3 tw-overflow-auto">
       <div className="tailwind-scope tw-mt-2 lg:tw-mt-4 tw-flow-root">
         <div className="tw-bg-iron-950 tw-overflow-x-auto tw-shadow tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
-          <table className="tw-min-w-full">
-            <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700">
-              <tr>
-                <th
-                  scope="col"
-                  className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-400"
-                >
-                  Rank
-                </th>
-
-                <th
-                  scope="col"
-                  className="tw-whitespace-nowrap tw-pr-4 sm:tw-pr-6 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-400"
-                >
-                  Profile
-                </th>
-
-                <th
-                  scope="col"
-                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-md tw-font-medium tw-text-iron-400"
-                  onClick={() => onSort(CommunityMembersSortOption.LEVEL)}
-                >
-                  <span
-                    className={`${
-                      params.sort === CommunityMembersSortOption.LEVEL
-                        ? "tw-text-primary-400"
-                        : "group-hover:tw-text-iron-200"
-                    } tw-transition tw-duration-300 tw-ease-out`}
-                  >
-                    Level
-                  </span>
-
-                  <CommonTableSortIcon
-                    direction={params.sort_direction}
-                    isActive={params.sort === CommunityMembersSortOption.LEVEL}
-                  />
-                </th>
-                <th
-                  scope="col"
-                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-md tw-font-medium tw-text-iron-400"
-                  onClick={() => onSort(CommunityMembersSortOption.TDH)}
-                >
-                  <span
-                    className={`${
-                      params.sort === CommunityMembersSortOption.TDH
-                        ? "tw-text-primary-400"
-                        : "group-hover:tw-text-iron-200"
-                    } tw-transition tw-duration-300 tw-ease-out`}
-                  >
-                    TDH
-                  </span>
-
-                  <CommonTableSortIcon
-                    direction={params.sort_direction}
-                    isActive={params.sort === CommunityMembersSortOption.TDH}
-                  />
-                </th>
-                <th
-                  scope="col"
-                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-md tw-font-medium tw-text-iron-400"
-                >
-                  <span
-                    className={`${
-                      params.sort === CommunityMembersSortOption.REP
-                        ? "tw-text-primary-400"
-                        : "group-hover:tw-text-iron-200"
-                    } tw-transition tw-duration-300 tw-ease-out`}
-                  >
-                    REP
-                  </span>
-
-                  <CommonTableSortIcon
-                    direction={params.sort_direction}
-                    isActive={params.sort === CommunityMembersSortOption.REP}
-                  />
-                </th>
-                <th
-                  scope="col"
-                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-md tw-font-medium tw-text-iron-400"
-                >
-                  <span
-                    className={`${
-                      params.sort === CommunityMembersSortOption.CIC
-                        ? "tw-text-primary-400"
-                        : "group-hover:tw-text-iron-200"
-                    } tw-transition tw-duration-300 tw-ease-out`}
-                  >
-                    CIC
-                  </span>
-
-                  <CommonTableSortIcon
-                    direction={params.sort_direction}
-                    isActive={params.sort === CommunityMembersSortOption.CIC}
-                  />
-                </th>
-                <th
-                  scope="col"
-                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-md tw-font-medium tw-text-iron-400"
-                >
-                  <span>Active</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">
-              {members?.data.map((member, index) => (
-                <CommunityMembersTableRow
-                  key={member.detail_view_key}
-                  member={member}
-                  rank={index + 1 + (members.page - 1) * params.page_size}
-                />
-              ))}
-            </tbody>
-          </table>
+          <CommunityMembersTable
+            members={members?.data || []}
+            activeSort={params.sort}
+            sortDirection={params.sort_direction}
+            page={params.page}
+            pageSize={params.page_size}
+            isLoading={isFetching}
+            onSort={onSort}
+          />
         </div>
       </div>
       {totalPages > 1 && (
