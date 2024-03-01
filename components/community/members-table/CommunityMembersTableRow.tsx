@@ -30,7 +30,7 @@ export default function CommunityMembersTableRow({
         {rank}
       </td>
       <td
-        className={`tw-group tw-pr-2 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
+        className={`tw-group tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
       >
         {member.pfp ? (
           <img
@@ -43,10 +43,12 @@ export default function CommunityMembersTableRow({
         )}
       </td>
       <td className="tw-group tw-pr-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium">
-        <div className="tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs">
+        <div
+          className={`tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs ${textColorClass}`}
+        >
           <Link
             href={path}
-            className={`tw-no-underline group-hover:tw-underline  group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${textColorClass}`}
+            className={`tw-no-underline group-hover:tw-underline group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${textColorClass}`}
           >
             {member.display}
           </Link>
