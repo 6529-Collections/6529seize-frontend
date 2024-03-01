@@ -22,17 +22,20 @@ export default function CommunityMembersTableHeader({
         >
           Rank
         </th>
-
+        <th
+          scope="col"
+          className="tw-whitespace-nowrap tw-pr-2 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+        >
+          <span className="tw-sr-only">Profile Image</span>
+        </th>
         <th
           scope="col"
           className="tw-whitespace-nowrap tw-pr-4 sm:tw-pr-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
         >
           Profile
         </th>
-
         <th
           scope="col"
-          tabindex="0"
           className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.LEVEL)}
         >

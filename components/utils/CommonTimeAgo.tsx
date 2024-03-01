@@ -6,7 +6,7 @@ export default function CommonTimeAgo({
   readonly timestamp: number;
 }) {
   return (
-    <span className="tw-whitespace-nowrap tw-font-medium tw-text-sm tw-text-iron-500">
+    <span className="tw-whitespace-nowrap tw-font-medium tw-text-base tw-text-iron-500">
       {getTimeAgo(timestamp)}
     </span>
   );
