@@ -10,6 +10,8 @@ import { cicToType } from "../../../helpers/Helpers";
 import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
 import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
 import CommonTimeAgo from "../../utils/CommonTimeAgo";
+import Link from "next/link";
+
 export default function CommunityMembersTableRow({
   member,
   rank,
@@ -21,6 +23,7 @@ export default function CommunityMembersTableRow({
   const isProfile = !isNotProfile;
 
   const textColorClass = isProfile ? "tw-text-iron-50" : "tw-text-iron-400";
+  const path = `/${member.detail_view_key}`;
   return (
     <tr className="even:tw-bg-iron-900 tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out">
       <td className="tw-px-4 sm:tw-pl-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium tw-text-iron-400">
@@ -39,9 +42,12 @@ export default function CommunityMembersTableRow({
           ) : (
             <div className="tw-h-8 tw-w-8 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800"></div>
           )}
-          <a className="tw-no-underline group-hover:tw-text-iron-500 tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs tw-transition tw-duration-300 tw-ease-out">
+          <Link
+            href={path}
+            className="tw-no-underline group-hover:tw-text-iron-500 tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs tw-transition tw-duration-300 tw-ease-out"
+          >
             {member.display}
-          </a>
+          </Link>
         </div>
       </td>
       <td
