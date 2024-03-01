@@ -39,6 +39,7 @@ export function NextGenTokenArtImage(
     is_zoom: boolean;
     zoom_scale: number;
     setZoomScale: (scale: number) => void;
+    onImageLoaded: () => void;
   }>
 ) {
   const scene = getNextGenTokenScene(props.mode);
@@ -61,6 +62,7 @@ export function NextGenTokenArtImage(
         zoom_scale={props.zoom_scale}
         setZoomScale={props.setZoomScale}
         maintain_aspect_ratio={false}
+        onImageLoaded={props.onImageLoaded}
       />
     );
   }
@@ -88,6 +90,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
 
   const [zoomScale, setZoomScale] = useState(1);
+  const [showZoomControls, setShowZoomControls] = useState(false);
 
   const tokenImageRef = useRef(null);
 
@@ -213,32 +216,36 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             xs={6}
             sm={4}
             className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center">
-            <FontAwesomeIcon
-              className={styles.modeIcon}
-              icon="minus-square"
-              onClick={handleScaleDown}
-              style={{
-                color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
-              }}
-            />
-            <span className="unselectable">Scale: {zoomScale}</span>
-            <FontAwesomeIcon
-              className={styles.modeIcon}
-              icon="plus-square"
-              onClick={handleScaleUp}
-              style={{
-                color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
-              }}
-            />
-            <FontAwesomeIcon
-              className={styles.modeIcon}
-              icon="refresh"
-              onClick={() => setZoomScale(MIN_ZOOM_SCALE)}
-              style={{
-                paddingLeft: "5px",
-                color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
-              }}
-            />
+            {showZoomControls && (
+              <>
+                <FontAwesomeIcon
+                  className={styles.modeIcon}
+                  icon="minus-square"
+                  onClick={handleScaleDown}
+                  style={{
+                    color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+                  }}
+                />
+                <span className="unselectable">Scale: {zoomScale}</span>
+                <FontAwesomeIcon
+                  className={styles.modeIcon}
+                  icon="plus-square"
+                  onClick={handleScaleUp}
+                  style={{
+                    color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
+                  }}
+                />
+                <FontAwesomeIcon
+                  className={styles.modeIcon}
+                  icon="refresh"
+                  onClick={() => setZoomScale(MIN_ZOOM_SCALE)}
+                  style={{
+                    paddingLeft: "5px",
+                    color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+                  }}
+                />
+              </>
+            )}
           </Col>
         )}
         {props.mode !== NextGenTokenImageMode.IMAGE &&
@@ -369,6 +376,10 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     return `row ${styles.modeRow}`;
   }
 
+  useEffect(() => {
+    setShowZoomControls(false);
+  }, [mode]);
+
   return (
     <Container>
       <Row>
@@ -392,6 +403,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                       is_zoom={mode === NextGenTokenImageMode.HIGH_RES}
                       zoom_scale={zoomScale}
                       setZoomScale={setZoomScale}
+                      onImageLoaded={() => {
+                        setShowZoomControls(true);
+                      }}
                     />
                   </div>
                 </div>
