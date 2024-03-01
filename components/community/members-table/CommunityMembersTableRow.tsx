@@ -43,7 +43,11 @@ export default function CommunityMembersTableRow({
           <div>{member.display}</div>
         </div>
       </td>
-      <td className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
+      <td
+        className={`tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium ${
+          isNotProfile ? "tw-opacity-50" : ""
+        }`}
+      >
         <UserLevel level={member.level} size="sm" />
       </td>
       <td
@@ -62,8 +66,8 @@ export default function CommunityMembersTableRow({
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
           {formatNumberWithCommasOrDash(member.cic)}
           <Tippy
-            placement={"auto"}
-            interactive={true}
+            placement={"top"}
+            interactive={false}
             content={CIC_TO_TEXT[cicToType(member.cic)]}
           >
             <div className="tw-h-5 tw-w-5">
