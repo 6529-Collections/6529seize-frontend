@@ -169,15 +169,25 @@ export default function NextGenZoomableImage(
   }
 
   function getContent() {
+    let height = "85vh";
+    if (props.is_fullscreen) {
+      height = "100vh";
+    } else if (isMobileScreen) {
+      height = "60vh";
+    }
+    let cursor = "default";
+    if (props.zoom_scale > MIN_ZOOM_SCALE) {
+      if (dragStart) {
+        cursor = "grabbing";
+      } else {
+        cursor = "grab";
+      }
+    }
     return (
       <span
         className="d-flex align-items-center justify-content-center"
         style={{
-          height: props.is_fullscreen
-            ? "100vh"
-            : isMobileScreen
-            ? "60vh"
-            : "85vh",
+          height: height,
           width: "auto",
           maxHeight: props.is_fullscreen ? "100vh" : "85vh",
           maxWidth: "100%",
@@ -210,12 +220,7 @@ export default function NextGenZoomableImage(
             objectFit: "contain",
             transform: `scale(${props.zoom_scale})`,
             transformOrigin: objectPosition,
-            cursor:
-              props.zoom_scale > MIN_ZOOM_SCALE
-                ? dragStart
-                  ? "grabbing"
-                  : "grab"
-                : "default",
+            cursor: cursor,
           }}
           onLoad={() =>
             setTimeout(() => {

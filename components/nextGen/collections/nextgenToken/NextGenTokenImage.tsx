@@ -19,6 +19,7 @@ export function NextGenTokenImage(
     info_class?: string;
     show_animation?: boolean;
     show_original?: boolean;
+    token_art?: boolean;
     is_fullscreen?: boolean;
     rarity_type?: NextGenTokenRarityType;
     show_listing?: boolean;
@@ -136,6 +137,15 @@ export function NextGenTokenImage(
     );
   }
   function getImage() {
+    let height = "auto";
+    if (props.token_art) {
+      height = "85vh";
+    } else if (props.is_fullscreen) {
+      height = "100vh";
+    } else if (isMobileScreen) {
+      height = "60vh";
+    }
+
     return (
       <>
         <span
@@ -149,11 +159,7 @@ export function NextGenTokenImage(
             width="0"
             height="0"
             style={{
-              height: props.is_fullscreen
-                ? "100vh"
-                : isMobileScreen
-                ? "60vh"
-                : "85vh",
+              height: height,
               width: "auto",
               maxHeight: props.is_fullscreen ? "100vh" : "85vh",
               maxWidth: "100%",
