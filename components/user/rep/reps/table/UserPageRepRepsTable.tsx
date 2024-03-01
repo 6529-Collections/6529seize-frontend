@@ -7,6 +7,7 @@ import UserPageRepRepsTableBody from "./UserPageRepRepsTableBody";
 import UserPageRepRepsTableHeader from "./UserPageRepRepsTableHeader";
 import { SortDirection } from "../../../../../entities/ISort";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import CommonTableWrapper from "../../../../utils/table/CommonTableWrapper";
 
 export enum RepsTableSort {
   REP = "REP",
@@ -106,23 +107,21 @@ export default function UserPageRepRepsTable({
   }, [canEditRep, sortType]);
 
   return (
-    <div className="tw-mt-2 lg:tw-mt-4 tw-flow-root">
-      <div className="tw-bg-iron-900/50 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-iron-800 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
-        <table className="tw-min-w-full">
-          <UserPageRepRepsTableHeader
-            activeType={sortType}
-            sortDirection={sortDirection}
-            showMyRates={canEditRep}
-            onSortTypeClick={onSortTypeClick}
-          />
-          <UserPageRepRepsTableBody
-            reps={sortedReps}
-            profile={profile}
-            giverAvailableRep={giverAvailableRep}
-            canEditRep={canEditRep}
-          />
-        </table>
-      </div>
-    </div>
+    <CommonTableWrapper>
+      <UserPageRepRepsTableHeader
+        activeType={sortType}
+        sortDirection={sortDirection}
+        showMyRates={canEditRep}
+        onSortTypeClick={onSortTypeClick}
+      />
+
+        <UserPageRepRepsTableBody
+          reps={sortedReps}
+          profile={profile}
+          giverAvailableRep={giverAvailableRep}
+          canEditRep={canEditRep}
+        />
+
+    </CommonTableWrapper>
   );
 }

@@ -1,27 +1,31 @@
-import Head from "next/head";
-import styles from "../styles/Home.module.scss";
-
-import { useState } from "react";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
-import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
+import { FullPageRequest } from "../helpers/Types";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
-
-const Leaderboard = dynamic(
-  () => import("../components/leaderboard/Leaderboard"),
-  { ssr: false }
-);
+import Head from "next/head";
+import CommunityMembers from "../components/community/CommunityMembers";
+import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function TheMemesPage() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+export enum CommunityMembersSortOption {
+  DISPLAY = "display",
+  LEVEL = "level",
+  TDH = "tdh",
+  REP = "rep",
+  CIC = "cic",
+}
+
+export type CommunityMembersQuery = FullPageRequest<CommunityMembersSortOption>;
+
+
+export default function CommunityPage() {
+  const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Community" },
-  ]);
+  ];
 
   return (
     <>
@@ -41,22 +45,13 @@ export default function TheMemesPage() {
         />
       </Head>
 
-      <main className={styles.main}>
+      <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950">
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
-          <Row>
-            <Col>
-              <Leaderboard
-                page={1}
-                pageSize={50}
-                showMore={true}
-                showDownload={true}
-                showLastTdh={true}
-              />
-            </Col>
-          </Row>
-        </Container>
+        <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+          <h1 className="tw-block tw-float-none">Community</h1>
+          <CommunityMembers />
+        </div>
       </main>
     </>
   );

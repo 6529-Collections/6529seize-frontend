@@ -1,6 +1,5 @@
 import Head from "next/head";
 
-import { Inter } from "next/font/google";
 import {
   getCommonHeaders,
   getUserProfileActivityLogs,
@@ -16,17 +15,11 @@ import ProfileActivityLogs, {
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
 import { useContext } from "react";
 import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
+import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
-});
-
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
 });
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
@@ -47,6 +40,10 @@ export default function CommunityActivityPage({
 }: {
   readonly pageProps: CommunityActivityPage;
 }) {
+  const breadcrumbs: Crumb[] = [
+    { display: "Home", href: "/" },
+    { display: "Community Activity" },
+  ];
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
   initCommunityActivityPage({
     activityLogs: {
@@ -74,10 +71,12 @@ export default function CommunityActivityPage({
 
       <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950">
         <Header />
+        <Breadcrumb breadcrumbs={breadcrumbs} />
         <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <ProfileActivityLogs
             initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-            withFilters={true}>
+            withFilters={true}
+          >
             <h1 className="tw-block tw-float-none">
               <span className="font-lightest">Community</span> Activity
             </h1>
