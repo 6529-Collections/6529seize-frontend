@@ -321,7 +321,7 @@ export default function Home({
                                   : manifoldClaim.endDate
                               }
                               hide_mint_btn={false}
-                              btn_label="MINT NOW"
+                              btn_label="GO TO MINTING PAGE"
                               mint_link={MEMES_MINTING_HREF}
                               new_tab={true}
                               additional_elements={
