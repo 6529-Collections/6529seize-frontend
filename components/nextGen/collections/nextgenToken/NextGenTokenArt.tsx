@@ -57,6 +57,7 @@ export function NextGenTokenArtImage(
       hide_link={true}
       show_animation={props.mode === Mode.LIVE}
       is_fullscreen={props.is_fullscreen}
+      token_art={true}
     />
   );
 }
