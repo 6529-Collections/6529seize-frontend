@@ -14,6 +14,7 @@ import CommonTablePagination from "../utils/table/CommonTablePagination";
 import { SortDirection } from "../../entities/ISort";
 import CommonTableSortIcon from "../user/utils/icons/CommonTableSortIcon";
 import { formatNumberWithCommasOrDash } from "../../helpers/Helpers";
+import UserPageHeaderLevel from "../user/user-page-header/UserPageHeaderLevel";
 
 export default function CommunityMembers({
   initialParams,
@@ -64,9 +65,9 @@ export default function CommunityMembers({
   return (
     <div className="tw-scroll-py-3 tw-overflow-auto">
       <div className="tailwind-scope tw-mt-2 lg:tw-mt-4 tw-flow-root">
-        <div className="tw-bg-iron-900/50 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-iron-800 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
+        <div className="tw-bg-iron-950 tw-overflow-x-auto tw-shadow tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
           <table className="tw-min-w-full">
-            <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
+            <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700">
               <tr>
                 <th
                   scope="col"
@@ -162,29 +163,37 @@ export default function CommunityMembers({
                 </th>
               </tr>
             </thead>
-            <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-800">
+            <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">
               {members?.data.map((member, index) => (
                 <tr
                   key={member.detail_view_key}
                   className="even:tw-bg-iron-900"
                 >
-                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                  <td className="tw-px-4 sm:tw-pl-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-500">
                     {index + 1 + members.page * params.page_size}
                   </td>
-                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
-                    {member.display}
+                  <td className="tw-px-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-50">
+                    <div className="tw-flex tw-items-center tw-gap-x-4">
+                      <img
+                        src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        alt=""
+                        className="tw-h-8 tw-w-8 tw-rounded-lg tw-bg-iron-800"
+                      />
+                      <div>{member.display}</div>
+                    </div>
                   </td>
-                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
-                    {formatNumberWithCommasOrDash(member.level)}
+                  <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
+                    <UserPageHeaderLevel level={member.level} />
                   </td>
-                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                  <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommasOrDash(member.tdh)}
                   </td>
-                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                  <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommasOrDash(member.rep)}
                   </td>
-                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                  <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommasOrDash(member.cic)}
+                    
                   </td>
                 </tr>
               ))}
@@ -197,7 +206,7 @@ export default function CommunityMembers({
           currentPage={params.page}
           setCurrentPage={onPage}
           totalPages={totalPages}
-          small={true}
+          small={false}
           loading={isLoading}
         />
       )}

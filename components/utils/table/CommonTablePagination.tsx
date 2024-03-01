@@ -17,7 +17,7 @@ export default function CommonTablePagination({
         small
           ? "tw-px-4 sm:tw-px-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800"
           : ""
-      } tw-pt-3 tw-pb-3`}
+      } tw-pt-4 tw-pb-3`}
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
         <div className="tw-text-sm tw-text-iron-300 tw-font-medium tw-mr-3">

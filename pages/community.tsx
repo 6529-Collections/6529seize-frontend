@@ -34,7 +34,7 @@ export type CommunityMembersQuery = FullPageRequest<CommunityMembersSortOption>;
 
 const INITIAL_PARAMS: CommunityMembersQuery = {
   page: 1,
-  page_size: 50,
+  page_size: 20,
   sort_direction: SortDirection.DESC,
   sort: CommunityMembersSortOption.LEVEL,
 };
@@ -74,7 +74,7 @@ export default function CommunityPage({
       <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950">
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+        <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <h1 className="tw-block tw-float-none">Community</h1>
           <CommunityMembers initialParams={INITIAL_PARAMS} />
         </div>
