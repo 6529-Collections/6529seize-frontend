@@ -8,6 +8,8 @@ import Tippy from "@tippyjs/react";
 import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
 import { cicToType } from "../../../helpers/Helpers";
 import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
+import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
+import CommonTimeAgo from "../../utils/CommonTimeAgo";
 export default function CommunityMembersTableRow({
   member,
   rank,
@@ -30,7 +32,7 @@ export default function CommunityMembersTableRow({
         <div className="tw-flex tw-items-center tw-gap-x-4">
           {member.pfp ? (
             <img
-              src={member.pfp}
+              src={getScaledImageUri(member.pfp, ImageScale.W_AUTO_H_50)}
               alt="Community Table Profile Picture"
               className="tw-h-8 tw-w-8 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800"
             />
@@ -74,7 +76,9 @@ export default function CommunityMembersTableRow({
         </div>
       </td>
       <td className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
-        2 m ago
+        {member.last_activity && (
+          <CommonTimeAgo timestamp={member.last_activity} />
+        )}
       </td>
     </tr>
   );

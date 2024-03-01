@@ -414,4 +414,5 @@ export interface CommunityMemberOverview {
   readonly rep: number;
   readonly cic: number;
   readonly pfp: string | null;
+  readonly last_activity: number | null;
 }
