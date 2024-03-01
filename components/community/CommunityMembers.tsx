@@ -8,15 +8,12 @@ import {
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
-import CommonTableWrapper from "../utils/table/CommonTableWrapper";
-import CommonTableHeader from "../utils/table/CommonTableHeader";
 
-import CommonTableRow from "../utils/table/CommonTableRow";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
-import { formatNumberWithCommasOrDash } from "../../helpers/Helpers";
 import CommonTablePagination from "../utils/table/CommonTablePagination";
-import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
+
 import { SortDirection } from "../../entities/ISort";
+import CommonTableSortIcon from "../user/utils/icons/CommonTableSortIcon";
+import { formatNumberWithCommasOrDash } from "../../helpers/Helpers";
 
 export default function CommunityMembers({
   initialParams,
@@ -66,50 +63,135 @@ export default function CommunityMembers({
 
   return (
     <div className="tw-scroll-py-3 tw-overflow-auto">
-      <CommonTableWrapper>
-        <CommunityMembersTableHeader
-          sort={params.sort}
-          sortDirection={params.sort_direction}
-          onSortClick={onSort}
-        />
-        <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-800">
-          {members?.data.map((member, i) => (
-            <CommonTableRow
-              key={member.detail_view_key}
-              values={[
-                {
-                  value: formatNumberWithCommasOrDash(
-                    i + 1 + (members.page - 1) * params.page_size
-                  ),
-                  key: getRandomObjectId(),
-                  alignRight: true,
-                },
-                { value: member.display, key: getRandomObjectId() },
-                {
-                  value: formatNumberWithCommasOrDash(member.level),
-                  key: getRandomObjectId(),
-                  alignRight: true,
-                },
-                {
-                  value: formatNumberWithCommasOrDash(member.tdh),
-                  key: getRandomObjectId(),
-                  alignRight: true,
-                },
-                {
-                  value: formatNumberWithCommasOrDash(member.rep),
-                  key: getRandomObjectId(),
-                  alignRight: true,
-                },
-                {
-                  value: formatNumberWithCommasOrDash(member.cic),
-                  key: getRandomObjectId(),
-                  alignRight: true,
-                },
-              ]}
-            />
-          ))}
-        </tbody>
-      </CommonTableWrapper>
+      <div className="tailwind-scope tw-mt-2 lg:tw-mt-4 tw-flow-root">
+        <div className="tw-bg-iron-900/50 tw-overflow-x-auto tw-shadow tw-ring-1 tw-ring-iron-800 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
+          <table className="tw-min-w-full">
+            <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
+              <tr>
+                <th
+                  scope="col"
+                  className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400"
+                >
+                  Rank
+                </th>
+
+                <th
+                  scope="col"
+                  className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400"
+                >
+                  Profile
+                </th>
+
+                <th
+                  scope="col"
+                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+                  onClick={() => onSort(CommunityMembersSortOption.LEVEL)}
+                >
+                  <span
+                    className={`${
+                      params.sort === CommunityMembersSortOption.LEVEL
+                        ? "tw-text-primary-400"
+                        : "group-hover:tw-text-iron-200"
+                    } tw-transition tw-duration-300 tw-ease-out`}
+                  >
+                    Level
+                  </span>
+
+                  <CommonTableSortIcon
+                    direction={params.sort_direction}
+                    isActive={params.sort === CommunityMembersSortOption.LEVEL}
+                  />
+                </th>
+                <th
+                  scope="col"
+                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+                  onClick={() => onSort(CommunityMembersSortOption.TDH)}
+                >
+                  <span
+                    className={`${
+                      params.sort === CommunityMembersSortOption.TDH
+                        ? "tw-text-primary-400"
+                        : "group-hover:tw-text-iron-200"
+                    } tw-transition tw-duration-300 tw-ease-out`}
+                  >
+                    TDH
+                  </span>
+
+                  <CommonTableSortIcon
+                    direction={params.sort_direction}
+                    isActive={params.sort === CommunityMembersSortOption.TDH}
+                  />
+                </th>
+                <th
+                  scope="col"
+                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+                >
+                  <span
+                    className={`${
+                      params.sort === CommunityMembersSortOption.REP
+                        ? "tw-text-primary-400"
+                        : "group-hover:tw-text-iron-200"
+                    } tw-transition tw-duration-300 tw-ease-out`}
+                  >
+                    REP
+                  </span>
+
+                  <CommonTableSortIcon
+                    direction={params.sort_direction}
+                    isActive={params.sort === CommunityMembersSortOption.REP}
+                  />
+                </th>
+                <th
+                  scope="col"
+                  className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400"
+                >
+                  <span
+                    className={`${
+                      params.sort === CommunityMembersSortOption.CIC
+                        ? "tw-text-primary-400"
+                        : "group-hover:tw-text-iron-200"
+                    } tw-transition tw-duration-300 tw-ease-out`}
+                  >
+                    CIC
+                  </span>
+
+                  <CommonTableSortIcon
+                    direction={params.sort_direction}
+                    isActive={params.sort === CommunityMembersSortOption.CIC}
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-800">
+              {members?.data.map((member, index) => (
+                <tr
+                  key={member.detail_view_key}
+                  className="even:tw-bg-iron-900"
+                >
+                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                    {index + 1 + members.page * params.page_size}
+                  </td>
+                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                    {member.display}
+                  </td>
+                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                    {formatNumberWithCommasOrDash(member.level)}
+                  </td>
+                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                    {formatNumberWithCommasOrDash(member.tdh)}
+                  </td>
+                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                    {formatNumberWithCommasOrDash(member.rep)}
+                  </td>
+                  <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                    {formatNumberWithCommasOrDash(member.cic)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
       {totalPages > 1 && (
         <CommonTablePagination
           currentPage={params.page}
