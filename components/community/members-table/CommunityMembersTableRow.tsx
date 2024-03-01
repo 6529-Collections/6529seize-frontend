@@ -42,13 +42,11 @@ export default function CommunityMembersTableRow({
           <div className="tw-h-8 tw-w-8 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800"></div>
         )}
       </td>
-      <td
-        className={`tw-group tw-pr-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
-      >
+      <td className="tw-group tw-pr-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium">
         <div className="tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs">
           <Link
             href={path}
-            className="tw-no-underline group-hover:tw-underline group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
+            className={`tw-no-underline group-hover:tw-underline  group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${textColorClass}`}
           >
             {member.display}
           </Link>
