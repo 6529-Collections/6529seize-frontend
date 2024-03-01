@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CommunityMemberOverview } from "../../entities/IProfile";
+import { CIC_TO_TEXT, CommunityMemberOverview } from "../../entities/IProfile";
 import { Page } from "../../helpers/Types";
 import {
   CommunityMembersQuery,
@@ -13,8 +13,10 @@ import CommonTablePagination from "../utils/table/CommonTablePagination";
 
 import { SortDirection } from "../../entities/ISort";
 import CommonTableSortIcon from "../user/utils/icons/CommonTableSortIcon";
-import { formatNumberWithCommasOrDash } from "../../helpers/Helpers";
-import UserPageHeaderLevel from "../user/user-page-header/UserPageHeaderLevel";
+import { cicToType, formatNumberWithCommasOrDash } from "../../helpers/Helpers";
+import UserLevel from "../user/utils/level/UserLevel";
+import UserCICTypeIcon from "../user/utils/user-cic-type/UserCICTypeIcon";
+import Tippy from "@tippyjs/react";
 
 export default function CommunityMembers({
   initialParams,
@@ -183,7 +185,7 @@ export default function CommunityMembers({
                     </div>
                   </td>
                   <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
-                    <UserPageHeaderLevel level={member.level} />
+                    <UserLevel level={member.level} size="sm" />
                   </td>
                   <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommasOrDash(member.tdh)}
@@ -193,7 +195,15 @@ export default function CommunityMembers({
                   </td>
                   <td className="tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-base tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommasOrDash(member.cic)}
-                    
+                    <Tippy
+                      placement={"auto"}
+                      interactive={true}
+                      content={CIC_TO_TEXT[cicToType(member.cic)]}
+                    >
+                      <div className="tw-h-6 tw-w-6">
+                        <UserCICTypeIcon cic={member.cic} />
+                      </div>
+                    </Tippy>
                   </td>
                 </tr>
               ))}

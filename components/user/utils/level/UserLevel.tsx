@@ -6,16 +6,19 @@ const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
   { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
 ].reverse();
 
-export default function UserPageHeaderLevel({ level }: { level: number }) {
-  const getClasses = (): string => {
-    const targetClasses = LEVEL_CLASSES.find(
-      (levelClass) => levelClass.minLevel <= level
-    )?.classes;
-    return targetClasses ?? LEVEL_CLASSES[0].classes;
-  };
+export default function UserLevel({
+  level,
+  size = "base",
+}: {
+  level: number;
+  size?: "sm" | "base";
+}) {
+  const getColorClasses = () =>
+    LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
+    LEVEL_CLASSES[0].classes;
 
-  const classes = getClasses();
-
+  const getSizeClasses = () => (size === "sm" ? "tw-text-sm" : "tw-text-base");
+  const classes = `${getColorClasses()} ${getSizeClasses()}`;
   const openLevelsPage = () => {
     window.open("/levels", "_blank");
   };
@@ -24,7 +27,7 @@ export default function UserPageHeaderLevel({ level }: { level: number }) {
     <div className="tw-mt-2">
       <span
         onClick={openLevelsPage}
-        className={`tw-cursor-pointer tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-text-base tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
+        className={`tw-cursor-pointer tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
       >
         Level {level}
       </span>
