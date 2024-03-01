@@ -4,7 +4,7 @@ import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { get8KUrl, get16KUrl } from "./NextGenTokenImage";
 import Image from "next/image";
-import { Spinner } from "../../../dotLoader/DotLoader";
+import DotLoader, { Spinner } from "../../../dotLoader/DotLoader";
 
 export const MAX_ZOOM_SCALE = 20;
 export const MIN_ZOOM_SCALE = 1;
@@ -16,12 +16,14 @@ export default function NextGenZoomableImage(
     setZoomScale: (scale: number) => void;
     is_fullscreen?: boolean;
     maintain_aspect_ratio: boolean;
+    onImageLoaded: () => void;
   }>
 ) {
   const isMobileScreen = useIsMobileScreen();
   const isMobileDevice = useIsMobileDevice();
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null
@@ -113,7 +115,7 @@ export default function NextGenZoomableImage(
     const deltaX = clientX - dragStart.x;
     const deltaY = clientY - dragStart.y;
 
-    updateObjectPosition(deltaX, deltaY);
+    updateObjectPosition(-deltaX, -deltaY);
     e.preventDefault();
   };
 
@@ -168,6 +170,16 @@ export default function NextGenZoomableImage(
     return get16KUrl(props.token.id);
   }
 
+  function ensureImageRendered() {
+    setTimeout(() => {
+      props.setZoomScale(MIN_ZOOM_SCALE);
+      setTimeout(() => {
+        setLoading(false);
+        props.onImageLoaded();
+      }, 5000);
+    }, 8000);
+  }
+
   function getContent() {
     let height = "85vh";
     if (props.is_fullscreen) {
@@ -192,17 +204,36 @@ export default function NextGenZoomableImage(
           maxHeight: props.is_fullscreen ? "100vh" : "85vh",
           maxWidth: "100%",
           overflow: "hidden",
+          position: "relative",
         }}>
         {loading && (
-          <span className="d-flex flex-column gap-3 align-items-center">
+          <span
+            className="d-flex flex-column gap-3 align-items-center justify-content-center"
+            style={{
+              position: "absolute",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "100%",
+              zIndex: 2,
+              backgroundColor: "rgb(0, 0, 0)",
+            }}>
             <span className="d-flex flex-wrap text-center">
               {isMobileDevice ? "8K" : "16K"} Pebbles are very large
             </span>
             <span className="d-flex flex-wrap text-center">
               Chill while we download you into the Pebbles multiverse
             </span>
-            <span className="font-larger">
-              <Spinner dimension={36} />
+            <span className="color-white">
+              {imageLoaded ? (
+                <>
+                  Almost There <DotLoader />
+                </>
+              ) : (
+                <>
+                  Downloading <DotLoader />
+                </>
+              )}
             </span>
           </span>
         )}
@@ -213,7 +244,7 @@ export default function NextGenZoomableImage(
           width="0"
           height="0"
           style={{
-            display: loading ? "none" : "initial",
+            display: imageLoaded ? "block" : "none",
             height: "100%",
             width: "auto",
             transition: "transform 0.2s ease-out",
@@ -222,11 +253,11 @@ export default function NextGenZoomableImage(
             transformOrigin: objectPosition,
             cursor: cursor,
           }}
-          onLoad={() =>
-            setTimeout(() => {
-              setLoading(false);
-            }, 3000)
-          }
+          onLoad={() => {
+            props.setZoomScale(MIN_ZOOM_SCALE + 1);
+            setImageLoaded(true);
+            ensureImageRendered();
+          }}
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
           onMouseMove={handleDragging}
