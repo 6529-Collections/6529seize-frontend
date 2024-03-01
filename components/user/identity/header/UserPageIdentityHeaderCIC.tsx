@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { amIUser, formatNumberWithCommas } from "../../../../helpers/Helpers";
-import UserCICTypeIcon from "../../utils/user-cic-type/UserCICTypeIcon";
+import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICStatus from "../../utils/user-cic-status/UserCICStatus";
 import { useAccount } from "wagmi";
 
@@ -35,10 +35,12 @@ export default function UserPageIdentityHeaderCIC({
       <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300">
         <div className="tw-flex tw items-center tw-space-x-1">
           <span>CIC:</span>
-          <span className="tw-text-iron-50 tw-font-semibold">{formatNumberWithCommas(cicRating)}</span>
+          <span className="tw-text-iron-50 tw-font-semibold">
+            {formatNumberWithCommas(cicRating)}
+          </span>
         </div>
-        <span className="tw-ml-2 -tw-mt-1.5 tw-h-5 tw-w-5">
-          <UserCICTypeIcon profile={profile} />
+        <span className="tw-ml-2 tw-h-5 tw-w-5">
+          <UserCICTypeIconWrapper profile={profile} />
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-space-x-1">
@@ -47,7 +49,9 @@ export default function UserPageIdentityHeaderCIC({
       </div>
       <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300 tw-space-x-1">
         <span>Raters:</span>
-        <span className="tw-text-iron-50 tw-font-semibold">{formatNumberWithCommas(cicRaters)}</span>
+        <span className="tw-text-iron-50 tw-font-semibold">
+          {formatNumberWithCommas(cicRaters)}
+        </span>
       </div>
     </div>
   );

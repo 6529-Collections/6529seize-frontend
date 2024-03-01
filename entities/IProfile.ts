@@ -405,3 +405,14 @@ export interface WalletDelegation {
   readonly from_display: string | null;
   readonly to_display: string | null;
 }
+
+export interface CommunityMemberOverview {
+  readonly display: string;
+  readonly detail_view_key: string;
+  readonly level: number;
+  readonly tdh: number;
+  readonly rep: number;
+  readonly cic: number;
+  readonly pfp: string | null;
+  readonly last_activity: number | null;
+}

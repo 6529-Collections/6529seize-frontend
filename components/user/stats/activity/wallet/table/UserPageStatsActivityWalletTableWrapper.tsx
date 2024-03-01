@@ -2,7 +2,7 @@ import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityW
 import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
 import { Transaction } from "../../../../../../entities/ITransaction";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
-import CommonTablePagination from "../../../../../utils/CommonTablePagination";
+import CommonTablePagination from "../../../../../utils/table/CommonTablePagination";
 import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import CommonCardSkeleton from "../../../../../utils/animation/CommonCardSkeleton";
