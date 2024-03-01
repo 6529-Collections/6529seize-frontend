@@ -185,9 +185,9 @@ export default function CommunityMembers() {
   if (!members) return null;
 
   return (
-    <div className="tw-scroll-py-3 tw-overflow-auto">
+    <div>
       <div className="tailwind-scope tw-mt-2 lg:tw-mt-4 tw-flow-root">
-        <div className="tw-bg-iron-950 tw-overflow-x-auto tw-shadow tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
+        <div className="tw-overflow-auto tw-bg-iron-950 tw-shadow tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
           <CommunityMembersTable
             members={members.data}
             activeSort={params.sort}

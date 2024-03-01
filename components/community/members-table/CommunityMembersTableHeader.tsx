@@ -18,21 +18,22 @@ export default function CommunityMembersTableHeader({
       <tr>
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-400"
+          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
         >
           Rank
         </th>
 
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-pr-4 sm:tw-pr-6 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-400"
+          className="tw-whitespace-nowrap tw-pr-4 sm:tw-pr-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
         >
           Profile
         </th>
 
         <th
           scope="col"
-          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-md tw-font-medium tw-text-iron-400"
+          tabindex="0"
+          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.LEVEL)}
         >
           <CommunityMembersTableHeaderSortableContent
@@ -44,7 +45,7 @@ export default function CommunityMembersTableHeader({
         </th>
         <th
           scope="col"
-          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-md tw-font-medium tw-text-iron-400"
+          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.TDH)}
         >
           <CommunityMembersTableHeaderSortableContent
@@ -56,7 +57,7 @@ export default function CommunityMembersTableHeader({
         </th>
         <th
           scope="col"
-          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-md tw-font-medium tw-text-iron-400"
+          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.REP)}
         >
           <CommunityMembersTableHeaderSortableContent
@@ -68,7 +69,7 @@ export default function CommunityMembersTableHeader({
         </th>
         <th
           scope="col"
-          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-md tw-font-medium tw-text-iron-400"
+          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.CIC)}
         >
           <CommunityMembersTableHeaderSortableContent
@@ -80,7 +81,7 @@ export default function CommunityMembersTableHeader({
         </th>
         <th
           scope="col"
-          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-md tw-font-medium tw-text-iron-400"
+          className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
         >
           <span>Active</span>
         </th>
