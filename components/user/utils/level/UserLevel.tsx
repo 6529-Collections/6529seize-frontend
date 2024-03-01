@@ -24,7 +24,7 @@ export default function UserLevel({
   };
 
   return (
-    <div className="tw-mt-2">
+    <div>
       <span
         onClick={openLevelsPage}
         className={`tw-cursor-pointer tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}

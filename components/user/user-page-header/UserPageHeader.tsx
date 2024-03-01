@@ -108,7 +108,9 @@ export default function UserPageHeader({
               mainAddress={mainAddress}
             />
 
-            <UserLevel level={profile.level} />
+            <div className="tw-mt-2">
+              <UserLevel level={profile.level} />
+            </div>
             {showAbout && (
               <UserPageHeaderAbout
                 profile={profile}

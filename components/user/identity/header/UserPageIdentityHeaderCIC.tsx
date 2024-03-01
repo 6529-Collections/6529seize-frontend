@@ -39,7 +39,7 @@ export default function UserPageIdentityHeaderCIC({
             {formatNumberWithCommas(cicRating)}
           </span>
         </div>
-        <span className="tw-ml-2 -tw-mt-1.5 tw-h-5 tw-w-5">
+        <span className="tw-ml-2 tw-h-5 tw-w-5">
           <UserCICTypeIconWrapper profile={profile} />
         </span>
       </div>
