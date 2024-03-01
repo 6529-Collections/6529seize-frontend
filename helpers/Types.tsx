@@ -1,3 +1,12 @@
+import { SortDirection } from "../entities/ISort";
+
+export interface FullPageRequest<SORT_BY_OPTIONS> {
+  readonly sort_direction: SortDirection;
+  readonly sort: SORT_BY_OPTIONS;
+  readonly page: number;
+  readonly page_size: number;
+}
+
 export interface Page<T> {
   count: number;
   page: number;

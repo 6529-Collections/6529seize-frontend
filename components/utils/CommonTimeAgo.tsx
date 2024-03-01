@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { getTimeAgo } from "../../helpers/Helpers";
 
 export default function CommonTimeAgo({
@@ -6,13 +5,9 @@ export default function CommonTimeAgo({
 }: {
   readonly timestamp: number;
 }) {
-  const [timeAgo, setTimeAgo] = useState<string>("");
-  useEffect(() => {
-    setTimeAgo(getTimeAgo(timestamp));
-  }, []);
   return (
-    <span className="tw-whitespace-nowrap tw-font-light tw-text-sm tw-text-iron-500">
-      {timeAgo}
+    <span className="tw-whitespace-nowrap tw-font-normal tw-text-sm sm:tw-text-base tw-text-iron-500">
+      {getTimeAgo(timestamp)}
     </span>
   );
 }

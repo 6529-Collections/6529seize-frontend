@@ -10,7 +10,7 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
-import CommonTablePagination from "../utils/CommonTablePagination";
+import CommonTablePagination from "../utils/table/CommonTablePagination";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";
@@ -158,11 +158,7 @@ export default function ProfileActivityLogs({
   }, [logs?.count, logs?.page, isLoading]);
 
   return (
-    <div
-      className={`${
-        initialParams.handleOrWallet ? "" : "tw-mt-2"
-      }  `}
-    >
+    <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
       <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
         {children && <div>{children}</div>}
         {withFilters && (
