@@ -17,6 +17,11 @@ import {
 } from "./NextGenTokenScene";
 import useDownloader from "react-use-downloader";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import NextGenZoomableImage, {
+  MAX_ZOOM_SCALE,
+  MIN_ZOOM_SCALE,
+} from "./NextGenZoomableImage";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 interface Props {
   collection: NextGenCollection;
@@ -32,6 +37,8 @@ export function NextGenTokenArtImage(
     is_fullscreen: boolean;
     setCanvasUrl: (url: string) => void;
     is_zoom: boolean;
+    zoom_scale: number;
+    setZoomScale: (scale: number) => void;
   }>
 ) {
   const scene = getNextGenTokenScene(props.mode);
@@ -46,6 +53,18 @@ export function NextGenTokenArtImage(
     );
   }
 
+  if (props.mode === NextGenTokenImageMode.HIGH_RES) {
+    return (
+      <NextGenZoomableImage
+        token={props.token}
+        is_fullscreen={props.is_fullscreen}
+        zoom_scale={props.zoom_scale}
+        setZoomScale={props.setZoomScale}
+        maintain_aspect_ratio={false}
+      />
+    );
+  }
+
   return (
     <NextGenTokenImage
       token={props.token}
@@ -54,7 +73,6 @@ export function NextGenTokenArtImage(
       hide_link={true}
       show_animation={props.mode === NextGenTokenImageMode.LIVE}
       is_fullscreen={props.is_fullscreen}
-      is_zoom={props.is_zoom}
     />
   );
 }
@@ -63,9 +81,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   const downloader = useDownloader();
   const mode = props.mode;
   const isMobileDevice = useIsMobileDevice();
+  const isMobileScreen = useIsMobileScreen();
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
+
+  const [zoomScale, setZoomScale] = useState(1);
 
   const tokenImageRef = useRef(null);
 
@@ -131,12 +152,32 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     return props.token.image_url;
   }
 
+  const handleScaleDown = () => {
+    setZoomScale(Math.max(zoomScale - 1, MIN_ZOOM_SCALE));
+  };
+
+  const handleScaleUp = () => {
+    setZoomScale(Math.min(zoomScale + 1, MAX_ZOOM_SCALE));
+  };
+
   function printModeIcons() {
     return (
       <>
-        <span className="d-flex gap-3">
+        <Col
+          xs={12}
+          sm={
+            mode === NextGenTokenImageMode.HIGH_RES ||
+            (props.mode !== NextGenTokenImageMode.IMAGE &&
+              props.mode !== NextGenTokenImageMode.LIVE &&
+              props.mode !== NextGenTokenImageMode.HIGH_RES)
+              ? 4
+              : 6
+          }
+          className={`pt-2 pb-2 d-flex gap-3 ${
+            isMobileScreen ? "justify-content-center" : "justify-content-start"
+          }`}>
           <button
-            className={`${styles.imageResolutionBtn} ${
+            className={`unselectable ${styles.imageResolutionBtn} ${
               mode === NextGenTokenImageMode.IMAGE
                 ? styles.imageResolutionBtnSelected
                 : ""
@@ -145,7 +186,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             2K
           </button>
           <button
-            className={`${styles.imageResolutionBtn} ${
+            className={`unselectable ${styles.imageResolutionBtn} ${
               mode === NextGenTokenImageMode.HIGH_RES
                 ? styles.imageResolutionBtnSelected
                 : ""
@@ -165,13 +206,63 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               icon="play-circle"
             />
           </Tippy>
-          {props.mode !== NextGenTokenImageMode.IMAGE &&
-            props.mode !== NextGenTokenImageMode.LIVE &&
-            props.mode !== NextGenTokenImageMode.HIGH_RES && (
-              <span>Scene: {props.mode}</span>
-            )}
-        </span>
-        <span className="d-flex gap-3">
+        </Col>
+        {mode === NextGenTokenImageMode.HIGH_RES && (
+          <Col
+            xs={6}
+            sm={4}
+            className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center">
+            <FontAwesomeIcon
+              className={styles.modeIcon}
+              icon="minus-square"
+              onClick={handleScaleDown}
+              style={{
+                color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+              }}
+            />
+            <span className="unselectable">Scale: {zoomScale}</span>
+            <FontAwesomeIcon
+              className={styles.modeIcon}
+              icon="plus-square"
+              onClick={handleScaleUp}
+              style={{
+                color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
+              }}
+            />
+            <FontAwesomeIcon
+              className={styles.modeIcon}
+              icon="refresh"
+              onClick={() => setZoomScale(MIN_ZOOM_SCALE)}
+              style={{
+                paddingLeft: "5px",
+                color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+              }}
+            />
+          </Col>
+        )}
+        {props.mode !== NextGenTokenImageMode.IMAGE &&
+          props.mode !== NextGenTokenImageMode.LIVE &&
+          props.mode !== NextGenTokenImageMode.HIGH_RES && (
+            <Col
+              xs={12}
+              sm={4}
+              className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center">
+              Scene: {props.mode}
+            </Col>
+          )}
+        <Col
+          xs={mode === NextGenTokenImageMode.HIGH_RES ? 6 : 12}
+          sm={
+            mode === NextGenTokenImageMode.HIGH_RES ||
+            (props.mode !== NextGenTokenImageMode.IMAGE &&
+              props.mode !== NextGenTokenImageMode.LIVE &&
+              props.mode !== NextGenTokenImageMode.HIGH_RES)
+              ? 4
+              : 6
+          }
+          className={`pt-2 pb-2 d-flex gap-3 ${
+            isMobileScreen ? "justify-content-center" : "justify-content-end"
+          }`}>
           <Lightbulb
             mode="black"
             className={styles.modeIcon}
@@ -205,13 +296,17 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                   Scene
                 </Dropdown.Item>
               )}
-              {Object.values(Resolution).map((resolution) => (
-                <NextGenTokenDownloadDropdownItem
-                  resolution={resolution}
-                  token={props.token}
-                  key={resolution}
-                />
-              ))}
+              {Object.values(Resolution)
+                .filter((r) =>
+                  [Resolution["0.5K"], Resolution.Thumbnail].includes(r)
+                )
+                .map((resolution) => (
+                  <NextGenTokenDownloadDropdownItem
+                    resolution={resolution}
+                    token={props.token}
+                    key={resolution}
+                  />
+                ))}
             </Dropdown.Menu>
           </Dropdown>
           <Tippy
@@ -244,7 +339,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               onClick={toggleFullScreen}
             />
           </Tippy>
-        </span>
+        </Col>
       </>
     );
   }
@@ -294,6 +389,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                       is_fullscreen={isFullScreen}
                       setCanvasUrl={setCanvasUrl}
                       is_zoom={mode === NextGenTokenImageMode.HIGH_RES}
+                      zoom_scale={zoomScale}
+                      setZoomScale={setZoomScale}
                     />
                   </div>
                 </div>
@@ -305,11 +402,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
       <Row>
         <Col>
           <Container className={styles.modeRow}>
-            <Row>
-              <Col className="pt-4 pb-3 d-flex align-items-center justify-content-between">
-                {printModeIcons()}
-              </Col>
-            </Row>
+            <Row className="pt-2 pb-1">{printModeIcons()}</Row>
           </Container>
         </Col>
       </Row>
