@@ -2,7 +2,7 @@ import styles from "./NextGenToken.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
-import { NextGenTokenImage } from "./NextGenTokenImage";
+import { NextGenTokenImage, get16KUrl, get8KUrl } from "./NextGenTokenImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import Lightbulb from "./Lightbulb";
@@ -10,6 +10,7 @@ import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface Props {
   collection: NextGenCollection;
@@ -19,6 +20,7 @@ interface Props {
 enum Mode {
   LIVE = "Live",
   IMAGE = "Image",
+  HIGH_RES = "High Res",
 }
 
 export function NextGenTokenArtImage(
@@ -26,6 +28,7 @@ export function NextGenTokenArtImage(
     token: NextGenToken;
     mode: Mode;
     is_fullscreen: boolean;
+    is_zoom: boolean;
   }>
 ) {
   return (
@@ -34,13 +37,15 @@ export function NextGenTokenArtImage(
       show_original
       hide_info={true}
       hide_link={true}
-      show_animation={props.mode !== Mode.IMAGE}
+      show_animation={props.mode === Mode.LIVE}
       is_fullscreen={props.is_fullscreen}
+      is_zoom={props.is_zoom}
     />
   );
 }
 
 export default function NextGenToken(props: Readonly<Props>) {
+  const isMobileDevice = useIsMobileDevice();
   const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
@@ -91,6 +96,12 @@ export default function NextGenToken(props: Readonly<Props>) {
     if (mode === Mode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
+    if (mode === Mode.HIGH_RES) {
+      if (isMobileDevice) {
+        return get8KUrl(props.token.id);
+      }
+      return get16KUrl(props.token.id);
+    }
     return props.token.image_url;
   }
 
@@ -98,18 +109,20 @@ export default function NextGenToken(props: Readonly<Props>) {
     return (
       <>
         <span className="d-flex gap-3">
-          <Tippy
-            content="Image"
-            hideOnClick={true}
-            placement="bottom"
-            theme="light"
-            delay={100}>
-            <FontAwesomeIcon
-              className={getModeStyle(Mode.IMAGE)}
-              onClick={() => setMode(Mode.IMAGE)}
-              icon="image"
-            />
-          </Tippy>
+          <button
+            className={`${styles.imageResolutionBtn} ${
+              mode === Mode.IMAGE ? styles.imageResolutionBtnSelected : ""
+            }`}
+            onClick={() => setMode(Mode.IMAGE)}>
+            2K
+          </button>
+          <button
+            className={`${styles.imageResolutionBtn} ${
+              mode === Mode.HIGH_RES ? styles.imageResolutionBtnSelected : ""
+            }`}
+            onClick={() => setMode(Mode.HIGH_RES)}>
+            {isMobileDevice ? "8K" : "16K"}
+          </button>
           <Tippy
             content="Live"
             hideOnClick={true}
@@ -230,6 +243,7 @@ export default function NextGenToken(props: Readonly<Props>) {
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
+                      is_zoom={mode === Mode.HIGH_RES}
                     />
                   </div>
                 </div>
