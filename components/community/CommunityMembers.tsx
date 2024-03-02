@@ -195,7 +195,7 @@ export default function CommunityMembers() {
 
   return (
     <div>
-      <div className="tailwind-scope tw-mt-2 lg:tw-mt-4 tw-flow-root">
+      <div className="tailwind-scope tw-mt-4 lg:tw-mt-6 tw-flow-root">
         <div className="tw-overflow-auto tw-bg-iron-950 tw-shadow tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
           <CommunityMembersTable
             members={members.data}
