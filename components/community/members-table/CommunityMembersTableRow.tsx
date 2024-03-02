@@ -34,26 +34,30 @@ export default function CommunityMembersTableRow({
       <td
         className={`tw-group tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
       >
-        {member.pfp ? (
-          <img
-            src={getScaledImageUri(member.pfp, ImageScale.W_AUTO_H_50)}
-            alt="Community Table Profile Picture"
-            className="tw-flex-shrink-0 tw-object-contain tw-max-h-8 tw-w-auto tw-h-auto tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800"
-          />
-        ) : (
-          <div className="tw-h-8 tw-w-8 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800"></div>
-        )}
-      </td>
-      <td className="tw-group tw-pr-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium">
-        <div
-          className={`tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs ${textColorClass}`}
-        >
-          <Link
-            href={path}
-            className={`tw-no-underline group-hover:tw-underline group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${textColorClass}`}
+        <div className="tw-flex tw-gap-x-4 tw-items-center">
+          <div className="tw-h-8 tw-w-8 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
+            <div className="tw-h-full tw-w-full tw-max-w-full">
+              <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
+                {member.pfp && (
+                  <img
+                    src={getScaledImageUri(member.pfp, ImageScale.W_AUTO_H_50)}
+                    alt="Community Table Profile Picture"
+                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          <div
+            className={`tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs ${textColorClass}`}
           >
-            {member.display}
-          </Link>
+            <Link
+              href={path}
+              className={`tw-no-underline group-hover:tw-underline group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${textColorClass}`}
+            >
+              {member.display}
+            </Link>
+          </div>
         </div>
       </td>
       <td
