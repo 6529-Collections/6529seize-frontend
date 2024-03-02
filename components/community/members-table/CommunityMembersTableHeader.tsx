@@ -29,12 +29,6 @@ export default function CommunityMembersTableHeader({
           scope="col"
           className="tw-whitespace-nowrap tw-pr-4 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
         >
-          <span className="tw-sr-only">Profile Image</span>
-        </th>
-        <th
-          scope="col"
-          className="tw-whitespace-nowrap tw-pr-4 sm:tw-pr-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-        >
           Profile
         </th>
         <th
