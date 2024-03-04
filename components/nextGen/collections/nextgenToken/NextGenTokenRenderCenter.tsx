@@ -28,8 +28,8 @@ export default function NextgenTokenRenderCenter(
         </Col>
       </Row>
       <Row>
-        <Col sm={12} md={6} className="pb-3 d-flex flex-column gap-2">
-          <span className="font-color-h font-larger">Scenes:</span>
+        <Col className="pb-3 d-flex flex-column gap-2">
+          <span className="font-color-h">Scenes:</span>
           <span className="d-flex flex-wrap gap-3">
             {NEXTGEN_TOKEN_SCENES.map((scene) => (
               <SceneButton
@@ -41,8 +41,10 @@ export default function NextgenTokenRenderCenter(
             ))}
           </span>
         </Col>
-        <Col sm={12} md={6} className="pb-3 d-flex flex-column gap-2">
-          <span className="font-color-h font-larger">Rendered Versions:</span>
+      </Row>
+      <Row className="pt-3">
+        <Col sm={12} md={6} className="pb-3 d-flex flex-wrap gap-2">
+          <span className="font-color-h">Rendered Versions:</span>
           <NextGenTokenDownload
             token={props.token}
             resolution={Resolution["1K"]}
@@ -62,6 +64,17 @@ export default function NextgenTokenRenderCenter(
           <NextGenTokenDownload
             token={props.token}
             resolution={Resolution["16K"]}
+          />
+        </Col>
+        <Col sm={12} md={6} className="pb-3 d-flex flex-column gap-2">
+          <span className="font-color-h">For Thumbnail Use Only :</span>
+          <NextGenTokenDownload
+            token={props.token}
+            resolution={Resolution["Thumbnail"]}
+          />
+          <NextGenTokenDownload
+            token={props.token}
+            resolution={Resolution["0.5K"]}
           />
         </Col>
       </Row>
@@ -137,7 +150,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
       }}>
       <Row>
         <Col>
-          <span className="font-color-h font-larger">Custom Render:</span>
+          <span className="font-color-h">Custom Render:</span>
         </Col>
       </Row>
       <Row>
