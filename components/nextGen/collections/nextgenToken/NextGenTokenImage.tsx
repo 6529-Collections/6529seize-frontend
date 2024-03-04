@@ -140,7 +140,7 @@ export function NextGenTokenImage(
     let height = "auto";
     if (props.token_art) {
       if (isMobileScreen) {
-        height = "60vh";
+        height = "55vh";
       } else {
         height = "85vh";
       }
@@ -151,9 +151,10 @@ export function NextGenTokenImage(
     return (
       <>
         <span
-          className="d-flex flex-column align-items-center"
+          className="d-flex flex-column align-items-center justify-content-center"
           style={{
             overflow: "hidden",
+            height: height,
           }}>
           <Image
             priority
@@ -161,9 +162,9 @@ export function NextGenTokenImage(
             width="0"
             height="0"
             style={{
-              height: height,
+              height: "auto",
               width: "auto",
-              maxHeight: props.is_fullscreen ? "100vh" : "85vh",
+              maxHeight: "100%",
               maxWidth: "100%",
             }}
             src={getImageUrl()}

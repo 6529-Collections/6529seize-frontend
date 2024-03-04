@@ -185,7 +185,7 @@ export default function NextGenZoomableImage(
     if (props.is_fullscreen) {
       height = "100vh";
     } else if (isMobileScreen) {
-      height = "60vh";
+      height = "55vh";
     }
     let cursor = "default";
     if (props.zoom_scale > MIN_ZOOM_SCALE) {
@@ -245,8 +245,10 @@ export default function NextGenZoomableImage(
           height="0"
           style={{
             display: imageLoaded ? "block" : "none",
-            height: "100%",
+            height: "auto",
             width: "auto",
+            maxHeight: "100%",
+            maxWidth: "100%",
             transition: "transform 0.2s ease-out",
             objectFit: "contain",
             transform: `scale(${props.zoom_scale})`,
