@@ -50,8 +50,7 @@ export default function NextGenCollectionToken(props: any) {
   const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
   const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
-  let pageImage = token?.image_url ?? collection.image;
-  pageImage = pageImage.replace("/png/", "/png1k/");
+  const pageImage = token?.image_url ?? collection.image;
   const tokenView = props.pageProps.view;
   const tokenMode = props.pageProps.mode;
 
