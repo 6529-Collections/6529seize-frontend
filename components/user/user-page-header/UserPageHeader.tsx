@@ -3,7 +3,7 @@ import {
   IProfileAndConsolidations,
 } from "../../../entities/IProfile";
 import UserPageHeaderName from "./name/UserPageHeaderName";
-import UserPageHeaderLevel from "./UserPageHeaderLevel";
+import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
@@ -108,7 +108,9 @@ export default function UserPageHeader({
               mainAddress={mainAddress}
             />
 
-            <UserPageHeaderLevel level={profile.level} />
+            <div className="tw-mt-2">
+              <UserLevel level={profile.level} />
+            </div>
             {showAbout && (
               <UserPageHeaderAbout
                 profile={profile}

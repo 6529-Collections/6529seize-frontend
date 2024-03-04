@@ -9,7 +9,7 @@ import {
 } from "../../helpers/server.helpers";
 import UserPageCollected from "../../components/user/collected/UserPageCollected";
 
-export interface UserPageProps {
+interface UserPageProps {
   profile: IProfileAndConsolidations;
 }
 
