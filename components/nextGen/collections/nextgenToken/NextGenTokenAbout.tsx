@@ -23,7 +23,6 @@ import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
-import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { displayScore } from "./NextGenTokenProperties";
