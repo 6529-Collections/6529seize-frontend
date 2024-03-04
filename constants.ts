@@ -50,3 +50,5 @@ export const ROYALTIES_PERCENTAGE = 0.069;
 export const ETHEREUM_ICON_TEXT = "Ξ";
 
 export const MEMES_MINTING_HREF = "https://thememes.seize.io";
+
+export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";

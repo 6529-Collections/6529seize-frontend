@@ -95,7 +95,7 @@ export default function NextGenToken(props: Readonly<Props>) {
           )}
           {view === ContentView.DISPLAY_CENTER && (
             <Col className="pt-4 pb-4">
-              <NextGenTokenRenderCenter />
+              <NextGenTokenRenderCenter token={props.token} />
             </Col>
           )}
           {view === ContentView.RARITY && (
