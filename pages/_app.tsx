@@ -90,6 +90,10 @@ import {
   faFilter,
   faFilterCircleXmark,
   faMagnifyingGlass,
+  faMagnifyingGlassMinus,
+  faMagnifyingGlassPlus,
+  faPlusSquare,
+  faMinusSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -172,7 +176,11 @@ library.add(
   faFilter,
   faFilterCircleXmark,
   faCheckCircle,
-  faMagnifyingGlass
+  faMagnifyingGlass,
+  faMagnifyingGlassMinus,
+  faMagnifyingGlassPlus,
+  faPlusSquare,
+  faMinusSquare
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
