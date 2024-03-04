@@ -5,14 +5,6 @@ import CommonDropdownItemsWrapper from "./CommonDropdownItemsWrapper";
 import CommonDropdownItem from "./CommonDropdownItem";
 import { SortDirection } from "../../../../entities/ISort";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
-import { Inter } from "next/font/google";
-
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function CommonDropdown<T, U = unknown>(
   props: CommonSelectProps<T, U>
@@ -109,7 +101,7 @@ export default function CommonDropdown<T, U = unknown>(
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   return (
-    <div className={`${inter.className} `}>
+    <div>
       <div className="tw-relative">
         <button
           ref={buttonRef}

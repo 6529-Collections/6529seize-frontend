@@ -86,7 +86,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+          <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-italic tw-text-iron-500">
             {FILTER_TO_NO_DATA[filter]}
           </div>
         )}
