@@ -2,7 +2,7 @@ import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { NextGenToken } from "../../../../entities/INextgen";
 import useDownloader from "react-use-downloader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Spinner } from "../../../dotLoader/DotLoader";
+import DotLoader, { Spinner } from "../../../dotLoader/DotLoader";
 import Tippy from "@tippyjs/react";
 import { useEffect, useState } from "react";
 import { numberWithCommas } from "../../../../helpers/Helpers";
@@ -19,7 +19,10 @@ export enum Resolution {
 
 export function getUrl(token: NextGenToken, resolution: Resolution) {
   let u = token.image_url;
-  if (resolution == Resolution["1K"]) {
+  if (
+    (resolution == Resolution["1K"] && token.collection_id !== 1) ||
+    (resolution == Resolution["2K"] && token.collection_id == 1)
+  ) {
     return u;
   }
   if (resolution === Resolution["Thumbnail"]) {
@@ -36,6 +39,7 @@ type NextGenTokenProps = Readonly<{
 }>;
 
 function useImageChecker(token: NextGenToken, resolution: Resolution) {
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [imageExists, setImageExists] = useState(false);
   const [imageSize, setImageSize] = useState(0);
 
@@ -53,11 +57,12 @@ function useImageChecker(token: NextGenToken, resolution: Resolution) {
         } else {
           setImageExists(false);
         }
+        setImageLoaded(true);
       })
       .catch(() => setImageExists(false));
   }, [token, resolution]);
 
-  return { imageExists, imageSize };
+  return { imageLoaded, imageExists, imageSize };
 }
 
 export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
@@ -93,14 +98,14 @@ export default function NextGenTokenDownload(
     resolution: Resolution;
   }>
 ) {
-  const { imageExists, imageSize } = useImageChecker(
+  const { imageLoaded, imageExists, imageSize } = useImageChecker(
     props.token,
     props.resolution
   );
 
   function printResolution(quality: Resolution) {
     return (
-      <span className="d-flex gap-3 align-items-center">
+      <span className="d-flex gap-3 align-items-center no-wrap">
         <Tippy
           content={"Open in new tab"}
           placement={"top"}
@@ -125,7 +130,7 @@ export default function NextGenTokenDownload(
     <Container className="no-padding pt-1 pb-1 ">
       <Row className="d-flex flex-wrap align-items-center">
         <Col xs={4}>
-          <span>
+          <span className="no-wrap">
             <span>{props.resolution}</span>
             {imageExists &&
               imageSize > 0 &&
@@ -133,7 +138,15 @@ export default function NextGenTokenDownload(
           </span>
         </Col>
         <Col>
-          {imageExists ? printResolution(props.resolution) : "Coming Soon"}
+          {imageLoaded ? (
+            imageExists ? (
+              printResolution(props.resolution)
+            ) : (
+              "Coming Soon"
+            )
+          ) : (
+            <DotLoader />
+          )}
         </Col>
       </Row>
     </Container>
