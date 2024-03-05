@@ -15,7 +15,6 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
-import { getNextGenThumbnailUrl } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
