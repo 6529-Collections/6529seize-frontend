@@ -45,7 +45,6 @@
     "react-use": "^17.4.0",
     "react-use-downloader": "^1.2.2",
     "sass": "^1.69.5",
-    "sharp": "^0.33.2",
     "swiper": "^11.0.5",
     "uuid": "^9.0.1",
     "viem": "^1.19.5",
