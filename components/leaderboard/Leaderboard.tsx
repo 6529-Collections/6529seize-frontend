@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Dropdown, Form } from "react-bootstrap";
+import { Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import {
   TDHCalc,
@@ -16,7 +16,6 @@ import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { MEMES_CONTRACT } from "../../constants";
 import { MemesExtendedData } from "../../entities/INFT";
-import Address from "../address/Address";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -25,8 +24,6 @@ import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
 import {
-  getDisplay,
-  getDisplayEns,
   getLeaderboardProfileDisplay,
   getLink,
 } from "./LeaderboardHelpers";
@@ -206,9 +203,6 @@ export default function Leaderboard(props: Readonly<Props>) {
     OwnerTagFilter.ALL
   );
   const [focus, setFocus] = useState<Focus>(Focus.TDH);
-  const [hideMuseum, setHideMuseum] = useState(false);
-  const [hideTeam, setHideTeam] = useState(false);
-
   const [memesCount, setMemesCount] = useState<number>();
   const [memesCountS1, setMemesCountS1] = useState<number>();
   const [memesCountS2, setMemesCountS2] = useState<number>();
@@ -225,7 +219,7 @@ export default function Leaderboard(props: Readonly<Props>) {
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.level, sort_direction: SortDirection.DESC });
-  const [showViewAll, setShowViewAll] = useState(
+  const [showViewAll] = useState(
     !window.location.pathname.includes("community")
   );
 
@@ -286,15 +280,13 @@ export default function Leaderboard(props: Readonly<Props>) {
         tagFilter = "&filter=gradients";
         break;
     }
-    let museumFilter = hideMuseum ? "&hide_museum=true" : "";
-    let teamFilter = hideTeam ? "&hide_team=true" : "";
     let walletFilter = "";
     if (searchWallets && searchWallets.length > 0) {
       walletFilter = `&wallet=${searchWallets.join(",")}`;
     }
     let url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics`;
     let mysort = sort.sort;
-    url = `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${mysort}&sort_direction=${sort.sort_direction}${tagFilter}${museumFilter}${teamFilter}${walletFilter}`;
+    url = `${url}?page_size=${props.pageSize}&page=${pageProps.page}&sort=${mysort}&sort_direction=${sort.sort_direction}${tagFilter}${walletFilter}`;
     setMyFetchUrl(url);
     fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
@@ -316,8 +308,7 @@ export default function Leaderboard(props: Readonly<Props>) {
     ownerTagFilter,
     router.isReady,
     content,
-    hideMuseum,
-    hideTeam,
+
     searchWallets,
   ]);
 
