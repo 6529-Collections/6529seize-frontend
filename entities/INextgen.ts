@@ -92,6 +92,7 @@ export interface NextGenLog {
   transaction: string;
   block: number;
   block_timestamp: number;
+  heading: string;
   log: string;
   collection_id: number;
   source: string;
