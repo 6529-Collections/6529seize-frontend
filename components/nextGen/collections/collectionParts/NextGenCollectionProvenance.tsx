@@ -1,6 +1,7 @@
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import { Container, Row, Col, Accordion } from "react-bootstrap";
 import {
+  areEqualAddresses,
   getDateDisplay,
   getTransactionLink,
 } from "../../../../helpers/Helpers";
@@ -15,6 +16,13 @@ import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
+import { Transaction } from "../../../../entities/ITransaction";
+import Address from "../../../address/Address";
+import {
+  printGas,
+  printRoyalties,
+} from "../../../latest-activity/LatestActivityRow";
+import { NULL_ADDRESS } from "../../../../constants";
 
 interface Props {
   collection: NextGenCollection;
@@ -52,19 +60,16 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
 
   return (
     <Container className="no-padding" ref={scrollTarget}>
-      <Row className={`pt-2 ${styles.logsScrollContainer}`}>
+      <Row className="pt-2">
         <Col>
-          <Table bordered={false} className={styles.logsTable}>
-            <tbody>
-              {logs.map((log) => (
-                <NextGenCollectionProvenanceRow
-                  collection={props.collection}
-                  log={log}
-                  key={`${log.block}-${log.transaction}`}
-                />
-              ))}
-            </tbody>
-          </Table>
+          {logs.map((log, index) => (
+            <NextGenCollectionProvenanceRow
+              collection={props.collection}
+              log={log}
+              key={`${log.id}`}
+              odd={index % 2 !== 0}
+            />
+          ))}
         </Col>
       </Row>
       {totalResults > PAGE_SIZE && logsLoaded && (
@@ -88,14 +93,34 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   );
 }
 
+interface NextGenCollectionProvenanceRowProps {
+  collection: NextGenCollection;
+  log: NextGenLog;
+  disable_link?: boolean;
+}
+
 export function NextGenCollectionProvenanceRow(
   props: Readonly<{
     collection: NextGenCollection;
     log: NextGenLog;
     disable_link?: boolean;
+    odd?: boolean;
   }>
 ) {
   const log = props.log;
+
+  const [isTransaction, setIsTransaction] = useState<boolean>(false);
+  const [transaction, setTransaction] = useState<Transaction>();
+
+  useEffect(() => {
+    if (isTransaction) {
+      commonApiFetch<Transaction>({
+        endpoint: `transactions/${log.transaction}`,
+      }).then((response) => {
+        setTransaction(response);
+      });
+    }
+  }, [isTransaction]);
 
   function printParsedLog() {
     const escapedCollectionName = props.collection.name.replace(
@@ -103,10 +128,13 @@ export function NextGenCollectionProvenanceRow(
       "\\$&"
     );
     const pattern = new RegExp("(" + escapedCollectionName + " #(\\d+))");
-    const match = log.log.match(pattern);
+    const match = pattern.exec(log.log);
 
     try {
-      if (match && match[1] && match[2] && typeof match.index === "number") {
+      if (match?.[1] && match?.[2] && typeof match.index === "number") {
+        if (!isTransaction) {
+          setIsTransaction(true);
+        }
         const startIndex = match.index;
         const endIndex = startIndex + match[1].length;
         const beforeMatch = log.log.substring(0, startIndex);
@@ -153,7 +181,11 @@ export function NextGenCollectionProvenanceRow(
           return (
             <>
               {beforeMatch}
-              <a href={`/nextgen/token/${tokenId}`}>{content}</a>
+              <a
+                href={`/nextgen/token/${tokenId}`}
+                onClick={(e) => e.stopPropagation()}>
+                {content}
+              </a>
               {afterMatch}
             </>
           );
@@ -163,27 +195,110 @@ export function NextGenCollectionProvenanceRow(
       console.error("Error processing log:", e);
     }
 
-    return <>{log.log}</>;
+    return <>{log.heading}</>;
+  }
+
+  function printBody() {
+    if (!isTransaction || !transaction) {
+      const logSpan = <span>{log.log}</span>;
+      if (log.log.startsWith("Script at index")) {
+        return (
+          <span className="d-flex flex-column">
+            <span className="font-smaller font-color-h pb-2">
+              * The script of each collection is split into manageable chunks
+              due to Ethereum&apos;s transaction size limits. Each chunk of the
+              script is updated individually in a separate transaction.
+            </span>
+            {logSpan}
+          </span>
+        );
+      }
+      return logSpan;
+    }
+
+    return (
+      <span className="d-flex align-items-center justify-content-between">
+        <span className="d-flex gap-1">
+          <span>
+            {areEqualAddresses(transaction.from_address, NULL_ADDRESS) ? (
+              "Minted"
+            ) : (
+              <>
+                From:&nbsp;
+                <Address
+                  wallets={[transaction.from_address]}
+                  display={transaction.from_display}
+                />
+              </>
+            )}
+          </span>
+          <span>
+            To:&nbsp;
+            <Address
+              wallets={[transaction.to_address]}
+              display={transaction.to_display}
+            />
+          </span>
+        </span>
+        <span className="d-flex align-items-center gap-3">
+          {printRoyalties(transaction)}
+          {printGas(transaction)}
+        </span>
+      </span>
+    );
   }
 
   return (
-    <tr>
-      <td className="align-middle text-center">
-        {getDateDisplay(new Date(log.block_timestamp * 1000))}
-      </td>
-      <td className={styles.collectionProvenance}>
-        <span className="d-flex">{printParsedLog()}</span>
-      </td>
-      <td className="text-right">
-        <a
-          href={getTransactionLink(NEXTGEN_CHAIN_ID, log.transaction)}
-          target="_blank"
-          rel="noreferrer">
-          <FontAwesomeIcon
-            className={styles.globeIcon}
-            icon="external-link-square"></FontAwesomeIcon>
-        </a>
-      </td>
-    </tr>
+    <Accordion
+      className={
+        props.odd
+          ? styles.collectionProvenanceAccordionOdd
+          : styles.collectionProvenanceAccordion
+      }>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button className="d-flex justify-content-between">
+          <Container className={styles.collectionProvenanceAccordionButton}>
+            <Row>
+              <Col>
+                <span className="d-flex align-items-center justify-content-between">
+                  <span className="d-flex align-items-center gap-4">
+                    <span className="no-wrap">
+                      {getDateDisplay(new Date(log.block_timestamp * 1000))}
+                    </span>
+                    <span>{printParsedLog()}</span>
+                  </span>
+                  <span>
+                    <a
+                      href={getTransactionLink(
+                        NEXTGEN_CHAIN_ID,
+                        log.transaction
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                      target="_blank"
+                      rel="noreferrer">
+                      <FontAwesomeIcon
+                        className={styles.globeIcon}
+                        icon="external-link-square"></FontAwesomeIcon>
+                    </a>
+                  </span>
+                </span>
+              </Col>
+            </Row>
+          </Container>
+        </Accordion.Button>
+        <Accordion.Body
+          className={
+            props.odd
+              ? styles.collectionProvenanceAccordionBodyOdd
+              : styles.collectionProvenanceAccordionBody
+          }>
+          <Container>
+            <Row className="pt-2 pb-2">
+              <Col>{printBody()}</Col>
+            </Row>
+          </Container>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
   );
 }

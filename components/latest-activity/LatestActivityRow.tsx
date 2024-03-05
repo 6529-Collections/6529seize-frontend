@@ -28,6 +28,86 @@ import {
   getNextGenImageUrl,
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 
+function calculateRoyaltiesPercentage(tr: Transaction) {
+  return Math.round((tr.royalties / tr.value) * 10000) / 10000;
+}
+
+export function printRoyalties(tr: Transaction) {
+  if (
+    tr.value == 0 ||
+    isNullAddress(tr.from_address) ||
+    areEqualAddresses(tr.from_address, MANIFOLD)
+  ) {
+    return <></>;
+  }
+  const royaltiesPercentage = calculateRoyaltiesPercentage(tr);
+  if (tr.royalties <= 0) return <></>;
+
+  const imgSrc = getRoyaltyImage(royaltiesPercentage);
+
+  return (
+    <Tippy
+      content={
+        <Container>
+          <Row>
+            <Col className="no-wrap">Royalties</Col>
+            <Col className="text-right no-wrap">
+              {tr.royalties > 0
+                ? `${displayDecimal(tr.royalties, 5)} (${displayDecimal(
+                    royaltiesPercentage * 100,
+                    2
+                  )}%)`
+                : "-"}
+            </Col>
+          </Row>
+        </Container>
+      }
+      placement={"top-end"}
+      theme={"light"}
+      hideOnClick={false}>
+      <Image
+        width={0}
+        height={0}
+        style={{ height: "25px", width: "auto" }}
+        src={`/${imgSrc}`}
+        alt={imgSrc}
+        className="cursor-pointer"
+      />
+    </Tippy>
+  );
+}
+
+export function printGas(tr: Transaction) {
+  return (
+    <Tippy
+      content={
+        <Container>
+          <Row>
+            <Col className="no-wrap">Gas</Col>
+            <Col className="text-right">{displayDecimal(tr.gas, 5)}</Col>
+          </Row>
+          <Row>
+            <Col className="no-wrap">GWEI</Col>
+            <Col className="text-right">{numberWithCommas(tr.gas_gwei)}</Col>
+          </Row>
+          <Row>
+            <Col className="no-wrap">Gas Price</Col>
+            <Col className="text-right">
+              {displayDecimal(tr.gas_price_gwei, 2)}
+            </Col>
+          </Row>
+        </Container>
+      }
+      placement={"top-end"}
+      theme={"light"}
+      hideOnClick={false}>
+      <FontAwesomeIcon
+        className={styles.gasIcon}
+        icon="gas-pump"></FontAwesomeIcon>
+    </Tippy>
+  );
+}
+
 interface Props {
   nft?: NFTLite;
   nextgen_collection?: NextGenCollection;
@@ -53,90 +133,6 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       return nft.image;
     }
     return "";
-  }
-
-  function calculateRoyaltiesPercentage() {
-    return Math.round((props.tr.royalties / props.tr.value) * 10000) / 10000;
-  }
-
-  function printRoyalties() {
-    if (
-      props.tr.value == 0 ||
-      isNullAddress(props.tr.from_address) ||
-      areEqualAddresses(props.tr.from_address, MANIFOLD)
-    ) {
-      return <></>;
-    }
-    const royaltiesPercentage = calculateRoyaltiesPercentage();
-    if (props.tr.royalties <= 0) return <></>;
-
-    const imgSrc = getRoyaltyImage(royaltiesPercentage);
-
-    return (
-      <Tippy
-        content={
-          <Container>
-            <Row>
-              <Col className="no-wrap">Royalties</Col>
-              <Col className="text-right no-wrap">
-                {props.tr.royalties > 0
-                  ? `${displayDecimal(props.tr.royalties, 5)} (${displayDecimal(
-                      royaltiesPercentage * 100,
-                      2
-                    )}%)`
-                  : "-"}
-              </Col>
-            </Row>
-          </Container>
-        }
-        placement={"top-end"}
-        theme={"light"}
-        hideOnClick={false}>
-        <Image
-          width={0}
-          height={0}
-          style={{ height: "25px", width: "auto" }}
-          src={`/${imgSrc}`}
-          alt={imgSrc}
-          className="cursor-pointer"
-        />
-      </Tippy>
-    );
-  }
-
-  function printGas() {
-    return (
-      <Tippy
-        content={
-          <Container>
-            <Row>
-              <Col className="no-wrap">Gas</Col>
-              <Col className="text-right">
-                {displayDecimal(props.tr.gas, 5)}
-              </Col>
-            </Row>
-            <Row>
-              <Col className="no-wrap">GWEI</Col>
-              <Col className="text-right">
-                {numberWithCommas(props.tr.gas_gwei)}
-              </Col>
-            </Row>
-            <Row>
-              <Col className="no-wrap">Gas Price</Col>
-              <Col className="text-right">
-                {displayDecimal(props.tr.gas_price_gwei, 2)}
-              </Col>
-            </Row>
-          </Container>
-        }
-        placement={"top-end"}
-        theme={"light"}
-        hideOnClick={false}>
-        <FontAwesomeIcon
-          className={styles.gasIcon}
-          icon="gas-pump"></FontAwesomeIcon>
-      </Tippy>
-    );
   }
 
   function getHref() {
@@ -356,8 +352,8 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   function printInfo() {
     return (
       <span className="d-flex align-items-center gap-3">
-        {printRoyalties()}
-        {printGas()}
+        {printRoyalties(props.tr)}
+        {printGas(props.tr)}
         <a
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           className={styles.transactionLink}

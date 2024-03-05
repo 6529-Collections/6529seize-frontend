@@ -16,6 +16,7 @@ import { ContentView } from "../../../../../components/nextGen/collections/colle
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { getNextGenTokenScene } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenScene";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
+import { getNextGenThumbnailUrl } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -69,6 +70,12 @@ export default function NextGenCollectionToken(props: any) {
     },
   ];
 
+  let twitterImage = pageImage;
+  if (token) {
+    const thumbnail = getNextGenThumbnailUrl(token.id);
+    twitterImage = `${process.env.BASE_ENDPOINT}/api/screenshot?image=${thumbnail}`;
+  }
+
   return (
     <>
       <Head>
@@ -87,7 +94,7 @@ export default function NextGenCollectionToken(props: any) {
         <meta name="twitter:image:alt" content={pagenameFull} />
         <meta name="twitter:title" content={pagenameFull} />
         <meta name="twitter:description" content="NEXTGEN | 6529 SEIZE" />
-        <meta name="twitter:image" content={pageImage} />
+        <meta name="twitter:image" content={twitterImage} />
       </Head>
 
       <main className={styles.main}>

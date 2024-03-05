@@ -126,6 +126,16 @@ export default function NextGenTokenDownload(
     );
   }
 
+  function getDisplay() {
+    if (!imageLoaded) {
+      return <DotLoader />;
+    }
+    if (!imageExists) {
+      return "Coming Soon";
+    }
+    return printResolution(props.resolution);
+  }
+
   return (
     <Container className="no-padding pt-1 pb-1 ">
       <Row className="d-flex flex-wrap align-items-center">
@@ -137,17 +147,7 @@ export default function NextGenTokenDownload(
               ` (${numberWithCommas(imageSize)} MB)`}
           </span>
         </Col>
-        <Col>
-          {imageLoaded ? (
-            imageExists ? (
-              printResolution(props.resolution)
-            ) : (
-              "Coming Soon"
-            )
-          ) : (
-            <DotLoader />
-          )}
-        </Col>
+        <Col>{getDisplay()}</Col>
       </Row>
     </Container>
   );
