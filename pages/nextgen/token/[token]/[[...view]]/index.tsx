@@ -16,7 +16,6 @@ import { ContentView } from "../../../../../components/nextGen/collections/colle
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { getNextGenTokenScene } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenScene";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
-import { getNextGenThumbnailUrl } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),

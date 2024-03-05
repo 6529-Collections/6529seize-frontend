@@ -1545,7 +1545,9 @@ export default function Leaderboard(props: Readonly<Props>) {
                   <th className={styles.rank}>Rank</th>
                   <th className={`${styles.hodlerContainer}`}>
                     Collector&nbsp;&nbsp;
-                    <span className={styles.totalResults}>x{totalResults}</span>
+                    <span className={styles.totalResults}>
+                      x{totalResults.toLocaleString()}
+                    </span>
                     {showLoader && <DotLoader />}
                   </th>
                   {focus === Focus.TDH && (

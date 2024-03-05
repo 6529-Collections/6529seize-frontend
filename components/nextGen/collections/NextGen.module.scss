@@ -398,6 +398,12 @@
   }
 }
 
+.collectionProvenanceAccordionButtonHideCaret {
+  &::after {
+    display: none !important;
+  }
+}
+
 .collectionProvenanceAccordionButton {
   padding: 0;
   margin: 0;
