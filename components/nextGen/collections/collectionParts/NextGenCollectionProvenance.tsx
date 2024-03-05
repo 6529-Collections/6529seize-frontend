@@ -292,7 +292,7 @@ export function NextGenCollectionProvenanceRow(
               ? styles.collectionProvenanceAccordionBodyOdd
               : styles.collectionProvenanceAccordionBody
           }>
-          <Container>
+          <Container className="no-padding">
             <Row className="pt-2 pb-2">
               <Col>{printBody()}</Col>
             </Row>
