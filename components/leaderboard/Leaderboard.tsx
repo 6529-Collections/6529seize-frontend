@@ -24,7 +24,14 @@ import {
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-import { getDisplay, getDisplayEns } from "./LeaderboardHelpers";
+import {
+  getDisplay,
+  getDisplayEns,
+  getLeaderboardProfileDisplay,
+  getLink,
+} from "./LeaderboardHelpers";
+import { ImageScale, getScaledImageUri } from "../../helpers/image.helpers";
+import Link from "next/link";
 
 interface Props {
   page: number;
@@ -188,6 +195,7 @@ enum Focus {
 export interface LeaderboardTDH extends BaseTDHMetrics {
   handle?: string | undefined;
   level: number;
+  pfp?: string | null;
 }
 
 export default function Leaderboard(props: Readonly<Props>) {
@@ -1322,7 +1330,8 @@ export default function Leaderboard(props: Readonly<Props>) {
           {Object.values(OwnerTagFilter).map((tagFilter) => (
             <Dropdown.Item
               key={tagFilter}
-              onClick={() => setOwnerTagFilter(tagFilter)}>
+              onClick={() => setOwnerTagFilter(tagFilter)}
+            >
               {[
                 OwnerTagFilter.MEMES_SETS,
                 OwnerTagFilter.MEMES_SETS_SZN1,
@@ -1387,7 +1396,8 @@ export default function Leaderboard(props: Readonly<Props>) {
         <Col
           className={`d-flex align-items-center`}
           xs={{ span: showViewAll ? 12 : 6 }}
-          sm={{ span: 6 }}>
+          sm={{ span: 6 }}
+        >
           <h1>
             Community{" "}
             {showViewAll && (
@@ -1400,12 +1410,14 @@ export default function Leaderboard(props: Readonly<Props>) {
         {lastTDH && props.showLastTdh && (
           <Col
             className={`${styles.lastTDH} d-flex align-items-center justify-content-end`}
-            xs={{ span: 6 }}>
+            xs={{ span: 6 }}
+          >
             * TDH Block&nbsp;
             <a
               href={`https://etherscan.io/block/${lastTDH.block}`}
               rel="noreferrer"
-              target="_blank">
+              target="_blank"
+            >
               {lastTDH.block}
             </a>
             {/* &nbsp;|&nbsp;Next Calculation&nbsp;
@@ -1421,7 +1433,8 @@ export default function Leaderboard(props: Readonly<Props>) {
               xs={{ span: 6 }}
               sm={{ span: 6 }}
               md={{ span: 3 }}
-              lg={{ span: 3 }}>
+              lg={{ span: 3 }}
+            >
               {printHodlersDropdown()}
             </Col>
             <Col
@@ -1429,7 +1442,8 @@ export default function Leaderboard(props: Readonly<Props>) {
               xs={{ span: 6 }}
               sm={{ span: 6 }}
               md={{ span: 3 }}
-              lg={{ span: 3 }}>
+              lg={{ span: 3 }}
+            >
               {printCollectionsDropdown()}
             </Col>
             <Col
@@ -1437,15 +1451,18 @@ export default function Leaderboard(props: Readonly<Props>) {
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}>
+              lg={{ span: 6 }}
+            >
               <div
-                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
+                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}
+              >
                 <span>
                   <span
                     onClick={() => changeFocus(Focus.TDH)}
                     className={`${styles.focus} ${
                       focus != Focus.TDH ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     {Focus.TDH}
                   </span>
                 </span>
@@ -1455,7 +1472,8 @@ export default function Leaderboard(props: Readonly<Props>) {
                     onClick={() => changeFocus(Focus.INTERACTIONS)}
                     className={`${styles.focus} ${
                       focus != Focus.INTERACTIONS ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     {Focus.INTERACTIONS}
                   </span>
                 </span>
@@ -1465,7 +1483,8 @@ export default function Leaderboard(props: Readonly<Props>) {
                     onClick={() => changeFocus(Focus.SETS)}
                     className={`${styles.focus} ${
                       focus != Focus.SETS ? styles.disabled : ""
-                    }`}>
+                    }`}
+                  >
                     {Focus.SETS}
                   </span>
                 </span>
@@ -1478,40 +1497,41 @@ export default function Leaderboard(props: Readonly<Props>) {
               sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 4 }}
-              className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}>
-              <Container className="no-padding">
-                <Row>
-                  <Col className="d-flex align-items-center justify-content-center">
-                    <Container className="no-padding">
-                      <Row>
-                        <Col>
-                          <Form.Check
-                            type="switch"
-                            checked={hideMuseum}
-                            className={`${styles.museumToggle}`}
-                            label={`Hide 6529Museum`}
-                            onChange={() => setHideMuseum(!hideMuseum)}
-                          />
-                          <Form.Check
-                            type="switch"
-                            checked={hideTeam}
-                            className={`${styles.museumToggle}`}
-                            label={`Hide 6529Team`}
-                            onChange={() => setHideTeam(!hideTeam)}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
-                  </Col>
-                </Row>
-              </Container>
+              className={`${styles.pageHeader} d-flex justify-content-center align-items-center`}
+            >
+              {globalTdhHistory && (
+                <Container className="pt-1 pb-3">
+                  <Row>
+                    <Col className="d-flex flex-wrap  font-larger">
+                      <b>
+                        Community TDH:{" "}
+                        {numberWithCommas(globalTdhHistory.total_boosted_tdh)}
+                      </b>
+                      <b>
+                        Daily Change:{" "}
+                        {numberWithCommas(globalTdhHistory.net_boosted_tdh)}{" "}
+                        <span className="font-smaller">
+                          (
+                          {(
+                            (globalTdhHistory.net_boosted_tdh /
+                              globalTdhHistory.total_boosted_tdh) *
+                            100
+                          ).toFixed(2)}
+                          %)
+                        </span>
+                      </b>
+                    </Col>
+                  </Row>
+                </Container>
+              )}
             </Col>
             <Col
               className={`d-flex justify-content-end align-items-center`}
               xs={{ span: 12 }}
               sm={{ span: 12 }}
               md={{ span: 6 }}
-              lg={{ span: 8 }}>
+              lg={{ span: 8 }}
+            >
               <SearchWalletsDisplay
                 searchWallets={searchWallets}
                 setSearchWallets={setSearchWallets}
@@ -1523,29 +1543,6 @@ export default function Leaderboard(props: Readonly<Props>) {
       )}
       <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
-          {globalTdhHistory && (
-            <Container className="pt-1 pb-3">
-              <Row>
-                <Col className="d-flex flex-wrap justify-content-end font-larger">
-                  <b>
-                    Community TDH:{" "}
-                    {numberWithCommas(globalTdhHistory.total_boosted_tdh)}
-                    &nbsp;|&nbsp;Daily Change:{" "}
-                    {numberWithCommas(globalTdhHistory.net_boosted_tdh)}{" "}
-                    <span className="font-smaller">
-                      (
-                      {(
-                        (globalTdhHistory.net_boosted_tdh /
-                          globalTdhHistory.total_boosted_tdh) *
-                        100
-                      ).toFixed(2)}
-                      %)
-                    </span>
-                  </b>
-                </Col>
-              </Row>
-            </Container>
-          )}
           {!leaderboard && (
             <Container>
               <Row>
@@ -2313,7 +2310,7 @@ export default function Leaderboard(props: Readonly<Props>) {
               </thead>
               <tbody>
                 {leaderboard &&
-                  leaderboard.map((lead, index) => {
+                  leaderboard.map((lead: any, index) => {
                     if (lead.balance > 0 && getWallets(lead).length > 0) {
                       return (
                         <tr key={`wallet-${index}`}>
@@ -2325,26 +2322,22 @@ export default function Leaderboard(props: Readonly<Props>) {
                                 1 +
                                 (pageProps.page - 1) * pageProps.pageSize}
                           </td>
-                          <td className={styles.hodlerContainer}>
-                            <div className={styles.hodler}>
-                              <Address
-                                wallets={getWallets(lead)}
-                                display={getDisplay(lead)}
-                                displayEns={getDisplayEns(lead)}
-                                tags={{
-                                  memesCardsSets: lead.memes_cards_sets,
-                                  memesCardsSetS1: lead.memes_cards_sets_szn1,
-                                  memesCardsSetS2: lead.memes_cards_sets_szn2,
-                                  memesCardsSetS3: lead.memes_cards_sets_szn3,
-                                  memesCardsSetS4: lead.memes_cards_sets_szn4,
-                                  memesCardsSetS5: lead.memes_cards_sets_szn5,
-                                  memesCardsSetS6: lead.memes_cards_sets_szn6,
-                                  memesBalance: lead.unique_memes,
-                                  gradientsBalance: lead.gradients_balance,
-                                  genesis: lead.genesis,
-                                }}
-                                setLinkQueryAddress={false}
-                              />
+                          <td className="tw-max-w-[20px] tw-truncate">
+                            <div className="tw-h-full tw-inline-flex tw-space-x-4">
+                              {lead.pfp && (
+                                <img
+                                  src={getScaledImageUri(
+                                    lead.pfp,
+                                    ImageScale.W_AUTO_H_50
+                                  )}
+                                  alt="Community Table Profile Picture"
+                                  className="tw-bg-transparent tw-h-[40px] tw-w-auto tw-mx-auto tw-object-contain"
+                                />
+                              )}
+
+                              <Link href={getLink(lead)}>
+                                {getLeaderboardProfileDisplay(lead)}
+                              </Link>
                             </div>
                           </td>
                           {focus === Focus.TDH && (
@@ -2483,7 +2476,8 @@ export default function Leaderboard(props: Readonly<Props>) {
             xs={12}
             sm={12}
             md={6}
-            className="pt-4 pb-3 d-flex justify-content-center gap-4">
+            className="pt-4 pb-3 d-flex justify-content-center gap-4"
+          >
             <DownloadUrlWidget
               preview="Page"
               name={getFileName(pageProps.page)}
@@ -2500,7 +2494,8 @@ export default function Leaderboard(props: Readonly<Props>) {
               xs={12}
               sm={12}
               md={6}
-              className="pt-4 pb-3 d-flex justify-content-center">
+              className="pt-4 pb-3 d-flex justify-content-center"
+            >
               <Pagination
                 page={pageProps.page}
                 pageSize={pageProps.pageSize}

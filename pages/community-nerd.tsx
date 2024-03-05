@@ -13,11 +13,13 @@ const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
+
 export default function TheMemesPage() {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
-    { display: "Community Nerd" },
+    { display: "Community" },
   ]);
+
   return (
     <>
       <Head>
@@ -49,7 +51,6 @@ export default function TheMemesPage() {
                 showLastTdh={true}
               />
             </Col>
-            Expand Down
           </Row>
         </Container>
       </main>
