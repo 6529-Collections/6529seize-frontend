@@ -23,10 +23,7 @@ import {
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader from "../dotLoader/DotLoader";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-import {
-  getLeaderboardProfileDisplay,
-  getLink,
-} from "./LeaderboardHelpers";
+import { getLeaderboardProfileDisplay, getLink } from "./LeaderboardHelpers";
 import { ImageScale, getScaledImageUri } from "../../helpers/image.helpers";
 import Link from "next/link";
 
@@ -219,10 +216,8 @@ export default function Leaderboard(props: Readonly<Props>) {
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.level, sort_direction: SortDirection.DESC });
-  const [showViewAll] = useState(
-    !window.location.pathname.includes("community")
-  );
 
+  const showViewAll = !window.location.pathname.includes("community");
   const [showLoader, setShowLoader] = useState(false);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -303,14 +298,7 @@ export default function Leaderboard(props: Readonly<Props>) {
         setPageProps({ ...pageProps, page: 1 });
       }
     }
-  }, [
-    sort,
-    ownerTagFilter,
-    router.isReady,
-    content,
-
-    searchWallets,
-  ]);
+  }, [sort, ownerTagFilter, router.isReady, content, searchWallets]);
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(

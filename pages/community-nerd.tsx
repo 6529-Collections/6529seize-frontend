@@ -1,7 +1,5 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-
-import { useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
@@ -18,10 +16,10 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function TheMemesPage() {
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+  const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Community" },
-  ]);
+    { display: "Community Nerd" },
+  ];
 
   return (
     <>
