@@ -17,7 +17,6 @@ import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
-import { Transaction } from "../../../../entities/ITransaction";
 import { NULL_ADDRESS } from "../../../../constants";
 import {
   printGas,
