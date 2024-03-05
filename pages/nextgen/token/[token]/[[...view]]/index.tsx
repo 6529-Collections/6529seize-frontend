@@ -70,12 +70,6 @@ export default function NextGenCollectionToken(props: any) {
     },
   ];
 
-  let twitterImage = pageImage;
-  if (token) {
-    const thumbnail = getNextGenThumbnailUrl(token.id);
-    twitterImage = `${process.env.BASE_ENDPOINT}/api/screenshot?image=${thumbnail}`;
-  }
-
   return (
     <>
       <Head>
@@ -94,7 +88,7 @@ export default function NextGenCollectionToken(props: any) {
         <meta name="twitter:image:alt" content={pagenameFull} />
         <meta name="twitter:title" content={pagenameFull} />
         <meta name="twitter:description" content="NEXTGEN | 6529 SEIZE" />
-        <meta name="twitter:image" content={twitterImage} />
+        <meta name="twitter:image" content={pageImage} />
       </Head>
 
       <main className={styles.main}>
