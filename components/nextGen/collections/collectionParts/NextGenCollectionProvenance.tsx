@@ -110,17 +110,6 @@ export function NextGenCollectionProvenanceRow(
   const log = props.log;
 
   const [isTransaction, setIsTransaction] = useState<boolean>(false);
-  const [transaction, setTransaction] = useState<Transaction>();
-
-  useEffect(() => {
-    if (isTransaction) {
-      commonApiFetch<Transaction>({
-        endpoint: `transactions/${log.transaction}`,
-      }).then((response) => {
-        setTransaction(response);
-      });
-    }
-  }, [isTransaction]);
 
   function printAddress(address: string, display?: string) {
     return <a href={`/${address}`}>{display ?? formatAddress(address)}</a>;
@@ -174,25 +163,22 @@ export function NextGenCollectionProvenanceRow(
         );
 
         let fromTo: any;
-        if (transaction) {
+        if (isTransaction) {
           fromTo = (
             <span className="d-flex gap-1">
               <span>
-                {areEqualAddresses(transaction.from_address, NULL_ADDRESS) ? (
+                {areEqualAddresses(log.from_address, NULL_ADDRESS) ? (
                   "Minted"
                 ) : (
                   <>
                     from&nbsp;
-                    {printAddress(
-                      transaction.from_address,
-                      transaction.from_display
-                    )}
+                    {printAddress(log.from_address, log.from_display)}
                   </>
                 )}
               </span>
               <span>
                 to&nbsp;
-                {printAddress(transaction.to_address, transaction.to_display)}
+                {printAddress(log.to_address, log.to_display)}
               </span>
             </span>
           );
@@ -237,7 +223,7 @@ export function NextGenCollectionProvenanceRow(
   }
 
   function printBody() {
-    if (!isTransaction || !transaction) {
+    if (!isTransaction) {
       const logSpan = <span>{log.log}</span>;
       if (log.log.startsWith("Script at index")) {
         return (
@@ -282,8 +268,14 @@ export function NextGenCollectionProvenanceRow(
                     </span>
                   </span>
                   <span className="d-flex align-items-center gap-2">
-                    {transaction && printGas(transaction)}
-                    {transaction && printRoyalties(transaction)}
+                    {isTransaction &&
+                      printGas(log.gas, log.gas_price, log.gas_price_gwei)}
+                    {isTransaction &&
+                      printRoyalties(
+                        log.value,
+                        log.royalties,
+                        log.from_address
+                      )}
                     <a
                       href={getTransactionLink(
                         NEXTGEN_CHAIN_ID,
