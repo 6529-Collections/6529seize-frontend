@@ -2,11 +2,9 @@ import styles from "../NextGen.module.scss";
 import { Container, Row, Col, Accordion } from "react-bootstrap";
 import {
   areEqualAddresses,
-  displayDecimal,
   formatAddress,
   getDateDisplay,
   getTransactionLink,
-  numberWithCommas,
 } from "../../../../helpers/Helpers";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenLog } from "../../../../entities/INextgen";
