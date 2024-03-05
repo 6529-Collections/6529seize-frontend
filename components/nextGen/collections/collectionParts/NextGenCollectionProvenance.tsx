@@ -2,8 +2,11 @@ import styles from "../NextGen.module.scss";
 import { Container, Row, Col, Accordion } from "react-bootstrap";
 import {
   areEqualAddresses,
+  displayDecimal,
+  formatAddress,
   getDateDisplay,
   getTransactionLink,
+  numberWithCommas,
 } from "../../../../helpers/Helpers";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollection, NextGenLog } from "../../../../entities/INextgen";
@@ -17,12 +20,11 @@ import {
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
 import { Transaction } from "../../../../entities/ITransaction";
-import Address from "../../../address/Address";
+import { NULL_ADDRESS } from "../../../../constants";
 import {
   printGas,
   printRoyalties,
 } from "../../../latest-activity/LatestActivityRow";
-import { NULL_ADDRESS } from "../../../../constants";
 
 interface Props {
   collection: NextGenCollection;
@@ -122,6 +124,10 @@ export function NextGenCollectionProvenanceRow(
     }
   }, [isTransaction]);
 
+  function printAddress(address: string, display?: string) {
+    return <a href={`/${address}`}>{display ?? formatAddress(address)}</a>;
+  }
+
   function printParsedLog() {
     const escapedCollectionName = props.collection.name.replace(
       /[-\/\\^$*+?.()|[\]{}]/g,
@@ -169,24 +175,58 @@ export function NextGenCollectionProvenanceRow(
           </>
         );
 
+        let fromTo: any;
+        if (transaction) {
+          fromTo = (
+            <span className="d-flex gap-1">
+              <span>
+                {areEqualAddresses(transaction.from_address, NULL_ADDRESS) ? (
+                  "Minted"
+                ) : (
+                  <>
+                    from&nbsp;
+                    {printAddress(
+                      transaction.from_address,
+                      transaction.from_display
+                    )}
+                  </>
+                )}
+              </span>
+              <span>
+                to&nbsp;
+                {printAddress(transaction.to_address, transaction.to_display)}
+              </span>
+            </span>
+          );
+        }
+
+        const beforeMatchSpan = <span>{beforeMatch}</span>;
+        const afterMatchSpan = afterMatch ? (
+          <span>{afterMatch}&nbsp;</span>
+        ) : (
+          <></>
+        );
         if (props.disable_link) {
           return (
             <>
-              {beforeMatch}
+              {beforeMatchSpan}
               {content}
-              {afterMatch}
+              {afterMatchSpan}
+              {fromTo}
             </>
           );
         } else {
           return (
             <>
-              {beforeMatch}
+              {beforeMatchSpan}
+              &nbsp;
               <a
                 href={`/nextgen/token/${tokenId}`}
                 onClick={(e) => e.stopPropagation()}>
                 {content}
               </a>
-              {afterMatch}
+              {afterMatchSpan}
+              {fromTo}
             </>
           );
         }
@@ -215,37 +255,6 @@ export function NextGenCollectionProvenanceRow(
       }
       return logSpan;
     }
-
-    return (
-      <span className="d-flex align-items-center justify-content-between">
-        <span className="d-flex gap-1">
-          <span>
-            {areEqualAddresses(transaction.from_address, NULL_ADDRESS) ? (
-              "Minted"
-            ) : (
-              <>
-                From:&nbsp;
-                <Address
-                  wallets={[transaction.from_address]}
-                  display={transaction.from_display}
-                />
-              </>
-            )}
-          </span>
-          <span>
-            To:&nbsp;
-            <Address
-              wallets={[transaction.to_address]}
-              display={transaction.to_display}
-            />
-          </span>
-        </span>
-        <span className="d-flex align-items-center gap-3">
-          {printRoyalties(transaction)}
-          {printGas(transaction)}
-        </span>
-      </span>
-    );
   }
 
   return (
@@ -256,7 +265,12 @@ export function NextGenCollectionProvenanceRow(
           : styles.collectionProvenanceAccordion
       }>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className="d-flex justify-content-between">
+        <Accordion.Button
+          className={`d-flex justify-content-between ${
+            isTransaction
+              ? styles.collectionProvenanceAccordionButtonHideCaret
+              : ""
+          }`}>
           <Container className={styles.collectionProvenanceAccordionButton}>
             <Row>
               <Col>
@@ -265,9 +279,13 @@ export function NextGenCollectionProvenanceRow(
                     <span className="no-wrap">
                       {getDateDisplay(new Date(log.block_timestamp * 1000))}
                     </span>
-                    <span>{printParsedLog()}</span>
+                    <span className="d-flex align-items-center">
+                      {printParsedLog()}
+                    </span>
                   </span>
-                  <span>
+                  <span className="d-flex align-items-center gap-2">
+                    {transaction && printGas(transaction)}
+                    {transaction && printRoyalties(transaction)}
                     <a
                       href={getTransactionLink(
                         NEXTGEN_CHAIN_ID,
@@ -277,7 +295,10 @@ export function NextGenCollectionProvenanceRow(
                       target="_blank"
                       rel="noreferrer">
                       <FontAwesomeIcon
-                        className={styles.globeIcon}
+                        style={{
+                          height: "25px",
+                          cursor: "pointer",
+                        }}
                         icon="external-link-square"></FontAwesomeIcon>
                     </a>
                   </span>
@@ -286,18 +307,20 @@ export function NextGenCollectionProvenanceRow(
             </Row>
           </Container>
         </Accordion.Button>
-        <Accordion.Body
-          className={
-            props.odd
-              ? styles.collectionProvenanceAccordionBodyOdd
-              : styles.collectionProvenanceAccordionBody
-          }>
-          <Container className="no-padding">
-            <Row className="pt-2 pb-2">
-              <Col>{printBody()}</Col>
-            </Row>
-          </Container>
-        </Accordion.Body>
+        {!isTransaction && (
+          <Accordion.Body
+            className={
+              props.odd
+                ? styles.collectionProvenanceAccordionBodyOdd
+                : styles.collectionProvenanceAccordionBody
+            }>
+            <Container className="no-padding">
+              <Row className="pt-2 pb-2">
+                <Col>{printBody()}</Col>
+              </Row>
+            </Container>
+          </Accordion.Body>
+        )}
       </Accordion.Item>
     </Accordion>
   );
