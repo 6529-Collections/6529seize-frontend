@@ -96,6 +96,16 @@ export interface NextGenLog {
   log: string;
   collection_id: number;
   source: string;
+  from_address: string;
+  to_address: string;
+  from_display: string;
+  to_display: string;
+  value: number;
+  royalties: number;
+  gas_gwei: number;
+  gas_price: number;
+  gas: number;
+  gas_price_gwei: number;
 }
 
 export interface NextGenTrait {

@@ -28,20 +28,16 @@ import {
   getNextGenImageUrl,
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 
-function calculateRoyaltiesPercentage(tr: Transaction) {
-  return Math.round((tr.royalties / tr.value) * 10000) / 10000;
+function calculateRoyaltiesPercentage(value: number, royalties: number) {
+  return Math.round((royalties / value) * 10000) / 10000;
 }
 
-export function printRoyalties(tr: Transaction) {
-  if (
-    tr.value == 0 ||
-    isNullAddress(tr.from_address) ||
-    areEqualAddresses(tr.from_address, MANIFOLD)
-  ) {
+export function printRoyalties(value: number, royalties: number, from: string) {
+  if (value == 0 || isNullAddress(from) || areEqualAddresses(from, MANIFOLD)) {
     return <></>;
   }
-  const royaltiesPercentage = calculateRoyaltiesPercentage(tr);
-  if (tr.royalties <= 0) return <></>;
+  const royaltiesPercentage = calculateRoyaltiesPercentage(value, royalties);
+  if (royalties <= 0) return <></>;
 
   const imgSrc = getRoyaltyImage(royaltiesPercentage);
 
@@ -52,8 +48,8 @@ export function printRoyalties(tr: Transaction) {
           <Row>
             <Col className="no-wrap">Royalties</Col>
             <Col className="text-right no-wrap">
-              {tr.royalties > 0
-                ? `${displayDecimal(tr.royalties, 5)} (${displayDecimal(
+              {royalties > 0
+                ? `${displayDecimal(royalties, 5)} (${displayDecimal(
                     royaltiesPercentage * 100,
                     2
                   )}%)`
@@ -77,23 +73,27 @@ export function printRoyalties(tr: Transaction) {
   );
 }
 
-export function printGas(tr: Transaction) {
+export function printGas(
+  gas: number,
+  gas_gwei: number,
+  gas_price_gwei: number
+) {
   return (
     <Tippy
       content={
         <Container>
           <Row>
             <Col className="no-wrap">Gas</Col>
-            <Col className="text-right">{displayDecimal(tr.gas, 5)}</Col>
+            <Col className="text-right">{displayDecimal(gas, 5)}</Col>
           </Row>
           <Row>
             <Col className="no-wrap">GWEI</Col>
-            <Col className="text-right">{numberWithCommas(tr.gas_gwei)}</Col>
+            <Col className="text-right">{numberWithCommas(gas_gwei)}</Col>
           </Row>
           <Row>
             <Col className="no-wrap">Gas Price</Col>
             <Col className="text-right">
-              {displayDecimal(tr.gas_price_gwei, 2)}
+              {displayDecimal(gas_price_gwei, 2)}
             </Col>
           </Row>
         </Container>
@@ -352,8 +352,12 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   function printInfo() {
     return (
       <span className="d-flex align-items-center gap-3">
-        {printRoyalties(props.tr)}
-        {printGas(props.tr)}
+        {printRoyalties(
+          props.tr.value,
+          props.tr.royalties,
+          props.tr.from_address
+        )}
+        {printGas(props.tr.gas, props.tr.gas_gwei, props.tr.gas_price_gwei)}
         <a
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           className={styles.transactionLink}
