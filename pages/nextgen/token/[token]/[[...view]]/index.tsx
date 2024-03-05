@@ -15,6 +15,7 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
+import { getNextGenThumbnailUrl } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -66,7 +67,11 @@ export default function NextGenCollectionToken(props: any) {
     },
   ];
 
-  const twitterImage = `${process.env.BASE_ENDPOINT}/api/screenshot?image=${token?.image_url}`;
+  let twitterImage = pageImage;
+  if (token) {
+    const thumbnail = getNextGenThumbnailUrl(token.id);
+    twitterImage = `${process.env.BASE_ENDPOINT}/api/screenshot?image=${thumbnail}`;
+  }
 
   return (
     <>
