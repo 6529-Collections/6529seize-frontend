@@ -13,7 +13,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function TheMemesPage() {
+export default function CommunityNerdPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Community Nerd" },
