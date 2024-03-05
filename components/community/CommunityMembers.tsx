@@ -30,7 +30,7 @@ const SEARCH_PARAMS_FIELDS = {
 export default function CommunityMembers() {
   const defaultSortBy = CommunityMembersSortOption.LEVEL;
   const defaultSortDirection = SortDirection.DESC;
-  const defaultPageSize = 20;
+  const defaultPageSize = 50;
   const defaultPage = 1;
 
   const router = useRouter();
