@@ -66,6 +66,8 @@ export default function NextGenCollectionToken(props: any) {
     },
   ];
 
+  const twitterImage = `${process.env.BASE_ENDPOINT}/api/screenshot?image=${token?.image_url}`;
+
   return (
     <>
       <Head>
@@ -84,7 +86,7 @@ export default function NextGenCollectionToken(props: any) {
         <meta name="twitter:image:alt" content={pagenameFull} />
         <meta name="twitter:title" content={pagenameFull} />
         <meta name="twitter:description" content="NEXTGEN | 6529 SEIZE" />
-        <meta name="twitter:image" content={pageImage} />
+        <meta name="twitter:image" content={twitterImage} />
       </Head>
 
       <main className={styles.main}>
