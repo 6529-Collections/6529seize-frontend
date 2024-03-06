@@ -64,7 +64,7 @@ export default function UserPageRateWrapper({
             />
           </svg>
           <div className="tw-ml-3 tw-self-center">
-            <h3 className="tw-text-sm sm:tw-text-base tw-mb-0 tw-font-semibold tw-text-primary-300">
+            <h3 className="tw-text-sm sm:tw-text-md tw-mb-0 tw-font-semibold tw-text-primary-300">
               Please connect to {SUB_TITLE[type]} {profile.profile?.handle}
             </h3>
           </div>
