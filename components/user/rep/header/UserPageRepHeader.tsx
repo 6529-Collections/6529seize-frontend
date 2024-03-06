@@ -12,7 +12,7 @@ export default function UserPageRepHeader({
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1">
             <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300">
-              <div className="tw-flex tw items-center tw-space-x-1">
+              <div className="tw-flex tw-items-center tw-space-x-1">
                 <span>Rep:</span>
                 <span className="tw-text-iron-50 tw-font-semibold">
                   {repRates

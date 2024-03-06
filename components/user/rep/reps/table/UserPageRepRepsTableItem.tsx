@@ -39,17 +39,17 @@ export default function UserPageRepRepsTableItem({
       }
       onClick={onTableClick}
     >
-      <td className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-iron-50">
+      <td className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-iron-50">
         <span>{rep.category}</span>
       </td>
       <td
         className={`${
           isPositiveRating ? "tw-text-green" : "tw-text-red"
-        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
+        } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right`}
       >
         {formatNumberWithCommas(rep.rating)}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right tw-text-iron-400">
+      <td className="tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right tw-text-iron-400">
         {formatNumberWithCommas(rep.contributor_count)}
       </td>
       {canEditRep && (
@@ -57,7 +57,7 @@ export default function UserPageRepRepsTableItem({
           <td
             className={`${
               isPositiveRaterContribution ? "tw-text-green" : "tw-text-red"
-            } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm tw-font-medium tw-text-right`}
+            } tw-whitespace-nowrap tw-py-3 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-font-medium tw-text-right`}
           >
             {rep.rater_contribution
               ? formatNumberWithCommas(rep.rater_contribution)

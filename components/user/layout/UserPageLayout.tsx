@@ -11,7 +11,6 @@ import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageTabs from "./UserPageTabs";
-import { Inter } from "next/font/google";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import {
