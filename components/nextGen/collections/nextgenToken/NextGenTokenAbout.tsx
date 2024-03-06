@@ -23,7 +23,6 @@ import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
-import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { displayScore } from "./NextGenTokenProperties";
@@ -265,44 +264,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <Col className="pb-3 d-flex gap-1">
           <span className="font-color-h">Image Licence:</span>
           <span>{props.collection.licence}</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex flex-column gap-2">
-          <span className="font-color-h">Rendered Versions:</span>
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["1K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["2K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["4K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["8K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["16K"]}
-          />
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex flex-column gap-2">
-          <span className="font-color-h">For Thumbnail Use Only :</span>
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["Thumbnail"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["0.5K"]}
-          />
         </Col>
       </Row>
     </Container>

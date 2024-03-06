@@ -128,7 +128,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                   <NextGenCollectionProvenanceRow
                     collection={props.collection}
                     log={log}
-                    key={`${log.block}-${log.transaction}`}
+                    key={`${log.block}-${log.id}`}
                     disable_link={true}
                   />
                 ))}
