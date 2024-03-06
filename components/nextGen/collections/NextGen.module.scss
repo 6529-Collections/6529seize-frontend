@@ -384,8 +384,41 @@
   }
 }
 
-.collectionProvenance {
-  white-space: pre-wrap !important;
+.collectionProvenanceAccordion {
+  border-radius: 0 !important;
+  button {
+    background-color: $almost-very-dark-grey !important;
+  }
+}
+
+.collectionProvenanceAccordionOdd {
+  border-radius: 0 !important;
+  button {
+    background-color: $very-dark-grey !important;
+  }
+}
+
+.collectionProvenanceAccordionButtonHideCaret {
+  &::after {
+    display: none !important;
+  }
+}
+
+.collectionProvenanceAccordionButton {
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  width: calc(100% - 30px);
+}
+
+.collectionProvenanceAccordionBody {
+  color: white;
+  background-color: $almost-very-dark-grey !important;
+}
+
+.collectionProvenanceAccordionBodyOdd {
+  color: white;
+  background-color: $very-dark-grey !important;
 }
 
 .logsScrollContainer {

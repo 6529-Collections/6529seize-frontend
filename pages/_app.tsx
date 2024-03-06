@@ -94,6 +94,7 @@ import {
   faMagnifyingGlassPlus,
   faPlusSquare,
   faMinusSquare,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -180,7 +181,8 @@ library.add(
   faMagnifyingGlassMinus,
   faMagnifyingGlassPlus,
   faPlusSquare,
-  faMinusSquare
+  faMinusSquare,
+  faChevronDown
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
