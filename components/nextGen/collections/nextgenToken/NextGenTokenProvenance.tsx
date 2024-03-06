@@ -120,20 +120,17 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             <h3>Collection Provenance</h3>
           </Col>
         </Row>
-        <Row className={`pt-2 ${styles.logsScrollContainer}`}>
+        <Row className="pt-2">
           <Col>
-            <Table bordered={false} className={styles.logsTable}>
-              <tbody>
-                {logs.map((log) => (
-                  <NextGenCollectionProvenanceRow
-                    collection={props.collection}
-                    log={log}
-                    key={`${log.block}-${log.id}`}
-                    disable_link={true}
-                  />
-                ))}
-              </tbody>
-            </Table>
+            {logs.map((log, index) => (
+              <NextGenCollectionProvenanceRow
+                collection={props.collection}
+                log={log}
+                key={`${log.block}-${log.id}`}
+                disable_link={true}
+                odd={index % 2 !== 0}
+              />
+            ))}
           </Col>
         </Row>
         {logsTotalResults > PAGE_SIZE && logsLoaded && (
