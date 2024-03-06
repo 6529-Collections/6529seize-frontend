@@ -1,7 +1,7 @@
 export default function XIcon() {
   return (
     <svg
-      className="tw-w-full tw-h-full tw-rounded-full tw-ring-1 tw-ring-white/20"
+      className="tw-w-full tw-h-full tw-rounded-full tw-ring-1 tw-ring-white/20 tw-align-top"
       viewBox="0 0 90 90"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
