@@ -264,7 +264,7 @@ export default function UserPageMints({
             ))}
 
             <UserPageMintsMintingAddresses wallets={mintingWallets} />
-            <div className="tw-mt-6 tw-max-w-4xl ">
+            <div className="tw-mt-6 tw-max-w-4xl">
               <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
                 NextGen mints check{" "}
                 <a

@@ -35,7 +35,7 @@ export default function CommonFilterTargetSelect({
             />
             <label
               htmlFor={target.id}
-              className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 tw-cursor-pointer"
+              className="tw-ml-2 tw-block tw-text-sm sm:tw-text-md tw-font-medium tw-leading-6 tw-text-iron-300 tw-cursor-pointer"
             >
               {target.name}
             </label>

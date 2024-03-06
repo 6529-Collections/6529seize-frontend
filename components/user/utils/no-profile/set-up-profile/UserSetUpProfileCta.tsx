@@ -2,15 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
-import { Inter } from "next/font/google";
-
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export default function UserSetUpProfileCta() {
   const { connectedProfile } = useContext(AuthContext);
   const { address } = useAccount();
@@ -29,7 +20,7 @@ export default function UserSetUpProfileCta() {
 
   return (
     <div
-      className={`tailwind-scope tw-mx-2 ${inter.className} ${
+      className={`tailwind-scope tw-mx-2 ${
         show ? "" : "tw-hidden"
       }`}
     >

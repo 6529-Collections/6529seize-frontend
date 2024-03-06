@@ -80,7 +80,7 @@ export default function UserPageRepReps({
       {!!reps.length && (
         <>
           <div className="tw-mt-6 lg:tw-mt-8">
-            <h3 className="tw-float-none tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+            <h3 className="tw-float-none tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
               Top Rep
             </h3>
           </div>
@@ -91,7 +91,7 @@ export default function UserPageRepReps({
             canEditRep={canEditRep}
           />
           <div className="tw-mt-6 lg:tw-mt-8">
-            <h3 className="tw-float-none tw-block tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+            <h3 className="tw-float-none tw-block tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
               Total Rep
             </h3>
           </div>

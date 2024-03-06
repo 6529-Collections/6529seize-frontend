@@ -2,14 +2,7 @@ import { cloneElement, isValidElement, useEffect, useState } from "react";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "../../../../entities/ISort";
-import { Inter } from "next/font/google";
 
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function CommonDropdownItem<T, U = unknown>(
   props: Readonly<CommonSelectItemProps<T, U>>
@@ -42,7 +35,7 @@ export default function CommonDropdownItem<T, U = unknown>(
   };
 
   return (
-    <li className={`${inter.className} tw-h-full`}>
+    <li className="tw-h-full">
       <button
         type="button"
         className={`${

@@ -59,7 +59,7 @@ export default function ProfileRatersTable({
         </div>
       ) : (
         <div className="tw-py-4">
-          <span className="tw-px-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+          <span className="tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500">
             {noRatingsMessage}
           </span>
         </div>

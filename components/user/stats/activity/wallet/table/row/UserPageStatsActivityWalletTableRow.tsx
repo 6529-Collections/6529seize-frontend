@@ -285,7 +285,7 @@ export default function UserPageStatsActivityWalletTableRow({
             type={type}
             profile={profile}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
+          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-400 tw-font-medium">
             {TYPE_TP_ACTION[type]}
           </span>
           {transaction.token_count > 1 && (
@@ -293,7 +293,7 @@ export default function UserPageStatsActivityWalletTableRow({
               x{transaction.token_count}
             </span>
           )}
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium">
+          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-font-medium">
             <Link
               className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
               href={getPath()}>
@@ -305,7 +305,7 @@ export default function UserPageStatsActivityWalletTableRow({
             src={getImageSrc()}
             alt={meme?.name ?? ""}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-100 tw-font-medium">
+          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-100 tw-font-medium">
             {showAnotherSide && (
               <UserPageStatsActivityWalletTableRowSecondAddress
                 type={type}
@@ -314,7 +314,7 @@ export default function UserPageStatsActivityWalletTableRow({
             )}
           </span>
           {showValue() && (
-            <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
+            <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-400 tw-font-medium">
               for{" "}
               <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
                 <svg
@@ -374,7 +374,7 @@ export default function UserPageStatsActivityWalletTableRow({
           </a>
         </span>
       </td>
-      <td className="tw-py-2.5 tw-w-24 tw-text-right">
+      <td className="tw-py-2.5 tw-w-24 sm:tw-w-32 tw-text-right">
         <CommonTimeAgo
           timestamp={new Date(transaction.transaction_date).getTime()}
         />

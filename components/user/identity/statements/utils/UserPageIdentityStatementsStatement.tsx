@@ -41,7 +41,7 @@ export default function UserPageIdentityStatementsStatement({
   }, [router.isReady]);
 
   return (
-    <li className="hover:tw-bg-iron-800 tw-group -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
+    <li className="hover:tw-bg-iron-800 tw-group -tw-ml-1 tw-inline-flex tw-h-8 tw-px-1.5 tw-rounded-lg tw-items-center tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
       <div className="tw-inline-flex tw-items-center tw-space-x-3">
         <div className="tw-flex-shrink-0 tw-cursor-pointer tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
           <SocialStatementIcon statementType={statement.statement_type} />
@@ -61,7 +61,7 @@ export default function UserPageIdentityStatementsStatement({
             rel="noopener noreferrer"
             className={`${
               isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
           >
             <OutsideLinkIcon />
           </a>
@@ -77,7 +77,7 @@ export default function UserPageIdentityStatementsStatement({
           aria-label="Copy"
           className={`${
             isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-          } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+          } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
           onClick={handleCopy}
         >
           <CopyIcon />

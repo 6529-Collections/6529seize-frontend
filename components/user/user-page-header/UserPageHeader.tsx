@@ -8,7 +8,6 @@ import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { amIUser, getRandomColor } from "../../../helpers/Helpers";
-import { Inter } from "next/font/google";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";

@@ -75,11 +75,11 @@ export default function ProfileRatersTableItem({
               href={profileRoute}
               className="tw-no-underline tw-p-0 tw-flex tw-items-center"
             >
-              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-100">
+              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-medium tw-text-iron-100">
                 {rating.handle}
               </span>
             </Link>
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-400 tw-font-medium">
               {TYPE_TO_TEXT[type]}
             </span>
           </div>
@@ -87,13 +87,13 @@ export default function ProfileRatersTableItem({
       </td>
       <td className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-2.5 tw-text-right">
         <span
-          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium ${ratingColor}`}
+          className={`tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-font-medium ${ratingColor}`}
         >
           {ratingStr}
         </span>
       </td>
       <td className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-2.5 tw-text-right">
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-light tw-text-iron-500">
+        <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-font-normal tw-text-iron-500">
           {timeAgo}
         </span>
       </td>

@@ -40,7 +40,7 @@ export default function UserPageStatsTableRow({
   return (
     <>
       <td
-        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-text-md`}>
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base`}>
         {data.title}{" "}
         {data.tooltip && (
           <Tippy content={data.tooltip} theme="dark" placement="top">
@@ -52,23 +52,22 @@ export default function UserPageStatsTableRow({
       </td>
 
       <td
-        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right`}>
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
         {data.total}
       </td>
       <td
-        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right`}>
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
         {data.memes}
       </td>
       {Object.values(MEMES_SEASON).map((season) => (
         <td
           key={season}
-          className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right`}>
+          className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
           {getSZNData(season)}
         </td>
       ))}
-
       <td
-        className={`${classes} tw-font-normal tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-md tw-text-right`}>
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
         {data.gradient}
       </td>
     </>

@@ -11,7 +11,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
     case TransactionType.AIRDROPPED:
       return (
         <svg
-          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-mr-1 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-mr-2 tw-text-iron-300"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -34,7 +34,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
     case TransactionType.MINTED_TO:
       return (
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-mr-2 tw-text-iron-300"
           viewBox="0 0 27 27"
           fill="none"
           aria-hidden="true"
@@ -65,7 +65,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
     case TransactionType.SALE:
       return (
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-mr-2 tw-text-iron-300"
           viewBox="0 0 27 27"
           fill="none"
           aria-hidden="true"
@@ -98,7 +98,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
     case TransactionType.PURCHASE:
       return (
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-mr-2 tw-text-iron-300"
           viewBox="0 0 27 27"
           fill="none"
           aria-hidden="true"
@@ -132,7 +132,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
     case TransactionType.TRANSFER_OUT:
       return (
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-mr-2 tw-text-iron-300"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -151,7 +151,7 @@ export default function UserPageStatsActivityWalletTableRowIcon({
     case TransactionType.RECEIVED_BURN:
       return (
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-mr-2 tw-text-iron-300"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           aria-hidden="true"
