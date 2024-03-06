@@ -43,14 +43,14 @@ export default function UserPageRepsItem({
           } tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 
            tw-px-3 tw-py-1.5 sm:tw-py-1 tw-transition tw-duration-300 tw-ease-out`}
         >
-          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-font-medium tw-text-iron-50">
+          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-50">
             {rep.category}
           </span>
 
           <span
             className={`${
               isPositiveRating ? "tw-text-green" : "tw-text-red"
-            } tw-whitespace-nowrap tw-font-medium tw-text-sm sm:tw-text-base`}
+            } tw-whitespace-nowrap tw-font-medium tw-text-sm sm:tw-text-md`}
           >
             <Tippy
               content={`My Rep: ${formatNumberWithCommas(
