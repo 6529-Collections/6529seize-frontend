@@ -7,10 +7,9 @@ import {
 import { Page } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
+import { commonApiPost } from "../../services/api/common-api";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
-import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";

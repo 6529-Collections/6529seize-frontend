@@ -22,6 +22,8 @@ export default function FilterBuilderCIC({
   readonly setMaxCIC: (newV: number | null) => void;
   readonly setUserDirection: (newV: FilterDirection) => void;
 }) {
+  const userPlaceholder =
+    userDirection === FilterDirection.SENT ? "CIC Receiver" : "CIC Giver";
   return (
     <div className="tw-w-full tw-space-y-2">
       <FilterBuilderUserDirection
@@ -31,7 +33,7 @@ export default function FilterBuilderCIC({
       <FilterBuilderSearchUser
         user={user}
         setUser={setUser}
-        label="CIC Giver Username"
+        label={userPlaceholder}
       />
       <div className="tw-w-full tw-inline-flex tw-space-x-2">
         <CommonInput

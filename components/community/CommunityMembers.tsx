@@ -7,8 +7,7 @@ import {
 } from "../../pages/community";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
-import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
-import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
+import { commonApiPost } from "../../services/api/common-api";
 import { SortDirection } from "../../entities/ISort";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import { usePathname, useSearchParams } from "next/navigation";

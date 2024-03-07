@@ -24,7 +24,7 @@ export default function FilterBuilderSearchRep({
     [category]
   );
 
-  const { isFetching, data } = useQuery<string[]>({
+  const { data } = useQuery<string[]>({
     queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
     queryFn: async () =>
       await commonApiFetch<string[]>({

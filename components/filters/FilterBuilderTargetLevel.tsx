@@ -1,4 +1,3 @@
-import { useState } from "react";
 import CommonInput from "../utils/input/CommonInput";
 
 export default function FilterBuilderTargetLevel({
