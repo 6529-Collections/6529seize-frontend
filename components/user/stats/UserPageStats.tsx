@@ -13,6 +13,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import CommonSkeletonLoader from "../../utils/animation/CommonSkeletonLoader";
 import CommonCardSkeleton from "../../utils/animation/CommonCardSkeleton";
 import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
+import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
 
 export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
 
@@ -105,9 +106,13 @@ export default function UserPageStats({
           <div className="tw-w-full tw-pt-8 tw-h-96">
             <CommonCardSkeleton />
           </div>
+          <div className="tw-w-full tw-pt-8 tw-h-96">
+            <CommonCardSkeleton />
+          </div>
         </>
       ) : (
         <>
+          <UserPageStatsBoostBreakdown tdh={tdh} />
           <UserPageStatsCollected tdh={tdh} />
           <UserPageStatsActivityOverview tdh={tdh} />
         </>

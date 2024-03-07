@@ -1,9 +1,29 @@
 import { NftRank, NftTDH } from "./INFT";
 
+export interface TDHBoostBreakdown {
+  available: number;
+  acquired: number;
+  total_cards?: number;
+  acquired_cards?: number;
+}
+
 export interface BaseTDH {
   block: number;
   tdh: number;
   boost: number;
+  boost_breakdown: {
+    memes_card_sets: TDHBoostBreakdown;
+    memes_szn1: TDHBoostBreakdown;
+    memes_szn2: TDHBoostBreakdown;
+    memes_szn3: TDHBoostBreakdown;
+    memes_szn4: TDHBoostBreakdown;
+    memes_szn5: TDHBoostBreakdown;
+    memes_genesis: TDHBoostBreakdown;
+    memes_nakamoto: TDHBoostBreakdown;
+    gradients: TDHBoostBreakdown;
+    ens: TDHBoostBreakdown;
+    profile: TDHBoostBreakdown;
+  };
   boosted_tdh: number;
   tdh__raw: number;
   tdh_rank: number;
