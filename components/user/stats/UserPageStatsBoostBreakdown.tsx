@@ -1,4 +1,5 @@
 import { TDHBoostBreakdown } from "../../../entities/ITDH";
+import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { UserPageStatsTDHType } from "./UserPageStats";
 
 export default function UserPageStatsBoostBreakdown({
@@ -12,7 +13,7 @@ export default function UserPageStatsBoostBreakdown({
 
   function getMemeRow(name: string, breakdown: TDHBoostBreakdown) {
     return (
-      <tr>
+      <tr key={getRandomObjectId()}>
         <td className="tw-px-8 sm:tw-px-10 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           {name}
         </td>
@@ -29,16 +30,15 @@ export default function UserPageStatsBoostBreakdown({
   function getMemesRows() {
     let rows = [];
     rows.push(
-      <tr>
-        <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
+      <tr key={getRandomObjectId()}>
+        <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-pt-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
           Memes
         </td>
       </tr>
     );
     if (tdh?.boost_breakdown) {
-      if (tdh.boost_breakdown.memes_card_sets.acquired > 0) {
-        rows.push(getMemeRow("Card Sets", tdh.boost_breakdown.memes_card_sets));
-      } else {
+      rows.push(getMemeRow("Card Sets", tdh.boost_breakdown.memes_card_sets));
+      if (tdh.boost_breakdown.memes_card_sets.acquired === 0) {
         rows.push(getMemeRow("SZN1", tdh.boost_breakdown.memes_szn1));
         if (!tdh.boost_breakdown.memes_szn1.acquired) {
           rows.push(getMemeRow("Genesis", tdh.boost_breakdown.memes_genesis));
@@ -57,14 +57,14 @@ export default function UserPageStatsBoostBreakdown({
   function getBaseBoostRow(name: string, breakdown?: TDHBoostBreakdown) {
     if (breakdown) {
       return (
-        <tr>
-          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
+        <tr key={getRandomObjectId()}>
+          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
             {name}
           </td>
-          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
+          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
             {breakdown.available}
           </td>
-          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
+          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
             {breakdown.acquired || "-"}
           </td>
         </tr>
@@ -86,7 +86,7 @@ export default function UserPageStatsBoostBreakdown({
           <div className="tw-inline-block tw-min-w-full tw-align-middle">
             <table className="tw-min-w-full">
               <thead className="tw-bg-iron-900">
-                <tr>
+                <tr key={getRandomObjectId()}>
                   <th
                     scope="col"
                     className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
@@ -114,7 +114,7 @@ export default function UserPageStatsBoostBreakdown({
                     )}
                     {getBaseBoostRow("ENS", tdh?.boost_breakdown.ens)}
                     {getBaseBoostRow("Profile", tdh?.boost_breakdown.profile)}
-                    <tr>
+                    <tr key={getRandomObjectId()}>
                       <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
                         TOTAL BOOST
                       </td>
