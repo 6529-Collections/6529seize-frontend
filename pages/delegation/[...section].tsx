@@ -183,24 +183,6 @@ export default function DelegationsDocumentation(props: any) {
   ]);
 
   useEffect(() => {
-    const mySection = router.query.section?.[0];
-    if (
-      Object.values(DelegationCenterSection).includes(
-        mySection as DelegationCenterSection
-      )
-    ) {
-      const pathSection = mySection as DelegationCenterSection;
-      if (pathSection != activeSection) {
-        setActiveSection(pathSection);
-      }
-    } else {
-      if (activeSection != DelegationCenterSection.HTML) {
-        setActiveSection(DelegationCenterSection.HTML);
-      }
-    }
-  }, [router.query.section]);
-
-  useEffect(() => {
     if (activeSection) {
       if (activeSection === DelegationCenterSection.HTML && pageProps.path) {
         router.push(
@@ -211,9 +193,9 @@ export default function DelegationsDocumentation(props: any) {
           { shallow: true }
         );
 
-        const sectionTitle: any[] = [];
+        const sectionTitle: Crumb[] = [];
 
-        pageProps.path.map((p: any) => {
+        pageProps.path.map((p: any, index: number) => {
           const title = p
             .replaceAll("-", " ")
             .replace(/(^\w{1})|(\s+\w{1})/g, (letter: any) =>
@@ -221,8 +203,11 @@ export default function DelegationsDocumentation(props: any) {
             )
             .replace("Faq", "FAQ")
             .replace("Sub Delegation", "Sub-Delegation");
-
-          sectionTitle.push({ display: title });
+          const crumb: any = { display: title };
+          if (index != pageProps.path.length - 1) {
+            crumb.href = `/delegation/${p}`;
+          }
+          sectionTitle.push(crumb);
         });
 
         setBreadcrumbs([
