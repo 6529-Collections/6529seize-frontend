@@ -1,6 +1,6 @@
 import { IDistribution } from "../../../../../entities/IDistribution";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import CommonTablePagination from "../../../../utils/table/CommonTablePagination";
+import CommonTablePagination from "../../../../utils/table/paginator/CommonTablePagination";
 import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
 import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";
 
