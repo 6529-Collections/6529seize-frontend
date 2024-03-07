@@ -782,24 +782,58 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     contractWriteRevoke.reset();
   }
 
+  function getDelegationsCount(delegations: ContractDelegation[]) {
+    let count: number = 0;
+    delegations.map((del) => {
+      if (del.wallets.length > 0) {
+        count += del.wallets.length;
+      }
+    });
+    return count;
+  }
+
+  function getActiveKeys(
+    outDelegations: ContractDelegation[],
+    inDelegations: ContractDelegation[]
+  ) {
+    const outCount = getDelegationsCount(outDelegations);
+    const inCount = getDelegationsCount(inDelegations);
+    if (outCount > 0 && inCount > 0) {
+      return ["0", "1"];
+    }
+    if (outCount > 0) {
+      return ["0"];
+    }
+    if (inCount > 0) {
+      return ["1"];
+    }
+    return [""];
+  }
+
   function printDelegations() {
+    const outDelegations = [...outgoingDelegations].filter(
+      (d) =>
+        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
+        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
+    );
+    const inDelegations = [...incomingDelegations].filter(
+      (d) =>
+        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
+        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
+    );
     return (
       <>
         <h5 className="float-none pt-3 pb-1">Delegations</h5>
-        <Accordion alwaysOpen className={styles.collectionDelegationsAccordion}>
+        <Accordion
+          alwaysOpen
+          className={styles.collectionDelegationsAccordion}
+          activeKey={getActiveKeys(outDelegations, inDelegations)}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
             <Accordion.Header>Outgoing</Accordion.Header>
             <Accordion.Body>
-              {printOutgoingDelegations(
-                "delegations",
-                [...outgoingDelegations].filter(
-                  (d) =>
-                    d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
-                    d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
-                )
-              )}
+              {printOutgoingDelegations("delegations", outDelegations)}
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
@@ -807,14 +841,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             eventKey={"1"}>
             <Accordion.Header>Incoming</Accordion.Header>
             <Accordion.Body>
-              {printIncomingDelegations(
-                "delegations",
-                [...incomingDelegations].filter(
-                  (d) =>
-                    d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
-                    d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
-                )
-              )}
+              {printIncomingDelegations("delegations", inDelegations)}
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
