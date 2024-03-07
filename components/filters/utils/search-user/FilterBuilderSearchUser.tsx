@@ -27,7 +27,7 @@ export default function FilterBuilderSearchUser({
     [user]
   );
 
-  const { isFetching, data } = useQuery<CommunityMemberMinimal[]>({
+  const { data } = useQuery<CommunityMemberMinimal[]>({
     queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({

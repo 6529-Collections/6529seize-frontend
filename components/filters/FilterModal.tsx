@@ -1,4 +1,3 @@
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 import FilterBuilder, { GeneralFilter } from "./FilterBuilder";
 import FilterModalHeader from "./FilterModalHeader";
 

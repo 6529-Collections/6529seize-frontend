@@ -6,7 +6,7 @@ import {
   PROFILE_ACTIVITY_TYPE_TO_TEXT,
   ProfileActivityLogType,
 } from "../../../entities/IProfile";
-import { FilterDirection, GeneralFilter } from "../../filters/FilterBuilder";
+import { GeneralFilter } from "../../filters/FilterBuilder";
 import FiltersButton from "../../filters/FiltersButton";
 
 export default function ProfileActivityLogsFilter({

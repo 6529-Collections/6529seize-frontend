@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef } from "react";
 import { CommunityMemberMinimal } from "../../../../entities/IProfile";
 import FilterBuilderSearchUserDropdownItem from "./FilterBuilderSearchUserDropdownItem";
 

@@ -1,4 +1,3 @@
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 import FilterBuilderTargetTDH from "./FilterBuilderTargetTDH";
 import FilterBuilderTargetLevel from "./FilterBuilderTargetLevel";
 import FilterBuilderRep from "./FilterBuilderRep";

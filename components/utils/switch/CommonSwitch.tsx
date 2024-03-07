@@ -4,8 +4,8 @@ export default function CommonSwitch({
   setIsOn,
 }: {
   readonly label: string;
-  isOn: boolean;
-  setIsOn: (isOn: boolean) => void;
+  readonly isOn: boolean;
+  readonly setIsOn: (isOn: boolean) => void;
 }) {
   const onBackground = "tw-bg-primary-500";
   const offBackground = "tw-bg-neutral-700";

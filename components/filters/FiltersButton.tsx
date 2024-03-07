@@ -1,4 +1,3 @@
-import { useState } from "react";
 import CommonAnimationWrapper from "../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../utils/animation/CommonAnimationOpacity";
 import { GeneralFilter } from "./FilterBuilder";
@@ -11,9 +10,9 @@ export default function FiltersButton({
   onFilters,
   setIsOpen,
 }: {
-    readonly filters: GeneralFilter;
+  readonly filters: GeneralFilter;
   readonly isOpen: boolean;
-    readonly onFilters: (filters: GeneralFilter) => void;
+  readonly onFilters: (filters: GeneralFilter) => void;
   readonly setIsOpen: (isOpen: boolean) => void;
 }) {
   return (

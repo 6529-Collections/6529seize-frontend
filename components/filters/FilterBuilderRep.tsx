@@ -27,6 +27,9 @@ export default function FilterBuilderRep({
   readonly setMaxRep: (newV: number | null) => void;
   readonly setUserDirection: (newV: FilterDirection) => void;
 }) {
+  const userPlaceholder =
+    userDirection === FilterDirection.SENT ? "Rep Receiver" : "Rep Giver";
+
   return (
     <div className="tw-w-full tw-space-y-2">
       <FilterBuilderUserDirection
@@ -37,7 +40,7 @@ export default function FilterBuilderRep({
         <FilterBuilderSearchUser
           user={user}
           setUser={setUser}
-          label="Rep Giver Username"
+          label={userPlaceholder}
         />
         <FilterBuilderSearchRep category={category} setCategory={setCategory} />
       </div>
