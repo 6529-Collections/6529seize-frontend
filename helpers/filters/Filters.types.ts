@@ -7,9 +7,11 @@ export enum OpCode {
   EQ = "EQ",
   GTE = "GTE",
   LTE = "LTE",
+  EXTRACT = "EXTRACT",
 }
 
 export type PrimitiveValueOpCode = OpCode.EQ | OpCode.GTE | OpCode.LTE;
+export type ExtractOpCode = OpCode.EXTRACT;
 
 export enum CSRepExchangeProp {
   FROM_PROFILE_ID = "rep_exchange_from_profile_id",
@@ -24,6 +26,11 @@ export enum CSCicExchangeProp {
   AMOUNT = "cic_exchange_amount",
 }
 
+export enum CsExtractProp {
+  REP = "rep",
+  CIC = "cic",
+}
+
 export enum CSProfileProp {
   TDH = "tdh",
   REP = "rep",
@@ -34,7 +41,8 @@ export enum CSProfileProp {
 export type PrimitivePropertyKey =
   | CSRepExchangeProp
   | CSCicExchangeProp
-  | CSProfileProp;
+  | CSProfileProp
+  | CsExtractProp;
 
 export interface PrimitiveValueOp<T extends PrimitiveValueOpCode> {
   readonly op: T;
@@ -42,8 +50,14 @@ export interface PrimitiveValueOp<T extends PrimitiveValueOpCode> {
   readonly property_value: string;
 }
 
+export interface ExtractOp {
+  readonly op: OpCode.EXTRACT;
+  readonly property_key: CsExtractProp;
+  readonly property_value: "receiver" | "sender";
+}
+
 export type EqOp = PrimitiveValueOp<OpCode.EQ>;
 export type GteOp = PrimitiveValueOp<OpCode.GTE>;
 export type LteOp = PrimitiveValueOp<OpCode.LTE>;
 
-export type Operation = EqOp | GteOp | LteOp;
+export type Operation = EqOp | GteOp | LteOp | ExtractOp;
