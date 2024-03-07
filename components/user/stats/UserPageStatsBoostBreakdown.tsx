@@ -6,7 +6,7 @@ export default function UserPageStatsBoostBreakdown({
 }: {
   readonly tdh: UserPageStatsTDHType;
 }) {
-  if (!tdh || !tdh.boost_breakdown) {
+  if (!tdh?.boost_breakdown) {
     return <></>;
   }
 
@@ -35,7 +35,7 @@ export default function UserPageStatsBoostBreakdown({
         </td>
       </tr>
     );
-    if (tdh && tdh.boost_breakdown) {
+    if (tdh?.boost_breakdown) {
       if (tdh.boost_breakdown.memes_card_sets.acquired > 0) {
         rows.push(getMemeRow("Card Sets", tdh.boost_breakdown.memes_card_sets));
       } else {
