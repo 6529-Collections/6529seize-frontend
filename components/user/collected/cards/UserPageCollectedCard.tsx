@@ -53,7 +53,7 @@ export default function UserPageCollectedCard({
             <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
               {collectionMeta.label}
             </span>
-            <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-normal tw-text-iron-500">
+            <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-500">
               #{card.token_id}
             </span>
           </div>
@@ -65,7 +65,7 @@ export default function UserPageCollectedCard({
                 {card.token_name}
               </span>
               {showSeizedCount && (
-                <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-normal tw-text-iron-400">
+                <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
                   {formatNumberWithCommasOrDash(card.seized_count)}x
                 </span>
               )}

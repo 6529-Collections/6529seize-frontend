@@ -47,7 +47,7 @@ export default function UserPageIdentityStatementsStatementsList({
       ))}
 
       {!statements.length && (
-        <span className="tw-text-sm tw-italic tw-text-iron-500">
+        <span className="tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500">
           {noItemsMessage}
         </span>
       )}

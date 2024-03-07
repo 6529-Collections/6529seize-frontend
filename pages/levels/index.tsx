@@ -2,19 +2,11 @@ import Head from "next/head";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { Inter } from "next/font/google";
 import { useState } from "react";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
-});
-
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal"],
-  subsets: ["latin"],
-  display: "swap",
 });
 
 const LEVELS: { minTdh: number; level: number }[] = [
@@ -445,7 +437,7 @@ export default function Levels() {
       </Head>
       <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
-      <div className={`tailwind-scope ${inter.className}`}>
+      <div className="tailwind-scope">
         <div className="tw-pt-12 tw-pb-12">
           <div className="tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
             <div className="tw-max-w-3xl tw-pb-4 tw-flex tw-flex-col">
