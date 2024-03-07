@@ -11,7 +11,7 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
-  readonly buttonRef: RefObject<HTMLButtonElement>;
+  readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement>;
   readonly buttonPosition?: { readonly bottom: number; readonly right: number };
   readonly children: ReactNode;
 }) {

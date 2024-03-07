@@ -7,13 +7,16 @@ import {
 import { Page } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../services/api/common-api";
+import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
-import CommonTablePagination from "../utils/table/CommonTablePagination";
+import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";
+import { FilterDirection, GeneralFilter } from "../filters/FilterBuilder";
+import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
+import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -88,7 +91,6 @@ export default function ProfileActivityLogs({
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
-  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     setSelectedFilters(initialParams.logTypes);
@@ -134,28 +136,53 @@ export default function ProfileActivityLogs({
     );
   }, [currentPage, selectedFilters, initialParams.handleOrWallet, targetType]);
 
+  const [filters, setFilters] = useState<GeneralFilter>({
+    tdh: { min: null, max: null },
+    rep: {
+      min: null,
+      max: null,
+      direction: FilterDirection.RECEIVED,
+      user: null,
+      category: null,
+    },
+    cic: {
+      min: null,
+      max: null,
+      direction: FilterDirection.RECEIVED,
+      user: null,
+    },
+    level: { min: null, max: null },
+  });
+
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
   const { isLoading, data: logs } = useQuery<Page<ProfileActivityLog>>({
-    queryKey: [QueryKey.PROFILE_LOGS, params],
+    queryKey: [
+      QueryKey.PROFILE_LOGS,
+      {
+        ...params,
+        ...filters,
+      },
+    ],
     queryFn: async () =>
-      await commonApiFetch<
+      await commonApiPost<
+        GeneralFilter,
         Page<ProfileActivityLog>,
         ActivityLogParamsConverted
       >({
         endpoint: `profile-logs`,
         params: params,
+        body: filters,
       }),
     placeholderData: keepPreviousData,
+    enabled: !isFiltersOpen,
   });
 
+  const [showPaginator, setShowPaginator] = useState(false);
+
   useEffect(() => {
-    if (isLoading) return;
-    if (!logs?.count) {
-      setCurrentPage(1);
-      setTotalPages(1);
-      return;
-    }
-    setTotalPages(Math.ceil(logs.count / initialParams.pageSize));
-  }, [logs?.count, logs?.page, isLoading]);
+    setShowPaginator(!!(logs?.page && logs?.page > 1) || !!logs?.next);
+  }, [logs]);
 
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
@@ -167,9 +194,13 @@ export default function ProfileActivityLogs({
               className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-96`}
             >
               <ProfileActivityLogsFilter
-                selected={selectedFilters}
-                setSelected={onFilter}
                 user={initialParams.handleOrWallet}
+                selected={selectedFilters}
+                filters={filters}
+                isFiltersOpen={isFiltersOpen}
+                setFilters={setFilters}
+                setSelected={onFilter}
+                setIsFiltersOpen={setIsFiltersOpen}
               />
             </div>
           </div>
@@ -181,30 +212,39 @@ export default function ProfileActivityLogs({
           onChange={onTargetType}
         />
       )}
-      {logs?.data.length ? (
-        <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
-          <ProfileActivityLogsList
-            logs={logs.data}
-            user={initialParams.handleOrWallet}
-          />
-          {totalPages > 1 && (
-            <CommonTablePagination
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-              small={!!initialParams.handleOrWallet}
-            />
+      {logs ? (
+        <div>
+          {logs?.data.length ? (
+            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
+              <ProfileActivityLogsList
+                logs={logs.data}
+                user={initialParams.handleOrWallet}
+              />
+              {showPaginator && (
+                <CommonTableSimplePagination
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  showNextPage={!!logs.next}
+                  small={false}
+                  loading={isLoading}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="tw-py-4">
+              <span
+                className={`${
+                  initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
+                } tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500`}
+              >
+                No Activity Log
+              </span>
+            </div>
           )}
         </div>
       ) : (
-        <div className="tw-py-4">
-          <span
-            className={`${
-              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
-            } tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500`}
-          >
-            No Activity Log
-          </span>
+        <div className="tw-h-screen tw-w-full">
+          <CommonCardSkeleton />
         </div>
       )}
     </div>

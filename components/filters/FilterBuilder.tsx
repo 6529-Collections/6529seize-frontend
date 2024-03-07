@@ -3,7 +3,6 @@ import FilterBuilderTargetTDH from "./FilterBuilderTargetTDH";
 import FilterBuilderTargetLevel from "./FilterBuilderTargetLevel";
 import FilterBuilderRep from "./FilterBuilderRep";
 import FilterBuilderCIC from "./FilterBuilderCIC";
-import { useEffect, useState } from "react";
 
 export enum FilterDirection {
   RECEIVED = "RECEIVED",
@@ -16,7 +15,7 @@ export interface FilterMinMax {
 }
 
 export interface FilterMinMaxDirectionAndUser extends FilterMinMax {
-  readonly direction: FilterDirection | null;
+  readonly direction: FilterDirection;
   readonly user: string | null;
 }
 
@@ -32,11 +31,9 @@ export interface GeneralFilter {
 }
 
 export default function FilterBuilder({
-  profile,
   filters,
   onFilters,
 }: {
-  readonly profile: IProfileAndConsolidations;
   readonly filters: GeneralFilter;
   readonly onFilters: (filters: GeneralFilter) => void;
 }) {
@@ -54,7 +51,6 @@ export default function FilterBuilder({
       rep: {
         ...filters.rep,
         user: newV,
-        direction: newV ? filters.rep.direction ?? FilterDirection.SENT : null,
       },
     });
   const setRepCategory = (newV: string | null) =>
@@ -63,16 +59,8 @@ export default function FilterBuilder({
     onFilters({ ...filters, rep: { ...filters.rep, min: newV } });
   const setMaxRep = (newV: number | null) =>
     onFilters({ ...filters, rep: { ...filters.rep, max: newV } });
-  const setRepDirection = (newV: FilterDirection | null) =>
+  const setRepDirection = (newV: FilterDirection) =>
     onFilters({ ...filters, rep: { ...filters.rep, direction: newV } });
-
-  const setRepFromUser = (newV: boolean) => {
-    if (!filters.rep.user) {
-      setRepDirection(null);
-      return;
-    }
-    setRepDirection(newV ? FilterDirection.SENT : FilterDirection.RECEIVED);
-  };
 
   const setCICUser = (newV: string | null) =>
     onFilters({
@@ -80,64 +68,56 @@ export default function FilterBuilder({
       cic: {
         ...filters.cic,
         user: newV,
-        direction: newV ? filters.rep.direction ?? FilterDirection.SENT : null,
       },
     });
   const setMinCIC = (newV: number | null) =>
     onFilters({ ...filters, cic: { ...filters.cic, min: newV } });
   const setMaxCIC = (newV: number | null) =>
     onFilters({ ...filters, cic: { ...filters.cic, max: newV } });
-  const setCICDirection = (newV: FilterDirection | null) =>
+  const setCICDirection = (newV: FilterDirection) =>
     onFilters({ ...filters, cic: { ...filters.cic, direction: newV } });
-  const setCICFromUser = (newV: boolean) => {
-    if (!filters.cic.user) {
-      setCICDirection(null);
-      return;
-    }
-    setCICDirection(newV ? FilterDirection.SENT : FilterDirection.RECEIVED);
-  };
 
   return (
-    <div>
-      <br />
-      <FilterBuilderTargetTDH
-        minTDH={filters.tdh.min}
-        maxTDH={filters.tdh.max}
-        setMinTDH={setMinTDH}
-        setMaxTDH={setMaxTDH}
-      />
-      <br />
-      <FilterBuilderTargetLevel
-        minLevel={filters.level.min}
-        maxLevel={filters.level.max}
-        setMinLevel={setMinLevel}
-        setMaxLevel={setMaxLevel}
-      />
-      <br />
+    <div className="tw-w-full tw-space-y-8 tw-mt-4">
+      <div className="tw-wf-full tw-space-y-2">
+        <FilterBuilderTargetTDH
+          minTDH={filters.tdh.min}
+          maxTDH={filters.tdh.max}
+          setMinTDH={setMinTDH}
+          setMaxTDH={setMaxTDH}
+        />
+
+        <FilterBuilderTargetLevel
+          minLevel={filters.level.min}
+          maxLevel={filters.level.max}
+          setMinLevel={setMinLevel}
+          setMaxLevel={setMaxLevel}
+        />
+      </div>
+
       <FilterBuilderRep
         user={filters.rep.user}
         category={filters.rep.category}
         minRep={filters.rep.min}
         maxRep={filters.rep.max}
-        isFromUser={filters.rep.direction === FilterDirection.SENT}
+        userDirection={filters.rep.direction}
         setUser={setRepUser}
         setCategory={setRepCategory}
         setMinRep={setMinRep}
         setMaxRep={setMaxRep}
-        setIsFromUser={setRepFromUser}
+        setUserDirection={setRepDirection}
       />
-      <br />
+
       <FilterBuilderCIC
         user={filters.cic.user}
         minCIC={filters.cic.min}
         maxCIC={filters.cic.max}
-        isFromUser={filters.cic.direction === FilterDirection.SENT}
+        userDirection={filters.cic.direction}
         setUser={setCICUser}
         setMinCIC={setMinCIC}
         setMaxCIC={setMaxCIC}
-        setIsFromUser={setCICFromUser}
+        setUserDirection={setCICDirection}
       />
-      <br />
     </div>
   );
 }

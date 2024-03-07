@@ -13,7 +13,7 @@ export default function FilterBuilderTargetTDH({
   readonly setMaxTDH: (newV: number | null) => void;
 }) {
   return (
-    <div>
+    <div className="tw-w-full tw-inline-flex tw-space-x-4">
       <CommonInput
         inputType="number"
         placeholder="Min TDH"

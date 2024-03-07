@@ -13,7 +13,7 @@ export default function FilterBuilderTargetLevel({
   readonly setMaxLevel: (newV: number | null) => void;
 }) {
   return (
-    <div>
+    <div className="tw-w-full tw-inline-flex tw-space-x-4">
       <CommonInput
         inputType="number"
         placeholder="Min Level"
