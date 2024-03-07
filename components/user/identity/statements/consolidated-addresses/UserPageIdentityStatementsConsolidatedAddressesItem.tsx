@@ -56,7 +56,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   }, [router.isReady]);
 
   return (
-    <li className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+    <li className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
       <Tippy
         content="Opensea"
         theme="dark"
@@ -128,7 +128,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               aria-label="Copy address"
               className={`${
                 isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-              } tw-ml-2 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+              } tw-ml-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
               onClick={handleCopy}
             >
               <CopyIcon />

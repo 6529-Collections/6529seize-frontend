@@ -36,7 +36,7 @@ export default function ProfileRatersTableHeader({
   return (
     <thead className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
       <tr>
-        <th className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-py-3.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400">
+        <th className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-py-3.5 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           Name
         </th>
         <ProfileRatersTableHeaderSortableCell

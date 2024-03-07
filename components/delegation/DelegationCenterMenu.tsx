@@ -18,6 +18,7 @@ import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
+import { useRouter } from "next/router";
 
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
+  const router = useRouter();
   const accountResolution = useAccount();
   const ensResolution = useEnsName({
     address: accountResolution.address,
@@ -223,7 +225,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                   props.setActiveSection(DelegationCenterSection.FAQ)
                 }
                 className={`${styles.menuLeftItem} ${
-                  props.section === DelegationCenterSection.FAQ
+                  props.section === DelegationCenterSection.FAQ ||
+                  (props.section === DelegationCenterSection.HTML &&
+                    router.asPath.startsWith("/delegation/delegation-faq/"))
                     ? styles.menuLeftItemActive
                     : ""
                 }`}>
