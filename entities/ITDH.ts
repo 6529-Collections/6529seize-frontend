@@ -3,8 +3,6 @@ import { NftRank, NftTDH } from "./INFT";
 export interface TDHBoostBreakdown {
   available: number;
   acquired: number;
-  total_cards?: number;
-  acquired_cards?: number;
 }
 
 export interface BaseTDH {

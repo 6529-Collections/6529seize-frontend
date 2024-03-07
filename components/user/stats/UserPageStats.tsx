@@ -106,13 +106,9 @@ export default function UserPageStats({
           <div className="tw-w-full tw-pt-8 tw-h-96">
             <CommonCardSkeleton />
           </div>
-          <div className="tw-w-full tw-pt-8 tw-h-96">
-            <CommonCardSkeleton />
-          </div>
         </>
       ) : (
         <>
-          <UserPageStatsBoostBreakdown tdh={tdh} />
           <UserPageStatsCollected tdh={tdh} />
           <UserPageStatsActivityOverview tdh={tdh} />
         </>
@@ -122,6 +118,8 @@ export default function UserPageStats({
         profile={profile}
         activeAddress={activeAddress}
       />
+
+      <UserPageStatsBoostBreakdown tdh={tdh} />
     </div>
   );
 }
