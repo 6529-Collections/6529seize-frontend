@@ -48,6 +48,7 @@ import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import UpdateDelegationComponent from "./UpdateDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -253,7 +254,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 new Date().getTime() / 1000 > myDate
                   ? `expired`
                   : myDate >= NEVER_DATE
-                  ? `active`
+                  ? `active - non-expiring`
                   : `active - expires ${formatExpiry(myDate)}`;
               walletDelegations.push({
                 wallet: wallet,
@@ -329,7 +330,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 new Date().getTime() / 1000 > myDate
                   ? `expired`
                   : myDate >= NEVER_DATE
-                  ? `active`
+                  ? `active - non-expiring`
                   : `active - expires ${formatExpiry(myDate)}`;
               walletDelegations.push({
                 wallet: wallet,
@@ -451,6 +452,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   >(undefined);
   const [showToast, setShowToast] = useState(false);
 
+  const [delegationKeys, setDelegationKeys] = useState<any[]>([]);
+  const [delegationKeysChanged, setDelegationKeysChanged] = useState(false);
+  const [subDelegationKeys, setSubDelegationKeys] = useState<any[]>([]);
+  const [subDelegationKeysChanged, setSubDelegationKeysChanged] =
+    useState(false);
+  const [consolidationKeys, setConsolidationKeys] = useState<any[]>([]);
+  const [consolidationKeysChanged, setConsolidationKeysChanged] =
+    useState(false);
+
   const collectionLockReadGlobal = areEqualAddresses(
     props.collection.contract,
     DELEGATION_ALL_ADDRESS
@@ -522,7 +532,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (contractWriteRevoke.error) {
       setToast({
         title: "Revoking Delegation Failed",
-        message: contractWriteRevoke.error.message,
+        message:
+          contractWriteRevoke.error.message.split("Request Arguments")[0],
       });
     }
     if (contractWriteRevoke.data) {
@@ -570,7 +581,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (contractWriteBatchRevoke.error) {
       setToast({
         title: "Revoking Delegations Failed",
-        message: contractWriteBatchRevoke.error.message,
+        message:
+          contractWriteBatchRevoke.error.message.split("Request Arguments")[0],
       });
     }
     if (contractWriteBatchRevoke.data) {
@@ -619,7 +631,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (collectionLockWrite.error) {
       setToast({
         title: `${collectionLockRead.data ? `Unlocking` : `Locking`} Wallet`,
-        message: collectionLockWrite.error.message,
+        message:
+          collectionLockWrite.error.message.split("Request Arguments")[0],
       });
     }
     if (collectionLockWrite.data) {
@@ -674,7 +687,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (useCaseLockWrite.error) {
       setToast({
         title: title,
-        message: useCaseLockWrite.error.message,
+        message: useCaseLockWrite.error.message.split("Request Arguments")[0],
       });
     }
     if (useCaseLockWrite.data) {
@@ -810,6 +823,47 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return [""];
   }
 
+  useEffect(() => {
+    const outDelegations = [...outgoingDelegations].filter(
+      (d) =>
+        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
+        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
+    );
+    const inDelegations = [...incomingDelegations].filter(
+      (d) =>
+        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
+        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
+    );
+
+    if (!delegationKeysChanged) {
+      setDelegationKeys(getActiveKeys(outDelegations, inDelegations));
+    }
+    if (!subDelegationKeysChanged) {
+      setSubDelegationKeys(
+        getActiveKeys(
+          [...outgoingDelegations].filter(
+            (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
+          ),
+          [...incomingDelegations].filter(
+            (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
+          )
+        )
+      );
+    }
+    if (!consolidationKeysChanged) {
+      setConsolidationKeys(
+        getActiveKeys(
+          [...outgoingDelegations].filter(
+            (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
+          ),
+          [...incomingDelegations].filter(
+            (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
+          )
+        )
+      );
+    }
+  }, [outgoingDelegations, incomingDelegations]);
+
   function printDelegations() {
     const outDelegations = [...outgoingDelegations].filter(
       (d) =>
@@ -827,11 +881,21 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Accordion
           alwaysOpen
           className={styles.collectionDelegationsAccordion}
-          activeKey={getActiveKeys(outDelegations, inDelegations)}>
+          activeKey={delegationKeys}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing</Accordion.Header>
+            <Accordion.Header
+              onClick={() => {
+                if (delegationKeys.includes("0")) {
+                  setDelegationKeys(delegationKeys.filter((k) => k != "0"));
+                } else {
+                  setDelegationKeys([...delegationKeys, "0"]);
+                }
+                setDelegationKeysChanged(true);
+              }}>
+              Outgoing
+            </Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations("delegations", outDelegations)}
             </Accordion.Body>
@@ -839,7 +903,17 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming</Accordion.Header>
+            <Accordion.Header
+              onClick={() => {
+                if (delegationKeys.includes("1")) {
+                  setDelegationKeys(delegationKeys.filter((k) => k != "1"));
+                } else {
+                  setDelegationKeys([...delegationKeys, "1"]);
+                }
+                setDelegationKeysChanged(true);
+              }}>
+              Incoming
+            </Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations("delegations", inDelegations)}
             </Accordion.Body>
@@ -857,11 +931,24 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         </h5>
         <Accordion
           alwaysOpen
-          className={`${styles.collectionDelegationsAccordion} `}>
+          className={`${styles.collectionDelegationsAccordion} `}
+          activeKey={subDelegationKeys}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing</Accordion.Header>
+            <Accordion.Header
+              onClick={() => {
+                if (subDelegationKeys.includes("0")) {
+                  setSubDelegationKeys(
+                    subDelegationKeys.filter((k) => k != "0")
+                  );
+                } else {
+                  setSubDelegationKeys([...subDelegationKeys, "0"]);
+                }
+                setSubDelegationKeysChanged(true);
+              }}>
+              Outgoing
+            </Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
                 "Delegation Managers",
@@ -874,7 +961,19 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming</Accordion.Header>
+            <Accordion.Header
+              onClick={() => {
+                if (subDelegationKeys.includes("1")) {
+                  setSubDelegationKeys(
+                    subDelegationKeys.filter((k) => k != "1")
+                  );
+                } else {
+                  setSubDelegationKeys([...subDelegationKeys, "1"]);
+                }
+                setSubDelegationKeysChanged(true);
+              }}>
+              Incoming
+            </Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "Delegation Managers",
@@ -896,11 +995,24 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <h5 className="float-none pt-5 pb-1">Consolidations</h5>
         <Accordion
           alwaysOpen
-          className={`${styles.collectionDelegationsAccordion}`}>
+          className={`${styles.collectionDelegationsAccordion}`}
+          activeKey={consolidationKeys}>
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem}`}
             eventKey={"0"}>
-            <Accordion.Header>Outgoing</Accordion.Header>
+            <Accordion.Header
+              onClick={() => {
+                if (consolidationKeys.includes("0")) {
+                  setConsolidationKeys(
+                    consolidationKeys.filter((k) => k != "0")
+                  );
+                } else {
+                  setConsolidationKeys([...consolidationKeys, "0"]);
+                }
+                setConsolidationKeysChanged(true);
+              }}>
+              Outgoing
+            </Accordion.Header>
             <Accordion.Body>
               {printOutgoingDelegations(
                 "consolidations",
@@ -913,7 +1025,19 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <Accordion.Item
             className={`${styles.collectionDelegationsAccordionItem} mt-3`}
             eventKey={"1"}>
-            <Accordion.Header>Incoming</Accordion.Header>
+            <Accordion.Header
+              onClick={() => {
+                if (consolidationKeys.includes("1")) {
+                  setConsolidationKeys(
+                    consolidationKeys.filter((k) => k != "1")
+                  );
+                } else {
+                  setConsolidationKeys([...consolidationKeys, "1"]);
+                }
+                setConsolidationKeysChanged(true);
+              }}>
+              Incoming
+            </Accordion.Header>
             <Accordion.Body>
               {printIncomingDelegations(
                 "consolidations",
@@ -925,6 +1049,154 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           </Accordion.Item>
         </Accordion>
       </>
+    );
+  }
+
+  function printOutgoingDelegationRow(
+    delegations: number,
+    del: ContractDelegation,
+    w: ContractWalletDelegation,
+    consolidationStatus: string | undefined,
+    pending: boolean,
+    isConsolidation: boolean
+  ) {
+    return (
+      <tr key={`outgoing-${del.useCase.use_case}-${w.wallet}`}>
+        <td>
+          <div
+            className={`d-flex flex-column gap-2 ${styles.delegationAccordionBlock}`}>
+            <span className="d-flex align-items-center justify-content-between">
+              <span className="d-flex gap-3 align-items-center">
+                {delegations >= 2 && (
+                  <FormCheck
+                    disabled={
+                      bulkRevocations.length == MAX_BULK_ACTIONS &&
+                      !bulkRevocations.some(
+                        (bd) =>
+                          bd.use_case == del.useCase.use_case &&
+                          areEqualAddresses(bd.wallet, w.wallet)
+                      )
+                    }
+                    checked={bulkRevocations.some(
+                      (bd) =>
+                        bd.use_case == del.useCase.use_case &&
+                        areEqualAddresses(bd.wallet, w.wallet)
+                    )}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setBulkRevocations((bd) => [
+                          ...bd,
+                          {
+                            use_case: del.useCase.use_case,
+                            wallet: w.wallet,
+                          },
+                        ]);
+                      } else {
+                        setBulkRevocations((bd) =>
+                          bd.filter(
+                            (x) =>
+                              !(
+                                x.use_case == del.useCase.use_case &&
+                                areEqualAddresses(x.wallet, w.wallet)
+                              )
+                          )
+                        );
+                      }
+                    }}
+                  />
+                )}
+                <span className="d-flex flex-column gap-1">
+                  <DelegationWallet address={w.wallet} />
+                  <span className="d-flex align-items-center gap-3">
+                    <span className="font-color-h">
+                      {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
+                    </span>
+                    <span
+                      className={
+                        w.expiry === "expired"
+                          ? styles.delegationExpiredLabel
+                          : styles.delegationActiveLabel
+                      }>
+                      {w.expiry}
+                    </span>
+                    {isConsolidation && (
+                      <span
+                        className={
+                          !pending
+                            ? styles.consolidationActiveLabel
+                            : styles.consolidationNotAcceptedLabel
+                        }>
+                        {consolidationStatus}
+                        {pending && (
+                          <Tippy
+                            content={"Incoming consolidation missing"}
+                            placement={"top"}
+                            theme={"light"}>
+                            <FontAwesomeIcon
+                              className={styles.infoIcon}
+                              icon="info-circle"></FontAwesomeIcon>
+                          </Tippy>
+                        )}
+                      </span>
+                    )}
+                  </span>
+                </span>
+              </span>
+              <span className="d-flex align-items-center gap-2">
+                <Tippy content={"Edit"} placement={"top"} theme={"light"}>
+                  <FontAwesomeIcon
+                    icon="edit"
+                    style={{ cursor: "pointer" }}
+                    height={25}
+                    onClick={() => {
+                      setUpdateDelegationParams({
+                        wallet: w.wallet,
+                        use_case: del.useCase.use_case,
+                        display: del.useCase.display,
+                      });
+                      setShowUpdateDelegation(true);
+                      window.scrollTo(0, 0);
+                    }}></FontAwesomeIcon>
+                </Tippy>
+                <Tippy content={"Revoke"} placement={"top"} theme={"light"}>
+                  <FontAwesomeIcon
+                    icon="xmark"
+                    color="white"
+                    fill="white"
+                    style={{
+                      cursor: "pointer",
+                      borderRadius: "25px",
+                      backgroundColor: "#c51d34",
+                      padding: "5px",
+                    }}
+                    width={25}
+                    height={25}
+                    onClick={() => {
+                      const title = "Revoking Delegation";
+                      let message = "Confirm in your wallet...";
+
+                      if (chainsMatch()) {
+                        setRevokeDelegationParams({
+                          collection: areEqualAddresses(
+                            props.collection.contract,
+                            DELEGATION_ALL_ADDRESS
+                          )
+                            ? DELEGATION_ALL_ADDRESS
+                            : props.collection.contract,
+                          address: w.wallet,
+                          use_case: del.useCase.use_case,
+                        });
+                      } else {
+                        message = getSwitchToHtml();
+                      }
+                      setToast({ title, message });
+                    }}></FontAwesomeIcon>
+                </Tippy>
+              </span>
+            </span>
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -969,142 +1241,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             const pending =
                               consolidationStatus ===
                               "consolidation incomplete";
-                            return (
-                              <tr
-                                key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}-${addressIndex}`}>
-                                <td className={styles.formCheckColumn}>
-                                  <FormCheck
-                                    disabled={
-                                      delegations < 2 ||
-                                      (bulkRevocations.length ==
-                                        MAX_BULK_ACTIONS &&
-                                        !bulkRevocations.some(
-                                          (bd) =>
-                                            bd.use_case ==
-                                              del.useCase.use_case &&
-                                            areEqualAddresses(
-                                              bd.wallet,
-                                              w.wallet
-                                            )
-                                        ))
-                                    }
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setBulkRevocations((bd) => [
-                                          ...bd,
-                                          {
-                                            use_case: del.useCase.use_case,
-                                            wallet: w.wallet,
-                                          },
-                                        ]);
-                                      } else {
-                                        setBulkRevocations((bd) =>
-                                          bd.filter(
-                                            (x) =>
-                                              !(
-                                                x.use_case ==
-                                                  del.useCase.use_case &&
-                                                areEqualAddresses(
-                                                  x.wallet,
-                                                  w.wallet
-                                                )
-                                              )
-                                          )
-                                        );
-                                      }
-                                    }}
-                                  />
-                                </td>
-                                <td>
-                                  <DelegationWallet address={w.wallet} />{" "}
-                                  <span
-                                    className={styles.delegationActiveLabel}>
-                                    {w.expiry}
-                                    {w.all
-                                      ? ` - all tokens`
-                                      : ` - token ID: ${w.tokens}`}
-                                  </span>
-                                  {isConsolidation && (
-                                    <span
-                                      className={
-                                        !pending
-                                          ? styles.consolidationActiveLabel
-                                          : styles.consolidationNotAcceptedLabel
-                                      }>
-                                      {consolidationStatus}
-                                      {pending && (
-                                        <Tippy
-                                          content={
-                                            "Incoming consolidation missing"
-                                          }
-                                          placement={"top"}
-                                          theme={"light"}>
-                                          <FontAwesomeIcon
-                                            className={styles.infoIcon}
-                                            icon="info-circle"></FontAwesomeIcon>
-                                        </Tippy>
-                                      )}
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="text-right">
-                                  <span
-                                    className={styles.useCaseWalletUpdate}
-                                    onClick={() => {
-                                      setUpdateDelegationParams({
-                                        wallet: w.wallet,
-                                        use_case: del.useCase.use_case,
-                                        display: del.useCase.display,
-                                      });
-                                      setShowUpdateDelegation(true);
-                                      window.scrollTo(0, 0);
-                                    }}>
-                                    Update
-                                  </span>
-                                </td>
-                                <td>
-                                  <span
-                                    className={styles.useCaseWalletRevoke}
-                                    onClick={() => {
-                                      const title = "Revoking Delegation";
-                                      let message = "Confirm in your wallet...";
-
-                                      if (chainsMatch()) {
-                                        setRevokeDelegationParams({
-                                          collection: areEqualAddresses(
-                                            props.collection.contract,
-                                            DELEGATION_ALL_ADDRESS
-                                          )
-                                            ? DELEGATION_ALL_ADDRESS
-                                            : props.collection.contract,
-                                          address: w.wallet,
-                                          use_case: del.useCase.use_case,
-                                        });
-                                      } else {
-                                        message = getSwitchToHtml();
-                                      }
-                                      setToast({ title, message });
-                                    }}>
-                                    Revoke
-                                    {(contractWriteRevoke.isLoading ||
-                                      waitContractWriteRevoke.isLoading) &&
-                                      areEqualAddresses(
-                                        revokeDelegationParams.address,
-                                        w.wallet
-                                      ) &&
-                                      revokeDelegationParams.use_case ==
-                                        del.useCase.use_case && (
-                                        <div className="d-inline">
-                                          <div
-                                            className={`spinner-border ${styles.loader}`}
-                                            role="status">
-                                            <span className="sr-only"></span>
-                                          </div>
-                                        </div>
-                                      )}
-                                  </span>
-                                </td>
-                              </tr>
+                            return printOutgoingDelegationRow(
+                              delegations,
+                              del,
+                              w,
+                              consolidationStatus,
+                              pending,
+                              isConsolidation
                             );
                           })}
                         </Fragment>
@@ -1123,13 +1266,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 {delegations > 1 && (
                   <>
                     <tr>
-                      <td colSpan={4} className="pt-5">
+                      <td colSpan={4} className="pt-3">
                         selected:{" "}
                         {bulkRevocations.length === MAX_BULK_ACTIONS
                           ? `${MAX_BULK_ACTIONS} (max)`
                           : bulkRevocations.length}
                         &nbsp;&nbsp;
-                        <span
+                        <button
+                          disabled={bulkRevocations.length < 2}
                           className={`${styles.useCaseWalletRevoke} ${
                             bulkRevocations.length < 2
                               ? `${styles.useCaseWalletRevokeDisabled}`
@@ -1138,7 +1282,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           onClick={() => {
                             const title = "Batch Revoking Delegations";
                             let message = "Confirm in your wallet...";
-
                             if (chainsMatch()) {
                               setBatchRevokeDelegationParams({
                                 collections: [...bulkRevocations].map((br) =>
@@ -1172,7 +1315,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               </div>
                             </div>
                           )}
-                        </span>
+                        </button>
                       </td>
                     </tr>
                   </>
@@ -1182,6 +1325,79 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           </Col>
         </Row>
       </Container>
+    );
+  }
+
+  function printIncomingDelegationRow(
+    del: ContractDelegation,
+    w: ContractWalletDelegation,
+    consolidationStatus: string | undefined,
+    pending: boolean,
+    isConsolidation: boolean
+  ) {
+    return (
+      <tr key={`incoming-${del.useCase.use_case}-${w.wallet}`}>
+        <td>
+          <div
+            className={`d-flex flex-column gap-2 ${styles.delegationAccordionBlock}`}>
+            <span className="d-flex align-items-center gap-3">
+              {del.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case ? (
+                <FormCheck
+                  checked={areEqualAddresses(
+                    subDelegationOriginalDelegator,
+                    w.wallet
+                  )}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSubDelegationOriginalDelegator(w.wallet);
+                    } else {
+                      setSubDelegationOriginalDelegator(undefined);
+                    }
+                  }}
+                />
+              ) : (
+                <></>
+              )}
+              <span className="d-flex flex-column gap-1">
+                <DelegationWallet address={w.wallet} />
+                <span className="d-flex align-items-center gap-3">
+                  <span className="font-color-h">
+                    {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
+                  </span>
+                  <span
+                    className={
+                      w.expiry === "expired"
+                        ? styles.delegationExpiredLabel
+                        : styles.delegationActiveLabel
+                    }>
+                    {w.expiry}
+                  </span>
+                  {isConsolidation && (
+                    <span
+                      className={
+                        !pending
+                          ? styles.consolidationActiveLabel
+                          : styles.consolidationNotAcceptedLabel
+                      }>
+                      {consolidationStatus}
+                      {pending && (
+                        <Tippy
+                          content={"Outgoing consolidation missing"}
+                          placement={"top"}
+                          theme={"light"}>
+                          <FontAwesomeIcon
+                            className={styles.infoIcon}
+                            icon="info-circle"></FontAwesomeIcon>
+                        </Tippy>
+                      )}
+                    </span>
+                  )}
+                </span>
+              </span>
+            </span>
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -1227,66 +1443,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             const pending =
                               consolidationStatus ===
                               "consolidation incomplete";
-                            return (
-                              <tr
-                                key={`incoming-${del.useCase}-${index}-${w.wallet}`}>
-                                <td className={styles.formCheckColumn}>
-                                  {del.useCase.use_case ==
-                                  SUB_DELEGATION_USE_CASE.use_case ? (
-                                    <FormCheck
-                                      checked={areEqualAddresses(
-                                        subDelegationOriginalDelegator,
-                                        w.wallet
-                                      )}
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setSubDelegationOriginalDelegator(
-                                            w.wallet
-                                          );
-                                        } else {
-                                          setSubDelegationOriginalDelegator(
-                                            undefined
-                                          );
-                                        }
-                                      }}
-                                    />
-                                  ) : (
-                                    <>&nbsp;&bull;&nbsp;</>
-                                  )}
-                                </td>
-                                <td>
-                                  <DelegationWallet address={w.wallet} />{" "}
-                                  <span
-                                    className={styles.delegationActiveLabel}>
-                                    {w.expiry}
-                                    {w.all
-                                      ? ` - all tokens`
-                                      : ` - token ID: ${w.tokens}`}
-                                  </span>
-                                  {isConsolidation && (
-                                    <span
-                                      className={
-                                        !pending
-                                          ? styles.consolidationActiveLabel
-                                          : styles.consolidationNotAcceptedLabel
-                                      }>
-                                      {consolidationStatus}
-                                      {pending && (
-                                        <Tippy
-                                          content={
-                                            "Outgoing consolidation missing"
-                                          }
-                                          placement={"top"}
-                                          theme={"light"}>
-                                          <FontAwesomeIcon
-                                            className={styles.infoIcon}
-                                            icon="info-circle"></FontAwesomeIcon>
-                                        </Tippy>
-                                      )}
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
+                            return printIncomingDelegationRow(
+                              del,
+                              w,
+                              consolidationStatus,
+                              pending,
+                              isConsolidation
                             );
                           })}
                         </Fragment>
@@ -1306,70 +1468,72 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   isSubdelegation &&
                   delegations > 0 && (
                     <tr>
-                      <td colSpan={2} className="pt-5">
-                        <span
-                          className={`${styles.useCaseWalletUpdate} ${
-                            subDelegationOriginalDelegator === undefined
-                              ? styles.useCaseWalletUpdateDisabled
-                              : ""
-                          }`}
-                          onClick={() => {
-                            setShowCreateNewDelegationWithSub(true);
-                            window.scrollTo(0, 0);
-                          }}>
-                          <FontAwesomeIcon
-                            icon="plus"
-                            className={styles.buttonIcon}
-                          />
-                          Register Delegation
-                        </span>
-                        <span
-                          className={`${styles.useCaseWalletUpdate} ${
-                            subDelegationOriginalDelegator === undefined
-                              ? styles.useCaseWalletUpdateDisabled
-                              : ""
-                          }`}
-                          onClick={() => {
-                            setShowCreateNewSubDelegationWithSub(true);
-                            window.scrollTo(0, 0);
-                          }}>
-                          <FontAwesomeIcon
-                            icon="plus"
-                            className={styles.buttonIcon}
-                          />
-                          Register Delegation Manager
-                        </span>
-                        <span
-                          className={`${styles.useCaseWalletUpdate} ${
-                            subDelegationOriginalDelegator === undefined
-                              ? styles.useCaseWalletUpdateDisabled
-                              : ""
-                          }`}
-                          onClick={() => {
-                            setShowCreateNewConsolidationWithSub(true);
-                            window.scrollTo(0, 0);
-                          }}>
-                          <FontAwesomeIcon
-                            icon="plus"
-                            className={styles.buttonIcon}
-                          />
-                          Register Consolidation
-                        </span>
-                        <span
-                          className={`${styles.useCaseWalletRevoke} ${
-                            subDelegationOriginalDelegator === undefined
-                              ? styles.useCaseWalletRevokeDisabled
-                              : ""
-                          }`}
-                          onClick={() => {
-                            setShowRevokeDelegationWithSub(true);
-                            window.scrollTo(0, 0);
-                          }}>
-                          <FontAwesomeIcon
-                            icon="minus"
-                            className={styles.buttonIcon}
-                          />
-                          Revoke
+                      <td colSpan={2} className="pt-3">
+                        <span className="d-flex flex-wrap align-items-center gap-2">
+                          <button
+                            className={`${styles.useCaseWalletUpdate} ${
+                              subDelegationOriginalDelegator === undefined
+                                ? styles.useCaseWalletUpdateDisabled
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setShowCreateNewDelegationWithSub(true);
+                              window.scrollTo(0, 0);
+                            }}>
+                            <FontAwesomeIcon
+                              icon="plus"
+                              className={styles.buttonIcon}
+                            />
+                            Register Delegation
+                          </button>
+                          <button
+                            className={`${styles.useCaseWalletUpdate} ${
+                              subDelegationOriginalDelegator === undefined
+                                ? styles.useCaseWalletUpdateDisabled
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setShowCreateNewSubDelegationWithSub(true);
+                              window.scrollTo(0, 0);
+                            }}>
+                            <FontAwesomeIcon
+                              icon="plus"
+                              className={styles.buttonIcon}
+                            />
+                            Register Delegation Manager
+                          </button>
+                          <button
+                            className={`${styles.useCaseWalletUpdate} ${
+                              subDelegationOriginalDelegator === undefined
+                                ? styles.useCaseWalletUpdateDisabled
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setShowCreateNewConsolidationWithSub(true);
+                              window.scrollTo(0, 0);
+                            }}>
+                            <FontAwesomeIcon
+                              icon="plus"
+                              className={styles.buttonIcon}
+                            />
+                            Register Consolidation
+                          </button>
+                          <button
+                            className={`${styles.useCaseWalletRevoke} ${
+                              subDelegationOriginalDelegator === undefined
+                                ? styles.useCaseWalletRevokeDisabled
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setShowRevokeDelegationWithSub(true);
+                              window.scrollTo(0, 0);
+                            }}>
+                            <FontAwesomeIcon
+                              icon="minus"
+                              className={styles.buttonIcon}
+                            />
+                            Revoke
+                          </button>
                         </span>
                       </td>
                     </tr>
@@ -1611,9 +1775,23 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Col>
           {props.collection && (
             <Container>
-              <Row className="pb-2">
+              <Row>
                 <Col>
-                  <h1>{props.collection.title}</h1>
+                  <h1 className="mb-0">{props.collection.title}</h1>
+                </Col>
+              </Row>
+              <Row className="pb-4">
+                <Col className="d-flex align-items-center justify-content-start">
+                  <span
+                    className={styles.backBtn}
+                    onClick={() =>
+                      props.setSection(DelegationCenterSection.CENTER)
+                    }>
+                    <FontAwesomeIcon icon="circle-arrow-left" />
+                    <span className="font-smaller">
+                      Back to Delegation Center
+                    </span>
+                  </span>
                 </Col>
               </Row>
               {!showUpdateDelegation &&

@@ -52,14 +52,18 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   function printCollectionSelection() {
     return (
       <Container className="no-padding">
-        <Row className="pt-4 pb-4">
+        <Row className="pt-4 pb-2">
           <Col>
             <h4>Manage by Collection</h4>
           </Col>
         </Row>
         <Row>
-          <Col className="d-flex flex-wrap gap-3">
-            {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
+          {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
+            <Col
+              xs={12}
+              sm={6}
+              md={3}
+              className="pt-2 pb-2 d-flex flex-wrap gap-3">
               <button
                 key={c.contract}
                 className={styles.collectionSelectionButton}
@@ -93,8 +97,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   <span>{c.title}</span>
                 </span>
               </button>
-            ))}
-          </Col>
+            </Col>
+          ))}
         </Row>
       </Container>
     );
@@ -115,8 +119,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <Row>
               <Col
                 sm={12}
-                md={8}
-                className="d-flex align-items-center justify-content-between gap-2">
+                md={9}
+                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2">
                 <span className="d-flex flex-column">
                   <h3 className="pb-4">Delegations</h3>
                   <span className="d-flex align-items-center gap-3">
@@ -139,8 +143,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               </Col>
               <Col
                 sm={12}
-                md={4}
-                className="d-flex align-items-center justify-content-center">
+                md={3}
+                className="pt-2 pb-2 d-flex align-items-center justify-content-center">
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
@@ -160,8 +164,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <Row>
               <Col
                 sm={12}
-                md={8}
-                className="d-flex align-items-center justify-content-between gap-2">
+                md={9}
+                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2">
                 <span className="d-flex flex-column">
                   <h3 className="pb-4">Consolidations</h3>
                   <span className="d-flex align-items-center gap-3">
@@ -184,8 +188,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               </Col>
               <Col
                 sm={12}
-                md={4}
-                className="d-flex align-items-center justify-content-center">
+                md={3}
+                className="pt-2 pb-2 d-flex align-items-center justify-content-center">
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
@@ -205,8 +209,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <Row>
               <Col
                 sm={12}
-                md={8}
-                className="d-flex align-items-center justify-content-between gap-2">
+                md={9}
+                className="pt-2 pb-2 d-flex align-items-center justify-content-between gap-2">
                 <span className="d-flex flex-column">
                   <h3 className="pb-4">Delegation Management</h3>
                   <span className="d-flex align-items-center gap-3">
@@ -230,8 +234,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               </Col>
               <Col
                 sm={12}
-                md={4}
-                className="d-flex align-items-center justify-content-center">
+                md={3}
+                className="pt-2 pb-2 d-flex align-items-center justify-content-center">
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
