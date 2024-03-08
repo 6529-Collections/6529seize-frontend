@@ -60,6 +60,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         <Row>
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
             <Col
+              key={c.contract}
               xs={12}
               sm={6}
               md={3}

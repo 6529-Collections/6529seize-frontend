@@ -1008,6 +1008,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }
 
   function printOutgoingDelegationRow(
+    index: number,
     delegations: number,
     del: ContractDelegation,
     w: ContractWalletDelegation,
@@ -1016,7 +1017,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     isConsolidation: boolean
   ) {
     return (
-      <tr key={`outgoing-${del.useCase.use_case}-${w.wallet}`}>
+      <tr key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
           <div
             className={`d-flex flex-column gap-2 ${styles.delegationAccordionBlock}`}>
@@ -1197,6 +1198,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               consolidationStatus ===
                               "consolidation incomplete";
                             return printOutgoingDelegationRow(
+                              index,
                               delegations,
                               del,
                               w,
@@ -1284,6 +1286,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }
 
   function printIncomingDelegationRow(
+    index: number,
     del: ContractDelegation,
     w: ContractWalletDelegation,
     consolidationStatus: string | undefined,
@@ -1291,7 +1294,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     isConsolidation: boolean
   ) {
     return (
-      <tr key={`incoming-${del.useCase.use_case}-${w.wallet}`}>
+      <tr key={`incoming-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
           <div
             className={`d-flex flex-column gap-2 ${styles.delegationAccordionBlock}`}>
@@ -1399,6 +1402,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               consolidationStatus ===
                               "consolidation incomplete";
                             return printIncomingDelegationRow(
+                              index,
                               del,
                               w,
                               consolidationStatus,
