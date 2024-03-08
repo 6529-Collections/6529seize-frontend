@@ -199,7 +199,6 @@
   color: $dark-grey !important;
   border-radius: 0 !important;
   border-color: $lightest-grey;
-  font-size: smaller !important;
   height: 100%;
 
   &:focus {
@@ -650,5 +649,4 @@
 .delegationAccordionBlock {
   padding: 15px;
   background-color: $very-dark-grey !important;
-  // border: 1px solid $lightest-grey !important;
 }

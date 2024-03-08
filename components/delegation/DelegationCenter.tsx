@@ -1,5 +1,5 @@
 import styles from "./Delegation.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import Image from "next/image";
 import { useWeb3Modal } from "@web3modal/react";
