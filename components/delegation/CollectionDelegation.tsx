@@ -101,8 +101,8 @@ function getParams(
 }
 
 function getReadParams(
-  address: `0x${string}` | string | undefined,
-  collection: `0x${string}` | string | undefined,
+  address: string | undefined,
+  collection: string | undefined,
   functionName: string,
   useCases?: any[]
 ) {
