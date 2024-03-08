@@ -19,7 +19,8 @@ export default function FiltersButton({
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-bg-transparent tw-border-none"
+        aria-label="Filters"
+        className="tw-h-10 tw-w-10 tw-relative tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
           className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100"

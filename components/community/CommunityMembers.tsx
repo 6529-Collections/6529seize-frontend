@@ -215,7 +215,7 @@ export default function CommunityMembers() {
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
         <h1 className="tw-block tw-float-none">Community</h1>
-        <div className="tw-inline-flex tw-space-x-4 tw-items-center">
+        <div className="tw-inline-flex tw-space-x-3 tw-items-center">
           <FiltersButton
             filters={filters}
             onFilters={setFilters}
@@ -224,7 +224,7 @@ export default function CommunityMembers() {
           />
           <button
             type="button"
-            className="tw-relative tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-relative tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
             onClick={goToNerd}
           >
             <span>Nerd view</span>
