@@ -3,31 +3,7 @@ import FilterBuilderTargetLevel from "./FilterBuilderTargetLevel";
 import FilterBuilderRep from "./FilterBuilderRep";
 import FilterBuilderCIC from "./FilterBuilderCIC";
 
-export enum FilterDirection {
-  RECEIVED = "RECEIVED",
-  SENT = "SENT",
-}
 
-export interface FilterMinMax {
-  readonly min: number | null;
-  readonly max: number | null;
-}
-
-export interface FilterMinMaxDirectionAndUser extends FilterMinMax {
-  readonly direction: FilterDirection;
-  readonly user: string | null;
-}
-
-export interface FilterRep extends FilterMinMaxDirectionAndUser {
-  readonly category: string | null;
-}
-
-export interface GeneralFilter {
-  readonly tdh: FilterMinMax;
-  readonly rep: FilterRep;
-  readonly cic: FilterMinMaxDirectionAndUser;
-  readonly level: FilterMinMax;
-}
 
 export default function FilterBuilder({
   filters,

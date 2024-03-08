@@ -645,3 +645,18 @@ export function getRoyaltyImage(royaltiesPercentage: number) {
     ? "pepe-xglasses.png"
     : "pepe-smile.png";
 }
+
+export const convertStringOrNullToNumberOrNull = (
+  value: string | null
+): number | null => {
+  if (value === null) {
+    return null;
+  }
+  if (value === "") {
+    return null;
+  }
+  if (isNaN(parseFloat(value))) {
+    return null;
+  }
+  return parseFloat(value);
+};

@@ -6,6 +6,7 @@ import CommunityMembers from "../components/community/CommunityMembers";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import SlideOver from "../components/utils/sidebar/SlideOver";
 import { useState } from "react";
+import CommunityCurationFilters from "../components/curation/CommunityCurationFilters";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -28,7 +29,7 @@ export default function CommunityPage() {
     { display: "Community" },
   ];
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
     <>
@@ -57,11 +58,13 @@ export default function CommunityPage() {
             <div
               className={`${
                 open
-                  ? "tw-w-64 tw-col-span-2 tw-bg-iron-900 tw-fixed tw-bottom-0 tw-left-0 tw-top-[150px] tw-overflow-y-auto tw-border-r tw-border-white/5 tw-visible"
+                  ? "tw-w-74 tw-col-span-2 tw-bg-iron-900 tw-fixed tw-bottom-0 tw-left-0 tw-top-[150px] tw-overflow-y-auto tw-border-r tw-border-white/5 tw-visible"
                   : "tw-w-0 tw-invisible tw-h-0"
               } tw-transition-all tw-duration-500 tw-ease-in-out`}
             >
-              <SlideOver />
+              <SlideOver>
+                <CommunityCurationFilters setOpen={setOpen} />
+              </SlideOver>
             </div>
             <div
               className={` ${

@@ -14,9 +14,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useDebounce } from "react-use";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-import { FilterDirection, GeneralFilter } from "../filters/FilterBuilder";
+
 import FiltersButton from "../filters/FiltersButton";
 import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
+import {
+  FilterDirection,
+  GeneralFilter,
+} from "../../helpers/filters/Filters.types";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;

@@ -1,63 +1,29 @@
-export interface CommunitySearchCriteria {
-  readonly id: string;
-  readonly criteria: Operation[];
+export enum FilterDirection {
+  RECEIVED = "RECEIVED",
+  SENT = "SENT",
 }
 
-export enum OpCode {
-  EQ = "EQ",
-  GTE = "GTE",
-  LTE = "LTE",
-  EXTRACT = "EXTRACT",
+export interface FilterMinMax {
+  readonly min: number | null;
+  readonly max: number | null;
 }
 
-export type PrimitiveValueOpCode = OpCode.EQ | OpCode.GTE | OpCode.LTE;
-export type ExtractOpCode = OpCode.EXTRACT;
-
-export enum CSRepExchangeProp {
-  FROM_PROFILE_ID = "rep_exchange_from_profile_id",
-  TO_PROFILE_ID = "rep_exchange_to_profile_id",
-  CATEGORY = "rep_exchange_category",
-  AMOUNT = "rep_exchange_amount",
+export interface FilterMinMaxDirectionAndUser extends FilterMinMax {
+  readonly direction: FilterDirection;
+  readonly user: string | null;
 }
 
-export enum CSCicExchangeProp {
-  FROM_PROFILE_ID = "cic_exchange_from_profile_id",
-  TO_PROFILE_ID = "cic_exchange_to_profile_id",
-  AMOUNT = "cic_exchange_amount",
+export interface RepFilter extends FilterMinMaxDirectionAndUser {
+  readonly category: string | null;
 }
 
-export enum CsExtractProp {
-  REP = "rep",
-  CIC = "cic",
+export type TDHFilter = FilterMinMax;
+export type CICFilter = FilterMinMaxDirectionAndUser;
+export type LevelFilter = FilterMinMax;
+
+export interface GeneralFilter {
+  readonly tdh: TDHFilter;
+  readonly rep: RepFilter;
+  readonly cic: CICFilter;
+  readonly level: LevelFilter;
 }
-
-export enum CSProfileProp {
-  TDH = "tdh",
-  REP = "rep",
-  CIC = "cic",
-  LEVEL = "level",
-}
-
-export type PrimitivePropertyKey =
-  | CSRepExchangeProp
-  | CSCicExchangeProp
-  | CSProfileProp
-  | CsExtractProp;
-
-export interface PrimitiveValueOp<T extends PrimitiveValueOpCode> {
-  readonly op: T;
-  readonly property_key: PrimitivePropertyKey;
-  readonly property_value: string;
-}
-
-export interface ExtractOp {
-  readonly op: OpCode.EXTRACT;
-  readonly property_key: CsExtractProp;
-  readonly property_value: "receiver" | "sender";
-}
-
-export type EqOp = PrimitiveValueOp<OpCode.EQ>;
-export type GteOp = PrimitiveValueOp<OpCode.GTE>;
-export type LteOp = PrimitiveValueOp<OpCode.LTE>;
-
-export type Operation = EqOp | GteOp | LteOp | ExtractOp;
