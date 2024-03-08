@@ -48,7 +48,6 @@ import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import UpdateDelegationComponent from "./UpdateDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -68,15 +67,12 @@ interface ContractDelegation {
   wallets: ContractWalletDelegation[];
 }
 
-function getReadParams(
+function getParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
   functionName: string,
-  useCases?: any[]
+  useCases: any[]
 ) {
-  if (!useCases) {
-    useCases = DELEGATION_USE_CASES;
-  }
   const params: any = [];
   useCases.map((uc) => {
     params.push({
@@ -104,37 +100,24 @@ function getReadParams(
   return params;
 }
 
+function getReadParams(
+  address: `0x${string}` | string | undefined,
+  collection: `0x${string}` | string | undefined,
+  functionName: string,
+  useCases?: any[]
+) {
+  if (!useCases) {
+    useCases = DELEGATION_USE_CASES;
+  }
+  return getParams(address, collection, functionName, useCases);
+}
+
 function getActiveDelegationsReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
   functionName: string
 ) {
-  const params: any = [];
-
-  DELEGATION_USE_CASES.map((uc) => {
-    params.push({
-      address: DELEGATION_CONTRACT.contract,
-      abi: DELEGATION_ABI,
-      chainId: DELEGATION_CONTRACT.chain_id,
-      functionName: functionName,
-      args: [address, collection, uc.use_case],
-    });
-  });
-  params.push({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: functionName,
-    args: [address, collection, SUB_DELEGATION_USE_CASE.use_case],
-  });
-  params.push({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: functionName,
-    args: [address, collection, CONSOLIDATION_USE_CASE.use_case],
-  });
-  return params;
+  return getParams(address, collection, functionName, DELEGATION_USE_CASES);
 }
 
 function getConsolidationReadParams(
@@ -157,6 +140,52 @@ function getConsolidationReadParams(
     return params;
   }
   return null;
+}
+
+function formatExpiry(myDate: any) {
+  const date = new Date(parseInt(myDate) * 1000);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getDelegationsFromData(data: any) {
+  const myDelegations: ContractDelegation[] = [];
+  data.map((d: any, index: number) => {
+    const walletDelegations: ContractWalletDelegation[] = [];
+    const useCase =
+      DELEGATION_USE_CASES.length > index
+        ? DELEGATION_USE_CASES[index]
+        : index === SUB_DELEGATION_USE_CASE.index
+        ? SUB_DELEGATION_USE_CASE
+        : index === CONSOLIDATION_USE_CASE.index
+        ? CONSOLIDATION_USE_CASE
+        : null;
+    if (useCase) {
+      const delegationsArray = d.result as any[];
+      delegationsArray[0].map((wallet: string, i: number) => {
+        const myDate = delegationsArray[1][i];
+        const myDateDisplay =
+          new Date().getTime() / 1000 > myDate
+            ? `expired`
+            : myDate >= NEVER_DATE
+            ? `active - non-expiring`
+            : `active - expires ${formatExpiry(myDate)}`;
+        walletDelegations.push({
+          wallet: wallet,
+          expiry: myDateDisplay,
+          all: delegationsArray[2][i],
+          tokens: delegationsArray[3][i],
+        });
+      });
+      myDelegations.push({
+        useCase: useCase,
+        wallets: walletDelegations,
+      });
+    }
+  });
+  return myDelegations;
 }
 
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
@@ -235,40 +264,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     enabled: accountResolution.isConnected,
     onSettled(data, error) {
       if (data) {
-        const myDelegations: ContractDelegation[] = [];
-        data.map((d, index: number) => {
-          const walletDelegations: ContractWalletDelegation[] = [];
-          const useCase =
-            DELEGATION_USE_CASES.length > index
-              ? DELEGATION_USE_CASES[index]
-              : index === SUB_DELEGATION_USE_CASE.index
-              ? SUB_DELEGATION_USE_CASE
-              : index === CONSOLIDATION_USE_CASE.index
-              ? CONSOLIDATION_USE_CASE
-              : null;
-          if (useCase) {
-            const delegationsArray = d.result as any[];
-            delegationsArray[0].map((wallet: string, i: number) => {
-              const myDate = delegationsArray[1][i];
-              const myDateDisplay =
-                new Date().getTime() / 1000 > myDate
-                  ? `expired`
-                  : myDate >= NEVER_DATE
-                  ? `active - non-expiring`
-                  : `active - expires ${formatExpiry(myDate)}`;
-              walletDelegations.push({
-                wallet: wallet,
-                expiry: myDateDisplay,
-                all: delegationsArray[2][i],
-                tokens: delegationsArray[3][i],
-              });
-            });
-            myDelegations.push({
-              useCase: useCase,
-              wallets: walletDelegations,
-            });
-          }
-        });
+        const myDelegations = getDelegationsFromData(data);
         setOutgoingDelegations(myDelegations);
         setOutgoingDelegationsLoaded(true);
       }
@@ -311,40 +307,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     enabled: accountResolution.isConnected && incomingDelegations.length > 0,
     onSettled(data, error) {
       if (data) {
-        const myDelegations: ContractDelegation[] = [];
-        data.map((d, index: number) => {
-          const walletDelegations: ContractWalletDelegation[] = [];
-          const useCase =
-            DELEGATION_USE_CASES.length > index
-              ? DELEGATION_USE_CASES[index]
-              : index === SUB_DELEGATION_USE_CASE.index
-              ? SUB_DELEGATION_USE_CASE
-              : index === CONSOLIDATION_USE_CASE.index
-              ? CONSOLIDATION_USE_CASE
-              : null;
-          if (useCase) {
-            const delegationsArray = d.result as any[];
-            delegationsArray[0].map((wallet: string, i: number) => {
-              const myDate = delegationsArray[1][i];
-              const myDateDisplay =
-                new Date().getTime() / 1000 > myDate
-                  ? `expired`
-                  : myDate >= NEVER_DATE
-                  ? `active - non-expiring`
-                  : `active - expires ${formatExpiry(myDate)}`;
-              walletDelegations.push({
-                wallet: wallet,
-                expiry: myDateDisplay,
-                all: delegationsArray[2][i],
-                tokens: delegationsArray[3][i],
-              });
-            });
-            myDelegations.push({
-              useCase: useCase,
-              wallets: walletDelegations,
-            });
-          }
-        });
+        const myDelegations = getDelegationsFromData(data);
         setIncomingDelegations(myDelegations);
         setIncomingDelegationsLoaded(true);
       }
@@ -767,14 +730,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       contractWriteBatchRevoke.write();
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke.write]);
-
-  function formatExpiry(myDate: any) {
-    const date = new Date(parseInt(myDate) * 1000);
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
 
   function reset() {
     setOutgoingDelegations([]);
