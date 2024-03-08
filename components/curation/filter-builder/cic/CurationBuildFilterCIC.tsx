@@ -17,7 +17,7 @@ export default function CurationBuildFilterCIC({
     setFilters({
       ...filters,
       cic: {
-        ...filters.rep,
+        ...filters.cic,
         user: value,
       },
     });

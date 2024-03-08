@@ -27,3 +27,15 @@ export interface GeneralFilter {
   readonly cic: CICFilter;
   readonly level: LevelFilter;
 }
+
+export interface CurationFilterRequest {
+  readonly name: string;
+  readonly criteria: GeneralFilter;
+}
+
+export interface CurationFilterResponse extends CurationFilterRequest {
+  readonly id: string;
+  readonly created_at: string;
+  readonly created_by: string;
+  readonly visible: boolean;
+}

@@ -1,8 +1,29 @@
+import { CommonSelectItem } from "../utils/select/CommonSelect";
+import CommonTabs from "../utils/select/tabs/CommonTabs";
+import { CommunityCurationFiltersView } from "./CommunityCurationFilters";
+
 export default function CurationHeader({
+  view,
+  setView,
   setOpen,
 }: {
+  readonly view: CommunityCurationFiltersView;
+  readonly setView: (view: CommunityCurationFiltersView) => void;
   readonly setOpen: (open: boolean) => void;
 }) {
+  const items: CommonSelectItem<CommunityCurationFiltersView>[] = [
+    {
+      label: "Select",
+      value: CommunityCurationFiltersView.SELECT,
+      key: "select",
+    },
+    {
+      label: "Build",
+      value: CommunityCurationFiltersView.BUILD,
+      key: "build",
+    },
+  ];
+
   return (
     <div>
       <div className="tw-max-w-xl tw-flex tw-flex-col">
@@ -32,6 +53,12 @@ export default function CurationHeader({
           </svg>
         </button>
       </div>
+      <CommonTabs
+        items={items}
+        activeItem={view}
+        setSelected={setView}
+        filterLabel="Curation Statement"
+      />
     </div>
   );
 }

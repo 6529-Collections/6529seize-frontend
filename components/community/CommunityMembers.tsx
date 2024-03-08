@@ -7,15 +7,13 @@ import {
 } from "../../pages/community";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
-import { commonApiPost } from "../../services/api/common-api";
+import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { SortDirection } from "../../entities/ISort";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useDebounce } from "react-use";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-
-import FiltersButton from "../filters/FiltersButton";
 import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
 import {
   FilterDirection,
@@ -26,6 +24,8 @@ interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
   value: string | null;
 }
+
+// name2-4DzQH9ASvH3zVPBCA7Bdaz
 
 const SEARCH_PARAMS_FIELDS = {
   page: "page",
@@ -113,24 +113,8 @@ export default function CommunityMembers() {
     return defaultSortDirection;
   };
 
-  const [filters, setFilters] = useState<GeneralFilter>({
-    tdh: { min: null, max: null },
-    rep: {
-      min: null,
-      max: null,
-      direction: FilterDirection.RECEIVED,
-      user: null,
-      category: null,
-    },
-    cic: {
-      min: null,
-      max: null,
-      direction: FilterDirection.RECEIVED,
-      user: null,
-    },
-    level: { min: null, max: null },
-  });
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+
 
   const [debouncedParams, setDebouncedParams] =
     useState<CommunityMembersQuery>(params);
@@ -146,21 +130,20 @@ export default function CommunityMembers() {
       QueryKey.COMMUNITY_MEMBERS_TOP,
       {
         ...debouncedParams,
-        ...filters,
       },
     ],
     queryFn: async () =>
-      await commonApiPost<
-        GeneralFilter,
+      await commonApiFetch<
         Page<CommunityMemberOverview>,
         CommunityMembersQuery
       >({
         endpoint: `community-members/top`,
-        params: debouncedParams,
-        body: filters,
+        params: {
+          ...debouncedParams,
+          // curation_criteria_id: "name2-4DzQH9ASvH3zVPBCA7Bdaz",
+        },
       }),
     placeholderData: keepPreviousData,
-    enabled: !isFiltersOpen,
   });
 
   const updateFields = async (
@@ -220,12 +203,6 @@ export default function CommunityMembers() {
       <div className="tw-flex tw-items-center tw-justify-between">
         <h1 className="tw-block tw-float-none">Community</h1>
         <div className="tw-inline-flex tw-space-x-3 tw-items-center">
-          <FiltersButton
-            filters={filters}
-            onFilters={setFilters}
-            isOpen={isFiltersOpen}
-            setIsOpen={setIsFiltersOpen}
-          />
           <button
             type="button"
             className="tw-relative tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"

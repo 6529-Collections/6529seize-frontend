@@ -13,9 +13,10 @@ import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";
-import { FilterDirection, GeneralFilter } from "../filters/FilterBuilder";
+
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
+import { FilterDirection, GeneralFilter } from "../../helpers/filters/Filters.types";
 
 export interface ActivityLogParams {
   readonly page: number;
