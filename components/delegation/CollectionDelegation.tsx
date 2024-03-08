@@ -1007,6 +1007,53 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     );
   }
 
+  function printDelegationRowDetails(
+    label: string,
+    w: ContractWalletDelegation,
+    consolidationStatus: string | undefined,
+    pending: boolean,
+    isConsolidation: boolean
+  ) {
+    return (
+      <span className="d-flex flex-column gap-1">
+        <DelegationWallet address={w.wallet} />
+        <span className="d-flex align-items-center gap-3">
+          <span className="font-color-h">
+            {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
+          </span>
+          <span
+            className={
+              w.expiry === "expired"
+                ? styles.delegationExpiredLabel
+                : styles.delegationActiveLabel
+            }>
+            {w.expiry}
+          </span>
+          {isConsolidation && (
+            <span
+              className={
+                !pending
+                  ? styles.consolidationActiveLabel
+                  : styles.consolidationNotAcceptedLabel
+              }>
+              {consolidationStatus}
+              {pending && (
+                <Tippy
+                  content={`${label} consolidation missing`}
+                  placement={"top"}
+                  theme={"light"}>
+                  <FontAwesomeIcon
+                    className={styles.infoIcon}
+                    icon="info-circle"></FontAwesomeIcon>
+                </Tippy>
+              )}
+            </span>
+          )}
+        </span>
+      </span>
+    );
+  }
+
   function printOutgoingDelegationRow(
     index: number,
     delegations: number,
@@ -1061,42 +1108,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     }}
                   />
                 )}
-                <span className="d-flex flex-column gap-1">
-                  <DelegationWallet address={w.wallet} />
-                  <span className="d-flex align-items-center gap-3">
-                    <span className="font-color-h">
-                      {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
-                    </span>
-                    <span
-                      className={
-                        w.expiry === "expired"
-                          ? styles.delegationExpiredLabel
-                          : styles.delegationActiveLabel
-                      }>
-                      {w.expiry}
-                    </span>
-                    {isConsolidation && (
-                      <span
-                        className={
-                          !pending
-                            ? styles.consolidationActiveLabel
-                            : styles.consolidationNotAcceptedLabel
-                        }>
-                        {consolidationStatus}
-                        {pending && (
-                          <Tippy
-                            content={"Incoming consolidation missing"}
-                            placement={"top"}
-                            theme={"light"}>
-                            <FontAwesomeIcon
-                              className={styles.infoIcon}
-                              icon="info-circle"></FontAwesomeIcon>
-                          </Tippy>
-                        )}
-                      </span>
-                    )}
-                  </span>
-                </span>
+                {printDelegationRowDetails(
+                  "Incoming",
+                  w,
+                  consolidationStatus,
+                  pending,
+                  isConsolidation
+                )}
               </span>
               <span className="d-flex align-items-center gap-2">
                 <Tippy content={"Edit"} placement={"top"} theme={"light"}>
@@ -1316,42 +1334,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               ) : (
                 <></>
               )}
-              <span className="d-flex flex-column gap-1">
-                <DelegationWallet address={w.wallet} />
-                <span className="d-flex align-items-center gap-3">
-                  <span className="font-color-h">
-                    {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
-                  </span>
-                  <span
-                    className={
-                      w.expiry === "expired"
-                        ? styles.delegationExpiredLabel
-                        : styles.delegationActiveLabel
-                    }>
-                    {w.expiry}
-                  </span>
-                  {isConsolidation && (
-                    <span
-                      className={
-                        !pending
-                          ? styles.consolidationActiveLabel
-                          : styles.consolidationNotAcceptedLabel
-                      }>
-                      {consolidationStatus}
-                      {pending && (
-                        <Tippy
-                          content={"Outgoing consolidation missing"}
-                          placement={"top"}
-                          theme={"light"}>
-                          <FontAwesomeIcon
-                            className={styles.infoIcon}
-                            icon="info-circle"></FontAwesomeIcon>
-                        </Tippy>
-                      )}
-                    </span>
-                  )}
-                </span>
-              </span>
+              {printDelegationRowDetails(
+                "Outgoing",
+                w,
+                consolidationStatus,
+                pending,
+                isConsolidation
+              )}
             </span>
           </div>
         </td>
