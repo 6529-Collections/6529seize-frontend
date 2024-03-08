@@ -286,7 +286,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           (w, index) => {
             activeConsolidations.push({
               wallet: w.wallet,
-              status: data[index]
+              status: data[index].result
                 ? "consolidation active"
                 : "consolidation incomplete",
             });
@@ -329,7 +329,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           (w, index) => {
             activeConsolidations.push({
               wallet: w.wallet,
-              status: data[index]
+              status: data[index].result
                 ? "consolidation active"
                 : "consolidation incomplete",
             });
