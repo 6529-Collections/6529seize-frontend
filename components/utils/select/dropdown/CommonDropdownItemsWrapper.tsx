@@ -1,9 +1,4 @@
-import {
-  ReactElement,
-  RefObject,
-  useEffect,
-  useState,
-} from "react";
+import { ReactElement, RefObject, useEffect, useState } from "react";
 import CommonDropdownItemsMobileWrapper from "./CommonDropdownItemsMobileWrapper";
 import { createBreakpoint } from "react-use";
 import CommonDropdownItemsDefaultWrapper from "./CommonDropdownItemsDefaultWrapper";
@@ -32,7 +27,7 @@ export default function CommonDropdownItemsWrapper({
   const breakpoint = useBreakpoint();
 
   const getIsMobile = () => breakpoint !== "LG";
-  const [isMobile, setIsMobile] = useState<boolean>(getIsMobile());
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMobile(getIsMobile());
