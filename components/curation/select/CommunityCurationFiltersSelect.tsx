@@ -38,5 +38,7 @@ export default function CommunityCurationFiltersSelect() {
     },
   });
 
-  return <div>{JSON.stringify(data)}</div>;
+  return (
+    <div className="tw-mt-8 tw-w-full tw-space-y-4">{JSON.stringify(data)}</div>
+  );
 }
