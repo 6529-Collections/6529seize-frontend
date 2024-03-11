@@ -1071,6 +1071,28 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     pending: boolean,
     isConsolidation: boolean
   ) {
+    function addToBulkRevocations(del: ContractDelegation) {
+      setBulkRevocations((bd) => [
+        ...bd,
+        {
+          use_case: del.useCase.use_case,
+          wallet: w.wallet,
+        },
+      ]);
+    }
+
+    function removeFromBulkRevocations(del: ContractDelegation) {
+      setBulkRevocations((bd) =>
+        bd.filter(
+          (x) =>
+            !(
+              x.use_case == del.useCase.use_case &&
+              areEqualAddresses(x.wallet, w.wallet)
+            )
+        )
+      );
+    }
+
     return (
       <tr key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
@@ -1095,23 +1117,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setBulkRevocations((bd) => [
-                          ...bd,
-                          {
-                            use_case: del.useCase.use_case,
-                            wallet: w.wallet,
-                          },
-                        ]);
+                        addToBulkRevocations(del);
                       } else {
-                        setBulkRevocations((bd) =>
-                          bd.filter(
-                            (x) =>
-                              !(
-                                x.use_case == del.useCase.use_case &&
-                                areEqualAddresses(x.wallet, w.wallet)
-                              )
-                          )
-                        );
+                        removeFromBulkRevocations(del);
                       }
                     }}
                   />
@@ -1156,7 +1164,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     onClick={() => {
                       const title = "Revoking Delegation";
                       let message = "Confirm in your wallet...";
-
                       if (chainsMatch()) {
                         setRevokeDelegationParams({
                           collection: areEqualAddresses(

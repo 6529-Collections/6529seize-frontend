@@ -16,6 +16,7 @@ import {
   DelegationCollection,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{
@@ -388,7 +389,7 @@ export function DelegationSubmitGroups(
           <Col sm={8}>
             <ul className="mb-0">
               {errors.map((e, index) => (
-                <li key={`new-delegation-error-${index}`}>{e}</li>
+                <li key={getRandomObjectId()}>{e}</li>
               ))}
               {props.gasError && <li>{props.gasError}</li>}
             </ul>
