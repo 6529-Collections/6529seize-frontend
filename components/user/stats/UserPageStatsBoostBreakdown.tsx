@@ -7,7 +7,7 @@ export default function UserPageStatsBoostBreakdown({
 }: {
   readonly tdh: UserPageStatsTDHType;
 }) {
-  if (!tdh?.boost_breakdown) {
+  if (!tdh?.boost_breakdown || !tdh.boost) {
     return <></>;
   }
 
