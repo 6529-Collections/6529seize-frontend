@@ -26,6 +26,7 @@ import {
   DelegationExpiryCalendar,
   DelegationTokenSelection,
   DelegationCloseButton,
+  DelegationAddressDisabledInput,
 } from "./delegation_shared";
 
 interface Props {
@@ -194,15 +195,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 } the delegation`}
               />
               <Col sm={9}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  value={
-                    props.ens
-                      ? `${props.ens} - ${props.address}`
-                      : `${props.address}`
-                  }
-                  disabled
+                <DelegationAddressDisabledInput
+                  address={props.address}
+                  ens={props.ens}
                 />
               </Col>
             </Form.Group>

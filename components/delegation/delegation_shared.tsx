@@ -117,6 +117,19 @@ export function DelegationFormLabel(
   );
 }
 
+export function DelegationAddressDisabledInput(
+  props: Readonly<{ address: string; ens: string | null | undefined }>
+) {
+  return (
+    <Form.Control
+      className={`${styles.formInput} ${styles.formInputDisabled}`}
+      type="text"
+      value={props.ens ? `${props.ens} - ${props.address}` : `${props.address}`}
+      disabled
+    />
+  );
+}
+
 export function DelegationButtons(
   props: Readonly<{
     showCancel: boolean;

@@ -1,6 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useContractWrite, useEnsName, usePrepareContractWrite } from "wagmi";
+import { useEnsName } from "wagmi";
 import { useState } from "react";
 
 import {
@@ -8,12 +8,11 @@ import {
   SUPPORTED_COLLECTIONS,
   ALL_USE_CASES,
 } from "../../pages/delegation/[...section]";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
 import {
+  DelegationAddressDisabledInput,
   DelegationAddressInput,
   DelegationCloseButton,
   DelegationFormLabel,
@@ -134,15 +133,9 @@ export default function RevokeDelegationWithSubComponent(
                 tooltip="Address executing the revocation"
               />
               <Col sm={9}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  value={
-                    props.ens
-                      ? `${props.ens} - ${props.address}`
-                      : `${props.address}`
-                  }
-                  disabled
+                <DelegationAddressDisabledInput
+                  address={props.address}
+                  ens={props.ens}
                 />
               </Col>
             </Form.Group>

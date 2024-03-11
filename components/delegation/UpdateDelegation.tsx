@@ -14,6 +14,7 @@ import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";
 import {
+  DelegationAddressDisabledInput,
   DelegationCloseButton,
   DelegationExpiryCalendar,
   DelegationFormLabel,
@@ -165,15 +166,9 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 span={4}
               />
               <Col sm={8}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  value={
-                    props.ens
-                      ? `${props.ens} - ${props.address}`
-                      : `${props.address}`
-                  }
-                  disabled
+                <DelegationAddressDisabledInput
+                  address={props.address}
+                  ens={props.ens}
                 />
               </Col>
             </Form.Group>
