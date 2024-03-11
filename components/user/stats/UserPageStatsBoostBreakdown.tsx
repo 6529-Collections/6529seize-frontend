@@ -11,17 +11,17 @@ export default function UserPageStatsBoostBreakdown({
     return <></>;
   }
 
-  function getMemeRow(name: string, breakdown: TDHBoostBreakdown) {
+  function getMemeRow(name: string, breakdown: TDHBoostBreakdown | undefined) {
     return (
       <tr key={getRandomObjectId()}>
         <td className="tw-px-8 sm:tw-px-10 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           {name}
         </td>
         <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-          {breakdown.available}
+          {breakdown?.available}
         </td>
         <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-          {breakdown.acquired || "-"}
+          {breakdown?.acquired ?? "-"}
         </td>
       </tr>
     );
@@ -37,17 +37,19 @@ export default function UserPageStatsBoostBreakdown({
       </tr>
     );
     if (tdh?.boost_breakdown) {
-      rows.push(getMemeRow("Card Sets", tdh.boost_breakdown.memes_card_sets));
-      if (tdh.boost_breakdown.memes_card_sets.acquired === 0) {
-        rows.push(getMemeRow("SZN1", tdh.boost_breakdown.memes_szn1));
-        if (!tdh.boost_breakdown.memes_szn1.acquired) {
-          rows.push(getMemeRow("Genesis", tdh.boost_breakdown.memes_genesis));
-          rows.push(getMemeRow("Nakamoto", tdh.boost_breakdown.memes_nakamoto));
+      rows.push(getMemeRow("Card Sets", tdh.boost_breakdown?.memes_card_sets));
+      if (tdh.boost_breakdown?.memes_card_sets?.acquired === 0) {
+        rows.push(getMemeRow("SZN1", tdh.boost_breakdown?.memes_szn1));
+        if (!tdh.boost_breakdown?.memes_szn1?.acquired) {
+          rows.push(getMemeRow("Genesis", tdh.boost_breakdown?.memes_genesis));
+          rows.push(
+            getMemeRow("Nakamoto", tdh.boost_breakdown?.memes_nakamoto)
+          );
         }
-        rows.push(getMemeRow("SZN2", tdh.boost_breakdown.memes_szn2));
-        rows.push(getMemeRow("SZN3", tdh.boost_breakdown.memes_szn3));
-        rows.push(getMemeRow("SZN4", tdh.boost_breakdown.memes_szn4));
-        rows.push(getMemeRow("SZN5", tdh.boost_breakdown.memes_szn5));
+        rows.push(getMemeRow("SZN2", tdh.boost_breakdown?.memes_szn2));
+        rows.push(getMemeRow("SZN3", tdh.boost_breakdown?.memes_szn3));
+        rows.push(getMemeRow("SZN4", tdh.boost_breakdown?.memes_szn4));
+        rows.push(getMemeRow("SZN5", tdh.boost_breakdown?.memes_szn5));
       }
     }
 
@@ -62,10 +64,10 @@ export default function UserPageStatsBoostBreakdown({
             {name}
           </td>
           <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-            {breakdown.available}
+            {breakdown?.available}
           </td>
           <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-            {breakdown.acquired || "-"}
+            {breakdown?.acquired ?? "-"}
           </td>
         </tr>
       );
