@@ -2,6 +2,8 @@ import CurationBuildFilter from "./filter-builder/CurationBuildFilter";
 import CurationHeader from "./CurationHeader";
 import CommunityCurationFiltersSelect from "./select/CommunityCurationFiltersSelect";
 import { useState } from "react";
+import { LocalStorageKey } from "../../helpers/Types";
+import { useLocalStorage } from "react-use";
 
 export enum CommunityCurationFiltersView {
   SELECT = "SELECT",
@@ -21,6 +23,9 @@ export default function CommunityCurationFilters({
   const [view, setView] = useState<CommunityCurationFiltersView>(
     CommunityCurationFiltersView.SELECT
   );
+
+  const [selectedFilter, setSelectedFilter, removeSelectedFilter] =
+    useLocalStorage(LocalStorageKey.ACTIVE_CURATION_FILTER, null);
 
   return (
     <div className="tw-px-2">

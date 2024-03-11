@@ -4,6 +4,8 @@ import { Mutable, NonNullableNotRequired, Page } from "../../../helpers/Types";
 import { useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
+import CurationBuildFiltersUserSearch from "../filter-builder/common/user-search/CurationBuildFiltersUserSearch";
+import CommunityCurationFiltersSearchFilter from "./CommunityCurationFiltersSearchFilter";
 
 interface CurationFilterRequestParams {
   readonly curation_criteria_name: string | null;
@@ -16,7 +18,7 @@ export default function CommunityCurationFiltersSelect() {
     curation_criteria_user: null,
   });
 
-  const { data } = useQuery<Page<CurationFilterResponse>>({
+  const { data } = useQuery<CurationFilterResponse[]>({
     queryKey: [QueryKey.CURATION_FILTERS, filters],
     queryFn: async () => {
       const params: Mutable<
@@ -28,8 +30,9 @@ export default function CommunityCurationFiltersSelect() {
       if (filters.curation_criteria_user) {
         params.curation_criteria_user = filters.curation_criteria_user;
       }
+      console.log(params);
       return await commonApiFetch<
-        Page<CurationFilterResponse>,
+        CurationFilterResponse[],
         NonNullableNotRequired<CurationFilterRequestParams>
       >({
         endpoint: "community-members-curation",
@@ -38,7 +41,32 @@ export default function CommunityCurationFiltersSelect() {
     },
   });
 
+  const onUserSearch = (value: string | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      curation_criteria_user: value,
+    }));
+  };
+
+  const onFilterNameSearch = (value: string | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      curation_criteria_name: value,
+    }));
+  };
+
   return (
-    <div className="tw-mt-8 tw-w-full tw-space-y-4">{JSON.stringify(data)}</div>
+    <div className="tw-mt-8 tw-w-full tw-space-y-4">
+      <CurationBuildFiltersUserSearch
+        value={filters.curation_criteria_user}
+        setValue={onUserSearch}
+        placeholder="Search user"
+      />
+      <CommunityCurationFiltersSearchFilter
+        filterName={filters.curation_criteria_name}
+        setFilterName={onFilterNameSearch}
+        filters={data ?? []}
+      />
+    </div>
   );
 }
