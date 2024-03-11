@@ -16,7 +16,7 @@ import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
 import {
   DelegationAddressInput,
   DelegationFormLabel,
-  DelegationWaitContractWrite,
+  DelegationSubmitGroups,
   getGasError,
 } from "./delegation_shared";
 
@@ -46,10 +46,7 @@ export default function RevokeDelegationWithSubComponent(
     chainId: 1,
   });
 
-  const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
-
-  const [isWaitLoading, setIsWaitLoading] = useState(false);
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
@@ -80,7 +77,6 @@ export default function RevokeDelegationWithSubComponent(
 
   function clearErrors() {
     setGasError(undefined);
-    setErrors([]);
   }
 
   function validate() {
@@ -99,20 +95,6 @@ export default function RevokeDelegationWithSubComponent(
     }
 
     return newErrors;
-  }
-
-  function submitDelegation() {
-    const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
-      window.scrollBy(0, 100);
-    } else {
-      contractWriteDelegation.write?.();
-      props.onSetToast({
-        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
-        message: "Confirm in your wallet...",
-      });
-    }
   }
 
   return (
@@ -258,69 +240,19 @@ export default function RevokeDelegationWithSubComponent(
                 </Form.Select>
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pt-2 pb-4">
-              <Form.Label
-                column
-                sm={3}
-                className="d-flex align-items-center"></Form.Label>
-              <Col
-                sm={9}
-                className="d-flex align-items-center justify-content-center">
-                <span
-                  className={styles.newDelegationCancelBtn}
-                  onClick={() => props.onHide()}>
-                  Cancel
-                </span>
-                <span
-                  className={`${styles.revokeDelegationBtn} ${
-                    contractWriteDelegation.isLoading || isWaitLoading
-                      ? `${styles.revokeDelegationBtnDisabled}`
-                      : ``
-                  }`}
-                  onClick={() => {
-                    setErrors([]);
-                    submitDelegation();
-                  }}>
-                  Revoke{" "}
-                  {(contractWriteDelegation.isLoading || isWaitLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
-                </span>
-              </Col>
-            </Form.Group>
-            {(errors.length > 0 || gasError) && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Errors
-                </Form.Label>
-                <Col sm={9}>
-                  <ul className="mb-0">
-                    {errors.map((e, index) => (
-                      <li key={`new-delegation-error-${index}`}>{e}</li>
-                    ))}
-                    {gasError && <li>{gasError}</li>}
-                  </ul>
-                </Col>
-              </Form.Group>
-            )}
+            <DelegationSubmitGroups
+              title={`Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`}
+              config={contractWriteDelegationConfig.config}
+              showCancel={true}
+              gasError={gasError}
+              validate={validate}
+              onHide={props.onHide}
+              onSetToast={props.onSetToast}
+              submitBtnLabel={"Revoke"}
+            />
           </Form>
         </Col>
       </Row>
-      <DelegationWaitContractWrite
-        title={`Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`}
-        data={contractWriteDelegation.data}
-        error={contractWriteDelegation.error}
-        onSetToast={props.onSetToast}
-        setIsWaitLoading={setIsWaitLoading}
-      />
     </Container>
   );
 }

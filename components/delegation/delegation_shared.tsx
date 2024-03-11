@@ -162,6 +162,7 @@ export function DelegationSubmitGroups(
     validate: () => string[];
     onHide: () => void;
     onSetToast: (toast: { title: string; message: string }) => void;
+    submitBtnLabel?: string;
   }>
 ) {
   const writeDelegation = useContractWrite(props.config);
@@ -252,7 +253,7 @@ export function DelegationSubmitGroups(
               e.preventDefault();
               submitDelegation();
             }}>
-            Submit{" "}
+            {props.submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <div className="d-inline">
                 <div
