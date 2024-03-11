@@ -19,7 +19,7 @@ import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
-import { getGasError } from "./html/delegation_shared";
+import { DelegationWaitContractWrite, getGasError } from "./delegation_shared";
 
 interface Props {
   address: string;
@@ -51,8 +51,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
 
   const [delegationToInput, setDelegationToInput] = useState("");
   const [delegationToAddress, setDelegationToAddress] = useState("");
+
   const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
+
+  const [isWaitLoading, setIsWaitLoading] = useState(false);
 
   const previousDelegationEns = useEnsName({
     address: props.delegation.wallet as `0x${string}`,
@@ -123,11 +126,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     contractWriteDelegationConfig.config
   );
 
-  const waitContractWriteDelegation = useWaitForTransaction({
-    confirmations: 1,
-    hash: contractWriteDelegation.data?.hash,
-  });
-
   function validate() {
     const newErrors: string[] = [];
     if (!delegationToAddress || !isValidEthAddress(delegationToAddress)) {
@@ -164,55 +162,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
       });
     }
   }
-
-  useEffect(() => {
-    if (contractWriteDelegation.error) {
-      props.onSetToast({
-        title: `Updating Delegation`,
-        message:
-          contractWriteDelegation.error.message.split("Request Arguments")[0],
-      });
-    }
-    if (contractWriteDelegation.data) {
-      if (contractWriteDelegation.data?.hash) {
-        if (waitContractWriteDelegation.isLoading) {
-          props.onSetToast({
-            title: "Updating Delegation",
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          props.onSetToast({
-            title: "Updating Delegation",
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-          });
-        }
-      }
-    }
-  }, [
-    contractWriteDelegation.error,
-    contractWriteDelegation.data,
-    waitContractWriteDelegation.isLoading,
-  ]);
 
   return (
     <Container className="no-padding">
@@ -503,8 +452,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 )}
                 <span
                   className={`${styles.newDelegationSubmitBtn} ${
-                    contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading
+                    contractWriteDelegation.isLoading || isWaitLoading
                       ? `${styles.newDelegationSubmitBtnDisabled}`
                       : ``
                   }`}
@@ -513,8 +461,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     submitDelegation();
                   }}>
                   Submit{" "}
-                  {(contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading) && (
+                  {(contractWriteDelegation.isLoading || isWaitLoading) && (
                     <div className="d-inline">
                       <div
                         className={`spinner-border ${styles.loader}`}
@@ -546,6 +493,13 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
           </Form>
         </Col>
       </Row>
+      <DelegationWaitContractWrite
+        title={"Updaing Delegation"}
+        data={contractWriteDelegation.data}
+        error={contractWriteDelegation.error}
+        onSetToast={props.onSetToast}
+        setIsWaitLoading={setIsWaitLoading}
+      />
     </Container>
   );
 }

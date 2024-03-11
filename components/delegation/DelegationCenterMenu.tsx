@@ -468,7 +468,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             ref={toastRef}>
             <Toast onClose={() => setShowToast(false)} show={showToast}>
               <Toast.Header>
-                <strong className="me-auto">{toast.title}</strong>
+                <span className="me-auto">{toast.title}</span>
               </Toast.Header>
               {toast.message && (
                 <Toast.Body

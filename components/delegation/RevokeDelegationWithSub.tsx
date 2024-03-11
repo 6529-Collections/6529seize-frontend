@@ -1,12 +1,7 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import {
-  useContractWrite,
-  useEnsName,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
-import { useEffect, useState } from "react";
+import { useContractWrite, useEnsName, usePrepareContractWrite } from "wagmi";
+import { useState } from "react";
 
 import {
   DelegationCollection,
@@ -17,12 +12,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
+import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
 import {
-  areEqualAddresses,
-  getTransactionLink,
-  isValidEthAddress,
-} from "../../helpers/Helpers";
-import { DelegationAddressInput, getGasError } from "./html/delegation_shared";
+  DelegationAddressInput,
+  DelegationWaitContractWrite,
+  getGasError,
+} from "./delegation_shared";
 
 interface Props {
   address: string;
@@ -53,6 +48,8 @@ export default function RevokeDelegationWithSubComponent(
   const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
 
+  const [isWaitLoading, setIsWaitLoading] = useState(false);
+
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
@@ -79,11 +76,6 @@ export default function RevokeDelegationWithSubComponent(
   const contractWriteDelegation = useContractWrite(
     contractWriteDelegationConfig.config
   );
-
-  const waitContractWriteDelegation = useWaitForTransaction({
-    confirmations: 1,
-    hash: contractWriteDelegation.data?.hash,
-  });
 
   function clearErrors() {
     setGasError(undefined);
@@ -121,55 +113,6 @@ export default function RevokeDelegationWithSubComponent(
       });
     }
   }
-
-  useEffect(() => {
-    if (contractWriteDelegation.error) {
-      props.onSetToast({
-        title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
-        message:
-          contractWriteDelegation.error.message.split("Request Arguments")[0],
-      });
-    }
-    if (contractWriteDelegation.data) {
-      if (contractWriteDelegation.data?.hash) {
-        if (waitContractWriteDelegation.isLoading) {
-          props.onSetToast({
-            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          props.onSetToast({
-            title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-          });
-        }
-      }
-    }
-  }, [
-    contractWriteDelegation.error,
-    contractWriteDelegation.data,
-    waitContractWriteDelegation.isLoading,
-  ]);
 
   return (
     <Container className="no-padding">
@@ -366,8 +309,7 @@ export default function RevokeDelegationWithSubComponent(
                 </span>
                 <span
                   className={`${styles.revokeDelegationBtn} ${
-                    contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading
+                    contractWriteDelegation.isLoading || isWaitLoading
                       ? `${styles.revokeDelegationBtnDisabled}`
                       : ``
                   }`}
@@ -376,8 +318,7 @@ export default function RevokeDelegationWithSubComponent(
                     submitDelegation();
                   }}>
                   Revoke{" "}
-                  {(contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading) && (
+                  {(contractWriteDelegation.isLoading || isWaitLoading) && (
                     <div className="d-inline">
                       <div
                         className={`spinner-border ${styles.loader}`}
@@ -409,6 +350,13 @@ export default function RevokeDelegationWithSubComponent(
           </Form>
         </Col>
       </Row>
+      <DelegationWaitContractWrite
+        title={`Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`}
+        data={contractWriteDelegation.data}
+        error={contractWriteDelegation.error}
+        onSetToast={props.onSetToast}
+        setIsWaitLoading={setIsWaitLoading}
+      />
     </Container>
   );
 }

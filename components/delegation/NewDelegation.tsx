@@ -1,11 +1,7 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import {
-  useContractWrite,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
-import { useEffect, useState } from "react";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useState } from "react";
 
 import {
   DELEGATION_USE_CASES,
@@ -20,16 +16,13 @@ import {
   NEVER_DATE,
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import {
-  areEqualAddresses,
-  getTransactionLink,
-  isValidEthAddress,
-} from "../../helpers/Helpers";
+import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
 import {
   DelegationAddressInput,
   useOrignalDelegatorEnsResolution,
   getGasError,
-} from "./html/delegation_shared";
+  DelegationWaitContractWrite,
+} from "./delegation_shared";
 
 interface Props {
   address: string;
@@ -64,6 +57,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
 
   const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
+
+  const [isWaitLoading, setIsWaitLoading] = useState(false);
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -128,11 +123,6 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     contractWriteDelegationConfig.config
   );
 
-  const waitContractWriteDelegation = useWaitForTransaction({
-    confirmations: 1,
-    hash: contractWriteDelegation.data?.hash,
-  });
-
   function clearErrors() {
     setGasError(undefined);
     setErrors([]);
@@ -191,55 +181,6 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
       });
     }
   }
-
-  useEffect(() => {
-    if (contractWriteDelegation.error) {
-      props.onSetToast({
-        title: `Registering Delegation`,
-        message:
-          contractWriteDelegation.error.message.split("Request Arguments")[0],
-      });
-    }
-    if (contractWriteDelegation.data) {
-      if (contractWriteDelegation.data?.hash) {
-        if (waitContractWriteDelegation.isLoading) {
-          props.onSetToast({
-            title: `Registering Delegation`,
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          props.onSetToast({
-            title: `Registering Delegation`,
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-          });
-        }
-      }
-    }
-  }, [
-    contractWriteDelegation.error,
-    contractWriteDelegation.data,
-    waitContractWriteDelegation.isLoading,
-  ]);
 
   return (
     <Container>
@@ -385,7 +326,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 <DelegationAddressInput
                   setAddress={(address: string) => {
                     setNewDelegationToAddress(address);
-                    clearForm();
+                    clearErrors();
                   }}
                 />
               </Col>
@@ -564,8 +505,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 </span>
                 <span
                   className={`${styles.newDelegationSubmitBtn} ${
-                    contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading
+                    contractWriteDelegation.isLoading || isWaitLoading
                       ? `${styles.newDelegationSubmitBtnDisabled}`
                       : ``
                   }`}
@@ -574,8 +514,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                     submitDelegation();
                   }}>
                   Submit{" "}
-                  {(contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading) && (
+                  {(contractWriteDelegation.isLoading || isWaitLoading) && (
                     <div className="d-inline">
                       <div
                         className={`spinner-border ${styles.loader}`}
@@ -607,6 +546,13 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
           </Form>
         </Col>
       </Row>
+      <DelegationWaitContractWrite
+        title={"Registering Delegation"}
+        data={contractWriteDelegation.data}
+        error={contractWriteDelegation.error}
+        onSetToast={props.onSetToast}
+        setIsWaitLoading={setIsWaitLoading}
+      />
     </Container>
   );
 }

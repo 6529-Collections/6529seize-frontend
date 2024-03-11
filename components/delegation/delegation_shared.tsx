@@ -1,8 +1,15 @@
 import styles from "./Delegation.module.scss";
 import { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
-import { useEnsAddress, useEnsName } from "wagmi";
-import { DELEGATION_CONTRACT } from "../../../constants";
+import {
+  useContractWrite,
+  useEnsAddress,
+  useEnsName,
+  useWaitForTransaction,
+} from "wagmi";
+import { DELEGATION_CONTRACT } from "../../constants";
+import { Hash } from "viem";
+import { getTransactionLink } from "../../helpers/Helpers";
 
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{
@@ -88,4 +95,67 @@ export function DelegationAddressInput(
       }}
     />
   );
+}
+
+export function DelegationWaitContractWrite(
+  props: Readonly<{
+    title: string;
+    data: any;
+    error: any;
+    onSetToast: (toast: { title: string; message: string }) => void;
+    setIsWaitLoading: (isLoading: boolean) => void;
+  }>
+) {
+  const waitContractWriteDelegation = useWaitForTransaction({
+    confirmations: 1,
+    hash: props.data?.hash,
+  });
+
+  useEffect(() => {
+    props.setIsWaitLoading(waitContractWriteDelegation.isLoading);
+  }, [waitContractWriteDelegation.isLoading]);
+
+  useEffect(() => {
+    if (props.error) {
+      props.onSetToast({
+        title: props.title,
+        message: props.error.message.split("Request Arguments")[0],
+      });
+    }
+    if (props.data) {
+      if (waitContractWriteDelegation.isLoading) {
+        props.onSetToast({
+          title: props.title,
+          message: `Transaction submitted...
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      props.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a><br />Waiting for confirmation...`,
+        });
+      } else {
+        props.onSetToast({
+          title: props.title,
+          message: `Transaction Successful!
+                    <a
+                    href=${getTransactionLink(
+                      DELEGATION_CONTRACT.chain_id,
+                      props.data.hash
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className=${styles.etherscanLink}>
+                    view
+                  </a>`,
+        });
+      }
+    }
+  }, [props.error, props.data, waitContractWriteDelegation.isLoading]);
+
+  return <></>;
 }
