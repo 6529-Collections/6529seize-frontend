@@ -1,6 +1,5 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useState } from "react";
 
 import {
@@ -8,8 +7,6 @@ import {
   SUB_DELEGATION_USE_CASE,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
@@ -25,6 +22,9 @@ import {
   DelegationSubmitGroups,
   DelegationCloseButton,
   DelegationAddressDisabledInput,
+  DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormCollectionFormGroup,
+  DelegationFormDelegateAddressFormGroup,
 } from "./delegation_shared";
 
 interface Props {
@@ -39,10 +39,6 @@ interface Props {
 }
 
 export default function NewSubDelegationComponent(props: Readonly<Props>) {
-  const orignalDelegatorEnsResolution = useOrignalDelegatorEnsResolution({
-    subdelegation: props.subdelegation,
-  });
-
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
 
@@ -144,24 +140,9 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         <Col>
           <Form>
             {props.subdelegation && (
-              <Form.Group as={Row} className="pb-4">
-                <DelegationFormLabel
-                  title="Original Delegator"
-                  tooltip="Original Delegator of Sub Delegation - The address the delegation will be registed for"
-                />
-                <Col sm={9}>
-                  <Form.Control
-                    className={`${styles.formInput} ${styles.formInputDisabled}`}
-                    type="text"
-                    value={
-                      orignalDelegatorEnsResolution.data
-                        ? `${orignalDelegatorEnsResolution.data} - ${props.subdelegation.originalDelegator}`
-                        : `${props.subdelegation.originalDelegator}`
-                    }
-                    disabled
-                  />
-                </Col>
-              </Form.Group>
+              <DelegationFormOriginalDelegatorFormGroup
+                subdelegation={props.subdelegation}
+              />
             )}
             <Form.Group as={Row} className="pb-4">
               <DelegationFormLabel
@@ -177,58 +158,16 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <DelegationFormLabel
-                title="Collection"
-                tooltip="Collection address for delegation"
-              />
-              <Col sm={9}>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={newDelegationCollection}
-                  onChange={(e) => {
-                    setNewDelegationCollection(e.target.value);
-                    clearErrors();
-                  }}>
-                  <option value="0" disabled>
-                    Select Collection
-                  </option>
-                  {!props.subdelegation ||
-                  areEqualAddresses(
-                    props.subdelegation.collection.contract,
-                    DELEGATION_ALL_ADDRESS
-                  ) ? (
-                    SUPPORTED_COLLECTIONS.map((sc) => (
-                      <option
-                        key={`add-delegation-select-collection-${sc.contract}`}
-                        value={sc.contract}>
-                        {`${sc.display}`}
-                      </option>
-                    ))
-                  ) : (
-                    <option
-                      key={`add-delegation-select-collection`}
-                      value={props.subdelegation.collection.contract}>
-                      {`${props.subdelegation.collection.display}`}
-                    </option>
-                  )}
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <DelegationFormLabel
-                title="Delegate Address"
-                tooltip="Delegate to Address e.g. your hot wallet"
-              />
-              <Col sm={9}>
-                <DelegationAddressInput
-                  setAddress={(address: string) => {
-                    setNewDelegationToAddress(address);
-                    clearErrors();
-                  }}
-                />
-              </Col>
-            </Form.Group>
+            <DelegationFormCollectionFormGroup
+              collection={newDelegationCollection}
+              setCollection={setNewDelegationCollection}
+              subdelegation={props.subdelegation}
+            />
+            <DelegationFormDelegateAddressFormGroup
+              setAddress={setNewDelegationToAddress}
+              title="Delegate Address"
+              tooltip="Delegate to Address e.g. your hot wallet"
+            />
             <DelegationSubmitGroups
               title={"Registering Delegation Manager"}
               writeParams={contractWriteDelegationConfigParams}

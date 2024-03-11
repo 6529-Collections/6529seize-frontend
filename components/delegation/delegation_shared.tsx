@@ -8,10 +8,14 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-import { DELEGATION_CONTRACT } from "../../constants";
-import { getTransactionLink } from "../../helpers/Helpers";
+import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  DelegationCollection,
+  SUPPORTED_COLLECTIONS,
+} from "../../pages/delegation/[...section]";
 
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{
@@ -117,6 +121,37 @@ export function DelegationFormLabel(
   );
 }
 
+export function DelegationFormOriginalDelegatorFormGroup(
+  props: Readonly<{
+    subdelegation: { originalDelegator: string };
+  }>
+) {
+  const orignalDelegatorEnsResolution = useOrignalDelegatorEnsResolution({
+    subdelegation: props.subdelegation,
+  });
+
+  return (
+    <Form.Group as={Row} className="pb-4">
+      <DelegationFormLabel
+        title="Original Delegator"
+        tooltip="Original Delegator of Sub Delegation - The address the delegation will be registed for"
+      />
+      <Col sm={9}>
+        <Form.Control
+          className={`${styles.formInput} ${styles.formInputDisabled}`}
+          type="text"
+          value={
+            orignalDelegatorEnsResolution.data
+              ? `${orignalDelegatorEnsResolution.data} - ${props.subdelegation.originalDelegator}`
+              : `${props.subdelegation.originalDelegator}`
+          }
+          disabled
+        />
+      </Col>
+    </Form.Group>
+  );
+}
+
 export function DelegationAddressDisabledInput(
   props: Readonly<{ address: string; ens: string | null | undefined }>
 ) {
@@ -127,6 +162,74 @@ export function DelegationAddressDisabledInput(
       value={props.ens ? `${props.ens} - ${props.address}` : `${props.address}`}
       disabled
     />
+  );
+}
+
+export function DelegationFormCollectionFormGroup(
+  props: Readonly<{
+    collection: string;
+    setCollection: (collection: string) => void;
+    subdelegation?: {
+      originalDelegator: string;
+      collection: DelegationCollection;
+    };
+  }>
+) {
+  return (
+    <Form.Group as={Row} className="pb-4">
+      <DelegationFormLabel
+        title="Collection"
+        tooltip="Collection address for delegation"
+      />
+      <Col sm={9}>
+        <Form.Select
+          className={`${styles.formInput}`}
+          value={props.collection}
+          onChange={(e) => props.setCollection(e.target.value)}>
+          <option value="0" disabled>
+            Select Collection
+          </option>
+          {!props.subdelegation ||
+          areEqualAddresses(
+            props.subdelegation.collection.contract,
+            DELEGATION_ALL_ADDRESS
+          ) ? (
+            SUPPORTED_COLLECTIONS.map((sc) => (
+              <option
+                key={`add-delegation-select-collection-${sc.contract}`}
+                value={sc.contract}>
+                {`${sc.display}`}
+              </option>
+            ))
+          ) : (
+            <option
+              key={`add-delegation-select-collection`}
+              value={props.subdelegation.collection.contract}>
+              {`${props.subdelegation.collection.display}`}
+            </option>
+          )}
+        </Form.Select>
+      </Col>
+    </Form.Group>
+  );
+}
+
+export function DelegationFormDelegateAddressFormGroup(
+  props: Readonly<{
+    setAddress: (address: string) => void;
+    title: string;
+    tooltip: string;
+  }>
+) {
+  return (
+    <Form.Group as={Row} className="pb-4">
+      <DelegationFormLabel title={props.title} tooltip={props.tooltip} />
+      <Col sm={9}>
+        <DelegationAddressInput
+          setAddress={(address: string) => props.setAddress(address)}
+        />
+      </Col>
+    </Form.Group>
   );
 }
 

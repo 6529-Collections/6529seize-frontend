@@ -15,6 +15,8 @@ import {
   DelegationAddressDisabledInput,
   DelegationAddressInput,
   DelegationCloseButton,
+  DelegationFormCollectionFormGroup,
+  DelegationFormDelegateAddressFormGroup,
   DelegationFormLabel,
   DelegationSubmitGroups,
   getGasError,
@@ -139,58 +141,19 @@ export default function RevokeDelegationWithSubComponent(
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <DelegationFormLabel
-                title="Collection"
-                tooltip="Collection address for delegation"
-              />
-              <Col sm={9}>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={newDelegationCollection}
-                  onChange={(e) => {
-                    setNewDelegationCollection(e.target.value);
-                    clearErrors();
-                  }}>
-                  <option value="0" disabled>
-                    Select Collection
-                  </option>
-                  {!props ||
-                  areEqualAddresses(
-                    props.collection.contract,
-                    DELEGATION_ALL_ADDRESS
-                  ) ? (
-                    SUPPORTED_COLLECTIONS.map((sc) => (
-                      <option
-                        key={`add-delegation-select-collection-${sc.contract}`}
-                        value={sc.contract}>
-                        {`${sc.display}`}
-                      </option>
-                    ))
-                  ) : (
-                    <option
-                      key={`add-delegation-select-collection`}
-                      value={props.collection.contract}>
-                      {`${props.collection.display}`}
-                    </option>
-                  )}
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <DelegationFormLabel
-                title="Revoke Address"
-                tooltip="Revoke wallet Address"
-              />
-              <Col sm={9}>
-                <DelegationAddressInput
-                  setAddress={(address: string) => {
-                    setNewDelegationToAddress(address);
-                    clearErrors();
-                  }}
-                />
-              </Col>
-            </Form.Group>
+            <DelegationFormCollectionFormGroup
+              collection={newDelegationCollection}
+              setCollection={setNewDelegationCollection}
+              subdelegation={{
+                originalDelegator: props.originalDelegator,
+                collection: props.collection,
+              }}
+            />
+            <DelegationFormDelegateAddressFormGroup
+              setAddress={setNewDelegationToAddress}
+              title="Revoke Address"
+              tooltip="Revoke wallet Address"
+            />
             <Form.Group as={Row} className="pb-4">
               <DelegationFormLabel
                 title="Use Case"

@@ -33,7 +33,7 @@ interface Props {
 }
 
 export default function UpdateDelegationComponent(props: Readonly<Props>) {
-  const [isDelegation, setIsDelegation] = useState(
+  const isDelegation = useState(
     ![
       CONSOLIDATION_USE_CASE.use_case,
       SUB_DELEGATION_USE_CASE.use_case,
