@@ -19,7 +19,11 @@ import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
-import { DelegationWaitContractWrite, getGasError } from "./delegation_shared";
+import {
+  DelegationFormLabel,
+  DelegationWaitContractWrite,
+  getGasError,
+} from "./delegation_shared";
 
 interface Props {
   address: string;
@@ -195,17 +199,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         <Col>
           <Form>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={4} className="d-flex align-items-center">
-                Delegator
-                <Tippy
-                  content={"Address registering the delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Delegator"
+                tooltip="Original Delegator"
+                span={4}
+              />
               <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -220,17 +218,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={4} className="d-flex align-items-center">
-                Collection
-                <Tippy
-                  content={"Collection address for delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Collection"
+                tooltip="Collection address for delegation"
+                span={4}
+              />
               <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -242,17 +234,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={4} className="d-flex align-items-center">
-                  Use Case
-                  <Tippy
-                    content={"Delegation Use Case"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
+                <DelegationFormLabel
+                  title="Use Case"
+                  tooltip="Delegation Use Case"
+                  span={4}
+                />
                 <Col sm={8}>
                   <Form.Control
                     className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -264,17 +250,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={4} className="d-flex align-items-center">
-                Current Delegate Address
-                <Tippy
-                  content={"Current Delegate to Address"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Current Delegate Address"
+                tooltip="Current Delegate to Address"
+                span={4}
+              />
               <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -289,17 +269,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={4} className="d-flex align-items-center">
-                New Delegate Address
-                <Tippy
-                  content={"New Delegate to Address"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="New Delegate Address"
+                tooltip="New Delegate to Address"
+                span={4}
+              />
               <Col sm={8}>
                 <Form.Control
                   placeholder="Delegate to - 0x... or ENS"
@@ -316,17 +290,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={4} className="d-flex align-items-center">
-                  Expiry Date
-                  <Tippy
-                    content={"Expiry date for delegation (optional)"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
+                <DelegationFormLabel
+                  title="Expiry Date"
+                  tooltip="Expiry date for delegation (optional)"
+                  span={4}
+                />
                 <Col sm={8}>
                   <Form.Check
                     checked={!showExpiryCalendar}
@@ -376,17 +344,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             )}
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={4} className="d-flex align-items-center">
-                  Tokens
-                  <Tippy
-                    content={"Tokens involved in the delegation (optional)"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
+                <DelegationFormLabel
+                  title="Tokens"
+                  tooltip="Tokens involved in the delegation (optional)"
+                  span={4}
+                />
                 <Col sm={8}>
                   <Form.Check
                     checked={!showTokensInput}

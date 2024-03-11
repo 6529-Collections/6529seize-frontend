@@ -22,6 +22,7 @@ import {
   useOrignalDelegatorEnsResolution,
   getGasError,
   DelegationWaitContractWrite,
+  DelegationFormLabel,
 } from "./delegation_shared";
 
 interface Props {
@@ -183,19 +184,10 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
           <Form>
             {props.subdelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Original Delegator
-                  <Tippy
-                    content={
-                      "Original Delegator of Sub Delegation - The address the delegation will be registed for"
-                    }
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
+                <DelegationFormLabel
+                  title="Original Delegator"
+                  tooltip="Original Delegator of Sub Delegation - The address the delegation will be registed for"
+                />
                 <Col sm={9}>
                   <Form.Control
                     className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -211,19 +203,12 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                {props.subdelegation ? `Delegation Manager` : `Delegator`}
-                <Tippy
-                  content={`Address ${
-                    props.subdelegation ? `executing` : `registering`
-                  } the sub-consolidation`}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title={props.subdelegation ? `Delegation Manager` : `Delegator`}
+                tooltip={`Address ${
+                  props.subdelegation ? `executing` : `registering`
+                } the sub-consolidation`}
+              />
               <Col sm={9}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -238,17 +223,10 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Collection{" "}
-                <Tippy
-                  content={"Collection address for delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Collection"
+                tooltip="Collection address for delegation"
+              />
               <Col sm={9}>
                 <Form.Select
                   className={`${styles.formInput}`}
@@ -283,17 +261,10 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegate Address
-                <Tippy
-                  content={"Consolidate with Address e.g. your hot wallet"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Delegate Address"
+                tooltip="Consolidate with Address e.g. your hot wallet"
+              />
               <Col sm={9}>
                 <DelegationAddressInput
                   setAddress={(address: string) => {

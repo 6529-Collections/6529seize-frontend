@@ -1,15 +1,11 @@
 import styles from "./Delegation.module.scss";
 import { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
-import {
-  useContractWrite,
-  useEnsAddress,
-  useEnsName,
-  useWaitForTransaction,
-} from "wagmi";
+import { useEnsAddress, useEnsName, useWaitForTransaction } from "wagmi";
 import { DELEGATION_CONTRACT } from "../../constants";
-import { Hash } from "viem";
 import { getTransactionLink } from "../../helpers/Helpers";
+import Tippy from "@tippyjs/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{
@@ -158,4 +154,22 @@ export function DelegationWaitContractWrite(
   }, [props.error, props.data, waitContractWriteDelegation.isLoading]);
 
   return <></>;
+}
+
+export function DelegationFormLabel(
+  props: Readonly<{ title: string; tooltip: string; span?: number }>
+) {
+  return (
+    <Form.Label
+      column
+      sm={props.span ?? 3}
+      className="d-flex align-items-center">
+      {props.title}
+      <Tippy content={props.tooltip} placement={"top"} theme={"light"}>
+        <FontAwesomeIcon
+          className={styles.infoIcon}
+          icon="info-circle"></FontAwesomeIcon>
+      </Tippy>
+    </Form.Label>
+  );
 }

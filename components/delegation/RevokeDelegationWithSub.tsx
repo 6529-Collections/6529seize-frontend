@@ -15,6 +15,7 @@ import { DELEGATION_ABI } from "../../abis";
 import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
 import {
   DelegationAddressInput,
+  DelegationFormLabel,
   DelegationWaitContractWrite,
   getGasError,
 } from "./delegation_shared";
@@ -139,19 +140,10 @@ export default function RevokeDelegationWithSubComponent(
         <Col>
           <Form>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Original Delegator
-                <Tippy
-                  content={
-                    "Original Delegator of Sub Delegation - The address the delegation will be revoked for"
-                  }
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Original Delegator"
+                tooltip="Original Delegator of Sub Delegation - The address the delegation will be revoked for"
+              />
               <Col sm={9}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -166,17 +158,10 @@ export default function RevokeDelegationWithSubComponent(
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegation Manager
-                <Tippy
-                  content={"Address executing the revocation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Delegation Manager"
+                tooltip="Address executing the revocation"
+              />
               <Col sm={9}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
@@ -191,17 +176,10 @@ export default function RevokeDelegationWithSubComponent(
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Collection
-                <Tippy
-                  content={"Collection address for delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Collection"
+                tooltip="Collection address for delegation"
+              />
               <Col sm={9}>
                 <Form.Select
                   className={`${styles.formInput}`}
@@ -236,17 +214,10 @@ export default function RevokeDelegationWithSubComponent(
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Revoke Address
-                <Tippy
-                  content={"Revoke wallet Address"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Revoke Address"
+                tooltip="Revoke wallet Address"
+              />
               <Col sm={9}>
                 <DelegationAddressInput
                   setAddress={(address: string) => {
@@ -257,17 +228,10 @@ export default function RevokeDelegationWithSubComponent(
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Use Case
-                <Tippy
-                  content={"Delegation Use Case"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title="Use Case"
+                tooltip="Delegation Use Case"
+              />
               <Col sm={9}>
                 <Form.Select
                   className={`${styles.formInput}`}
