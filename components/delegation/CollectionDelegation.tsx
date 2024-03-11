@@ -41,7 +41,10 @@ import {
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import Tippy from "@tippyjs/react";
-import { DelegationCenterSection } from "./DelegationCenterMenu";
+import {
+  DelegationCenterSection,
+  DelegationToast,
+} from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
@@ -1886,33 +1889,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         </Col>
       </Row>
       {toast && (
-        <div
-          className={styles.toastWrapper}
-          onClick={(e) => {
-            if (
-              !toastRef.current ||
-              !toastRef.current.contains(e.target as Node)
-            ) {
-              setShowToast(false);
-            }
-          }}>
-          <ToastContainer
-            position={"top-center"}
-            className={styles.toast}
-            ref={toastRef}>
-            <Toast onClose={() => setShowToast(false)} show={showToast}>
-              <Toast.Header>
-                <span className="me-auto">{toast.title}</span>
-              </Toast.Header>
-              {toast.message && (
-                <Toast.Body
-                  dangerouslySetInnerHTML={{
-                    __html: toast.message,
-                  }}></Toast.Body>
-              )}
-            </Toast>
-          </ToastContainer>
-        </div>
+        <DelegationToast
+          toastRef={toastRef}
+          toast={toast}
+          showToast={showToast}
+          setShowToast={setShowToast}
+        />
       )}
     </Container>
   );
