@@ -256,7 +256,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         <Col>
           <Form>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
+              <Form.Label column sm={4} className="d-flex align-items-center">
                 Delegator
                 <Tippy
                   content={"Address registering the delegation"}
@@ -267,7 +267,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     icon="info-circle"></FontAwesomeIcon>
                 </Tippy>
               </Form.Label>
-              <Col sm={9}>
+              <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
@@ -281,7 +281,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
+              <Form.Label column sm={4} className="d-flex align-items-center">
                 Collection
                 <Tippy
                   content={"Collection address for delegation"}
@@ -292,7 +292,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     icon="info-circle"></FontAwesomeIcon>
                 </Tippy>
               </Form.Label>
-              <Col sm={9}>
+              <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
@@ -303,7 +303,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
+                <Form.Label column sm={4} className="d-flex align-items-center">
                   Use Case
                   <Tippy
                     content={"Delegation Use Case"}
@@ -314,7 +314,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                       icon="info-circle"></FontAwesomeIcon>
                   </Tippy>
                 </Form.Label>
-                <Col sm={9}>
+                <Col sm={8}>
                   <Form.Control
                     className={`${styles.formInput} ${styles.formInputDisabled}`}
                     type="text"
@@ -325,7 +325,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
+              <Form.Label column sm={4} className="d-flex align-items-center">
                 Current Delegate Address
                 <Tippy
                   content={"Current Delegate to Address"}
@@ -336,7 +336,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     icon="info-circle"></FontAwesomeIcon>
                 </Tippy>
               </Form.Label>
-              <Col sm={9}>
+              <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
@@ -350,7 +350,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
+              <Form.Label column sm={4} className="d-flex align-items-center">
                 New Delegate Address
                 <Tippy
                   content={"New Delegate to Address"}
@@ -361,7 +361,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     icon="info-circle"></FontAwesomeIcon>
                 </Tippy>
               </Form.Label>
-              <Col sm={9}>
+              <Col sm={8}>
                 <Form.Control
                   placeholder="Delegate to - 0x... or ENS"
                   className={`${styles.formInput}`}
@@ -377,7 +377,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
+                <Form.Label column sm={4} className="d-flex align-items-center">
                   Expiry Date
                   <Tippy
                     content={"Expiry date for delegation (optional)"}
@@ -388,7 +388,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                       icon="info-circle"></FontAwesomeIcon>
                   </Tippy>
                 </Form.Label>
-                <Col sm={9}>
+                <Col sm={8}>
                   <Form.Check
                     checked={!showExpiryCalendar}
                     className={styles.newDelegationFormToggle}
@@ -437,7 +437,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             )}
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
+                <Form.Label column sm={4} className="d-flex align-items-center">
                   Tokens
                   <Tippy
                     content={"Tokens involved in the delegation (optional)"}
@@ -448,7 +448,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                       icon="info-circle"></FontAwesomeIcon>
                   </Tippy>
                 </Form.Label>
-                <Col sm={9}>
+                <Col sm={8}>
                   <Form.Check
                     checked={!showTokensInput}
                     className={styles.newDelegationFormToggle}
@@ -499,10 +499,10 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             <Form.Group as={Row} className="pt-2 pb-4">
               <Form.Label
                 column
-                sm={3}
+                sm={4}
                 className="d-flex align-items-center"></Form.Label>
               <Col
-                sm={9}
+                sm={8}
                 className="d-flex align-items-center  justify-content-center">
                 {props.showCancel && (
                   <span
@@ -540,10 +540,10 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               <Form.Group
                 as={Row}
                 className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={3} className="d-flex align-items-center">
+                <Form.Label column sm={4} className="d-flex align-items-center">
                   Errors
                 </Form.Label>
-                <Col sm={9}>
+                <Col sm={8}>
                   <ul className="mb-0">
                     {errors.map((e, index) => (
                       <li key={`new-delegation-error-${index}`}>{e}</li>
