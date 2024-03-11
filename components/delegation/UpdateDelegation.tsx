@@ -94,7 +94,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     }
   }, [newDelegationToAddressFromEns.data]);
 
-  const contractWriteDelegationConfig = usePrepareContractWrite({
+  const contractWriteDelegationConfigParams = {
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
@@ -111,7 +111,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     ],
     functionName:
       validate().length === 0 ? "updateDelegationAddress" : undefined,
-    onSettled(data, error) {
+    onSettled(data: any, error: any) {
       if (data) {
         setGasError(undefined);
       }
@@ -119,7 +119,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         setGasError(getGasError(error));
       }
     },
-  });
+  };
 
   function validate() {
     const newErrors: string[] = [];
@@ -324,7 +324,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             )}
             <DelegationSubmitGroups
               title={"Updating Delegation"}
-              config={contractWriteDelegationConfig.config}
+              writeParams={contractWriteDelegationConfigParams}
               showCancel={props.showCancel}
               gasError={gasError}
               validate={validate}

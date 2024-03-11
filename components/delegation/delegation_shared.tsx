@@ -5,6 +5,7 @@ import {
   useContractWrite,
   useEnsAddress,
   useEnsName,
+  usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
 import { DELEGATION_CONTRACT } from "../../constants";
@@ -156,7 +157,7 @@ export function DelegationButtons(
 export function DelegationSubmitGroups(
   props: Readonly<{
     title: string;
-    config: any;
+    writeParams: any;
     showCancel: boolean;
     gasError?: string;
     validate: () => string[];
@@ -165,7 +166,8 @@ export function DelegationSubmitGroups(
     submitBtnLabel?: string;
   }>
 ) {
-  const writeDelegation = useContractWrite(props.config);
+  const writeConfig = usePrepareContractWrite(props.writeParams);
+  const writeDelegation = useContractWrite(writeConfig.config);
   const waitWriteDelegation = useWaitForTransaction({
     confirmations: 1,
     hash: writeDelegation.data?.hash,

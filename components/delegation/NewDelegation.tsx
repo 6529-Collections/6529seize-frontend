@@ -116,10 +116,6 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         },
       };
 
-  const contractWriteDelegationConfig = usePrepareContractWrite(
-    contractWriteDelegationConfigParams
-  );
-
   function clearErrors() {
     setGasError(undefined);
   }
@@ -368,7 +364,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             <DelegationSubmitGroups
               title={"Registering Delegation"}
-              config={contractWriteDelegationConfig.config}
+              writeParams={contractWriteDelegationConfigParams}
               showCancel={true}
               gasError={gasError}
               validate={validate}

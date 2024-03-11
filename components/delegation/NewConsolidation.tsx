@@ -100,10 +100,6 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
         },
       };
 
-  const contractWriteDelegationConfig = usePrepareContractWrite(
-    contractWriteDelegationConfigParams
-  );
-
   function clearErrors() {
     setGasError(undefined);
   }
@@ -254,7 +250,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             </Form.Group>
             <DelegationSubmitGroups
               title={"Registering Consolidation"}
-              config={contractWriteDelegationConfig.config}
+              writeParams={contractWriteDelegationConfigParams}
               showCancel={true}
               gasError={gasError}
               validate={validate}

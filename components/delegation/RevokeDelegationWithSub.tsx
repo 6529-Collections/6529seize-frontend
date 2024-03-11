@@ -49,7 +49,7 @@ export default function RevokeDelegationWithSubComponent(
 
   const [gasError, setGasError] = useState<string>();
 
-  const contractWriteDelegationConfig = usePrepareContractWrite({
+  const contractWriteDelegationConfigParams = {
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
@@ -63,7 +63,7 @@ export default function RevokeDelegationWithSubComponent(
       validate().length === 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
-    onSettled(data, error) {
+    onSettled(data: any, error: any) {
       if (data) {
         setGasError(undefined);
       }
@@ -71,7 +71,7 @@ export default function RevokeDelegationWithSubComponent(
         setGasError(getGasError(error));
       }
     },
-  });
+  };
 
   function clearErrors() {
     setGasError(undefined);
@@ -231,7 +231,7 @@ export default function RevokeDelegationWithSubComponent(
             </Form.Group>
             <DelegationSubmitGroups
               title={`Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`}
-              config={contractWriteDelegationConfig.config}
+              writeParams={contractWriteDelegationConfigParams}
               showCancel={true}
               gasError={gasError}
               validate={validate}
