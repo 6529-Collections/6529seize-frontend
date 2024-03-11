@@ -5,20 +5,12 @@ import { useState } from "react";
 import {
   DELEGATION_USE_CASES,
   DelegationCollection,
-  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
-} from "../../constants";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
+import { isValidEthAddress } from "../../helpers/Helpers";
 import {
-  DelegationAddressInput,
-  useOrignalDelegatorEnsResolution,
   getGasError,
   DelegationFormLabel,
   DelegationSubmitGroups,

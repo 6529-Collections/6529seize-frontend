@@ -1,22 +1,14 @@
-import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useState } from "react";
 
 import {
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
-  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
-} from "../../constants";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
+import { isValidEthAddress } from "../../helpers/Helpers";
 import {
-  DelegationAddressInput,
-  useOrignalDelegatorEnsResolution,
   getGasError,
   DelegationFormLabel,
   DelegationSubmitGroups,

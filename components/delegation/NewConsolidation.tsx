@@ -5,18 +5,12 @@ import { useState } from "react";
 import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
-  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
-} from "../../constants";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
+import { isValidEthAddress } from "../../helpers/Helpers";
 import {
-  DelegationAddressInput,
   getGasError,
   DelegationFormLabel,
   DelegationSubmitGroups,

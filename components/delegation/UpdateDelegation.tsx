@@ -33,12 +33,16 @@ interface Props {
 }
 
 export default function UpdateDelegationComponent(props: Readonly<Props>) {
-  const isDelegation = useState(
-    ![
-      CONSOLIDATION_USE_CASE.use_case,
-      SUB_DELEGATION_USE_CASE.use_case,
-    ].includes(props.delegation.use_case)
-  );
+  const [isDelegation, setIsDelegation] = useState(false);
+
+  useEffect(() => {
+    setIsDelegation(
+      ![
+        CONSOLIDATION_USE_CASE.use_case,
+        SUB_DELEGATION_USE_CASE.use_case,
+      ].includes(props.delegation.use_case)
+    );
+  }, [props.delegation.use_case]);
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 

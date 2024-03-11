@@ -5,15 +5,13 @@ import { useState } from "react";
 
 import {
   DelegationCollection,
-  SUPPORTED_COLLECTIONS,
   ALL_USE_CASES,
 } from "../../pages/delegation/[...section]";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import { DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
+import { isValidEthAddress } from "../../helpers/Helpers";
 import {
   DelegationAddressDisabledInput,
-  DelegationAddressInput,
   DelegationCloseButton,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,

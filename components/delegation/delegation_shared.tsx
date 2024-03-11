@@ -52,10 +52,9 @@ export function DelegationAddressInput(
   const [newDelegationAddress, setNewDelegationAddress] = useState("");
 
   const newDelegationAddressEns = useEnsName({
-    address:
-      newDelegationInput && newDelegationInput.startsWith("0x")
-        ? (newDelegationInput as `0x${string}`)
-        : undefined,
+    address: newDelegationInput?.startsWith("0x")
+      ? (newDelegationInput as `0x${string}`)
+      : undefined,
     chainId: 1,
   });
 
@@ -69,10 +68,7 @@ export function DelegationAddressInput(
   }, [newDelegationAddressEns.data]);
 
   const newDelegationToAddressFromEns = useEnsAddress({
-    name:
-      newDelegationInput && newDelegationInput.endsWith(".eth")
-        ? newDelegationInput
-        : undefined,
+    name: newDelegationInput?.endsWith(".eth") ? newDelegationInput : undefined,
     chainId: 1,
   });
 
@@ -260,9 +256,9 @@ export function DelegationButtons(
         Submit{" "}
         {props.isLoading && (
           <div className="d-inline">
-            <div className={`spinner-border ${styles.loader}`} role="status">
+            <output className={`spinner-border ${styles.loader}`}>
               <span className="sr-only"></span>
-            </div>
+            </output>
           </div>
         )}
       </button>
@@ -374,11 +370,9 @@ export function DelegationSubmitGroups(
             {props.submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <div className="d-inline">
-                <div
-                  className={`spinner-border ${styles.loader}`}
-                  role="status">
+                <output className={`spinner-border ${styles.loader}`}>
                   <span className="sr-only"></span>
-                </div>
+                </output>
               </div>
             )}
           </button>

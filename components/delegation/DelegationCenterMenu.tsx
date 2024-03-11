@@ -443,10 +443,7 @@ export function DelegationToast(
     <div
       className={styles.toastWrapper}
       onClick={(e) => {
-        if (
-          !props.toastRef.current ||
-          !props.toastRef.current.contains(e.target as Node)
-        ) {
+        if (!props.toastRef.current?.contains(e.target as Node)) {
           props.setShowToast(false);
         }
       }}>
