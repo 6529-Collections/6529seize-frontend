@@ -1,7 +1,12 @@
 import styles from "./Delegation.module.scss";
 import { useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import { useEnsAddress, useEnsName, useWaitForTransaction } from "wagmi";
+import {
+  useContractWrite,
+  useEnsAddress,
+  useEnsName,
+  useWaitForTransaction,
+} from "wagmi";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { getTransactionLink } from "../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
@@ -93,69 +98,6 @@ export function DelegationAddressInput(
   );
 }
 
-export function DelegationWaitContractWrite(
-  props: Readonly<{
-    title: string;
-    data: any;
-    error: any;
-    onSetToast: (toast: { title: string; message: string }) => void;
-    setIsWaitLoading: (isLoading: boolean) => void;
-  }>
-) {
-  const waitContractWriteDelegation = useWaitForTransaction({
-    confirmations: 1,
-    hash: props.data?.hash,
-  });
-
-  useEffect(() => {
-    props.setIsWaitLoading(waitContractWriteDelegation.isLoading);
-  }, [waitContractWriteDelegation.isLoading]);
-
-  useEffect(() => {
-    if (props.error) {
-      props.onSetToast({
-        title: props.title,
-        message: props.error.message.split("Request Arguments")[0],
-      });
-    }
-    if (props.data) {
-      if (waitContractWriteDelegation.isLoading) {
-        props.onSetToast({
-          title: props.title,
-          message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      props.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-        });
-      } else {
-        props.onSetToast({
-          title: props.title,
-          message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      props.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-        });
-      }
-    }
-  }, [props.error, props.data, waitContractWriteDelegation.isLoading]);
-
-  return <></>;
-}
-
 export function DelegationFormLabel(
   props: Readonly<{ title: string; tooltip: string; span?: number }>
 ) {
@@ -213,14 +155,78 @@ export function DelegationButtons(
 
 export function DelegationSubmitGroups(
   props: Readonly<{
+    title: string;
+    config: any;
     showCancel: boolean;
-    onSubmit: () => void;
-    onHide: () => void;
-    isLoading: boolean;
-    errors: string[];
     gasError?: string;
+    validate: () => string[];
+    onHide: () => void;
+    onSetToast: (toast: { title: string; message: string }) => void;
   }>
 ) {
+  const writeDelegation = useContractWrite(props.config);
+  const waitWriteDelegation = useWaitForTransaction({
+    confirmations: 1,
+    hash: writeDelegation.data?.hash,
+  });
+  const [errors, setErrors] = useState<string[]>([]);
+
+  function submitDelegation() {
+    const newErrors = props.validate();
+    if (newErrors.length > 0 || props.gasError) {
+      setErrors(newErrors);
+      window.scrollBy(0, 100);
+    } else {
+      writeDelegation.write?.();
+      props.onSetToast({
+        title: props.title,
+        message: "Confirm in your wallet...",
+      });
+    }
+  }
+
+  function getTransactionAnchor(hash: any) {
+    return `<a href=${getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
+    target="_blank"
+    rel="noreferrer"
+    className=${styles.etherscanLink}>
+      view
+    </a>`;
+  }
+
+  useEffect(() => {
+    if (writeDelegation.error) {
+      props.onSetToast({
+        title: props.title,
+        message: writeDelegation.error.message.split("Request Arguments")[0],
+      });
+    }
+    if (writeDelegation.data) {
+      if (waitWriteDelegation.isLoading) {
+        props.onSetToast({
+          title: props.title,
+          message: `Transaction submitted...
+                    ${getTransactionAnchor(writeDelegation.data.hash)}
+                    <br />Waiting for confirmation...`,
+        });
+      } else {
+        props.onSetToast({
+          title: props.title,
+          message: `Transaction Successful!
+                    ${getTransactionAnchor(writeDelegation.data.hash)}`,
+        });
+      }
+    }
+  }, [
+    writeDelegation.error,
+    writeDelegation.data,
+    waitWriteDelegation.isLoading,
+  ]);
+
+  function isLoading() {
+    return writeDelegation.isLoading || waitWriteDelegation.isLoading;
+  }
+
   return (
     <>
       <Form.Group as={Row} className="pt-2 pb-4">
@@ -230,16 +236,36 @@ export function DelegationSubmitGroups(
           className="d-flex align-items-center"></Form.Label>
         <Col
           sm={8}
-          className="d-flex align-items-center  justify-content-center">
-          <DelegationButtons
-            showCancel={props.showCancel}
-            onSubmit={props.onSubmit}
-            onHide={props.onHide}
-            isLoading={props.isLoading}
-          />
+          className="d-flex align-items-center justify-content-center">
+          {props.showCancel && (
+            <button
+              className={styles.newDelegationCancelBtn}
+              onClick={() => props.onHide()}>
+              Cancel
+            </button>
+          )}
+          <button
+            className={`${styles.newDelegationSubmitBtn} ${
+              isLoading() ? `${styles.newDelegationSubmitBtnDisabled}` : ``
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              submitDelegation();
+            }}>
+            Submit{" "}
+            {isLoading() && (
+              <div className="d-inline">
+                <div
+                  className={`spinner-border ${styles.loader}`}
+                  role="status">
+                  <span className="sr-only"></span>
+                </div>
+              </div>
+            )}
+          </button>
         </Col>
       </Form.Group>
-      {(props.errors.length > 0 || props.gasError) && (
+      {(errors.length > 0 || props.gasError) && (
         <Form.Group
           as={Row}
           className={`pt-2 pb-2 ${styles.newDelegationError}`}>
@@ -248,7 +274,7 @@ export function DelegationSubmitGroups(
           </Form.Label>
           <Col sm={8}>
             <ul className="mb-0">
-              {props.errors.map((e, index) => (
+              {errors.map((e, index) => (
                 <li key={`new-delegation-error-${index}`}>{e}</li>
               ))}
               {props.gasError && <li>{props.gasError}</li>}

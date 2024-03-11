@@ -21,7 +21,6 @@ import {
   DelegationAddressInput,
   useOrignalDelegatorEnsResolution,
   getGasError,
-  DelegationWaitContractWrite,
   DelegationFormLabel,
   DelegationSubmitGroups,
   DelegationExpiryCalendar,
@@ -59,10 +58,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
 
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
-  const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
-
-  const [isWaitLoading, setIsWaitLoading] = useState(false);
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -123,13 +119,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     contractWriteDelegationConfigParams
   );
 
-  const contractWriteDelegation = useContractWrite(
-    contractWriteDelegationConfig.config
-  );
-
   function clearErrors() {
     setGasError(undefined);
-    setErrors([]);
   }
 
   function validate() {
@@ -159,31 +150,6 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     }
 
     return newErrors;
-  }
-
-  function clearForm() {
-    setErrors([]);
-    setShowExpiryCalendar(false);
-    setShowTokensInput(false);
-    setNewDelegationDate(undefined);
-    setNewDelegationToken(undefined);
-    setNewDelegationUseCase(0);
-    setNewDelegationToAddress("");
-    setNewDelegationCollection("0");
-  }
-
-  function submitDelegation() {
-    const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
-      window.scrollBy(0, 100);
-    } else {
-      contractWriteDelegation.write?.();
-      props.onSetToast({
-        title: `Registering Delegation`,
-        message: "Confirm in your wallet...",
-      });
-    }
   }
 
   return (
@@ -409,26 +375,17 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               </Form.Label>
             </Form.Group>
             <DelegationSubmitGroups
+              title={"Registering Delegation"}
+              config={contractWriteDelegationConfig.config}
               showCancel={true}
-              onSubmit={() => {
-                setErrors([]);
-                submitDelegation();
-              }}
-              onHide={props.onHide}
-              isLoading={contractWriteDelegation.isLoading || isWaitLoading}
-              errors={errors}
               gasError={gasError}
+              validate={validate}
+              onHide={props.onHide}
+              onSetToast={props.onSetToast}
             />
           </Form>
         </Col>
       </Row>
-      <DelegationWaitContractWrite
-        title={"Registering Delegation"}
-        data={contractWriteDelegation.data}
-        error={contractWriteDelegation.error}
-        onSetToast={props.onSetToast}
-        setIsWaitLoading={setIsWaitLoading}
-      />
     </Container>
   );
 }

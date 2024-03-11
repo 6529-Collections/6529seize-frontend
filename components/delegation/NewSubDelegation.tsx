@@ -21,7 +21,6 @@ import {
   DelegationAddressInput,
   useOrignalDelegatorEnsResolution,
   getGasError,
-  DelegationWaitContractWrite,
   DelegationFormLabel,
   DelegationSubmitGroups,
 } from "./delegation_shared";
@@ -47,10 +46,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
 
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
-  const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
-
-  const [isWaitLoading, setIsWaitLoading] = useState(false);
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -107,13 +103,8 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
     contractWriteDelegationConfigParams
   );
 
-  const contractWriteDelegation = useContractWrite(
-    contractWriteDelegationConfig.config
-  );
-
   function clearErrors() {
     setGasError(undefined);
-    setErrors([]);
   }
 
   function validate() {
@@ -134,26 +125,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
     }
 
     return newErrors;
-  }
-
-  function clearForm() {
-    setErrors([]);
-    setNewDelegationToAddress("");
-    setNewDelegationCollection("0");
-  }
-
-  function submitDelegation() {
-    const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
-      window.scrollBy(0, 100);
-    } else {
-      contractWriteDelegation.write?.();
-      props.onSetToast({
-        title: `Registering Delegation Manager`,
-        message: "Confirm in your wallet...",
-      });
-    }
   }
 
   return (
@@ -273,26 +244,17 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <DelegationSubmitGroups
+              title={"Registering Delegation Manager"}
+              config={contractWriteDelegationConfig.config}
               showCancel={true}
-              onSubmit={() => {
-                setErrors([]);
-                submitDelegation();
-              }}
-              onHide={props.onHide}
-              isLoading={contractWriteDelegation.isLoading || isWaitLoading}
-              errors={errors}
               gasError={gasError}
+              validate={validate}
+              onHide={props.onHide}
+              onSetToast={props.onSetToast}
             />
           </Form>
         </Col>
       </Row>
-      <DelegationWaitContractWrite
-        title={"Registering Delegation Manager"}
-        data={contractWriteDelegation.data}
-        error={contractWriteDelegation.error}
-        onSetToast={props.onSetToast}
-        setIsWaitLoading={setIsWaitLoading}
-      />
     </Container>
   );
 }

@@ -1,11 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import {
-  useContractWrite,
-  useEnsAddress,
-  useEnsName,
-  usePrepareContractWrite,
-} from "wagmi";
+import { useEnsAddress, useEnsName, usePrepareContractWrite } from "wagmi";
 import { useEffect, useState } from "react";
 
 import {
@@ -23,7 +18,6 @@ import {
   DelegationFormLabel,
   DelegationSubmitGroups,
   DelegationTokenSelection,
-  DelegationWaitContractWrite,
   getGasError,
 } from "./delegation_shared";
 
@@ -58,10 +52,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
   const [delegationToInput, setDelegationToInput] = useState("");
   const [delegationToAddress, setDelegationToAddress] = useState("");
 
-  const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
-
-  const [isWaitLoading, setIsWaitLoading] = useState(false);
 
   const previousDelegationEns = useEnsName({
     address: props.delegation.wallet as `0x${string}`,
@@ -128,9 +119,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
       }
     },
   });
-  const contractWriteDelegation = useContractWrite(
-    contractWriteDelegationConfig.config
-  );
 
   function validate() {
     const newErrors: string[] = [];
@@ -145,28 +133,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     }
 
     return newErrors;
-  }
-
-  function clearForm() {
-    setErrors([]);
-    setShowExpiryCalendar(false);
-    setShowTokensInput(false);
-    setDelegationDate(undefined);
-    setDelegationToken(undefined);
-  }
-
-  function submitDelegation() {
-    const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
-      window.scrollBy(0, 100);
-    } else {
-      contractWriteDelegation.write?.();
-      props.onSetToast({
-        title: `Updating Delegation`,
-        message: "Confirm in your wallet...",
-      });
-    }
   }
 
   return (
@@ -365,26 +331,17 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Form.Group>
             )}
             <DelegationSubmitGroups
+              title={"Updating Delegation"}
+              config={contractWriteDelegationConfig.config}
               showCancel={props.showCancel}
-              onSubmit={() => {
-                setErrors([]);
-                submitDelegation();
-              }}
-              onHide={props.onHide}
-              isLoading={contractWriteDelegation.isLoading || isWaitLoading}
-              errors={errors}
               gasError={gasError}
+              validate={validate}
+              onHide={props.onHide}
+              onSetToast={props.onSetToast}
             />
           </Form>
         </Col>
       </Row>
-      <DelegationWaitContractWrite
-        title={"Updating Delegation"}
-        data={contractWriteDelegation.data}
-        error={contractWriteDelegation.error}
-        onSetToast={props.onSetToast}
-        setIsWaitLoading={setIsWaitLoading}
-      />
     </Container>
   );
 }
