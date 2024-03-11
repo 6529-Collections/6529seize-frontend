@@ -1,6 +1,5 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useState } from "react";
 
 import {

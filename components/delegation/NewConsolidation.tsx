@@ -1,6 +1,5 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { usePrepareContractWrite } from "wagmi";
 import { useState } from "react";
 
 import {
@@ -9,7 +8,6 @@ import {
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,

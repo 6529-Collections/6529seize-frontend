@@ -1,6 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useEnsAddress, useEnsName, usePrepareContractWrite } from "wagmi";
+import { useEnsAddress, useEnsName } from "wagmi";
 import { useEffect, useState } from "react";
 
 import {
@@ -8,8 +8,6 @@ import {
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
 } from "../../pages/delegation/[...section]";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";
