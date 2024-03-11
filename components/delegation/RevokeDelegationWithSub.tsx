@@ -174,7 +174,8 @@ export default function RevokeDelegationWithSubComponent(
     if (contractWriteDelegation.error) {
       props.onSetToast({
         title: `Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`,
-        message: contractWriteDelegation.error.message,
+        message:
+          contractWriteDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (contractWriteDelegation.data) {

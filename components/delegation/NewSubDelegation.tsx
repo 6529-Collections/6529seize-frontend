@@ -222,7 +222,8 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
     if (contractWriteDelegation.error) {
       props.onSetToast({
         title: `Registering Delegation Manager`,
-        message: contractWriteDelegation.error.message,
+        message:
+          contractWriteDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (contractWriteDelegation.data) {

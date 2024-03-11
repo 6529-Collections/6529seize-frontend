@@ -180,7 +180,8 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     if (contractWriteDelegation.error) {
       props.onSetToast({
         title: `Updating Delegation`,
-        message: contractWriteDelegation.error.message,
+        message:
+          contractWriteDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (contractWriteDelegation.data) {

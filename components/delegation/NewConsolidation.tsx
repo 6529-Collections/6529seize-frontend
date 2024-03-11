@@ -222,7 +222,8 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
     if (contractWriteDelegation.error) {
       props.onSetToast({
         title: `Registering Consolidation`,
-        message: contractWriteDelegation.error.message,
+        message:
+          contractWriteDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (contractWriteDelegation.data) {
