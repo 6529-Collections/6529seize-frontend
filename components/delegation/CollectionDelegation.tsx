@@ -1067,6 +1067,26 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     );
   }
 
+  function addToBulkRevocations(del: ContractDelegation, wallet: string) {
+    setBulkRevocations((bd) => [
+      ...bd,
+      {
+        use_case: del.useCase.use_case,
+        wallet: wallet,
+      },
+    ]);
+  }
+
+  function removeFromBulkRevocations(del: ContractDelegation, wallet: string) {
+    const shouldKeepItem = (item: Revocation, del: ContractDelegation) =>
+      !(
+        item.use_case === del.useCase.use_case &&
+        areEqualAddresses(item.wallet, wallet)
+      );
+
+    setBulkRevocations((bd) => bd.filter((item) => shouldKeepItem(item, del)));
+  }
+
   function printOutgoingDelegationRow(
     index: number,
     delegations: number,
@@ -1076,28 +1096,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     pending: boolean,
     isConsolidation: boolean
   ) {
-    function addToBulkRevocations(del: ContractDelegation) {
-      setBulkRevocations((bd) => [
-        ...bd,
-        {
-          use_case: del.useCase.use_case,
-          wallet: w.wallet,
-        },
-      ]);
-    }
-
-    function removeFromBulkRevocations(del: ContractDelegation) {
-      const shouldKeepItem = (item: Revocation, del: ContractDelegation) =>
-        !(
-          item.use_case === del.useCase.use_case &&
-          areEqualAddresses(item.wallet, w.wallet)
-        );
-
-      setBulkRevocations((bd) =>
-        bd.filter((item) => shouldKeepItem(item, del))
-      );
-    }
-
     return (
       <tr key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
@@ -1122,9 +1120,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        addToBulkRevocations(del);
+                        addToBulkRevocations(del, w.wallet);
                       } else {
-                        removeFromBulkRevocations(del);
+                        removeFromBulkRevocations(del, w.wallet);
                       }
                     }}
                   />
