@@ -23,7 +23,6 @@ import {
   getGasError,
   DelegationWaitContractWrite,
   DelegationFormLabel,
-  NewDelegationButtons,
   DelegationSubmitGroups,
 } from "./delegation_shared";
 

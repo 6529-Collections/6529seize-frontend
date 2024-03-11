@@ -23,8 +23,9 @@ import {
   getGasError,
   DelegationWaitContractWrite,
   DelegationFormLabel,
-  NewDelegationButtons,
   DelegationSubmitGroups,
+  DelegationExpiryCalendar,
+  DelegationTokenSelection,
 } from "./delegation_shared";
 
 interface Props {
@@ -357,26 +358,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                   onChange={() => setShowExpiryCalendar(true)}
                 />
                 {showExpiryCalendar && (
-                  <Container fluid className="no-padding pt-3">
-                    <Row>
-                      <Col xs={12} xm={12} md={6} lg={4}>
-                        <Form.Control
-                          min={new Date().toISOString().slice(0, 10)}
-                          className={`${styles.formInput}`}
-                          type="date"
-                          placeholder="Expiry Date"
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value) {
-                              setNewDelegationDate(new Date(value));
-                            } else {
-                              setNewDelegationDate(undefined);
-                            }
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                  </Container>
+                  <DelegationExpiryCalendar
+                    setDelegationDate={setNewDelegationDate}
+                  />
                 )}
               </Col>
             </Form.Group>
@@ -404,27 +388,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                   onChange={() => setShowTokensInput(true)}
                 />
                 {showTokensInput && (
-                  <Container fluid className="no-padding pt-3">
-                    <Row>
-                      <Col xs={12} xm={12} md={6} lg={4}>
-                        <Form.Control
-                          min={0}
-                          className={`${styles.formInput}`}
-                          type="number"
-                          placeholder="Token ID"
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            try {
-                              const intValue = parseInt(value);
-                              setNewDelegationToken(intValue);
-                            } catch {
-                              setNewDelegationToken(undefined);
-                            }
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                  </Container>
+                  <DelegationTokenSelection
+                    setDelegationToken={setNewDelegationToken}
+                  />
                 )}
               </Col>
             </Form.Group>

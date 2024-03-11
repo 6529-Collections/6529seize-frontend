@@ -5,7 +5,6 @@ import {
   useEnsAddress,
   useEnsName,
   usePrepareContractWrite,
-  useWaitForTransaction,
 } from "wagmi";
 import { useEffect, useState } from "react";
 
@@ -18,12 +17,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
+import { isValidEthAddress } from "../../helpers/Helpers";
 import {
+  DelegationExpiryCalendar,
   DelegationFormLabel,
   DelegationSubmitGroups,
+  DelegationTokenSelection,
   DelegationWaitContractWrite,
-  NewDelegationButtons,
   getGasError,
 } from "./delegation_shared";
 
@@ -320,26 +320,9 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     onChange={() => setShowExpiryCalendar(true)}
                   />
                   {showExpiryCalendar && (
-                    <Container fluid className="no-padding pt-3">
-                      <Row>
-                        <Col xs={12} xm={12} md={6} lg={4}>
-                          <Form.Control
-                            min={new Date().toISOString().slice(0, 10)}
-                            className={`${styles.formInput}`}
-                            type="date"
-                            placeholder="Expiry Date"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value) {
-                                setDelegationDate(new Date(value));
-                              } else {
-                                setDelegationDate(undefined);
-                              }
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
+                    <DelegationExpiryCalendar
+                      setDelegationDate={setDelegationDate}
+                    />
                   )}
                 </Col>
               </Form.Group>
@@ -374,27 +357,9 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     onChange={() => setShowTokensInput(true)}
                   />
                   {showTokensInput && (
-                    <Container fluid className="no-padding pt-3">
-                      <Row>
-                        <Col xs={12} xm={12} md={6} lg={4}>
-                          <Form.Control
-                            min={0}
-                            className={`${styles.formInput}`}
-                            type="number"
-                            placeholder="Token ID"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              try {
-                                const intValue = parseInt(value);
-                                setDelegationToken(intValue);
-                              } catch {
-                                setDelegationToken(undefined);
-                              }
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
+                    <DelegationTokenSelection
+                      setDelegationToken={setDelegationToken}
+                    />
                   )}
                 </Col>
               </Form.Group>
@@ -414,7 +379,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         </Col>
       </Row>
       <DelegationWaitContractWrite
-        title={"Updaing Delegation"}
+        title={"Updating Delegation"}
         data={contractWriteDelegation.data}
         error={contractWriteDelegation.error}
         onSetToast={props.onSetToast}

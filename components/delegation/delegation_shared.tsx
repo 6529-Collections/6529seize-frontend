@@ -1,6 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { useEffect, useState } from "react";
-import { Col, Form, Row } from "react-bootstrap";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsAddress, useEnsName, useWaitForTransaction } from "wagmi";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { getTransactionLink } from "../../helpers/Helpers";
@@ -257,5 +257,64 @@ export function DelegationSubmitGroups(
         </Form.Group>
       )}
     </>
+  );
+}
+
+export function DelegationExpiryCalendar(
+  props: Readonly<{
+    setDelegationDate: (date: Date | undefined) => void;
+  }>
+) {
+  return (
+    <Container fluid className="no-padding pt-3">
+      <Row>
+        <Col xs={12} xm={12} md={6} lg={4}>
+          <Form.Control
+            min={new Date().toISOString().slice(0, 10)}
+            className={`${styles.formInput}`}
+            type="date"
+            placeholder="Expiry Date"
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value) {
+                props.setDelegationDate(new Date(value));
+              } else {
+                props.setDelegationDate(undefined);
+              }
+            }}
+          />
+        </Col>
+      </Row>
+    </Container>
+  );
+}
+
+export function DelegationTokenSelection(
+  props: Readonly<{
+    setDelegationToken: (token: number | undefined) => void;
+  }>
+) {
+  return (
+    <Container fluid className="no-padding pt-3">
+      <Row>
+        <Col xs={12} xm={12} md={6} lg={4}>
+          <Form.Control
+            min={0}
+            className={`${styles.formInput}`}
+            type="number"
+            placeholder="Token ID"
+            onChange={(e) => {
+              const value = e.target.value;
+              try {
+                const intValue = parseInt(value);
+                props.setDelegationToken(intValue);
+              } catch {
+                props.setDelegationToken(undefined);
+              }
+            }}
+          />
+        </Col>
+      </Row>
+    </Container>
   );
 }
