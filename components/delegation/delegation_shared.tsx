@@ -1,6 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { useEffect, useState } from "react";
-import { Form } from "react-bootstrap";
+import { Col, Form, Row } from "react-bootstrap";
 import { useEnsAddress, useEnsName, useWaitForTransaction } from "wagmi";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { getTransactionLink } from "../../helpers/Helpers";
@@ -171,5 +171,91 @@ export function DelegationFormLabel(
           icon="info-circle"></FontAwesomeIcon>
       </Tippy>
     </Form.Label>
+  );
+}
+
+export function DelegationButtons(
+  props: Readonly<{
+    showCancel: boolean;
+    onSubmit: () => void;
+    onHide: () => void;
+    isLoading: boolean;
+  }>
+) {
+  return (
+    <>
+      {props.showCancel && (
+        <button
+          className={styles.newDelegationCancelBtn}
+          onClick={() => props.onHide()}>
+          Cancel
+        </button>
+      )}
+      <button
+        className={`${styles.newDelegationSubmitBtn} ${
+          props.isLoading ? `${styles.newDelegationSubmitBtnDisabled}` : ``
+        }`}
+        onClick={() => {
+          props.onSubmit();
+        }}>
+        Submit{" "}
+        {props.isLoading && (
+          <div className="d-inline">
+            <div className={`spinner-border ${styles.loader}`} role="status">
+              <span className="sr-only"></span>
+            </div>
+          </div>
+        )}
+      </button>
+    </>
+  );
+}
+
+export function DelegationSubmitGroups(
+  props: Readonly<{
+    showCancel: boolean;
+    onSubmit: () => void;
+    onHide: () => void;
+    isLoading: boolean;
+    errors: string[];
+    gasError?: string;
+  }>
+) {
+  return (
+    <>
+      <Form.Group as={Row} className="pt-2 pb-4">
+        <Form.Label
+          column
+          sm={4}
+          className="d-flex align-items-center"></Form.Label>
+        <Col
+          sm={8}
+          className="d-flex align-items-center  justify-content-center">
+          <DelegationButtons
+            showCancel={props.showCancel}
+            onSubmit={props.onSubmit}
+            onHide={props.onHide}
+            isLoading={props.isLoading}
+          />
+        </Col>
+      </Form.Group>
+      {(props.errors.length > 0 || props.gasError) && (
+        <Form.Group
+          as={Row}
+          className={`pt-2 pb-2 ${styles.newDelegationError}`}>
+          <Form.Label column sm={4} className="d-flex align-items-center">
+            Errors
+          </Form.Label>
+          <Col sm={8}>
+            <ul className="mb-0">
+              {props.errors.map((e, index) => (
+                <li key={`new-delegation-error-${index}`}>{e}</li>
+              ))}
+              {props.gasError && <li>{props.gasError}</li>}
+            </ul>
+          </Col>
+        </Form.Group>
+      )}
+    </>
   );
 }

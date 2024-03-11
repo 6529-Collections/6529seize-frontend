@@ -23,6 +23,8 @@ import {
   getGasError,
   DelegationWaitContractWrite,
   DelegationFormLabel,
+  NewDelegationButtons,
+  DelegationSubmitGroups,
 } from "./delegation_shared";
 
 interface Props {
@@ -271,59 +273,17 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pt-2 pb-4">
-              <Form.Label
-                column
-                sm={3}
-                className="d-flex align-items-center"></Form.Label>
-              <Col
-                sm={9}
-                className="d-flex align-items-center justify-content-center">
-                <span
-                  className={styles.newDelegationCancelBtn}
-                  onClick={() => props.onHide()}>
-                  Cancel
-                </span>
-                <span
-                  className={`${styles.newDelegationSubmitBtn} ${
-                    contractWriteDelegation.isLoading || isWaitLoading
-                      ? `${styles.newDelegationSubmitBtnDisabled}`
-                      : ``
-                  }`}
-                  onClick={() => {
-                    setErrors([]);
-                    submitDelegation();
-                  }}>
-                  Submit{" "}
-                  {(contractWriteDelegation.isLoading || isWaitLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
-                </span>
-              </Col>
-            </Form.Group>
-            {(errors.length > 0 || gasError) && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Errors
-                </Form.Label>
-                <Col sm={9} className="d-flex align-items-center">
-                  <ul className="mb-0">
-                    {errors.map((e, index) => (
-                      <li key={`new-delegation-error-${index}`}>{e}</li>
-                    ))}
-                    {gasError && <li>{gasError}</li>}
-                  </ul>
-                </Col>
-              </Form.Group>
-            )}
+            <DelegationSubmitGroups
+              showCancel={true}
+              onSubmit={() => {
+                setErrors([]);
+                submitDelegation();
+              }}
+              onHide={props.onHide}
+              isLoading={contractWriteDelegation.isLoading || isWaitLoading}
+              errors={errors}
+              gasError={gasError}
+            />
           </Form>
         </Col>
       </Row>
