@@ -27,7 +27,7 @@ export default function CommonDropdown<T, U = unknown>(
     } else {
       animateIcon(iconScope.current, { rotate: -90 });
     }
-  });
+  }, [isOpen]);
 
   const getLabel = (): string => {
     const targetItem = items.find((item) => item.value === activeItem);

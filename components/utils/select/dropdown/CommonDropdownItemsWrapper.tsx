@@ -27,7 +27,7 @@ export default function CommonDropdownItemsWrapper({
   const breakpoint = useBreakpoint();
 
   const getIsMobile = () => breakpoint !== "LG";
-  const [isMobile, setIsMobile] = useState<boolean>(getIsMobile());
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMobile(getIsMobile());
