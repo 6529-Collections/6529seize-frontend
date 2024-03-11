@@ -5,8 +5,15 @@ import Head from "next/head";
 import CommunityMembers from "../components/community/CommunityMembers";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import SlideOver from "../components/utils/sidebar/SlideOver";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommunityCurationFilters from "../components/curation/CommunityCurationFilters";
+
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectActiveCurationFilterId,
+  setActiveCurationFilterId,
+} from "../store/curationFilterSlice";
+import { useRouter } from "next/router";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -21,7 +28,10 @@ export enum CommunityMembersSortOption {
   CIC = "cic",
 }
 
-export type CommunityMembersQuery = FullPageRequest<CommunityMembersSortOption>;
+export interface CommunityMembersQuery
+  extends FullPageRequest<CommunityMembersSortOption> {
+  curation_criteria_id?: string;
+}
 
 export default function CommunityPage() {
   const breadcrumbs: Crumb[] = [
@@ -29,7 +39,22 @@ export default function CommunityPage() {
     { display: "Community" },
   ];
 
+  const [init, setInit] = useState(false);
+  const router = useRouter();
+
+  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    if (router.isReady && !init) {
+      const { curation } = router.query as { curation: string | undefined };
+      if (curation && curation !== activeCurationFilterId) {
+        dispatch(setActiveCurationFilterId(curation));
+      }
+      setInit(true);
+    }
+  }, [router.isReady]);
 
   return (
     <>
@@ -71,7 +96,7 @@ export default function CommunityPage() {
                 open ? "tw-ml-64 2xl:tw-ml-0" : "tw-w-full"
               } tw-col-span-6 tw-transition-all tw-duration-500 tw-ease-in-out`}
             >
-              <CommunityMembers />
+              {init && <CommunityMembers />}
             </div>
           </div>
         </div>

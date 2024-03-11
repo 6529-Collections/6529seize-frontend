@@ -47,8 +47,9 @@ export default function CurationBuildFilter() {
   });
 
   const [mutating, setMutating] = useState<boolean>(false);
+  // new-curation-bbwy6HP4Jh2txKnmuKVGsp
 
-  const addRepMutation = useMutation({
+  const addCurationFilterMutation = useMutation({
     mutationFn: async (body: CurationFilterRequest) =>
       await commonApiPost<CurationFilterRequest, CurationFilterResponse>({
         endpoint: `community-members-curation`,
@@ -57,6 +58,35 @@ export default function CurationBuildFilter() {
     onSuccess: () => {
       setToast({
         message: "Curation filter updated.",
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
+    onSettled: () => {
+      setMutating(false);
+    },
+  });
+
+  const makeCurationFilterVisibleMutation = useMutation({
+    mutationFn: async (param: {
+      id: string;
+      body: { visible: true; old_version_id: string | null };
+    }) =>
+      await commonApiPost<
+        { visible: true; old_version_id: string | null },
+        CurationFilterResponse
+      >({
+        endpoint: `community-members-curation/${param.id}/visible`,
+        body: param.body,
+      }),
+    onSuccess: () => {
+      setToast({
+        message: "Curation filter visible.",
         type: "success",
       });
     },
@@ -81,10 +111,16 @@ export default function CurationBuildFilter() {
       setMutating(false);
       return;
     }
-    await addRepMutation.mutateAsync({
+    const response = await addCurationFilterMutation.mutateAsync({
       name,
       criteria: filters,
     });
+    console.log(response);
+    const response2 = await makeCurationFilterVisibleMutation.mutateAsync({
+      id: response.id,
+      body: { visible: true, old_version_id: null },
+    });
+    console.log(response2);
   };
 
   return (

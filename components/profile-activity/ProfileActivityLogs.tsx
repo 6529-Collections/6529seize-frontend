@@ -7,7 +7,7 @@ import {
 import { Page } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPost } from "../../services/api/common-api";
+import { commonApiFetch } from "../../services/api/common-api";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 import CommonFilterTargetSelect, {
@@ -16,7 +16,6 @@ import CommonFilterTargetSelect, {
 
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
-import { FilterDirection, GeneralFilter } from "../../helpers/filters/Filters.types";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -136,46 +135,22 @@ export default function ProfileActivityLogs({
     );
   }, [currentPage, selectedFilters, initialParams.handleOrWallet, targetType]);
 
-  const [filters, setFilters] = useState<GeneralFilter>({
-    tdh: { min: null, max: null },
-    rep: {
-      min: null,
-      max: null,
-      direction: FilterDirection.RECEIVED,
-      user: null,
-      category: null,
-    },
-    cic: {
-      min: null,
-      max: null,
-      direction: FilterDirection.RECEIVED,
-      user: null,
-    },
-    level: { min: null, max: null },
-  });
-
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-
   const { isLoading, data: logs } = useQuery<Page<ProfileActivityLog>>({
     queryKey: [
       QueryKey.PROFILE_LOGS,
       {
         ...params,
-        ...filters,
       },
     ],
     queryFn: async () =>
-      await commonApiPost<
-        GeneralFilter,
+      await commonApiFetch<
         Page<ProfileActivityLog>,
         ActivityLogParamsConverted
       >({
         endpoint: `profile-logs`,
         params: params,
-        body: filters,
       }),
     placeholderData: keepPreviousData,
-    enabled: !isFiltersOpen,
   });
 
   const [showPaginator, setShowPaginator] = useState(false);
@@ -196,11 +171,7 @@ export default function ProfileActivityLogs({
               <ProfileActivityLogsFilter
                 user={initialParams.handleOrWallet}
                 selected={selectedFilters}
-                filters={filters}
-                isFiltersOpen={isFiltersOpen}
-                setFilters={setFilters}
                 setSelected={onFilter}
-                setIsFiltersOpen={setIsFiltersOpen}
               />
             </div>
           </div>

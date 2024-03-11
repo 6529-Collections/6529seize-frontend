@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
 import { Mutable, NonNullableNotRequired, Page } from "../../../helpers/Types";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import CurationBuildFiltersUserSearch from "../filter-builder/common/user-search/CurationBuildFiltersUserSearch";
 import CommunityCurationFiltersSearchFilter from "./CommunityCurationFiltersSearchFilter";
+import CommunityCurationFiltersSelectItems from "./CommunityCurationFiltersSelectItems";
 
 interface CurationFilterRequestParams {
   readonly curation_criteria_name: string | null;
@@ -30,7 +31,6 @@ export default function CommunityCurationFiltersSelect() {
       if (filters.curation_criteria_user) {
         params.curation_criteria_user = filters.curation_criteria_user;
       }
-      console.log(params);
       return await commonApiFetch<
         CurationFilterResponse[],
         NonNullableNotRequired<CurationFilterRequestParams>
@@ -39,9 +39,10 @@ export default function CommunityCurationFiltersSelect() {
         params,
       });
     },
+    placeholderData: keepPreviousData,
   });
 
-  const onUserSearch = (value: string | null) => {
+  const onUserSelect = (value: string | null) => {
     setFilters((prev) => ({
       ...prev,
       curation_criteria_user: value,
@@ -59,14 +60,14 @@ export default function CommunityCurationFiltersSelect() {
     <div className="tw-mt-8 tw-w-full tw-space-y-4">
       <CurationBuildFiltersUserSearch
         value={filters.curation_criteria_user}
-        setValue={onUserSearch}
+        setValue={onUserSelect}
         placeholder="Search user"
       />
       <CommunityCurationFiltersSearchFilter
         filterName={filters.curation_criteria_name}
         setFilterName={onFilterNameSearch}
-        filters={data ?? []}
       />
+      <CommunityCurationFiltersSelectItems filters={data ?? []} />
     </div>
   );
 }

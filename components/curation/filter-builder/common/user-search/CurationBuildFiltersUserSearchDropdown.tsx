@@ -11,7 +11,7 @@ export default function CurationBuildFiltersUserSearchDropdown({
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
   readonly selected: string | null;
-  readonly onSelect: (newV: string) => void;
+  readonly onSelect: (newV: string | null) => void;
 }) {
   const noResultsText =
     !selected || selected.length < 3

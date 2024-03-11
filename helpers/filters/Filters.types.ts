@@ -33,9 +33,19 @@ export interface CurationFilterRequest {
   readonly criteria: GeneralFilter;
 }
 
+export interface ProfileMin {
+  readonly id: string;
+  readonly handle: string;
+  readonly pfp: string | null;
+  readonly cic: number;
+  readonly rep: number;
+  readonly tdh: number;
+  readonly level: number;
+}
+
 export interface CurationFilterResponse extends CurationFilterRequest {
   readonly id: string;
   readonly created_at: string;
-  readonly created_by: string;
+  readonly created_by: ProfileMin | null;
   readonly visible: boolean;
 }

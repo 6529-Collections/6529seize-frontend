@@ -7,17 +7,20 @@ export default function CurationBuildFiltersUserSearchDropdownItem({
 }: {
   readonly profile: CommunityMemberMinimal;
   readonly selected: string | null;
-  readonly onSelect: (newV: string) => void;
+  readonly onSelect: (newV: string | null) => void;
 }) {
   const handleOrWallet = profile.handle ?? profile.wallet;
   const isSelected = selected?.toLowerCase() === handleOrWallet.toLowerCase();
   const title = profile.handle ?? profile.display;
+
+  const onProfileClick = () => onSelect(handleOrWallet);
+
   return (
     <li className="tw-h-full">
       <button
         type="button"
         className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-        onClick={() => onSelect(handleOrWallet)}
+        onClick={onProfileClick}
       >
         <div className="tw-w-44 tw-truncate">
           <span className="tw-text-sm tw-font-medium tw-text-white">

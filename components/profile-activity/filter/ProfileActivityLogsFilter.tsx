@@ -11,19 +11,11 @@ import { GeneralFilter } from "../../../helpers/filters/Filters.types";
 export default function ProfileActivityLogsFilter({
   user,
   selected,
-  filters,
-  isFiltersOpen,
   setSelected,
-  setFilters,
-  setIsFiltersOpen,
 }: {
   readonly user: string | null;
   readonly selected: ProfileActivityLogType[];
-  readonly filters: GeneralFilter;
-  readonly isFiltersOpen: boolean;
   readonly setSelected: (selected: ProfileActivityLogType) => void;
-  readonly setFilters: (filters: GeneralFilter) => void;
-  readonly setIsFiltersOpen: (isOpen: boolean) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
