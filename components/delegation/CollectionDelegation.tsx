@@ -68,6 +68,11 @@ interface ContractDelegation {
   wallets: ContractWalletDelegation[];
 }
 
+interface Revocation {
+  use_case: number;
+  wallet: string;
+}
+
 function getParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
@@ -214,7 +219,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const [incomingDelegationsLoaded, setIncomingDelegationsLoaded] =
     useState(false);
 
-  const [bulkRevocations, setBulkRevocations] = useState<any[]>([]);
+  const [bulkRevocations, setBulkRevocations] = useState<Revocation[]>([]);
   const [showUpdateDelegation, setShowUpdateDelegation] = useState(false);
 
   const [updateDelegationParams, setUpdateDelegationParams] = useState<
@@ -1082,14 +1087,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     }
 
     function removeFromBulkRevocations(del: ContractDelegation) {
+      const shouldKeepItem = (item: Revocation, del: ContractDelegation) =>
+        !(
+          item.use_case === del.useCase.use_case &&
+          areEqualAddresses(item.wallet, w.wallet)
+        );
+
       setBulkRevocations((bd) =>
-        bd.filter(
-          (x) =>
-            !(
-              x.use_case == del.useCase.use_case &&
-              areEqualAddresses(x.wallet, w.wallet)
-            )
-        )
+        bd.filter((item) => shouldKeepItem(item, del))
       );
     }
 
