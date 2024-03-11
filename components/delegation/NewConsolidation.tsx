@@ -27,6 +27,7 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
+import { useOrignalDelegatorEnsResolution } from "./html/delegation_hooks";
 
 interface Props {
   address: string;
@@ -40,11 +41,8 @@ interface Props {
 }
 
 export default function NewConsolidationComponent(props: Readonly<Props>) {
-  const orignalDelegatorEnsResolution = useEnsName({
-    address: props.subdelegation
-      ? (props.subdelegation.originalDelegator as `0x${string}`)
-      : undefined,
-    chainId: 1,
+  const orignalDelegatorEnsResolution = useOrignalDelegatorEnsResolution({
+    subdelegation: props.subdelegation,
   });
 
   const [newDelegationCollection, setNewDelegationCollection] =

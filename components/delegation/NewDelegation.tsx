@@ -27,6 +27,7 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
+import { useOrignalDelegatorEnsResolution } from "./html/delegation_hooks";
 
 interface Props {
   address: string;
@@ -43,11 +44,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 
-  const orignalDelegatorEnsResolution = useEnsName({
-    address: props.subdelegation
-      ? (props.subdelegation.originalDelegator as `0x${string}`)
-      : undefined,
-    chainId: 1,
+  const orignalDelegatorEnsResolution = useOrignalDelegatorEnsResolution({
+    subdelegation: props.subdelegation,
   });
 
   const [newDelegationDate, setNewDelegationDate] = useState<Date | undefined>(
