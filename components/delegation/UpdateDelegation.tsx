@@ -19,6 +19,7 @@ import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
+import { getGasError } from "./html/delegation_shared";
 
 interface Props {
   address: string;
@@ -114,19 +115,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         setGasError(undefined);
       }
       if (error) {
-        if (error.message.includes("Chain mismatch")) {
-          setGasError(
-            `Switch to ${
-              DELEGATION_CONTRACT.chain_id === 1
-                ? "Ethereum Mainnet"
-                : "Sepolia Network"
-            }`
-          );
-        } else {
-          setGasError(
-            "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-          );
-        }
+        setGasError(getGasError(error));
       }
     },
   });

@@ -2,7 +2,6 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import {
   useContractWrite,
-  useEnsAddress,
   useEnsName,
   usePrepareContractWrite,
   useWaitForTransaction,
@@ -10,9 +9,7 @@ import {
 import { useEffect, useState } from "react";
 
 import {
-  CONSOLIDATION_USE_CASE,
   DelegationCollection,
-  DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
   ALL_USE_CASES,
 } from "../../pages/delegation/[...section]";
@@ -25,6 +22,7 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
+import { DelegationAddressInput, getGasError } from "./html/delegation_shared";
 
 interface Props {
   address: string;
@@ -44,50 +42,16 @@ export default function RevokeDelegationWithSubComponent(
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
   const [newDelegationUseCaseDisplay, setNewDelegationUseCaseDisplay] =
     useState("");
-  const [newDelegationToInput, setNewDelegationToInput] = useState("");
+
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
-
-  const [errors, setErrors] = useState<string[]>([]);
-  const [gasError, setGasError] = useState<string>();
-
-  const newDelegationToAddressEns = useEnsName({
-    address:
-      newDelegationToInput && newDelegationToInput.startsWith("0x")
-        ? (newDelegationToInput as `0x${string}`)
-        : undefined,
-    chainId: 1,
-  });
 
   const orignalDelegatorEnsResolution = useEnsName({
     address: props.originalDelegator as `0x${string}`,
     chainId: 1,
   });
 
-  useEffect(() => {
-    if (newDelegationToAddressEns.data) {
-      setNewDelegationToAddress(newDelegationToInput);
-      setNewDelegationToInput(
-        `${newDelegationToAddressEns.data} - ${newDelegationToInput}`
-      );
-    }
-  }, [newDelegationToAddressEns.data]);
-
-  const newDelegationToAddressFromEns = useEnsAddress({
-    name:
-      newDelegationToInput && newDelegationToInput.endsWith(".eth")
-        ? newDelegationToInput
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setNewDelegationToAddress(newDelegationToAddressFromEns.data);
-      setNewDelegationToInput(
-        `${newDelegationToInput} - ${newDelegationToAddressFromEns.data}`
-      );
-    }
-  }, [newDelegationToAddressFromEns.data]);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [gasError, setGasError] = useState<string>();
 
   const contractWriteDelegationConfig = usePrepareContractWrite({
     address: DELEGATION_CONTRACT.contract,
@@ -108,19 +72,7 @@ export default function RevokeDelegationWithSubComponent(
         setGasError(undefined);
       }
       if (error) {
-        if (error.message.includes("Chain mismatch")) {
-          setGasError(
-            `Switch to ${
-              DELEGATION_CONTRACT.chain_id === 1
-                ? "Ethereum Mainnet"
-                : "Sepolia Network"
-            }`
-          );
-        } else {
-          setGasError(
-            "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-          );
-        }
+        setGasError(getGasError(error));
       }
     },
   });
@@ -353,14 +305,9 @@ export default function RevokeDelegationWithSubComponent(
                 </Tippy>
               </Form.Label>
               <Col sm={9}>
-                <Form.Control
-                  placeholder="Revoke Address - 0x... or ENS"
-                  className={`${styles.formInput}`}
-                  type="text"
-                  value={newDelegationToInput}
-                  onChange={(e) => {
-                    setNewDelegationToInput(e.target.value);
-                    setNewDelegationToAddress(e.target.value);
+                <DelegationAddressInput
+                  setAddress={(address: string) => {
+                    setNewDelegationToAddress(address);
                     clearErrors();
                   }}
                 />

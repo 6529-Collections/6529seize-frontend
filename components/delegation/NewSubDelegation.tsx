@@ -2,8 +2,6 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import {
   useContractWrite,
-  useEnsAddress,
-  useEnsName,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
@@ -27,7 +25,11 @@ import {
   getTransactionLink,
   isValidEthAddress,
 } from "../../helpers/Helpers";
-import { useOrignalDelegatorEnsResolution } from "./html/delegation_hooks";
+import {
+  DelegationAddressInput,
+  useOrignalDelegatorEnsResolution,
+  getGasError,
+} from "./html/delegation_shared";
 
 interface Props {
   address: string;
@@ -47,45 +49,11 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
 
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
-  const [newDelegationToInput, setNewDelegationToInput] = useState("");
+
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
   const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
-
-  const newDelegationToAddressEns = useEnsName({
-    address:
-      newDelegationToInput && newDelegationToInput.startsWith("0x")
-        ? (newDelegationToInput as `0x${string}`)
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressEns.data) {
-      setNewDelegationToAddress(newDelegationToInput);
-      setNewDelegationToInput(
-        `${newDelegationToAddressEns.data} - ${newDelegationToInput}`
-      );
-    }
-  }, [newDelegationToAddressEns.data]);
-
-  const newDelegationToAddressFromEns = useEnsAddress({
-    name:
-      newDelegationToInput && newDelegationToInput.endsWith(".eth")
-        ? newDelegationToInput
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setNewDelegationToAddress(newDelegationToAddressFromEns.data);
-      setNewDelegationToInput(
-        `${newDelegationToInput} - ${newDelegationToAddressFromEns.data}`
-      );
-    }
-  }, [newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -110,19 +78,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             setGasError(undefined);
           }
           if (error) {
-            if (error.message.includes("Chain mismatch")) {
-              setGasError(
-                `Switch to ${
-                  DELEGATION_CONTRACT.chain_id === 1
-                    ? "Ethereum Mainnet"
-                    : "Sepolia Network"
-                }`
-              );
-            } else {
-              setGasError(
-                "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-              );
-            }
+            setGasError(getGasError(error));
           }
         },
       }
@@ -145,19 +101,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             setGasError(undefined);
           }
           if (error) {
-            if (error.message.includes("Chain mismatch")) {
-              setGasError(
-                `Switch to ${
-                  DELEGATION_CONTRACT.chain_id === 1
-                    ? "Ethereum Mainnet"
-                    : "Sepolia Network"
-                }`
-              );
-            } else {
-              setGasError(
-                "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-              );
-            }
+            setGasError(getGasError(error));
           }
         },
       };
@@ -203,7 +147,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
   function clearForm() {
     setErrors([]);
     setNewDelegationToAddress("");
-    setNewDelegationToInput("");
     setNewDelegationCollection("0");
   }
 
@@ -408,15 +351,10 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
                 </Tippy>
               </Form.Label>
               <Col sm={9}>
-                <Form.Control
-                  placeholder={"Delegate to - 0x... or ENS"}
-                  className={`${styles.formInput}`}
-                  type="text"
-                  value={newDelegationToInput}
-                  onChange={(e) => {
-                    setNewDelegationToInput(e.target.value);
-                    setNewDelegationToAddress(e.target.value);
-                    clearErrors();
+                <DelegationAddressInput
+                  setAddress={(address: string) => {
+                    setNewDelegationToAddress(address);
+                    clearForm();
                   }}
                 />
               </Col>
