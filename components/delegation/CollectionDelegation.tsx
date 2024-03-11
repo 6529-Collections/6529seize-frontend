@@ -340,12 +340,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     },
   });
 
-  const useCaseLockStatusesGlobal = areEqualAddresses(
+  const useCaseLockStatusesGlobalParams = areEqualAddresses(
     props.collection.contract,
     DELEGATION_ALL_ADDRESS
   )
-    ? null
-    : useContractReads({
+    ? {}
+    : {
         contracts: getReadParams(
           DELEGATION_ALL_ADDRESS,
           accountResolution.address,
@@ -353,7 +353,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         ),
         enabled: accountResolution.isConnected,
         watch: true,
-      });
+      };
+  const useCaseLockStatusesGlobal = useContractReads(
+    useCaseLockStatusesGlobalParams
+  );
 
   const useCaseLockStatuses = useContractReads({
     contracts: getReadParams(
@@ -424,12 +427,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const [consolidationKeysChanged, setConsolidationKeysChanged] =
     useState(false);
 
-  const collectionLockReadGlobal = areEqualAddresses(
+  const collectionLockReadGlobalParams = areEqualAddresses(
     props.collection.contract,
     DELEGATION_ALL_ADDRESS
   )
-    ? null
-    : useContractRead({
+    ? {}
+    : {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
@@ -437,7 +440,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         args: [DELEGATION_ALL_ADDRESS, accountResolution.address],
         enabled: accountResolution.isConnected,
         watch: true,
-      });
+      };
+
+  const collectionLockReadGlobal = useContractRead(
+    collectionLockReadGlobalParams
+  );
 
   const collectionLockRead = useContractRead({
     address: DELEGATION_CONTRACT.contract,

@@ -89,8 +89,8 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
     }
   }, [newDelegationToAddressFromEns.data]);
 
-  const contractWriteDelegationConfig = props.subdelegation
-    ? usePrepareContractWrite({
+  const contractWriteDelegationConfigParams = props.subdelegation
+    ? {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
@@ -107,7 +107,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data, error) {
+        onSettled(data: any, error: any) {
           if (data) {
             setGasError(undefined);
           }
@@ -127,8 +127,8 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             }
           }
         },
-      })
-    : usePrepareContractWrite({
+      }
+    : {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
@@ -142,7 +142,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data, error) {
+        onSettled(data: any, error: any) {
           if (data) {
             setGasError(undefined);
           }
@@ -162,7 +162,12 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             }
           }
         },
-      });
+      };
+
+  const contractWriteDelegationConfig = usePrepareContractWrite(
+    contractWriteDelegationConfigParams
+  );
+
   const contractWriteDelegation = useContractWrite(
     contractWriteDelegationConfig.config
   );
