@@ -14,6 +14,18 @@ import { useRouter } from "next/router";
 import Download from "../download/Download";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 
+export function getFileTypeFromMetadata(metadata: any) {
+  return metadata.animation_details?.format ?? metadata.image_details.format;
+}
+
+export function getDimensionsFromMetadata(metadata: any) {
+  return `${numberWithCommas(
+    metadata.animation_details?.width ?? metadata.image_details.width
+  )} x ${numberWithCommas(
+    metadata.animation_details?.height ?? metadata.image_details.height
+  )}`;
+}
+
 export function MemePageArt(props: {
   show: boolean;
   nft: NFT | undefined;
@@ -236,17 +248,12 @@ export function MemePageArt(props: {
                         </tr>
                         <tr>
                           <td>File Type</td>
-                          <td>
-                            {props.nft.animation
-                              ? props.nft.metadata.animation_details?.format
-                              : props.nft.metadata.image_details.format}
-                          </td>
+                          <td>{getFileTypeFromMetadata(props.nft.metadata)}</td>
                         </tr>
                         <tr>
                           <td>Dimensions</td>
                           <td>
-                            {props.nft.metadata.image_details.width} x{" "}
-                            {props.nft.metadata.image_details.height}
+                            {getDimensionsFromMetadata(props.nft.metadata)}
                           </td>
                         </tr>
                       </tbody>
