@@ -345,3 +345,20 @@ export function DelegationTokenSelection(
     </Container>
   );
 }
+
+export function DelegationCloseButton(
+  props: Readonly<{ title: string; onHide: () => void }>
+) {
+  return (
+    <Tippy
+      content={`Cancel ${props.title}`}
+      delay={250}
+      placement={"top"}
+      theme={"light"}>
+      <FontAwesomeIcon
+        className={styles.closeNewDelegationForm}
+        icon="times-circle"
+        onClick={() => props.onHide()}></FontAwesomeIcon>
+    </Tippy>
+  );
+}

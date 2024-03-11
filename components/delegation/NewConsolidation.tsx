@@ -1,6 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { usePrepareContractWrite } from "wagmi";
 import { useState } from "react";
 
 import {
@@ -23,6 +23,7 @@ import {
   getGasError,
   DelegationFormLabel,
   DelegationSubmitGroups,
+  DelegationCloseButton,
 } from "./delegation_shared";
 
 interface Props {
@@ -139,16 +140,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
         <Col
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
-          <Tippy
-            content={"Cancel Consolidation"}
-            delay={250}
-            placement={"top"}
-            theme={"light"}>
-            <FontAwesomeIcon
-              className={styles.closeNewDelegationForm}
-              icon="times-circle"
-              onClick={() => props.onHide()}></FontAwesomeIcon>
-          </Tippy>
+          <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
         </Col>
       </Row>
       <Row className="pt-4">

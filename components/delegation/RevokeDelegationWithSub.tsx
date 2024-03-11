@@ -15,6 +15,7 @@ import { DELEGATION_ABI } from "../../abis";
 import { areEqualAddresses, isValidEthAddress } from "../../helpers/Helpers";
 import {
   DelegationAddressInput,
+  DelegationCloseButton,
   DelegationFormLabel,
   DelegationSubmitGroups,
   getGasError,
@@ -71,9 +72,6 @@ export default function RevokeDelegationWithSubComponent(
       }
     },
   });
-  const contractWriteDelegation = useContractWrite(
-    contractWriteDelegationConfig.config
-  );
 
   function clearErrors() {
     setGasError(undefined);
@@ -106,16 +104,7 @@ export default function RevokeDelegationWithSubComponent(
         <Col
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
-          <Tippy
-            content={"Cancel Delegation"}
-            delay={250}
-            placement={"top"}
-            theme={"light"}>
-            <FontAwesomeIcon
-              className={styles.closeNewDelegationForm}
-              icon="times-circle"
-              onClick={() => props.onHide()}></FontAwesomeIcon>
-          </Tippy>
+          <DelegationCloseButton onHide={props.onHide} title="Revocation" />
         </Col>
       </Row>
       <Row className="pt-4">

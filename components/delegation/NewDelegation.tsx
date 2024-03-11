@@ -25,6 +25,7 @@ import {
   DelegationSubmitGroups,
   DelegationExpiryCalendar,
   DelegationTokenSelection,
+  DelegationCloseButton,
 } from "./delegation_shared";
 
 interface Props {
@@ -163,16 +164,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         <Col
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
-          <Tippy
-            content={"Cancel Delegation"}
-            delay={250}
-            placement={"top"}
-            theme={"light"}>
-            <FontAwesomeIcon
-              className={styles.closeNewDelegationForm}
-              icon="times-circle"
-              onClick={() => props.onHide()}></FontAwesomeIcon>
-          </Tippy>
+          <DelegationCloseButton onHide={props.onHide} title="Delegation" />
         </Col>
       </Row>
       <Row className="pt-4">

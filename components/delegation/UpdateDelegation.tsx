@@ -14,6 +14,7 @@ import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";
 import {
+  DelegationCloseButton,
   DelegationExpiryCalendar,
   DelegationFormLabel,
   DelegationSubmitGroups,
@@ -150,16 +151,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         </Col>
         {props.showCancel && (
           <Col xs={2} className="d-flex align-items-center justify-content-end">
-            <Tippy
-              content={`Cancel Update`}
-              delay={250}
-              placement={"top"}
-              theme={"light"}>
-              <FontAwesomeIcon
-                className={styles.closeNewDelegationForm}
-                icon="times-circle"
-                onClick={() => props.onHide()}></FontAwesomeIcon>
-            </Tippy>
+            <DelegationCloseButton onHide={props.onHide} title="Update" />
           </Col>
         )}
       </Row>
