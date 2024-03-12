@@ -27,7 +27,7 @@ export default function CurationHeader({
   return (
     <div>
       <div className="tw-max-w-xl tw-flex tw-flex-col">
-        <p className="tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
+        <p className="tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-0">
           Curate your online experience
         </p>
       </div>
