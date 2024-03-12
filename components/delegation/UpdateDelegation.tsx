@@ -1,12 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import {
-  useContractWrite,
-  useEnsAddress,
-  useEnsName,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
+import { useEnsAddress, useEnsName } from "wagmi";
 import { useEffect, useState } from "react";
 
 import {
@@ -14,11 +8,18 @@ import {
   DelegationCollection,
   SUB_DELEGATION_USE_CASE,
 } from "../../pages/delegation/[...section]";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
-import { getTransactionLink, isValidEthAddress } from "../../helpers/Helpers";
+import { isValidEthAddress } from "../../helpers/Helpers";
+import { getGasError } from "./delegation_shared";
+import {
+  DelegationCloseButton,
+  DelegationFormLabel,
+  DelegationAddressDisabledInput,
+  DelegationExpiryCalendar,
+  DelegationTokenSelection,
+  DelegationSubmitGroups,
+} from "./DelegationFormParts";
 
 interface Props {
   address: string;
@@ -32,12 +33,11 @@ interface Props {
 }
 
 export default function UpdateDelegationComponent(props: Readonly<Props>) {
-  const [isDelegation, setIsDelegation] = useState(
-    ![
-      CONSOLIDATION_USE_CASE.use_case,
-      SUB_DELEGATION_USE_CASE.use_case,
-    ].includes(props.delegation.use_case)
-  );
+  const isDelegation = ![
+    CONSOLIDATION_USE_CASE.use_case,
+    SUB_DELEGATION_USE_CASE.use_case,
+  ].includes(props.delegation.use_case);
+
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 
@@ -50,7 +50,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
 
   const [delegationToInput, setDelegationToInput] = useState("");
   const [delegationToAddress, setDelegationToAddress] = useState("");
-  const [errors, setErrors] = useState<string[]>([]);
+
   const [gasError, setGasError] = useState<string>();
 
   const previousDelegationEns = useEnsName({
@@ -92,7 +92,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     }
   }, [newDelegationToAddressFromEns.data]);
 
-  const contractWriteDelegationConfig = usePrepareContractWrite({
+  const contractWriteDelegationConfigParams = {
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
@@ -109,35 +109,15 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     ],
     functionName:
       validate().length === 0 ? "updateDelegationAddress" : undefined,
-    onSettled(data, error) {
+    onSettled(data: any, error: any) {
       if (data) {
         setGasError(undefined);
       }
       if (error) {
-        if (error.message.includes("Chain mismatch")) {
-          setGasError(
-            `Switch to ${
-              DELEGATION_CONTRACT.chain_id === 1
-                ? "Ethereum Mainnet"
-                : "Sepolia Network"
-            }`
-          );
-        } else {
-          setGasError(
-            "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-          );
-        }
+        setGasError(getGasError(error));
       }
     },
-  });
-  const contractWriteDelegation = useContractWrite(
-    contractWriteDelegationConfig.config
-  );
-
-  const waitContractWriteDelegation = useWaitForTransaction({
-    confirmations: 1,
-    hash: contractWriteDelegation.data?.hash,
-  });
+  };
 
   function validate() {
     const newErrors: string[] = [];
@@ -154,76 +134,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     return newErrors;
   }
 
-  function clearForm() {
-    setErrors([]);
-    setShowExpiryCalendar(false);
-    setShowTokensInput(false);
-    setDelegationDate(undefined);
-    setDelegationToken(undefined);
-  }
-
-  function submitDelegation() {
-    const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
-      window.scrollBy(0, 100);
-    } else {
-      contractWriteDelegation.write?.();
-      props.onSetToast({
-        title: `Updating Delegation`,
-        message: "Confirm in your wallet...",
-      });
-    }
-  }
-
-  useEffect(() => {
-    if (contractWriteDelegation.error) {
-      props.onSetToast({
-        title: `Updating Delegation`,
-        message: contractWriteDelegation.error.message,
-      });
-    }
-    if (contractWriteDelegation.data) {
-      if (contractWriteDelegation.data?.hash) {
-        if (waitContractWriteDelegation.isLoading) {
-          props.onSetToast({
-            title: "Updating Delegation",
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          props.onSetToast({
-            title: "Updating Delegation",
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-          });
-        }
-      }
-    }
-  }, [
-    contractWriteDelegation.error,
-    contractWriteDelegation.data,
-    waitContractWriteDelegation.isLoading,
-  ]);
-
   return (
     <Container className="no-padding">
       <Row>
@@ -239,16 +149,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         </Col>
         {props.showCancel && (
           <Col xs={2} className="d-flex align-items-center justify-content-end">
-            <Tippy
-              content={`Cancel Update`}
-              delay={250}
-              placement={"top"}
-              theme={"light"}>
-              <FontAwesomeIcon
-                className={styles.closeNewDelegationForm}
-                icon="times-circle"
-                onClick={() => props.onHide()}></FontAwesomeIcon>
-            </Tippy>
+            <DelegationCloseButton onHide={props.onHide} title="Update" />
           </Col>
         )}
       </Row>
@@ -256,43 +157,25 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         <Col>
           <Form>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegator
-                <Tippy
-                  content={"Address registering the delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  value={
-                    props.ens
-                      ? `${props.ens} - ${props.address}`
-                      : `${props.address}`
-                  }
-                  disabled
+              <DelegationFormLabel
+                title="Delegator"
+                tooltip="Original Delegator"
+                span={4}
+              />
+              <Col sm={8}>
+                <DelegationAddressDisabledInput
+                  address={props.address}
+                  ens={props.ens}
                 />
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Collection
-                <Tippy
-                  content={"Collection address for delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
+              <DelegationFormLabel
+                title="Collection"
+                tooltip="Collection address for delegation"
+                span={4}
+              />
+              <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
@@ -303,18 +186,12 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Use Case
-                  <Tippy
-                    content={"Delegation Use Case"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
-                <Col sm={9}>
+                <DelegationFormLabel
+                  title="Use Case"
+                  tooltip="Delegation Use Case"
+                  span={4}
+                />
+                <Col sm={8}>
                   <Form.Control
                     className={`${styles.formInput} ${styles.formInputDisabled}`}
                     type="text"
@@ -325,18 +202,12 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Form.Group>
             )}
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Current Delegate Address
-                <Tippy
-                  content={"Current Delegate to Address"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
+              <DelegationFormLabel
+                title="Current Delegate Address"
+                tooltip="Current Delegate to Address"
+                span={4}
+              />
+              <Col sm={8}>
                 <Form.Control
                   className={`${styles.formInput} ${styles.formInputDisabled}`}
                   type="text"
@@ -350,18 +221,12 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               </Col>
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                New Delegate Address
-                <Tippy
-                  content={"New Delegate to Address"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
+              <DelegationFormLabel
+                title="New Delegate Address"
+                tooltip="New Delegate to Address"
+                span={4}
+              />
+              <Col sm={8}>
                 <Form.Control
                   placeholder="Delegate to - 0x... or ENS"
                   className={`${styles.formInput}`}
@@ -377,18 +242,12 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Expiry Date
-                  <Tippy
-                    content={"Expiry date for delegation (optional)"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
-                <Col sm={9}>
+                <DelegationFormLabel
+                  title="Expiry Date"
+                  tooltip="Expiry date for delegation (optional)"
+                  span={4}
+                />
+                <Col sm={8}>
                   <Form.Check
                     checked={!showExpiryCalendar}
                     className={styles.newDelegationFormToggle}
@@ -411,44 +270,21 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     onChange={() => setShowExpiryCalendar(true)}
                   />
                   {showExpiryCalendar && (
-                    <Container fluid className="no-padding pt-3">
-                      <Row>
-                        <Col xs={12} xm={12} md={6} lg={4}>
-                          <Form.Control
-                            min={new Date().toISOString().slice(0, 10)}
-                            className={`${styles.formInput}`}
-                            type="date"
-                            placeholder="Expiry Date"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value) {
-                                setDelegationDate(new Date(value));
-                              } else {
-                                setDelegationDate(undefined);
-                              }
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
+                    <DelegationExpiryCalendar
+                      setDelegationDate={setDelegationDate}
+                    />
                   )}
                 </Col>
               </Form.Group>
             )}
             {isDelegation && (
               <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Tokens
-                  <Tippy
-                    content={"Tokens involved in the delegation (optional)"}
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
-                <Col sm={9}>
+                <DelegationFormLabel
+                  title="Tokens"
+                  tooltip="Tokens involved in the delegation (optional)"
+                  span={4}
+                />
+                <Col sm={8}>
                   <Form.Check
                     checked={!showTokensInput}
                     className={styles.newDelegationFormToggle}
@@ -471,88 +307,22 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     onChange={() => setShowTokensInput(true)}
                   />
                   {showTokensInput && (
-                    <Container fluid className="no-padding pt-3">
-                      <Row>
-                        <Col xs={12} xm={12} md={6} lg={4}>
-                          <Form.Control
-                            min={0}
-                            className={`${styles.formInput}`}
-                            type="number"
-                            placeholder="Token ID"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              try {
-                                const intValue = parseInt(value);
-                                setDelegationToken(intValue);
-                              } catch {
-                                setDelegationToken(undefined);
-                              }
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </Container>
+                    <DelegationTokenSelection
+                      setDelegationToken={setDelegationToken}
+                    />
                   )}
                 </Col>
               </Form.Group>
             )}
-            <Form.Group as={Row} className="pt-2 pb-4">
-              <Form.Label
-                column
-                sm={3}
-                className="d-flex align-items-center"></Form.Label>
-              <Col
-                sm={9}
-                className="d-flex align-items-center  justify-content-center">
-                {props.showCancel && (
-                  <span
-                    className={styles.newDelegationCancelBtn}
-                    onClick={() => props.onHide()}>
-                    Cancel
-                  </span>
-                )}
-                <span
-                  className={`${styles.newDelegationSubmitBtn} ${
-                    contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading
-                      ? `${styles.newDelegationSubmitBtnDisabled}`
-                      : ``
-                  }`}
-                  onClick={() => {
-                    setErrors([]);
-                    submitDelegation();
-                  }}>
-                  Submit{" "}
-                  {(contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
-                </span>
-              </Col>
-            </Form.Group>
-            {(errors.length > 0 || gasError) && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Errors
-                </Form.Label>
-                <Col sm={9}>
-                  <ul className="mb-0">
-                    {errors.map((e, index) => (
-                      <li key={`new-delegation-error-${index}`}>{e}</li>
-                    ))}
-                    {gasError && <li>{gasError}</li>}
-                  </ul>
-                </Col>
-              </Form.Group>
-            )}
+            <DelegationSubmitGroups
+              title={"Updating Delegation"}
+              writeParams={contractWriteDelegationConfigParams}
+              showCancel={props.showCancel}
+              gasError={gasError}
+              validate={validate}
+              onHide={props.onHide}
+              onSetToast={props.onSetToast}
+            />
           </Form>
         </Col>
       </Row>

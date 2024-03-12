@@ -265,57 +265,17 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             </Row>
             <Row className="pt-4 pb-2">
               <Col>
-                <a
-                  href="https://nftdelegation.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.delegationLink}>
-                  <Image
-                    src="/nftdelegation.jpg"
-                    alt="nftdelegation"
-                    width={30}
-                    height={30}
-                  />
-                  <span>NFTDelegation.com</span>
-                </a>
+                <NFTDelegationLink />
               </Col>
             </Row>
             <Row className="pt-2 pb-2">
               <Col>
-                <a
-                  href={
-                    DELEGATION_CONTRACT.chain_id === sepolia.id
-                      ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                      : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.delegationLink}>
-                  <Image
-                    src="/etherscan_w.png"
-                    alt="etherscan"
-                    width={30}
-                    height={30}
-                  />
-                  <span>Etherscan</span>
-                </a>
+                <EtherscanLink />
               </Col>
             </Row>
             <Row className="pt-2 pb-2">
               <Col>
-                <a
-                  href={`https://github.com/6529-Collections/nftdelegation`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.delegationLink}>
-                  <Image
-                    src="/github_w.png"
-                    alt="github"
-                    width={30}
-                    height={30}
-                  />
-                  <span>Github</span>
-                </a>
+                <GithubLink />
               </Col>
             </Row>
           </Container>
@@ -392,57 +352,17 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 <Container className="no-padding">
                   <Row className="pt-2 pb-2">
                     <Col>
-                      <a
-                        href="https://nftdelegation.com/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.delegationLink}>
-                        <Image
-                          src="/nftdelegation.jpg"
-                          alt="nftdelegation"
-                          width={30}
-                          height={30}
-                        />
-                        <span>NFTDelegation.com</span>
-                      </a>
+                      <NFTDelegationLink />
                     </Col>
                   </Row>
                   <Row className="pt-2 pb-2">
                     <Col>
-                      <a
-                        href={
-                          DELEGATION_CONTRACT.chain_id === sepolia.id
-                            ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                            : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.delegationLink}>
-                        <Image
-                          src="/etherscan_w.png"
-                          alt="etherscan"
-                          width={30}
-                          height={30}
-                        />
-                        <span>Etherscan</span>
-                      </a>
+                      <EtherscanLink />
                     </Col>
                   </Row>
                   <Row className="pt-2 pb-2">
                     <Col>
-                      <a
-                        href={`https://github.com/6529-Collections/nftdelegation`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.delegationLink}>
-                        <Image
-                          src="/github_w.png"
-                          alt="github"
-                          width={30}
-                          height={30}
-                        />
-                        <span>Github</span>
-                      </a>
+                      <GithubLink />
                     </Col>
                   </Row>
                 </Container>
@@ -452,34 +372,97 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         </Col>
       </Row>
       {toast && (
-        <div
-          className={styles.toastWrapper}
-          onClick={(e) => {
-            if (
-              !toastRef.current ||
-              !toastRef.current.contains(e.target as Node)
-            ) {
-              setShowToast(false);
-            }
-          }}>
-          <ToastContainer
-            position={"top-center"}
-            className={styles.toast}
-            ref={toastRef}>
-            <Toast onClose={() => setShowToast(false)} show={showToast}>
-              <Toast.Header>
-                <strong className="me-auto">{toast.title}</strong>
-              </Toast.Header>
-              {toast.message && (
-                <Toast.Body
-                  dangerouslySetInnerHTML={{
-                    __html: toast.message,
-                  }}></Toast.Body>
-              )}
-            </Toast>
-          </ToastContainer>
-        </div>
+        <DelegationToast
+          toastRef={toastRef}
+          toast={toast}
+          showToast={showToast}
+          setShowToast={setShowToast}
+        />
       )}
     </Container>
+  );
+}
+
+function NFTDelegationLink() {
+  return (
+    <a
+      href="https://nftdelegation.com/"
+      target="_blank"
+      rel="noreferrer"
+      className={styles.delegationLink}>
+      <Image
+        src="/nftdelegation.jpg"
+        alt="nftdelegation"
+        width={30}
+        height={30}
+      />
+      <span>NFTDelegation.com</span>
+    </a>
+  );
+}
+
+function EtherscanLink() {
+  return (
+    <a
+      href={
+        DELEGATION_CONTRACT.chain_id === sepolia.id
+          ? `https://sepolia.etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+          : `https://etherscan.io/address/${DELEGATION_CONTRACT.contract}`
+      }
+      target="_blank"
+      rel="noreferrer"
+      className={styles.delegationLink}>
+      <Image src="/etherscan_w.png" alt="etherscan" width={30} height={30} />
+      <span>Etherscan</span>
+    </a>
+  );
+}
+
+function GithubLink() {
+  return (
+    <a
+      href={`https://github.com/6529-Collections/nftdelegation`}
+      target="_blank"
+      rel="noreferrer"
+      className={styles.delegationLink}>
+      <Image src="/github_w.png" alt="github" width={30} height={30} />
+      <span>Github</span>
+    </a>
+  );
+}
+
+export function DelegationToast(
+  props: Readonly<{
+    toastRef: React.RefObject<HTMLDivElement>;
+    toast: { title: string; message?: string };
+    showToast: boolean;
+    setShowToast: (show: boolean) => void;
+  }>
+) {
+  return (
+    <div
+      className={styles.toastWrapper}
+      onClick={(e) => {
+        if (!props.toastRef.current?.contains(e.target as Node)) {
+          props.setShowToast(false);
+        }
+      }}>
+      <ToastContainer
+        position={"top-center"}
+        className={styles.toast}
+        ref={props.toastRef}>
+        <Toast onClose={() => props.setShowToast(false)} show={props.showToast}>
+          <Toast.Header>
+            <span className="me-auto">{props.toast.title}</span>
+          </Toast.Header>
+          {props.toast.message && (
+            <Toast.Body
+              dangerouslySetInnerHTML={{
+                __html: props.toast.message,
+              }}></Toast.Body>
+          )}
+        </Toast>
+      </ToastContainer>
+    </div>
   );
 }
