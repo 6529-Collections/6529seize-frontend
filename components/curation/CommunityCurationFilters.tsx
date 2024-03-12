@@ -23,7 +23,7 @@ export default function CommunityCurationFilters({
     CommunityCurationFiltersView.SELECT
   );
   return (
-    <div className="tw-px-4 tw-py-6 sm:tw-px-6">
+    <div className="tw-px-4 tw-py-6 sm:tw-px-6 tw-sticky tw-top-0">
       <CurationHeader setOpen={setOpen} view={view} setView={setView} />
       {components[view]}
     </div>
