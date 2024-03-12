@@ -272,10 +272,8 @@ export default function Distribution(props: Readonly<Props>) {
               <Row>
                 <Col className={`${styles.distributionHeader} pb-1`}>
                   <h1 className="text-center mb-0">
-                    <span className="font-lightest">
-                      {props.header.toUpperCase()}
-                    </span>{" "}
-                    Card #{nftId} Distribution
+                    <span className="font-lightest">{props.header}</span> Card #
+                    {nftId} Distribution
                   </h1>
                   <Button
                     className="seize-btn btn-white"

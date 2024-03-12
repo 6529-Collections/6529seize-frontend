@@ -178,7 +178,6 @@ export async function getServerSideProps(
       },
     };
   } catch (e: any) {
-    console.log(e);
     return {
       redirect: {
         permanent: false,
