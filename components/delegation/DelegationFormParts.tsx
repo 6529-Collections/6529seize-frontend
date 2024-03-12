@@ -1,50 +1,23 @@
 import styles from "./Delegation.module.scss";
-import { useEffect, useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
+import { useState, useEffect } from "react";
+import { Form, Row, Col, Container } from "react-bootstrap";
 import {
-  useContractWrite,
-  useEnsAddress,
   useEnsName,
+  useEnsAddress,
   usePrepareContractWrite,
+  useContractWrite,
   useWaitForTransaction,
 } from "wagmi";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   DelegationCollection,
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
-
-export function useOrignalDelegatorEnsResolution(
-  props: Readonly<{
-    subdelegation?: { originalDelegator: string };
-  }>
-) {
-  return useEnsName({
-    address: props.subdelegation
-      ? (props.subdelegation.originalDelegator as `0x${string}`)
-      : undefined,
-    chainId: 1,
-  });
-}
-
-const DELEGATION_NETWORK_ERROR = `Switch to ${
-  DELEGATION_CONTRACT.chain_id === 1 ? "Ethereum Mainnet" : "Sepolia Network"
-}`;
-
-const DELEGATION_LOCKED_ERROR =
-  "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases";
-
-export function getGasError(error: any) {
-  if (error.message.includes("Chain mismatch")) {
-    return DELEGATION_NETWORK_ERROR;
-  } else {
-    return DELEGATION_LOCKED_ERROR;
-  }
-}
+import { useOrignalDelegatorEnsResolution } from "./delegation_shared";
 
 export function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>

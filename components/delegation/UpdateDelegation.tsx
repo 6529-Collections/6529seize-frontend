@@ -11,15 +11,15 @@ import {
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";
+import { getGasError } from "./delegation_shared";
 import {
-  DelegationAddressDisabledInput,
   DelegationCloseButton,
-  DelegationExpiryCalendar,
   DelegationFormLabel,
-  DelegationSubmitGroups,
+  DelegationAddressDisabledInput,
+  DelegationExpiryCalendar,
   DelegationTokenSelection,
-  getGasError,
-} from "./delegation_shared";
+  DelegationSubmitGroups,
+} from "./DelegationFormParts";
 
 interface Props {
   address: string;
@@ -33,16 +33,11 @@ interface Props {
 }
 
 export default function UpdateDelegationComponent(props: Readonly<Props>) {
-  const [isDelegation, setIsDelegation] = useState(false);
+  const isDelegation = ![
+    CONSOLIDATION_USE_CASE.use_case,
+    SUB_DELEGATION_USE_CASE.use_case,
+  ].includes(props.delegation.use_case);
 
-  useEffect(() => {
-    setIsDelegation(
-      ![
-        CONSOLIDATION_USE_CASE.use_case,
-        SUB_DELEGATION_USE_CASE.use_case,
-      ].includes(props.delegation.use_case)
-    );
-  }, [props.delegation.use_case]);
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 
