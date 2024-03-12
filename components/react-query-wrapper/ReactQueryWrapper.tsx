@@ -40,6 +40,7 @@ export enum QueryKey {
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
   CURATION_FILTERS = "CURATION_FILTERS",
+  CURATION_FILTER = "CURATION_FILTER",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -124,6 +125,11 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
+  onCurationFilterRemoved: ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -138,6 +144,7 @@ export const ReactQueryWrapperContext =
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
+    onCurationFilterRemoved: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -224,6 +231,20 @@ export default function ReactQueryWrapper({
     invalidateQueries({
       key: QueryKey.PROFILE_CIC_STATEMENTS,
       values: handles,
+    });
+  };
+
+  const onCurationFilterRemoved = ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => {
+    invalidateQueries({
+      key: QueryKey.CURATION_FILTER,
+      values: [filterId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.CURATION_FILTERS],
     });
   };
 
@@ -484,6 +505,7 @@ export default function ReactQueryWrapper({
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,
+        onCurationFilterRemoved,
       }}
     >
       {children}

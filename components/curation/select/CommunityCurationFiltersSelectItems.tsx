@@ -1,21 +1,22 @@
 import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
-import CommunityCurationFiltersSelectItemsItem from "./CommunityCurationFiltersSelectItemsItem";
+import CommunityCurationFiltersSelectItemsItem from "./item/CommunityCurationFiltersSelectItemsItem";
 
 export default function CommunityCurationFiltersSelectItems({
   filters,
+  onEditClick,
 }: {
   readonly filters: CurationFilterResponse[];
+  readonly onEditClick: (filter: CurationFilterResponse) => void;
 }) {
   return (
-    <div>
-      <ul>
-        {filters.map((filter) => (
-          <CommunityCurationFiltersSelectItemsItem
-            key={filter.id}
-            filter={filter}
-          />
-        ))}
-      </ul>
+    <div className="tw-space-y-2">
+      {filters.map((filter) => (
+        <CommunityCurationFiltersSelectItemsItem
+          key={filter.id}
+          filter={filter}
+          onEditClick={onEditClick}
+        />
+      ))}
     </div>
   );
 }

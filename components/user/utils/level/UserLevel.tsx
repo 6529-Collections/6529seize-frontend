@@ -11,13 +11,18 @@ export default function UserLevel({
   size = "base",
 }: {
   readonly level: number;
-  readonly size?: "sm" | "base";
+  readonly size?: "xs" | "sm" | "base";
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
     LEVEL_CLASSES[0].classes;
 
-  const getSizeClasses = () => (size === "sm" ? "tw-text-sm" : "tw-text-base");
+  const getSizeClasses = () =>
+    size === "sm"
+      ? "tw-text-sm"
+      : size === "xs"
+      ? "tw-text-xs"
+      : "tw-text-base";
   const classes = `${getColorClasses()} ${getSizeClasses()}`;
   const openLevelsPage = () => {
     window.open("/levels", "_blank");

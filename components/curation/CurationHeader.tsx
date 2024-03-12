@@ -11,18 +11,16 @@ export default function CurationHeader({
   readonly setView: (view: CommunityCurationFiltersView) => void;
   readonly setOpen: (open: boolean) => void;
 }) {
-  const items: CommonSelectItem<CommunityCurationFiltersView>[] = [
-    {
-      label: "Select",
-      value: CommunityCurationFiltersView.SELECT,
-      key: "select",
-    },
-    {
-      label: "Build",
-      value: CommunityCurationFiltersView.BUILD,
-      key: "build",
-    },
-  ];
+  const buttonTitle =
+    view === CommunityCurationFiltersView.SELECT ? "Create new" : "Close";
+
+  const onView = () => {
+    if (view === CommunityCurationFiltersView.SELECT) {
+      setView(CommunityCurationFiltersView.BUILD);
+    } else {
+      setView(CommunityCurationFiltersView.SELECT);
+    }
+  };
 
   return (
     <div>
@@ -53,12 +51,7 @@ export default function CurationHeader({
           </svg>
         </button>
       </div>
-      <CommonTabs
-        items={items}
-        activeItem={view}
-        setSelected={setView}
-        filterLabel="Curation Statement"
-      />
+      <button onClick={onView}>{buttonTitle}</button>
     </div>
   );
 }

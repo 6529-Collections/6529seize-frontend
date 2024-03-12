@@ -3,22 +3,12 @@ import {
   FilterDirection,
   GeneralFilter,
 } from "../../../../helpers/filters/Filters.types";
-import { CommunityCurationFilterStatement } from "../CurationBuildFilter";
 
 export enum CommunityCurationFilterStatementType {
-  MIN_TDH = "MIN_TDH",
-  MAX_TDH = "MAX_TDH",
-  MIN_REP = "MIN_REP",
-  MAX_REP = "MAX_REP",
-  USER_REP = "USER_REP",
-  DIRECTION_REP = "DIRECTION_REP",
-  CATEGORY_REP = "CATEGORY_REP",
-  MIN_CIC = "MIN_CIC",
-  MAX_CIC = "MAX_CIC",
-  DIRECTION_CIC = "DIRECTION_CIC",
-  USER_CIC = "USER_CIC",
-  MIN_LEVEL = "MIN_LEVEL",
-  MAX_LEVEL = "MAX_LEVEL",
+  TDH = "TDH",
+  CIC = "CIC",
+  REP = "REP",
+  LEVEL = "LEVEL",
 }
 
 export interface CommunityCurationFilterStatementItem {
@@ -28,108 +18,213 @@ export interface CommunityCurationFilterStatementItem {
 
 export default function CurationBuildFilterStatementsList({
   filters,
-  setFilters,
+  onRemoveFilters,
 }: {
   readonly filters: GeneralFilter;
-  readonly setFilters: (filters: GeneralFilter) => void;
+  readonly onRemoveFilters?: (
+    keys: CommunityCurationFilterStatementType[]
+  ) => void;
 }) {
+  const showRemoveButton = !!onRemoveFilters;
+
+  const getLevelStatement = (): CommunityCurationFilterStatementItem | null => {
+    if (filters.level.min && filters.level.max) {
+      return {
+        key: CommunityCurationFilterStatementType.LEVEL,
+        label: `Level: ${formatNumberWithCommas(
+          filters.level.min
+        )} to ${formatNumberWithCommas(filters.level.max)}`,
+      };
+    }
+    if (filters.level.min) {
+      return {
+        key: CommunityCurationFilterStatementType.LEVEL,
+        label: `Level: ${formatNumberWithCommas(filters.level.min)}+`,
+      };
+    }
+
+    if (filters.level.max) {
+      return {
+        key: CommunityCurationFilterStatementType.LEVEL,
+        label: `Level: Up to ${formatNumberWithCommas(filters.level.max)}`,
+      };
+    }
+    return null;
+  };
+
+  const getTDHStatement = (): CommunityCurationFilterStatementItem | null => {
+    if (filters.tdh.min && filters.tdh.max) {
+      return {
+        key: CommunityCurationFilterStatementType.TDH,
+        label: `TDH: ${formatNumberWithCommas(
+          filters.tdh.min
+        )} to ${formatNumberWithCommas(filters.tdh.max)}`,
+      };
+    }
+    if (filters.tdh.min) {
+      return {
+        key: CommunityCurationFilterStatementType.TDH,
+        label: `TDH: ${formatNumberWithCommas(filters.tdh.min)}+`,
+      };
+    }
+
+    if (filters.tdh.max) {
+      return {
+        key: CommunityCurationFilterStatementType.TDH,
+        label: `TDH: Up to ${formatNumberWithCommas(filters.tdh.max)}`,
+      };
+    }
+    return null;
+  };
+
+  const getCICSubStatement = (): string => {
+    if (filters.cic.user) {
+      if (filters.cic.direction === FilterDirection.RECEIVED) {
+        return `CIC from ${filters.cic.user}`;
+      }
+      return `CIC to ${filters.cic.user}`;
+    }
+    return "CIC";
+  };
+
+  const getCICStatement = (): CommunityCurationFilterStatementItem | null => {
+    const subStatement = getCICSubStatement();
+    if (filters.cic.min && filters.cic.max) {
+      return {
+        key: CommunityCurationFilterStatementType.CIC,
+        label: `${subStatement}: ${formatNumberWithCommas(
+          filters.cic.min
+        )} to ${formatNumberWithCommas(filters.cic.max)}`,
+      };
+    }
+    if (filters.cic.min) {
+      return {
+        key: CommunityCurationFilterStatementType.CIC,
+        label: `${subStatement}: ${formatNumberWithCommas(filters.cic.min)}+`,
+      };
+    }
+
+    if (filters.cic.max) {
+      return {
+        key: CommunityCurationFilterStatementType.CIC,
+        label: `${subStatement}: Up to ${formatNumberWithCommas(
+          filters.cic.max
+        )}`,
+      };
+    }
+    if (subStatement !== "CIC") {
+      return {
+        key: CommunityCurationFilterStatementType.CIC,
+        label: subStatement,
+      };
+    }
+    return null;
+  };
+
+  const getRepSubStatement = (): string => {
+    if (filters.rep.user) {
+      if (filters.rep.direction === FilterDirection.RECEIVED) {
+        if (filters.rep.category) {
+          return `${filters.rep.category} Rep from ${filters.rep.user}`;
+        }
+        return `Rep from ${filters.rep.user}`;
+      }
+      if (filters.rep.category) {
+        return `${filters.rep.category} Rep to ${filters.rep.user}`;
+      }
+      return `Rep to ${filters.rep.user}`;
+    }
+    if (filters.rep.category) {
+      if (filters.rep.direction === FilterDirection.RECEIVED) {
+        return `Received ${filters.rep.category} Rep`;
+      }
+      return `Given ${filters.rep.category} Rep`;
+    }
+    return "Rep";
+  };
+
+  const getRepStatement = (): CommunityCurationFilterStatementItem | null => {
+    const subStatement = getRepSubStatement();
+    if (filters.rep.min && filters.rep.max) {
+      return {
+        key: CommunityCurationFilterStatementType.REP,
+        label: `${subStatement}: ${formatNumberWithCommas(
+          filters.rep.min
+        )} to ${formatNumberWithCommas(filters.rep.max)}`,
+      };
+    }
+    if (filters.rep.min) {
+      return {
+        key: CommunityCurationFilterStatementType.REP,
+        label: `${subStatement}: ${formatNumberWithCommas(filters.rep.min)}+`,
+      };
+    }
+    if (filters.rep.max) {
+      return {
+        key: CommunityCurationFilterStatementType.REP,
+        label: `${subStatement}: Up to ${formatNumberWithCommas(
+          filters.rep.max
+        )}`,
+      };
+    }
+    if (subStatement !== "Rep") {
+      return {
+        key: CommunityCurationFilterStatementType.REP,
+        label: subStatement,
+      };
+    }
+    return null;
+  };
+
   const getStatements = (): CommunityCurationFilterStatementItem[] => {
     const response: CommunityCurationFilterStatementItem[] = [];
-    if (filters.tdh.min !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MIN_TDH,
-        label: `Min TDH: ${formatNumberWithCommas(filters.tdh.min)}`,
-      });
-    }
-    if (filters.tdh.max !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MAX_TDH,
-        label: `Max TDH: ${formatNumberWithCommas(filters.tdh.max)}`,
-      });
+    const levelStatement = getLevelStatement();
+    if (levelStatement) {
+      response.push(levelStatement);
     }
 
-    if (filters.rep.user !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.USER_REP,
-        label: `Rep User: ${filters.rep.user}`,
-      });
+    const tdhStatement = getTDHStatement();
+    if (tdhStatement) {
+      response.push(tdhStatement);
     }
-    if (filters.rep.direction !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.DIRECTION_REP,
-        label: `Rep Direction: ${filters.rep.direction}`,
-      });
+    const cicStatement = getCICStatement();
+    if (cicStatement) {
+      response.push(cicStatement);
     }
-    if (filters.rep.category !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.CATEGORY_REP,
-        label: `Rep Category: ${filters.rep.category}`,
-      });
+    const repStatement = getRepStatement();
+    if (repStatement) {
+      response.push(repStatement);
     }
-    if (filters.rep.min !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MIN_REP,
-        label: `Min REP: ${formatNumberWithCommas(filters.rep.min)}`,
-      });
-    }
-    if (filters.rep.max !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MAX_REP,
-        label: `Max REP: ${formatNumberWithCommas(filters.rep.max)}`,
-      });
-    }
-
-    if (filters.cic.user !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.USER_CIC,
-        label: `CIC User: ${filters.cic.user}`,
-      });
-    }
-
-    if (filters.cic.direction !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.DIRECTION_CIC,
-        label: `CIC Direction: ${filters.cic.direction}`,
-      });
-    }
-
-    if (filters.cic.min !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MIN_CIC,
-        label: `Min CIC: ${formatNumberWithCommas(filters.cic.min)}`,
-      });
-    }
-    if (filters.cic.max !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MAX_CIC,
-        label: `Max CIC: ${formatNumberWithCommas(filters.cic.max)}`,
-      });
-    }
-
-    if (filters.level.min !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MIN_LEVEL,
-        label: `Min Level: ${formatNumberWithCommas(filters.level.min)}`,
-      });
-    }
-
-    if (filters.level.max !== null) {
-      response.push({
-        key: CommunityCurationFilterStatementType.MAX_LEVEL,
-        label: `Max Level: ${formatNumberWithCommas(filters.level.max)}`,
-      });
-    }
-
     return response;
   };
 
   const statements = getStatements();
 
   return (
-    <ul>
+    <div className="tw-w-full tw-space-y-1">
       {statements.map((statement) => (
-        <li key={statement.key}>{statement.label}</li>
+        <span
+          key={statement.key}
+          className="tw-w-full tw-inline-flex tw-items-center tw-justify-between tw-gap-x-0.5 tw-rounded-md tw-bg-blue-100 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-blue-700"
+        >
+          {statement.label}
+          {showRemoveButton && (
+            <button
+              onClick={() => onRemoveFilters([statement.key])}
+              type="button"
+              className="tw-bg-transparent tw-border-none tw-group tw-relative -tw-mr-1 tw-h-3.5 tw-w-3.5 tw-rounded-sm hover:tw-bg-blue-600/20"
+            >
+              <span className="tw-sr-only">Remove</span>
+              <svg
+                viewBox="0 0 14 14"
+                className="tw-h-3.5 tw-w-3.5 tw-stroke-blue-800/50 group-hover:tw-stroke-blue-800/75"
+              >
+                <path d="M4 4l6 6m0-6l-6 6" />
+              </svg>
+            </button>
+          )}
+        </span>
       ))}
-    </ul>
+    </div>
   );
 }

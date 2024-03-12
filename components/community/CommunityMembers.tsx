@@ -45,7 +45,6 @@ export default function CommunityMembers() {
   const searchParams = useSearchParams();
 
   const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
-  const dispatch = useDispatch();
 
   const convertSortBy = (sort: string | null): CommunityMembersSortOption => {
     if (!sort) return defaultSortBy;

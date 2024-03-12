@@ -15,14 +15,14 @@ export default function CurationBuildFilterSelectStatement({
 }) {
   const items: CommonSelectItem<CommunityCurationFilterStatement>[] = [
     {
+      label: "LEVEL",
+      value: CommunityCurationFilterStatement.LEVEL,
+      key: "level",
+    },
+    {
       label: "TDH",
       value: CommunityCurationFilterStatement.TDH,
       key: "tdh",
-    },
-    {
-      label: "REP",
-      value: CommunityCurationFilterStatement.REP,
-      key: "rep",
     },
     {
       label: "CIC",
@@ -30,9 +30,9 @@ export default function CurationBuildFilterSelectStatement({
       key: "cic",
     },
     {
-      label: "LEVEL",
-      value: CommunityCurationFilterStatement.LEVEL,
-      key: "level",
+      label: "REP",
+      value: CommunityCurationFilterStatement.REP,
+      key: "rep",
     },
   ];
   return (
