@@ -39,6 +39,10 @@ import NFTImage from "../nft-image/NFTImage";
 import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 import Timeline from "../timeline/Timeline";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
+import {
+  getDimensionsFromMetadata,
+  getFileTypeFromMetadata,
+} from "../the-memes/MemePageArt";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -1094,18 +1098,11 @@ export default function LabPage(props: Readonly<Props>) {
                           </tr>
                           <tr>
                             <td>File Type</td>
-                            <td>
-                              {nft.animation
-                                ? nft.metadata.animation_details?.format
-                                : nft.metadata.image_details.format}
-                            </td>
+                            <td>{getFileTypeFromMetadata(nft.metadata)}</td>
                           </tr>
                           <tr>
                             <td>Dimensions</td>
-                            <td>
-                              {nft.metadata.image_details.width} x{" "}
-                              {nft.metadata.image_details.height}
-                            </td>
+                            <td>{getDimensionsFromMetadata(nft.metadata)}</td>
                           </tr>
                         </tbody>
                       </Table>

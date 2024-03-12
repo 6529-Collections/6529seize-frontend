@@ -12,7 +12,7 @@ export default function UserPageStatsCollected({
   readonly tdh: UserPageStatsTDHType;
 }) {
   function getRankDisplay(balance: number, rank: number, ties: number) {
-    if (balance === 0 || 0 >= rank) return "-";
+    if (!rank || !balance) return "-";
     return `#${formatNumberWithCommasOrDash(rank)}${ties > 1 ? " (tie)" : ""}`;
   }
 
@@ -169,7 +169,7 @@ export default function UserPageStatsCollected({
   };
 
   function getTDHRank(rank: number) {
-    if (0 > rank) return "-";
+    if (!rank) return "-";
     return `#${formatNumberWithCommasOrDash(rank)}`;
   }
 
