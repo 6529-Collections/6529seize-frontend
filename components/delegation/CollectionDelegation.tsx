@@ -6,8 +6,6 @@ import {
   Accordion,
   Table,
   FormCheck,
-  Toast,
-  ToastContainer,
   Form,
 } from "react-bootstrap";
 import {
@@ -41,7 +39,10 @@ import {
 } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import Tippy from "@tippyjs/react";
-import { DelegationCenterSection } from "./DelegationCenterMenu";
+import {
+  DelegationCenterSection,
+  DelegationToast,
+} from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
@@ -65,6 +66,11 @@ interface ContractWalletDelegation {
 interface ContractDelegation {
   useCase: any;
   wallets: ContractWalletDelegation[];
+}
+
+interface Revocation {
+  use_case: number;
+  wallet: string;
 }
 
 function getParams(
@@ -213,7 +219,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const [incomingDelegationsLoaded, setIncomingDelegationsLoaded] =
     useState(false);
 
-  const [bulkRevocations, setBulkRevocations] = useState<any[]>([]);
+  const [bulkRevocations, setBulkRevocations] = useState<Revocation[]>([]);
   const [showUpdateDelegation, setShowUpdateDelegation] = useState(false);
 
   const [updateDelegationParams, setUpdateDelegationParams] = useState<
@@ -1061,6 +1067,26 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     );
   }
 
+  function addToBulkRevocations(del: ContractDelegation, wallet: string) {
+    setBulkRevocations((bd) => [
+      ...bd,
+      {
+        use_case: del.useCase.use_case,
+        wallet: wallet,
+      },
+    ]);
+  }
+
+  function removeFromBulkRevocations(del: ContractDelegation, wallet: string) {
+    const shouldKeepItem = (item: Revocation, del: ContractDelegation) =>
+      !(
+        item.use_case === del.useCase.use_case &&
+        areEqualAddresses(item.wallet, wallet)
+      );
+
+    setBulkRevocations((bd) => bd.filter((item) => shouldKeepItem(item, del)));
+  }
+
   function printOutgoingDelegationRow(
     index: number,
     delegations: number,
@@ -1094,23 +1120,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setBulkRevocations((bd) => [
-                          ...bd,
-                          {
-                            use_case: del.useCase.use_case,
-                            wallet: w.wallet,
-                          },
-                        ]);
+                        addToBulkRevocations(del, w.wallet);
                       } else {
-                        setBulkRevocations((bd) =>
-                          bd.filter(
-                            (x) =>
-                              !(
-                                x.use_case == del.useCase.use_case &&
-                                areEqualAddresses(x.wallet, w.wallet)
-                              )
-                          )
-                        );
+                        removeFromBulkRevocations(del, w.wallet);
                       }
                     }}
                   />
@@ -1155,7 +1167,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     onClick={() => {
                       const title = "Revoking Delegation";
                       let message = "Confirm in your wallet...";
-
                       if (chainsMatch()) {
                         setRevokeDelegationParams({
                           collection: areEqualAddresses(
@@ -1886,33 +1897,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         </Col>
       </Row>
       {toast && (
-        <div
-          className={styles.toastWrapper}
-          onClick={(e) => {
-            if (
-              !toastRef.current ||
-              !toastRef.current.contains(e.target as Node)
-            ) {
-              setShowToast(false);
-            }
-          }}>
-          <ToastContainer
-            position={"top-center"}
-            className={styles.toast}
-            ref={toastRef}>
-            <Toast onClose={() => setShowToast(false)} show={showToast}>
-              <Toast.Header>
-                <strong className="me-auto">{toast.title}</strong>
-              </Toast.Header>
-              {toast.message && (
-                <Toast.Body
-                  dangerouslySetInnerHTML={{
-                    __html: toast.message,
-                  }}></Toast.Body>
-              )}
-            </Toast>
-          </ToastContainer>
-        </div>
+        <DelegationToast
+          toastRef={toastRef}
+          toast={toast}
+          showToast={showToast}
+          setShowToast={setShowToast}
+        />
       )}
     </Container>
   );

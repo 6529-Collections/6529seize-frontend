@@ -1,32 +1,25 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import {
-  useContractWrite,
-  useEnsAddress,
-  useEnsName,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   CONSOLIDATION_USE_CASE,
   DelegationCollection,
-  SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
-} from "../../constants";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
+import { isValidEthAddress } from "../../helpers/Helpers";
 import {
-  areEqualAddresses,
-  getTransactionLink,
-  isValidEthAddress,
-} from "../../helpers/Helpers";
+  getGasError,
+  DelegationFormLabel,
+  DelegationSubmitGroups,
+  DelegationCloseButton,
+  DelegationAddressDisabledInput,
+  DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormCollectionFormGroup,
+  DelegationFormDelegateAddressFormGroup,
+} from "./delegation_shared";
 
 interface Props {
   address: string;
@@ -40,54 +33,12 @@ interface Props {
 }
 
 export default function NewConsolidationComponent(props: Readonly<Props>) {
-  const orignalDelegatorEnsResolution = useEnsName({
-    address: props.subdelegation
-      ? (props.subdelegation.originalDelegator as `0x${string}`)
-      : undefined,
-    chainId: 1,
-  });
-
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
-  const [newDelegationToInput, setNewDelegationToInput] = useState("");
+
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
-  const [errors, setErrors] = useState<string[]>([]);
   const [gasError, setGasError] = useState<string>();
-
-  const newDelegationToAddressEns = useEnsName({
-    address:
-      newDelegationToInput && newDelegationToInput.startsWith("0x")
-        ? (newDelegationToInput as `0x${string}`)
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressEns.data) {
-      setNewDelegationToAddress(newDelegationToInput);
-      setNewDelegationToInput(
-        `${newDelegationToAddressEns.data} - ${newDelegationToInput}`
-      );
-    }
-  }, [newDelegationToAddressEns.data]);
-
-  const newDelegationToAddressFromEns = useEnsAddress({
-    name:
-      newDelegationToInput && newDelegationToInput.endsWith(".eth")
-        ? newDelegationToInput
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setNewDelegationToAddress(newDelegationToAddressFromEns.data);
-      setNewDelegationToInput(
-        `${newDelegationToInput} - ${newDelegationToAddressFromEns.data}`
-      );
-    }
-  }, [newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -112,19 +63,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             setGasError(undefined);
           }
           if (error) {
-            if (error.message.includes("Chain mismatch")) {
-              setGasError(
-                `Switch to ${
-                  DELEGATION_CONTRACT.chain_id === 1
-                    ? "Ethereum Mainnet"
-                    : "Sepolia Network"
-                }`
-              );
-            } else {
-              setGasError(
-                "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-              );
-            }
+            setGasError(getGasError(error));
           }
         },
       }
@@ -147,39 +86,13 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             setGasError(undefined);
           }
           if (error) {
-            if (error.message.includes("Chain mismatch")) {
-              setGasError(
-                `Switch to ${
-                  DELEGATION_CONTRACT.chain_id === 1
-                    ? "Ethereum Mainnet"
-                    : "Sepolia Network"
-                }`
-              );
-            } else {
-              setGasError(
-                "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases"
-              );
-            }
+            setGasError(getGasError(error));
           }
         },
       };
 
-  const contractWriteDelegationConfig = usePrepareContractWrite(
-    contractWriteDelegationConfigParams
-  );
-
-  const contractWriteDelegation = useContractWrite(
-    contractWriteDelegationConfig.config
-  );
-
-  const waitContractWriteDelegation = useWaitForTransaction({
-    confirmations: 1,
-    hash: contractWriteDelegation.data?.hash,
-  });
-
   function clearErrors() {
     setGasError(undefined);
-    setErrors([]);
   }
 
   function validate() {
@@ -202,76 +115,6 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
     return newErrors;
   }
 
-  function clearForm() {
-    setErrors([]);
-    setNewDelegationToAddress("");
-    setNewDelegationToInput("");
-    setNewDelegationCollection("0");
-  }
-
-  function submitDelegation() {
-    const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
-      window.scrollBy(0, 100);
-    } else {
-      contractWriteDelegation.write?.();
-      props.onSetToast({
-        title: `Registering Consolidation`,
-        message: "Confirm in your wallet...",
-      });
-    }
-  }
-
-  useEffect(() => {
-    if (contractWriteDelegation.error) {
-      props.onSetToast({
-        title: `Registering Consolidation`,
-        message:
-          contractWriteDelegation.error.message.split("Request Arguments")[0],
-      });
-    }
-    if (contractWriteDelegation.data) {
-      if (contractWriteDelegation.data?.hash) {
-        if (waitContractWriteDelegation.isLoading) {
-          props.onSetToast({
-            title: `Registering Consolidation`,
-            message: `Transaction submitted...
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a><br />Waiting for confirmation...`,
-          });
-        } else {
-          props.onSetToast({
-            title: `Registering Consolidation`,
-            message: `Transaction Successful!
-                    <a
-                    href=${getTransactionLink(
-                      DELEGATION_CONTRACT.chain_id,
-                      contractWriteDelegation.data.hash
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=${styles.etherscanLink}>
-                    view
-                  </a>`,
-          });
-        }
-      }
-    }
-  }, [
-    contractWriteDelegation.error,
-    contractWriteDelegation.data,
-    waitContractWriteDelegation.isLoading,
-  ]);
-
   return (
     <Container>
       <Row>
@@ -284,148 +127,41 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
         <Col
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
-          <Tippy
-            content={"Cancel Consolidation"}
-            delay={250}
-            placement={"top"}
-            theme={"light"}>
-            <FontAwesomeIcon
-              className={styles.closeNewDelegationForm}
-              icon="times-circle"
-              onClick={() => props.onHide()}></FontAwesomeIcon>
-          </Tippy>
+          <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
         </Col>
       </Row>
       <Row className="pt-4">
         <Col>
           <Form>
             {props.subdelegation && (
-              <Form.Group as={Row} className="pb-4">
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Original Delegator
-                  <Tippy
-                    content={
-                      "Original Delegator of Sub Delegation - The address the delegation will be registed for"
-                    }
-                    placement={"top"}
-                    theme={"light"}>
-                    <FontAwesomeIcon
-                      className={styles.infoIcon}
-                      icon="info-circle"></FontAwesomeIcon>
-                  </Tippy>
-                </Form.Label>
-                <Col sm={9}>
-                  <Form.Control
-                    className={`${styles.formInput} ${styles.formInputDisabled}`}
-                    type="text"
-                    value={
-                      orignalDelegatorEnsResolution.data
-                        ? `${orignalDelegatorEnsResolution.data} - ${props.subdelegation.originalDelegator}`
-                        : `${props.subdelegation.originalDelegator}`
-                    }
-                    disabled
-                  />
-                </Col>
-              </Form.Group>
+              <DelegationFormOriginalDelegatorFormGroup
+                subdelegation={props.subdelegation}
+              />
             )}
             <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                {props.subdelegation ? `Delegation Manager` : `Delegator`}
-                <Tippy
-                  content={`Address ${
-                    props.subdelegation ? `executing` : `registering`
-                  } the sub-consolidation`}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
+              <DelegationFormLabel
+                title={props.subdelegation ? `Delegation Manager` : `Delegator`}
+                tooltip={`Address ${
+                  props.subdelegation ? `executing` : `registering`
+                } the sub-consolidation`}
+              />
               <Col sm={9}>
-                <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
-                  type="text"
-                  value={
-                    props.ens
-                      ? `${props.ens} - ${props.address}`
-                      : `${props.address}`
-                  }
-                  disabled
+                <DelegationAddressDisabledInput
+                  address={props.address}
+                  ens={props.ens}
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Collection{" "}
-                <Tippy
-                  content={"Collection address for delegation"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Select
-                  className={`${styles.formInput}`}
-                  value={newDelegationCollection}
-                  onChange={(e) => {
-                    setNewDelegationCollection(e.target.value);
-                    clearErrors();
-                  }}>
-                  <option value="0" disabled>
-                    Select Collection
-                  </option>
-                  {!props.subdelegation ||
-                  areEqualAddresses(
-                    props.subdelegation.collection.contract,
-                    DELEGATION_ALL_ADDRESS
-                  ) ? (
-                    SUPPORTED_COLLECTIONS.map((sc) => (
-                      <option
-                        key={`add-delegation-select-collection-${sc.contract}`}
-                        value={sc.contract}>
-                        {`${sc.display}`}
-                      </option>
-                    ))
-                  ) : (
-                    <option
-                      key={`add-delegation-select-collection`}
-                      value={props.subdelegation.collection.contract}>
-                      {`${props.subdelegation.collection.display}`}
-                    </option>
-                  )}
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={3} className="d-flex align-items-center">
-                Delegate Address
-                <Tippy
-                  content={"Consolidate with Address e.g. your hot wallet"}
-                  placement={"top"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </Form.Label>
-              <Col sm={9}>
-                <Form.Control
-                  placeholder={"Consolidate with - 0x... or ENS"}
-                  className={`${styles.formInput}`}
-                  type="text"
-                  value={newDelegationToInput}
-                  onChange={(e) => {
-                    setNewDelegationToInput(e.target.value);
-                    setNewDelegationToAddress(e.target.value);
-                    clearErrors();
-                  }}
-                />
-              </Col>
-            </Form.Group>
+            <DelegationFormCollectionFormGroup
+              collection={newDelegationCollection}
+              setCollection={setNewDelegationCollection}
+              subdelegation={props.subdelegation}
+            />
+            <DelegationFormDelegateAddressFormGroup
+              setAddress={setNewDelegationToAddress}
+              title="Delegate Address"
+              tooltip="Consolidate with Address e.g. your hot wallet"
+            />
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Note: For TDH Consolidation use either &apos;Any
@@ -440,61 +176,15 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                 </a>
               </Form.Label>
             </Form.Group>
-            <Form.Group as={Row} className="pt-2 pb-4">
-              <Form.Label
-                column
-                sm={3}
-                className="d-flex align-items-center"></Form.Label>
-              <Col
-                sm={9}
-                className="d-flex align-items-center justify-content-center">
-                <span
-                  className={styles.newDelegationCancelBtn}
-                  onClick={() => props.onHide()}>
-                  Cancel
-                </span>
-                <span
-                  className={`${styles.newDelegationSubmitBtn} ${
-                    contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading
-                      ? `${styles.newDelegationSubmitBtnDisabled}`
-                      : ``
-                  }`}
-                  onClick={() => {
-                    setErrors([]);
-                    submitDelegation();
-                  }}>
-                  Submit{" "}
-                  {(contractWriteDelegation.isLoading ||
-                    waitContractWriteDelegation.isLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
-                </span>
-              </Col>
-            </Form.Group>
-            {(errors.length > 0 || gasError) && (
-              <Form.Group
-                as={Row}
-                className={`pt-2 pb-2 ${styles.newDelegationError}`}>
-                <Form.Label column sm={3} className="d-flex align-items-center">
-                  Errors
-                </Form.Label>
-                <Col sm={9} className="d-flex align-items-center">
-                  <ul className="mb-0">
-                    {errors.map((e, index) => (
-                      <li key={`new-delegation-error-${index}`}>{e}</li>
-                    ))}
-                    {gasError && <li>{gasError}</li>}
-                  </ul>
-                </Col>
-              </Form.Group>
-            )}
+            <DelegationSubmitGroups
+              title={"Registering Consolidation"}
+              writeParams={contractWriteDelegationConfigParams}
+              showCancel={true}
+              gasError={gasError}
+              validate={validate}
+              onHide={props.onHide}
+              onSetToast={props.onSetToast}
+            />
           </Form>
         </Col>
       </Row>
