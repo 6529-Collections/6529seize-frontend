@@ -66,14 +66,21 @@ export default function CommunityCurationFiltersSelect({
     }));
   };
 
+  const [curationFilters, setCurationFilters] = useState<
+    CurationFilterResponse[]
+  >([]);
+  useEffect(() => {
+    if (data) {
+      setCurationFilters(
+        data.filter((filter) => filter.id !== activeCurationFilterId)
+      );
+    } else {
+      setCurationFilters([]);
+    }
+  }, [data]);
+
   return (
     <div className="tw-mt-8 tw-w-full tw-space-y-4">
-      {activeCurationFilterId && (
-        <CommunityCurationFiltersSelectActiveFilter
-          activeCurationFilterId={activeCurationFilterId}
-          onEditClick={onEditClick}
-        />
-      )}
       <CurationBuildFiltersUserSearch
         value={filters.curation_criteria_user}
         setValue={onUserSelect}
@@ -83,8 +90,14 @@ export default function CommunityCurationFiltersSelect({
         filterName={filters.curation_criteria_name}
         setFilterName={onFilterNameSearch}
       />
+      {activeCurationFilterId && (
+        <CommunityCurationFiltersSelectActiveFilter
+          activeCurationFilterId={activeCurationFilterId}
+          onEditClick={onEditClick}
+        />
+      )}
       <CommunityCurationFiltersSelectItems
-        filters={data ?? []}
+        filters={curationFilters}
         onEditClick={onEditClick}
       />
     </div>
