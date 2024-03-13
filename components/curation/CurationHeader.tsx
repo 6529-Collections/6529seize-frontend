@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
 import { CommunityCurationFiltersView } from "./CommunityCurationFilters";
+import { AuthContext } from "../auth/Auth";
 
 export default function CurationHeader({
   view,
@@ -11,6 +13,7 @@ export default function CurationHeader({
   readonly setView: (view: CommunityCurationFiltersView) => void;
   readonly setOpen: (open: boolean) => void;
 }) {
+  const { connectedProfile } = useContext(AuthContext);
   const onView = () => {
     if (view === CommunityCurationFiltersView.SELECT) {
       setView(CommunityCurationFiltersView.BUILD);
@@ -39,15 +42,15 @@ export default function CurationHeader({
             <path
               d="M20 12H4M4 12L10 18M4 12L10 6"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
           <span>Back to list</span>
         </button>
       )}
-      {view === CommunityCurationFiltersView.SELECT && (
+      {view === CommunityCurationFiltersView.SELECT && connectedProfile && (
         <button
           type="button"
           onClick={onView}
@@ -62,9 +65,9 @@ export default function CurationHeader({
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
           <span>Create new</span>

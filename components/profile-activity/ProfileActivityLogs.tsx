@@ -15,7 +15,9 @@ import CommonFilterTargetSelect, {
 } from "../utils/CommonFilterTargetSelect";
 
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
+import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
+import { useSelector } from "react-redux";
+import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -24,6 +26,7 @@ export interface ActivityLogParams {
   readonly matter: RateMatter | null;
   readonly targetType: FilterTargetType;
   readonly handleOrWallet: string | null;
+  readonly activeCurationFilterId: string | null;
 }
 
 export interface ActivityLogParamsConverted {
@@ -34,6 +37,7 @@ export interface ActivityLogParamsConverted {
   rating_matter?: string;
   profile?: string;
   target?: string;
+  curation_criteria_id?: string;
 }
 
 export const convertActivityLogParams = (
@@ -49,6 +53,9 @@ export const convertActivityLogParams = (
 
   if (params.matter) {
     converted.rating_matter = params.matter;
+  }
+  if (params.activeCurationFilterId && !params.handleOrWallet) {
+    converted.curation_criteria_id = params.activeCurationFilterId;
   }
 
   if (!params.handleOrWallet) {
@@ -83,6 +90,7 @@ export default function ProfileActivityLogs({
   readonly withFilters: boolean;
   readonly children?: React.ReactNode;
 }) {
+  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -119,6 +127,7 @@ export default function ProfileActivityLogs({
       matter: initialParams.matter,
       targetType,
       handleOrWallet: initialParams.handleOrWallet,
+      activeCurationFilterId,
     })
   );
 
@@ -131,9 +140,16 @@ export default function ProfileActivityLogs({
         matter: initialParams.matter,
         targetType,
         handleOrWallet: initialParams.handleOrWallet,
+        activeCurationFilterId,
       })
     );
-  }, [currentPage, selectedFilters, initialParams.handleOrWallet, targetType]);
+  }, [
+    currentPage,
+    selectedFilters,
+    initialParams.handleOrWallet,
+    targetType,
+    activeCurationFilterId,
+  ]);
 
   const { isLoading, data: logs } = useQuery<Page<ProfileActivityLog>>({
     queryKey: [
@@ -152,13 +168,16 @@ export default function ProfileActivityLogs({
       }),
     placeholderData: keepPreviousData,
   });
-
-  const [showPaginator, setShowPaginator] = useState(false);
-
+  const [totalPages, setTotalPages] = useState<number>(1);
   useEffect(() => {
-    setShowPaginator(!!(logs?.page && logs?.page > 1) || !!logs?.next);
-  }, [logs]);
-
+    if (isLoading) return;
+    if (!logs?.count) {
+      setCurrentPage(1);
+      setTotalPages(1);
+      return;
+    }
+    setTotalPages(Math.ceil(logs.count / initialParams.pageSize));
+  }, [logs?.count, logs?.page, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
       <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
@@ -191,13 +210,12 @@ export default function ProfileActivityLogs({
                 logs={logs.data}
                 user={initialParams.handleOrWallet}
               />
-              {showPaginator && (
-                <CommonTableSimplePagination
+              {totalPages > 1 && (
+                <CommonTablePagination
                   currentPage={currentPage}
                   setCurrentPage={setCurrentPage}
-                  showNextPage={!!logs.next}
-                  small={false}
-                  loading={isLoading}
+                  totalPages={totalPages}
+                  small={!!initialParams.handleOrWallet}
                 />
               )}
             </div>

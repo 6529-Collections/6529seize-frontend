@@ -1,8 +1,7 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import CommonInput from "../../utils/input/CommonInput";
 import CurationBuildFilterSelectStatement from "./CurationBuildFilterSelectStatement";
 import {
-  CurationFilterRequest,
   CurationFilterResponse,
   FilterDirection,
   GeneralFilter,
@@ -11,12 +10,10 @@ import CurationBuildFilterStatement from "./CurationBuildFilterStatement";
 import CurationBuildFilterStatementsList, {
   CommunityCurationFilterStatementType,
 } from "./statements/CurationBuildFilterStatementsList";
-import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../services/api/common-api";
-import { AuthContext } from "../../auth/Auth";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CurationBuildFilterSave from "./actions/CurationBuildFilterSave";
 import CurationBuildFilterTest from "./actions/CurationBuildFilterTest";
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
 
 export enum CommunityCurationFilterStatement {
   TDH = "TDH",
@@ -35,7 +32,7 @@ export default function CurationBuildFilter({
   const [name, setName] = useState<string>(originalFilter?.name ?? "");
   const [statementType, setStatementType] =
     useState<CommunityCurationFilterStatement>(
-      CommunityCurationFilterStatement.TDH
+      CommunityCurationFilterStatement.LEVEL
     );
 
   const [filters, setFilters] = useState<GeneralFilter>(
@@ -96,6 +93,10 @@ export default function CurationBuildFilter({
     }
   };
 
+  const [testRunMembersCount, setTestRunMembersCount] = useState<number | null>(
+    null
+  );
+
   return (
     <div className="tw-mt-4 tw-pb-6 tw-w-full tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
       <div className="tw-px-4 tw-pt-4">
@@ -124,15 +125,26 @@ export default function CurationBuildFilter({
             setFilters={setFilters}
           />
         </div>
+        <div className="tw-pt-4 tw-px-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-w-full tw-inline-flex tw-justify-between tw-items-center">
+          {testRunMembersCount !== null && (
+            <div className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 ">
+              Members: {formatNumberWithCommas(testRunMembersCount)}
+            </div>
+          )}
 
-        <div className="tw-pt-4 tw-px-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-flex tw-gap-x-3 tw-justify-end">
-          <CurationBuildFilterTest filters={filters} name={name} />
-          <CurationBuildFilterSave
-            filters={filters}
-            name={name}
-            originalFilter={originalFilter}
-            onSaved={onSaved}
-          />
+          <div className="tw-w-full tw-flex tw-gap-x-3 tw-justify-end tw-items-center">
+            <CurationBuildFilterTest
+              filters={filters}
+              name={name}
+              onTestRunMembersCount={setTestRunMembersCount}
+            />
+            <CurationBuildFilterSave
+              filters={filters}
+              name={name}
+              originalFilter={originalFilter}
+              onSaved={onSaved}
+            />
+          </div>
         </div>
       </div>
     </div>

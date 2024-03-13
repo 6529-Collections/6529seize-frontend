@@ -204,19 +204,21 @@ export default function CurationBuildFilterStatementsList({
       {statements.map((statement) => (
         <div
           key={statement.key}
-          className="tw-inline-flex tw-items-center tw-justify-between tw-gap-x-0.5 tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+          className="tw-inline-flex tw-items-center tw-justify-between  tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700"
         >
           {statement.label}
           {showRemoveButton && (
             <button
               onClick={() => onRemoveFilters([statement.key])}
               type="button"
-              className="tw-bg-transparent tw-border-none tw-group tw-relative -tw-mr-1 tw-h-3.5 tw-w-3.5 tw-rounded-sm hover:tw-bg-blue-600/20"
+              className="tw-bg-transparent tw-items-center -tw-right-2 tw-relative  tw-border-none tw-group tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
             >
               <span className="tw-sr-only">Remove</span>
               <svg
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 14 14"
-                className="tw-h-3.5 tw-w-3.5 tw-stroke-blue-800/50 group-hover:tw-stroke-blue-800/75"
+                className="tw-h-3.5 tw-w-3.5 "
               >
                 <path d="M4 4l6 6m0-6l-6 6" />
               </svg>

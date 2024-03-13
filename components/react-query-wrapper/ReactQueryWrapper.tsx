@@ -130,6 +130,11 @@ type ReactQueryWrapperContextType = {
   }: {
     readonly filterId: string;
   }) => void;
+  onCurationFilterChanged: ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -145,6 +150,7 @@ export const ReactQueryWrapperContext =
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     onCurationFilterRemoved: () => {},
+    onCurationFilterChanged: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -234,19 +240,39 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const onCurationFilterRemoved = ({
+  const inValidateCurationFilter = ({
     filterId,
   }: {
     readonly filterId: string;
   }) => {
-    invalidateQueries({
-      key: QueryKey.CURATION_FILTER,
-      values: [filterId],
-    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CURATION_FILTERS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.CURATION_FILTER, filterId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_LOGS, { curation_criteria_id: filterId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [
+        QueryKey.COMMUNITY_MEMBERS_TOP,
+        { curation_criteria_id: filterId },
+      ],
+    });
   };
+
+  const onCurationFilterRemoved = ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => inValidateCurationFilter({ filterId });
+
+  const onCurationFilterChanged = ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => inValidateCurationFilter({ filterId });
 
   const setRepRates = ({
     data,
@@ -506,6 +532,7 @@ export default function ReactQueryWrapper({
         initLandingPage,
         initCommunityActivityPage,
         onCurationFilterRemoved,
+        onCurationFilterChanged,
       }}
     >
       {children}

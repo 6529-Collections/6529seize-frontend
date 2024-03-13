@@ -1,4 +1,4 @@
-import { use, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
 import { AuthContext } from "../../../auth/Auth";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,9 +11,7 @@ import {
   getScaledImageUri,
 } from "../../../../helpers/image.helpers";
 import Link from "next/link";
-import UserLevel from "../../../user/utils/level/UserLevel";
-import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
-import CommunityCurationFiltersSelectItemsItemFilters from "./CommunityCurationFiltersSelectItemsItemFilters";
+
 import CommunityCurationFiltersSelectItemsItemDelete from "./CommunityCurationFiltersSelectItemsItemDelete";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -74,7 +72,8 @@ export default function CommunityCurationFiltersSelectItemsItem({
 
   return (
     <div
-      className={` tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700 hover:tw-border-primary-300 tw-transition tw-duration-300 tw-ease-out  ${
+      onClick={onFilterClick}
+      className={`tw-cursor-pointer tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700 hover:tw-border-primary-300 tw-transition tw-duration-300 tw-ease-out  ${
         isActive ? "tw-border-primary-300" : ""
       }`}
     >
@@ -92,7 +91,10 @@ export default function CommunityCurationFiltersSelectItemsItem({
                 id="options-menu-0-button"
                 aria-expanded="false"
                 aria-haspopup="true"
-                onClick={() => setIsOptionsOpen(!isOptionsOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOptionsOpen(!isOptionsOpen);
+                }}
               >
                 <span className="tw-sr-only">Open options</span>
                 <svg
@@ -119,7 +121,10 @@ export default function CommunityCurationFiltersSelectItemsItem({
                   >
                     <div>
                       <div
-                        onClick={() => onEditClick(filter)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditClick(filter);
+                        }}
                         className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
                         role="menuitem"
                         tabIndex={-1}
@@ -143,47 +148,47 @@ export default function CommunityCurationFiltersSelectItemsItem({
           <CurationBuildFilterStatementsList filters={filter.criteria} />
         </div>
       </div>
-      <button
-        onClick={onFilterClick}
-        className="tw-bg-transparent tw-px-4 tw-py-2 tw-border-none tw-text-left tw-w-full"
-      >
-        <div className="tw-w-full tw-inline-flex tw-gap-x-2 tw-items-center">
-          <p className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-mb-0">
-            Created by
-          </p>
-          <div className="tw-flex tw-gap-x-2 tw-items-center">
-            {filter.created_by?.pfp && (
-              <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
-                <div className="tw-h-full tw-w-full tw-max-w-full">
-                  <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
-                    <img
-                      src={getScaledImageUri(
-                        filter.created_by.pfp,
-                        ImageScale.W_AUTO_H_50
-                      )}
-                      alt="Community Table Profile Picture"
-                      className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
-                    />
-                  </div>
+      <div className="tw-w-full tw-inline-flex tw-px-4 tw-py-2 tw-gap-x-2 tw-items-center">
+        <p className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-mb-0">
+          Created by
+        </p>
+        <div className="tw-flex tw-gap-x-2 tw-items-center">
+          {filter.created_by?.pfp && (
+            <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
+              <div className="tw-h-full tw-w-full tw-max-w-full">
+                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
+                  <img
+                    src={getScaledImageUri(
+                      filter.created_by.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
+                    alt="Community Table Profile Picture"
+                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                  />
                 </div>
               </div>
-            )}
-            <div className="tw-flex tw-items-center tw-space-x-2">
-              <Link
-                href={`/${filter.created_by?.handle}`}
-                className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-semibold"
-              >
-                {filter.created_by?.handle}
-              </Link>
-            </div>
-          </div>
-          {!filter.visible && (
-            <div className="tw-text-xs tw-w-full tw-text-right tw-text-red">
-              Not saved
             </div>
           )}
+          <div
+            className="tw-flex tw-items-center tw-space-x-2"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Link
+              href={`/${filter.created_by?.handle}`}
+              className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-semibold"
+            >
+              {filter.created_by?.handle}
+            </Link>
+          </div>
         </div>
-      </button>
+        {!filter.visible && (
+          <div className="tw-text-xs tw-w-full tw-text-right tw-text-red">
+            Not saved
+          </div>
+        )}
+      </div>
     </div>
   );
 }

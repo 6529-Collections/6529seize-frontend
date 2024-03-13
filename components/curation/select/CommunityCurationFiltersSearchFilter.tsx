@@ -10,7 +10,7 @@ export default function CommunityCurationFiltersSearchFilter({
   return (
     <CommonInput
       inputType="text"
-      placeholder="Search filter"
+      placeholder="Search by curation name"
       value={filterName ?? ""}
       showSearchIcon={true}
       onChange={setFilterName}

@@ -21,6 +21,7 @@ import {
   selectActiveCurationFilterId,
   setActiveCurationFilterId,
 } from "../../store/curationFilterSlice";
+import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -207,11 +208,19 @@ export default function CommunityMembers() {
     await updateFields(items);
   };
 
-  const [showPaginator, setShowPaginator] = useState(false);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
-    setShowPaginator(!!(members?.page && members?.page > 1) || !!members?.next);
-  }, [members]);
+    if (isLoading) return;
+    if (!members?.count) {
+      setPage(1);
+      setTotalPages(1);
+      return;
+    }
+    const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
+    if (pagesCount < debouncedParams.page) setPage(pagesCount);
+    setTotalPages(pagesCount);
+  }, [members?.count, isLoading]);
 
   const goToNerd = () => router.push("/community-nerd");
 
@@ -256,11 +265,11 @@ export default function CommunityMembers() {
               />
             </div>
           </div>
-          {showPaginator && (
-            <CommonTableSimplePagination
+          {totalPages > 1 && (
+            <CommonTablePagination
               currentPage={params.page}
               setCurrentPage={setPage}
-              showNextPage={!!members.next}
+              totalPages={totalPages}
               small={false}
               loading={isLoading}
             />

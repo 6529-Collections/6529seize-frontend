@@ -1,10 +1,11 @@
 import CurationBuildFilter from "./filter-builder/CurationBuildFilter";
 import CurationHeader from "./CurationHeader";
 import CommunityCurationFiltersSelect from "./select/CommunityCurationFiltersSelect";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CurationFilterResponse } from "../../helpers/filters/Filters.types";
 import { useDispatch } from "react-redux";
 import { setActiveCurationFilterId } from "../../store/curationFilterSlice";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
 export enum CommunityCurationFiltersView {
   SELECT = "SELECT",
@@ -17,6 +18,7 @@ export default function CommunityCurationFilters({
   readonly setOpen: (open: boolean) => void;
 }) {
   const dispatch = useDispatch();
+  const { onCurationFilterChanged } = useContext(ReactQueryWrapperContext);
   const [editFilter, setEditFilter] = useState<CurationFilterResponse | null>(
     null
   );
@@ -40,10 +42,11 @@ export default function CommunityCurationFilters({
     setEditFilter(null);
     setView(CommunityCurationFiltersView.SELECT);
     dispatch(setActiveCurationFilterId(response.id));
+    onCurationFilterChanged({ filterId: response.id });
   };
 
   return (
-    <div className="tw-pr-2">
+    <div className="tw-pr-2 pb-4">
       <CurationHeader setOpen={setOpen} view={view} setView={onView} />
       {view === CommunityCurationFiltersView.SELECT && (
         <CommunityCurationFiltersSelect onEditClick={onEditClick} />

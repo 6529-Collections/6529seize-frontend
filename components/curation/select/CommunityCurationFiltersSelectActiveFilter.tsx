@@ -20,13 +20,15 @@ export default function CommunityCurationFiltersSelectActiveFilter({
     placeholderData: keepPreviousData,
   });
   if (!data) {
-    return <div className="tw-px-4 tw-text-sm tw-text-iron-400 tw-text-normal">Loading...</div>;
+    return <div>loading</div>;
   }
   return (
-    <CommunityCurationFiltersSelectItemsItem
-      key={data.id}
-      filter={data}
-      onEditClick={onEditClick}
-    />
+    <div className="tw-px-4">
+      <CommunityCurationFiltersSelectItemsItem
+        key={data.id}
+        filter={data}
+        onEditClick={onEditClick}
+      />
+    </div>
   );
 }

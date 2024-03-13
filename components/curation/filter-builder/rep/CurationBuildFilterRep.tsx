@@ -1,10 +1,10 @@
+import { useEffect } from "react";
 import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
 import {
   FilterDirection,
   GeneralFilter,
 } from "../../../../helpers/filters/Filters.types";
 import CommonInput from "../../../utils/input/CommonInput";
-import CurationBuildFilterMinMaxValues from "../common/CurationBuildFilterMinMaxValues";
 import CurationBuildFiltersRepSearch from "../common/rep-search/CurationBuildFiltersRepSearch";
 import CurationBuildFiltersUserDirection from "../common/user-direction/CurationBuildFiltersUserDirection";
 import CurationBuildFiltersUserSearch from "../common/user-search/CurationBuildFiltersUserSearch";
@@ -56,20 +56,26 @@ export default function CurationBuildFilterRep({
     });
   };
 
-  const userPlaceholder =
-    filters.rep.direction === FilterDirection.SENT
-      ? "Rep Receiver"
-      : "Rep Giver";
+  const showDirection = !!(filters.rep.user || filters.rep.category);
+
+  useEffect(() => {
+    if (!showDirection) {
+      setUserDirection(FilterDirection.RECEIVED);
+    }
+  }, [showDirection]);
 
   return (
     <div className="tw-space-y-4">
-      <CurationBuildFiltersUserDirection
-        userDirection={filters.rep.direction}
-        setUserDirection={setUserDirection}
-      />
+      {showDirection && (
+        <CurationBuildFiltersUserDirection
+          userDirection={filters.rep.direction}
+          type="Rep"
+          setUserDirection={setUserDirection}
+        />
+      )}
       <CurationBuildFiltersUserSearch
         value={filters.rep.user}
-        placeholder={userPlaceholder}
+        placeholder="User"
         setValue={setUser}
       />
       <CurationBuildFiltersRepSearch
@@ -77,7 +83,7 @@ export default function CurationBuildFilterRep({
         setCategory={setCategory}
       />
       <CommonInput
-        placeholder="Min Rep"
+        placeholder="Rep from"
         inputType="number"
         value={
           typeof filters.rep.min === "number" ? filters.rep.min.toString() : ""

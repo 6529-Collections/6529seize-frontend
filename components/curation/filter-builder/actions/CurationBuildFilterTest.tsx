@@ -8,28 +8,35 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "../../../../services/api/common-api";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { useDispatch } from "react-redux";
 import { setActiveCurationFilterId } from "../../../../store/curationFilterSlice";
 import { Page } from "../../../../helpers/Types";
 import { CommunityMemberOverview } from "../../../../entities/IProfile";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../../react-query-wrapper/ReactQueryWrapper";
 import {
   CommunityMembersQuery,
   CommunityMembersSortOption,
 } from "../../../../pages/community";
 import { SortDirection } from "../../../../entities/ISort";
+import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 
 export default function CurationBuildFilterTest({
   filters,
   name,
+  onTestRunMembersCount,
 }: {
   readonly filters: GeneralFilter;
   readonly name: string;
+  readonly onTestRunMembersCount: (count: number | null) => void;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const dispatch = useDispatch();
+  const { onCurationFilterChanged } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const createNewFilterMutation = useMutation({
     mutationFn: async (body: CurationFilterRequest) =>
@@ -94,6 +101,7 @@ export default function CurationBuildFilterTest({
     });
     if (response) {
       dispatch(setActiveCurationFilterId(response.id));
+      onCurationFilterChanged({ filterId: response.id });
       setParams((prev) => ({
         ...prev,
         curation_criteria_id: response.id,
@@ -101,10 +109,18 @@ export default function CurationBuildFilterTest({
     }
   };
 
+  useEffect(() => onTestRunMembersCount(members?.count ?? null), [members]);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  useEffect(() => setLoading(isFetching || mutating), [isFetching, mutating]);
+
   return (
-    <div>
-      <button type="button" onClick={onTest} className="tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-700">Test</button>
-      {members?.count && <div>Members: {members.count}</div>}
-    </div>
+    <button
+      type="button"
+      onClick={onTest}
+      className="tw-bg-iron-900 tw-w-[4rem] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-700"
+    >
+      {loading ? <CircleLoader /> : "Test"}
+    </button>
   );
 }
