@@ -6,7 +6,7 @@ export default function CommonTabs<T, U = unknown>(
 ) {
   const { items, activeItem, setSelected } = props;
   return (
-    <div className="tw-mt-4 tw-inline-flex tw-rounded-lg tw-w-full sm:tw-w-auto -tw-space-x-px">
+    <div className="tw-inline-flex tw-rounded-lg tw-w-full sm:tw-w-auto -tw-space-x-px">
       {Object.values(items).map((item, i) => (
         <CommonTabsTab
           key={item.key}

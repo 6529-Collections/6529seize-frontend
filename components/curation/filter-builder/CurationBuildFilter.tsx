@@ -97,34 +97,38 @@ export default function CurationBuildFilter({
   };
 
   return (
-    <div className="tw-mt-8 tw-w-full tw-space-y-4">
-      <div>BUIDL Filter</div>
-      <CommonInput
-        value={name}
-        onChange={(newV) => setName(newV ?? "")}
-        placeholder="Curation Name"
-      />
-      <CurationBuildFilterStatementsList
-        filters={filters}
-        onRemoveFilters={onRemoveFilters}
-      />
-      <CurationBuildFilterSelectStatement
-        statementType={statementType}
-        setStatementType={setStatementType}
-      />
-      <CurationBuildFilterStatement
-        statementType={statementType}
-        filters={filters}
-        setFilters={setFilters}
-      />
+    <div className="tw-mt-4 tw-w-full tw-px-4">
+      <p className="tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-4">
+        Build Filter
+      </p>
+      <div className="tw-space-y-4">
+        <CommonInput
+          value={name}
+          onChange={(newV) => setName(newV ?? "")}
+          placeholder="Curation Name"
+        />
+        <CurationBuildFilterStatementsList
+          filters={filters}
+          onRemoveFilters={onRemoveFilters}
+        />
+        <CurationBuildFilterSelectStatement
+          statementType={statementType}
+          setStatementType={setStatementType}
+        />
+        <CurationBuildFilterStatement
+          statementType={statementType}
+          filters={filters}
+          setFilters={setFilters}
+        />
 
-      <CurationBuildFilterTest filters={filters} name={name} />
-      <CurationBuildFilterSave
-        filters={filters}
-        name={name}
-        originalFilter={originalFilter}
-        onSaved={onSaved}
-      />
+        <CurationBuildFilterTest filters={filters} name={name} />
+        <CurationBuildFilterSave
+          filters={filters}
+          name={name}
+          originalFilter={originalFilter}
+          onSaved={onSaved}
+        />
+      </div>
     </div>
   );
 }

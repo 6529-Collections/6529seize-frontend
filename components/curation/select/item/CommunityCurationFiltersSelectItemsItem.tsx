@@ -69,8 +69,8 @@ export default function CommunityCurationFiltersSelectItemsItem({
 
   return (
     <div
-      className={` tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700  ${
-        isActive ? "" : ""
+      className={` tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700 hover:tw-border-primary-300 tw-transition tw-duration-300 tw-ease-out  ${
+        isActive ? "tw-border-primary-300" : ""
       }`}
     >
       <div className="tw-px-4 tw-py-2.5">

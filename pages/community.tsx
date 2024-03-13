@@ -128,7 +128,7 @@ export default function CommunityPage() {
               ref={sidebarRef}
               className={`${
                 open
-                  ? "tw-w-80 tw-py-4 tw-fixed tw-inset-y-0 tw-bg-iron-950 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 tw-top-[150px] tw-left-0 tw-overflow-x-hidden"
+                  ? "tw-w-80 tw-py-4 tw-fixed tw-inset-y-0 tw-bg-iron-950 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 tw-left-0 tw-overflow-x-hidden"
                   : "tw-w-0 tw-h-0 tw-invisible -tw-translate-x-full"
               } tw-transform tw-transition tw-duration-300 tw-ease-out`}
             >
@@ -141,7 +141,7 @@ export default function CommunityPage() {
               <div
                 className={` ${
                   open ? "tw-ml-64 2xl:tw-ml-0" : "tw-w-full"
-                } tw-col-span-6 tw-transition-all tw-duration-500 tw-ease-in-out`}
+                } tw-transition-all tw-duration-500 tw-ease-in-out`}
               >
                 {init && <CommunityMembers />}
               </div>

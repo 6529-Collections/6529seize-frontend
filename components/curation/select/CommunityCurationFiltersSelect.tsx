@@ -92,7 +92,7 @@ export default function CommunityCurationFiltersSelect({
           setFilterName={onFilterNameSearch}
         />
       </div>
-      <div className="tw-pt-4 tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+      <div className="tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
         {activeCurationFilterId && (
           <CommunityCurationFiltersSelectActiveFilter
             activeCurationFilterId={activeCurationFilterId}
