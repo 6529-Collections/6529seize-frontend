@@ -4,7 +4,6 @@ import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import Head from "next/head";
 import CommunityMembers from "../components/community/CommunityMembers";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
-import SlideOver from "../components/utils/sidebar/SlideOver";
 import { useEffect, useRef, useState } from "react";
 import CommunityCurationFilters from "../components/curation/CommunityCurationFilters";
 
@@ -14,6 +13,7 @@ import {
   setActiveCurationFilterId,
 } from "../store/curationFilterSlice";
 import { useRouter } from "next/router";
+import { motion } from "framer-motion";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -124,27 +124,27 @@ export default function CommunityPage() {
 
         <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-flex">
-            <div
+            <motion.div
+              layout
               ref={sidebarRef}
-              className={`${
-                open
-                  ? "tw-w-80 tw-pt-4 tw-pb-6 tw-fixed tw-inset-y-0 tw-bg-iron-950 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 tw-left-0 tw-overflow-x-hidden"
-                  : "tw-w-0 tw-h-0 tw-invisible -tw-translate-x-full"
-              } tw-transform tw-transition tw-duration-300 tw-ease-out`}
+              style={{ width: open ? "320px" : "0px" }}
+              transition={{ duration: 0.5, ease: "linear" }} // Set transition duration
+              className="tw-py-4 tw-fixed tw-inset-y-0 tw-left-0 tw-overflow-x-hidden"
             >
-              <SlideOver>
+              <div className="tw-bg-iron-950 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 ">
                 <CommunityCurationFilters setOpen={setOpen} />
-              </SlideOver>
-            </div>
-            <div className="tw-w-full">
-              <button onClick={() => setOpen(!open)}>nupp</button>
-              <div
-                className={` ${
-                  open ? "tw-ml-64 2xl:tw-ml-0" : "tw-w-full"
-                } tw-transition-all tw-duration-500 tw-ease-in-out`}
-              >
-                {init && <CommunityMembers />}
               </div>
+            </motion.div>
+            <div className="tw-w-full">
+              <motion.div
+                initial={false} // Disable initial animation
+                animate={{ marginLeft: open ? "320px" : "0px" }} // Apply x-axis translation
+                transition={{ duration: 0.5, ease: "linear" }} // Set transition duration
+              >
+                {" "}
+                <button onClick={() => setOpen(!open)}>nupp</button>
+                {init && <CommunityMembers />}
+              </motion.div>
             </div>
           </div>
         </div>
