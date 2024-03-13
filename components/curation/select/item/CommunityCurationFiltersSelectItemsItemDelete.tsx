@@ -64,7 +64,10 @@ export default function CommunityCurationFiltersSelectItemsItemDelete({
   };
   return (
     <div
-      onClick={onDelete}
+      onClick={(e) => {
+        e.stopPropagation();
+        onDelete();
+      }}
       className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
       role="menuitem"
       tabIndex={-1}

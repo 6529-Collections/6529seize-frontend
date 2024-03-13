@@ -210,7 +210,7 @@ export default function CommunityActivityPage({
             >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
-                  initial={false}
+                  initial={{ width: "320px" }}
                   animate={{
                     width: open ? "320px" : "0px",
                   }}
@@ -225,7 +225,9 @@ export default function CommunityActivityPage({
 
             <div className="tw-w-full ">
               <motion.div
-                initial={false}
+                initial={{
+                  marginLeft: "320px",
+                }}
                 animate={{
                   marginLeft: animateContentMarginLeft ? "320px" : "0px",
                 }}
