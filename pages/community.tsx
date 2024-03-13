@@ -5,7 +5,7 @@ import Head from "next/head";
 import CommunityMembers from "../components/community/CommunityMembers";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import SlideOver from "../components/utils/sidebar/SlideOver";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CommunityCurationFilters from "../components/curation/CommunityCurationFilters";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -56,6 +56,48 @@ export default function CommunityPage() {
     }
   }, [router.isReady]);
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const elementIsVisibleInViewportPx = (el: HTMLElement | null) => {
+    if (!el) {
+      return 0;
+    }
+    const { top, bottom } = el.getBoundingClientRect();
+    const { innerHeight } = window;
+    const visibleHeight = Math.min(bottom, innerHeight) - Math.max(top, 0);
+    return visibleHeight > 0 ? visibleHeight : 0;
+  };
+
+  useEffect(() => {
+    const handleSidebarTop = () => {
+      const headerHeight = headerRef.current
+        ? headerRef.current.clientHeight
+        : 0;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const newPosition =
+        scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
+      sidebarRef.current!.style.top = `${newPosition}px`;
+    };
+
+    const handleSidebarBottom = () => {
+      const footerRef = document.getElementById("footer");
+      const footerVisibleHeight = elementIsVisibleInViewportPx(footerRef);
+      sidebarRef.current!.style.bottom = `${footerVisibleHeight}px`;
+    };
+
+    const handleScroll = () => {
+      handleSidebarTop();
+      handleSidebarBottom();
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <>
       <Head>
@@ -75,14 +117,18 @@ export default function CommunityPage() {
       </Head>
 
       <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
+        <div ref={headerRef}>
+          <Header />
+          <Breadcrumb breadcrumbs={breadcrumbs} />
+        </div>
+
         <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-flex">
             <div
+              ref={sidebarRef}
               className={`${
                 open
-                  ? "tw-w-80 tw-px-4 tw-py-6 tw-fixed tw-inset-y-0 tw-bg-iron-950 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 tw-top-[150px] tw-left-0 tw-overflow-y-auto tw-overflow-x-hidden"
+                  ? "tw-w-80 tw-px-4 tw-py-6 tw-fixed tw-inset-y-0 tw-bg-iron-950 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 tw-left-0 tw-overflow-y-auto tw-overflow-x-hidden"
                   : "tw-w-0 tw-h-0 tw-invisible -tw-translate-x-full"
               } tw-transform tw-transition tw-duration-300 tw-ease-out`}
             >
