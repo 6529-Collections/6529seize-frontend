@@ -69,8 +69,10 @@ export default function CommunityCurationFiltersSelectItemsItem({
 
   return (
     <div
-      className={`tw-bg-neutral-700 tw-rounded-lg tw-w-full tw-text-left tw-p-4 ${
-        isActive ? "tw-border-2 tw-border-solid tw-border-blue-500" : ""
+      className={`tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-p-4 tw-border tw-border-solid  ${
+        isActive
+          ? "tw-border-primary-400"
+          : "tw-border-iron-700"
       }`}
     >
       <button

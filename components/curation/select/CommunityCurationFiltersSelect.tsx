@@ -96,6 +96,7 @@ export default function CommunityCurationFiltersSelect({
           onEditClick={onEditClick}
         />
       )}
+      <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-0">Created</p>
       <CommunityCurationFiltersSelectItems
         filters={curationFilters}
         onEditClick={onEditClick}

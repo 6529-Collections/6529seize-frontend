@@ -24,7 +24,9 @@ export default function CommunityCurationFiltersSelectActiveFilter({
   }
   return (
     <div>
-      <div>Active curation:</div>
+      <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-0">
+        Active curation
+      </p>
       <CommunityCurationFiltersSelectItemsItem
         key={data.id}
         filter={data}
