@@ -1,7 +1,9 @@
+import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
 import {
   FilterDirection,
   GeneralFilter,
 } from "../../../../helpers/filters/Filters.types";
+import CommonInput from "../../../utils/input/CommonInput";
 import CurationBuildFilterMinMaxValues from "../common/CurationBuildFilterMinMaxValues";
 import CurationBuildFiltersUserDirection from "../common/user-direction/CurationBuildFiltersUserDirection";
 import CurationBuildFiltersUserSearch from "../common/user-search/CurationBuildFiltersUserSearch";
@@ -33,13 +35,6 @@ export default function CurationBuildFilterCIC({
     });
   };
 
-  const setMax = (value: number | null) => {
-    setFilters({
-      ...filters,
-      cic: { ...filters.cic, max: value },
-    });
-  };
-
   const setUserDirection = (value: FilterDirection) => {
     setFilters({
       ...filters,
@@ -66,13 +61,13 @@ export default function CurationBuildFilterCIC({
         placeholder={userPlaceholder}
         setValue={setUser}
       />
-      <CurationBuildFilterMinMaxValues
-        min={filters.cic.min}
-        max={filters.cic.max}
-        minPlaceholder="Min CIC"
-        maxPlaceholder="Max CIC"
-        setMin={setMin}
-        setMax={setMax}
+      <CommonInput
+        placeholder="Min CIC"
+        inputType="number"
+        value={
+          typeof filters.cic.min === "number" ? filters.cic.min.toString() : ""
+        }
+        onChange={(value) => setMin(convertStringOrNullToNumberOrNull(value))}
       />
     </div>
   );
