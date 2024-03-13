@@ -1,4 +1,6 @@
+import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
 import { GeneralFilter } from "../../../../helpers/filters/Filters.types";
+import CommonInput from "../../../utils/input/CommonInput";
 import CurationBuildFilterMinMaxValues from "../common/CurationBuildFilterMinMaxValues";
 
 export default function CurationBuildFilterLevel({
@@ -18,24 +20,16 @@ export default function CurationBuildFilterLevel({
     });
   };
 
-  const setMax = (value: number | null) => {
-    setFilters({
-      ...filters,
-      level: {
-        ...filters.level,
-        max: value,
-      },
-    });
-  };
-
   return (
-    <CurationBuildFilterMinMaxValues
-      min={filters.level.min}
-      max={filters.level.max}
-      minPlaceholder="Min Level"
-      maxPlaceholder="Max Level"
-      setMin={setMin}
-      setMax={setMax}
+    <CommonInput
+      placeholder="Min level"
+      inputType="number"
+      value={
+        typeof filters.level.min === "number"
+          ? filters.level.min.toString()
+          : ""
+      }
+      onChange={(value) => setMin(convertStringOrNullToNumberOrNull(value))}
     />
   );
 }

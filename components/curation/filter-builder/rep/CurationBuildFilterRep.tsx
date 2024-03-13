@@ -1,7 +1,9 @@
+import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
 import {
   FilterDirection,
   GeneralFilter,
 } from "../../../../helpers/filters/Filters.types";
+import CommonInput from "../../../utils/input/CommonInput";
 import CurationBuildFilterMinMaxValues from "../common/CurationBuildFilterMinMaxValues";
 import CurationBuildFiltersRepSearch from "../common/rep-search/CurationBuildFiltersRepSearch";
 import CurationBuildFiltersUserDirection from "../common/user-direction/CurationBuildFiltersUserDirection";
@@ -44,13 +46,6 @@ export default function CurationBuildFilterRep({
     });
   };
 
-  const setMax = (value: number | null) => {
-    setFilters({
-      ...filters,
-      rep: { ...filters.rep, max: value },
-    });
-  };
-
   const setUserDirection = (value: FilterDirection) => {
     setFilters({
       ...filters,
@@ -81,13 +76,13 @@ export default function CurationBuildFilterRep({
         category={filters.rep.category}
         setCategory={setCategory}
       />
-      <CurationBuildFilterMinMaxValues
-        min={filters.rep.min}
-        max={filters.rep.max}
-        minPlaceholder="Min Rep"
-        maxPlaceholder="Max Rep"
-        setMin={setMin}
-        setMax={setMax}
+      <CommonInput
+        placeholder="Min Rep"
+        inputType="number"
+        value={
+          typeof filters.rep.min === "number" ? filters.rep.min.toString() : ""
+        }
+        onChange={(value) => setMin(convertStringOrNullToNumberOrNull(value))}
       />
     </div>
   );

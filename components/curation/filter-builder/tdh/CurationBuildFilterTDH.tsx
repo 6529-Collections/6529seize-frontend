@@ -21,21 +21,14 @@ export default function CurationBuildFilterTDH({
     });
   };
 
-  const setMax = (value: number | null) => {
-    setFilters({
-      ...filters,
-      tdh: { ...filters.tdh, max: value },
-    });
-  };
-
   return (
-    <CurationBuildFilterMinMaxValues
-      min={filters.tdh.min}
-      max={filters.tdh.max}
-      minPlaceholder="Min TDH"
-      maxPlaceholder="Max TDH"
-      setMin={setMin}
-      setMax={setMax}
+    <CommonInput
+      placeholder="Min TDH"
+      inputType="number"
+      value={
+        typeof filters.tdh.min === "number" ? filters.tdh.min.toString() : ""
+      }
+      onChange={(value) => setMin(convertStringOrNullToNumberOrNull(value))}
     />
   );
 }
