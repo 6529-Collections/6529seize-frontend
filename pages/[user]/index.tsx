@@ -52,6 +52,7 @@ const getInitialActivityLogParams = (
   matter: RateMatter.REP,
   targetType: FilterTargetType.ALL,
   handleOrWallet,
+  activeCurationFilterId: null,
 });
 
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({

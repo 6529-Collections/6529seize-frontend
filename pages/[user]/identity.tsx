@@ -28,6 +28,7 @@ const getInitialActivityLogParams = (
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet,
+  activeCurationFilterId: null,
 });
 
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
