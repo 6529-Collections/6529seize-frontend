@@ -77,7 +77,7 @@ export default function CommunityCurationFiltersSelect({
     } else {
       setCurationFilters([]);
     }
-  }, [data]);
+  }, [data, activeCurationFilterId]);
 
   return (
     <div className="tw-mt-8 tw-w-full tw-space-y-4">
