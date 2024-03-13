@@ -75,16 +75,14 @@ export default function CommunityPage() {
       </Head>
 
       <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950">
-        <div className="tw-sticky tw-top-0">
-          <Header />
-          <Breadcrumb breadcrumbs={breadcrumbs} />
-        </div>
+        <Header />
+        <Breadcrumb breadcrumbs={breadcrumbs} />
         <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-flex">
             <div
               className={`${
                 open
-                  ? "tw-w-[20rem] tw-col-span-2 tw-fixed tw-inset-y-0 tw-bg-iron-800 tw-top-[150px] tw-left-0 "
+                  ? "tw-w-80 tw-px-4 tw-py-6 tw-fixed tw-inset-y-0 tw-bg-iron-800 tw-top-[150px] tw-left-0 tw-overflow-y-auto tw-overflow-x-hidden"
                   : "tw-w-0 tw-h-0 tw-invisible -tw-translate-x-full"
               } tw-transform tw-transition tw-duration-300 tw-ease-out`}
             >

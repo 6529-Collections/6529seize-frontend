@@ -43,7 +43,7 @@ export default function CommunityCurationFilters({
   };
 
   return (
-    <div className="tw-px-4 tw-py-6 sm:tw-px-6 tw-sticky tw-top-0">
+    <div>
       <CurationHeader setOpen={setOpen} view={view} setView={onView} />
       {view === CommunityCurationFiltersView.SELECT && (
         <CommunityCurationFiltersSelect onEditClick={onEditClick} />
