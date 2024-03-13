@@ -9,7 +9,7 @@ export default function CommunityCurationFiltersSelectItems({
   readonly onEditClick: (filter: CurationFilterResponse) => void;
 }) {
   return (
-    <div className="tw-space-y-3">
+    <div className="tw-space-y-4">
       {filters.map((filter) => (
         <CommunityCurationFiltersSelectItemsItem
           key={filter.id}

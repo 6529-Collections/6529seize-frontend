@@ -23,8 +23,8 @@ export default function CommunityCurationFiltersSelectActiveFilter({
     return <div>loading</div>;
   }
   return (
-    <div>
-      <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-0">
+    <div className="tw-px-4">
+      <p className="tw-text-lg tw-text-primary-300 tw-font-semibold tw-mb-4">
         Active curation
       </p>
       <CommunityCurationFiltersSelectItemsItem

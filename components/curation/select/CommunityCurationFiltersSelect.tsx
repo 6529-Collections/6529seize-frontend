@@ -80,27 +80,35 @@ export default function CommunityCurationFiltersSelect({
   }, [data, activeCurationFilterId]);
 
   return (
-    <div className="tw-mt-8 tw-w-full tw-space-y-4">
-      <CurationBuildFiltersUserSearch
-        value={filters.curation_criteria_user}
-        setValue={onUserSelect}
-        placeholder="Search user"
-      />
-      <CommunityCurationFiltersSearchFilter
-        filterName={filters.curation_criteria_name}
-        setFilterName={onFilterNameSearch}
-      />
-      {activeCurationFilterId && (
-        <CommunityCurationFiltersSelectActiveFilter
-          activeCurationFilterId={activeCurationFilterId}
-          onEditClick={onEditClick}
+    <div className="tw-mt-4 tw-w-full tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+      <div className="tw-space-y-4 tw-px-4">
+        <CurationBuildFiltersUserSearch
+          value={filters.curation_criteria_user}
+          setValue={onUserSelect}
+          placeholder="Search user"
         />
-      )}
-      <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-0">Created</p>
-      <CommunityCurationFiltersSelectItems
-        filters={curationFilters}
-        onEditClick={onEditClick}
-      />
+        <CommunityCurationFiltersSearchFilter
+          filterName={filters.curation_criteria_name}
+          setFilterName={onFilterNameSearch}
+        />
+      </div>
+      <div className="tw-pt-4 tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+        {activeCurationFilterId && (
+          <CommunityCurationFiltersSelectActiveFilter
+            activeCurationFilterId={activeCurationFilterId}
+            onEditClick={onEditClick}
+          />
+        )}
+        <div className="tw-pt-4 tw-px-4">
+          <p className="tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-4">
+            Created curations
+          </p>
+          <CommunityCurationFiltersSelectItems
+            filters={curationFilters}
+            onEditClick={onEditClick}
+          />
+        </div>
+      </div>
     </div>
   );
 }
