@@ -38,6 +38,10 @@ import useManifoldClaim, {
 } from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
+import {
+  getDimensionsFromMetadata,
+  getFileTypeFromMetadata,
+} from "../components/the-memes/MemePageArt";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -98,8 +102,13 @@ export default function Home({
   );
 
   useEffect(() => {
-    if (manifoldClaim) {
-      setDisableClaim(manifoldClaim.total === manifoldClaim.totalMax);
+    if (
+      manifoldClaim &&
+      (manifoldClaim.total === manifoldClaim.totalMax ||
+        (manifoldClaim.phase == ManifoldPhase.PUBLIC &&
+          manifoldClaim.status === ManifoldClaimStatus.EXPIRED))
+    ) {
+      setDisableClaim(true);
     }
   }, [manifoldClaim]);
 
@@ -280,21 +289,16 @@ export default function Home({
                             <tr>
                               <td>File Type</td>
                               <td>
-                                {pageProps.nft.animation
-                                  ? pageProps.nft.metadata.animation_details
-                                      ?.format
-                                  : pageProps.nft.metadata.image_details.format}
+                                {getFileTypeFromMetadata(
+                                  pageProps.nft.metadata
+                                )}
                               </td>
                             </tr>
                             <tr>
                               <td>Dimensions</td>
                               <td>
-                                {numberWithCommas(
-                                  pageProps.nft.metadata.image_details.width
-                                )}{" "}
-                                x{" "}
-                                {numberWithCommas(
-                                  pageProps.nft.metadata.image_details.height
+                                {getDimensionsFromMetadata(
+                                  pageProps.nft.metadata
                                 )}
                               </td>
                             </tr>

@@ -7,7 +7,7 @@ export default function UserPageStatsBoostBreakdown({
 }: {
   readonly tdh: UserPageStatsTDHType;
 }) {
-  if (!tdh?.boost_breakdown) {
+  if (!tdh?.boost_breakdown || !tdh.boost) {
     return <></>;
   }
 
@@ -91,20 +91,17 @@ export default function UserPageStatsBoostBreakdown({
                 <tr key={getRandomObjectId()}>
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-                  >
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
                     Type
                   </th>
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400  tw-text-center"
-                  >
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400  tw-text-center">
                     Available Boost
                   </th>
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400 tw-text-center"
-                  >
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400 tw-text-center">
                     Eligible Boost
                   </th>
                 </tr>
