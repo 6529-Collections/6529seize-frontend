@@ -1,4 +1,4 @@
-export default function FilterBuilderSearchRepDropdownItem({
+export default function CurationBuildFiltersRepSearchDropdownItem({
   category,
   selected,
   onSelect,

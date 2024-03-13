@@ -1,15 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { CommunityMemberMinimal } from "../../../../entities/IProfile";
-import FilterBuilderSearchUserDropdownItem from "./FilterBuilderSearchUserDropdownItem";
+import CurationBuildFiltersRepSearchDropdownItem from "./CurationBuildFiltersRepSearchDropdownItem";
 
-export default function FilterBuilderSearchUserDropdown({
+export default function CurationBuildFiltersRepSearchDropdown({
   open,
-  profiles,
+  categories,
   selected,
   onSelect,
 }: {
   readonly open: boolean;
-  readonly profiles: CommunityMemberMinimal[];
+  readonly categories: string[];
   readonly selected: string | null;
   readonly onSelect: (newV: string) => void;
 }) {
@@ -31,11 +30,11 @@ export default function FilterBuilderSearchUserDropdown({
             <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {profiles.length ? (
-                    profiles.map((profile) => (
-                      <FilterBuilderSearchUserDropdownItem
-                        key={profile.wallet}
-                        profile={profile}
+                  {categories.length ? (
+                    categories.map((category) => (
+                      <CurationBuildFiltersRepSearchDropdownItem
+                        key={category}
+                        category={category}
                         selected={selected}
                         onSelect={onSelect}
                       />

@@ -1,11 +1,13 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import { counterSlice } from "./counterSlice";
+import { curationFilterSlice } from "./curationFilterSlice";
 
 const makeStore = () =>
   configureStore({
     reducer: {
       [counterSlice.name]: counterSlice.reducer,
+      [curationFilterSlice.name]: curationFilterSlice.reducer,
     },
     devTools: true,
   });

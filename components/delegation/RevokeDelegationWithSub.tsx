@@ -10,15 +10,15 @@ import {
 import { DELEGATION_CONTRACT } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";
+import { getGasError } from "./delegation_shared";
 import {
-  DelegationAddressDisabledInput,
   DelegationCloseButton,
+  DelegationFormLabel,
+  DelegationAddressDisabledInput,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
-  DelegationFormLabel,
   DelegationSubmitGroups,
-  getGasError,
-} from "./delegation_shared";
+} from "./DelegationFormParts";
 
 interface Props {
   address: string;

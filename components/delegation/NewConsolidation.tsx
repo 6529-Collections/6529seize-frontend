@@ -10,16 +10,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "../../constants";
 import { DELEGATION_ABI } from "../../abis";
 import { isValidEthAddress } from "../../helpers/Helpers";
+import { getGasError } from "./delegation_shared";
 import {
-  getGasError,
-  DelegationFormLabel,
-  DelegationSubmitGroups,
   DelegationCloseButton,
-  DelegationAddressDisabledInput,
   DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormLabel,
+  DelegationAddressDisabledInput,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
-} from "./delegation_shared";
+  DelegationSubmitGroups,
+} from "./DelegationFormParts";
 
 interface Props {
   address: string;

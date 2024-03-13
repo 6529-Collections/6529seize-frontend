@@ -1,16 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
-import FilterBuilderSearchRepDropdownItem from "./FilterBuilderSearchRepDropdownItem";
+import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
+import CurationBuildFiltersUserSearchDropdownItem from "./CurationBuildFiltersUserSearchDropdownItem";
 
-export default function FilterBuilderSearchRepDropdown({
+export default function CurationBuildFiltersUserSearchDropdown({
   open,
-  categories,
+  profiles,
   selected,
   onSelect,
 }: {
   readonly open: boolean;
-  readonly categories: string[];
+  readonly profiles: CommunityMemberMinimal[];
   readonly selected: string | null;
-  readonly onSelect: (newV: string) => void;
+  readonly onSelect: (newV: string | null) => void;
 }) {
   const noResultsText =
     !selected || selected.length < 3
@@ -21,20 +22,20 @@ export default function FilterBuilderSearchRepDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {open && (
           <motion.div
-            className="tw-z-10 tw-mt-1 tw-min-w-[18rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-relative tw-z-10 tw-mt-1 tw-min-w-[17.4rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div className="tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {categories.length ? (
-                    categories.map((category) => (
-                      <FilterBuilderSearchRepDropdownItem
-                        key={category}
-                        category={category}
+                  {profiles.length ? (
+                    profiles.map((profile) => (
+                      <CurationBuildFiltersUserSearchDropdownItem
+                        key={profile.wallet}
+                        profile={profile}
                         selected={selected}
                         onSelect={onSelect}
                       />

@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDebounce } from "react-use";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import CommonInput from "../../../utils/input/CommonInput";
-import FilterBuilderSearchRepDropdown from "./FilterBuilderSearchRepDropdown";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import CommonInput from "../../../../utils/input/CommonInput";
+import CurationBuildFiltersRepSearchDropdown from "./CurationBuildFiltersRepSearchDropdown";
 
 const MIN_SEARCH_LENGTH = 3;
 
-export default function FilterBuilderSearchRep({
+export default function CurationBuildFiltersRepSearch({
   category,
   setCategory,
 }: {
@@ -20,7 +20,7 @@ export default function FilterBuilderSearchRep({
     () => {
       setDebouncedValue(category);
     },
-    500,
+    200,
     [category]
   );
 
@@ -37,8 +37,6 @@ export default function FilterBuilderSearchRep({
   });
 
   const [isOpen, setIsOpen] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
-  useEffect(() => setCategories(data ?? []), [data]);
 
   return (
     <div>
@@ -46,13 +44,14 @@ export default function FilterBuilderSearchRep({
         inputType="text"
         placeholder="Rep Category"
         value={category ?? ""}
+        showSearchIcon={true}
         onChange={setCategory}
         onFocusChange={(newV) => setIsOpen(newV)}
       />
-      <FilterBuilderSearchRepDropdown
+      <CurationBuildFiltersRepSearchDropdown
         open={isOpen}
         selected={category}
-        categories={categories}
+        categories={data ?? []}
         onSelect={setCategory}
       />
     </div>
