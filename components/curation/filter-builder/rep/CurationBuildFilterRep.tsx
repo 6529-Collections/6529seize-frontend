@@ -62,7 +62,7 @@ export default function CurationBuildFilterRep({
       : "Rep Giver";
 
   return (
-    <div>
+    <div className="tw-space-y-4">
       <CurationBuildFiltersUserDirection
         userDirection={filters.rep.direction}
         setUserDirection={setUserDirection}

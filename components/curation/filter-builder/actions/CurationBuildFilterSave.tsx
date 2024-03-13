@@ -97,5 +97,5 @@ export default function CurationBuildFilterSave({
     }
   };
 
-  return <button onClick={onSave}>Save</button>;
+  return <button type="button" onClick={onSave} className="tw-flex tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600">Save</button>;
 }

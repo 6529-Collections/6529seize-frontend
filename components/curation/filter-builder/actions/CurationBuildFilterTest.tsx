@@ -103,7 +103,7 @@ export default function CurationBuildFilterTest({
 
   return (
     <div>
-      <button onClick={onTest}>Test</button>
+      <button type="button" onClick={onTest} className="tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-700">Test</button>
       {members?.count && <div>Members: {members.count}</div>}
     </div>
   );

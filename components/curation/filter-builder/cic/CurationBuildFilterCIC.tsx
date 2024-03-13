@@ -51,7 +51,7 @@ export default function CurationBuildFilterCIC({
       : "CIC Giver";
 
   return (
-    <div>
+    <div className="tw-space-y-4">
       <CurationBuildFiltersUserDirection
         userDirection={filters.cic.direction}
         setUserDirection={setUserDirection}
