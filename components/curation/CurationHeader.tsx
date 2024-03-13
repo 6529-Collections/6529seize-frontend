@@ -21,33 +21,9 @@ export default function CurationHeader({
 
   return (
     <div className="tw-px-4 tw-space-y-4">
-      <div className="tw-flex tw-flex-col tw-space-y-2">
-        <div className="-tw-m-2.5 tw-flex tw-justify-end tw-items-center">
-          <button
-            onClick={() => setOpen(false)}
-            type="button"
-            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-          >
-            <span className="tw-sr-only tw-text-sm">Close</span>
-            <svg
-              className="tw-h-6 tw-w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-        <p className="tw-text-xl tw-text-iron-50 tw-font-semibold tw-mb-0">
-          Curate your online experience
-        </p>
-      </div>
+      <p className="tw-text-lg tw-pt-4 tw-text-iron-50 tw-font-semibold tw-mb-0 tw-whitespace-nowrap">
+        Curate your online experience
+      </p>
       {view === CommunityCurationFiltersView.BUILD && (
         <button
           type="button"

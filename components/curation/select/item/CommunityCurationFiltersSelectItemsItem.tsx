@@ -17,6 +17,7 @@ import CommunityCurationFiltersSelectItemsItemFilters from "./CommunityCurationF
 import CommunityCurationFiltersSelectItemsItemDelete from "./CommunityCurationFiltersSelectItemsItemDelete";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import CurationBuildFilterStatementsList from "../../filter-builder/statements/CurationBuildFilterStatementsList";
 
 export default function CommunityCurationFiltersSelectItemsItem({
   filter,
@@ -47,8 +48,6 @@ export default function CommunityCurationFiltersSelectItemsItem({
     }
   };
 
-  const [showFilters, setShowFilters] = useState(false);
-
   const [isMyFilter, setIsMyFilter] = useState(
     connectedProfile?.profile?.handle.toLowerCase() ===
       filter.created_by?.handle.toLowerCase()
@@ -70,7 +69,6 @@ export default function CommunityCurationFiltersSelectItemsItem({
 
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const optionsButtonRef = useRef<HTMLButtonElement>(null);
   useClickAway(listRef, () => setIsOptionsOpen(false));
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
@@ -141,64 +139,23 @@ export default function CommunityCurationFiltersSelectItemsItem({
             </div>
           )}
         </div>
-        <div className="tw-mt-2 tw-w-full tw-inline-flex tw-gap-x-3">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="tw-relative tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-200 tw-focus:tw-outline-none tw-focus:tw-ring-1 tw-focus:tw-ring-inset tw-focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-800 tw-focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-          >
-            <span>Show filters</span>
-            <svg
-              className="tw-flex-shrink-0 tw-h-4 tw-w-4 -tw-mr-1.5 tw-ml-1"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M9 18L15 12L9 6"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-          <div className="tw-space-x-3 tw-hidden">
-            {connectedProfile && (
-              <button
-                onClick={() => onEditClick(filter)}
-                className="tw-relative tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-200 tw-focus:tw-outline-none tw-focus:tw-ring-1 tw-focus:tw-ring-inset tw-focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-800 tw-focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-              >
-                {editTitle}
-              </button>
-            )}
-            {isMyFilter && (
-              <CommunityCurationFiltersSelectItemsItemDelete
-                filterId={filter.id}
-              />
-            )}
-          </div>
+        <div className="tw-pt-2">
+          <CurationBuildFilterStatementsList filters={filter.criteria} />
         </div>
-        <CommunityCurationFiltersSelectItemsItemFilters
-          showFilters={showFilters}
-          filters={filter.criteria}
-        />
       </div>
       <button
         onClick={onFilterClick}
         className="tw-bg-transparent tw-px-4 tw-py-2 tw-border-none tw-text-left tw-w-full"
       >
-        {!filter.visible && (
-          <div className="tw-text-xs tw-text-right tw-text-red">Not saved</div>
-        )}
         <div className="tw-w-full tw-inline-flex tw-gap-x-2 tw-items-center">
           <p className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-mb-0">
             Created by
           </p>
           <div className="tw-flex tw-gap-x-2 tw-items-center">
-            <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
-              <div className="tw-h-full tw-w-full tw-max-w-full">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
-                  {filter.created_by?.pfp && (
+            {filter.created_by?.pfp && (
+              <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
+                <div className="tw-h-full tw-w-full tw-max-w-full">
+                  <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
                     <img
                       src={getScaledImageUri(
                         filter.created_by.pfp,
@@ -207,10 +164,10 @@ export default function CommunityCurationFiltersSelectItemsItem({
                       alt="Community Table Profile Picture"
                       className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                     />
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <div className="tw-flex tw-items-center tw-space-x-2">
               <Link
                 href={`/${filter.created_by?.handle}`}
@@ -219,18 +176,12 @@ export default function CommunityCurationFiltersSelectItemsItem({
                 {filter.created_by?.handle}
               </Link>
             </div>
-            <div className="tw-hidden tw-inline-flex tw-text-xs tw-space-x-2 tw-whitespace-nowrap">
-              <div>
-                TDH: {formatNumberWithCommasOrDash(filter.created_by?.tdh ?? 0)}
-              </div>
-              <div>
-                CIC: {formatNumberWithCommasOrDash(filter.created_by?.cic ?? 0)}
-              </div>
-              <div>
-                Rep: {formatNumberWithCommasOrDash(filter.created_by?.rep ?? 0)}
-              </div>
-            </div>
           </div>
+          {!filter.visible && (
+            <div className="tw-text-xs tw-w-full tw-text-right tw-text-red">
+              Not saved
+            </div>
+          )}
         </div>
       </button>
     </div>

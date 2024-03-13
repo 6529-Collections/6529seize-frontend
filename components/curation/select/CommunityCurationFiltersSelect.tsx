@@ -79,6 +79,27 @@ export default function CommunityCurationFiltersSelect({
     }
   }, [data, activeCurationFilterId]);
 
+  const [showActiveCurationFilter, setShowActiveCurationFilter] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    if (!activeCurationFilterId) {
+      setShowActiveCurationFilter(false);
+      return;
+    }
+    if (!data) {
+      setShowActiveCurationFilter(true);
+      return;
+    }
+    if (filters.curation_criteria_name || filters.curation_criteria_user) {
+      setShowActiveCurationFilter(
+        data.some((filter) => filter.id === activeCurationFilterId)
+      );
+      return;
+    }
+    setShowActiveCurationFilter(true);
+  }, [data, activeCurationFilterId, filters]);
+
   return (
     <div className="tw-mt-4 tw-w-full tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       <div className="tw-space-y-4 tw-px-4">
@@ -93,16 +114,20 @@ export default function CommunityCurationFiltersSelect({
         />
       </div>
       <div className="tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-        {activeCurationFilterId && (
-          <CommunityCurationFiltersSelectActiveFilter
-            activeCurationFilterId={activeCurationFilterId}
-            onEditClick={onEditClick}
-          />
-        )}
         <div className="tw-pt-4 tw-px-4">
           <p className="tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-4">
             Created curations
           </p>
+
+          {showActiveCurationFilter && (
+            <div className="tw-pb-4">
+              <CommunityCurationFiltersSelectActiveFilter
+                activeCurationFilterId={activeCurationFilterId}
+                onEditClick={onEditClick}
+              />
+            </div>
+          )}
+
           <CommunityCurationFiltersSelectItems
             filters={curationFilters}
             onEditClick={onEditClick}

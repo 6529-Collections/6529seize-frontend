@@ -199,13 +199,12 @@ export default function CurationBuildFilterStatementsList({
   };
 
   const statements = getStatements();
-
   return (
     <div className="tw-w-full tw-space-y-1">
       {statements.map((statement) => (
-        <span
+        <div
           key={statement.key}
-          className="tw-w-full tw-inline-flex tw-items-center tw-justify-between tw-gap-x-0.5 tw-rounded-md tw-bg-blue-100 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-blue-700"
+          className="tw-w-full tw-inline-flex tw-items-center tw-justify-between tw-gap-x-0.5 tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
         >
           {statement.label}
           {showRemoveButton && (
@@ -223,7 +222,7 @@ export default function CurationBuildFilterStatementsList({
               </svg>
             </button>
           )}
-        </span>
+        </div>
       ))}
     </div>
   );

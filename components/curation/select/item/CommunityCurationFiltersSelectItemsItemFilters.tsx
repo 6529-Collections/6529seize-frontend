@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { GeneralFilter } from "../../../../helpers/filters/Filters.types";
 import CurationBuildFilterStatementsList from "../../filter-builder/statements/CurationBuildFilterStatementsList";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function CommunityCurationFiltersSelectItemsItemFilters({
   showFilters,
@@ -10,16 +11,18 @@ export default function CommunityCurationFiltersSelectItemsItemFilters({
   readonly filters: GeneralFilter;
 }) {
   return (
-    <div className="tw-w-full">
-      <div
-        className={`${
-          showFilters
-            ? "tw-h-[200px] tw-overflow-scroll"
-            : "tw-h-0 tw-overflow-hidden"
-        }   tw-bg-slate-300  tw-transition-[height] tw-duration-1000 tw-ease-in-out`}
-      >
-        <CurationBuildFilterStatementsList filters={filters} />;
-      </div>
-    </div>
+    <AnimatePresence mode="wait" initial={false}>
+      {showFilters && (
+        <motion.div
+          className="tw-pt-2"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+         
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
