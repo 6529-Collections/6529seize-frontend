@@ -38,6 +38,7 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet: null,
+  activeCurationFilterId: null,
 };
 
 export interface CommunityActivityPage {
