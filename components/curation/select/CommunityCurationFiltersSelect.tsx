@@ -101,7 +101,7 @@ export default function CommunityCurationFiltersSelect({
   }, [data, activeCurationFilterId, filters]);
 
   return (
-    <div className="tw-mt-4 tw-w-full tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+    <div className="tw-mt-4 tw-pb-6 tw-w-full tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       <div className="tw-space-y-4 tw-px-4">
         <CurationBuildFiltersUserSearch
           value={filters.curation_criteria_user}

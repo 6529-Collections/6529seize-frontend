@@ -200,11 +200,11 @@ export default function CurationBuildFilterStatementsList({
 
   const statements = getStatements();
   return (
-    <div className="tw-w-full tw-space-y-1">
+    <div className="tw-w-full tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       {statements.map((statement) => (
         <div
           key={statement.key}
-          className="tw-w-full tw-inline-flex tw-items-center tw-justify-between tw-gap-x-0.5 tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+          className="tw-inline-flex tw-items-center tw-justify-between tw-gap-x-0.5 tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700"
         >
           {statement.label}
           {showRemoveButton && (

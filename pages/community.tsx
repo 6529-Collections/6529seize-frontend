@@ -132,7 +132,7 @@ export default function CommunityPage() {
         />
       </Head>
 
-      <main className="tailwind-scope  tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+      <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
         <div ref={headerRef}>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
