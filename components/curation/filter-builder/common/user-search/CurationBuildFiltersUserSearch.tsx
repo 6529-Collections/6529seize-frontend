@@ -47,6 +47,7 @@ export default function CurationBuildFiltersUserSearch({
         inputType="text"
         placeholder={placeholder}
         value={value ?? ""}
+        showSearchIcon={true}
         onChange={setValue}
         onFocusChange={(newV) => setIsOpen(newV)}
       />

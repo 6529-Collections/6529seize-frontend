@@ -12,6 +12,7 @@ export default function CommunityCurationFiltersSearchFilter({
       inputType="text"
       placeholder="Search filter"
       value={filterName ?? ""}
+      showSearchIcon={true}
       onChange={setFilterName}
     />
   );

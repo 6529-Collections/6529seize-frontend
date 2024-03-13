@@ -63,12 +63,14 @@ export default function CommunityCurationFiltersSelectItemsItemDelete({
     });
   };
   return (
-    <button
-      type="button"
-      className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-px-3 tw-py-2 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-[#D92D20] tw-border-0 tw-ring-1 tw-ring-inset tw-ring-[#F04438] focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out tw-bg-[#F04438] hover:tw-bg-[#D92D20]"
+    <div
       onClick={onDelete}
+      className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+      role="menuitem"
+      tabIndex={-1}
+      id="options-menu-0-item-1"
     >
       Delete
-    </button>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { use, useContext, useEffect, useState } from "react";
+import { use, useContext, useEffect, useRef, useState } from "react";
 import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
 import { AuthContext } from "../../../auth/Auth";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +15,8 @@ import UserLevel from "../../../user/utils/level/UserLevel";
 import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
 import CommunityCurationFiltersSelectItemsItemFilters from "./CommunityCurationFiltersSelectItemsItemFilters";
 import CommunityCurationFiltersSelectItemsItemDelete from "./CommunityCurationFiltersSelectItemsItemDelete";
+import { AnimatePresence, motion } from "framer-motion";
+import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function CommunityCurationFiltersSelectItemsItem({
   filter,
@@ -64,8 +66,13 @@ export default function CommunityCurationFiltersSelectItemsItem({
   const getEditTitle = () => (isMyFilter ? "Edit" : "Clone");
 
   const [editTitle, setEditTitle] = useState<string>(getEditTitle());
-
   useEffect(() => setEditTitle(getEditTitle()), [isMyFilter]);
+
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  const optionsButtonRef = useRef<HTMLButtonElement>(null);
+  useClickAway(listRef, () => setIsOptionsOpen(false));
+  useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
   return (
     <div
@@ -79,49 +86,60 @@ export default function CommunityCurationFiltersSelectItemsItem({
             <span className="tw-text-iron-400 tw-pr-1">Curation:</span>
             <span className="tw-text-iron-50">{filter.name}</span>
           </p>
-          <div className="tw-relative">
-            <button
-              type="button"
-              className="tw-bg-transparent tw-h-full tw-border-0 tw-block tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-              id="options-menu-0-button"
-              aria-expanded="false"
-              aria-haspopup="true"
-            >
-              <span className="tw-sr-only">Open options</span>
-              <svg
-                className="tw-h-5 tw-w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
+          {connectedProfile && (
+            <div className="tw-relative" ref={listRef}>
+              <button
+                type="button"
+                className="tw-bg-transparent tw-h-full tw-border-0 tw-block tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                id="options-menu-0-button"
+                aria-expanded="false"
+                aria-haspopup="true"
+                onClick={() => setIsOptionsOpen(!isOptionsOpen)}
               >
-                <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
-              </svg>
-            </button>
-            <div
-              className="tw-hidden tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-md tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/5 tw-focus:tw-outline-none"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="options-menu-0-button"
-              tabindex="-1"
-            >
-              <div
-                className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-                role="menuitem"
-                tabindex="-1"
-                id="options-menu-0-item-0"
-              >
-                Edit
-              </div>
-              <div
-                className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-                role="menuitem"
-                tabindex="-1"
-                id="options-menu-0-item-1"
-              >
-                Delete
-              </div>
+                <span className="tw-sr-only">Open options</span>
+                <svg
+                  className="tw-h-5 tw-w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
+                </svg>
+              </button>
+              <AnimatePresence mode="wait" initial={false}>
+                {isOptionsOpen && (
+                  <motion.div
+                    className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-md tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/5 tw-focus:tw-outline-none"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu-0-button"
+                    tabIndex={-1}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div>
+                      <div
+                        onClick={() => onEditClick(filter)}
+                        className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+                        role="menuitem"
+                        tabIndex={-1}
+                        id="options-menu-0-item-0"
+                      >
+                        {editTitle}
+                      </div>
+                      {isMyFilter && (
+                        <CommunityCurationFiltersSelectItemsItemDelete
+                          filterId={filter.id}
+                        />
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
+          )}
         </div>
         <div className="tw-mt-2 tw-w-full tw-inline-flex tw-gap-x-3">
           <button
@@ -200,7 +218,6 @@ export default function CommunityCurationFiltersSelectItemsItem({
               >
                 {filter.created_by?.handle}
               </Link>
-              <UserLevel level={filter.created_by?.level ?? 0} size="xs" />
             </div>
             <div className="tw-hidden tw-inline-flex tw-text-xs tw-space-x-2 tw-whitespace-nowrap">
               <div>

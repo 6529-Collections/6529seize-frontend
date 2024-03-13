@@ -44,6 +44,7 @@ export default function CurationBuildFiltersRepSearch({
         inputType="text"
         placeholder="Rep Category"
         value={category ?? ""}
+        showSearchIcon={true}
         onChange={setCategory}
         onFocusChange={(newV) => setIsOpen(newV)}
       />
