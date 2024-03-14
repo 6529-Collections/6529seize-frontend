@@ -131,9 +131,10 @@ export async function getServerSideProps(
         getUserProfile({ user: handleOrWallet, headers }),
         getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
           headers,
-          params: convertActivityLogParams(
-            getInitialActivityLogParams(handleOrWallet)
-          ),
+          params: convertActivityLogParams({
+            params: getInitialActivityLogParams(handleOrWallet),
+            disableActiveCurationFilter: true,
+          }),
         }),
         getProfileRatings({
           user: handleOrWallet,

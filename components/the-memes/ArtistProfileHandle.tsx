@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BaseNFT } from "../../entities/INFT";
 
 export default function ArtistProfileHandle(
@@ -7,9 +8,9 @@ export default function ArtistProfileHandle(
 ) {
   if (props.nft.artist_seize_handle) {
     return (
-      <a href={`/${props.nft.artist_seize_handle}`}>
+      <Link href={`/${props.nft.artist_seize_handle}`}>
         {props.nft.artist_seize_handle}
-      </a>
+      </Link>
     );
   }
 

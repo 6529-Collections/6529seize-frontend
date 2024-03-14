@@ -28,10 +28,12 @@ import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 export default function CurationBuildFilterTest({
   filters,
   name,
+  disabled,
   onTestRunMembersCount,
 }: {
   readonly filters: GeneralFilter;
   readonly name: string;
+  readonly disabled: boolean;
   readonly onTestRunMembersCount: (count: number | null) => void;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -96,7 +98,9 @@ export default function CurationBuildFilterTest({
       curation_criteria_id: undefined,
     }));
     const response = await createNewFilterMutation.mutateAsync({
-      name,
+      name: name.length
+        ? name
+        : `${connectedProfile?.profile?.handle} Test Run`,
       criteria: filters,
     });
     if (response) {
@@ -116,9 +120,14 @@ export default function CurationBuildFilterTest({
 
   return (
     <button
+      disabled={disabled}
       type="button"
       onClick={onTest}
-      className="tw-bg-iron-900 tw-w-[4rem] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-700"
+      className={`${
+        disabled
+          ? "tw-text-iron-400 tw-opacity-60"
+          : "tw-text-white hover:tw-bg-iron-800 hover:tw-border-iron-700"
+      } tw-bg-iron-900 tw-w-[4rem] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold  tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out `}
     >
       {loading ? <CircleLoader /> : "Test"}
     </button>

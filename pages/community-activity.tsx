@@ -263,7 +263,10 @@ export async function getServerSideProps(
     const headers = getCommonHeaders(req);
     const logsPage = await getUserProfileActivityLogs({
       headers,
-      params: convertActivityLogParams(INITIAL_ACTIVITY_LOGS_PARAMS),
+      params: convertActivityLogParams({
+        params: INITIAL_ACTIVITY_LOGS_PARAMS,
+        disableActiveCurationFilter: true,
+      }),
     });
     return {
       props: {

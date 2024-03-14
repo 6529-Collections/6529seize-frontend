@@ -40,9 +40,13 @@ export interface ActivityLogParamsConverted {
   curation_criteria_id?: string;
 }
 
-export const convertActivityLogParams = (
-  params: ActivityLogParams
-): ActivityLogParamsConverted => {
+export const convertActivityLogParams = ({
+  params,
+  disableActiveCurationFilter,
+}: {
+  readonly params: ActivityLogParams;
+  readonly disableActiveCurationFilter: boolean;
+}): ActivityLogParamsConverted => {
   const converted: ActivityLogParamsConverted = {
     page: `${params.page}`,
     page_size: `${params.pageSize}`,
@@ -54,7 +58,11 @@ export const convertActivityLogParams = (
   if (params.matter) {
     converted.rating_matter = params.matter;
   }
-  if (params.activeCurationFilterId && !params.handleOrWallet) {
+  if (
+    params.activeCurationFilterId &&
+    !params.handleOrWallet &&
+    !disableActiveCurationFilter
+  ) {
     converted.curation_criteria_id = params.activeCurationFilterId;
   }
 
@@ -84,10 +92,12 @@ export const convertActivityLogParams = (
 export default function ProfileActivityLogs({
   initialParams,
   withFilters,
+  disableActiveCurationFilter = false,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
+  readonly disableActiveCurationFilter?: boolean;
   readonly children?: React.ReactNode;
 }) {
   const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
@@ -121,19 +131,7 @@ export default function ProfileActivityLogs({
 
   const [params, setParams] = useState<ActivityLogParamsConverted>(
     convertActivityLogParams({
-      page: currentPage,
-      pageSize: initialParams.pageSize,
-      logTypes: selectedFilters,
-      matter: initialParams.matter,
-      targetType,
-      handleOrWallet: initialParams.handleOrWallet,
-      activeCurationFilterId,
-    })
-  );
-
-  useEffect(() => {
-    setParams(
-      convertActivityLogParams({
+      params: {
         page: currentPage,
         pageSize: initialParams.pageSize,
         logTypes: selectedFilters,
@@ -141,6 +139,24 @@ export default function ProfileActivityLogs({
         targetType,
         handleOrWallet: initialParams.handleOrWallet,
         activeCurationFilterId,
+      },
+      disableActiveCurationFilter: !!disableActiveCurationFilter,
+    })
+  );
+
+  useEffect(() => {
+    setParams(
+      convertActivityLogParams({
+        params: {
+          page: currentPage,
+          pageSize: initialParams.pageSize,
+          logTypes: selectedFilters,
+          matter: initialParams.matter,
+          targetType,
+          handleOrWallet: initialParams.handleOrWallet,
+          activeCurationFilterId,
+        },
+        disableActiveCurationFilter: !!disableActiveCurationFilter,
       })
     );
   }, [
