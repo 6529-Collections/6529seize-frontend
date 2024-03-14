@@ -6,6 +6,7 @@ import {
 } from "../../../../store/curationFilterSlice";
 import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
 import { AuthContext } from "../../../auth/Auth";
+import { motion } from "framer-motion";
 
 export default function CommunityCurationFiltersSelectItemsItemWrapper({
   filter,
@@ -68,11 +69,16 @@ export default function CommunityCurationFiltersSelectItemsItemWrapper({
   }, [isActive, haveProfile]);
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ height: "auto", opacity: 1 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={onFilterClick}
       className={` tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700 hover:tw-border-primary-300 tw-transition tw-duration-300 tw-ease-out  ${classes}`}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
