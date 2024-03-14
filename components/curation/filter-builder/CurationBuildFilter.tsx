@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommonInput from "../../utils/input/CommonInput";
 import CurationBuildFilterSelectStatement from "./CurationBuildFilterSelectStatement";
 import {
@@ -94,6 +94,36 @@ export default function CurationBuildFilter({
   const [testRunMembersCount, setTestRunMembersCount] = useState<number | null>(
     null
   );
+
+  const getIsNotEmptyFilters = (): boolean => {
+    if (filters.level.min !== null || filters.level.max !== null) {
+      return true;
+    }
+    if (filters.tdh.min !== null || filters.tdh.max !== null) {
+      return true;
+    }
+    if (filters.rep.min !== null || filters.rep.max !== null) {
+      return true;
+    }
+    if (filters.rep.user !== null || filters.rep.category !== null) {
+      return true;
+    }
+    if (filters.cic.min !== null || filters.cic.max !== null) {
+      return true;
+    }
+    if (filters.cic.user !== null) {
+      return true;
+    }
+    return false;
+  };
+
+  const [isNotEmptyFilters, setIsNotEmptyFilters] = useState<boolean>(
+    getIsNotEmptyFilters()
+  );
+
+  useEffect(() => {
+    setIsNotEmptyFilters(getIsNotEmptyFilters());
+  }, [filters]);
 
   return (
     <div className="tw-mt-4 tw-pb-6 tw-w-full tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
