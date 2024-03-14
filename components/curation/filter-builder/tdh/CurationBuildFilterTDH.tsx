@@ -23,8 +23,9 @@ export default function CurationBuildFilterTDH({
 
   return (
     <CommonInput
-      placeholder="Min TDH"
+      placeholder="TDH at least"
       inputType="number"
+      minValue={0}
       value={
         typeof filters.tdh.min === "number" ? filters.tdh.min.toString() : ""
       }

@@ -1,27 +1,62 @@
 import { HTMLInputTypeAttribute } from "react";
 
-export default function CommonInput({
-  value,
-  inputType = "text",
-  placeholder = "",
-  showSearchIcon = false,
-  onChange,
-  onFocusChange,
-}: {
+type InputProps = {
   readonly value: string;
-  readonly inputType?: HTMLInputTypeAttribute;
   readonly placeholder?: string;
   readonly showSearchIcon?: boolean;
   readonly onChange: (newV: string | null) => void;
   readonly onFocusChange?: (focus: boolean) => void;
-}) {
+};
+
+type NumberInputProps = InputProps & {
+  readonly inputType: "number";
+  readonly minValue?: number;
+  readonly maxValue?: number;
+};
+
+type TextInputProps = InputProps & {
+  readonly inputType?: "text";
+};
+
+export default function CommonInput(props: NumberInputProps | TextInputProps) {
+  const {
+    value,
+    placeholder,
+    showSearchIcon,
+    onChange,
+    onFocusChange,
+    inputType = "text",
+  } = props;
+
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value === "") {
       onChange(null);
       return;
     }
+    if (props.inputType === "number") {
+      const numericValue = parseFloat(e.target.value);
+      if (isNaN(numericValue)) {
+        onChange(null);
+        return;
+      }
+
+      if (props.minValue !== undefined && numericValue < props.minValue) {
+        onChange(props.minValue.toString());
+        return;
+      }
+
+      if (props.maxValue !== undefined && numericValue > props.maxValue) {
+        onChange(props.maxValue.toString());
+        return;
+      }
+    }
+
     onChange(e.target.value);
   };
+
+  const min = props.inputType === "number" ? props.minValue : undefined;
+  const max = props.inputType === "number" ? props.maxValue : undefined;
+
   return (
     <div className="tw-relative">
       {showSearchIcon && (
@@ -42,6 +77,8 @@ export default function CommonInput({
         type={inputType}
         placeholder={placeholder}
         value={value}
+        min={min}
+        max={max}
         onChange={onInput}
         onFocus={() => onFocusChange && onFocusChange(true)}
         onBlur={() => onFocusChange && onFocusChange(false)}

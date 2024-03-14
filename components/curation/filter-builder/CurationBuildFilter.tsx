@@ -7,9 +7,7 @@ import {
   GeneralFilter,
 } from "../../../helpers/filters/Filters.types";
 import CurationBuildFilterStatement from "./CurationBuildFilterStatement";
-import CurationBuildFilterStatementsList, {
-  CommunityCurationFilterStatementType,
-} from "./statements/CurationBuildFilterStatementsList";
+import CurationBuildFilterStatementsList from "./statements/CurationBuildFilterStatementsList";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CurationBuildFilterSave from "./actions/CurationBuildFilterSave";
 import CurationBuildFilterTest from "./actions/CurationBuildFilterTest";
@@ -55,13 +53,13 @@ export default function CurationBuildFilter({
     }
   );
 
-  const onRemoveFilters = (keys: CommunityCurationFilterStatementType[]) => {
+  const onRemoveFilters = (keys: CommunityCurationFilterStatement[]) => {
     for (const key of keys) {
       switch (key) {
-        case CommunityCurationFilterStatementType.TDH:
+        case CommunityCurationFilterStatement.TDH:
           setFilters((prev) => ({ ...prev, tdh: { min: null, max: null } }));
           break;
-        case CommunityCurationFilterStatementType.REP:
+        case CommunityCurationFilterStatement.REP:
           setFilters((prev) => ({
             ...prev,
             rep: {
@@ -73,7 +71,7 @@ export default function CurationBuildFilter({
             },
           }));
           break;
-        case CommunityCurationFilterStatementType.CIC:
+        case CommunityCurationFilterStatement.CIC:
           setFilters((prev) => ({
             ...prev,
             cic: {
@@ -84,7 +82,7 @@ export default function CurationBuildFilter({
             },
           }));
           break;
-        case CommunityCurationFilterStatementType.LEVEL:
+        case CommunityCurationFilterStatement.LEVEL:
           setFilters((prev) => ({ ...prev, level: { min: null, max: null } }));
           break;
         default:
@@ -114,6 +112,7 @@ export default function CurationBuildFilter({
           <CurationBuildFilterStatementsList
             filters={filters}
             onRemoveFilters={onRemoveFilters}
+            onStatementType={setStatementType}
           />
           <CurationBuildFilterSelectStatement
             statementType={statementType}

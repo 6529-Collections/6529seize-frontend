@@ -22,8 +22,10 @@ export default function CurationBuildFilterLevel({
 
   return (
     <CommonInput
-      placeholder="Min level"
+      placeholder="Level at least"
       inputType="number"
+      minValue={-100}
+      maxValue={100}
       value={
         typeof filters.level.min === "number"
           ? filters.level.min.toString()

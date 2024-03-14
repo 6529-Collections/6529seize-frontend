@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useDebounce } from "react-use";
+import { useRef, useState } from "react";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -41,21 +41,36 @@ export default function CurationBuildFiltersUserSearch({
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const onValueChange = (newValue: string | null) => {
+    setValue(newValue);
+    setIsOpen(false);
+  };
+
+  const onFocusChange = (newV: boolean) => {
+    if (newV) {
+      setIsOpen(true);
+    }
+  };
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useClickAway(wrapperRef, () => setIsOpen(false));
+  useKeyPressEvent("Escape", () => setIsOpen(false));
+
   return (
-    <div>
+    <div ref={wrapperRef}>
       <CommonInput
         inputType="text"
         placeholder={placeholder}
         value={value ?? ""}
         showSearchIcon={true}
         onChange={setValue}
-        onFocusChange={(newV) => setIsOpen(newV)}
+        onFocusChange={onFocusChange}
       />
       <CurationBuildFiltersUserSearchDropdown
         open={isOpen}
         selected={value}
         profiles={data ?? []}
-        onSelect={setValue}
+        onSelect={onValueChange}
       />
     </div>
   );

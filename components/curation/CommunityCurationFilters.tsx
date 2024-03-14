@@ -1,5 +1,5 @@
 import CurationBuildFilter from "./filter-builder/CurationBuildFilter";
-import CurationHeader from "./CurationHeader";
+import CurationHeader from "./header/CurationHeader";
 import CommunityCurationFiltersSelect from "./select/CommunityCurationFiltersSelect";
 import { useContext, useState } from "react";
 import { CurationFilterResponse } from "../../helpers/filters/Filters.types";

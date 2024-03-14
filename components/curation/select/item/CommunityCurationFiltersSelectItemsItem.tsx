@@ -1,11 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
 import { AuthContext } from "../../../auth/Auth";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectActiveCurationFilterId,
-  setActiveCurationFilterId,
-} from "../../../../store/curationFilterSlice";
 import {
   ImageScale,
   getScaledImageUri,
@@ -16,6 +11,7 @@ import CommunityCurationFiltersSelectItemsItemDelete from "./CommunityCurationFi
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import CurationBuildFilterStatementsList from "../../filter-builder/statements/CurationBuildFilterStatementsList";
+import CommunityCurationFiltersSelectItemsItemWrapper from "./CommunityCurationFiltersSelectItemsItemWrapper";
 
 export default function CommunityCurationFiltersSelectItemsItem({
   filter,
@@ -25,26 +21,6 @@ export default function CommunityCurationFiltersSelectItemsItem({
   readonly onEditClick: (filter: CurationFilterResponse) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
-  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
-  const dispatch = useDispatch();
-
-  const [isActive, setIsActive] = useState(
-    activeCurationFilterId && activeCurationFilterId === filter.id
-  );
-  useEffect(() => {
-    setIsActive(
-      activeCurationFilterId &&
-        activeCurationFilterId.toLocaleLowerCase() === filter.id.toLowerCase()
-    );
-  }, [activeCurationFilterId]);
-
-  const onFilterClick = () => {
-    if (isActive) {
-      dispatch(setActiveCurationFilterId(null));
-    } else {
-      dispatch(setActiveCurationFilterId(filter.id));
-    }
-  };
 
   const [isMyFilter, setIsMyFilter] = useState(
     connectedProfile?.profile?.handle.toLowerCase() ===
@@ -71,11 +47,9 @@ export default function CommunityCurationFiltersSelectItemsItem({
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
   return (
-    <div
-      onClick={onFilterClick}
-      className={`tw-cursor-pointer tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700 hover:tw-border-primary-300 tw-transition tw-duration-300 tw-ease-out  ${
-        isActive ? "tw-border-primary-300" : ""
-      }`}
+    <CommunityCurationFiltersSelectItemsItemWrapper
+      filter={filter}
+      onEditClick={onEditClick}
     >
       <div className="tw-px-4 tw-py-2.5">
         <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
@@ -189,6 +163,6 @@ export default function CommunityCurationFiltersSelectItemsItem({
           </div>
         )}
       </div>
-    </div>
+    </CommunityCurationFiltersSelectItemsItemWrapper>
   );
 }
