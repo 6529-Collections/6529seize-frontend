@@ -18,22 +18,33 @@ export default function CurationBuildFiltersUserSearch({
   readonly placeholder: string;
   readonly setValue: (value: string | null) => void;
 }) {
-  const [debouncedValue, setDebouncedValue] = useState<string | null>(value);
+  const [searchCriteria, setSearchCriteria] = useState<string | null>(value);
+
+  const [debouncedValue, setDebouncedValue] = useState<string | null>(
+    searchCriteria
+  );
   useDebounce(
     () => {
-      setDebouncedValue(value);
+      setDebouncedValue(searchCriteria);
     },
     200,
-    [value]
+    [searchCriteria]
   );
 
   const { data } = useQuery<CommunityMemberMinimal[]>({
-    queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
+    queryKey: [
+      QueryKey.PROFILE_SEARCH,
+      {
+        param: debouncedValue,
+        only_profile_owners: "true",
+      },
+    ],
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
         params: {
           param: debouncedValue ?? "",
+          only_profile_owners: "true",
         },
       }),
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
@@ -61,9 +72,9 @@ export default function CurationBuildFiltersUserSearch({
       <CommonInput
         inputType="text"
         placeholder={placeholder}
-        value={value ?? ""}
+        value={searchCriteria ?? ""}
         showSearchIcon={true}
-        onChange={setValue}
+        onChange={setSearchCriteria}
         onFocusChange={onFocusChange}
       />
       <CurationBuildFiltersUserSearchDropdown

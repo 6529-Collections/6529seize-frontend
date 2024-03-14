@@ -6,7 +6,6 @@ import {
 import { CommunityCurationFilterStatement } from "../CurationBuildFilter";
 import CurationBuildFilterStatementsListItem from "./CurationBuildFilterStatementsListItem";
 
-
 export interface CommunityCurationFilterStatementItem {
   readonly key: CommunityCurationFilterStatement;
   readonly label: string;
@@ -18,12 +17,8 @@ export default function CurationBuildFilterStatementsList({
   onStatementType,
 }: {
   readonly filters: GeneralFilter;
-  readonly onRemoveFilters?: (
-    keys: CommunityCurationFilterStatement[]
-  ) => void;
-  readonly onStatementType?: (
-    type: CommunityCurationFilterStatement
-  ) => void;
+  readonly onRemoveFilters?: (keys: CommunityCurationFilterStatement[]) => void;
+  readonly onStatementType?: (type: CommunityCurationFilterStatement) => void;
 }) {
   const getLevelStatement = (): CommunityCurationFilterStatementItem | null => {
     if (filters.level.min && filters.level.max) {
@@ -197,6 +192,11 @@ export default function CurationBuildFilterStatementsList({
   };
 
   const statements = getStatements();
+
+  if (!statements.length) {
+    return null;
+  }
+
   return (
     <div className="tw-w-full tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       {statements.map((statement) => (
