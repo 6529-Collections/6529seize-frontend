@@ -20,7 +20,7 @@ export default function CommunityCurationFiltersSelectActiveFilter({
     placeholderData: keepPreviousData,
   });
   if (!data) {
-    return <div>loading</div>;
+    return <div className="tw-px-4 tw-text-md tw-text-iron-400 tw-font-normal">Loading...</div>;
   }
   return (
     <div className="tw-px-4 tw-pt-4">

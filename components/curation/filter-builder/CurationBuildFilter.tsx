@@ -126,7 +126,7 @@ export default function CurationBuildFilter({
         </div>
         <div className="tw-pt-4 tw-px-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-w-full tw-inline-flex tw-justify-between tw-items-center">
           {testRunMembersCount !== null && (
-            <div className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 ">
+            <div className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400">
               Members: {formatNumberWithCommas(testRunMembersCount)}
             </div>
           )}
