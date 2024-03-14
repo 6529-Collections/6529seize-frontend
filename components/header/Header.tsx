@@ -11,11 +11,18 @@ import HeaderConnect from "./HeaderConnect";
 import { useAccount } from "wagmi";
 import SearchProfileButton from "./search-profile/SearchProfileButton";
 import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
+import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
 
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
+}
+
+export interface HeaderLink {
+  readonly name: string;
+  readonly path: `/${string}`;
+  readonly isNew?: boolean;
 }
 
 export default function Header(props: Readonly<Props>) {
@@ -87,21 +94,6 @@ export default function Header(props: Readonly<Props>) {
     );
   }
 
-  function printNavDropdown(name: string, path: string) {
-    return (
-      <NavDropdown.Item
-        className={styles.dropdownItem}
-        onClick={() => (window.location.href = path)}
-      >
-        {name}
-      </NavDropdown.Item>
-    );
-  }
-
-  function printHeaderConnect() {
-    return <HeaderConnect />;
-  }
-
   function printBurgerMenu() {
     return (
       <div
@@ -145,15 +137,15 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
               >
-                {printHeaderConnect()}
+                <HeaderConnect />
               </h3>
             </Col>
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <a href="/">
+              <Link href="/">
                 <h3>Home</h3>
-              </a>
+              </Link>
             </Col>
           </Row>
           <Row className="pt-3 pb-3">
@@ -192,16 +184,16 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/the-memes">
+                    <Link href="/the-memes">
                       <h3>The Memes</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/6529-gradient">
+                    <Link href="/6529-gradient">
                       <h3>Gradient</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -211,12 +203,12 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/nextgen">
+                    <Link href="/nextgen">
                       <h3>
                         <span>NextGen</span>&nbsp;
                         <span className={styles.new}>new</span>
                       </h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -226,16 +218,16 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/meme-lab">
+                    <Link href="/meme-lab">
                       <h3>Meme Lab</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/rememes">
+                    <Link href="/rememes">
                       <h3>ReMemes</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -282,23 +274,23 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/community">
+                    <Link href="/community">
                       <h3>Community</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/community-activity">
+                    <Link href="/community-activity">
                       <h3>Community Activity</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/nft-activity">
+                    <Link href="/nft-activity">
                       <h3>NFT Activity</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -308,23 +300,23 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/community-metrics">
+                    <Link href="/community-metrics">
                       <h3>Community Metrics</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/community-stats">
+                    <Link href="/community-stats">
                       <h3>Community Stats</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/levels">
+                    <Link href="/levels">
                       <h3>Levels</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -371,9 +363,9 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/delegation/delegation-center">
+                    <Link href="/delegation/delegation-center">
                       <h3>Delegation Center</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -383,23 +375,23 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/emma">
+                    <Link href="/emma">
                       <h3>EMMA</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/meme-blocks">
+                    <Link href="/meme-blocks">
                       <h3>Meme Blocks</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href="/open-data">
+                    <Link href="/open-data">
                       <h3>Open Data</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -445,30 +437,30 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.MEMES}`}>
+                    <Link href={`/about/${AboutSection.MEMES}`}>
                       <h3>The Memes</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.MEMES_CALENDAR}`}>
+                    <Link href={`/about/${AboutSection.MEMES_CALENDAR}`}>
                       <h3>Memes Calendar</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.MEME_LAB}`}>
+                    <Link href={`/about/${AboutSection.MEME_LAB}`}>
                       <h3>Meme Lab</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.GRADIENTS}`}>
+                    <Link href={`/about/${AboutSection.GRADIENTS}`}>
                       <h3>Gradient</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -478,9 +470,9 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.GDRC1}`}>
+                    <Link href={`/about/${AboutSection.GDRC1}`}>
                       <h3>GDRC1</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -490,9 +482,9 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.NFT_DELEGATION}`}>
+                    <Link href={`/about/${AboutSection.NFT_DELEGATION}`}>
                       <h3>NFT Delegation</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -502,30 +494,30 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.FAQ}`}>
+                    <Link href={`/about/${AboutSection.FAQ}`}>
                       <h3>FAQ</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.ENS}`}>
+                    <Link href={`/about/${AboutSection.ENS}`}>
                       <h3>ENS</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.MINTING}`}>
+                    <Link href={`/about/${AboutSection.MINTING}`}>
                       <h3>Minting</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.LICENSE}`}>
+                    <Link href={`/about/${AboutSection.LICENSE}`}>
                       <h3>License</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -535,30 +527,30 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.APPLY}`}>
+                    <Link href={`/about/${AboutSection.APPLY}`}>
                       <h3>Apply</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.CONTACT_US}`}>
+                    <Link href={`/about/${AboutSection.CONTACT_US}`}>
                       <h3>Contact Us</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.RELEASE_NOTES}`}>
+                    <Link href={`/about/${AboutSection.RELEASE_NOTES}`}>
                       <h3>Release Notes</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.DATA_DECENTR}`}>
+                    <Link href={`/about/${AboutSection.DATA_DECENTR}`}>
                       <h3>Data Decentralization</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -568,23 +560,23 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
+                    <Link href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
                       <h3>Terms of Service</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.PRIVACY_POLICY}`}>
+                    <Link href={`/about/${AboutSection.PRIVACY_POLICY}`}>
                       <h3>Privacy Policy</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <a href={`/about/${AboutSection.COOKIE_POLICY}`}>
+                    <Link href={`/about/${AboutSection.COOKIE_POLICY}`}>
                       <h3>Cookie Policy</h3>
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>
@@ -599,6 +591,8 @@ export default function Header(props: Readonly<Props>) {
       </div>
     );
   }
+
+  const goTo = (path: string) => router.push(path);
 
   return (
     <>
@@ -615,7 +609,7 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 3 }}
                   className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
                 >
-                  <a href="/">
+                  <Link href="/">
                     <Image
                       loading="eager"
                       priority
@@ -625,7 +619,7 @@ export default function Header(props: Readonly<Props>) {
                       width={319}
                       height={50}
                     />
-                  </a>
+                  </Link>
                 </Col>
 
                 <Col
@@ -670,149 +664,137 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/" ? "active" : ""
                               }`}
-                              href="/"
+                              onClick={() => goTo("/")}
                             >
                               Home
                             </Nav.Link>
+
                             <NavDropdown
                               title="Collections"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
                             >
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/the-memes")
-                                }
-                              >
-                                The Memes
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/6529-gradient")
-                                }
-                              >
-                                Gradient
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "The Memes",
+                                  path: "/the-memes",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Gradient",
+                                  path: "/6529-gradient",
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/nextgen")
-                                }
-                              >
-                                <span>NextGen</span>&nbsp;
-                                <span className={styles.new}>new</span>
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "NextGen",
+                                  path: "/nextgen",
+                                  isNew: true,
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/meme-lab")
-                                }
-                              >
-                                Meme Lab
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/rememes")
-                                }
-                              >
-                                ReMemes
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Meme Lab",
+                                  path: "/meme-lab",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "ReMemes",
+                                  path: "/rememes",
+                                }}
+                              />
                             </NavDropdown>
                             <NavDropdown
                               title="Community"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
                             >
-                              <NavDropdown.Item className={styles.dropdownItem}>
-                                <Link href="/community">Community</Link>
-                              </NavDropdown.Item>
-                              <NavDropdown.Item className={styles.dropdownItem}>
-                                <Link href="/community-activity">
-                                  Community Activity
-                                </Link>
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/nft-activity")
-                                }
-                              >
-                                NFT Activity
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Community",
+                                  path: "/community",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Community Activity",
+                                  path: "/community-activity",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "NFT Activity",
+                                  path: "/nft-activity",
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/community-metrics")
-                                }
-                              >
-                                Community Metrics
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/community-stats")
-                                }
-                              >
-                                Community Stats
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/levels")
-                                }
-                              >
-                                Levels
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Community Metrics",
+                                  path: "/community-metrics",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Community Stats",
+                                  path: "/community-stats",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Levels",
+                                  path: "/levels",
+                                }}
+                              />
                             </NavDropdown>
                             <NavDropdown
                               title="Tools"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
                             >
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href =
-                                    "/delegation/delegation-center")
-                                }
-                              >
-                                Delegation Center
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Delegation Center",
+                                  path: "/delegation/delegation-center",
+                                }}
+                              />
+
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() => (window.location.href = "/emma")}
-                              >
-                                EMMA
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/meme-blocks")
-                                }
-                              >
-                                Meme Blocks
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = "/open-data")
-                                }
-                              >
-                                Open Data
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "EMMA",
+                                  path: "/emma",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Meme Blocks",
+                                  path: "/meme-blocks",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Open Data",
+                                  path: "/open-data",
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              {printNavDropdown(
-                                "Meme Accounting",
-                                "/meme-accounting"
-                              )}
-                              {printNavDropdown("Meme Gas", "/meme-gas")}
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Meme Accounting",
+                                  path: "/meme-accounting",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Meme Gas",
+                                  path: "/meme-gas",
+                                }}
+                              />
                             </NavDropdown>
                             <NavDropdown
                               title="About"
@@ -825,149 +807,115 @@ export default function Header(props: Readonly<Props>) {
                               }`}
                               align={"start"}
                             >
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.MEMES}`)
-                                }
-                              >
-                                The Memes
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.MEMES_CALENDAR}`)
-                                }
-                              >
-                                Memes Calendar
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.MEME_LAB}`)
-                                }
-                              >
-                                Meme Lab
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.GRADIENTS}`)
-                                }
-                              >
-                                Gradient
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "The Memes",
+                                  path: `/about/${AboutSection.MEMES}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Memes Calendar",
+                                  path: `/about/${AboutSection.MEMES_CALENDAR}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Meme Lab",
+                                  path: `/about/${AboutSection.MEME_LAB}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Gradient",
+                                  path: `/about/${AboutSection.GRADIENTS}`,
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.GDRC1}`)
-                                }
-                              >
-                                GDRC1
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "GDRC1",
+                                  path: `/about/${AboutSection.GDRC1}`,
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.NFT_DELEGATION}`)
-                                }
-                              >
-                                NFT Delegation
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "NFT Delegation",
+                                  path: `/about/${AboutSection.NFT_DELEGATION}`,
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.FAQ}`)
-                                }
-                              >
-                                FAQ
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.ENS}`)
-                                }
-                              >
-                                ENS
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.MINTING}`)
-                                }
-                              >
-                                Minting
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.LICENSE}`)
-                                }
-                              >
-                                License
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "FAQ",
+                                  path: `/about/${AboutSection.FAQ}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "ENS",
+                                  path: `/about/${AboutSection.ENS}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Minting",
+                                  path: `/about/${AboutSection.MINTING}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "License",
+                                  path: `/about/${AboutSection.LICENSE}`,
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.APPLY}`)
-                                }
-                              >
-                                Apply
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.CONTACT_US}`)
-                                }
-                              >
-                                Contact Us
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.RELEASE_NOTES}`)
-                                }
-                              >
-                                Release Notes
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.DATA_DECENTR}`)
-                                }
-                              >
-                                Data Decentralization
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Apply",
+                                  path: `/about/${AboutSection.APPLY}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Contact Us",
+                                  path: `/about/${AboutSection.CONTACT_US}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Release Notes",
+                                  path: `/about/${AboutSection.RELEASE_NOTES}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Data Decentralization",
+                                  path: `/about/${AboutSection.DATA_DECENTR}`,
+                                }}
+                              />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.TERMS_OF_SERVICE}`)
-                                }
-                              >
-                                Terms of Service
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.PRIVACY_POLICY}`)
-                                }
-                              >
-                                Privacy Policy
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.dropdownItem}
-                                onClick={() =>
-                                  (window.location.href = `/about/${AboutSection.COOKIE_POLICY}`)
-                                }
-                              >
-                                Cookie Policy
-                              </NavDropdown.Item>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Terms of Service",
+                                  path: `/about/${AboutSection.TERMS_OF_SERVICE}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Privacy Policy",
+                                  path: `/about/${AboutSection.PRIVACY_POLICY}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Cookie Policy",
+                                  path: `/about/${AboutSection.COOKIE_POLICY}`,
+                                }}
+                              />
                             </NavDropdown>
-                            {printHeaderConnect()}
+                            <HeaderConnect />
                             <UserSetUpProfileCta />
                             <SearchProfileButton />
                           </Nav>

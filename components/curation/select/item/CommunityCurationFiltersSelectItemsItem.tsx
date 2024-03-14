@@ -7,7 +7,7 @@ import {
 } from "../../../../helpers/image.helpers";
 import Link from "next/link";
 
-import CommunityCurationFiltersSelectItemsItemDelete from "./CommunityCurationFiltersSelectItemsItemDelete";
+import CommunityCurationFiltersSelectItemsItemDelete from "./delete/CommunityCurationFiltersSelectItemsItemDelete";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import CurationBuildFilterStatementsList from "../../filter-builder/statements/CurationBuildFilterStatementsList";

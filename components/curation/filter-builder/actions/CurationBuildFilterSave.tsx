@@ -9,16 +9,17 @@ import { commonApiPost } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 
-
 export default function CurationBuildFilterSave({
   originalFilter,
   filters,
   name,
+  disabled,
   onSaved,
 }: {
   readonly originalFilter: CurationFilterResponse | null;
   readonly filters: GeneralFilter;
   readonly name: string;
+  readonly disabled: boolean;
   readonly onSaved: (response: CurationFilterResponse) => void;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -104,7 +105,12 @@ export default function CurationBuildFilterSave({
     <button
       type="button"
       onClick={onSave}
-      className="tw-flex tw-w-[4rem] tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
+      disabled={disabled}
+      className={`${
+        disabled
+          ? "tw-opacity-50"
+          : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
+      } tw-flex tw-w-[4rem] tw-items-center tw-justify-center tw-relative tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-bg-primary-500 tw-border-primary-500 `}
     >
       {mutating ? <CircleLoader /> : "Save"}
     </button>

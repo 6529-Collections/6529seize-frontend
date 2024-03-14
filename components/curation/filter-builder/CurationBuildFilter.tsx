@@ -95,34 +95,35 @@ export default function CurationBuildFilter({
     null
   );
 
-  const getIsNotEmptyFilters = (): boolean => {
+  const getIsEmptyFilters = (): boolean => {
     if (filters.level.min !== null || filters.level.max !== null) {
-      return true;
+      return false;
     }
     if (filters.tdh.min !== null || filters.tdh.max !== null) {
-      return true;
+      return false;
     }
     if (filters.rep.min !== null || filters.rep.max !== null) {
-      return true;
+      return false;
     }
     if (filters.rep.user !== null || filters.rep.category !== null) {
-      return true;
+      return false;
     }
     if (filters.cic.min !== null || filters.cic.max !== null) {
-      return true;
+      return false;
     }
     if (filters.cic.user !== null) {
-      return true;
+      return false;
     }
-    return false;
+    return true;
   };
 
-  const [isNotEmptyFilters, setIsNotEmptyFilters] = useState<boolean>(
-    getIsNotEmptyFilters()
+  const [isEmptyFilters, setIsEmptyFilters] = useState<boolean>(
+    getIsEmptyFilters()
   );
 
   useEffect(() => {
-    setIsNotEmptyFilters(getIsNotEmptyFilters());
+    setIsEmptyFilters(getIsEmptyFilters());
+    setTestRunMembersCount(null);
   }, [filters]);
 
   return (
@@ -167,12 +168,14 @@ export default function CurationBuildFilter({
             <CurationBuildFilterTest
               filters={filters}
               name={name}
+              disabled={isEmptyFilters}
               onTestRunMembersCount={setTestRunMembersCount}
             />
             <CurationBuildFilterSave
               filters={filters}
               name={name}
               originalFilter={originalFilter}
+              disabled={isEmptyFilters}
               onSaved={onSaved}
             />
           </div>

@@ -42,6 +42,7 @@ import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "../components/the-memes/MemePageArt";
+import Link from "next/link";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -217,7 +218,7 @@ export default function Home({
                           />
                         </span>
                       ) : (
-                        <a
+                        <Link
                           href={`/the-memes/${pageProps.nft.id}`}
                           className={connectedWallets && styles.nftImagePadding}
                         >
@@ -228,7 +229,7 @@ export default function Home({
                             balance={nftBalance}
                             showUnseized={connectedWallets.length > 0}
                           />
-                        </a>
+                        </Link>
                       )}
                     </Row>
                   </Container>
@@ -246,9 +247,9 @@ export default function Home({
                       <Col>
                         <u>
                           <h3>
-                            <a href={`/the-memes/${pageProps.nft.id}`}>
+                            <Link href={`/the-memes/${pageProps.nft.id}`}>
                               Card {pageProps.nft.id} - {pageProps.nft.name}
-                            </a>
+                            </Link>
                           </h3>
                         </u>
                       </Col>
@@ -432,14 +433,14 @@ export default function Home({
                         <span className="font-lightest">Discover</span> NextGen
                         - {pageProps.nextGenFeatured.name}{" "}
                       </h1>
-                      <a
+                      <Link
                         href={`/nextgen/collection/${formatNameForUrl(
                           pageProps.nextGenFeatured.name
                         )}`}
                         className={styles.viewAllLink}
                       >
                         <span>View Collection</span>
-                      </a>
+                      </Link>
                     </Col>
                   </Row>
                   <Row className="pt-3">
@@ -456,17 +457,18 @@ export default function Home({
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}
+                  disableActiveCurationFilter={true}
                 >
                   <span className="d-flex align-items-center gap-3">
                     <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                       <span className="font-lightest">Community</span> Activity{" "}
                     </h1>
-                    <a
+                    <Link
                       href="/community-activity"
                       className={styles.viewAllLink}
                     >
                       <span>View All</span>
-                    </a>
+                    </Link>
                   </span>
                 </ProfileActivityLogs>
               </div>
@@ -516,7 +518,10 @@ export async function getServerSideProps(
     });
     const logsPage = await getUserProfileActivityLogs({
       headers,
-      params: convertActivityLogParams(INITIAL_ACTIVITY_LOGS_PARAMS),
+      params: convertActivityLogParams({
+        params: INITIAL_ACTIVITY_LOGS_PARAMS,
+        disableActiveCurationFilter: true,
+      }),
     });
     const nextGenFeatured = await commonApiFetch<NextGenCollection>({
       endpoint: `nextgen/featured`,

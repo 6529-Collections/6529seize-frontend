@@ -464,13 +464,18 @@ export default function ReactQueryWrapper({
 
   const initProfileActivityLogs = ({
     params,
+    disableActiveCurationFilter,
     data,
   }: {
     readonly params: ActivityLogParams;
+    readonly disableActiveCurationFilter: boolean;
     readonly data: Page<ProfileActivityLog>;
   }) => {
     queryClient.setQueryData(
-      [QueryKey.PROFILE_LOGS, convertActivityLogParams(params)],
+      [
+        QueryKey.PROFILE_LOGS,
+        convertActivityLogParams({ params, disableActiveCurationFilter }),
+      ],
       data
     );
   };
@@ -485,7 +490,11 @@ export default function ReactQueryWrapper({
   }: InitProfileRepPageParams) => {
     setProfile(profile);
     setRepRates({ data: repRates, handleOrWallet });
-    initProfileActivityLogs(repLogs);
+    initProfileActivityLogs({
+      params: repLogs.params,
+      data: repLogs.data,
+      disableActiveCurationFilter: true,
+    });
     setProfileRaters(repGivenToUsers);
     setProfileRaters(repReceivedFromUsers);
   };
@@ -497,7 +506,11 @@ export default function ReactQueryWrapper({
     cicReceivedFromUsers,
   }: InitProfileIdentityPageParams) => {
     setProfile(profile);
-    initProfileActivityLogs(activityLogs);
+    initProfileActivityLogs({
+      params: activityLogs.params,
+      data: activityLogs.data,
+      disableActiveCurationFilter: true,
+    });
     setProfileRaters(cicGivenToUsers);
     setProfileRaters(cicReceivedFromUsers);
   };
@@ -507,7 +520,11 @@ export default function ReactQueryWrapper({
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => {
-    initProfileActivityLogs(activityLogs);
+    initProfileActivityLogs({
+      params: activityLogs.params,
+      data: activityLogs.data,
+      disableActiveCurationFilter: true,
+    });
   };
 
   const initCommunityActivityPage = ({
@@ -515,7 +532,11 @@ export default function ReactQueryWrapper({
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => {
-    initProfileActivityLogs(activityLogs);
+    initProfileActivityLogs({
+      params: activityLogs.params,
+      data: activityLogs.data,
+      disableActiveCurationFilter: false,
+    });
   };
 
   return (
