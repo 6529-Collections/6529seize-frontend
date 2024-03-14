@@ -1,7 +1,6 @@
 import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
 import { GeneralFilter } from "../../../../helpers/filters/Filters.types";
 import CommonInput from "../../../utils/input/CommonInput";
-import CurationBuildFilterMinMaxValues from "../common/CurationBuildFilterMinMaxValues";
 
 export default function CurationBuildFilterLevel({
   filters,

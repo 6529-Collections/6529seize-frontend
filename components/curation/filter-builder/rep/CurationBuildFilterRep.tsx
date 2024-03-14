@@ -56,7 +56,7 @@ export default function CurationBuildFilterRep({
     });
   };
 
-  const showDirection = !!(filters.rep.user || filters.rep.category);
+  const showDirection: boolean = !!filters.rep.user?.length ?? !!filters.rep.category
 
   useEffect(() => {
     if (!showDirection) {

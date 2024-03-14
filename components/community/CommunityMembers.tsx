@@ -6,7 +6,7 @@ import {
   CommunityMembersSortOption,
 } from "../../pages/community";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import { SortDirection } from "../../entities/ISort";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
@@ -14,13 +14,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useDebounce } from "react-use";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-import CommonTableSimplePagination from "../utils/table/paginator/CommonTableSimplePagination";
-import { AuthContext } from "../auth/Auth";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectActiveCurationFilterId,
-  setActiveCurationFilterId,
-} from "../../store/curationFilterSlice";
+
+import { useSelector } from "react-redux";
+import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 interface QueryUpdateInput {

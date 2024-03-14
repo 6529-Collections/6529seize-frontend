@@ -6,7 +6,6 @@ import {
   PROFILE_ACTIVITY_TYPE_TO_TEXT,
   ProfileActivityLogType,
 } from "../../../entities/IProfile";
-import { GeneralFilter } from "../../../helpers/filters/Filters.types";
 
 export default function ProfileActivityLogsFilter({
   user,
