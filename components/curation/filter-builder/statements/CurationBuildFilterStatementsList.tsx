@@ -204,7 +204,7 @@ export default function CurationBuildFilterStatementsList({
       {statements.map((statement) => (
         <div
           key={statement.key}
-          className="tw-inline-flex tw-items-center tw-justify-between  tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+          className="tw-inline-flex tw-items-center tw-justify-between tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700"
         >
           {statement.label}
           {showRemoveButton && (

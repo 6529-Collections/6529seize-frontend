@@ -23,7 +23,7 @@ export default function CommunityCurationFiltersSelectActiveFilter({
     return <div>loading</div>;
   }
   return (
-    <div className="tw-px-4">
+    <div className="tw-px-4 tw-pt-4">
       <CommunityCurationFiltersSelectItemsItem
         key={data.id}
         filter={data}

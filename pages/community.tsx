@@ -199,14 +199,14 @@ export default function CommunityPage() {
                   }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  <div className="tw-bg-iron-950 tw-w-80  ">
+                  <div className="tw-bg-iron-950 tw-w-80">
                     <CommunityCurationFilters setOpen={setOpen} />
                   </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <div className="tw-w-full ">
+            <div className="tw-w-full">
               <motion.div
                 initial={{
                   marginLeft: "320px",
