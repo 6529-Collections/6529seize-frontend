@@ -71,9 +71,7 @@ export default function CommunityCurationFiltersSelect({
   >([]);
   useEffect(() => {
     if (data) {
-      setCurationFilters(
-        data.filter((filter) => filter.id !== activeCurationFilterId)
-      );
+      setCurationFilters(data);
     } else {
       setCurationFilters([]);
     }

@@ -12,15 +12,33 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import CurationBuildFilterStatementsList from "../../filter-builder/statements/CurationBuildFilterStatementsList";
 import CommunityCurationFiltersSelectItemsItemWrapper from "./CommunityCurationFiltersSelectItemsItemWrapper";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectActiveCurationFilterId,
+  setActiveCurationFilterId,
+} from "../../../../store/curationFilterSlice";
 
 export default function CommunityCurationFiltersSelectItemsItem({
   filter,
+  membersCount = null,
   onEditClick,
 }: {
   readonly filter: CurationFilterResponse;
+  readonly membersCount?: number | null;
   readonly onEditClick: (filter: CurationFilterResponse) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
+
+  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const dispatch = useDispatch();
+  const getIsActive = (): boolean =>
+    !!activeCurationFilterId && activeCurationFilterId === filter.id;
+
+  const [isActive, setIsActive] = useState(getIsActive());
+
+  useEffect(() => {
+    setIsActive(getIsActive());
+  }, [activeCurationFilterId]);
 
   const [isMyFilter, setIsMyFilter] = useState(
     connectedProfile?.profile?.handle.toLowerCase() ===
@@ -46,28 +64,44 @@ export default function CommunityCurationFiltersSelectItemsItem({
   useClickAway(listRef, () => setIsOptionsOpen(false));
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
+  const deActivate = () => {
+    if (!isActive) return;
+    dispatch(setActiveCurationFilterId(null));
+  };
+
+  const [deactivateHover, setDeactivateHover] = useState(false);
+
   return (
     <CommunityCurationFiltersSelectItemsItemWrapper
       filter={filter}
-      onEditClick={onEditClick}
+      isActive={isActive}
+      deactivateHover={deactivateHover}
     >
       <div className="tw-px-4 tw-py-2.5 tw-relative">
-        <div className="tw-absolute -tw-right-2 -tw-top-3">
-          <button
-            type="button"
-            className="tw-group tw-p-1 tw-bg-iron-800 tw-border-0 tw-flex tw-items-center tw-justify-center tw-rounded-full"
-          >
-            <span className="tw-sr-only">Remove</span>
-            <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
+        {isActive && (
+          <div className="tw-absolute -tw-right-2 -tw-top-3">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deActivate();
+              }}
+              onMouseEnter={() => setDeactivateHover(true)}
+              onMouseLeave={() => setDeactivateHover(false)}
+              type="button"
+              className="tw-group tw-p-1 tw-bg-iron-800 tw-border-0 tw-flex tw-items-center tw-justify-center tw-rounded-full"
             >
-              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-            </svg>
-          </button>
-        </div>
+              <span className="tw-sr-only">Remove</span>
+              <svg
+                className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          </div>
+        )}
         <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
           <p className="tw-text-sm tw-font-medium tw-mb-0 tw-truncate">
             <span className="tw-text-iron-400 tw-pr-1.5">Name:</span>
@@ -138,6 +172,7 @@ export default function CommunityCurationFiltersSelectItemsItem({
           <CurationBuildFilterStatementsList filters={filter.criteria} />
         </div>
       </div>
+
       <div className="tw-w-full tw-inline-flex tw-px-4 tw-py-2 tw-gap-x-2 tw-items-center">
         <p className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-mb-0">
           Created by
