@@ -15,13 +15,16 @@ export default function CurationBuildFiltersRepSearch({
   readonly category: string | null;
   readonly setCategory: (newV: string | null) => void;
 }) {
-  const [debouncedValue, setDebouncedValue] = useState<string | null>(category);
+  const [searchCriteria, setSearchCriteria] = useState<string | null>(category);
+  const [debouncedValue, setDebouncedValue] = useState<string | null>(
+    searchCriteria
+  );
   useDebounce(
     () => {
-      setDebouncedValue(category);
+      setDebouncedValue(searchCriteria);
     },
     200,
-    [category]
+    [searchCriteria]
   );
 
   const { data } = useQuery<string[]>({
@@ -39,12 +42,20 @@ export default function CurationBuildFiltersRepSearch({
   const [isOpen, setIsOpen] = useState(false);
   const onValueChange = (newValue: string | null) => {
     setCategory(newValue);
+    setSearchCriteria(newValue);
     setIsOpen(false);
   };
 
   const onFocusChange = (newV: boolean) => {
     if (newV) {
       setIsOpen(true);
+    }
+  };
+
+  const onSearchCriteriaChange = (newV: string | null) => {
+    setSearchCriteria(newV);
+    if (!newV) {
+      setCategory(null);
     }
   };
 
@@ -57,9 +68,9 @@ export default function CurationBuildFiltersRepSearch({
       <CommonInput
         inputType="text"
         placeholder="Rep Category"
-        value={category ?? ""}
+        value={searchCriteria ?? ""}
         showSearchIcon={true}
-        onChange={setCategory}
+        onChange={onSearchCriteriaChange}
         onFocusChange={onFocusChange}
       />
       <CurationBuildFiltersRepSearchDropdown

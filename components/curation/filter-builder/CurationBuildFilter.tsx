@@ -106,6 +106,8 @@ export default function CurationBuildFilter({
         <div className="tw-px-4 tw-space-y-4">
           <CommonInput
             value={name}
+            inputType="text"
+            maxLength={100}
             onChange={(newV) => setName(newV ?? "")}
             placeholder="Curation Name"
           />

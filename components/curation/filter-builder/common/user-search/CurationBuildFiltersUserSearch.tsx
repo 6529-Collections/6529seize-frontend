@@ -54,12 +54,20 @@ export default function CurationBuildFiltersUserSearch({
 
   const onValueChange = (newValue: string | null) => {
     setValue(newValue);
+    setSearchCriteria(newValue);
     setIsOpen(false);
   };
 
   const onFocusChange = (newV: boolean) => {
     if (newV) {
       setIsOpen(true);
+    }
+  };
+
+  const onSearchCriteriaChange = (newV: string | null) => {
+    setSearchCriteria(newV);
+    if (!newV) {
+      setValue(null);
     }
   };
 
@@ -74,7 +82,7 @@ export default function CurationBuildFiltersUserSearch({
         placeholder={placeholder}
         value={searchCriteria ?? ""}
         showSearchIcon={true}
-        onChange={setSearchCriteria}
+        onChange={onSearchCriteriaChange}
         onFocusChange={onFocusChange}
       />
       <CurationBuildFiltersUserSearchDropdown
