@@ -16,6 +16,7 @@ type NumberInputProps = InputProps & {
 
 type TextInputProps = InputProps & {
   readonly inputType?: "text";
+  readonly maxLength?: number;
 };
 
 export default function CommonInput(props: NumberInputProps | TextInputProps) {
@@ -49,6 +50,14 @@ export default function CommonInput(props: NumberInputProps | TextInputProps) {
         onChange(props.maxValue.toString());
         return;
       }
+    } else if (props.inputType === "text") {
+      if (
+        props.maxLength !== undefined &&
+        e.target.value.length > props.maxLength
+      ) {
+        onChange(e.target.value.substring(0, props.maxLength));
+        return;
+      }
     }
 
     onChange(e.target.value);
@@ -56,6 +65,7 @@ export default function CommonInput(props: NumberInputProps | TextInputProps) {
 
   const min = props.inputType === "number" ? props.minValue : undefined;
   const max = props.inputType === "number" ? props.maxValue : undefined;
+  const maxLength = props.inputType === "text" ? props.maxLength : undefined;
 
   return (
     <div className="tw-relative">
@@ -79,6 +89,7 @@ export default function CommonInput(props: NumberInputProps | TextInputProps) {
         value={value}
         min={min}
         max={max}
+        maxLength={maxLength}
         onChange={onInput}
         onFocus={() => onFocusChange && onFocusChange(true)}
         onBlur={() => onFocusChange && onFocusChange(false)}
