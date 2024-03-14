@@ -31,7 +31,7 @@ export default function UserPageIdentityAddStatements({
     [STATEMENT_ADD_VIEW.CONTACT]: "sm:tw-max-w-[26.25rem]",
     [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
     [STATEMENT_ADD_VIEW.NFT_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
-    [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "sm:tw-max-w-lg ",
+    [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "sm:tw-max-w-lg",
   };
 
   return (

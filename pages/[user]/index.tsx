@@ -52,6 +52,7 @@ const getInitialActivityLogParams = (
   matter: RateMatter.REP,
   targetType: FilterTargetType.ALL,
   handleOrWallet,
+  activeCurationFilterId: null,
 });
 
 const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
@@ -130,9 +131,10 @@ export async function getServerSideProps(
         getUserProfile({ user: handleOrWallet, headers }),
         getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
           headers,
-          params: convertActivityLogParams(
-            getInitialActivityLogParams(handleOrWallet)
-          ),
+          params: convertActivityLogParams({
+            params: getInitialActivityLogParams(handleOrWallet),
+            disableActiveCurationFilter: true,
+          }),
         }),
         getProfileRatings({
           user: handleOrWallet,
