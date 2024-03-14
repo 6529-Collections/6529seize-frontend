@@ -68,6 +68,8 @@ export default function CurationBuildFilterCIC({
       <CommonInput
         placeholder="CIC at least"
         inputType="number"
+        minValue={-100000000000}
+        maxValue={100000000000}
         value={
           typeof filters.cic.min === "number" ? filters.cic.min.toString() : ""
         }
