@@ -89,7 +89,7 @@ export default function CommunityCurationFiltersSelect({
       )}
       <div className="tw-px-4 tw-pt-3">
         <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-3">
-          Community curations
+          Apply A Curation
         </p>
         <div className="tw-space-y-3">
           <CurationBuildFiltersUserSearch

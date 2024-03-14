@@ -37,7 +37,7 @@ export default function CurationHeaderSelect({
             strokeLinejoin="round"
           />
         </svg>
-        <span>Create new</span>
+        <span>Create A Curation</span>
       </button>
     );
   }
