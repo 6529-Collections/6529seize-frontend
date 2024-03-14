@@ -56,7 +56,8 @@ export default function CurationBuildFilterRep({
     });
   };
 
-  const showDirection: boolean = !!filters.rep.user?.length ?? !!filters.rep.category
+  const showDirection: boolean =
+    !!filters.rep.user?.length ?? !!filters.rep.category;
 
   useEffect(() => {
     if (!showDirection) {
@@ -85,6 +86,8 @@ export default function CurationBuildFilterRep({
       <CommonInput
         placeholder="Rep at least"
         inputType="number"
+        minValue={-100000000000}
+        maxValue={100000000000}
         value={
           typeof filters.rep.min === "number" ? filters.rep.min.toString() : ""
         }

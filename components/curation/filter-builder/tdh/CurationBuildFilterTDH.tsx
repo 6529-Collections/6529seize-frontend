@@ -24,6 +24,7 @@ export default function CurationBuildFilterTDH({
       placeholder="TDH at least"
       inputType="number"
       minValue={0}
+      maxValue={100000000000}
       value={
         typeof filters.tdh.min === "number" ? filters.tdh.min.toString() : ""
       }
