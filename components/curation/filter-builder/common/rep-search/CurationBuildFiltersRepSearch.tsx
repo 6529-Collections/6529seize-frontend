@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useDebounce } from "react-use";
+import { useRef, useState } from "react";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import CommonInput from "../../../../utils/input/CommonInput";
@@ -15,13 +15,16 @@ export default function CurationBuildFiltersRepSearch({
   readonly category: string | null;
   readonly setCategory: (newV: string | null) => void;
 }) {
-  const [debouncedValue, setDebouncedValue] = useState<string | null>(category);
+  const [searchCriteria, setSearchCriteria] = useState<string | null>(category);
+  const [debouncedValue, setDebouncedValue] = useState<string | null>(
+    searchCriteria
+  );
   useDebounce(
     () => {
-      setDebouncedValue(category);
+      setDebouncedValue(searchCriteria);
     },
     200,
-    [category]
+    [searchCriteria]
   );
 
   const { data } = useQuery<string[]>({
@@ -37,22 +40,44 @@ export default function CurationBuildFiltersRepSearch({
   });
 
   const [isOpen, setIsOpen] = useState(false);
+  const onValueChange = (newValue: string | null) => {
+    setCategory(newValue);
+    setSearchCriteria(newValue);
+    setIsOpen(false);
+  };
+
+  const onFocusChange = (newV: boolean) => {
+    if (newV) {
+      setIsOpen(true);
+    }
+  };
+
+  const onSearchCriteriaChange = (newV: string | null) => {
+    setSearchCriteria(newV);
+    if (!newV) {
+      setCategory(null);
+    }
+  };
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useClickAway(wrapperRef, () => setIsOpen(false));
+  useKeyPressEvent("Escape", () => setIsOpen(false));
 
   return (
-    <div>
+    <div ref={wrapperRef}>
       <CommonInput
         inputType="text"
         placeholder="Rep Category"
-        value={category ?? ""}
+        value={searchCriteria ?? ""}
         showSearchIcon={true}
-        onChange={setCategory}
-        onFocusChange={(newV) => setIsOpen(newV)}
+        onChange={onSearchCriteriaChange}
+        onFocusChange={onFocusChange}
       />
       <CurationBuildFiltersRepSearchDropdown
         open={isOpen}
         selected={category}
         categories={data ?? []}
-        onSelect={setCategory}
+        onSelect={onValueChange}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import CurationBuildFilter from "./filter-builder/CurationBuildFilter";
-import CurationHeader from "./CurationHeader";
+import CurationHeader from "./header/CurationHeader";
 import CommunityCurationFiltersSelect from "./select/CommunityCurationFiltersSelect";
 import { useContext, useState } from "react";
 import { CurationFilterResponse } from "../../helpers/filters/Filters.types";
@@ -46,7 +46,7 @@ export default function CommunityCurationFilters({
   };
 
   return (
-    <div className="tw-pr-2 pb-4">
+    <div className="tw-pb-4">
       <CurationHeader setOpen={setOpen} view={view} setView={onView} />
       {view === CommunityCurationFiltersView.SELECT && (
         <CommunityCurationFiltersSelect onEditClick={onEditClick} />

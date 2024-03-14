@@ -71,27 +71,25 @@ export default function CommunityCurationFiltersSelect({
   >([]);
   useEffect(() => {
     if (data) {
-      setCurationFilters(
-        data.filter((filter) => filter.id !== activeCurationFilterId)
-      );
+      setCurationFilters(data);
     } else {
       setCurationFilters([]);
     }
   }, [data, activeCurationFilterId]);
 
   return (
-    <div className="tw-mt-4 tw-w-full tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+    <div className="tw-mt-4 tw-w-full tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0  tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       {activeCurationFilterId && (
         <CommunityCurationFiltersSelectActiveFilter
           activeCurationFilterId={activeCurationFilterId}
           onEditClick={onEditClick}
         />
       )}
-      <div className="tw-px-4 tw-pt-4">
-        <p className="tw-text-lg tw-text-iron-50 tw-font-semibold">
-          Created curations
+      <div className="tw-px-4 tw-pt-3">
+        <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-3">
+          Apply A Curation
         </p>
-        <div className="tw-space-y-2 ">
+        <div className="tw-space-y-3">
           <CurationBuildFiltersUserSearch
             value={filters.curation_criteria_user}
             setValue={onUserSelect}

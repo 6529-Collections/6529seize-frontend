@@ -3,34 +3,27 @@ import {
   FilterDirection,
   GeneralFilter,
 } from "../../../../helpers/filters/Filters.types";
-
-export enum CommunityCurationFilterStatementType {
-  TDH = "TDH",
-  CIC = "CIC",
-  REP = "REP",
-  LEVEL = "LEVEL",
-}
+import { CommunityCurationFilterStatement } from "../CurationBuildFilter";
+import CurationBuildFilterStatementsListItem from "./CurationBuildFilterStatementsListItem";
 
 export interface CommunityCurationFilterStatementItem {
-  readonly key: CommunityCurationFilterStatementType;
+  readonly key: CommunityCurationFilterStatement;
   readonly label: string;
 }
 
 export default function CurationBuildFilterStatementsList({
   filters,
   onRemoveFilters,
+  onStatementType,
 }: {
   readonly filters: GeneralFilter;
-  readonly onRemoveFilters?: (
-    keys: CommunityCurationFilterStatementType[]
-  ) => void;
+  readonly onRemoveFilters?: (keys: CommunityCurationFilterStatement[]) => void;
+  readonly onStatementType?: (type: CommunityCurationFilterStatement) => void;
 }) {
-  const showRemoveButton = !!onRemoveFilters;
-
   const getLevelStatement = (): CommunityCurationFilterStatementItem | null => {
     if (filters.level.min && filters.level.max) {
       return {
-        key: CommunityCurationFilterStatementType.LEVEL,
+        key: CommunityCurationFilterStatement.LEVEL,
         label: `Level: ${formatNumberWithCommas(
           filters.level.min
         )} to ${formatNumberWithCommas(filters.level.max)}`,
@@ -38,14 +31,14 @@ export default function CurationBuildFilterStatementsList({
     }
     if (filters.level.min) {
       return {
-        key: CommunityCurationFilterStatementType.LEVEL,
+        key: CommunityCurationFilterStatement.LEVEL,
         label: `Level: ${formatNumberWithCommas(filters.level.min)}+`,
       };
     }
 
     if (filters.level.max) {
       return {
-        key: CommunityCurationFilterStatementType.LEVEL,
+        key: CommunityCurationFilterStatement.LEVEL,
         label: `Level: Up to ${formatNumberWithCommas(filters.level.max)}`,
       };
     }
@@ -55,7 +48,7 @@ export default function CurationBuildFilterStatementsList({
   const getTDHStatement = (): CommunityCurationFilterStatementItem | null => {
     if (filters.tdh.min && filters.tdh.max) {
       return {
-        key: CommunityCurationFilterStatementType.TDH,
+        key: CommunityCurationFilterStatement.TDH,
         label: `TDH: ${formatNumberWithCommas(
           filters.tdh.min
         )} to ${formatNumberWithCommas(filters.tdh.max)}`,
@@ -63,14 +56,14 @@ export default function CurationBuildFilterStatementsList({
     }
     if (filters.tdh.min) {
       return {
-        key: CommunityCurationFilterStatementType.TDH,
+        key: CommunityCurationFilterStatement.TDH,
         label: `TDH: ${formatNumberWithCommas(filters.tdh.min)}+`,
       };
     }
 
     if (filters.tdh.max) {
       return {
-        key: CommunityCurationFilterStatementType.TDH,
+        key: CommunityCurationFilterStatement.TDH,
         label: `TDH: Up to ${formatNumberWithCommas(filters.tdh.max)}`,
       };
     }
@@ -91,7 +84,7 @@ export default function CurationBuildFilterStatementsList({
     const subStatement = getCICSubStatement();
     if (filters.cic.min && filters.cic.max) {
       return {
-        key: CommunityCurationFilterStatementType.CIC,
+        key: CommunityCurationFilterStatement.CIC,
         label: `${subStatement}: ${formatNumberWithCommas(
           filters.cic.min
         )} to ${formatNumberWithCommas(filters.cic.max)}`,
@@ -99,14 +92,14 @@ export default function CurationBuildFilterStatementsList({
     }
     if (filters.cic.min) {
       return {
-        key: CommunityCurationFilterStatementType.CIC,
+        key: CommunityCurationFilterStatement.CIC,
         label: `${subStatement}: ${formatNumberWithCommas(filters.cic.min)}+`,
       };
     }
 
     if (filters.cic.max) {
       return {
-        key: CommunityCurationFilterStatementType.CIC,
+        key: CommunityCurationFilterStatement.CIC,
         label: `${subStatement}: Up to ${formatNumberWithCommas(
           filters.cic.max
         )}`,
@@ -114,7 +107,7 @@ export default function CurationBuildFilterStatementsList({
     }
     if (subStatement !== "CIC") {
       return {
-        key: CommunityCurationFilterStatementType.CIC,
+        key: CommunityCurationFilterStatement.CIC,
         label: subStatement,
       };
     }
@@ -147,7 +140,7 @@ export default function CurationBuildFilterStatementsList({
     const subStatement = getRepSubStatement();
     if (filters.rep.min && filters.rep.max) {
       return {
-        key: CommunityCurationFilterStatementType.REP,
+        key: CommunityCurationFilterStatement.REP,
         label: `${subStatement}: ${formatNumberWithCommas(
           filters.rep.min
         )} to ${formatNumberWithCommas(filters.rep.max)}`,
@@ -155,13 +148,13 @@ export default function CurationBuildFilterStatementsList({
     }
     if (filters.rep.min) {
       return {
-        key: CommunityCurationFilterStatementType.REP,
+        key: CommunityCurationFilterStatement.REP,
         label: `${subStatement}: ${formatNumberWithCommas(filters.rep.min)}+`,
       };
     }
     if (filters.rep.max) {
       return {
-        key: CommunityCurationFilterStatementType.REP,
+        key: CommunityCurationFilterStatement.REP,
         label: `${subStatement}: Up to ${formatNumberWithCommas(
           filters.rep.max
         )}`,
@@ -169,7 +162,7 @@ export default function CurationBuildFilterStatementsList({
     }
     if (subStatement !== "Rep") {
       return {
-        key: CommunityCurationFilterStatementType.REP,
+        key: CommunityCurationFilterStatement.REP,
         label: subStatement,
       };
     }
@@ -199,32 +192,20 @@ export default function CurationBuildFilterStatementsList({
   };
 
   const statements = getStatements();
+
+  if (!statements.length) {
+    return null;
+  }
+
   return (
     <div className="tw-w-full tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       {statements.map((statement) => (
-        <div
+        <CurationBuildFilterStatementsListItem
           key={statement.key}
-          className="tw-inline-flex tw-items-center tw-justify-between  tw-rounded-md  tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700"
-        >
-          {statement.label}
-          {showRemoveButton && (
-            <button
-              onClick={() => onRemoveFilters([statement.key])}
-              type="button"
-              className="tw-bg-transparent tw-items-center -tw-right-2 tw-relative  tw-border-none tw-group tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-            >
-              <span className="tw-sr-only">Remove</span>
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 14 14"
-                className="tw-h-3.5 tw-w-3.5 "
-              >
-                <path d="M4 4l6 6m0-6l-6 6" />
-              </svg>
-            </button>
-          )}
-        </div>
+          statement={statement}
+          onRemoveFilters={onRemoveFilters}
+          onStatementType={onStatementType}
+        />
       ))}
     </div>
   );

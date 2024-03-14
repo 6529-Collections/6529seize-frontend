@@ -83,7 +83,7 @@ export default function CurationBuildFilterRep({
         setCategory={setCategory}
       />
       <CommonInput
-        placeholder="Rep from"
+        placeholder="Rep at least"
         inputType="number"
         value={
           typeof filters.rep.min === "number" ? filters.rep.min.toString() : ""

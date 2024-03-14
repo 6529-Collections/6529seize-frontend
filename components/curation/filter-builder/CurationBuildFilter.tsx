@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommonInput from "../../utils/input/CommonInput";
 import CurationBuildFilterSelectStatement from "./CurationBuildFilterSelectStatement";
 import {
@@ -7,9 +7,7 @@ import {
   GeneralFilter,
 } from "../../../helpers/filters/Filters.types";
 import CurationBuildFilterStatement from "./CurationBuildFilterStatement";
-import CurationBuildFilterStatementsList, {
-  CommunityCurationFilterStatementType,
-} from "./statements/CurationBuildFilterStatementsList";
+import CurationBuildFilterStatementsList from "./statements/CurationBuildFilterStatementsList";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CurationBuildFilterSave from "./actions/CurationBuildFilterSave";
 import CurationBuildFilterTest from "./actions/CurationBuildFilterTest";
@@ -55,13 +53,13 @@ export default function CurationBuildFilter({
     }
   );
 
-  const onRemoveFilters = (keys: CommunityCurationFilterStatementType[]) => {
+  const onRemoveFilters = (keys: CommunityCurationFilterStatement[]) => {
     for (const key of keys) {
       switch (key) {
-        case CommunityCurationFilterStatementType.TDH:
+        case CommunityCurationFilterStatement.TDH:
           setFilters((prev) => ({ ...prev, tdh: { min: null, max: null } }));
           break;
-        case CommunityCurationFilterStatementType.REP:
+        case CommunityCurationFilterStatement.REP:
           setFilters((prev) => ({
             ...prev,
             rep: {
@@ -73,7 +71,7 @@ export default function CurationBuildFilter({
             },
           }));
           break;
-        case CommunityCurationFilterStatementType.CIC:
+        case CommunityCurationFilterStatement.CIC:
           setFilters((prev) => ({
             ...prev,
             cic: {
@@ -84,7 +82,7 @@ export default function CurationBuildFilter({
             },
           }));
           break;
-        case CommunityCurationFilterStatementType.LEVEL:
+        case CommunityCurationFilterStatement.LEVEL:
           setFilters((prev) => ({ ...prev, level: { min: null, max: null } }));
           break;
         default:
@@ -97,10 +95,40 @@ export default function CurationBuildFilter({
     null
   );
 
+  const getIsNotEmptyFilters = (): boolean => {
+    if (filters.level.min !== null || filters.level.max !== null) {
+      return true;
+    }
+    if (filters.tdh.min !== null || filters.tdh.max !== null) {
+      return true;
+    }
+    if (filters.rep.min !== null || filters.rep.max !== null) {
+      return true;
+    }
+    if (filters.rep.user !== null || filters.rep.category !== null) {
+      return true;
+    }
+    if (filters.cic.min !== null || filters.cic.max !== null) {
+      return true;
+    }
+    if (filters.cic.user !== null) {
+      return true;
+    }
+    return false;
+  };
+
+  const [isNotEmptyFilters, setIsNotEmptyFilters] = useState<boolean>(
+    getIsNotEmptyFilters()
+  );
+
+  useEffect(() => {
+    setIsNotEmptyFilters(getIsNotEmptyFilters());
+  }, [filters]);
+
   return (
     <div className="tw-mt-4 tw-pb-6 tw-w-full tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
       <div className="tw-px-4 tw-pt-4">
-        <p className="tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-4">
+        <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-4">
           Build Filter
         </p>
       </div>
@@ -108,12 +136,15 @@ export default function CurationBuildFilter({
         <div className="tw-px-4 tw-space-y-4">
           <CommonInput
             value={name}
+            inputType="text"
+            maxLength={100}
             onChange={(newV) => setName(newV ?? "")}
             placeholder="Curation Name"
           />
           <CurationBuildFilterStatementsList
             filters={filters}
             onRemoveFilters={onRemoveFilters}
+            onStatementType={setStatementType}
           />
           <CurationBuildFilterSelectStatement
             statementType={statementType}
@@ -127,7 +158,7 @@ export default function CurationBuildFilter({
         </div>
         <div className="tw-pt-4 tw-px-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-w-full tw-inline-flex tw-justify-between tw-items-center">
           {testRunMembersCount !== null && (
-            <div className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 ">
+            <div className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400">
               Members: {formatNumberWithCommas(testRunMembersCount)}
             </div>
           )}

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useDebounce } from "react-use";
+import { useRef, useState } from "react";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -18,22 +18,33 @@ export default function CurationBuildFiltersUserSearch({
   readonly placeholder: string;
   readonly setValue: (value: string | null) => void;
 }) {
-  const [debouncedValue, setDebouncedValue] = useState<string | null>(value);
+  const [searchCriteria, setSearchCriteria] = useState<string | null>(value);
+
+  const [debouncedValue, setDebouncedValue] = useState<string | null>(
+    searchCriteria
+  );
   useDebounce(
     () => {
-      setDebouncedValue(value);
+      setDebouncedValue(searchCriteria);
     },
     200,
-    [value]
+    [searchCriteria]
   );
 
   const { data } = useQuery<CommunityMemberMinimal[]>({
-    queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
+    queryKey: [
+      QueryKey.PROFILE_SEARCH,
+      {
+        param: debouncedValue,
+        only_profile_owners: "true",
+      },
+    ],
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
         params: {
           param: debouncedValue ?? "",
+          only_profile_owners: "true",
         },
       }),
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
@@ -41,21 +52,44 @@ export default function CurationBuildFiltersUserSearch({
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const onValueChange = (newValue: string | null) => {
+    setValue(newValue);
+    setSearchCriteria(newValue);
+    setIsOpen(false);
+  };
+
+  const onFocusChange = (newV: boolean) => {
+    if (newV) {
+      setIsOpen(true);
+    }
+  };
+
+  const onSearchCriteriaChange = (newV: string | null) => {
+    setSearchCriteria(newV);
+    if (!newV) {
+      setValue(null);
+    }
+  };
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useClickAway(wrapperRef, () => setIsOpen(false));
+  useKeyPressEvent("Escape", () => setIsOpen(false));
+
   return (
-    <div>
+    <div ref={wrapperRef}>
       <CommonInput
         inputType="text"
         placeholder={placeholder}
-        value={value ?? ""}
+        value={searchCriteria ?? ""}
         showSearchIcon={true}
-        onChange={setValue}
-        onFocusChange={(newV) => setIsOpen(newV)}
+        onChange={onSearchCriteriaChange}
+        onFocusChange={onFocusChange}
       />
       <CurationBuildFiltersUserSearchDropdown
         open={isOpen}
         selected={value}
         profiles={data ?? []}
-        onSelect={setValue}
+        onSelect={onValueChange}
       />
     </div>
   );

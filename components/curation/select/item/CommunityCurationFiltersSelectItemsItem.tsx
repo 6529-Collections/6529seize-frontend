@@ -1,11 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
 import { AuthContext } from "../../../auth/Auth";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectActiveCurationFilterId,
-  setActiveCurationFilterId,
-} from "../../../../store/curationFilterSlice";
 import {
   ImageScale,
   getScaledImageUri,
@@ -16,35 +11,34 @@ import CommunityCurationFiltersSelectItemsItemDelete from "./CommunityCurationFi
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import CurationBuildFilterStatementsList from "../../filter-builder/statements/CurationBuildFilterStatementsList";
+import CommunityCurationFiltersSelectItemsItemWrapper from "./CommunityCurationFiltersSelectItemsItemWrapper";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectActiveCurationFilterId,
+  setActiveCurationFilterId,
+} from "../../../../store/curationFilterSlice";
 
 export default function CommunityCurationFiltersSelectItemsItem({
   filter,
+  membersCount = null,
   onEditClick,
 }: {
   readonly filter: CurationFilterResponse;
+  readonly membersCount?: number | null;
   readonly onEditClick: (filter: CurationFilterResponse) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
+
   const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
   const dispatch = useDispatch();
+  const getIsActive = (): boolean =>
+    !!activeCurationFilterId && activeCurationFilterId === filter.id;
 
-  const [isActive, setIsActive] = useState(
-    activeCurationFilterId && activeCurationFilterId === filter.id
-  );
+  const [isActive, setIsActive] = useState(getIsActive());
+
   useEffect(() => {
-    setIsActive(
-      activeCurationFilterId &&
-        activeCurationFilterId.toLocaleLowerCase() === filter.id.toLowerCase()
-    );
+    setIsActive(getIsActive());
   }, [activeCurationFilterId]);
-
-  const onFilterClick = () => {
-    if (isActive) {
-      dispatch(setActiveCurationFilterId(null));
-    } else {
-      dispatch(setActiveCurationFilterId(filter.id));
-    }
-  };
 
   const [isMyFilter, setIsMyFilter] = useState(
     connectedProfile?.profile?.handle.toLowerCase() ===
@@ -70,18 +64,55 @@ export default function CommunityCurationFiltersSelectItemsItem({
   useClickAway(listRef, () => setIsOptionsOpen(false));
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
+  const deActivate = () => {
+    if (!isActive) return;
+    dispatch(setActiveCurationFilterId(null));
+  };
+
+  const [deactivateHover, setDeactivateHover] = useState(false);
+
   return (
-    <div
-      onClick={onFilterClick}
-      className={`tw-cursor-pointer tw-bg-iron-950 tw-rounded-lg tw-w-full tw-text-left tw-border tw-border-solid tw-border-iron-700 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700 hover:tw-border-primary-300 tw-transition tw-duration-300 tw-ease-out  ${
-        isActive ? "tw-border-primary-300" : ""
-      }`}
+    <CommunityCurationFiltersSelectItemsItemWrapper
+      filter={filter}
+      isActive={isActive}
+      deactivateHover={deactivateHover}
     >
-      <div className="tw-px-4 tw-py-2.5">
+      <div className="tw-px-4 tw-py-2.5 tw-relative">
+        {isActive && (
+          <div className="tw-absolute -tw-right-2 -tw-top-3">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deActivate();
+              }}
+              onMouseEnter={() => setDeactivateHover(true)}
+              onMouseLeave={() => setDeactivateHover(false)}
+              type="button"
+              className="tw-group tw-p-1.5 tw-bg-iron-800 tw-border-0 tw-flex tw-items-center tw-justify-center tw-rounded-full"
+            >
+              <span className="tw-sr-only">Remove</span>
+              <svg
+                className="tw-h-4 tw-w-4 tw-text-iron-400 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        )}
         <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
-          <p className="tw-text-sm tw-font-medium tw-mb-0">
-            <span className="tw-text-iron-400 tw-pr-1">Curation:</span>
-            <span className="tw-text-iron-50">{filter.name}</span>
+          <p className="tw-text-sm tw-font-normal tw-mb-0 tw-truncate">
+            <span className="tw-text-iron-400 tw-pr-1.5">Name:</span>
+            <span className="tw-text-iron-50 tw-font-medium">
+              {filter.name}
+            </span>
           </p>
           {connectedProfile && (
             <div className="tw-relative" ref={listRef}>
@@ -148,8 +179,9 @@ export default function CommunityCurationFiltersSelectItemsItem({
           <CurationBuildFilterStatementsList filters={filter.criteria} />
         </div>
       </div>
+
       <div className="tw-w-full tw-inline-flex tw-px-4 tw-py-2 tw-gap-x-2 tw-items-center">
-        <p className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-mb-0">
+        <p className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400 tw-mb-0">
           Created by
         </p>
         <div className="tw-flex tw-gap-x-2 tw-items-center">
@@ -177,7 +209,7 @@ export default function CommunityCurationFiltersSelectItemsItem({
           >
             <Link
               href={`/${filter.created_by?.handle}`}
-              className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-semibold"
+              className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-medium"
             >
               {filter.created_by?.handle}
             </Link>
@@ -189,6 +221,6 @@ export default function CommunityCurationFiltersSelectItemsItem({
           </div>
         )}
       </div>
-    </div>
+    </CommunityCurationFiltersSelectItemsItemWrapper>
   );
 }

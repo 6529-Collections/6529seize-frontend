@@ -66,7 +66,7 @@ export default function CurationBuildFilterCIC({
         setValue={setUser}
       />
       <CommonInput
-        placeholder="CIC from"
+        placeholder="CIC at least"
         inputType="number"
         value={
           typeof filters.cic.min === "number" ? filters.cic.min.toString() : ""
