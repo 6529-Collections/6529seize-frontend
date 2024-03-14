@@ -10,10 +10,14 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
-import CommonTablePagination from "../utils/table/CommonTablePagination";
 import CommonFilterTargetSelect, {
   FilterTargetType,
 } from "../utils/CommonFilterTargetSelect";
+
+import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
+import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
+import { useSelector } from "react-redux";
+import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -22,6 +26,7 @@ export interface ActivityLogParams {
   readonly matter: RateMatter | null;
   readonly targetType: FilterTargetType;
   readonly handleOrWallet: string | null;
+  readonly activeCurationFilterId: string | null;
 }
 
 export interface ActivityLogParamsConverted {
@@ -32,11 +37,16 @@ export interface ActivityLogParamsConverted {
   rating_matter?: string;
   profile?: string;
   target?: string;
+  curation_criteria_id?: string;
 }
 
-export const convertActivityLogParams = (
-  params: ActivityLogParams
-): ActivityLogParamsConverted => {
+export const convertActivityLogParams = ({
+  params,
+  disableActiveCurationFilter,
+}: {
+  readonly params: ActivityLogParams;
+  readonly disableActiveCurationFilter: boolean;
+}): ActivityLogParamsConverted => {
   const converted: ActivityLogParamsConverted = {
     page: `${params.page}`,
     page_size: `${params.pageSize}`,
@@ -47,6 +57,13 @@ export const convertActivityLogParams = (
 
   if (params.matter) {
     converted.rating_matter = params.matter;
+  }
+  if (
+    params.activeCurationFilterId &&
+    !params.handleOrWallet &&
+    !disableActiveCurationFilter
+  ) {
+    converted.curation_criteria_id = params.activeCurationFilterId;
   }
 
   if (!params.handleOrWallet) {
@@ -75,12 +92,15 @@ export const convertActivityLogParams = (
 export default function ProfileActivityLogs({
   initialParams,
   withFilters,
+  disableActiveCurationFilter = false,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
+  readonly disableActiveCurationFilter?: boolean;
   readonly children?: React.ReactNode;
 }) {
+  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -88,7 +108,6 @@ export default function ProfileActivityLogs({
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
-  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     setSelectedFilters(initialParams.logTypes);
@@ -112,30 +131,49 @@ export default function ProfileActivityLogs({
 
   const [params, setParams] = useState<ActivityLogParamsConverted>(
     convertActivityLogParams({
-      page: currentPage,
-      pageSize: initialParams.pageSize,
-      logTypes: selectedFilters,
-      matter: initialParams.matter,
-      targetType,
-      handleOrWallet: initialParams.handleOrWallet,
-    })
-  );
-
-  useEffect(() => {
-    setParams(
-      convertActivityLogParams({
+      params: {
         page: currentPage,
         pageSize: initialParams.pageSize,
         logTypes: selectedFilters,
         matter: initialParams.matter,
         targetType,
         handleOrWallet: initialParams.handleOrWallet,
+        activeCurationFilterId,
+      },
+      disableActiveCurationFilter: !!disableActiveCurationFilter,
+    })
+  );
+
+  useEffect(() => {
+    setParams(
+      convertActivityLogParams({
+        params: {
+          page: currentPage,
+          pageSize: initialParams.pageSize,
+          logTypes: selectedFilters,
+          matter: initialParams.matter,
+          targetType,
+          handleOrWallet: initialParams.handleOrWallet,
+          activeCurationFilterId,
+        },
+        disableActiveCurationFilter: !!disableActiveCurationFilter,
       })
     );
-  }, [currentPage, selectedFilters, initialParams.handleOrWallet, targetType]);
+  }, [
+    currentPage,
+    selectedFilters,
+    initialParams.handleOrWallet,
+    targetType,
+    activeCurationFilterId,
+  ]);
 
   const { isLoading, data: logs } = useQuery<Page<ProfileActivityLog>>({
-    queryKey: [QueryKey.PROFILE_LOGS, params],
+    queryKey: [
+      QueryKey.PROFILE_LOGS,
+      {
+        ...params,
+      },
+    ],
     queryFn: async () =>
       await commonApiFetch<
         Page<ProfileActivityLog>,
@@ -146,7 +184,7 @@ export default function ProfileActivityLogs({
       }),
     placeholderData: keepPreviousData,
   });
-
+  const [totalPages, setTotalPages] = useState<number>(1);
   useEffect(() => {
     if (isLoading) return;
     if (!logs?.count) {
@@ -156,7 +194,6 @@ export default function ProfileActivityLogs({
     }
     setTotalPages(Math.ceil(logs.count / initialParams.pageSize));
   }, [logs?.count, logs?.page, isLoading]);
-
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
       <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
@@ -167,9 +204,9 @@ export default function ProfileActivityLogs({
               className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-96`}
             >
               <ProfileActivityLogsFilter
+                user={initialParams.handleOrWallet}
                 selected={selectedFilters}
                 setSelected={onFilter}
-                user={initialParams.handleOrWallet}
               />
             </div>
           </div>
@@ -181,30 +218,38 @@ export default function ProfileActivityLogs({
           onChange={onTargetType}
         />
       )}
-      {logs?.data.length ? (
-        <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
-          <ProfileActivityLogsList
-            logs={logs.data}
-            user={initialParams.handleOrWallet}
-          />
-          {totalPages > 1 && (
-            <CommonTablePagination
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-              small={!!initialParams.handleOrWallet}
-            />
+      {logs ? (
+        <div>
+          {logs?.data.length ? (
+            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
+              <ProfileActivityLogsList
+                logs={logs.data}
+                user={initialParams.handleOrWallet}
+              />
+              {totalPages > 1 && (
+                <CommonTablePagination
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  totalPages={totalPages}
+                  small={!!initialParams.handleOrWallet}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="tw-py-4">
+              <span
+                className={`${
+                  initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
+                } tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500`}
+              >
+                No Activity Log
+              </span>
+            </div>
           )}
         </div>
       ) : (
-        <div className="tw-py-4">
-          <span
-            className={`${
-              initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
-            } tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500`}
-          >
-            No Activity Log
-          </span>
+        <div className="tw-h-screen tw-w-full">
+          <CommonCardSkeleton />
         </div>
       )}
     </div>

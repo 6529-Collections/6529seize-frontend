@@ -61,7 +61,7 @@ export default function CommunityMembersTableRow({
         </div>
       </td>
       <td
-        className={`tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${
+        className={`tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium  ${
           isNotProfile ? "tw-opacity-50" : ""
         }`}
       >

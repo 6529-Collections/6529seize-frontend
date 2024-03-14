@@ -14,6 +14,18 @@ export interface Page<T> {
   data: T[];
 }
 
+export type NonNullableRequired<T> = {
+  [P in keyof T]-?: NonNullable<T[P]>;
+};
+
+export type NonNullableNotRequired<T> = {
+  [P in keyof T]?: NonNullable<T[P]>;
+};
+
+export type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
 export enum STATEMENT_GROUP {
   CONTACT = "CONTACT",
   SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",
@@ -297,3 +309,5 @@ export const SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES = [
 
 export type SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPE =
   (typeof SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES)[number];
+
+

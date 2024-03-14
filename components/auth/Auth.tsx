@@ -242,6 +242,7 @@ export default function Auth({
     }
     return { success: !!getAuthJwt() };
   };
+
   return (
     <AuthContext.Provider
       value={{
