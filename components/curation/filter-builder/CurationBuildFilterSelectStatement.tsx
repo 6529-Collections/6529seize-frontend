@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { CommonSelectItem } from "../../utils/select/CommonSelect";
 
 import CommonTabs from "../../utils/select/tabs/CommonTabs";

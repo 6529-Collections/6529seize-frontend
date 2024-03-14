@@ -1,5 +1,3 @@
-import { HTMLInputTypeAttribute } from "react";
-
 type InputProps = {
   readonly value: string;
   readonly placeholder?: string;

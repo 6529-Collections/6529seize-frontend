@@ -65,23 +65,21 @@ export default function CurationBuildFilterTest({
     curation_criteria_id: undefined,
   });
 
-  const {
-    isLoading,
-    isFetching,
-    data: members,
-  } = useQuery<Page<CommunityMemberOverview>>({
-    queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, params],
-    queryFn: async () =>
-      await commonApiFetch<
-        Page<CommunityMemberOverview>,
-        CommunityMembersQuery
-      >({
-        endpoint: `community-members/top`,
-        params: params,
-      }),
-    placeholderData: keepPreviousData,
-    enabled: !!params.curation_criteria_id,
-  });
+  const { isFetching, data: members } = useQuery<Page<CommunityMemberOverview>>(
+    {
+      queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, params],
+      queryFn: async () =>
+        await commonApiFetch<
+          Page<CommunityMemberOverview>,
+          CommunityMembersQuery
+        >({
+          endpoint: `community-members/top`,
+          params: params,
+        }),
+      placeholderData: keepPreviousData,
+      enabled: !!params.curation_criteria_id,
+    }
+  );
 
   const onTest = async (): Promise<void> => {
     if (mutating) {

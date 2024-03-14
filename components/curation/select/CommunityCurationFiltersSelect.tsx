@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
-import { Mutable, NonNullableNotRequired, Page } from "../../../helpers/Types";
+import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";

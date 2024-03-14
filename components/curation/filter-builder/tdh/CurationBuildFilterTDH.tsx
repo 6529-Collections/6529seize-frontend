@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { GeneralFilter } from "../../../../helpers/filters/Filters.types";
 import CommonInput from "../../../utils/input/CommonInput";
 import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
-import CurationBuildFilterMinMaxValues from "../common/CurationBuildFilterMinMaxValues";
 
 export default function CurationBuildFilterTDH({
   filters,

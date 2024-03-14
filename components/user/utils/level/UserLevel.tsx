@@ -17,12 +17,16 @@ export default function UserLevel({
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
     LEVEL_CLASSES[0].classes;
 
-  const getSizeClasses = () =>
-    size === "sm"
-      ? "tw-text-sm"
-      : size === "xs"
-      ? "tw-text-xs"
-      : "tw-text-base";
+  const getSizeClasses = () => {
+    if (size === "sm") {
+      return "tw-text-sm";
+    }
+    if (size === "xs") {
+      return "tw-text-xs";
+    }
+    return "tw-text-base";
+  };
+
   const classes = `${getColorClasses()} ${getSizeClasses()}`;
   const openLevelsPage = () => {
     window.open("/levels", "_blank");

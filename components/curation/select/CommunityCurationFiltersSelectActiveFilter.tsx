@@ -3,7 +3,6 @@ import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import CommunityCurationFiltersSelectItemsItem from "./item/CommunityCurationFiltersSelectItemsItem";
-import { AnimatePresence } from "framer-motion";
 import { CommunityMemberOverview } from "../../../entities/IProfile";
 import { Page } from "../../../helpers/Types";
 import {
@@ -29,11 +28,7 @@ export default function CommunityCurationFiltersSelectActiveFilter({
     placeholderData: keepPreviousData,
   });
 
-  const {
-    isLoading,
-    isFetching,
-    data: members,
-  } = useQuery<Page<CommunityMemberOverview>>({
+  const { data: members } = useQuery<Page<CommunityMemberOverview>>({
     queryKey: [
       QueryKey.COMMUNITY_MEMBERS_TOP,
       {
@@ -85,7 +80,7 @@ export default function CommunityCurationFiltersSelectActiveFilter({
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="1.5"
+            strokeWidth="1.5"
             stroke="currentColor"
             className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-200"
           >
@@ -96,7 +91,7 @@ export default function CommunityCurationFiltersSelectActiveFilter({
             />
           </svg>
           <p className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400 tw-mb-0">
-            Members:
+            Members:{" "}
             <span className="tw-pl-1.5 tw-text-iron-50 tw-font-medium">
               {membersCount}
             </span>
