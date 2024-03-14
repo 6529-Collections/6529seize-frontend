@@ -58,4 +58,7 @@ const CommunityCurationFiltersSidebarToggleButton = forwardRef<
   );
 });
 
+CommunityCurationFiltersSidebarToggleButton.displayName =
+  "CommunityCurationFiltersSidebarToggleButton";
+
 export default CommunityCurationFiltersSidebarToggleButton;
