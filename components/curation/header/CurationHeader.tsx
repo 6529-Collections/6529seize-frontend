@@ -32,8 +32,8 @@ export default function CurationHeader({
     <div className="tw-px-4 tw-space-y-4">
       <p className="tw-text-lg tw-pt-4 tw-text-iron-50 tw-font-semibold tw-mb-0 tw-whitespace-nowrap tw-inline-flex">
         Curate
-        <p className="tw-text-xs">ALPHA</p>
       </p>
+      <p className="tw-text-xs">ALPHA</p>
       {components[view]}
     </div>
   );
