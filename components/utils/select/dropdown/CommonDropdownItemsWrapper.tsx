@@ -16,7 +16,7 @@ export default function CommonDropdownItemsWrapper({
 }: {
   readonly isOpen: boolean;
   readonly filterLabel: string;
-  readonly buttonRef: RefObject<HTMLButtonElement>;
+  readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement>;
   readonly buttonPosition?: { readonly bottom: number; readonly right: number };
   readonly setOpen: (isOpen: boolean) => void;
   readonly onIsMobile: (isMobile: boolean) => void;

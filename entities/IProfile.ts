@@ -310,6 +310,7 @@ export interface CommunityMemberMinimal {
   readonly level: number;
   readonly cic_rating: number;
   readonly wallet: string;
+  readonly pfp: string | null;
 }
 
 export interface RatingStats {

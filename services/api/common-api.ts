@@ -38,12 +38,18 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   return res.json();
 };
 
-export const commonApiPost = async <T, U>(param: {
+export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   endpoint: string;
   body: T;
   headers?: Record<string, string>;
+  params?: Z;
 }): Promise<U> => {
-  const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+  let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
+  if (param.params) {
+    const queryParams = new URLSearchParams(param.params);
+    url += `?${queryParams.toString()}`;
+  }
+  const res = await fetch(url, {
     method: "POST",
     headers: getHeaders(param.headers),
     body: JSON.stringify(param.body),

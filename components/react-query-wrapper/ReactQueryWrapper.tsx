@@ -39,6 +39,8 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
+  CURATION_FILTERS = "CURATION_FILTERS",
+  CURATION_FILTER = "CURATION_FILTER",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -122,7 +124,17 @@ type ReactQueryWrapperContextType = {
     activityLogs,
   }: {
     activityLogs: InitProfileActivityLogsParams;
-    }) => void;
+  }) => void;
+  onCurationFilterRemoved: ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => void;
+  onCurationFilterChanged: ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -136,7 +148,9 @@ export const ReactQueryWrapperContext =
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
-    initCommunityActivityPage: () => { },
+    initCommunityActivityPage: () => {},
+    onCurationFilterRemoved: () => {},
+    onCurationFilterChanged: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -225,6 +239,40 @@ export default function ReactQueryWrapper({
       values: handles,
     });
   };
+
+  const inValidateCurationFilter = ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.CURATION_FILTERS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.CURATION_FILTER, filterId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_LOGS, { curation_criteria_id: filterId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [
+        QueryKey.COMMUNITY_MEMBERS_TOP,
+        { curation_criteria_id: filterId },
+      ],
+    });
+  };
+
+  const onCurationFilterRemoved = ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => inValidateCurationFilter({ filterId });
+
+  const onCurationFilterChanged = ({
+    filterId,
+  }: {
+    readonly filterId: string;
+  }) => inValidateCurationFilter({ filterId });
 
   const setRepRates = ({
     data,
@@ -416,13 +464,18 @@ export default function ReactQueryWrapper({
 
   const initProfileActivityLogs = ({
     params,
+    disableActiveCurationFilter,
     data,
   }: {
     readonly params: ActivityLogParams;
+    readonly disableActiveCurationFilter: boolean;
     readonly data: Page<ProfileActivityLog>;
   }) => {
     queryClient.setQueryData(
-      [QueryKey.PROFILE_LOGS, convertActivityLogParams(params)],
+      [
+        QueryKey.PROFILE_LOGS,
+        convertActivityLogParams({ params, disableActiveCurationFilter }),
+      ],
       data
     );
   };
@@ -437,7 +490,11 @@ export default function ReactQueryWrapper({
   }: InitProfileRepPageParams) => {
     setProfile(profile);
     setRepRates({ data: repRates, handleOrWallet });
-    initProfileActivityLogs(repLogs);
+    initProfileActivityLogs({
+      params: repLogs.params,
+      data: repLogs.data,
+      disableActiveCurationFilter: true,
+    });
     setProfileRaters(repGivenToUsers);
     setProfileRaters(repReceivedFromUsers);
   };
@@ -449,7 +506,11 @@ export default function ReactQueryWrapper({
     cicReceivedFromUsers,
   }: InitProfileIdentityPageParams) => {
     setProfile(profile);
-    initProfileActivityLogs(activityLogs);
+    initProfileActivityLogs({
+      params: activityLogs.params,
+      data: activityLogs.data,
+      disableActiveCurationFilter: true,
+    });
     setProfileRaters(cicGivenToUsers);
     setProfileRaters(cicReceivedFromUsers);
   };
@@ -459,7 +520,11 @@ export default function ReactQueryWrapper({
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => {
-    initProfileActivityLogs(activityLogs);
+    initProfileActivityLogs({
+      params: activityLogs.params,
+      data: activityLogs.data,
+      disableActiveCurationFilter: true,
+    });
   };
 
   const initCommunityActivityPage = ({
@@ -467,7 +532,11 @@ export default function ReactQueryWrapper({
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => {
-    initProfileActivityLogs(activityLogs);
+    initProfileActivityLogs({
+      params: activityLogs.params,
+      data: activityLogs.data,
+      disableActiveCurationFilter: false,
+    });
   };
 
   return (
@@ -483,7 +552,10 @@ export default function ReactQueryWrapper({
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,
-      }}>
+        onCurationFilterRemoved,
+        onCurationFilterChanged,
+      }}
+    >
       {children}
     </ReactQueryWrapperContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { RatingWithProfileInfoAndLevel } from "../../../../entities/IProfile";
 import { SortDirection } from "../../../../entities/ISort";
-import CommonTablePagination from "../../../utils/table/CommonTablePagination";
+import CommonTablePagination from "../../../utils/table/paginator/CommonTablePagination";
 import ProfileRatersTableBody from "./ProfileRatersTableBody";
 import ProfileRatersTableHeader from "./ProfileRatersTableHeader";
 import {
