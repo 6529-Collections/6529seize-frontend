@@ -54,7 +54,7 @@ export default function CommunityCurationFiltersSelectItemsItem({
       <div className="tw-px-4 tw-py-2.5">
         <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
           <p className="tw-text-sm tw-font-medium tw-mb-0">
-            <span className="tw-text-iron-400 tw-pr-1">Curation:</span>
+            <span className="tw-text-iron-400 tw-pr-1">Name:</span>
             <span className="tw-text-iron-50">{filter.name}</span>
           </p>
           {connectedProfile && (
