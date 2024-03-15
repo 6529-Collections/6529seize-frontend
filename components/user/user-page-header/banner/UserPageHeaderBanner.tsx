@@ -20,7 +20,7 @@ export default function UserPageHeaderBanner({
 
   return (
     <div
-      className="tw-h-28 sm:tw-h-36 tw-group tw-relative tw-overflow-hidden"
+      className="tw-h-24 sm:tw-h-36 tw-group tw-relative tw-overflow-hidden"
       style={{
         background: `linear-gradient(45deg, ${
           profile.profile?.banner_1 ?? defaultBanner1
