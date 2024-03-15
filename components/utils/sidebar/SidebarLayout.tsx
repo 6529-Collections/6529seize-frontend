@@ -2,7 +2,6 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
-import { AnimatePresence, motion } from "framer-motion";
 import CommunityCurationFiltersSidebarToggleButton from "../../curation/sidebar/CommunityCurationFiltersSidebarToggleButton";
 import CommunityCurationFilters from "../../curation/CommunityCurationFilters";
 import { createBreakpoint } from "react-use";
