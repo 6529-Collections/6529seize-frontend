@@ -7,7 +7,11 @@ import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import { amIUser, getRandomColor } from "../../../helpers/Helpers";
+import {
+  amIUser,
+  formatTimestampToMonthYear,
+  getRandomColor,
+} from "../../../helpers/Helpers";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
@@ -118,9 +122,16 @@ export default function UserPageHeader({
               />
             )}
             <UserPageHeaderStats profile={profile} />
-            <div className="tw-mt-2">
-              <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">Profile Enabled: March 2024</p>
-            </div>
+            {profile.profile?.created_at && (
+              <div className="tw-mt-2">
+                <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
+                  Profile Enabled:{" "}
+                  {formatTimestampToMonthYear(
+                    new Date(profile.profile.created_at).getTime()
+                  )}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
