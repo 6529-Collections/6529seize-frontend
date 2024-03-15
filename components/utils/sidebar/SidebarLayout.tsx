@@ -105,42 +105,29 @@ export default function SidebarLayout({
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
       </div>
-
-      <motion.div
-        initial={false}
-        animate={{
-          marginLeft: open ? "320px" : "0px",
-        }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+      <div
+        className={`tw-transform tw-transition-all tw-duration-300 tw-ease-out ${
+          !open ? "tw-ml-0" : "tw-ml-[320px]"
+        }`}
       >
         <CommunityCurationFiltersSidebarToggleButton
           ref={openButtonRef}
           open={open}
           setOpen={setOpen}
         />
-      </motion.div>
-
+      </div>
       <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex">
           <div
-            className="tw-fixed tw-z-50 tw-inset-y-0 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700 tw-left-0 tw-overflow-x-hidden no-scrollbar"
+            className={`tw-fixed tw-z-50 tw-inset-y-0 tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
+              !open ? "-tw-translate-x-full" : ""
+            }`}
             ref={sidebarRef}
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                initial={{ width: "320px" }}
-                animate={{
-                  width: open ? "320px" : "0px",
-                }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <div className="tw-bg-iron-950 tw-w-80  ">
-                  <CommunityCurationFilters setOpen={setOpen} />
-                </div>
-              </motion.div>
-            </AnimatePresence>
+            <div className="tw-bg-iron-950 tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
+              <CommunityCurationFilters setOpen={setOpen} />
+            </div>
           </div>
-
           <div className="tw-w-full">
             <motion.div
               initial={{
