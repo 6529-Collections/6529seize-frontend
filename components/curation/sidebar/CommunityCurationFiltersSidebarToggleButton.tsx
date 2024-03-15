@@ -16,7 +16,6 @@ const CommunityCurationFiltersSidebarToggleButton = forwardRef<
     activeCurationFilterId && !open
       ? "tw-text-primary-400 hover:tw-text-primary-300"
       : "tw-text-iron-400 hover:tw-text-iron-50";
-  console.log("color", color, activeCurationFilterId);
   return (
     <button
       ref={ref}
