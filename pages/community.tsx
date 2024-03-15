@@ -102,13 +102,15 @@ export default function CommunityPage() {
     };
   }, []);
 
-  const useBreakpoint = createBreakpoint({ MD: 2048, S: 0 });
+  const useBreakpoint = createBreakpoint({ XXL: 2048, MD: 768, S: 0 });
   const breakpoint = useBreakpoint();
+
+  const isMobile = breakpoint === "S"; 
 
   const [animateContentMarginLeft, setAnimateContentMarginLeft] =
     useState(false);
   useEffect(() => {
-    if (breakpoint === "MD" || !open) {
+    if (breakpoint === "XXL" || !open || isMobile) {
       setAnimateContentMarginLeft(false);
     } else {
       setAnimateContentMarginLeft(true);
