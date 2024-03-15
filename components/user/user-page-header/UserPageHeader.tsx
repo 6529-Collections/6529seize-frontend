@@ -7,7 +7,11 @@ import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import { amIUser, getRandomColor } from "../../../helpers/Helpers";
+import {
+  amIUser,
+  formatTimestampToMonthYear,
+  getRandomColor,
+} from "../../../helpers/Helpers";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
@@ -91,7 +95,7 @@ export default function UserPageHeader({
         />
         <div className="tw-relative tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-flex tw-flex-col">
-            <div className="-tw-mt-20 sm:-tw-mt-24 tw-w-min">
+            <div className="-tw-mt-16 sm:-tw-mt-24 tw-w-min">
               <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
                 <UserPageHeaderPfp
                   canEdit={canEdit}
@@ -118,6 +122,16 @@ export default function UserPageHeader({
               />
             )}
             <UserPageHeaderStats profile={profile} />
+            {profile.profile?.created_at && (
+              <div className="tw-mt-2">
+                <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
+                  Profile Enabled:{" "}
+                  {formatTimestampToMonthYear(
+                    new Date(profile.profile.created_at).getTime()
+                  )}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>

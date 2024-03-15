@@ -7,7 +7,7 @@ export default function UserPageHeaderStats({
   readonly profile: IProfileAndConsolidations;
 }) {
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-3">
       <div className="tw-flex tw-gap-x-6">
         <div className="tw-inline-flex tw-items-center tw-gap-x-1">
           <span className="tw-text-base tw-font-medium tw-text-iron-50">

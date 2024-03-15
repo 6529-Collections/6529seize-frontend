@@ -574,7 +574,7 @@ export const createPossessionStr = (name: string | null): string => {
   return "";
 };
 
-export function getTimeAgo(milliseconds: number): string {
+export const getTimeAgo = (milliseconds: number): string => {
   const currentTime = new Date().getTime();
   const timeDifference = currentTime - milliseconds;
 
@@ -596,9 +596,9 @@ export function getTimeAgo(milliseconds: number): string {
   } else if (minutes > 0) {
     return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
   } else {
-    return `${seconds} second${seconds !== 1 ? "s" : ""} ago`;
+    return `Just now`;
   }
-}
+};
 
 export const truncateMiddle = (value: string): string => {
   if (value.length > 50) {
@@ -660,3 +660,9 @@ export const convertStringOrNullToNumberOrNull = (
   }
   return parseFloat(value);
 };
+
+
+export const formatTimestampToMonthYear = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  return date.toLocaleString("default", { month: "long", year: "numeric" });
+}
