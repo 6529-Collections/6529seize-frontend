@@ -65,7 +65,8 @@ export default function NFTImage(props: Readonly<Props>) {
     props.animation &&
     props.nft.animation &&
     "metadata" in props.nft &&
-    props.nft.metadata.animation_details?.format === "MP4"
+    (props.nft.metadata.animation_details?.format === "MP4" ||
+      props.nft.metadata.animation_details?.format === "MOV")
   ) {
     return (
       <Col
