@@ -36,16 +36,21 @@ export default function SidebarLayout({
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(true);
-  const [animateContentMarginLeft, setAnimateContentMarginLeft] =
-    useState(false);
+
+  const getAnimateContentMarginLeft = () => {
+    if (["XXL", "S"].includes(breakpoint) || !open) {
+      return false;
+    }
+    return true;
+  };
+
+  const [animateContentMarginLeft, setAnimateContentMarginLeft] = useState(
+    getAnimateContentMarginLeft()
+  );
   const [init, setInit] = useState(false);
 
   useEffect(() => {
-    if (["XXL", "S"].includes(breakpoint) || !open) {
-      setAnimateContentMarginLeft(false);
-    } else {
-      setAnimateContentMarginLeft(true);
-    }
+    setAnimateContentMarginLeft(getAnimateContentMarginLeft());
   }, [breakpoint, open]);
 
   useEffect(() => {
