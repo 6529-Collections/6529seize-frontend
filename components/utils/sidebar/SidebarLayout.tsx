@@ -106,7 +106,7 @@ export default function SidebarLayout({
         <Breadcrumb breadcrumbs={breadcrumbs} />
       </div>
       <div
-        className={`tw-transform tw-transition-all tw-duration-300 tw-ease-out ${
+        className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"
         }`}
       >
@@ -129,17 +129,13 @@ export default function SidebarLayout({
             </div>
           </div>
           <div className="tw-w-full">
-            <motion.div
-              initial={{
-                marginLeft: "320px",
-              }}
-              animate={{
-                marginLeft: animateContentMarginLeft ? "320px" : "0px",
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+            <div
+              className={` tw-transform tw-transition-all tw-duration-300 tw-ease-out ${
+                animateContentMarginLeft ? "tw-ml-[320px]" : " tw-ml-0"
+              }`}
             >
               {init && children}
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
