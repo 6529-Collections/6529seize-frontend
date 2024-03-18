@@ -37,6 +37,12 @@ export default function SidebarLayout({
 
   const [open, setOpen] = useState(true);
 
+  useEffect(() => {
+    if (breakpoint === "S") {
+      setOpen(false);
+    }
+  }, [breakpoint]);
+
   const getAnimateContentMarginLeft = () => {
     if (["XXL", "S"].includes(breakpoint) || !open) {
       return false;
@@ -44,14 +50,14 @@ export default function SidebarLayout({
     return true;
   };
 
-  const [animateContentMarginLeft, setAnimateContentMarginLeft] = useState(
-    getAnimateContentMarginLeft()
-  );
+  const [animateContentMarginLeft, setAnimateContentMarginLeft] =
+    useState(false);
   const [init, setInit] = useState(false);
 
-  useEffect(() => {
-    setAnimateContentMarginLeft(getAnimateContentMarginLeft());
-  }, [breakpoint, open]);
+  useEffect(
+    () => setAnimateContentMarginLeft(getAnimateContentMarginLeft()),
+    [breakpoint, open]
+  );
 
   useEffect(() => {
     if (router.isReady && !init) {
