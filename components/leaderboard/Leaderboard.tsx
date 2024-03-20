@@ -189,42 +189,44 @@ export default function Leaderboard(
               "no-padding d-flex flex-column align-items-end justify-content-center"
             }
             xs={{ span: 6 }}>
-            <span className={styles.lastTDH}>
-              * TDH Block&nbsp;
-              <a
-                href={`https://etherscan.io/block/${lastTDH.block}`}
-                rel="noreferrer"
-                target="_blank">
-                {lastTDH.block}
-              </a>
-            </span>
-            <span>
-              Community TDH:{" "}
-              {globalTdhHistory ? (
-                numberWithCommas(globalTdhHistory.total_boosted_tdh)
-              ) : (
-                <DotLoader />
-              )}
-            </span>
-            <span>
-              Daily Change:{" "}
-              {globalTdhHistory ? (
-                <>
-                  {numberWithCommas(globalTdhHistory.net_boosted_tdh)}{" "}
-                  <span className="font-smaller">
-                    (
-                    {(
-                      (globalTdhHistory.net_boosted_tdh /
-                        globalTdhHistory.total_boosted_tdh) *
-                      100
-                    ).toFixed(2)}
-                    %)
-                  </span>
-                </>
-              ) : (
-                <DotLoader />
-              )}
-            </span>
+            <div className={styles.statsContainer}>
+              <span className={styles.lastTDH}>
+                TDH Block&nbsp;
+                <a
+                  href={`https://etherscan.io/block/${lastTDH.block}`}
+                  rel="noreferrer"
+                  target="_blank">
+                  {lastTDH.block}
+                </a>
+              </span>
+              <span>
+                Community TDH:{" "}
+                {globalTdhHistory ? (
+                  numberWithCommas(globalTdhHistory.total_boosted_tdh)
+                ) : (
+                  <DotLoader />
+                )}
+              </span>
+              <span>
+                Daily Change:{" "}
+                {globalTdhHistory ? (
+                  <>
+                    {numberWithCommas(globalTdhHistory.net_boosted_tdh)}{" "}
+                    <span className="font-smaller">
+                      (
+                      {(
+                        (globalTdhHistory.net_boosted_tdh /
+                          globalTdhHistory.total_boosted_tdh) *
+                        100
+                      ).toFixed(2)}
+                      %)
+                    </span>
+                  </>
+                ) : (
+                  <DotLoader />
+                )}
+              </span>
+            </div>
           </Col>
         )}
       </Row>
