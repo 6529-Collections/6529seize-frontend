@@ -7,8 +7,7 @@ export interface UserPageStatsTableProps {
   readonly data: UserPageStatsTableItemData[][];
 }
 
-export interface UserPageStatsTableItemData
-  extends Record<MEMES_SEASON, string> {
+export interface UserPageStatsTableItemData {
   readonly title: string;
   readonly isLast: boolean;
   readonly isMain: boolean;
@@ -16,6 +15,8 @@ export interface UserPageStatsTableItemData
   readonly total: string;
   readonly memes: string;
   readonly gradient: string;
+  readonly nextgen: string;
+  readonly memelab: string;
 }
 
 export default function UserPageStatsTable({
@@ -38,34 +39,31 @@ export default function UserPageStatsTable({
                 <tr>
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-                  ></th>
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"></th>
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-                  >
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
                     Total
                   </th>
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-                  >
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
                     Memes
                   </th>
-                  {Object.values(MEMES_SEASON).map((season) => (
-                    <th
-                      key={season}
-                      scope="col"
-                      className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-                    >
-                      {season}
-                    </th>
-                  ))}
                   <th
                     scope="col"
-                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-                  >
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+                    NextGen
+                  </th>
+                  <th
+                    scope="col"
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
                     Gradient
+                  </th>
+                  <th
+                    scope="col"
+                    className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+                    MemeLab
                   </th>
                 </tr>
               </thead>

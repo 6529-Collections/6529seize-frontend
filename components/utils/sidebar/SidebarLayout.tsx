@@ -36,17 +36,28 @@ export default function SidebarLayout({
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    if (breakpoint === "S") {
+      setOpen(false);
+    }
+  }, [breakpoint]);
+
+  const getAnimateContentMarginLeft = () => {
+    if (["XXL", "S"].includes(breakpoint) || !open) {
+      return false;
+    }
+    return true;
+  };
+
   const [animateContentMarginLeft, setAnimateContentMarginLeft] =
     useState(false);
   const [init, setInit] = useState(false);
 
-  useEffect(() => {
-    if (["XXL", "S"].includes(breakpoint) || !open) {
-      setAnimateContentMarginLeft(false);
-    } else {
-      setAnimateContentMarginLeft(true);
-    }
-  }, [breakpoint, open]);
+  useEffect(
+    () => setAnimateContentMarginLeft(getAnimateContentMarginLeft()),
+    [breakpoint, open]
+  );
 
   useEffect(() => {
     if (router.isReady && !init) {
@@ -107,8 +118,7 @@ export default function SidebarLayout({
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"
-        }`}
-      >
+        }`}>
         <CommunityCurationFiltersSidebarToggleButton
           ref={openButtonRef}
           open={open}
@@ -118,12 +128,11 @@ export default function SidebarLayout({
       <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex">
           <div
-            className={`tw-fixed tw-z-50 tw-inset-y-0 tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
+            className={`tw-fixed  tw-z-50 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
               !open ? "-tw-translate-x-full" : ""
             }`}
-            ref={sidebarRef}
-          >
-            <div className="tw-bg-iron-950 tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
+            ref={sidebarRef}>
+            <div className="tw-bg-iron-950 tw-min-h-screen  tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
               <CommunityCurationFilters setOpen={setOpen} />
             </div>
           </div>
@@ -131,8 +140,7 @@ export default function SidebarLayout({
             <div
               className={` tw-transform tw-transition-all tw-duration-300 tw-ease-out ${
                 animateContentMarginLeft ? "tw-ml-[320px]" : " tw-ml-0"
-              }`}
-            >
+              }`}>
               {init && children}
             </div>
           </div>

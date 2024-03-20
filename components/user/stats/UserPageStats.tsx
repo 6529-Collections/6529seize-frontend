@@ -1,21 +1,14 @@
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { ConsolidatedTDHMetrics, TDHMetrics } from "../../../entities/ITDH";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
 
-import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsCollected from "./UserPageStatsCollected";
-import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import CommonSkeletonLoader from "../../utils/animation/CommonSkeletonLoader";
-import CommonCardSkeleton from "../../utils/animation/CommonCardSkeleton";
 import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
-import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
-
-export type UserPageStatsTDHType = ConsolidatedTDHMetrics | TDHMetrics | null;
+import { MemeSeason } from "../../../entities/ISeason";
+import { OwnerBalance, OwnerBalanceMemes } from "../../../entities/IBalances";
+import UserPageStatsTags from "./tags/UserPageStatsTags";
 
 export default function UserPageStats({
   profile,
@@ -24,102 +17,74 @@ export default function UserPageStats({
 }) {
   const router = useRouter();
   const [activeAddress, setActiveAddress] = useState<string | null>(null);
-  const [isConsolidation, setIsConsolidation] = useState<boolean>(
-    profile.consolidation.wallets.length > 1
-  );
+
+  const [seasons, setSeasons] = useState<MemeSeason[]>([]);
+  const [ownerBalance, setownerBalance] = useState<OwnerBalance>();
+  const [balanceMemes, setBalanceMemes] = useState<OwnerBalanceMemes[]>([]);
 
   useEffect(() => {
-    setIsConsolidation(profile.consolidation.wallets.length > 1);
-  }, [profile, router.query.user]);
-
-  const { isFetching: isFetchingConsolidatedTDH, data: consolidatedTDH } =
-    useQuery<ConsolidatedTDHMetrics>({
-      queryKey: [
-        QueryKey.PROFILE_CONSOLIDATED_TDH,
-        profile.consolidation.consolidation_key,
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ConsolidatedTDHMetrics>({
-          endpoint: `consolidated_owner_metrics/${profile.consolidation.consolidation_key}/`,
-        }),
-      enabled: !!profile.consolidation.consolidation_key,
+    commonApiFetch<MemeSeason[]>({
+      endpoint: "new_memes_seasons",
+    }).then((response) => {
+      setSeasons(response);
     });
-
-  const { isFetching: isFetchingWalletTDH, data: walletTDH } =
-    useQuery<TDHMetrics | null>({
-      queryKey: [QueryKey.WALLET_TDH, activeAddress?.toLowerCase()],
-      queryFn: async () => {
-        const response = await commonApiFetch<{ data: TDHMetrics[] }>({
-          endpoint: `owner_metrics`,
-          params: {
-            wallet: activeAddress?.toLowerCase() ?? "",
-            profile_page: "true",
-          },
-        });
-        return response.data?.at(0) ?? null;
-      },
-      enabled: !!activeAddress,
-    });
-
-  const [tdh, setTDH] = useState<UserPageStatsTDHType>(consolidatedTDH ?? null);
+  }, []);
 
   useEffect(() => {
-    if (!activeAddress || !isConsolidation) {
-      setTDH(consolidatedTDH ?? null);
-      return;
+    let url;
+    if (activeAddress) {
+      url = `owners-balances/wallet/${activeAddress}`;
+    } else {
+      url = `owners-balances/consolidation/${profile.consolidation.consolidation_key}`;
     }
-
-    setTDH(walletTDH ?? null);
-  }, [activeAddress, isConsolidation, consolidatedTDH, walletTDH]);
-
-  const [isLoading, setIsLoading] = useState<boolean>(
-    isFetchingConsolidatedTDH || isFetchingWalletTDH
-  );
+    commonApiFetch<OwnerBalance>({
+      endpoint: url,
+    }).then((response) => {
+      setownerBalance(response);
+    });
+  }, [activeAddress]);
 
   useEffect(() => {
-    setIsLoading(isFetchingConsolidatedTDH || isFetchingWalletTDH);
-  }, [isFetchingConsolidatedTDH, isFetchingWalletTDH]);
+    let url;
+    if (activeAddress) {
+      url = `owners-balances/wallet/${activeAddress}/memes`;
+    } else {
+      url = `owners-balances/consolidation/${profile.consolidation.consolidation_key}/memes`;
+    }
+    commonApiFetch<OwnerBalanceMemes[]>({
+      endpoint: url,
+    }).then((response) => {
+      setBalanceMemes(response);
+    });
+  }, [activeAddress]);
 
   return (
     <div className="tailwind-scope">
       <div className="tw-flex-col-reverse tw-flex lg:tw-flex-row tw-justify-between tw-gap-6 lg:tw-space-y-0 tw-w-full tw-mt-6 lg:tw-mt-8">
-        {isLoading ? (
-          <div className="tw-w-full">
-            <CommonSkeletonLoader />
-            <CommonSkeletonLoader />
-          </div>
-        ) : (
-          <UserPageStatsTags tdh={tdh} />
-        )}
-
+        <UserPageStatsTags
+          ownerBalance={ownerBalance}
+          balanceMemes={balanceMemes}
+          seasons={seasons}
+        />
         <UserAddressesSelectDropdown
           addresses={profile.consolidation.wallets}
           onActiveAddress={setActiveAddress}
         />
       </div>
 
-      {isLoading ? (
-        <>
-          <div className="tw-w-full tw-pt-8 tw-h-96">
-            <CommonCardSkeleton />
-          </div>
-          <div className="tw-w-full tw-pt-8 tw-h-96">
-            <CommonCardSkeleton />
-          </div>
-        </>
-      ) : (
-        <>
-          <UserPageStatsCollected tdh={tdh} />
-          <UserPageStatsActivityOverview tdh={tdh} />
-        </>
-      )}
+      <UserPageStatsCollected
+        ownerBalance={ownerBalance}
+        balanceMemes={balanceMemes}
+        seasons={seasons}
+      />
+      {/* <UserPageStatsActivityOverview tdh={tdh} /> */}
 
       <UserPageActivityWrapper
         profile={profile}
         activeAddress={activeAddress}
       />
 
-      <UserPageStatsBoostBreakdown tdh={tdh} />
+      {/* <UserPageStatsBoostBreakdown tdh={tdh} /> */}
     </div>
   );
 }

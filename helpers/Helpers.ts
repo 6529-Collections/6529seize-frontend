@@ -661,8 +661,7 @@ export const convertStringOrNullToNumberOrNull = (
   return parseFloat(value);
 };
 
-
 export const formatTimestampToMonthYear = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleString("default", { month: "long", year: "numeric" });
-}
+};
