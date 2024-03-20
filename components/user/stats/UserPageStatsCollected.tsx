@@ -46,7 +46,7 @@ export default function UserPageStatsCollected({
 export function UserPageStatsCollectedOverview({
   ownerBalance,
 }: {
-  readonly ownerBalance: OwnerBalance;
+  readonly ownerBalance: OwnerBalance | undefined;
 }) {
   return (
     <Accordion>
