@@ -136,7 +136,7 @@ tr:not(.tailwind-scope tr),
 td:not(.tailwind-scope td),
 th:not(.tailwind-scope th) {
   color: $font-color !important;
-  border: none !important;
+  border: none;
 }
 
 .table > :not(caption) > * > * {
@@ -193,8 +193,8 @@ th:not(.tailwind-scope th) {
   right: 20px;
 }
 
-.accordion-item .accordion-button {
-  border-radius: 0 !important;
+.accordion-item:not(.tailwind-scope .accordion-item) .accordion-button {
+  border-radius: 0;
 }
 
 .accordion-item {

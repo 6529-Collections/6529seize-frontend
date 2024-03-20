@@ -1,6 +1,4 @@
 import Tippy from "@tippyjs/react";
-import { MEMES_SEASON } from "../../../../../enums";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import TooltipIcon from "../../../../utils/icons/TooltipIcon";
 import { UserPageStatsTableItemData } from "./UserPageStatsTable";
 
@@ -16,26 +14,6 @@ export default function UserPageStatsTableRow({
   const lastClasses = data.isLast ? "tw-pb-2.5" : "";
 
   const classes = `${mainClasses} ${lastClasses}`;
-
-  const getSZNData = (szn: MEMES_SEASON) => {
-    switch (szn) {
-      case MEMES_SEASON.SZN1:
-        return data.SZN1;
-      case MEMES_SEASON.SZN2:
-        return data.SZN2;
-      case MEMES_SEASON.SZN3:
-        return data.SZN3;
-      case MEMES_SEASON.SZN4:
-        return data.SZN4;
-      case MEMES_SEASON.SZN5:
-        return data.SZN5;
-      case MEMES_SEASON.SZN6:
-        return data.SZN6;
-      default:
-        assertUnreachable(szn);
-        return null;
-    }
-  };
 
   return (
     <>
@@ -59,16 +37,17 @@ export default function UserPageStatsTableRow({
         className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
         {data.memes}
       </td>
-      {Object.values(MEMES_SEASON).map((season) => (
-        <td
-          key={season}
-          className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
-          {getSZNData(season)}
-        </td>
-      ))}
+      <td
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
+        {data.nextgen}
+      </td>
       <td
         className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
         {data.gradient}
+      </td>
+      <td
+        className={`${classes} tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-right`}>
+        {data.memelab}
       </td>
     </>
   );

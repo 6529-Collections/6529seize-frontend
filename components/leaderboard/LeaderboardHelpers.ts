@@ -36,4 +36,5 @@ export const getLink = (lead: any) => {
   return `/${lead.wallets.at(0)}`;
 };
 
-export const getLeaderboardProfileDisplay = (lead: any) => getDisplay(lead) ?? getDisplayEns(lead);
+export const getLeaderboardProfileDisplay = (lead: any) =>
+  getDisplay(lead) ?? getDisplayEns(lead);
