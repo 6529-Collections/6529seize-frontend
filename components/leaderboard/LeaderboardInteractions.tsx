@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { numberWithCommas } from "../../helpers/Helpers";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { CICType } from "../../entities/IProfile";
 import { MemeSeason } from "../../entities/ISeason";
 import { Collector, Content } from "./Leaderboard";
-import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
-import Pagination from "../pagination/Pagination";
 import LeaderboardSort from "./LeaderboardSort";
 import {
   LeaderboardInteractionsSort,
   fetchLeaderboardData,
-  getLeaderboardDownloadFileName,
 } from "./leaderboard_helpers";
 import LeaderboardFooter from "./LeaderboardDownload";
 

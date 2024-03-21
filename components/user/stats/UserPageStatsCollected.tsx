@@ -3,6 +3,10 @@ import { Accordion, Container, Row, Col, Table } from "react-bootstrap";
 import { OwnerBalance, OwnerBalanceMemes } from "../../../entities/IBalances";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import { MemeSeason } from "../../../entities/ISeason";
+import {
+  UserPageStatsTableHead,
+  UserPageStatsTableHr,
+} from "./UserPageStatsTableShared";
 
 function getRankDisplay(balance: number | undefined, rank: number | undefined) {
   if (!balance || !rank) {
@@ -56,24 +60,9 @@ export function UserPageStatsCollectedTotals({
             <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
               <Col>
                 <Table className={styles.collectedAccordionTable}>
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th className="text-right">Total</th>
-                      <th className="text-right">Memes</th>
-                      <th className="text-right">NextGen</th>
-                      <th className="text-right">Gradient</th>
-                      <th className="text-right">Meme Lab</th>
-                    </tr>
-                  </thead>
+                  <UserPageStatsTableHead />
                   <tbody>
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className={styles.collectedAccordionTableHr}>
-                        <hr className="mb-1 mt-1" />
-                      </td>
-                    </tr>
+                    <UserPageStatsTableHr span={6} />
                     <tr>
                       <td>
                         <b>Cards</b>
@@ -129,13 +118,7 @@ export function UserPageStatsCollectedTotals({
                         )}
                       </td>
                     </tr>
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className={styles.collectedAccordionTableHr}>
-                        <hr className="mb-1 mt-1" />
-                      </td>
-                    </tr>
+                    <UserPageStatsTableHr span={6} />
                     <tr>
                       <td>
                         <b>TDH</b>
@@ -276,13 +259,7 @@ export function UserPageStatsCollectedMemes({
                     <tbody>
                       {balanceMemes.map((balanceMeme) => (
                         <>
-                          <tr>
-                            <td
-                              colSpan={6}
-                              className={styles.collectedAccordionTableHr}>
-                              <hr className="mb-1 mt-1" />
-                            </td>
-                          </tr>
+                          <UserPageStatsTableHr span={6} />
                           <tr>
                             <td colSpan={2}>Season {balanceMeme.season}</td>
                             <td className={styles.collectedAccordionTableValue}>
