@@ -4,13 +4,11 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { TDHCalc, GlobalTDHHistory } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
 import { numberWithCommas } from "../../helpers/Helpers";
-import { useRouter } from "next/router";
 import { fetchUrl } from "../../services/6529api";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
-import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { commonApiFetch } from "../../services/api/common-api";
 import { MemeSeason } from "../../entities/ISeason";
@@ -190,7 +188,7 @@ export default function Leaderboard(
             }
             xs={{ span: 6 }}>
             <div className={styles.statsContainer}>
-              <span className={styles.lastTDH}>
+              <span>
                 TDH Block&nbsp;
                 <a
                   href={`https://etherscan.io/block/${lastTDH.block}`}

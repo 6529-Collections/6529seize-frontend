@@ -45,6 +45,7 @@ export interface LeaderboardInteractions {
   pfp_url: string;
   rep_score: number;
   cic_score: number;
+  primary_wallet: string;
   boosted_tdh: number;
   day_change: number;
   level: number;
@@ -77,7 +78,7 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
 
   function getFileName(page?: number) {
     const tdhBlockSuffix = props.block ? `-${props.block}` : "";
-    const csvFileName = `consolidated-community-download${tdhBlockSuffix}`;
+    const csvFileName = `community-interactions${tdhBlockSuffix}`;
     if (page) {
       return `${csvFileName}-page${page}.csv`;
     }
@@ -91,7 +92,6 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
     if (props.searchWallets && props.searchWallets.length > 0) {
       walletFilter = `&search=${props.searchWallets.join(",")}`;
     }
-    let url = `aggregated-activity`;
     let mysort = sort.sort;
 
     let contentFilter = "";
@@ -109,7 +109,7 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
       seasonFilter = `&season=${props.selectedSeason}`;
     }
 
-    url = `${url}?page_size=${PAGE_SIZE}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
+    const url = `aggregated-activity?page_size=${PAGE_SIZE}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
     commonApiFetch<{
       count: number;
       page: number;
@@ -124,7 +124,7 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
       });
       setLeaderboard(response.data);
       props.setIsLoading(false);
-      setMyFetchUrl(url);
+      setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${url}`);
     });
   }
 
@@ -373,12 +373,12 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
             <DownloadUrlWidget
               preview="Page"
               name={getFileName(page)}
-              url={`${myFetchUrl}&include_primary_wallet=true&download_page=true`}
+              url={`${myFetchUrl}&download_page=true`}
             />
             <DownloadUrlWidget
               preview="All Pages"
               name={getFileName()}
-              url={`${myFetchUrl}&include_primary_wallet=true&download_all=true`}
+              url={`${myFetchUrl}&download_all=true`}
             />
           </Col>
           {totalResults > PAGE_SIZE && (

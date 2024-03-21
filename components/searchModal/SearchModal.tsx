@@ -79,7 +79,7 @@ export default function SearchModal(props: Readonly<Props>) {
         ))}
         {props.searchWallets.length === 0 && (
           <div className={styles.noSearchWalletsText}>
-            No search wallets added
+            No search queries added
           </div>
         )}
         <Button
@@ -107,7 +107,7 @@ export function SearchWalletsDisplay(
 ) {
   const { searchWallets, setSearchWallets, setShowSearchModal } = props;
   return (
-    <span className="d-flex flex-wrap align-items-center">
+    <span className="d-flex flex-wrap align-items-center justify-content-end">
       {searchWallets.length > 0 &&
         searchWallets.map((sw) => (
           <span className={styles.searchWalletDisplayWrapper} key={sw}>

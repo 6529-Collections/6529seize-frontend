@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -9,17 +8,20 @@ import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddresses
 import { MemeSeason } from "../../../entities/ISeason";
 import { OwnerBalance, OwnerBalanceMemes } from "../../../entities/IBalances";
 import UserPageStatsTags from "./tags/UserPageStatsTags";
+import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
+import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
+import { ConsolidatedTDH, TDH } from "../../../entities/ITDH";
 
 export default function UserPageStats({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const router = useRouter();
   const [activeAddress, setActiveAddress] = useState<string | null>(null);
 
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
-  const [ownerBalance, setownerBalance] = useState<OwnerBalance>();
+  const [tdh, setTdh] = useState<ConsolidatedTDH | TDH>();
+  const [ownerBalance, setOwnerBalance] = useState<OwnerBalance>();
   const [balanceMemes, setBalanceMemes] = useState<OwnerBalanceMemes[]>([]);
 
   useEffect(() => {
@@ -33,15 +35,33 @@ export default function UserPageStats({
   useEffect(() => {
     let url;
     if (activeAddress) {
+      url = `tdh/wallet/${activeAddress}`;
+    } else {
+      url = `tdh/consolidation/${profile.consolidation.consolidation_key}`;
+    }
+    commonApiFetch<ConsolidatedTDH | TDH>({
+      endpoint: url,
+    }).then((response) => {
+      setTdh(response);
+    });
+  }, [activeAddress]);
+
+  useEffect(() => {
+    let url;
+    if (activeAddress) {
       url = `owners-balances/wallet/${activeAddress}`;
     } else {
       url = `owners-balances/consolidation/${profile.consolidation.consolidation_key}`;
     }
     commonApiFetch<OwnerBalance>({
       endpoint: url,
-    }).then((response) => {
-      setownerBalance(response);
-    });
+    })
+      .then((response) => {
+        setOwnerBalance(response);
+      })
+      .catch((error) => {
+        setOwnerBalance(undefined);
+      });
   }, [activeAddress]);
 
   useEffect(() => {
@@ -77,14 +97,18 @@ export default function UserPageStats({
         balanceMemes={balanceMemes}
         seasons={seasons}
       />
-      {/* <UserPageStatsActivityOverview tdh={tdh} /> */}
+
+      <UserPageStatsActivityOverview
+        profile={profile}
+        activeAddress={activeAddress}
+      />
 
       <UserPageActivityWrapper
         profile={profile}
         activeAddress={activeAddress}
       />
 
-      {/* <UserPageStatsBoostBreakdown tdh={tdh} /> */}
+      <UserPageStatsBoostBreakdown tdh={tdh} />
     </div>
   );
 }
