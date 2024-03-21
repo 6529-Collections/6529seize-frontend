@@ -50,6 +50,7 @@ export interface NftTDH {
   total_boosted_tdh: number;
   rep_score: number;
   cic_score: number;
+  primary_wallet: string;
   level: number;
   cic_type?: CICType;
 }

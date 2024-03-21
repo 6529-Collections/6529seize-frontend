@@ -4,7 +4,6 @@ import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "../../helpers/Helpers";
 import { SortDirection } from "../../entities/ISort";
-import DotLoader from "../dotLoader/DotLoader";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { commonApiFetch } from "../../services/api/common-api";
 import { CICType } from "../../entities/IProfile";
@@ -46,6 +45,7 @@ export interface LeaderboardMetrics {
   memes_cards_sets: number;
   rep_score: number;
   cic_score: number;
+  primary_wallet: string;
   boosted_tdh: number;
   day_change: number;
   level: number;
@@ -60,18 +60,12 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.level, sort_direction: SortDirection.DESC });
-  const [showLoader, setShowLoader] = useState(false);
 
   const [myFetchUrl, setMyFetchUrl] = useState<string>("");
 
-  const memesCount = props.seasons.reduce(
-    (acc, season) => acc + season.count,
-    0
-  );
-
   function getFileName(page?: number) {
     const tdhBlockSuffix = props.block ? `-${props.block}` : "";
-    const csvFileName = `consolidated-community-download${tdhBlockSuffix}`;
+    const csvFileName = `community-cards-collected${tdhBlockSuffix}`;
     if (page) {
       return `${csvFileName}-page${page}.csv`;
     }
@@ -80,13 +74,11 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
 
   async function fetchResults() {
     setMyFetchUrl("");
-    setShowLoader(true);
     props.setIsLoading(true);
     let walletFilter = "";
     if (props.searchWallets && props.searchWallets.length > 0) {
       walletFilter = `&search=${props.searchWallets.join(",")}`;
     }
-    let url = `tdh/consolidated_metrics`;
     let mysort = sort.sort;
 
     let contentFilter = "";
@@ -104,7 +96,7 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
       seasonFilter = `&season=${props.selectedSeason}`;
     }
 
-    url = `${url}?page_size=${PAGE_SIZE}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
+    const url = `tdh/consolidated_metrics?page_size=${PAGE_SIZE}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
     commonApiFetch<{
       count: number;
       page: number;
@@ -118,9 +110,8 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
         lead.cic_type = cicToType(lead.cic_score);
       });
       setLeaderboard(response.data);
-      setShowLoader(false);
       props.setIsLoading(false);
-      setMyFetchUrl(url);
+      setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${url}`);
     });
   }
 
@@ -494,12 +485,12 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
             <DownloadUrlWidget
               preview="Page"
               name={getFileName(page)}
-              url={`${myFetchUrl}&include_primary_wallet=true&download_page=true`}
+              url={`${myFetchUrl}&download_page=true`}
             />
             <DownloadUrlWidget
               preview="All Pages"
               name={getFileName()}
-              url={`${myFetchUrl}&include_primary_wallet=true&download_all=true`}
+              url={`${myFetchUrl}&download_all=true`}
             />
           </Col>
           {totalResults > PAGE_SIZE && (
