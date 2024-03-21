@@ -16,6 +16,7 @@ import {
   fetchLeaderboardData,
   getLeaderboardDownloadFileName,
 } from "./leaderboard_helpers";
+import LeaderboardFooter from "./LeaderboardDownload";
 
 const PAGE_SIZE = 50;
 
@@ -131,221 +132,195 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row>
-        <Col></Col>
-        <Table bordered={false} className={styles.leaderboardTable}>
-          <thead>
-            <tr>
-              <th colSpan={2}></th>
-              <th colSpan={2} className={`text-center ${styles.borderBottom}`}>
-                Primary Purchases
-              </th>
-              <th className={styles.gap}></th>
-              <th colSpan={2} className={`text-center ${styles.borderBottom}`}>
-                Secondary Purchases
-              </th>
-              <th className={styles.gap}></th>
-              <th colSpan={2} className={`text-center ${styles.borderBottom}`}>
-                Sales
-              </th>
-              <th className={styles.gap}></th>
-              <th colSpan={4} className={`text-center ${styles.borderBottom}`}>
-                Transfers
-              </th>
-            </tr>
-            <tr>
-              <th className={styles.rank}>Rank</th>
-              <th className={`${styles.hodlerContainer}`}>
-                Collector&nbsp;&nbsp;
-                <span className={styles.totalResults}>
-                  x{totalResults.toLocaleString()}
-                </span>
-              </th>
-              {/* primary purchases */}
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Count&nbsp;
-                  {printHeader(
-                    LeaderboardInteractionsSort.primary_purchases_count
-                  )}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Value&nbsp;
-                  {printHeader(
-                    LeaderboardInteractionsSort.primary_purchases_value
-                  )}
-                </span>
-              </th>
-              <th className={styles.gap}></th>
-              {/* secondary purchases */}
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Count&nbsp;
-                  {printHeader(
-                    LeaderboardInteractionsSort.secondary_purchases_count
-                  )}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Value&nbsp;
-                  {printHeader(
-                    LeaderboardInteractionsSort.secondary_purchases_value
-                  )}
-                </span>
-              </th>
-              <th className={styles.gap}></th>
-              {/* sales */}
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Count&nbsp;
-                  {printHeader(LeaderboardInteractionsSort.sales_count)}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Value&nbsp;
-                  {printHeader(LeaderboardInteractionsSort.sales_value)}
-                </span>
-              </th>
-              <th className={styles.gap}></th>
-              {/* transfers */}
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Airdrops&nbsp;
-                  {printHeader(LeaderboardInteractionsSort.airdrops)}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  In&nbsp;
-                  {printHeader(LeaderboardInteractionsSort.transfers_in)}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Out&nbsp;
-                  {printHeader(LeaderboardInteractionsSort.transfers_out)}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Burns&nbsp;
-                  {printHeader(LeaderboardInteractionsSort.burns)}
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaderboard &&
-              leaderboard.map((lead: LeaderboardInteractions, index) => {
-                return (
-                  <tr key={lead.consolidation_key}>
-                    <td className={styles.rank}>
-                      {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                    </td>
-                    <td className="tw-max-w-[20px] tw-truncate">
-                      <LeaderboardCollector
-                        handle={lead.handle}
-                        consolidationKey={lead.consolidation_key}
-                        consolidationDisplay={lead.consolidation_display}
-                        pfp={lead.pfp_url}
-                        cicType={lead.cic_type}
-                        level={lead.level}
-                      />
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.primary_purchases_count)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(
-                        Math.round(lead.primary_purchases_value * 100) / 100
-                      )}
-                    </td>
-                    <th className={styles.gap}></th>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.secondary_purchases_count)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(
-                        Math.round(lead.secondary_purchases_value * 100) / 100
-                      )}
-                    </td>
-                    <th className={styles.gap}></th>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.sales_count)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(
-                        Math.round(lead.sales_value * 100) / 100
-                      )}
-                    </td>
-                    <th className={styles.gap}></th>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.airdrops)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.transfers_in)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.transfers_out)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.burns)}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
-      </Row>
-      {totalResults > 0 && leaderboard && myFetchUrl && (
+    <>
+      <Container>
         <Row>
-          <Col
-            xs={12}
-            sm={12}
-            md={6}
-            className="pt-4 pb-3 d-flex justify-content-center gap-4">
-            <DownloadUrlWidget
-              preview="Page"
-              name={getLeaderboardDownloadFileName(
-                "community-interactions",
-                props.block ?? 0,
-                page
-              )}
-              url={`${myFetchUrl}&download_page=true`}
-            />
-            <DownloadUrlWidget
-              preview="All Pages"
-              name={getLeaderboardDownloadFileName(
-                "community-cards-collected",
-                props.block ?? 0,
-                0
-              )}
-              url={`${myFetchUrl}&download_all=true`}
-            />
-          </Col>
-          {totalResults > PAGE_SIZE && (
-            <Col
-              xs={12}
-              sm={12}
-              md={6}
-              className="pt-4 pb-3 d-flex justify-content-center">
-              <Pagination
-                page={page}
-                pageSize={PAGE_SIZE}
-                totalResults={totalResults}
-                setPage={function (newPage: number) {
-                  setPage(newPage);
-                }}
-              />
-            </Col>
-          )}
+          <Col></Col>
+          <Table bordered={false} className={styles.leaderboardTable}>
+            <thead>
+              <tr>
+                <th colSpan={2}></th>
+                <th
+                  colSpan={2}
+                  className={`text-center ${styles.borderBottom}`}>
+                  Primary Purchases
+                </th>
+                <th className={styles.gap}></th>
+                <th
+                  colSpan={2}
+                  className={`text-center ${styles.borderBottom}`}>
+                  Secondary Purchases
+                </th>
+                <th className={styles.gap}></th>
+                <th
+                  colSpan={2}
+                  className={`text-center ${styles.borderBottom}`}>
+                  Sales
+                </th>
+                <th className={styles.gap}></th>
+                <th
+                  colSpan={4}
+                  className={`text-center ${styles.borderBottom}`}>
+                  Transfers
+                </th>
+              </tr>
+              <tr>
+                <th className={styles.rank}>Rank</th>
+                <th className={`${styles.hodlerContainer}`}>
+                  Collector&nbsp;&nbsp;
+                  <span className={styles.totalResults}>
+                    x{totalResults.toLocaleString()}
+                  </span>
+                </th>
+                {/* primary purchases */}
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Count&nbsp;
+                    {printHeader(
+                      LeaderboardInteractionsSort.primary_purchases_count
+                    )}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Value&nbsp;
+                    {printHeader(
+                      LeaderboardInteractionsSort.primary_purchases_value
+                    )}
+                  </span>
+                </th>
+                <th className={styles.gap}></th>
+                {/* secondary purchases */}
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Count&nbsp;
+                    {printHeader(
+                      LeaderboardInteractionsSort.secondary_purchases_count
+                    )}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Value&nbsp;
+                    {printHeader(
+                      LeaderboardInteractionsSort.secondary_purchases_value
+                    )}
+                  </span>
+                </th>
+                <th className={styles.gap}></th>
+                {/* sales */}
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Count&nbsp;
+                    {printHeader(LeaderboardInteractionsSort.sales_count)}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Value&nbsp;
+                    {printHeader(LeaderboardInteractionsSort.sales_value)}
+                  </span>
+                </th>
+                <th className={styles.gap}></th>
+                {/* transfers */}
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Airdrops&nbsp;
+                    {printHeader(LeaderboardInteractionsSort.airdrops)}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    In&nbsp;
+                    {printHeader(LeaderboardInteractionsSort.transfers_in)}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Out&nbsp;
+                    {printHeader(LeaderboardInteractionsSort.transfers_out)}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Burns&nbsp;
+                    {printHeader(LeaderboardInteractionsSort.burns)}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard &&
+                leaderboard.map((lead: LeaderboardInteractions, index) => {
+                  return (
+                    <tr key={lead.consolidation_key}>
+                      <td className={styles.rank}>
+                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                      </td>
+                      <td className="tw-max-w-[20px] tw-truncate">
+                        <LeaderboardCollector
+                          handle={lead.handle}
+                          consolidationKey={lead.consolidation_key}
+                          consolidationDisplay={lead.consolidation_display}
+                          pfp={lead.pfp_url}
+                          cicType={lead.cic_type}
+                          level={lead.level}
+                        />
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.primary_purchases_count)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(
+                          Math.round(lead.primary_purchases_value * 100) / 100
+                        )}
+                      </td>
+                      <th className={styles.gap}></th>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.secondary_purchases_count)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(
+                          Math.round(lead.secondary_purchases_value * 100) / 100
+                        )}
+                      </td>
+                      <th className={styles.gap}></th>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.sales_count)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(
+                          Math.round(lead.sales_value * 100) / 100
+                        )}
+                      </td>
+                      <th className={styles.gap}></th>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.airdrops)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.transfers_in)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.transfers_out)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.burns)}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </Table>
         </Row>
-      )}
-    </Container>
+      </Container>
+      <LeaderboardFooter
+        url={myFetchUrl}
+        totalResults={totalResults}
+        page={page}
+        pageSize={PAGE_SIZE}
+        setPage={setPage}
+        block={props.block}
+      />
+    </>
   );
 }

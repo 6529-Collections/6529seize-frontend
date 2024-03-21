@@ -15,6 +15,7 @@ import {
   fetchLeaderboardData,
   getLeaderboardDownloadFileName,
 } from "./leaderboard_helpers";
+import LeaderboardFooter from "./LeaderboardDownload";
 
 const PAGE_SIZE = 50;
 
@@ -138,196 +139,162 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row>
-        <Col></Col>
-        <Table bordered={false} className={styles.leaderboardTable}>
-          <thead>
-            <tr>
-              <th className={styles.rank}>Rank</th>
-              <th className={`${styles.hodlerContainer}`}>
-                Collector&nbsp;&nbsp;
-                <span className={styles.totalResults}>
-                  x{totalResults.toLocaleString()}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Level&nbsp;
-                  <LeaderboardSort
-                    sort={sort}
-                    setSort={setSort}
-                    s={LeaderboardCardsCollectedSort.level}
-                  />
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Cards Collected&nbsp;
-                  <LeaderboardSort
-                    sort={sort}
-                    setSort={setSort}
-                    s={LeaderboardCardsCollectedSort.balance}
-                  />
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Unique Memes&nbsp;
-                  <LeaderboardSort
-                    sort={sort}
-                    setSort={setSort}
-                    s={LeaderboardCardsCollectedSort.unique_memes}
-                  />
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Sets&nbsp;
-                  <LeaderboardSort
-                    sort={sort}
-                    setSort={setSort}
-                    s={LeaderboardCardsCollectedSort.memes_cards_sets}
-                  />
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  TDH&nbsp;
-                  <LeaderboardSort
-                    sort={sort}
-                    setSort={setSort}
-                    s={LeaderboardCardsCollectedSort.boosted_tdh}
-                  />
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Daily Change&nbsp; &nbsp;
-                  <LeaderboardSort
-                    sort={sort}
-                    setSort={setSort}
-                    s={LeaderboardCardsCollectedSort.day_change}
-                  />
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  vs Community&nbsp; &nbsp;
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaderboard &&
-              leaderboard.map((lead: LeaderboardMetrics, index) => {
-                return (
-                  <tr key={lead.consolidation_key}>
-                    <td className={styles.rank}>
-                      {/* {lead.tdh_rank} */}
-                      {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                    </td>
-                    <td className="tw-max-w-[20px] tw-truncate">
-                      <LeaderboardCollector
-                        handle={lead.handle}
-                        consolidationKey={lead.consolidation_key}
-                        consolidationDisplay={lead.consolidation_display}
-                        pfp={lead.pfp_url}
-                        cicType={lead.cic_type}
-                        level={lead.level}
-                      />
-                    </td>
-
-                    <td className={styles.tdhSub}>{lead.level}</td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.balance)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {lead.unique_memes
-                        ? numberWithCommas(lead.unique_memes)
-                        : 0}{" "}
-                      / {numberWithCommas(lead.unique_memes_total)} (
-                      {Math.round(
-                        (lead.unique_memes / lead.unique_memes_total) * 100
-                      )}
-                      %)
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.memes_cards_sets)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(Math.round(lead.boosted_tdh))}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {!lead.day_change ? (
-                        "-"
-                      ) : (
-                        <>
-                          {lead.day_change > 0 ? `+` : ``}
-                          {numberWithCommas(lead.day_change)}
-                          {lead.day_change != 0 && (
-                            <span className={styles.tdhBoost}>
-                              {getTDHChange(lead)}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {!lead.day_change
-                        ? "-"
-                        : `${calculateTdhVsCommunity(lead)}`}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
-      </Row>
-      {totalResults > 0 && leaderboard && myFetchUrl && (
+    <>
+      <Container>
         <Row>
-          <Col
-            xs={12}
-            sm={12}
-            md={6}
-            className="pt-4 pb-3 d-flex justify-content-center gap-4">
-            <DownloadUrlWidget
-              preview="Page"
-              name={getLeaderboardDownloadFileName(
-                "community-cards-collected",
-                props.block ?? 0,
-                page
-              )}
-              url={`${myFetchUrl}&download_page=true`}
-            />
-            <DownloadUrlWidget
-              preview="All Pages"
-              name={getLeaderboardDownloadFileName(
-                "community-cards-collected",
-                props.block ?? 0,
-                0
-              )}
-              url={`${myFetchUrl}&download_all=true`}
-            />
-          </Col>
-          {totalResults > PAGE_SIZE && (
-            <Col
-              xs={12}
-              sm={12}
-              md={6}
-              className="pt-4 pb-3 d-flex justify-content-center">
-              <Pagination
-                page={page}
-                pageSize={PAGE_SIZE}
-                totalResults={totalResults}
-                setPage={function (newPage: number) {
-                  setPage(newPage);
-                }}
-              />
-            </Col>
-          )}
+          <Col></Col>
+          <Table bordered={false} className={styles.leaderboardTable}>
+            <thead>
+              <tr>
+                <th className={styles.rank}>Rank</th>
+                <th className={`${styles.hodlerContainer}`}>
+                  Collector&nbsp;&nbsp;
+                  <span className={styles.totalResults}>
+                    x{totalResults.toLocaleString()}
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Level&nbsp;
+                    <LeaderboardSort
+                      sort={sort}
+                      setSort={setSort}
+                      s={LeaderboardCardsCollectedSort.level}
+                    />
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Cards Collected&nbsp;
+                    <LeaderboardSort
+                      sort={sort}
+                      setSort={setSort}
+                      s={LeaderboardCardsCollectedSort.balance}
+                    />
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Unique Memes&nbsp;
+                    <LeaderboardSort
+                      sort={sort}
+                      setSort={setSort}
+                      s={LeaderboardCardsCollectedSort.unique_memes}
+                    />
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Sets&nbsp;
+                    <LeaderboardSort
+                      sort={sort}
+                      setSort={setSort}
+                      s={LeaderboardCardsCollectedSort.memes_cards_sets}
+                    />
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    TDH&nbsp;
+                    <LeaderboardSort
+                      sort={sort}
+                      setSort={setSort}
+                      s={LeaderboardCardsCollectedSort.boosted_tdh}
+                    />
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Daily Change&nbsp; &nbsp;
+                    <LeaderboardSort
+                      sort={sort}
+                      setSort={setSort}
+                      s={LeaderboardCardsCollectedSort.day_change}
+                    />
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    vs Community&nbsp; &nbsp;
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard &&
+                leaderboard.map((lead: LeaderboardMetrics, index) => {
+                  return (
+                    <tr key={lead.consolidation_key}>
+                      <td className={styles.rank}>
+                        {/* {lead.tdh_rank} */}
+                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                      </td>
+                      <td className="tw-max-w-[20px] tw-truncate">
+                        <LeaderboardCollector
+                          handle={lead.handle}
+                          consolidationKey={lead.consolidation_key}
+                          consolidationDisplay={lead.consolidation_display}
+                          pfp={lead.pfp_url}
+                          cicType={lead.cic_type}
+                          level={lead.level}
+                        />
+                      </td>
+
+                      <td className={styles.tdhSub}>{lead.level}</td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.balance)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {lead.unique_memes
+                          ? numberWithCommas(lead.unique_memes)
+                          : 0}{" "}
+                        / {numberWithCommas(lead.unique_memes_total)} (
+                        {Math.round(
+                          (lead.unique_memes / lead.unique_memes_total) * 100
+                        )}
+                        %)
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.memes_cards_sets)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(Math.round(lead.boosted_tdh))}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {!lead.day_change ? (
+                          "-"
+                        ) : (
+                          <>
+                            {lead.day_change > 0 ? `+` : ``}
+                            {numberWithCommas(lead.day_change)}
+                            {lead.day_change != 0 && (
+                              <span className={styles.tdhBoost}>
+                                {getTDHChange(lead)}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {!lead.day_change
+                          ? "-"
+                          : `${calculateTdhVsCommunity(lead)}`}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </Table>
         </Row>
-      )}
-    </Container>
+      </Container>
+      <LeaderboardFooter
+        url={myFetchUrl}
+        totalResults={totalResults}
+        page={page}
+        pageSize={PAGE_SIZE}
+        setPage={setPage}
+        block={props.block}
+      />
+    </>
   );
 }
