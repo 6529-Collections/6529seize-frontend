@@ -1,19 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDropLexicalExample from "../../drops/drop/lexical/CreateDropLexicalExample";
-import {
-  DropApiRequest,
-  MentionedUser,
-  ReferencedNft,
-} from "../../../entities/IDrop";
+import { MentionedUser, ReferencedNft } from "../../../entities/IDrop";
 import CommonInput from "../../utils/input/CommonInput";
 import { useMutation } from "wagmi";
-import {
-  commonApiPost,
-  commonApiPostForm,
-} from "../../../services/api/common-api";
+import { commonApiPostForm } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
-import UserSettingsImgSelectFile from "../settings/UserSettingsImgSelectFile";
+import CreateDropFileUpload from "../../drops/create/CreateDropFileUpload";
 
 export default function UserPageDrops({
   profile,
@@ -122,7 +115,7 @@ export default function UserPageDrops({
         onReferencedNfts={setReferencedNfts}
         onMentionedUsers={setMentionedUsers}
       />
-      <UserSettingsImgSelectFile imageToShow={imageToShow} setFile={onFile} />
+      <CreateDropFileUpload imageToShow={imageToShow} setFile={onFile} />
       <button onClick={onDrop} disabled={mutating}>
         DROP
       </button>
