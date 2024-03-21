@@ -106,6 +106,7 @@ import { ReactElement, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
+import "../components/drops/drop/lexical/lexical.styles.scss";
 
 library.add(
   faArrowUp,
