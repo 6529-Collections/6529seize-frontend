@@ -8,6 +8,10 @@ import {
 } from "../../../entities/IAggregatedActivity";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
+import {
+  UserPageStatsTableHead,
+  UserPageStatsTableHr,
+} from "./UserPageStatsTableShared";
 
 function printEthValue(value: number | undefined) {
   if (value === undefined) {
@@ -93,24 +97,9 @@ export function UserPageStatsActivityOverviewTotals({
             <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
               <Col>
                 <Table className={styles.collectedAccordionTable}>
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th className="text-right">Total</th>
-                      <th className="text-right">Memes</th>
-                      <th className="text-right">NextGen</th>
-                      <th className="text-right">Gradient</th>
-                      <th className="text-right">Meme Lab</th>
-                    </tr>
-                  </thead>
+                  <UserPageStatsTableHead />
                   <tbody>
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className={styles.collectedAccordionTableHr}>
-                        <hr className="mb-1 mt-1" />
-                      </td>
-                    </tr>
+                    <UserPageStatsTableHr span={6} />
                     <tr>
                       <td>
                         <b>Transfers In</b>
@@ -241,13 +230,7 @@ export function UserPageStatsActivityOverviewTotals({
                         )}
                       </td>
                     </tr>
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className={styles.collectedAccordionTableHr}>
-                        <hr className="mb-1 mt-1" />
-                      </td>
-                    </tr>
+                    <UserPageStatsTableHr span={6} />
                     <tr>
                       <td>
                         <b>Transfers Out</b>
@@ -373,13 +356,7 @@ export function UserPageStatsActivityOverviewMemes({
                     <tbody>
                       {activity.map((activity) => (
                         <>
-                          <tr>
-                            <td
-                              colSpan={10}
-                              className={styles.collectedAccordionTableHr}>
-                              <hr className="mb-1 mt-1" />
-                            </td>
-                          </tr>
+                          <UserPageStatsTableHr span={10} />
                           <tr>
                             <td>Season {activity.season}</td>
                             <td className={styles.collectedAccordionTableValue}>

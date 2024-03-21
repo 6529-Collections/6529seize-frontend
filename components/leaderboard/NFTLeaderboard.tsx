@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
-import { fetchUrl } from "../../services/6529api";
 import { CICType } from "../../entities/IProfile";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import {

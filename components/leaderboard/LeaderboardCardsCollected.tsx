@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { cicToType, numberWithCommas } from "../../helpers/Helpers";
+import { numberWithCommas } from "../../helpers/Helpers";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { commonApiFetch } from "../../services/api/common-api";
-import { CICType } from "../../entities/IProfile";
 import { MemeSeason } from "../../entities/ISeason";
 import { Collector, Content } from "./Leaderboard";
-import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
-import Pagination from "../pagination/Pagination";
+import LeaderboardSort from "./LeaderboardSort";
+import {
+  LeaderboardCardsCollectedSort,
+  LeaderboardMetrics,
+  useFetchLeaderboard,
+} from "./leaderboard_helpers";
+import LeaderboardFooter from "./LeaderboardDownload";
 
 const PAGE_SIZE = 50;
 
@@ -22,120 +24,38 @@ interface Props {
   searchWallets: string[];
   globalTdhRateChange?: number;
   seasons: MemeSeason[];
+  isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
 }
 
-enum Sort {
-  level = "level",
-  balance = "balance",
-  unique_memes = "unique_memes",
-  memes_cards_sets = "memes_cards_sets",
-  boosted_tdh = "boosted_tdh",
-  day_change = "day_change",
-}
-
-export interface LeaderboardMetrics {
-  handle: string;
-  consolidation_key: string;
-  consolidation_display: string;
-  pfp_url: string;
-  balance: number;
-  unique_memes: number;
-  unique_memes_total: number;
-  memes_cards_sets: number;
-  rep_score: number;
-  cic_score: number;
-  primary_wallet: string;
-  boosted_tdh: number;
-  day_change: number;
-  level: number;
-  cic_type?: CICType;
-}
-
-export default function LeaderboardCardsCollected(props: Readonly<Props>) {
+export default function LeaderboardCardsCollectedComponent(
+  props: Readonly<Props>
+) {
   const [page, setPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardMetrics[]>();
   const [sort, setSort] = useState<{
-    sort: Sort;
+    sort: LeaderboardCardsCollectedSort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.level, sort_direction: SortDirection.DESC });
+  }>({
+    sort: LeaderboardCardsCollectedSort.level,
+    sort_direction: SortDirection.DESC,
+  });
 
-  const [myFetchUrl, setMyFetchUrl] = useState<string>("");
-
-  function getFileName(page?: number) {
-    const tdhBlockSuffix = props.block ? `-${props.block}` : "";
-    const csvFileName = `community-cards-collected${tdhBlockSuffix}`;
-    if (page) {
-      return `${csvFileName}-page${page}.csv`;
-    }
-    return `${csvFileName}.csv`;
-  }
-
-  async function fetchResults() {
-    setMyFetchUrl("");
-    props.setIsLoading(true);
-    let walletFilter = "";
-    if (props.searchWallets && props.searchWallets.length > 0) {
-      walletFilter = `&search=${props.searchWallets.join(",")}`;
-    }
-    let mysort = sort.sort;
-
-    let contentFilter = "";
-    if (props.content !== Content.ALL) {
-      contentFilter = `&content=${props.content.toLowerCase()}`;
-    }
-
-    let collectorFilter = "";
-    if (props.collector !== Collector.ALL) {
-      collectorFilter = `&collector=${props.collector.toLowerCase()}`;
-    }
-
-    let seasonFilter = "";
-    if (props.selectedSeason > 0) {
-      seasonFilter = `&season=${props.selectedSeason}`;
-    }
-
-    const url = `tdh/consolidated_metrics?page_size=${PAGE_SIZE}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: LeaderboardMetrics[];
-    }>({
-      endpoint: url,
-    }).then((response) => {
-      setTotalResults(response.count);
-      response.data.forEach((lead: LeaderboardMetrics) => {
-        lead.cic_type = cicToType(lead.cic_score);
-      });
-      setLeaderboard(response.data);
-      props.setIsLoading(false);
-      setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${url}`);
-    });
-  }
-
-  useEffect(() => {
-    if (page === 1) {
-      fetchResults();
-    } else {
-      setPage(1);
-    }
-  }, [
+  const { myFetchUrl, totalResults, leaderboard } = useFetchLeaderboard(
+    "tdh/consolidated_metrics",
+    page,
     sort,
-    props.content,
-    props.selectedSeason,
-    props.searchWallets,
-    props.collector,
-  ]);
-
-  useEffect(() => {
-    fetchResults();
-    var top = document.getElementById(`leaderboard-page`)?.offsetTop;
-    if (top && window.scrollY > 0) {
-      window.scrollTo(0, 0);
-    }
-  }, [page]);
+    {
+      searchWallets: props.searchWallets,
+      content: props.content,
+      collector: props.collector,
+      selectedSeason: props.selectedSeason,
+    },
+    props.setIsLoading
+  ) as {
+    myFetchUrl: string;
+    totalResults: number;
+    leaderboard: LeaderboardMetrics[];
+  };
 
   function getTDHChange(lead: LeaderboardMetrics) {
     if (!lead.boosted_tdh) {
@@ -158,7 +78,7 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
     return <></>;
   }
 
-  if (leaderboard.length === 0) {
+  if (leaderboard.length === 0 && !props.isLoading) {
     return (
       <Container>
         <Row>
@@ -169,348 +89,163 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row>
-        <Col></Col>
-        <Table bordered={false} className={styles.leaderboardTable}>
-          <thead>
-            <tr>
-              <th className={styles.rank}>Rank</th>
-              <th className={`${styles.hodlerContainer}`}>
-                Collector&nbsp;&nbsp;
-                <span className={styles.totalResults}>
-                  x{totalResults.toLocaleString()}
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Level&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.level,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.level
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.level,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.level
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Cards Collected&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.balance,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.balance
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.balance,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.balance
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Unique Memes&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.unique_memes,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.unique_memes
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.unique_memes,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.unique_memes
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Sets&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.memes_cards_sets,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.memes_cards_sets
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.memes_cards_sets,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.memes_cards_sets
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  TDH&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.boosted_tdh,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.boosted_tdh
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.boosted_tdh,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.boosted_tdh
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  Daily Change&nbsp; &nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.day_change,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.day_change
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.day_change,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.day_change
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
-                </span>
-              </th>
-              <th className={styles.tdhSub}>
-                <span className="d-flex align-items-center justify-content-center">
-                  vs Community&nbsp; &nbsp;
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaderboard &&
-              leaderboard.map((lead: LeaderboardMetrics, index) => {
-                return (
-                  <tr key={lead.consolidation_key}>
-                    <td className={styles.rank}>
-                      {/* {lead.tdh_rank} */}
-                      {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                    </td>
-                    <td className="tw-max-w-[20px] tw-truncate">
-                      <LeaderboardCollector
-                        handle={lead.handle}
-                        consolidationKey={lead.consolidation_key}
-                        consolidationDisplay={lead.consolidation_display}
-                        pfp={lead.pfp_url}
-                        cicType={lead.cic_type}
-                        level={lead.level}
-                      />
-                    </td>
-
-                    <td className={styles.tdhSub}>{lead.level}</td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.balance)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.unique_memes)} /{" "}
-                      {numberWithCommas(lead.unique_memes_total)} (
-                      {Math.round(
-                        (lead.unique_memes / lead.unique_memes_total) * 100
-                      )}
-                      %)
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.memes_cards_sets)}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {numberWithCommas(Math.round(lead.boosted_tdh))}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {!lead.day_change ? (
-                        "-"
-                      ) : (
-                        <>
-                          {lead.day_change > 0 ? `+` : ``}
-                          {numberWithCommas(lead.day_change)}
-                          {lead.day_change != 0 && (
-                            <span className={styles.tdhBoost}>
-                              {getTDHChange(lead)}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </td>
-                    <td className={styles.tdhSub}>
-                      {!lead.day_change
-                        ? "-"
-                        : `${calculateTdhVsCommunity(lead)}`}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
-      </Row>
-      {totalResults > 0 && leaderboard && myFetchUrl && (
+    <>
+      <Container>
         <Row>
-          <Col
-            xs={12}
-            sm={12}
-            md={6}
-            className="pt-4 pb-3 d-flex justify-content-center gap-4">
-            <DownloadUrlWidget
-              preview="Page"
-              name={getFileName(page)}
-              url={`${myFetchUrl}&download_page=true`}
-            />
-            <DownloadUrlWidget
-              preview="All Pages"
-              name={getFileName()}
-              url={`${myFetchUrl}&download_all=true`}
-            />
+          <Col>
+            <Table bordered={false} className={styles.leaderboardTable}>
+              <thead>
+                <tr>
+                  <th className={styles.rank}>Rank</th>
+                  <th className={`${styles.hodlerContainer}`}>
+                    <span>Collector</span>
+                    <span className={styles.totalResults}>
+                      {props.isLoading
+                        ? "..."
+                        : `x${totalResults.toLocaleString()}`}
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Level&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.level}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Cards Collected&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.balance}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Unique Memes&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.unique_memes}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Sets&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.memes_cards_sets}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      TDH&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.boosted_tdh}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Daily Change&nbsp; &nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.day_change}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      vs Community&nbsp; &nbsp;
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard.map((lead: LeaderboardMetrics, index) => {
+                  return (
+                    <tr key={lead.consolidation_key}>
+                      <td className={styles.rank}>
+                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                      </td>
+                      <td className="tw-max-w-[20px] tw-truncate">
+                        <LeaderboardCollector
+                          handle={lead.handle}
+                          consolidationKey={lead.consolidation_key}
+                          consolidationDisplay={lead.consolidation_display}
+                          pfp={lead.pfp_url}
+                          cicType={lead.cic_type}
+                          level={lead.level}
+                        />
+                      </td>
+
+                      <td className={styles.tdhSub}>{lead.level}</td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.balance)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {lead.unique_memes
+                          ? numberWithCommas(lead.unique_memes)
+                          : 0}{" "}
+                        / {numberWithCommas(lead.unique_memes_total)} (
+                        {Math.round(
+                          (lead.unique_memes / lead.unique_memes_total) * 100
+                        )}
+                        %)
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.memes_cards_sets)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(Math.round(lead.boosted_tdh))}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {!lead.day_change ? (
+                          "-"
+                        ) : (
+                          <>
+                            {lead.day_change > 0 ? `+` : ``}
+                            {numberWithCommas(lead.day_change)}
+                            {lead.day_change != 0 && (
+                              <span className={styles.tdhBoost}>
+                                {getTDHChange(lead)}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {!lead.day_change
+                          ? "-"
+                          : `${calculateTdhVsCommunity(lead)}`}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
           </Col>
-          {totalResults > PAGE_SIZE && (
-            <Col
-              xs={12}
-              sm={12}
-              md={6}
-              className="pt-4 pb-3 d-flex justify-content-center">
-              <Pagination
-                page={page}
-                pageSize={PAGE_SIZE}
-                totalResults={totalResults}
-                setPage={function (newPage: number) {
-                  setPage(newPage);
-                }}
-              />
-            </Col>
-          )}
         </Row>
-      )}
-    </Container>
+      </Container>
+      <LeaderboardFooter
+        url={myFetchUrl}
+        totalResults={totalResults}
+        page={page}
+        pageSize={PAGE_SIZE}
+        setPage={setPage}
+        block={props.block}
+      />
+    </>
   );
 }
