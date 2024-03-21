@@ -4,7 +4,7 @@ import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
   REP = "REP",
-
+  DROPS = "DROPS",
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
   STATS = "STATS",
@@ -19,6 +19,11 @@ export const USER_PAGE_TAB_META: Record<
     tab: UserPageTabType.REP,
     title: "Rep",
     route: "",
+  },
+  [UserPageTabType.DROPS]: {
+    tab: UserPageTabType.DROPS,
+    title: "Drops",
+    route: "drops",
   },
   [UserPageTabType.IDENTITY]: {
     tab: UserPageTabType.IDENTITY,
