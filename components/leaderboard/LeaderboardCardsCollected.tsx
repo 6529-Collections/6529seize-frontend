@@ -6,17 +6,15 @@ import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { CICType } from "../../entities/IProfile";
 import { MemeSeason } from "../../entities/ISeason";
-import {
-  Collector,
-  Content,
-  fetchLeaderboardData,
-  getLeaderboardDownloadFileName,
-} from "./Leaderboard";
+import { Collector, Content } from "./Leaderboard";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Pagination from "../pagination/Pagination";
-import LeaderboardSort, {
+import LeaderboardSort from "./LeaderboardSort";
+import {
   LeaderboardCardsCollectedSort,
-} from "./LeaderboardSort";
+  fetchLeaderboardData,
+  getLeaderboardDownloadFileName,
+} from "./leaderboard_helpers";
 
 const PAGE_SIZE = 50;
 
