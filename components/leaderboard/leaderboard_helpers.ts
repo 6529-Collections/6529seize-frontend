@@ -177,7 +177,14 @@ export function useFetchLeaderboard(
     setLeaderboard(data.data);
     setIsLoading(false);
     setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
-  }, [sort, query]);
+  }, [
+    sort.sort,
+    sort.sort_direction,
+    query.searchWallets,
+    query.content,
+    query.collector,
+    query.selectedSeason,
+  ]);
 
   useEffect(() => {
     fetchResults();
