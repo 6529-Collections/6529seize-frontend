@@ -20,11 +20,21 @@
 }
 
 .editor-paragraph {
-  margin: 0;
+  margin-right: 0;
   margin-bottom: 8px;
   position: relative;
 }
 
 .editor-paragraph:last-child {
   margin-bottom: 0;
+}
+
+.editor-input-one-liner {
+  white-space: pre !important;
+  overflow-x: auto;
+}
+
+.editor-input-multi-liner {
+  overflow-y: auto;
+  height: 200px;
 }
