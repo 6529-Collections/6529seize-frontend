@@ -1,165 +1,431 @@
-// import { useEffect, useState } from "react";
-// import { UserPageStatsTDHType } from "./UserPageStats";
-// import UserPageStatsTable, {
-//   UserPageStatsTableItemData,
-//   UserPageStatsTableProps,
-// } from "./utils/table/UserPageStatsTable";
-// import { formatNumberWithCommasOrDash } from "../../../helpers/Helpers";
+import styles from "./UserPageStats.module.scss";
+import { numberWithCommas } from "../../../helpers/Helpers";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { Accordion, Container, Row, Col, Table } from "react-bootstrap";
+import {
+  AggregatedActivity,
+  AggregatedActivityMemes,
+} from "../../../entities/IAggregatedActivity";
+import { useEffect, useState } from "react";
+import { commonApiFetch } from "../../../services/api/common-api";
 
-// export default function UserPageStatsActivityOverview({
-//   tdh,
-// }: {
-//   readonly tdh: UserPageStatsTDHType;
-// }) {
-//   const getTransfersIn = (
-//     props: UserPageStatsTDHType
-//   ): UserPageStatsTableItemData[] => {
-//     if (!props) return [];
-//     return [
-//       {
-//         title: "Transfers In",
-//         isMain: true,
-//         isLast: false,
-//         tooltip: "Airdrops included",
-//         total: formatNumberWithCommasOrDash(props.transfers_in),
-//         memes: formatNumberWithCommasOrDash(props.transfers_in_memes),
-//         gradient: formatNumberWithCommasOrDash(props.transfers_in_gradients),
-//         SZN1: formatNumberWithCommasOrDash(props.transfers_in_memes_season1),
-//         SZN2: formatNumberWithCommasOrDash(props.transfers_in_memes_season2),
-//         SZN3: formatNumberWithCommasOrDash(props.transfers_in_memes_season3),
-//         SZN4: formatNumberWithCommasOrDash(props.transfers_in_memes_season4),
-//         SZN5: formatNumberWithCommasOrDash(props.transfers_in_memes_season5),
-//         SZN6: formatNumberWithCommasOrDash(props.transfers_in_memes_season6),
-//       },
-//       {
-//         title: "Purchases",
-//         isMain: false,
-//         isLast: false,
-//         tooltip: null,
-//         total: formatNumberWithCommasOrDash(props.purchases_count),
-//         memes: formatNumberWithCommasOrDash(props.purchases_count_memes),
-//         gradient: formatNumberWithCommasOrDash(props.purchases_count_gradients),
-//         SZN1: formatNumberWithCommasOrDash(props.purchases_count_memes_season1),
-//         SZN2: formatNumberWithCommasOrDash(props.purchases_count_memes_season2),
-//         SZN3: formatNumberWithCommasOrDash(props.purchases_count_memes_season3),
-//         SZN4: formatNumberWithCommasOrDash(props.purchases_count_memes_season4),
-//         SZN5: formatNumberWithCommasOrDash(props.purchases_count_memes_season5),
-//         SZN6: formatNumberWithCommasOrDash(props.purchases_count_memes_season6),
-//       },
-//       {
-//         title: "Purchases (ETH)",
-//         isMain: false,
-//         isLast: true,
-//         tooltip: null,
-//         total: formatNumberWithCommasOrDash(+props.purchases_value?.toFixed(2)),
-//         memes: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes?.toFixed(2)
-//         ),
-//         gradient: formatNumberWithCommasOrDash(
-//           +props?.purchases_value_gradients?.toFixed(2)
-//         ),
-//         SZN1: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes_season1?.toFixed(2)
-//         ),
-//         SZN2: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes_season2?.toFixed(2)
-//         ),
-//         SZN3: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes_season3?.toFixed(2)
-//         ),
-//         SZN4: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes_season4?.toFixed(2)
-//         ),
-//         SZN5: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes_season5?.toFixed(2)
-//         ),
-//         SZN6: formatNumberWithCommasOrDash(
-//           +props.purchases_value_memes_season6?.toFixed(2)
-//         ),
-//       },
-//     ];
-//   };
+function printEthValue(value: number | undefined) {
+  if (value === undefined) {
+    return "-";
+  }
+  return numberWithCommas(Math.round(value * 100) / 100);
+}
 
-//   const getTransfersOut = (
-//     props: UserPageStatsTDHType
-//   ): UserPageStatsTableItemData[] => {
-//     if (!props) return [];
-//     return [
-//       {
-//         title: "Transfers Out",
-//         isMain: true,
-//         isLast: false,
-//         tooltip: null,
-//         total: formatNumberWithCommasOrDash(props.transfers_out),
-//         memes: formatNumberWithCommasOrDash(props.transfers_out_memes),
-//         gradient: formatNumberWithCommasOrDash(props.transfers_out_gradients),
-//         SZN1: formatNumberWithCommasOrDash(props.transfers_out_memes_season1),
-//         SZN2: formatNumberWithCommasOrDash(props.transfers_out_memes_season2),
-//         SZN3: formatNumberWithCommasOrDash(props.transfers_out_memes_season3),
-//         SZN4: formatNumberWithCommasOrDash(props.transfers_out_memes_season4),
-//         SZN5: formatNumberWithCommasOrDash(props.transfers_out_memes_season5),
-//         SZN6: formatNumberWithCommasOrDash(props.transfers_out_memes_season6),
-//       },
-//       {
-//         title: "Sales",
-//         isMain: false,
-//         isLast: false,
-//         tooltip: null,
-//         total: formatNumberWithCommasOrDash(props.sales_count),
-//         memes: formatNumberWithCommasOrDash(props.sales_count_memes),
-//         gradient: formatNumberWithCommasOrDash(props.sales_count_gradients),
-//         SZN1: formatNumberWithCommasOrDash(props.sales_count_memes_season1),
-//         SZN2: formatNumberWithCommasOrDash(props.sales_count_memes_season2),
-//         SZN3: formatNumberWithCommasOrDash(props.sales_count_memes_season3),
-//         SZN4: formatNumberWithCommasOrDash(props.sales_count_memes_season4),
-//         SZN5: formatNumberWithCommasOrDash(props.sales_count_memes_season5),
-//         SZN6: formatNumberWithCommasOrDash(props.sales_count_memes_season6),
-//       },
-//       {
-//         title: "Sales (ETH)",
-//         isMain: false,
-//         isLast: true,
-//         tooltip: null,
-//         total: formatNumberWithCommasOrDash(+props.sales_value?.toFixed(2)),
-//         memes: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes?.toFixed(2)
-//         ),
-//         gradient: formatNumberWithCommasOrDash(
-//           +props.sales_value_gradients?.toFixed(2)
-//         ),
-//         SZN1: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes_season1?.toFixed(2)
-//         ),
-//         SZN2: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes_season2?.toFixed(2)
-//         ),
-//         SZN3: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes_season3?.toFixed(2)
-//         ),
-//         SZN4: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes_season4?.toFixed(2)
-//         ),
-//         SZN5: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes_season5?.toFixed(2)
-//         ),
-//         SZN6: formatNumberWithCommasOrDash(
-//           +props.sales_value_memes_season6?.toFixed(2)
-//         ),
-//       },
-//     ];
-//   };
+export default function UserPageStatsActivityOverview({
+  profile,
+  activeAddress,
+}: {
+  readonly profile: IProfileAndConsolidations;
+  readonly activeAddress: string | null;
+}) {
+  const [activity, setActivity] = useState<AggregatedActivity | undefined>();
+  const [activityMemes, setActivityMemes] = useState<AggregatedActivityMemes[]>(
+    []
+  );
 
-//   const getData = (props: UserPageStatsTDHType): UserPageStatsTableProps => {
-//     if (!props) return { title: "Activity Overview", data: [] };
-//     return {
-//       title: "Activity Overview",
-//       data: [getTransfersIn(props), getTransfersOut(props)],
-//     };
-//   };
+  useEffect(() => {
+    let url;
+    if (activeAddress) {
+      url = `aggregated-activity/wallet/${activeAddress}`;
+    } else {
+      url = `aggregated-activity/consolidation/${profile.consolidation.consolidation_key}`;
+    }
+    commonApiFetch<AggregatedActivity>({
+      endpoint: url,
+    })
+      .then((response) => {
+        setActivity(response);
+      })
+      .catch((error) => {
+        setActivity(undefined);
+      });
+  }, [activeAddress]);
 
-//   const [data, setData] = useState<UserPageStatsTableProps>(getData(tdh));
+  useEffect(() => {
+    let url;
+    if (activeAddress) {
+      url = `aggregated-activity/wallet/${activeAddress}/memes`;
+    } else {
+      url = `aggregated-activity/consolidation/${profile.consolidation.consolidation_key}/memes`;
+    }
+    commonApiFetch<AggregatedActivityMemes[]>({
+      endpoint: url,
+    }).then((response) => {
+      setActivityMemes(response);
+    });
+  }, [activeAddress]);
 
-//   useEffect(() => setData(getData(tdh)), [tdh]);
+  return (
+    <div className="pt-2 pb-2">
+      <div className="tw-flex pt-2 pb-2">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+          Activity Overview
+        </h3>
+      </div>
+      <div className="pt-2 pb-2">
+        <UserPageStatsActivityOverviewTotals activity={activity} />
+      </div>
+      <div className="pt-2 pb-2">
+        <UserPageStatsActivityOverviewMemes activity={activityMemes} />
+      </div>
+    </div>
+  );
+}
 
-//   return <UserPageStatsTable data={data} />;
-// }
+export function UserPageStatsActivityOverviewTotals({
+  activity,
+}: {
+  readonly activity: AggregatedActivity | undefined;
+}) {
+  return (
+    <Accordion>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button className={styles.collectedAccordionButton}>
+          <b>Overview</b>
+        </Accordion.Button>
+        <Accordion.Body className={styles.collectedAccordionBody}>
+          <Container>
+            <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
+              <Col>
+                <Table className={styles.collectedAccordionTable}>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th className="text-right">Total</th>
+                      <th className="text-right">Memes</th>
+                      <th className="text-right">NextGen</th>
+                      <th className="text-right">Gradient</th>
+                      <th className="text-right">Meme Lab</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className={styles.collectedAccordionTableHr}>
+                        <hr className="mb-1 mt-1" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Transfers In</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_in)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_in_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_in_nextgen)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_in_gradients)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_in_memelab)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Mints</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.primary_purchases_count)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.primary_purchases_count_memes
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.primary_purchases_count_nextgen
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.primary_purchases_count_gradients
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.primary_purchases_count_memelab
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Mints (ETH)</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.primary_purchases_value)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.primary_purchases_value_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.primary_purchases_value_nextgen
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.primary_purchases_value_gradients
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.primary_purchases_value_memelab
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Purchases</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.secondary_purchases_count)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.secondary_purchases_count_memes
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.secondary_purchases_count_nextgen
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.secondary_purchases_count_gradients
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(
+                          activity?.secondary_purchases_count_memelab
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Purchases (ETH)</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.secondary_purchases_value)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.secondary_purchases_value_memes
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.secondary_purchases_value_nextgen
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.secondary_purchases_value_gradients
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(
+                          activity?.secondary_purchases_value_memelab
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className={styles.collectedAccordionTableHr}>
+                        <hr className="mb-1 mt-1" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Transfers Out</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_out)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_out_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_out_nextgen)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_out_gradients)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.transfers_out_memelab)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Burns</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.burns)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.burns_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.burns_nextgen)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.burns_gradients)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.burns_memelab)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Sales</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.sales_count)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.sales_count_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.sales_count_nextgen)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.sales_count_gradients)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.sales_count_memelab)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Sales (ETH)</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.sales_value)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.sales_value_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.sales_value_nextgen)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.sales_value_gradients)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {printEthValue(activity?.sales_value_memelab)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Container>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
+  );
+}
+
+export function UserPageStatsActivityOverviewMemes({
+  activity,
+}: {
+  readonly activity: AggregatedActivityMemes[];
+}) {
+  return (
+    <Accordion>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button className={styles.collectedAccordionButton}>
+          <b>Memes Breakdown By Season</b>
+        </Accordion.Button>
+        <Accordion.Body className={styles.collectedAccordionBody}>
+          <Container>
+            <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
+              <Col>
+                {activity && (
+                  <Table className={styles.collectedAccordionTable}>
+                    <thead>
+                      <tr>
+                        <th colSpan={1}></th>
+                        <th className="text-right">Transfers In</th>
+                        <th className="text-right">Mints</th>
+                        <th className="text-right">Mints (ETH)</th>
+                        <th className="text-right">Purchases</th>
+                        <th className="text-right">Purchases (ETH)</th>
+                        <th className="text-right">Transfers Out</th>
+                        <th className="text-right">Burns</th>
+                        <th className="text-right">Sales</th>
+                        <th className="text-right">Sales (ETH)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activity.map((activity) => (
+                        <>
+                          <tr>
+                            <td
+                              colSpan={10}
+                              className={styles.collectedAccordionTableHr}>
+                              <hr className="mb-1 mt-1" />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Season {activity.season}</td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(activity.transfers_in)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(
+                                activity.primary_purchases_count
+                              )}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {printEthValue(activity.primary_purchases_value)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(
+                                activity.secondary_purchases_count
+                              )}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {printEthValue(
+                                activity.secondary_purchases_value
+                              )}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(activity.transfers_out)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(activity.burns)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(activity.sales_count)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {printEthValue(activity.sales_value)}
+                            </td>
+                          </tr>
+                        </>
+                      ))}
+                    </tbody>
+                  </Table>
+                )}
+              </Col>
+            </Row>
+          </Container>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
+  );
+}

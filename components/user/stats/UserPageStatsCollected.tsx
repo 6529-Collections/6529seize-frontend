@@ -1,13 +1,10 @@
 import styles from "./UserPageStats.module.scss";
-import { useEffect, useState } from "react";
 import { Accordion, Container, Row, Col, Table } from "react-bootstrap";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { commonApiFetch } from "../../../services/api/common-api";
 import { OwnerBalance, OwnerBalanceMemes } from "../../../entities/IBalances";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import { MemeSeason } from "../../../entities/ISeason";
 
-function getRankDisplay(balance: number, rank: number) {
+function getRankDisplay(balance: number | undefined, rank: number | undefined) {
   if (!balance || !rank) {
     return "-";
   }
@@ -31,7 +28,7 @@ export default function UserPageStatsCollected({
         </h3>
       </div>
       <div className="pt-2 pb-2">
-        <UserPageStatsCollectedOverview ownerBalance={ownerBalance} />
+        <UserPageStatsCollectedTotals ownerBalance={ownerBalance} />
       </div>
       <div className="pt-2 pb-2">
         <UserPageStatsCollectedMemes
@@ -43,7 +40,7 @@ export default function UserPageStatsCollected({
   );
 }
 
-export function UserPageStatsCollectedOverview({
+export function UserPageStatsCollectedTotals({
   ownerBalance,
 }: {
   readonly ownerBalance: OwnerBalance | undefined;
@@ -56,149 +53,155 @@ export function UserPageStatsCollectedOverview({
         </Accordion.Button>
         <Accordion.Body className={styles.collectedAccordionBody}>
           <Container>
-            <Row className="pt-2 pb-2">
+            <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
               <Col>
-                {ownerBalance && (
-                  <Table className={styles.collectedAccordionTable}>
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th className="text-right">Total</th>
-                        <th className="text-right">Memes</th>
-                        <th className="text-right">NextGen</th>
-                        <th className="text-right">Gradient</th>
-                        <th className="text-right">Meme Lab</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className={styles.collectedAccordionTableHr}>
-                          <hr className="mb-1 mt-1" />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <b>Cards</b>
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(ownerBalance.total_balance)}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(ownerBalance.memes_balance)}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(ownerBalance.nextgen_balance)}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(ownerBalance.gradients_balance)}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(ownerBalance.memelab_balance)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <b>Rank</b>
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.total_balance,
-                            ownerBalance.total_balance_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.memes_balance,
-                            ownerBalance.memes_balance_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.nextgen_balance,
-                            ownerBalance.nextgen_balance_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.gradients_balance,
-                            ownerBalance.gradients_balance_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.memelab_balance,
-                            ownerBalance.memelab_balance_rank
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className={styles.collectedAccordionTableHr}>
-                          <hr className="mb-1 mt-1" />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <b>TDH</b>
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(
-                            Math.round(ownerBalance.boosted_tdh)
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(
-                            Math.round(ownerBalance.boosted_memes_tdh)
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(
-                            Math.round(ownerBalance.boosted_nextgen_tdh)
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {numberWithCommas(
-                            Math.round(ownerBalance.boosted_gradients_tdh)
-                          )}
-                        </td>
-                        <td className="text-right">*</td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <b>Rank</b>
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.boosted_tdh,
-                            ownerBalance.boosted_tdh_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.boosted_memes_tdh,
-                            ownerBalance.boosted_memes_tdh_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.boosted_nextgen_tdh,
-                            ownerBalance.boosted_nextgen_tdh_rank
-                          )}
-                        </td>
-                        <td className={styles.collectedAccordionTableValue}>
-                          {getRankDisplay(
-                            ownerBalance.boosted_gradients_tdh,
-                            ownerBalance.boosted_gradients_tdh_rank
-                          )}
-                        </td>
-                        <td className="text-right">* No TDH</td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                )}
+                <Table className={styles.collectedAccordionTable}>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th className="text-right">Total</th>
+                      <th className="text-right">Memes</th>
+                      <th className="text-right">NextGen</th>
+                      <th className="text-right">Gradient</th>
+                      <th className="text-right">Meme Lab</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className={styles.collectedAccordionTableHr}>
+                        <hr className="mb-1 mt-1" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Cards</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.total_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.memes_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.nextgen_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.gradients_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.memelab_balance)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Rank</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.total_balance,
+                          ownerBalance?.total_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.memes_balance,
+                          ownerBalance?.memes_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.nextgen_balance,
+                          ownerBalance?.nextgen_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.gradients_balance,
+                          ownerBalance?.gradients_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.memelab_balance,
+                          ownerBalance?.memelab_balance_rank
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className={styles.collectedAccordionTableHr}>
+                        <hr className="mb-1 mt-1" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>TDH</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance.boosted_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance?.boosted_memes_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance?.boosted_nextgen_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance?.boosted_gradients_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className="text-right">*</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Rank</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_tdh,
+                          ownerBalance?.boosted_tdh_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_memes_tdh,
+                          ownerBalance?.boosted_memes_tdh_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_nextgen_tdh,
+                          ownerBalance?.boosted_nextgen_tdh_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_gradients_tdh,
+                          ownerBalance?.boosted_gradients_tdh_rank
+                        )}
+                      </td>
+                      <td className="text-right">* No TDH</td>
+                    </tr>
+                  </tbody>
+                </Table>
               </Col>
             </Row>
           </Container>
@@ -240,7 +243,7 @@ export function UserPageStatsCollectedMemes({
     }
     return (
       <>
-        {numberWithCommas(balanceMemes.unique)} /{" "}
+        {balanceMemes.unique ? numberWithCommas(balanceMemes.unique) : `0`} /{" "}
         {numberWithCommas(seasonBalance.count)}{" "}
         <span className={styles.fadedColor}>
           ({((balanceMemes.unique / seasonBalance.count) * 100).toFixed(0)}%)
@@ -257,7 +260,7 @@ export function UserPageStatsCollectedMemes({
         </Accordion.Button>
         <Accordion.Body className={styles.collectedAccordionBody}>
           <Container>
-            <Row className="pt-2 pb-2">
+            <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
               <Col>
                 {balanceMemes && (
                   <Table className={styles.collectedAccordionTable}>

@@ -1,3 +1,13 @@
+.scrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
 .collectedAccordionButton {
   background-color: rgb(28, 28, 33) !important;
   border: 1px solid rgb(55, 55, 61) !important;
@@ -24,8 +34,8 @@
   td {
     color: rgb(147, 147, 159);
     border-bottom: 0px;
-    padding-top: 0.3rem;
-    padding-bottom: 0.3rem;
+    padding: 0.3rem 0.2rem;
+    white-space: nowrap;
   }
 }
 
