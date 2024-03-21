@@ -42,10 +42,12 @@ export default function LeaderboardInteractionsComponent(
     "aggregated-activity",
     page,
     sort,
-    props.searchWallets,
-    props.content,
-    props.collector,
-    props.selectedSeason,
+    {
+      searchWallets: props.searchWallets,
+      content: props.content,
+      collector: props.collector,
+      selectedSeason: props.selectedSeason,
+    },
     props.setIsLoading
   ) as {
     myFetchUrl: string;
@@ -107,7 +109,7 @@ export default function LeaderboardInteractionsComponent(
                 <tr>
                   <th className={styles.rank}>Rank</th>
                   <th className={`${styles.hodlerContainer}`}>
-                    Collector
+                    <span>Collector</span>
                     <span className={styles.totalResults}>
                       {props.isLoading
                         ? "..."

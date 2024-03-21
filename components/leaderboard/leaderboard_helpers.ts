@@ -94,35 +94,37 @@ export async function fetchLeaderboardData(
   endpoint: string,
   pageSize: number,
   page: number,
-  searchWallets: string[],
   sort: {
     sort: string;
     sort_direction: SortDirection;
   },
-  content: Content,
-  collector: Collector,
-  selectedSeason: number
+  query: {
+    searchWallets: string[];
+    content: Content;
+    collector: Collector;
+    selectedSeason: number;
+  }
 ): Promise<{
   count: number;
   data: LeaderboardItem[];
   url: string;
 }> {
   let walletFilter = "";
-  if (searchWallets && searchWallets.length > 0) {
-    walletFilter = `&search=${searchWallets.join(",")}`;
+  if (query.searchWallets && query.searchWallets.length > 0) {
+    walletFilter = `&search=${query.searchWallets.join(",")}`;
   }
   let mysort = sort.sort;
   let contentFilter = "";
-  if (content !== Content.ALL) {
-    contentFilter = `&content=${content.toLowerCase()}`;
+  if (query.content !== Content.ALL) {
+    contentFilter = `&content=${query.content.toLowerCase()}`;
   }
   let collectorFilter = "";
-  if (collector !== Collector.ALL) {
-    collectorFilter = `&collector=${collector.toLowerCase()}`;
+  if (query.collector !== Collector.ALL) {
+    collectorFilter = `&collector=${query.collector.toLowerCase()}`;
   }
   let seasonFilter = "";
-  if (selectedSeason > 0) {
-    seasonFilter = `&season=${selectedSeason}`;
+  if (query.selectedSeason > 0) {
+    seasonFilter = `&season=${query.selectedSeason}`;
   }
   const url = `${endpoint}?page_size=${pageSize}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
   const response = await commonApiFetch<{
@@ -150,10 +152,12 @@ export function useFetchLeaderboard(
     sort: string;
     sort_direction: SortDirection;
   },
-  searchWallets: string[],
-  content: Content,
-  collector: Collector,
-  selectedSeason: number,
+  query: {
+    searchWallets: string[];
+    content: Content;
+    collector: Collector;
+    selectedSeason: number;
+  },
   setIsLoading: (isLoading: boolean) => void
 ) {
   const [myFetchUrl, setMyFetchUrl] = useState("");
@@ -166,17 +170,14 @@ export function useFetchLeaderboard(
       endpoint,
       LEADERBOARD_PAGE_SIZE,
       page,
-      searchWallets,
       sort,
-      content,
-      collector,
-      selectedSeason
+      query
     );
     setTotalResults(data.count);
     setLeaderboard(data.data);
     setIsLoading(false);
     setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
-  }, [sort, searchWallets, content, collector, selectedSeason]);
+  }, [sort, query]);
 
   useEffect(() => {
     fetchResults();
