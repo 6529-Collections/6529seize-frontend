@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { numberWithCommas } from "../../helpers/Helpers";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
@@ -15,6 +14,9 @@ import {
 } from "./Leaderboard";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Pagination from "../pagination/Pagination";
+import LeaderboardSort, {
+  LeaderboardCardsCollectedSort,
+} from "./LeaderboardSort";
 
 const PAGE_SIZE = 50;
 
@@ -27,15 +29,6 @@ interface Props {
   globalTdhRateChange?: number;
   seasons: MemeSeason[];
   setIsLoading: (isLoading: boolean) => void;
-}
-
-enum Sort {
-  level = "level",
-  balance = "balance",
-  unique_memes = "unique_memes",
-  memes_cards_sets = "memes_cards_sets",
-  boosted_tdh = "boosted_tdh",
-  day_change = "day_change",
 }
 
 export interface LeaderboardMetrics {
@@ -61,19 +54,26 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardMetrics[]>();
   const [sort, setSort] = useState<{
-    sort: Sort;
+    sort: LeaderboardCardsCollectedSort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.level, sort_direction: SortDirection.DESC });
+  }>({
+    sort: LeaderboardCardsCollectedSort.level,
+    sort_direction: SortDirection.DESC,
+  });
 
   const [myFetchUrl, setMyFetchUrl] = useState<string>("");
 
   async function fetchResults() {
     setMyFetchUrl("");
     props.setIsLoading(true);
-    const data = await fetchLeaderboardData(
+    const data: {
+      count: number;
+      data: LeaderboardMetrics[];
+      url: string;
+    } = await fetchLeaderboardData(
       "tdh/consolidated_metrics",
-      page,
       PAGE_SIZE,
+      page,
       props.searchWallets,
       sort,
       props.content,
@@ -156,223 +156,61 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Level&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.level,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.level
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.level,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.level
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
+                  <LeaderboardSort
+                    sort={sort}
+                    setSort={setSort}
+                    s={LeaderboardCardsCollectedSort.level}
+                  />
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Cards Collected&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.balance,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.balance
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.balance,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.balance
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
+                  <LeaderboardSort
+                    sort={sort}
+                    setSort={setSort}
+                    s={LeaderboardCardsCollectedSort.balance}
+                  />
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Unique Memes&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.unique_memes,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.unique_memes
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.unique_memes,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.unique_memes
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
+                  <LeaderboardSort
+                    sort={sort}
+                    setSort={setSort}
+                    s={LeaderboardCardsCollectedSort.unique_memes}
+                  />
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Sets&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.memes_cards_sets,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.memes_cards_sets
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.memes_cards_sets,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.memes_cards_sets
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
+                  <LeaderboardSort
+                    sort={sort}
+                    setSort={setSort}
+                    s={LeaderboardCardsCollectedSort.memes_cards_sets}
+                  />
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   TDH&nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.boosted_tdh,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.boosted_tdh
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.boosted_tdh,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.boosted_tdh
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
+                  <LeaderboardSort
+                    sort={sort}
+                    setSort={setSort}
+                    s={LeaderboardCardsCollectedSort.boosted_tdh}
+                  />
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Daily Change&nbsp; &nbsp;
-                  <span className="d-flex flex-column">
-                    <FontAwesomeIcon
-                      icon="square-caret-up"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.day_change,
-                          sort_direction: SortDirection.ASC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.ASC ||
-                        sort.sort != Sort.day_change
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                    <FontAwesomeIcon
-                      icon="square-caret-down"
-                      onClick={() =>
-                        setSort({
-                          sort: Sort.day_change,
-                          sort_direction: SortDirection.DESC,
-                        })
-                      }
-                      className={`${styles.caret} ${
-                        sort.sort_direction != SortDirection.DESC ||
-                        sort.sort != Sort.day_change
-                          ? styles.disabled
-                          : ""
-                      }`}
-                    />
-                  </span>
+                  <LeaderboardSort
+                    sort={sort}
+                    setSort={setSort}
+                    s={LeaderboardCardsCollectedSort.day_change}
+                  />
                 </span>
               </th>
               <th className={styles.tdhSub}>
@@ -407,8 +245,10 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
                       {numberWithCommas(lead.balance)}
                     </td>
                     <td className={styles.tdhSub}>
-                      {numberWithCommas(lead.unique_memes)} /{" "}
-                      {numberWithCommas(lead.unique_memes_total)} (
+                      {lead.unique_memes
+                        ? numberWithCommas(lead.unique_memes)
+                        : 0}{" "}
+                      / {numberWithCommas(lead.unique_memes_total)} (
                       {Math.round(
                         (lead.unique_memes / lead.unique_memes_total) * 100
                       )}

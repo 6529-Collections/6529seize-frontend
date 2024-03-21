@@ -1,8 +1,8 @@
+import styles from "./Leaderboard.module.scss";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHCalc, GlobalTDHHistory } from "../../entities/ITDH";
-import styles from "./Leaderboard.module.scss";
 import { cicToType, numberWithCommas } from "../../helpers/Helpers";
 import { fetchUrl } from "../../services/6529api";
 import {
@@ -336,7 +336,7 @@ export function getLeaderboardDownloadFileName(
   return `${csvFileName}.csv`;
 }
 
-export async function fetchLeaderboardData(
+export async function fetchLeaderboardData<T>(
   endpoint: string,
   pageSize: number,
   page: number,
@@ -350,7 +350,7 @@ export async function fetchLeaderboardData(
   selectedSeason: number
 ): Promise<{
   count: number;
-  data: any[];
+  data: T[];
   url: string;
 }> {
   let walletFilter = "";

@@ -15,6 +15,9 @@ import {
 } from "./Leaderboard";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Pagination from "../pagination/Pagination";
+import LeaderboardSort, {
+  LeaderboardInteractionsSort,
+} from "./LeaderboardSort";
 
 const PAGE_SIZE = 50;
 
@@ -26,19 +29,6 @@ interface Props {
   searchWallets: string[];
   seasons: MemeSeason[];
   setIsLoading: (isLoading: boolean) => void;
-}
-
-enum Sort {
-  "primary_purchases_count" = "primary_purchases_count",
-  "primary_purchases_value" = "primary_purchases_value",
-  "secondary_purchases_count" = "secondary_purchases_count",
-  "secondary_purchases_value" = "secondary_purchases_value",
-  "sales_count" = "sales_count",
-  "sales_value" = "sales_value",
-  "transfers_in" = "transfers_in",
-  "transfers_out" = "transfers_out",
-  "airdrops" = "airdrops",
-  "burns" = "burns",
 }
 
 export interface LeaderboardInteractions {
@@ -70,10 +60,10 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardInteractions[]>();
   const [sort, setSort] = useState<{
-    sort: Sort;
+    sort: LeaderboardInteractionsSort;
     sort_direction: SortDirection;
   }>({
-    sort: Sort.primary_purchases_count,
+    sort: LeaderboardInteractionsSort.primary_purchases_count,
     sort_direction: SortDirection.DESC,
   });
 
@@ -82,10 +72,14 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
   async function fetchResults() {
     setMyFetchUrl("");
     props.setIsLoading(true);
-    const data = await fetchLeaderboardData(
+    const data: {
+      count: number;
+      data: LeaderboardInteractions[];
+      url: string;
+    } = await fetchLeaderboardData(
       "aggregated-activity",
-      page,
       PAGE_SIZE,
+      page,
       props.searchWallets,
       sort,
       props.content,
@@ -134,39 +128,8 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
     );
   }
 
-  function printHeader(s: Sort) {
-    return (
-      <span className="d-flex flex-column">
-        <FontAwesomeIcon
-          icon="square-caret-up"
-          onClick={() =>
-            setSort({
-              sort: s,
-              sort_direction: SortDirection.ASC,
-            })
-          }
-          className={`${styles.caret} ${
-            sort.sort_direction != SortDirection.ASC || sort.sort != s
-              ? styles.disabled
-              : ""
-          }`}
-        />
-        <FontAwesomeIcon
-          icon="square-caret-down"
-          onClick={() =>
-            setSort({
-              sort: s,
-              sort_direction: SortDirection.DESC,
-            })
-          }
-          className={`${styles.caret} ${
-            sort.sort_direction != SortDirection.DESC || sort.sort != s
-              ? styles.disabled
-              : ""
-          }`}
-        />
-      </span>
-    );
+  function printHeader(s: LeaderboardInteractionsSort) {
+    return <LeaderboardSort sort={sort} setSort={setSort} s={s} />;
   }
 
   return (
@@ -205,13 +168,17 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Count&nbsp;
-                  {printHeader(Sort.primary_purchases_count)}
+                  {printHeader(
+                    LeaderboardInteractionsSort.primary_purchases_count
+                  )}
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Value&nbsp;
-                  {printHeader(Sort.primary_purchases_value)}
+                  {printHeader(
+                    LeaderboardInteractionsSort.primary_purchases_value
+                  )}
                 </span>
               </th>
               <th className={styles.gap}></th>
@@ -219,13 +186,17 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Count&nbsp;
-                  {printHeader(Sort.secondary_purchases_count)}
+                  {printHeader(
+                    LeaderboardInteractionsSort.secondary_purchases_count
+                  )}
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Value&nbsp;
-                  {printHeader(Sort.secondary_purchases_value)}
+                  {printHeader(
+                    LeaderboardInteractionsSort.secondary_purchases_value
+                  )}
                 </span>
               </th>
               <th className={styles.gap}></th>
@@ -233,13 +204,13 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Count&nbsp;
-                  {printHeader(Sort.sales_count)}
+                  {printHeader(LeaderboardInteractionsSort.sales_count)}
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Value&nbsp;
-                  {printHeader(Sort.sales_value)}
+                  {printHeader(LeaderboardInteractionsSort.sales_value)}
                 </span>
               </th>
               <th className={styles.gap}></th>
@@ -247,25 +218,25 @@ export default function LeaderboardInteractions(props: Readonly<Props>) {
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Airdrops&nbsp;
-                  {printHeader(Sort.airdrops)}
+                  {printHeader(LeaderboardInteractionsSort.airdrops)}
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   In&nbsp;
-                  {printHeader(Sort.transfers_in)}
+                  {printHeader(LeaderboardInteractionsSort.transfers_in)}
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Out&nbsp;
-                  {printHeader(Sort.transfers_out)}
+                  {printHeader(LeaderboardInteractionsSort.transfers_out)}
                 </span>
               </th>
               <th className={styles.tdhSub}>
                 <span className="d-flex align-items-center justify-content-center">
                   Burns&nbsp;
-                  {printHeader(Sort.burns)}
+                  {printHeader(LeaderboardInteractionsSort.burns)}
                 </span>
               </th>
             </tr>
