@@ -107,7 +107,7 @@ export default function LeaderboardInteractionsComponent(
                 <tr>
                   <th className={styles.rank}>Rank</th>
                   <th className={`${styles.hodlerContainer}`}>
-                    Collector&nbsp;&nbsp;
+                    Collector
                     <span className={styles.totalResults}>
                       {props.isLoading
                         ? "..."
@@ -192,68 +192,66 @@ export default function LeaderboardInteractionsComponent(
                 </tr>
               </thead>
               <tbody>
-                {leaderboard &&
-                  leaderboard.map((lead: LeaderboardInteractions, index) => {
-                    return (
-                      <tr key={lead.consolidation_key}>
-                        <td className={styles.rank}>
-                          {numberWithCommas(
-                            index + 1 + (page - 1) * LEADERBOARD_PAGE_SIZE
-                          )}
-                        </td>
-                        <td className="tw-max-w-[20px] tw-truncate">
-                          <LeaderboardCollector
-                            handle={lead.handle}
-                            consolidationKey={lead.consolidation_key}
-                            consolidationDisplay={lead.consolidation_display}
-                            pfp={lead.pfp_url}
-                            cicType={lead.cic_type}
-                            level={lead.level}
-                          />
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.primary_purchases_count)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(
-                            Math.round(lead.primary_purchases_value * 100) / 100
-                          )}
-                        </td>
-                        <th className={styles.gap}></th>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.secondary_purchases_count)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(
-                            Math.round(lead.secondary_purchases_value * 100) /
-                              100
-                          )}
-                        </td>
-                        <th className={styles.gap}></th>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.sales_count)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(
-                            Math.round(lead.sales_value * 100) / 100
-                          )}
-                        </td>
-                        <th className={styles.gap}></th>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.airdrops)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.transfers_in)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.transfers_out)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.burns)}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                {leaderboard.map((lead: LeaderboardInteractions, index) => {
+                  return (
+                    <tr key={lead.consolidation_key}>
+                      <td className={styles.rank}>
+                        {numberWithCommas(
+                          index + 1 + (page - 1) * LEADERBOARD_PAGE_SIZE
+                        )}
+                      </td>
+                      <td className="tw-max-w-[20px] tw-truncate">
+                        <LeaderboardCollector
+                          handle={lead.handle}
+                          consolidationKey={lead.consolidation_key}
+                          consolidationDisplay={lead.consolidation_display}
+                          pfp={lead.pfp_url}
+                          cicType={lead.cic_type}
+                          level={lead.level}
+                        />
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.primary_purchases_count)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(
+                          Math.round(lead.primary_purchases_value * 100) / 100
+                        )}
+                      </td>
+                      <th className={styles.gap}></th>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.secondary_purchases_count)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(
+                          Math.round(lead.secondary_purchases_value * 100) / 100
+                        )}
+                      </td>
+                      <th className={styles.gap}></th>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.sales_count)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(
+                          Math.round(lead.sales_value * 100) / 100
+                        )}
+                      </td>
+                      <th className={styles.gap}></th>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.airdrops)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.transfers_in)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.transfers_out)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.burns)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </Col>

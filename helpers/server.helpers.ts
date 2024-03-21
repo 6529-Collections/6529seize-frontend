@@ -10,7 +10,7 @@ import {
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
-import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
+import { areEqualAddresses } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
 import jwtDecode from "jwt-decode";

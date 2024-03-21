@@ -96,7 +96,7 @@ export default function LeaderboardCardsCollectedComponent(
                 <tr>
                   <th className={styles.rank}>Rank</th>
                   <th className={`${styles.hodlerContainer}`}>
-                    Collector&nbsp;&nbsp;
+                    Collector
                     <span className={styles.totalResults}>
                       {props.isLoading
                         ? "..."
@@ -171,68 +171,66 @@ export default function LeaderboardCardsCollectedComponent(
                 </tr>
               </thead>
               <tbody>
-                {leaderboard &&
-                  leaderboard.map((lead: LeaderboardMetrics, index) => {
-                    return (
-                      <tr key={lead.consolidation_key}>
-                        <td className={styles.rank}>
-                          {/* {lead.tdh_rank} */}
-                          {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                        </td>
-                        <td className="tw-max-w-[20px] tw-truncate">
-                          <LeaderboardCollector
-                            handle={lead.handle}
-                            consolidationKey={lead.consolidation_key}
-                            consolidationDisplay={lead.consolidation_display}
-                            pfp={lead.pfp_url}
-                            cicType={lead.cic_type}
-                            level={lead.level}
-                          />
-                        </td>
+                {leaderboard.map((lead: LeaderboardMetrics, index) => {
+                  return (
+                    <tr key={lead.consolidation_key}>
+                      <td className={styles.rank}>
+                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                      </td>
+                      <td className="tw-max-w-[20px] tw-truncate">
+                        <LeaderboardCollector
+                          handle={lead.handle}
+                          consolidationKey={lead.consolidation_key}
+                          consolidationDisplay={lead.consolidation_display}
+                          pfp={lead.pfp_url}
+                          cicType={lead.cic_type}
+                          level={lead.level}
+                        />
+                      </td>
 
-                        <td className={styles.tdhSub}>{lead.level}</td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.balance)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {lead.unique_memes
-                            ? numberWithCommas(lead.unique_memes)
-                            : 0}{" "}
-                          / {numberWithCommas(lead.unique_memes_total)} (
-                          {Math.round(
-                            (lead.unique_memes / lead.unique_memes_total) * 100
-                          )}
-                          %)
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.memes_cards_sets)}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(Math.round(lead.boosted_tdh))}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {!lead.day_change ? (
-                            "-"
-                          ) : (
-                            <>
-                              {lead.day_change > 0 ? `+` : ``}
-                              {numberWithCommas(lead.day_change)}
-                              {lead.day_change != 0 && (
-                                <span className={styles.tdhBoost}>
-                                  {getTDHChange(lead)}
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {!lead.day_change
-                            ? "-"
-                            : `${calculateTdhVsCommunity(lead)}`}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      <td className={styles.tdhSub}>{lead.level}</td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.balance)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {lead.unique_memes
+                          ? numberWithCommas(lead.unique_memes)
+                          : 0}{" "}
+                        / {numberWithCommas(lead.unique_memes_total)} (
+                        {Math.round(
+                          (lead.unique_memes / lead.unique_memes_total) * 100
+                        )}
+                        %)
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.memes_cards_sets)}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(Math.round(lead.boosted_tdh))}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {!lead.day_change ? (
+                          "-"
+                        ) : (
+                          <>
+                            {lead.day_change > 0 ? `+` : ``}
+                            {numberWithCommas(lead.day_change)}
+                            {lead.day_change != 0 && (
+                              <span className={styles.tdhBoost}>
+                                {getTDHChange(lead)}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {!lead.day_change
+                          ? "-"
+                          : `${calculateTdhVsCommunity(lead)}`}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </Col>
