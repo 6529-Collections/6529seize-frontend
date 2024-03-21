@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
 import { numberWithCommas } from "../../helpers/Helpers";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { CICType } from "../../entities/IProfile";
 import { MemeSeason } from "../../entities/ISeason";
 import { Collector, Content } from "./Leaderboard";
 import LeaderboardSort from "./LeaderboardSort";
 import {
   LeaderboardCardsCollectedSort,
-  fetchLeaderboardData,
+  LeaderboardMetrics,
+  useFetchLeaderboard,
 } from "./leaderboard_helpers";
 import LeaderboardFooter from "./LeaderboardDownload";
 
@@ -24,31 +24,14 @@ interface Props {
   searchWallets: string[];
   globalTdhRateChange?: number;
   seasons: MemeSeason[];
+  isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
 }
 
-export interface LeaderboardMetrics {
-  handle: string;
-  consolidation_key: string;
-  consolidation_display: string;
-  pfp_url: string;
-  balance: number;
-  unique_memes: number;
-  unique_memes_total: number;
-  memes_cards_sets: number;
-  rep_score: number;
-  cic_score: number;
-  primary_wallet: string;
-  boosted_tdh: number;
-  day_change: number;
-  level: number;
-  cic_type?: CICType;
-}
-
-export default function LeaderboardCardsCollected(props: Readonly<Props>) {
+export default function LeaderboardCardsCollectedComponent(
+  props: Readonly<Props>
+) {
   const [page, setPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardMetrics[]>();
   const [sort, setSort] = useState<{
     sort: LeaderboardCardsCollectedSort;
     sort_direction: SortDirection;
@@ -57,52 +40,20 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
     sort_direction: SortDirection.DESC,
   });
 
-  const [myFetchUrl, setMyFetchUrl] = useState<string>("");
-
-  async function fetchResults() {
-    setMyFetchUrl("");
-    props.setIsLoading(true);
-    const data: {
-      count: number;
-      data: LeaderboardMetrics[];
-      url: string;
-    } = await fetchLeaderboardData(
-      "tdh/consolidated_metrics",
-      PAGE_SIZE,
-      page,
-      props.searchWallets,
-      sort,
-      props.content,
-      props.collector,
-      props.selectedSeason
-    );
-    setTotalResults(data.count);
-    setLeaderboard(data.data);
-    props.setIsLoading(false);
-    setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
-  }
-
-  useEffect(() => {
-    if (page === 1) {
-      fetchResults();
-    } else {
-      setPage(1);
-    }
-  }, [
+  const { myFetchUrl, totalResults, leaderboard } = useFetchLeaderboard(
+    "tdh/consolidated_metrics",
+    page,
     sort,
-    props.content,
-    props.selectedSeason,
     props.searchWallets,
+    props.content,
     props.collector,
-  ]);
-
-  useEffect(() => {
-    fetchResults();
-    const top = document.getElementById(`leaderboard-page`)?.offsetTop;
-    if (top && window.scrollY > 0) {
-      window.scrollTo(0, 0);
-    }
-  }, [page]);
+    props.selectedSeason,
+    props.setIsLoading
+  ) as {
+    myFetchUrl: string;
+    totalResults: number;
+    leaderboard: LeaderboardMetrics[];
+  };
 
   function getTDHChange(lead: LeaderboardMetrics) {
     if (!lead.boosted_tdh) {
@@ -125,7 +76,7 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
     return <></>;
   }
 
-  if (leaderboard.length === 0) {
+  if (leaderboard.length === 0 && !props.isLoading) {
     return (
       <Container>
         <Row>
@@ -139,149 +90,152 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
     <>
       <Container>
         <Row>
-          <Col></Col>
-          <Table bordered={false} className={styles.leaderboardTable}>
-            <thead>
-              <tr>
-                <th className={styles.rank}>Rank</th>
-                <th className={`${styles.hodlerContainer}`}>
-                  Collector&nbsp;&nbsp;
-                  <span className={styles.totalResults}>
-                    x{totalResults.toLocaleString()}
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Level&nbsp;
-                    <LeaderboardSort
-                      sort={sort}
-                      setSort={setSort}
-                      s={LeaderboardCardsCollectedSort.level}
-                    />
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Cards Collected&nbsp;
-                    <LeaderboardSort
-                      sort={sort}
-                      setSort={setSort}
-                      s={LeaderboardCardsCollectedSort.balance}
-                    />
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Unique Memes&nbsp;
-                    <LeaderboardSort
-                      sort={sort}
-                      setSort={setSort}
-                      s={LeaderboardCardsCollectedSort.unique_memes}
-                    />
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Sets&nbsp;
-                    <LeaderboardSort
-                      sort={sort}
-                      setSort={setSort}
-                      s={LeaderboardCardsCollectedSort.memes_cards_sets}
-                    />
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    TDH&nbsp;
-                    <LeaderboardSort
-                      sort={sort}
-                      setSort={setSort}
-                      s={LeaderboardCardsCollectedSort.boosted_tdh}
-                    />
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Daily Change&nbsp; &nbsp;
-                    <LeaderboardSort
-                      sort={sort}
-                      setSort={setSort}
-                      s={LeaderboardCardsCollectedSort.day_change}
-                    />
-                  </span>
-                </th>
-                <th className={styles.tdhSub}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    vs Community&nbsp; &nbsp;
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard &&
-                leaderboard.map((lead: LeaderboardMetrics, index) => {
-                  return (
-                    <tr key={lead.consolidation_key}>
-                      <td className={styles.rank}>
-                        {/* {lead.tdh_rank} */}
-                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                      </td>
-                      <td className="tw-max-w-[20px] tw-truncate">
-                        <LeaderboardCollector
-                          handle={lead.handle}
-                          consolidationKey={lead.consolidation_key}
-                          consolidationDisplay={lead.consolidation_display}
-                          pfp={lead.pfp_url}
-                          cicType={lead.cic_type}
-                          level={lead.level}
-                        />
-                      </td>
+          <Col>
+            <Table bordered={false} className={styles.leaderboardTable}>
+              <thead>
+                <tr>
+                  <th className={styles.rank}>Rank</th>
+                  <th className={`${styles.hodlerContainer}`}>
+                    Collector&nbsp;&nbsp;
+                    <span className={styles.totalResults}>
+                      {props.isLoading
+                        ? "..."
+                        : `x${totalResults.toLocaleString()}`}
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Level&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.level}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Cards Collected&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.balance}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Unique Memes&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.unique_memes}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Sets&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.memes_cards_sets}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      TDH&nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.boosted_tdh}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      Daily Change&nbsp; &nbsp;
+                      <LeaderboardSort
+                        sort={sort}
+                        setSort={setSort}
+                        s={LeaderboardCardsCollectedSort.day_change}
+                      />
+                    </span>
+                  </th>
+                  <th className={styles.tdhSub}>
+                    <span className="d-flex align-items-center justify-content-center">
+                      vs Community&nbsp; &nbsp;
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard &&
+                  leaderboard.map((lead: LeaderboardMetrics, index) => {
+                    return (
+                      <tr key={lead.consolidation_key}>
+                        <td className={styles.rank}>
+                          {/* {lead.tdh_rank} */}
+                          {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                        </td>
+                        <td className="tw-max-w-[20px] tw-truncate">
+                          <LeaderboardCollector
+                            handle={lead.handle}
+                            consolidationKey={lead.consolidation_key}
+                            consolidationDisplay={lead.consolidation_display}
+                            pfp={lead.pfp_url}
+                            cicType={lead.cic_type}
+                            level={lead.level}
+                          />
+                        </td>
 
-                      <td className={styles.tdhSub}>{lead.level}</td>
-                      <td className={styles.tdhSub}>
-                        {numberWithCommas(lead.balance)}
-                      </td>
-                      <td className={styles.tdhSub}>
-                        {lead.unique_memes
-                          ? numberWithCommas(lead.unique_memes)
-                          : 0}{" "}
-                        / {numberWithCommas(lead.unique_memes_total)} (
-                        {Math.round(
-                          (lead.unique_memes / lead.unique_memes_total) * 100
-                        )}
-                        %)
-                      </td>
-                      <td className={styles.tdhSub}>
-                        {numberWithCommas(lead.memes_cards_sets)}
-                      </td>
-                      <td className={styles.tdhSub}>
-                        {numberWithCommas(Math.round(lead.boosted_tdh))}
-                      </td>
-                      <td className={styles.tdhSub}>
-                        {!lead.day_change ? (
-                          "-"
-                        ) : (
-                          <>
-                            {lead.day_change > 0 ? `+` : ``}
-                            {numberWithCommas(lead.day_change)}
-                            {lead.day_change != 0 && (
-                              <span className={styles.tdhBoost}>
-                                {getTDHChange(lead)}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </td>
-                      <td className={styles.tdhSub}>
-                        {!lead.day_change
-                          ? "-"
-                          : `${calculateTdhVsCommunity(lead)}`}
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </Table>
+                        <td className={styles.tdhSub}>{lead.level}</td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(lead.balance)}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {lead.unique_memes
+                            ? numberWithCommas(lead.unique_memes)
+                            : 0}{" "}
+                          / {numberWithCommas(lead.unique_memes_total)} (
+                          {Math.round(
+                            (lead.unique_memes / lead.unique_memes_total) * 100
+                          )}
+                          %)
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(lead.memes_cards_sets)}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {numberWithCommas(Math.round(lead.boosted_tdh))}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {!lead.day_change ? (
+                            "-"
+                          ) : (
+                            <>
+                              {lead.day_change > 0 ? `+` : ``}
+                              {numberWithCommas(lead.day_change)}
+                              {lead.day_change != 0 && (
+                                <span className={styles.tdhBoost}>
+                                  {getTDHChange(lead)}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </td>
+                        <td className={styles.tdhSub}>
+                          {!lead.day_change
+                            ? "-"
+                            : `${calculateTdhVsCommunity(lead)}`}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </Table>
+          </Col>
         </Row>
       </Container>
       <LeaderboardFooter

@@ -12,8 +12,8 @@ import {
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { commonApiFetch } from "../../services/api/common-api";
 import { MemeSeason } from "../../entities/ISeason";
-import LeaderboardCardsCollected from "./LeaderboardCardsCollected";
-import LeaderboardInteractions from "./LeaderboardInteractions";
+import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
+import LeaderboardInteractionsComponent from "./LeaderboardInteractions";
 
 export enum Content {
   ALL = "All",
@@ -288,7 +288,7 @@ export default function Leaderboard(
       <Row className={`${styles.scrollContainer} pt-2`}>
         <Col>
           {props.focus === LeaderboardFocus.TDH && (
-            <LeaderboardCardsCollected
+            <LeaderboardCardsCollectedComponent
               block={lastTDH?.block}
               content={content}
               collector={collector}
@@ -296,17 +296,19 @@ export default function Leaderboard(
               searchWallets={searchWallets}
               globalTdhRateChange={globalTdhRateChange}
               seasons={seasons}
+              isLoading={isLoading}
               setIsLoading={setIsLoading}
             />
           )}
           {props.focus === LeaderboardFocus.INTERACTIONS && (
-            <LeaderboardInteractions
+            <LeaderboardInteractionsComponent
               block={lastTDH?.block}
               content={content}
               collector={collector}
               selectedSeason={selectedSeason}
               searchWallets={searchWallets}
               seasons={seasons}
+              isLoading={isLoading}
               setIsLoading={setIsLoading}
             />
           )}

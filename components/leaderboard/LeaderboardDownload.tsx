@@ -40,6 +40,10 @@ export default function LeaderboardFooter(
     block?: number;
   }>
 ) {
+  if (props.totalResults == 0 || !props.url) {
+    return <></>;
+  }
+
   return (
     <Container>
       <Row>

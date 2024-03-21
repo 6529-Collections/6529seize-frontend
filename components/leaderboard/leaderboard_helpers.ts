@@ -1,7 +1,11 @@
+import { useState, useCallback, useEffect } from "react";
 import { SortDirection } from "../../entities/ISort";
 import { cicToType } from "../../helpers/Helpers";
 import { commonApiFetch } from "../../services/api/common-api";
 import { Content, Collector } from "./Leaderboard";
+import { CICType } from "../../entities/IProfile";
+
+export const LEADERBOARD_PAGE_SIZE = 50;
 
 export enum LeaderboardCardsCollectedSort {
   level = "level",
@@ -29,6 +33,50 @@ export type LeaderboardSortType =
   | LeaderboardCardsCollectedSort
   | LeaderboardInteractionsSort;
 
+export interface LeaderboardMetrics {
+  handle: string;
+  consolidation_key: string;
+  consolidation_display: string;
+  pfp_url: string;
+  balance: number;
+  unique_memes: number;
+  unique_memes_total: number;
+  memes_cards_sets: number;
+  rep_score: number;
+  cic_score: number;
+  primary_wallet: string;
+  boosted_tdh: number;
+  day_change: number;
+  level: number;
+  cic_type?: CICType;
+}
+
+type LeaderboardItem = LeaderboardMetrics | LeaderboardInteractions;
+
+export interface LeaderboardInteractions {
+  handle: string;
+  consolidation_key: string;
+  consolidation_display: string;
+  pfp_url: string;
+  rep_score: number;
+  cic_score: number;
+  primary_wallet: string;
+  boosted_tdh: number;
+  day_change: number;
+  level: number;
+  primary_purchases_count: number;
+  primary_purchases_value: number;
+  secondary_purchases_count: number;
+  secondary_purchases_value: number;
+  sales_count: number;
+  sales_value: number;
+  transfers_in: number;
+  transfers_out: number;
+  airdrops: number;
+  burns: number;
+  cic_type?: CICType;
+}
+
 export function getLeaderboardDownloadFileName(
   title: string,
   block: number,
@@ -42,7 +90,7 @@ export function getLeaderboardDownloadFileName(
   return `${csvFileName}.csv`;
 }
 
-export async function fetchLeaderboardData<T>(
+export async function fetchLeaderboardData(
   endpoint: string,
   pageSize: number,
   page: number,
@@ -56,7 +104,7 @@ export async function fetchLeaderboardData<T>(
   selectedSeason: number
 ): Promise<{
   count: number;
-  data: T[];
+  data: LeaderboardItem[];
   url: string;
 }> {
   let walletFilter = "";
@@ -81,7 +129,7 @@ export async function fetchLeaderboardData<T>(
     count: number;
     page: number;
     next: any;
-    data: T[];
+    data: LeaderboardItem[];
   }>({
     endpoint: url,
   });
@@ -93,4 +141,54 @@ export async function fetchLeaderboardData<T>(
     data: response.data,
     url: url,
   };
+}
+
+export function useFetchLeaderboard(
+  endpoint: string,
+  page: number,
+  sort: {
+    sort: string;
+    sort_direction: SortDirection;
+  },
+  searchWallets: string[],
+  content: Content,
+  collector: Collector,
+  selectedSeason: number,
+  setIsLoading: (isLoading: boolean) => void
+) {
+  const [myFetchUrl, setMyFetchUrl] = useState("");
+  const [totalResults, setTotalResults] = useState(0);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+
+  const fetchResults = useCallback(async () => {
+    setIsLoading(true);
+    const data = await fetchLeaderboardData(
+      endpoint,
+      LEADERBOARD_PAGE_SIZE,
+      page,
+      searchWallets,
+      sort,
+      content,
+      collector,
+      selectedSeason
+    );
+    setTotalResults(data.count);
+    setLeaderboard(data.data);
+    setIsLoading(false);
+    setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
+  }, [sort, searchWallets, content, collector, selectedSeason]);
+
+  useEffect(() => {
+    fetchResults();
+    const top = document.getElementById(`leaderboard-page`)?.offsetTop;
+    if (top && window.scrollY > 0) {
+      window.scrollTo(0, 0);
+    }
+  }, [page]);
+
+  useEffect(() => {
+    fetchResults();
+  }, [fetchResults]);
+
+  return { myFetchUrl, totalResults, leaderboard };
 }
