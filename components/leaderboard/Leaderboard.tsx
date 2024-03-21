@@ -3,7 +3,7 @@ import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { TDHCalc, GlobalTDHHistory } from "../../entities/ITDH";
 import styles from "./Leaderboard.module.scss";
-import { numberWithCommas } from "../../helpers/Helpers";
+import { cicToType, numberWithCommas } from "../../helpers/Helpers";
 import { fetchUrl } from "../../services/6529api";
 import {
   SearchModalDisplay,
@@ -14,6 +14,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { MemeSeason } from "../../entities/ISeason";
 import LeaderboardCardsCollected from "./LeaderboardCardsCollected";
 import LeaderboardInteractions from "./LeaderboardInteractions";
+import { SortDirection } from "../../entities/ISort";
 
 export enum Content {
   ALL = "All",
@@ -320,4 +321,70 @@ export default function Leaderboard(
       />
     </Container>
   );
+}
+
+export function getLeaderboardDownloadFileName(
+  title: string,
+  block: number,
+  page: number
+) {
+  const tdhBlockSuffix = block ? `-${block}` : "";
+  const csvFileName = `${title}${tdhBlockSuffix}`;
+  if (page) {
+    return `${csvFileName}-page${page}.csv`;
+  }
+  return `${csvFileName}.csv`;
+}
+
+export async function fetchLeaderboardData(
+  endpoint: string,
+  pageSize: number,
+  page: number,
+  searchWallets: string[],
+  sort: {
+    sort: string;
+    sort_direction: SortDirection;
+  },
+  content: Content,
+  collector: Collector,
+  selectedSeason: number
+): Promise<{
+  count: number;
+  data: any[];
+  url: string;
+}> {
+  let walletFilter = "";
+  if (searchWallets && searchWallets.length > 0) {
+    walletFilter = `&search=${searchWallets.join(",")}`;
+  }
+  let mysort = sort.sort;
+  let contentFilter = "";
+  if (content !== Content.ALL) {
+    contentFilter = `&content=${content.toLowerCase()}`;
+  }
+  let collectorFilter = "";
+  if (collector !== Collector.ALL) {
+    collectorFilter = `&collector=${collector.toLowerCase()}`;
+  }
+  let seasonFilter = "";
+  if (selectedSeason > 0) {
+    seasonFilter = `&season=${selectedSeason}`;
+  }
+  const url = `${endpoint}?page_size=${pageSize}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
+  const response = await commonApiFetch<{
+    count: number;
+    page: number;
+    next: any;
+    data: T[];
+  }>({
+    endpoint: url,
+  });
+  response.data.forEach((lead: any) => {
+    lead.cic_type = cicToType(lead.cic_score);
+  });
+  return {
+    count: response.count,
+    data: response.data,
+    url: url,
+  };
 }

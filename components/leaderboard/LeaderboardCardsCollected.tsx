@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { cicToType, numberWithCommas } from "../../helpers/Helpers";
+import { numberWithCommas } from "../../helpers/Helpers";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { commonApiFetch } from "../../services/api/common-api";
 import { CICType } from "../../entities/IProfile";
 import { MemeSeason } from "../../entities/ISeason";
-import { Collector, Content } from "./Leaderboard";
+import {
+  Collector,
+  Content,
+  fetchLeaderboardData,
+  getLeaderboardDownloadFileName,
+} from "./Leaderboard";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import Pagination from "../pagination/Pagination";
 
@@ -63,56 +67,23 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
 
   const [myFetchUrl, setMyFetchUrl] = useState<string>("");
 
-  function getFileName(page?: number) {
-    const tdhBlockSuffix = props.block ? `-${props.block}` : "";
-    const csvFileName = `community-cards-collected${tdhBlockSuffix}`;
-    if (page) {
-      return `${csvFileName}-page${page}.csv`;
-    }
-    return `${csvFileName}.csv`;
-  }
-
   async function fetchResults() {
     setMyFetchUrl("");
     props.setIsLoading(true);
-    let walletFilter = "";
-    if (props.searchWallets && props.searchWallets.length > 0) {
-      walletFilter = `&search=${props.searchWallets.join(",")}`;
-    }
-    let mysort = sort.sort;
-
-    let contentFilter = "";
-    if (props.content !== Content.ALL) {
-      contentFilter = `&content=${props.content.toLowerCase()}`;
-    }
-
-    let collectorFilter = "";
-    if (props.collector !== Collector.ALL) {
-      collectorFilter = `&collector=${props.collector.toLowerCase()}`;
-    }
-
-    let seasonFilter = "";
-    if (props.selectedSeason > 0) {
-      seasonFilter = `&season=${props.selectedSeason}`;
-    }
-
-    const url = `tdh/consolidated_metrics?page_size=${PAGE_SIZE}&page=${page}&sort=${mysort}&sort_direction=${sort.sort_direction}${walletFilter}${contentFilter}${collectorFilter}${seasonFilter}`;
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: LeaderboardMetrics[];
-    }>({
-      endpoint: url,
-    }).then((response) => {
-      setTotalResults(response.count);
-      response.data.forEach((lead: LeaderboardMetrics) => {
-        lead.cic_type = cicToType(lead.cic_score);
-      });
-      setLeaderboard(response.data);
-      props.setIsLoading(false);
-      setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${url}`);
-    });
+    const data = await fetchLeaderboardData(
+      "tdh/consolidated_metrics",
+      page,
+      PAGE_SIZE,
+      props.searchWallets,
+      sort,
+      props.content,
+      props.collector,
+      props.selectedSeason
+    );
+    setTotalResults(data.count);
+    setLeaderboard(data.data);
+    props.setIsLoading(false);
+    setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
   }
 
   useEffect(() => {
@@ -131,7 +102,7 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
 
   useEffect(() => {
     fetchResults();
-    var top = document.getElementById(`leaderboard-page`)?.offsetTop;
+    const top = document.getElementById(`leaderboard-page`)?.offsetTop;
     if (top && window.scrollY > 0) {
       window.scrollTo(0, 0);
     }
@@ -484,12 +455,20 @@ export default function LeaderboardCardsCollected(props: Readonly<Props>) {
             className="pt-4 pb-3 d-flex justify-content-center gap-4">
             <DownloadUrlWidget
               preview="Page"
-              name={getFileName(page)}
+              name={getLeaderboardDownloadFileName(
+                "community-cards-collected",
+                props.block ?? 0,
+                page
+              )}
               url={`${myFetchUrl}&download_page=true`}
             />
             <DownloadUrlWidget
               preview="All Pages"
-              name={getFileName()}
+              name={getLeaderboardDownloadFileName(
+                "community-cards-collected",
+                props.block ?? 0,
+                0
+              )}
               url={`${myFetchUrl}&download_all=true`}
             />
           </Col>
