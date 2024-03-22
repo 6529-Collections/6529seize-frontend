@@ -1,0 +1,34 @@
+@import "../../../../styles/variables.scss";
+
+.scrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.topUpHistoryAccordionButton {
+  background-color: rgb(28, 28, 33) !important;
+  border: 1px solid rgb(55, 55, 61) !important;
+  box-shadow: none !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+.topUpHistoryAccordionBody {
+  color: $font-color;
+  background-color: rgb(19, 19, 22) !important;
+  border-left: 1px solid rgb(55, 55, 61) !important;
+  border-right: 1px solid rgb(55, 55, 61) !important;
+  border-bottom: 1px solid rgb(55, 55, 61) !important;
+}
+
+.topUpHistoryEntry {
+  border: 1px solid rgb(55, 55, 61);
+  padding: 10px;
+}
