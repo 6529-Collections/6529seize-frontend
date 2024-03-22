@@ -7,11 +7,21 @@ export default function ArtistProfileHandle(
   }>
 ) {
   if (props.nft.artist_seize_handle) {
-    return (
-      <Link href={`/${props.nft.artist_seize_handle}`}>
-        {props.nft.artist_seize_handle}
-      </Link>
-    );
+    const handles = props.nft.artist_seize_handle.split(",");
+    const handleElements = handles.reduce((acc: any, handle, index) => {
+      handle = handle.trim();
+      acc.push(
+        <Link href={`/${handle}`} key={handle}>
+          {handle}
+        </Link>
+      );
+      if (index < handles.length - 1) {
+        acc.push(", ");
+      }
+      return acc;
+    }, []);
+
+    return <>{handleElements}</>;
   }
 
   return <span className="font-color-h">not available</span>;
