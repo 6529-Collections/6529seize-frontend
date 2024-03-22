@@ -201,7 +201,7 @@ export default function CommunityMetrics() {
                       <u>Category B</u>
                     </p>
                     These boosts are applied to the total TDH, not just to that
-                    SZN's TDH
+                    SZN&apos;s TDH
                     <ol>
                       <li>
                         SZN1:
@@ -250,7 +250,7 @@ export default function CommunityMetrics() {
                       <u>Category B</u>
                     </p>
                     These boosts are applied to the total TDH, not just to that
-                    SZN's TDH
+                    SZN&apos;s TDH
                     <ol>
                       <li>
                         SZN1:
