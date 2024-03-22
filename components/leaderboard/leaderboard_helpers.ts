@@ -178,6 +178,7 @@ export function useFetchLeaderboard(
     setIsLoading(false);
     setMyFetchUrl(`${process.env.API_ENDPOINT}/api/${data.url}`);
   }, [
+    page,
     sort.sort,
     sort.sort_direction,
     query.searchWallets,
@@ -187,10 +188,9 @@ export function useFetchLeaderboard(
   ]);
 
   useEffect(() => {
-    fetchResults();
     const top = document.getElementById(`leaderboard-page`)?.offsetTop;
     if (top && window.scrollY > 0) {
-      window.scrollTo(0, 0);
+      window.scrollTo(0, top);
     }
   }, [page]);
 

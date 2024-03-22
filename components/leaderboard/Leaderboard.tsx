@@ -166,7 +166,7 @@ export default function Leaderboard(
   }
 
   return (
-    <Container className={`pt-4`} id={`leaderboard-page`}>
+    <Container className={`pt-4`}>
       <Row className="pb-3">
         <Col
           className={`d-flex align-items-center`}
@@ -230,7 +230,7 @@ export default function Leaderboard(
       </Row>
       {!showViewAll && (
         <>
-          <Row className="pt-2 pb-2">
+          <Row className="pt-2 pb-2" id={`leaderboard-page`}>
             <Col
               className="d-flex justify-content-start gap-5 align-items-center"
               sm={{ span: 12 }}
