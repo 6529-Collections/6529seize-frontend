@@ -20,7 +20,7 @@ function LeaderboardDownload(
           props.block ?? 0,
           props.page
         )}
-        url={`${props.url}&download_page=true}`}
+        url={`${props.url}&download_page=true`}
       />
       <DownloadUrlWidget
         preview="All Pages"
