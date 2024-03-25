@@ -41,8 +41,10 @@ export default function CreateDropMobile({
       <CreateDropMobileFull
         viewType={viewType}
         editorState={editorState}
+        title={title}
         onViewType={onViewType}
         onEditorState={onEditorState}
+        onTitle={onTitle}
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
       />
