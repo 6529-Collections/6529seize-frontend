@@ -9,8 +9,12 @@ export default function CreateDropMobile({
   viewType,
   profile,
   title,
+  metadata,
   editorState,
   onTitle,
+  onMetadataEdit,
+  onMetadataRemove,
+  onFileChange,
   onViewType,
   onEditorState,
   onMentionedUser,
@@ -19,9 +23,16 @@ export default function CreateDropMobile({
   readonly viewType: CreateDropViewType;
   readonly profile: IProfileAndConsolidations;
   readonly title: string | null;
+  readonly metadata: {readonly key: string; readonly value: string}[];
   readonly editorState: EditorState | null;
   readonly onViewType: (newV: CreateDropViewType) => void;
   readonly onTitle: (newV: string | null) => void;
+  readonly onMetadataEdit: (param: {
+    readonly key: string;
+    readonly value: string;
+  }) => void;
+    readonly onMetadataRemove: (key: string) => void;
+  readonly onFileChange: (file: File) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMentionedUser: (newUser: MentionedUser) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
@@ -33,6 +44,7 @@ export default function CreateDropMobile({
         editorState={editorState}
         onViewType={onViewType}
         onEditorState={onEditorState}
+        onFileChange={onFileChange}
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
       />
@@ -42,9 +54,13 @@ export default function CreateDropMobile({
         viewType={viewType}
         editorState={editorState}
         title={title}
+        metadata={metadata}
         onViewType={onViewType}
         onEditorState={onEditorState}
         onTitle={onTitle}
+        onMetadataEdit={onMetadataEdit}
+        onMetadataRemove={onMetadataRemove}
+        onFileChange={onFileChange}
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
       />

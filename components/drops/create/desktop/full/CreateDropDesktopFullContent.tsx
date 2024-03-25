@@ -10,13 +10,15 @@ export default function CreateDropDesktopFullContent({
   onEditorState,
   onMentionedUser,
   onReferencedNft,
+  onFileChange,
 }: {
   readonly viewType: CreateDropViewType;
   readonly editorState: EditorState | null;
   readonly onViewType: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMentionedUser: (newUser: MentionedUser) => void;
-  readonly onReferencedNft: (newNft: ReferencedNft) => void;
+    readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onFileChange: (file: File) => void;
 }) {
   const onViewClick = () => onViewType(CreateDropViewType.COMPACT);
   return (
@@ -28,6 +30,7 @@ export default function CreateDropDesktopFullContent({
       onMentionedUser={onMentionedUser}
       onReferencedNft={onReferencedNft}
       onViewClick={onViewClick}
+      onFileChange={onFileChange}
     />
   );
 }

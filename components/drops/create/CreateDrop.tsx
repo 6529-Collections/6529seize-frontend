@@ -6,6 +6,9 @@ import CreateDropMobile from "./mobile/CreateDropMobile";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { EditorState } from "lexical";
 import { MentionedUser, ReferencedNft } from "../../../entities/IDrop";
+import CreateDropCompact from "./compact/CreateDropCompact";
+import CreateDropFull from "./full/CreateDropFull";
+import CreateDropWrapper from "./CreateDropWrapper";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
@@ -29,10 +32,7 @@ export default function CreateDrop({
 
   const breakpoint = useBreakpoint();
   const [screenType, setScreenType] = useState<CreateDropScreenType>(
-    CreateDropScreenType.MOBILE
-  );
-  const [viewType, setViewType] = useState<CreateDropViewType>(
-    CreateDropViewType.FULL
+    CreateDropScreenType.DESKTOP
   );
 
   useEffect(() => {
@@ -45,7 +45,13 @@ export default function CreateDrop({
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [title, setTitle] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<Record<string, string>>({});
+  const [metadata, setMetadata] = useState<
+    {
+      readonly key: string;
+      readonly value: string;
+    }[]
+  >([]);
+  const [file, setFile] = useState<File | null>(null);
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 
@@ -71,41 +77,69 @@ export default function CreateDrop({
 
   const onViewType = (newV: CreateDropViewType) => {
     setTitle(null);
+    setMetadata([]);
     setViewType(newV);
   };
 
-  const components: Record<CreateDropScreenType, JSX.Element> = {
-    [CreateDropScreenType.DESKTOP]: (
-      <CreateDropDesktop
-        viewType={viewType}
-        profile={profile}
-        title={title}
-        editorState={editorState}
-        onViewType={onViewType}
-        onTitle={setTitle}
-        onEditorState={setEditorState}
-        onMentionedUser={onMentionedUser}
-        onReferencedNft={onReferencedNft}
-      />
-    ),
-    [CreateDropScreenType.MOBILE]: (
-      <CreateDropMobile
-        viewType={viewType}
-        profile={profile}
-        title={title}
-        editorState={editorState}
-        onViewType={onViewType}
-        onTitle={setTitle}
-        onEditorState={setEditorState}
-        onMentionedUser={onMentionedUser}
-        onReferencedNft={onReferencedNft}
-      />
-    ),
+  const onMetadata = ({ key, value }: { key: string; value: string }) => {
+    const index = metadata.findIndex((m) => m.key === key);
+    if (index === -1) {
+      setMetadata((prev) => [...prev, { key, value }]);
+    } else {
+      setMetadata((prev) => {
+        const newMetadata = [...prev];
+        newMetadata[index] = { key, value };
+        return newMetadata;
+      });
+    }
   };
+
+  const onMetadataRemove = (key: string) => {
+    setMetadata((prev) => prev.filter((m) => m.key !== key));
+  };
+
+  // const components: Record<CreateDropScreenType, JSX.Element> = {
+  //   [CreateDropScreenType.DESKTOP]: (
+  //     <CreateDropDesktop
+  //       viewType={viewType}
+  //       profile={profile}
+  //       title={title}
+  //       metadata={metadata}
+  //       editorState={editorState}
+  //       onViewType={onViewType}
+  //       onTitle={setTitle}
+  //       onMetadataEdit={onMetadata}
+  //       onMetadataRemove={onMetadataRemove}
+  //       onEditorState={setEditorState}
+  //       onMentionedUser={onMentionedUser}
+  //       onReferencedNft={onReferencedNft}
+  //       onFileChange={setFile}
+  //     />
+  //   ),
+  //   [CreateDropScreenType.MOBILE]: (
+  //     <CreateDropMobile
+  //       viewType={viewType}
+  //       profile={profile}
+  //       title={title}
+  //       metadata={metadata}
+  //       editorState={editorState}
+  //       onViewType={onViewType}
+  //       onTitle={setTitle}
+  //       onMetadataEdit={onMetadata}
+  //       onMetadataRemove={onMetadataRemove}
+  //       onFileChange={setFile}
+  //       onEditorState={setEditorState}
+  //       onMentionedUser={onMentionedUser}
+  //       onReferencedNft={onReferencedNft}
+  //     />
+  //   ),
+  // };
+
+
 
   if (!init) {
     return null;
   }
 
-  return <div>{components[screenType]}</div>;
+  return <CreateDropWrapper />;
 }
