@@ -1,8 +1,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
-
-export default function CreateDropMobileFullWrapper({
+export default function CreateDropFullMobileWrapper({
   isOpen,
   onClose,
   onViewClick,
@@ -90,7 +89,7 @@ export default function CreateDropMobileFullWrapper({
                         Create a drop
                       </Dialog.Title>
                     </div>
-                        {children}
+                    {children}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

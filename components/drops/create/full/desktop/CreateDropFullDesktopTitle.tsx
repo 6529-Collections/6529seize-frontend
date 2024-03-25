@@ -5,7 +5,7 @@ enum TitleType {
   INSERT = "INSERT",
 }
 
-export default function CreateDropDesktopFullTitle({
+export default function CreateDropFullDesktopTitle({
   title,
   onTitle,
 }: {
