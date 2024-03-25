@@ -45,6 +45,7 @@ export default function CreateDrop({
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [title, setTitle] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState<Record<string, string>>({});
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 

@@ -58,6 +58,10 @@ export default function CreateDropContent({
     console.log("Media clicked");
   };
 
+  const showToggleViewButton =
+    viewType === CreateDropViewType.COMPACT ||
+    screenType === CreateDropScreenType.DESKTOP;
+
   return (
     <div className="tailwind-scope">
       <LexicalComposer initialConfig={editorConfig}>
@@ -89,7 +93,9 @@ export default function CreateDropContent({
               viewType === CreateDropViewType.COMPACT && (
                 <UploadMediaButtonPlugin onMediaClick={onMediaClick} />
               )}
-            <ToggleViewButtonPlugin onViewClick={onViewClick} />
+            {showToggleViewButton && (
+              <ToggleViewButtonPlugin onViewClick={onViewClick} />
+            )}
           </div>
         </div>
       </LexicalComposer>
