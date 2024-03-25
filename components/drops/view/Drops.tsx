@@ -17,9 +17,5 @@ export default function Drops() {
     placeholderData: keepPreviousData,
   });
 
-  return (
-    <div>
-      <DropsList drops={drops ?? []} />
-    </div>
-  );
+  return <div>{drops?.length && <DropsList drops={drops} />}</div>;
 }
