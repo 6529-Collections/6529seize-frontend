@@ -1,32 +1,40 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { CreateDropViewType } from "../../CreateDrop";
+import { CreateDropScreenType, CreateDropViewType } from "../../CreateDrop";
 import { EditorState } from "lexical";
 import { MentionedUser, ReferencedNft } from "../../../../../entities/IDrop";
-import CreateDropPfp from "../../utils/CreateDropPfp";
-import CreateDropDesktopFullTitle from "../../desktop/full/CreateDropDesktopFullTitle";
-import CreateDropDesktopFullContent from "../../desktop/full/CreateDropDesktopFullContent";
+import CreateDropContent from "../../utils/CreateDropContent";
 
 export default function CreateDropMobileFull({
   viewType,
   editorState,
+  title,
   onViewType,
   onEditorState,
+  onTitle,
   onMentionedUser,
   onReferencedNft,
 }: {
   readonly viewType: CreateDropViewType;
   readonly editorState: EditorState | null;
+  readonly title: string | null;
   readonly onViewType: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onTitle: (newV: string | null) => void;
   readonly onMentionedUser: (newUser: MentionedUser) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
 }) {
   const onViewClick = () => onViewType(CreateDropViewType.COMPACT);
   const [isOpen, setIsOpen] = useState(true);
 
-  const onClose = () => {
-    setIsOpen(false);
+  const onClose = () => setIsOpen(false);
+
+  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === "") {
+      onTitle(null);
+      return;
+    }
+    onTitle(e.target.value);
   };
 
   return (
@@ -103,24 +111,28 @@ export default function CreateDropMobileFull({
                   >
                     <div className="tw-px-6">
                       <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
-                        123
+                        Create a drop
                       </Dialog.Title>
                     </div>
                     <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
                       <div className="tw-w-full tw-inline-flex tw-justify-between">
-                        {/* <CreateDropPfp profile={profile} />
-                        <CreateDropDesktopFullTitle
-                          title={title}
-                          onTitle={onTitle}
-                        /> */}
+                        <input
+                          type="text"
+                          placeholder="Drop title"
+                          value={title ?? ""}
+                          maxLength={250}
+                          onChange={onInput}
+                          className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                        />
                       </div>
-                      <CreateDropDesktopFullContent
+                      <CreateDropContent
+                        screenType={CreateDropScreenType.MOBILE}
                         viewType={viewType}
                         editorState={editorState}
                         onEditorState={onEditorState}
                         onMentionedUser={onMentionedUser}
                         onReferencedNft={onReferencedNft}
-                        onViewType={onViewType}
+                        onViewClick={onViewClick}
                       />
                     </div>
                   </div>
