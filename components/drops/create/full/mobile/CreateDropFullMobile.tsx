@@ -1,59 +1,65 @@
 import { useState } from "react";
-import { CreateDropScreenType, CreateDropViewType } from "../../CreateDrop";
+import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
+import {
+  CreateDropScreenType,
+  CreateDropViewType,
+} from "../../utils/CreateDropWrapper";
 import { EditorState } from "lexical";
-import { MentionedUser, ReferencedNft } from "../../../../../entities/IDrop";
+import {
+  DropMetadata,
+  MentionedUser,
+  ReferencedNft,
+} from "../../../../../entities/IDrop";
+import CreateDropFullMobileTitle from "./CreateDropFullMobileTitle";
 import CreateDropContent from "../../utils/CreateDropContent";
-import CreateDropMobileFullWrapper from "./CreateDropMobileFullWrapper";
-import CreateDropMobileFullTitle from "./CreateDropMobileFullTitle";
-import CreateDropMobileFullMetadata from "./metadata/CreateDropMobileFullMetadata";
+import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
 
-export default function CreateDropMobileFull({
-  viewType,
-  editorState,
+export default function CreateDropFullMobile({
   title,
+  editorState,
   metadata,
-  onViewType,
+  file,
   onEditorState,
-  onTitle,
   onMetadataEdit,
   onMetadataRemove,
-  onFileChange,
   onMentionedUser,
   onReferencedNft,
+  onTitle,
+  onFileChange,
+  onViewChange,
+  onDrop,
 }: {
-  readonly viewType: CreateDropViewType;
-  readonly editorState: EditorState | null;
   readonly title: string | null;
-  readonly metadata: { readonly key: string; readonly value: string }[];
-  readonly onViewType: (newV: CreateDropViewType) => void;
+  readonly editorState: EditorState | null;
+  readonly metadata: DropMetadata[];
+  readonly file: File | null;
   readonly onEditorState: (editorState: EditorState | null) => void;
-  readonly onTitle: (newV: string | null) => void;
-  readonly onMetadataEdit: (param: {
-    readonly key: string;
-    readonly value: string;
-  }) => void;
+  readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
-  readonly onFileChange: (file: File) => void;
   readonly onMentionedUser: (newUser: MentionedUser) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onTitle: (newV: string | null) => void;
+  readonly onFileChange: (file: File | null) => void;
+  readonly onViewChange: (newV: CreateDropViewType) => void;
+  readonly onDrop: () => void;
 }) {
-  const onViewClick = () => onViewType(CreateDropViewType.COMPACT);
+  const onViewClick = () => onViewChange(CreateDropViewType.COMPACT);
   const [isOpen, setIsOpen] = useState(true);
 
   const onClose = () => setIsOpen(false);
 
   return (
-    <CreateDropMobileFullWrapper
+    <CreateDropFullMobileWrapper
       isOpen={isOpen}
       onClose={onClose}
       onViewClick={onViewClick}
     >
       <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
-        <CreateDropMobileFullTitle title={title} onTitle={onTitle} />
+        <CreateDropFullMobileTitle title={title} onTitle={onTitle} />
         <CreateDropContent
           screenType={CreateDropScreenType.MOBILE}
-          viewType={viewType}
+          viewType={CreateDropViewType.FULL}
           editorState={editorState}
           onEditorState={onEditorState}
           onMentionedUser={onMentionedUser}
@@ -61,14 +67,14 @@ export default function CreateDropMobileFull({
           onViewClick={onViewClick}
           onFileChange={onFileChange}
         />
-        <CreateDropMobileFullMetadata
+        <CreateDropFullMobileMetadata
           metadata={metadata}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
         />
-        <CreateDropSelectFile onFileChange={onFileChange} />
-        <button>Drop</button>
+        <CreateDropSelectFile onFileChange={onFileChange} file={file} />
+        <button onClick={onDrop}>Drop</button>
       </div>
-    </CreateDropMobileFullWrapper>
+    </CreateDropFullMobileWrapper>
   );
 }
