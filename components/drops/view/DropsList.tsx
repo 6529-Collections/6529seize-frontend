@@ -1,5 +1,5 @@
 import { DropFull } from "../../../entities/IDrop";
-import DropsListItem from "./DropsListItem";
+import DropsListItem from "./item/DropsListItem";
 
 export default function DropsList({ drops }: { readonly drops: DropFull[] }) {
   return (
