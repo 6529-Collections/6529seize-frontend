@@ -19,7 +19,7 @@ export default function UserPageDrops({
   );
 
   return (
-    <div className="tw-space-y-4">
+    <div className="tailwind-scope tw-space-y-4">
       {isMyProfile && <CreateDrop profile={profile} />}
       <Drops />
     </div>
