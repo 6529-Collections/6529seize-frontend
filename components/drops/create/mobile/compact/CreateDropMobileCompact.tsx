@@ -10,13 +10,15 @@ export default function CreateDropMobileCompact({
   onEditorState,
   onMentionedUser,
   onReferencedNft,
+  onFileChange,
 }: {
   readonly viewType: CreateDropViewType;
   readonly editorState: EditorState | null;
   readonly onViewType: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMentionedUser: (newUser: MentionedUser) => void;
-  readonly onReferencedNft: (newNft: ReferencedNft) => void;
+    readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onFileChange: (file: File) => void;
 }) {
   const onViewClick = () => onViewType(CreateDropViewType.FULL);
 
@@ -30,6 +32,7 @@ export default function CreateDropMobileCompact({
           onEditorState={onEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
+          onFileChange={onFileChange}
           onViewClick={onViewClick}
         />
       </div>

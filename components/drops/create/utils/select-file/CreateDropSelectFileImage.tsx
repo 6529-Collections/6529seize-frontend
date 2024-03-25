@@ -1,11 +1,14 @@
-export default function UploadMediaButtonPlugin({
+import { useRef } from "react";
+
+export default function CreateDropSelectFileImage({
   onFileChange,
 }: {
   readonly onFileChange: (file: File) => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="tw-absolute tw-top-[0.63rem] tw-right-9">
-      <label htmlFor="create-drop-any-input">
+    <div>
+      <label htmlFor="create-drop-image-input">
         <svg
           className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-300"
           viewBox="0 0 512 512"
@@ -19,10 +22,11 @@ export default function UploadMediaButtonPlugin({
           </g>
         </svg>
         <input
-          id="create-drop-any-input"
+          id="create-drop-image-input"
+          ref={inputRef}
           type="file"
           className="tw-hidden"
-          accept="image/*,video/*,.glb,audio/*"
+          accept="image/*"
           onChange={(e: any) => {
             if (e.target.files) {
               const f = e.target.files[0];

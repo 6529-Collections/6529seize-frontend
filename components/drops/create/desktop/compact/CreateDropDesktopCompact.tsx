@@ -13,6 +13,7 @@ export default function CreateDropDesktopCompact({
   onEditorState,
   onMentionedUser,
   onReferencedNft,
+  onFileChange,
 }: {
   readonly viewType: CreateDropViewType;
   readonly profile: IProfileAndConsolidations;
@@ -21,6 +22,7 @@ export default function CreateDropDesktopCompact({
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMentionedUser: (newUser: MentionedUser) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onFileChange: (file: File) => void;
 }) {
   return (
     <div className="tw-inline-flex tw-w-full tw-items-center tw-space-x-2">
@@ -33,6 +35,7 @@ export default function CreateDropDesktopCompact({
           onEditorState={onEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
+          onFileChange={onFileChange}
         />
       </div>
     </div>

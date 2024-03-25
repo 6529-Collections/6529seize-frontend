@@ -28,6 +28,7 @@ export default function CreateDropContent({
   onEditorState,
   onReferencedNft,
   onMentionedUser,
+  onFileChange,
   onViewClick,
 }: {
   readonly viewType: CreateDropViewType;
@@ -36,6 +37,7 @@ export default function CreateDropContent({
   readonly onEditorState: (editorState: EditorState) => void;
   readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
   readonly onMentionedUser: (mentionedUser: MentionedUser) => void;
+  readonly onFileChange: (file: File) => void;
   readonly onViewClick: () => void;
 }) {
   const editorConfig: InitialConfigType = {
@@ -53,10 +55,6 @@ export default function CreateDropContent({
 
   const onMentionedUserAdded = (user: MentionedUser) => onMentionedUser(user);
   const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
-
-  const onMediaClick = () => {
-    console.log("Media clicked");
-  };
 
   const showToggleViewButton =
     viewType === CreateDropViewType.COMPACT ||
@@ -91,7 +89,7 @@ export default function CreateDropContent({
             <MaxLengthPlugin maxLength={25000} />
             {screenType === CreateDropScreenType.MOBILE &&
               viewType === CreateDropViewType.COMPACT && (
-                <UploadMediaButtonPlugin onMediaClick={onMediaClick} />
+                <UploadMediaButtonPlugin onFileChange={onFileChange} />
               )}
             {showToggleViewButton && (
               <ToggleViewButtonPlugin onViewClick={onViewClick} />
