@@ -3,6 +3,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDrop from "../../drops/create/CreateDrop";
 import { useEffect, useState } from "react";
 import { amIUser } from "../../../helpers/Helpers";
+import Drops from "../../drops/view/Drops";
 
 export default function UserPageDrops({
   profile,
@@ -17,5 +18,10 @@ export default function UserPageDrops({
     [profile, address]
   );
 
-  return <div>{isMyProfile && <CreateDrop profile={profile} />}</div>;
+  return (
+    <div className="tw-space-y-4">
+      {isMyProfile && <CreateDrop profile={profile} />}
+      <Drops />
+    </div>
+  );
 }

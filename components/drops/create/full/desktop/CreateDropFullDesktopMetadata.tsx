@@ -1,21 +1,16 @@
 import { useState } from "react";
-import CommonInput from "../../../../../utils/input/CommonInput";
-import CreateDropMobileFullMetadataItem from "./CreateDropMobileFullMetadataItem";
+import CommonInput from "../../../../utils/input/CommonInput";
+import { DropMetadata } from "../../../../../entities/IDrop";
+import CreateDropMetadataItems from "../../utils/metadata/CreateDropMetadataItems";
 
-
-export default function CreateDropMobileFullMetadata({
+export default function CreateDropFullDesktopMetadata({
   metadata,
   onMetadataEdit,
   onMetadataRemove,
-
 }: {
-  readonly metadata: { readonly key: string; readonly value: string }[];
-  readonly onMetadataEdit: (param: {
-    readonly key: string;
-    readonly value: string;
-  }) => void;
+  readonly metadata: DropMetadata[];
+  readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
-
 }) {
   const [key, setKey] = useState<string | null>(null);
   const [value, setValue] = useState<string | null>(null);
@@ -23,7 +18,7 @@ export default function CreateDropMobileFullMetadata({
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (key && value) {
-      onMetadataEdit({ key, value });
+      onMetadataEdit({ data_key: key, data_value: value });
       setKey(null);
       setValue(null);
     }
@@ -31,15 +26,10 @@ export default function CreateDropMobileFullMetadata({
 
   return (
     <div>
-      <div className="tw-space-x-2 tw-mb-2">
-        {metadata.map((item, index) => (
-          <CreateDropMobileFullMetadataItem
-            key={index}
-            item={item}
-            onMetadataRemove={onMetadataRemove}
-          />
-        ))}
-      </div>
+      <CreateDropMetadataItems
+        items={metadata}
+        onMetadataRemove={onMetadataRemove}
+      />
       <form onSubmit={onSubmit} className="tw-space-y-2">
         <CommonInput
           inputType="text"
@@ -55,7 +45,6 @@ export default function CreateDropMobileFullMetadata({
         />
         <button type="submit">Add</button>
       </form>
-    
     </div>
   );
 }

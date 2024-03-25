@@ -1,25 +1,24 @@
-import { useEffect, useState } from "react";
-
-import { createBreakpoint } from "react-use";
-import CreateDropDesktop from "./desktop/CreateDropDesktop";
-import CreateDropMobile from "./mobile/CreateDropMobile";
+import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { EditorState } from "lexical";
-import { MentionedUser, ReferencedNft } from "../../../entities/IDrop";
-import CreateDropCompact from "./compact/CreateDropCompact";
-import CreateDropFull from "./full/CreateDropFull";
-import CreateDropWrapper from "./CreateDropWrapper";
+import CreateDropWrapper from "./utils/CreateDropWrapper";
+import {
+  DropMetadata,
+  MentionedUser,
+  ReferencedNft,
+} from "../../../entities/IDrop";
+import { useMutation } from "@tanstack/react-query";
+import { AuthContext } from "../../auth/Auth";
+import { commonApiPostForm } from "../../../services/api/common-api";
 
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
-
-export enum CreateDropViewType {
-  COMPACT = "COMPACT",
-  FULL = "FULL",
-}
-
-export enum CreateDropScreenType {
-  DESKTOP = "DESKTOP",
-  MOBILE = "MOBILE",
+export interface DropRequest {
+  readonly title: string | null;
+  readonly content: string | null;
+  readonly stormId: string | null;
+  readonly quotedDropId: string | null;
+  readonly referencedNfts: ReferencedNft[];
+  readonly mentionedUsers: MentionedUser[];
+  readonly metadata: DropMetadata[];
+  readonly file: File | null;
 }
 
 export default function CreateDrop({
@@ -27,119 +26,100 @@ export default function CreateDrop({
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
+  const { setToast, requestAuth } = useContext(AuthContext);
   const [init, setInit] = useState(false);
   useEffect(() => setInit(true), []);
 
-  const breakpoint = useBreakpoint();
-  const [screenType, setScreenType] = useState<CreateDropScreenType>(
-    CreateDropScreenType.DESKTOP
-  );
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (breakpoint === "LG") {
-      setScreenType(CreateDropScreenType.DESKTOP);
-    } else {
-      setScreenType(CreateDropScreenType.MOBILE);
-    }
-  }, [breakpoint]);
+  const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
-  const [editorState, setEditorState] = useState<EditorState | null>(null);
-  const [title, setTitle] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<
-    {
-      readonly key: string;
-      readonly value: string;
-    }[]
-  >([]);
-  const [file, setFile] = useState<File | null>(null);
-  const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
-  const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
-
-  const onMentionedUser = (newUser: MentionedUser) => {
-    const isAdded = mentionedUsers.some(
-      (mentionedUser) =>
-        mentionedUser.mentioned_profile_id === newUser.mentioned_profile_id
-    );
-    if (!isAdded) {
-      setMentionedUsers((prev) => [...prev, newUser]);
-    }
-  };
-
-  const onReferencedNft = (newNft: ReferencedNft) => {
-    const isAdded = referencedNfts.some(
-      (nft) =>
-        nft.tokenId === newNft.tokenId && nft.contract === newNft.contract
-    );
-    if (!isAdded) {
-      setReferencedNfts((prev) => [...prev, newNft]);
-    }
-  };
-
-  const onViewType = (newV: CreateDropViewType) => {
-    setTitle(null);
-    setMetadata([]);
-    setViewType(newV);
-  };
-
-  const onMetadata = ({ key, value }: { key: string; value: string }) => {
-    const index = metadata.findIndex((m) => m.key === key);
-    if (index === -1) {
-      setMetadata((prev) => [...prev, { key, value }]);
-    } else {
-      setMetadata((prev) => {
-        const newMetadata = [...prev];
-        newMetadata[index] = { key, value };
-        return newMetadata;
+  const addDropMutation = useMutation({
+    mutationFn: async (body: FormData) =>
+      await commonApiPostForm<any>({
+        endpoint: `drops`,
+        body,
+      }),
+    onSuccess: (response) => {
+      setToast({
+        message: "Drop created.",
+        type: "success",
       });
-    }
-  };
-
-  const onMetadataRemove = (key: string) => {
-    setMetadata((prev) => prev.filter((m) => m.key !== key));
-  };
-
-  // const components: Record<CreateDropScreenType, JSX.Element> = {
-  //   [CreateDropScreenType.DESKTOP]: (
-  //     <CreateDropDesktop
-  //       viewType={viewType}
-  //       profile={profile}
-  //       title={title}
-  //       metadata={metadata}
-  //       editorState={editorState}
-  //       onViewType={onViewType}
-  //       onTitle={setTitle}
-  //       onMetadataEdit={onMetadata}
-  //       onMetadataRemove={onMetadataRemove}
-  //       onEditorState={setEditorState}
-  //       onMentionedUser={onMentionedUser}
-  //       onReferencedNft={onReferencedNft}
-  //       onFileChange={setFile}
-  //     />
-  //   ),
-  //   [CreateDropScreenType.MOBILE]: (
-  //     <CreateDropMobile
-  //       viewType={viewType}
-  //       profile={profile}
-  //       title={title}
-  //       metadata={metadata}
-  //       editorState={editorState}
-  //       onViewType={onViewType}
-  //       onTitle={setTitle}
-  //       onMetadataEdit={onMetadata}
-  //       onMetadataRemove={onMetadataRemove}
-  //       onFileChange={setFile}
-  //       onEditorState={setEditorState}
-  //       onMentionedUser={onMentionedUser}
-  //       onReferencedNft={onReferencedNft}
-  //     />
-  //   ),
-  // };
-
-
+      setDropEditorRefreshKey((prev) => prev + 1);
+    },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
+    onSettled: () => {
+      setSubmitting(false);
+    },
+  });
 
   if (!init) {
     return null;
   }
 
-  return <CreateDropWrapper />;
+  const submitDrop = async (dropRequest: DropRequest) => {
+    if (submitting) {
+      return;
+    }
+    setSubmitting(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      setSubmitting(true);
+      return;
+    }
+    const formData = new FormData();
+    if (dropRequest.file) {
+      formData.append("drop_media", dropRequest.file);
+    }
+    if (dropRequest.title) {
+      formData.append("title", dropRequest.title);
+    }
+
+    if (dropRequest.content) {
+      formData.append("content", dropRequest.content);
+    }
+
+    if (dropRequest.stormId) {
+      formData.append("storm_id", dropRequest.stormId);
+    }
+
+    if (dropRequest.quotedDropId) {
+      formData.append("quoted_drop_id", dropRequest.quotedDropId);
+    }
+
+    if (dropRequest.referencedNfts.length) {
+      formData.append(
+        "referenced_nfts",
+        JSON.stringify(dropRequest.referencedNfts)
+      );
+    }
+
+    if (dropRequest.mentionedUsers.length) {
+      formData.append(
+        "mentioned_users",
+        JSON.stringify(dropRequest.mentionedUsers)
+      );
+    }
+
+    if (dropRequest.metadata.length) {
+      formData.append("metadata", JSON.stringify(dropRequest.metadata));
+    }
+
+    await addDropMutation.mutateAsync(formData);
+    // setDropEditorRefreshKey((prev) => prev + 1);
+    // setSubmitting(false);
+  };
+
+  return (
+    <CreateDropWrapper
+      profile={profile}
+      onSubmitDrop={submitDrop}
+      key={dropEditorRefreshKey}
+    />
+  );
 }

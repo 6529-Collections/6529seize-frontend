@@ -10,37 +10,26 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { $createHashtagNode } from "../../nodes/HashtagNode";
-import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
-import { isEthereumAddress } from "../../../../../../helpers/AllowlistToolHelpers";
-import { ReferencedNft } from "../../../../../../entities/IDrop";
-
-export interface ReservoirToken {
-  readonly token: {
-    readonly name: string;
-    readonly imageSmall: string;
-    readonly collection: {
-      readonly name: string;
-    };
-    readonly contract: string;
-    readonly tokenId: string;
-  };
-}
+import { $createMentionNode } from "../../nodes/MentionNode";
+import { commonApiFetch } from "../../../../../../services/api/common-api";
+import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
+import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
+import { MentionedUser } from "../../../../../../entities/IDrop";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
 const NAME = "\\b[A-Z][^\\s" + PUNCTUATION + "]";
 
-const DocumentHashtagRegex = {
+const DocumentMentionsRegex = {
   NAME,
   PUNCTUATION,
 };
 
-const PUNC = DocumentHashtagRegex.PUNCTUATION;
+const PUNC = DocumentMentionsRegex.PUNCTUATION;
 
-const TRIGGERS = ["#"].join("");
+const TRIGGERS = ["@"].join("");
 
-// Chars we expect to see in a hashtag (non-space, non-punctuation).
+// Chars we expect to see in a mention (non-space, non-punctuation).
 const VALID_CHARS = "[^" + TRIGGERS + PUNC + "\\s]";
 
 // Non-standard series of chars. Each series must be preceded and followed by
@@ -56,7 +45,7 @@ const VALID_JOINS =
 
 const LENGTH_LIMIT = 75;
 
-const HashtagSignHashtagRegex = new RegExp(
+const AtSignMentionsRegex = new RegExp(
   "(^|\\s|\\()(" +
     "[" +
     TRIGGERS +
@@ -74,7 +63,7 @@ const HashtagSignHashtagRegex = new RegExp(
 const ALIAS_LENGTH_LIMIT = 50;
 
 // Regex used to match alias.
-const HashtagSignHashtagsRegexAliasRegex = new RegExp(
+const AtSignMentionsRegexAliasRegex = new RegExp(
   "(^|\\s|\\()(" +
     "[" +
     TRIGGERS +
@@ -90,45 +79,40 @@ const HashtagSignHashtagsRegexAliasRegex = new RegExp(
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 
-function useHashtagLookupService(hashtagString: string | null) {
-  const [results, setResults] = useState<Array<ReservoirToken>>([]);
+function useMentionLookupService(mentionString: string | null) {
+  const [results, setResults] = useState<Array<CommunityMemberMinimal>>([]);
 
   const getResults = async (query: string): Promise<void> => {
-    const [contract, tokenId] = query.split(":");
-    const isContract = isEthereumAddress(contract);
-    const isTokenId = !isNaN(Number(tokenId));
-    if (!isContract || !isTokenId) {
-      setResults([]);
-      return;
-    }
-    const url = `https://api.reservoir.tools/tokens/v7?tokens=${contract}%3A${tokenId}`;
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      setResults(data.tokens);
-    }
+    const response = await commonApiFetch<CommunityMemberMinimal[]>({
+      endpoint: "community-members",
+      params: {
+        param: query.trim(),
+        only_profile_owners: "true",
+      },
+    });
+    setResults(response);
   };
 
   useEffect(() => {
-    if (hashtagString == null) {
+    if (mentionString == null) {
       setResults([]);
       return;
     }
 
-    getResults(hashtagString);
-  }, [hashtagString]);
+    getResults(mentionString);
+  }, [mentionString]);
 
   return results;
 }
 
-function checkForAtSignHashtags(
+function checkForAtSignMentions(
   text: string,
   minMatchLength: number
 ): MenuTextMatch | null {
-  let match = HashtagSignHashtagRegex.exec(text);
+  let match = AtSignMentionsRegex.exec(text);
 
   if (match === null) {
-    match = HashtagSignHashtagsRegexAliasRegex.exec(text);
+    match = AtSignMentionsRegexAliasRegex.exec(text);
   }
   if (match !== null) {
     // The strategy ignores leading whitespace but we need to know it's
@@ -148,42 +132,42 @@ function checkForAtSignHashtags(
 }
 
 function getPossibleQueryMatch(text: string): MenuTextMatch | null {
-  return checkForAtSignHashtags(text, 1);
+  return checkForAtSignMentions(text, 1);
 }
 
-export class HashtagsTypeaheadOption extends MenuOption {
-  contract: string;
-  tokenId: string;
-  name: string;
+export class MentionTypeaheadOption extends MenuOption {
+  id: string;
+  handle: string;
+  display: string | null;
   picture: string | null;
 
   constructor({
-    contract,
-    tokenId,
-    name,
+    id,
+    handle,
+    display,
     picture,
   }: {
-    contract: string;
-    tokenId: string;
-    name: string;
+    id: string;
+    handle: string;
+    display: string | null;
     picture: string | null;
   }) {
-    super(name);
-    this.contract = contract;
-    this.tokenId = tokenId;
-    this.name = name;
+    super(handle);
+    this.id = id;
+    this.handle = handle;
+    this.display = display;
     this.picture = picture;
   }
 }
 
-export default function NewHashtagsPlugin({
+export default function NewMentionsPlugin({
   onSelect,
 }: {
-  readonly onSelect: (nft: ReferencedNft) => void;
+  readonly onSelect: (user: MentionedUser) => void;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
-  const results = useHashtagLookupService(queryString);
+  const results = useMentionLookupService(queryString);
 
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
     minLength: 0,
@@ -194,11 +178,11 @@ export default function NewHashtagsPlugin({
       results
         .map(
           (result) =>
-            new HashtagsTypeaheadOption({
-              contract: result.token.contract,
-              tokenId: result.token.tokenId,
-              name: result.token.name,
-              picture: result.token.imageSmall,
+            new MentionTypeaheadOption({
+              id: result.profile_id,
+              handle: result.handle ?? result.wallet,
+              display: result.display,
+              picture: result.pfp,
             })
         )
         .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
@@ -207,20 +191,19 @@ export default function NewHashtagsPlugin({
 
   const onSelectOption = useCallback(
     (
-      selectedOption: HashtagsTypeaheadOption,
+      selectedOption: MentionTypeaheadOption,
       nodeToReplace: TextNode | null,
       closeMenu: () => void
     ) => {
       editor.update(() => {
-        const hashtagNode = $createHashtagNode(`#${selectedOption.name}`);
+        const mentionNode = $createMentionNode(`@${selectedOption.handle}`);
         if (nodeToReplace) {
-          nodeToReplace.replace(hashtagNode);
+          nodeToReplace.replace(mentionNode);
         }
-        hashtagNode.select();
+        mentionNode.select();
         onSelect({
-          contract: selectedOption.contract,
-          tokenId: selectedOption.tokenId,
-          name: selectedOption.name,
+          mentioned_profile_id: selectedOption.id,
+          handle_in_content: selectedOption.handle,
         });
         closeMenu();
       });
@@ -228,7 +211,7 @@ export default function NewHashtagsPlugin({
     [editor]
   );
 
-  const checkForHashtagMatch = useCallback(
+  const checkForMentionMatch = useCallback(
     (text: string) => {
       const slashMatch = checkForSlashTriggerMatch(text, editor);
       if (slashMatch !== null) {
@@ -240,10 +223,10 @@ export default function NewHashtagsPlugin({
   );
 
   return (
-    <LexicalTypeaheadMenuPlugin<HashtagsTypeaheadOption>
+    <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
       onQueryChange={setQueryString}
       onSelectOption={onSelectOption}
-      triggerFn={checkForHashtagMatch}
+      triggerFn={checkForMentionMatch}
       options={options}
       menuRenderFn={(
         anchorElementRef,
@@ -251,7 +234,7 @@ export default function NewHashtagsPlugin({
       ) => {
         return anchorElementRef.current && results.length
           ? ReactDOM.createPortal(
-              <HashtagsTypeaheadMenu
+              <MentionsTypeaheadMenu
                 selectedIndex={selectedIndex}
                 options={options}
                 setHighlightedIndex={setHighlightedIndex}

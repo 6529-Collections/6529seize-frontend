@@ -3,23 +3,24 @@ import {
   LexicalComposer,
 } from "@lexical/react/LexicalComposer";
 import { EditorState, RootNode } from "lexical";
-import { MentionNode } from "../../drop/lexical/nodes/MentionNode";
-import { HashtagNode } from "../../drop/lexical/nodes/HashtagNode";
-import ExampleTheme from "../../drop/lexical/ExampleTheme";
+import { MentionNode } from "../lexical/nodes/MentionNode";
+import { HashtagNode } from "../lexical/nodes/HashtagNode";
+import ExampleTheme from "../lexical/ExampleTheme";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import NewMentionsPlugin from "../../drop/lexical/plugins/mentions/MentionsPlugin";
-import NewHashtagsPlugin from "../../drop/lexical/plugins/hashtags/HashtagsPlugin";
+import NewMentionsPlugin from "../lexical/plugins/mentions/MentionsPlugin";
+import NewHashtagsPlugin from "../lexical/plugins/hashtags/HashtagsPlugin";
 import { MentionedUser, ReferencedNft } from "../../../../entities/IDrop";
-import OneLinerPlugin from "../../drop/lexical/plugins/OneLinerPlugin";
-import { MaxLengthPlugin } from "../../drop/lexical/plugins/MaxLengthPlugin";
-import ToggleViewButtonPlugin from "../../drop/lexical/plugins/ToggleViewButtonPlugin";
-import { CreateDropScreenType, CreateDropViewType } from "../CreateDrop";
-import UploadMediaButtonPlugin from "../../drop/lexical/plugins/UploadMediaButtonPlugin";
+import OneLinerPlugin from "../lexical/plugins/OneLinerPlugin";
+import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
+import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
+
+import UploadMediaButtonPlugin from "../lexical/plugins/UploadMediaButtonPlugin";
+import { CreateDropScreenType, CreateDropViewType } from "./CreateDropWrapper";
 
 export default function CreateDropContent({
   viewType,
