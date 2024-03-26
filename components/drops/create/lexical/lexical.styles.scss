@@ -1,10 +1,11 @@
 .editor-placeholder {
-  color: #999;
+  color: #848490;
+  font-weight: normal;
   overflow: hidden;
   position: absolute;
   text-overflow: ellipsis;
-  top: 15px;
-  left: 10px;
+  top: 12px;
+  left: 14px;
   font-size: 15px;
   user-select: none;
   display: inline-block;
@@ -30,7 +31,6 @@
 }
 
 .editor-input-one-liner {
-  white-space: pre !important;
   overflow-x: auto;
 }
 
