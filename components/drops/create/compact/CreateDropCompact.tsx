@@ -11,9 +11,7 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
-import CreateDropDesktopFooter from "../utils/CreateDropDesktopFooter";
 import CreateDropCompactTitle from "./CreateDropCompactTitle";
-import CreateDropMetadataItems from "../utils/metadata/CreateDropMetadataItems";
 import PrimaryButton from "../../../utils/buttons/PrimaryButton";
 
 export default function CreateDropCompact({

@@ -7,11 +7,13 @@ import DropListItemContentMention from "./DropListItemContentMention";
 export interface DropListItemContentMentionProps {
   readonly type: DropContentPartType.MENTION;
   readonly value: MentionedUser;
+  readonly match: string
 }
 
 export interface DropListItemContentHashtagProps {
   readonly type: DropContentPartType.HASHTAG;
   readonly value: ReferencedNft;
+  readonly match: string
 }
 
 export type DropListItemContentPartProps =
