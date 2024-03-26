@@ -13,7 +13,7 @@ export default function DropListItemContentHashtag({
       interactive={true}
       content={<NftTooltip contract={nft.contract} tokenId={nft.token} />}
     >
-      <span className="tw-text-blue-500 hover:tw-text-blue-600 tw-transition tw-duration-300 tw-ease-out">
+      <span className="tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
         #{nft.name}
       </span>
     </LazyTippy>

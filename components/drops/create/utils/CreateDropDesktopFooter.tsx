@@ -1,3 +1,4 @@
+import PrimaryButton from "../../../utils/buttons/PrimaryButton";
 import CreateDropSelectFile from "./select-file/CreateDropSelectFile";
 
 export default function CreateDropDesktopFooter({
@@ -12,7 +13,7 @@ export default function CreateDropDesktopFooter({
   return (
     <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
       <CreateDropSelectFile onFileChange={onFileChange} file={file} />
-      <button onClick={onDrop}>Drop</button>
+      <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
     </div>
   );
 }

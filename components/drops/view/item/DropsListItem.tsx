@@ -5,22 +5,22 @@ import DropListItemContent from "./content/DropListItemContent";
 
 export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   return (
-    <div className="tw-border-solid tw-border tw-border-iron-700 tw-rounded-lg tw-bg-iron-900 tw-p-5">
-      <div className="tw-flex tw-items-center tw-gap-x-3">
-        <div className="tw-inline-flex tw-items-center tw-gap-x-3">
-          <DropPfp pfpUrl={drop.author.pfp} />
-          <p className="tw-mb-0 tw-text-base tw-font-semibold">
-            {drop.author.handle}
-          </p>
+    <div className="tw-border-solid tw-border tw-border-iron-700 tw-rounded-xl tw-bg-iron-900 tw-p-5">
+      <div className="tw-flex tw-gap-x-3">
+        <DropPfp pfpUrl={drop.author.pfp} />
+        <div className="tw-flex tw-flex-col">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
+            <p className="tw-mb-0 tw-text-base tw-font-semibold">
+              {drop.author.handle}
+            </p>
+            <p className="tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-text-sm tw-text-iron-500">
+              {getTimeAgo(drop.created_at)}
+            </p>
+          </div>
+          <DropListItemContent drop={drop} />
         </div>
-        <p className="tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-text-sm tw-text-iron-500">
-          {getTimeAgo(drop.created_at)}
-        </p>
       </div>
-      <div className="tw-ml-[3.25rem]">
-        <DropListItemContent drop={drop} />
-      </div>
-      <div className="tw-ml-[3.25rem] tw-border-t tw-flex tw-items-center tw-gap-x-8">
+      <div className="tw-ml-12 tw-border-t tw-flex tw-items-center tw-gap-x-8">
         <button
           type="button"
           className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition tw-ease-out tw-duration-300"

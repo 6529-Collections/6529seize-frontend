@@ -26,25 +26,34 @@ export default function CreateDropFullDesktopMetadata({
 
   return (
     <div>
+      <form onSubmit={onSubmit} className="tw-flex tw-gap-x-3 tw-w-full">
+        <div className="tw-w-full">
+          <CommonInput
+            inputType="text"
+            placeholder="Key"
+            value={key ?? ""}
+            onChange={setKey}
+          />
+        </div>
+        <div className="tw-w-full">
+          <CommonInput
+            inputType="text"
+            placeholder="Value"
+            value={value ?? ""}
+            onChange={setValue}
+          />
+        </div>
+        <button
+          type="submit"
+          className="tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+        >
+          Add
+        </button>
+      </form>
       <CreateDropMetadataItems
         items={metadata}
         onMetadataRemove={onMetadataRemove}
       />
-      <form onSubmit={onSubmit} className="tw-space-y-2">
-        <CommonInput
-          inputType="text"
-          placeholder="Key"
-          value={key ?? ""}
-          onChange={setKey}
-        />
-        <CommonInput
-          inputType="text"
-          placeholder="Value"
-          value={value ?? ""}
-          onChange={setValue}
-        />
-        <button type="submit">Add</button>
-      </form>
     </div>
   );
 }
