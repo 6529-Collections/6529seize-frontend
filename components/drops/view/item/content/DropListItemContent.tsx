@@ -1,21 +1,32 @@
 import { ReactNode } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
 import Markdown from "react-markdown";
-import DropListItemContentMention from "./DropListItemContentMention";
-import DropListItemContentPart from "./DropListItemContentPart";
+import DropListItemContentPart, {
+  DropListItemContentHashtagProps,
+  DropListItemContentMentionProps,
+  DropListItemContentPartProps,
+} from "./DropListItemContentPart";
+import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 export enum DropContentPartType {
   MENTION = "MENTION",
   HASHTAG = "HASHTAG",
 }
 
-export interface DropContentPart {
-  value: string;
-  type: DropContentPartType;
-}
-
 const PART_STARTING_CHAR: Record<DropContentPartType, string> = {
   [DropContentPartType.MENTION]: "@",
   [DropContentPartType.HASHTAG]: "#",
+};
+
+const getRegex = (part: DropListItemContentPartProps) => {
+  switch (part.type) {
+    case DropContentPartType.MENTION:
+      return new RegExp(`@\\[${part.value.handle_in_content}\\]`, "g");
+    case DropContentPartType.HASHTAG:
+      return new RegExp(`#\\[${part.value.name}\\]`, "g");
+    default:
+      assertUnreachable(part);
+      return new RegExp("");
+  }
 };
 
 function CustomP({
@@ -28,29 +39,27 @@ function CustomP({
   if (typeof children !== "string") {
     return <p>{children}</p>;
   }
-  const mentionStrings = drop.mentioned_users.map(
-    (user) => user.handle_in_content
-  );
-  const nftStrings = drop.referenced_nfts.map((nft) => nft.name);
 
-  const parts: DropContentPart[] = [
-    ...mentionStrings.map((mention) => ({
-      value: mention,
+  const mentions: DropListItemContentMentionProps[] = drop.mentioned_users.map(
+    (user) => ({
       type: DropContentPartType.MENTION,
-    })),
-    ...nftStrings.map((nft) => ({
-      value: nft,
-      type: DropContentPartType.HASHTAG,
-    })),
-  ];
-  let nodes: (JSX.Element | string)[] = [children];
+      value: user,
+    })
+  );
 
-  parts.forEach((part) => {
-    const regex = new RegExp(
-      `${PART_STARTING_CHAR[part.type]}\\[${part.value}\\]`,
-      "g"
-    );
-    nodes = nodes.flatMap((node) =>
+  const hashtags: DropListItemContentHashtagProps[] = drop.referenced_nfts.map(
+    (nft) => ({
+      type: DropContentPartType.HASHTAG,
+      value: nft,
+    })
+  );
+
+  const parts: DropListItemContentPartProps[] = [...mentions, ...hashtags];
+  const initialNodes: (JSX.Element | string)[] = [children];
+
+  const nodes = parts.reduce((currentNodes, part) => {
+    const regex = getRegex(part);
+    return currentNodes.flatMap((node) =>
       typeof node === "string"
         ? node
             .split(regex)
@@ -59,14 +68,14 @@ function CustomP({
                 subnode
               ) : (
                 <DropListItemContentPart
-                  key={`${part.value}-${index}`}
+                  key={`${part.type}-${index}`}
                   part={part}
                 />
               )
             )
         : [node]
     );
-  });
+  }, initialNodes);
   return <p>{nodes}</p>;
 }
 
