@@ -76,7 +76,7 @@ function CustomP({
         : [node]
     );
   }, initialNodes);
-  return <p>{nodes}</p>;
+  return <p className="tw-text-base tw-text-iron-50 tw-font-normal">{nodes}</p>;
 }
 
 export default function DropListItemContent({
