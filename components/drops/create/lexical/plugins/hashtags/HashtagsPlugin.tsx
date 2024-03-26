@@ -14,18 +14,7 @@ import { $createHashtagNode } from "../../nodes/HashtagNode";
 import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
 import { isEthereumAddress } from "../../../../../../helpers/AllowlistToolHelpers";
 import { ReferencedNft } from "../../../../../../entities/IDrop";
-
-export interface ReservoirToken {
-  readonly token: {
-    readonly name: string;
-    readonly imageSmall: string;
-    readonly collection: {
-      readonly name: string;
-    };
-    readonly contract: string;
-    readonly tokenId: string;
-  };
-}
+import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -91,7 +80,9 @@ const HashtagSignHashtagsRegexAliasRegex = new RegExp(
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 
 function useHashtagLookupService(hashtagString: string | null) {
-  const [results, setResults] = useState<Array<ReservoirToken>>([]);
+  const [results, setResults] = useState<
+    Array<ReservoirTokensResponseTokenElement>
+  >([]);
 
   const getResults = async (query: string): Promise<void> => {
     const [contract, tokenId] = query.split(":");
