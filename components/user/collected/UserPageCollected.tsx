@@ -431,8 +431,7 @@ export default function UserPageCollected({
         <>
           <div
             className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
-            ref={scrollContainer}
-          >
+            ref={scrollContainer}>
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}

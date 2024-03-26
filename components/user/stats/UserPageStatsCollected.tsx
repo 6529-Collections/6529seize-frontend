@@ -1,243 +1,296 @@
-import { useEffect, useState } from "react";
-import { UserPageStatsTDHType } from "./UserPageStats";
-import UserPageStatsTable, {
-  UserPageStatsTableItemData,
-  UserPageStatsTableProps,
-} from "./utils/table/UserPageStatsTable";
-import { formatNumberWithCommasOrDash } from "../../../helpers/Helpers";
+import styles from "./UserPageStats.module.scss";
+import { Accordion, Container, Row, Col, Table } from "react-bootstrap";
+import { OwnerBalance, OwnerBalanceMemes } from "../../../entities/IBalances";
+import { numberWithCommas } from "../../../helpers/Helpers";
+import { MemeSeason } from "../../../entities/ISeason";
+import {
+  UserPageStatsTableHead,
+  UserPageStatsTableHr,
+} from "./UserPageStatsTableShared";
+
+function getRankDisplay(balance: number | undefined, rank: number | undefined) {
+  if (!balance || !rank) {
+    return "-";
+  }
+  return `#${numberWithCommas(rank)}`;
+}
 
 export default function UserPageStatsCollected({
-  tdh,
+  ownerBalance,
+  balanceMemes,
+  seasons,
 }: {
-  readonly tdh: UserPageStatsTDHType;
+  readonly ownerBalance: OwnerBalance | undefined;
+  readonly balanceMemes: OwnerBalanceMemes[];
+  readonly seasons: MemeSeason[];
 }) {
-  function getRankDisplay(balance: number, rank: number, ties: number) {
-    if (!rank || !balance) return "-";
-    return `#${formatNumberWithCommasOrDash(rank)}${ties > 1 ? " (tie)" : ""}`;
+  return (
+    <div className="pt-2 pb-2">
+      <div className="tw-flex pt-2 pb-2">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+          Collected
+        </h3>
+      </div>
+      <div className="pt-2 pb-2">
+        <UserPageStatsCollectedTotals ownerBalance={ownerBalance} />
+      </div>
+      <div className="pt-2 pb-2">
+        <UserPageStatsCollectedMemes
+          balanceMemes={balanceMemes}
+          seasons={seasons}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function UserPageStatsCollectedTotals({
+  ownerBalance,
+}: {
+  readonly ownerBalance: OwnerBalance | undefined;
+}) {
+  return (
+    <Accordion>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button className={styles.collectedAccordionButton}>
+          <b>Overview</b>
+        </Accordion.Button>
+        <Accordion.Body className={styles.collectedAccordionBody}>
+          <Container>
+            <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
+              <Col>
+                <Table className={styles.collectedAccordionTable}>
+                  <UserPageStatsTableHead />
+                  <tbody>
+                    <UserPageStatsTableHr span={6} />
+                    <tr>
+                      <td>
+                        <b>Cards</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.total_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.memes_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.nextgen_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.gradients_balance)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(ownerBalance?.memelab_balance)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Rank</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.total_balance,
+                          ownerBalance?.total_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.memes_balance,
+                          ownerBalance?.memes_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.nextgen_balance,
+                          ownerBalance?.nextgen_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.gradients_balance,
+                          ownerBalance?.gradients_balance_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.memelab_balance,
+                          ownerBalance?.memelab_balance_rank
+                        )}
+                      </td>
+                    </tr>
+                    <UserPageStatsTableHr span={6} />
+                    <tr>
+                      <td>
+                        <b>TDH</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance.boosted_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance?.boosted_memes_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance?.boosted_nextgen_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {ownerBalance
+                          ? numberWithCommas(
+                              Math.round(ownerBalance?.boosted_gradients_tdh)
+                            )
+                          : "-"}
+                      </td>
+                      <td className="text-right">*</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Rank</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_tdh,
+                          ownerBalance?.boosted_tdh_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_memes_tdh,
+                          ownerBalance?.boosted_memes_tdh_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_nextgen_tdh,
+                          ownerBalance?.boosted_nextgen_tdh_rank
+                        )}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {getRankDisplay(
+                          ownerBalance?.boosted_gradients_tdh,
+                          ownerBalance?.boosted_gradients_tdh_rank
+                        )}
+                      </td>
+                      <td className="text-right">* No TDH</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Container>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
+  );
+}
+
+export function UserPageStatsCollectedMemes({
+  balanceMemes,
+  seasons,
+}: {
+  readonly balanceMemes: OwnerBalanceMemes[];
+  readonly seasons: MemeSeason[];
+}) {
+  function getDisplayWithValueAndRank(value: number, rank: number) {
+    if (!value) {
+      return "-";
+    }
+    if (!rank) {
+      return numberWithCommas(value);
+    }
+
+    return (
+      <>
+        {numberWithCommas(value)}{" "}
+        <span className={styles.fadedColor}>(#{numberWithCommas(rank)})</span>
+      </>
+    );
   }
 
-  const getAllCards = (
-    props: UserPageStatsTDHType
-  ): UserPageStatsTableItemData[] => {
-    if (!props) return [];
-    return [
-      {
-        title: "All Cards",
-        isMain: true,
-        isLast: false,
-        tooltip: null,
-        total: formatNumberWithCommasOrDash(
-          props.memes_balance + props.gradients_balance
-        ),
-        memes: formatNumberWithCommasOrDash(props.memes_balance),
-        gradient: formatNumberWithCommasOrDash(props.gradients_balance),
-        SZN1: formatNumberWithCommasOrDash(props.memes_balance_season1),
-        SZN2: formatNumberWithCommasOrDash(props.memes_balance_season2),
-        SZN3: formatNumberWithCommasOrDash(props.memes_balance_season3),
-        SZN4: formatNumberWithCommasOrDash(props.memes_balance_season4),
-        SZN5: formatNumberWithCommasOrDash(props.memes_balance_season5),
-        SZN6: formatNumberWithCommasOrDash(props.memes_balance_season6),
-      },
-      {
-        title: "Rank",
-        isMain: false,
-        isLast: true,
-        tooltip: null,
-        total: getRankDisplay(
-          props.balance,
-          props.dense_rank_balance,
-          props.dense_rank_balance__ties
-        ),
-        memes: getRankDisplay(
-          props.memes_balance,
-          props.dense_rank_balance_memes,
-          props.dense_rank_balance_memes__ties
-        ),
-        gradient: getRankDisplay(
-          props.gradients_balance,
-          props.dense_rank_balance_gradients,
-          props.dense_rank_balance_gradients__ties
-        ),
-        SZN1: getRankDisplay(
-          props.memes_balance_season1,
-          props.dense_rank_balance_memes_season1,
-          props.dense_rank_balance_memes_season1__ties
-        ),
-        SZN2: getRankDisplay(
-          props.memes_balance_season2,
-          props.dense_rank_balance_memes_season2,
-          props.dense_rank_balance_memes_season2__ties
-        ),
-        SZN3: getRankDisplay(
-          props.memes_balance_season3,
-          props.dense_rank_balance_memes_season3,
-          props.dense_rank_balance_memes_season3__ties
-        ),
-        SZN4: getRankDisplay(
-          props.memes_balance_season4,
-          props.dense_rank_balance_memes_season4,
-          props.dense_rank_balance_memes_season4__ties
-        ),
-        SZN5: getRankDisplay(
-          props.memes_balance_season5,
-          props.dense_rank_balance_memes_season5,
-          props.dense_rank_balance_memes_season5__ties
-        ),
-        SZN6: getRankDisplay(
-          props.memes_balance_season6,
-          props.dense_rank_balance_memes_season6,
-          props.dense_rank_balance_memes_season6__ties
-        ),
-      },
-    ];
-  };
-
-  const getUniqueCards = (
-    props: UserPageStatsTDHType
-  ): UserPageStatsTableItemData[] => {
-    if (!props) return [];
-    return [
-      {
-        title: "Unique Cards",
-        isMain: true,
-        isLast: false,
-        tooltip: null,
-        total: formatNumberWithCommasOrDash(
-          props.unique_memes + props.gradients_balance
-        ),
-        memes: formatNumberWithCommasOrDash(props.unique_memes),
-        gradient: formatNumberWithCommasOrDash(props.gradients_balance),
-        SZN1: formatNumberWithCommasOrDash(props.unique_memes_szn1),
-        SZN2: formatNumberWithCommasOrDash(props.unique_memes_szn2),
-        SZN3: formatNumberWithCommasOrDash(props.unique_memes_szn3),
-        SZN4: formatNumberWithCommasOrDash(props.unique_memes_szn4),
-        SZN5: formatNumberWithCommasOrDash(props.unique_memes_szn5),
-        SZN6: formatNumberWithCommasOrDash(props.unique_memes_szn6),
-      },
-      {
-        title: "Rank",
-        isMain: false,
-        isLast: true,
-        tooltip: null,
-        total: getRankDisplay(
-          props.unique_memes + props.gradients_balance,
-          props.dense_rank_unique,
-          props.dense_rank_unique__ties
-        ),
-        memes: getRankDisplay(
-          props.unique_memes,
-          props.dense_rank_unique_memes,
-          props.dense_rank_unique_memes__ties
-        ),
-        gradient: getRankDisplay(
-          props.gradients_balance,
-          props.dense_rank_balance_gradients,
-          props.dense_rank_balance_gradients__ties
-        ),
-        SZN1: getRankDisplay(
-          props.unique_memes_szn1,
-          props.dense_rank_unique_memes_season1,
-          props.dense_rank_unique_memes_season1__ties
-        ),
-        SZN2: getRankDisplay(
-          props.unique_memes_szn2,
-          props.dense_rank_unique_memes_season2,
-          props.dense_rank_unique_memes_season2__ties
-        ),
-        SZN3: getRankDisplay(
-          props.unique_memes_szn3,
-          props.dense_rank_unique_memes_season3,
-          props.dense_rank_unique_memes_season3__ties
-        ),
-        SZN4: getRankDisplay(
-          props.unique_memes_szn4,
-          props.dense_rank_unique_memes_season4,
-          props.dense_rank_unique_memes_season4__ties
-        ),
-        SZN5: getRankDisplay(
-          props.unique_memes_szn5,
-          props.dense_rank_unique_memes_season5,
-          props.dense_rank_unique_memes_season5__ties
-        ),
-        SZN6: getRankDisplay(
-          props.unique_memes_szn6,
-          props.dense_rank_unique_memes_season6,
-          props.dense_rank_unique_memes_season6__ties
-        ),
-      },
-    ];
-  };
-
-  function getTDHRank(rank: number) {
-    if (!rank) return "-";
-    return `#${formatNumberWithCommasOrDash(rank)}`;
+  function getUniqueDisplay(balanceMemes: OwnerBalanceMemes) {
+    const seasonBalance = seasons.find(
+      (season) => season.id === balanceMemes.season
+    );
+    if (!seasonBalance) {
+      return numberWithCommas(balanceMemes.unique);
+    }
+    return (
+      <>
+        {balanceMemes.unique ? numberWithCommas(balanceMemes.unique) : `0`} /{" "}
+        {numberWithCommas(seasonBalance.count)}{" "}
+        <span className={styles.fadedColor}>
+          ({((balanceMemes.unique / seasonBalance.count) * 100).toFixed(0)}%)
+        </span>
+      </>
+    );
   }
 
-  const getTDH = (
-    props: UserPageStatsTDHType
-  ): UserPageStatsTableItemData[] => {
-    if (!props) return [];
-    return [
-      {
-        title: "TDH",
-        isMain: true,
-        isLast: false,
-        tooltip: null,
-        total: formatNumberWithCommasOrDash(props.boosted_tdh),
-        memes: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh)
-        ),
-        gradient: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_gradients_tdh)
-        ),
-        SZN1: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh_season1)
-        ),
-        SZN2: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh_season2)
-        ),
-        SZN3: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh_season3)
-        ),
-        SZN4: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh_season4)
-        ),
-        SZN5: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh_season5)
-        ),
-        SZN6: formatNumberWithCommasOrDash(
-          Math.round(props.boosted_memes_tdh_season6)
-        ),
-      },
-      {
-        title: "Rank",
-        isMain: false,
-        isLast: true,
-        tooltip: null,
-        total: getTDHRank(props.tdh_rank),
-        memes: getTDHRank(props.tdh_rank_memes),
-        gradient: getTDHRank(props.tdh_rank_gradients),
-        SZN1: getTDHRank(props.tdh_rank_memes_szn1),
-        SZN2: getTDHRank(props.tdh_rank_memes_szn2),
-        SZN3: getTDHRank(props.tdh_rank_memes_szn3),
-        SZN4: getTDHRank(props.tdh_rank_memes_szn4),
-        SZN5: getTDHRank(props.tdh_rank_memes_szn5),
-        SZN6: getTDHRank(props.tdh_rank_memes_szn6),
-      },
-    ];
-  };
-
-  const getData = (props: UserPageStatsTDHType): UserPageStatsTableProps => {
-    if (!props) return { title: "Collected", data: [] };
-    return {
-      title: "Collected",
-      data: [getAllCards(props), getUniqueCards(props), getTDH(props)],
-    };
-  };
-
-  const [data, setData] = useState<UserPageStatsTableProps>(getData(tdh));
-
-  useEffect(() => setData(getData(tdh)), [tdh]);
-
-  return <UserPageStatsTable data={data} />;
+  return (
+    <Accordion>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button className={styles.collectedAccordionButton}>
+          <b>Memes Breakdown By Season</b>
+        </Accordion.Button>
+        <Accordion.Body className={styles.collectedAccordionBody}>
+          <Container>
+            <Row className={`pt-2 pb-2 ${styles.scrollContainer}`}>
+              <Col>
+                {balanceMemes && (
+                  <Table className={styles.collectedAccordionTable}>
+                    <thead>
+                      <tr>
+                        <th colSpan={2}></th>
+                        <th className="text-right">Total</th>
+                        <th className="text-right">Unique</th>
+                        <th className="text-right">Sets</th>
+                        <th className="text-right">TDH</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {balanceMemes.map((balanceMeme) => (
+                        <>
+                          <UserPageStatsTableHr span={6} />
+                          <tr>
+                            <td colSpan={2}>Season {balanceMeme.season}</td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {getDisplayWithValueAndRank(
+                                balanceMeme.balance,
+                                balanceMeme.rank
+                              )}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {getUniqueDisplay(balanceMeme)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(balanceMeme.sets)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {getDisplayWithValueAndRank(
+                                balanceMeme.boosted_tdh,
+                                balanceMeme.tdh_rank
+                              )}
+                            </td>
+                          </tr>
+                        </>
+                      ))}
+                    </tbody>
+                  </Table>
+                )}
+              </Col>
+            </Row>
+          </Container>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
+  );
 }

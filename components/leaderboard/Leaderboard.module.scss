@@ -66,6 +66,7 @@
 
 .totalResults {
   font-size: larger;
+  padding-left: 5px;
 }
 
 .balance {
@@ -223,7 +224,7 @@
     background-color: transparent !important;
   }
 
-  tr:nth-child(odd) {
+  tbody tr:nth-child(odd) {
     background-color: $almost-very-dark-grey;
   }
 }
@@ -261,16 +262,6 @@
 .leaderboardTable > :not(caption) > * > *,
 .nftLeaderboardTable > :not(caption) > * > * {
   padding: 0.5rem;
-}
-
-.lastTDH {
-  white-space: nowrap;
-  color: $font-color-h;
-  // line-height: 48px;
-  font-size: smaller;
-  a {
-    color: $font-color-h !important;
-  }
 }
 
 .borderBottom {
@@ -507,4 +498,25 @@
   .dMdFlex {
     display: flex !important;
   }
+}
+
+.interactionsHeader {
+  text-align: center;
+  border-bottom: 1px solid $font-color !important;
+}
+
+.statsContainer {
+  background-color: $very-dark-grey;
+  padding: 15px 20px;
+  width: fit-content;
+  color: white;
+  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
+    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
+    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
+    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
+    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
 }
