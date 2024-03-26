@@ -12,7 +12,7 @@ export default function DropPfp({ pfpUrl }: { readonly pfpUrl: string | null | u
             <img
               src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
               alt="Create Drop Profile"
-              className="tw-bg-iron-900 tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+              className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
             />
           )}
         </div>
