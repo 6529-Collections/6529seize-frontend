@@ -12,7 +12,7 @@ export default function DropListItemContentMention({
     <LazyTippy
       placement={"top"}
       interactive={true}
-      content={<UserProfileTooltip user={user.handle_in_content} />}
+      content={<UserProfileTooltip user={user.mentioned_profile_id} />}
     >
       <Link
         href={`/${user.handle_in_content}`}
