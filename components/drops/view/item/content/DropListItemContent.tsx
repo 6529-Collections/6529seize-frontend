@@ -29,15 +29,16 @@ const getRegex = (part: DropListItemContentPartProps) => {
   }
 };
 
-function CustomP({
+
+const customRenderer = ({
   children,
   drop,
 }: {
   readonly children: ReactNode | undefined;
   readonly drop: DropFull;
-}) {
+}) => {
   if (typeof children !== "string") {
-    return <p>{children}</p>;
+    return children;
   }
 
   const mentions: DropListItemContentMentionProps[] = drop.mentioned_users.map(
@@ -76,8 +77,8 @@ function CustomP({
         : [node]
     );
   }, initialNodes);
-  return <p>{nodes}</p>;
-}
+  return nodes;
+};
 
 export default function DropListItemContent({
   drop,
@@ -87,7 +88,27 @@ export default function DropListItemContent({
   return (
     <Markdown
       components={{
-        p: (params) => CustomP({ children: params.children, drop }),
+        h5: (params) => (
+          <h5>{customRenderer({ children: params.children, drop })}</h5>
+        ),
+        h4: (params) => (
+          <h4>{customRenderer({ children: params.children, drop })}</h4>
+        ),
+        h3: (params) => (
+          <h3>{customRenderer({ children: params.children, drop })}</h3>
+        ),
+        h2: (params) => (
+          <h2>{customRenderer({ children: params.children, drop })}</h2>
+        ),
+        h1: (params) => (
+          <h1>{customRenderer({ children: params.children, drop })}</h1>
+        ),
+        p: (params) => (
+          <p>{customRenderer({ children: params.children, drop })}</p>
+        ),
+        li: (params) => (
+          <li>{customRenderer({ children: params.children, drop })}</li>
+        ),
       }}
     >
       {drop.content}
