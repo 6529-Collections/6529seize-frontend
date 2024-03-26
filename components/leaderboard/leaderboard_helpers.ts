@@ -90,7 +90,7 @@ export function getLeaderboardDownloadFileName(
   return `${csvFileName}.csv`;
 }
 
-export async function fetchLeaderboardData(
+export async function fetchLeaderboardData<T>(
   endpoint: string,
   pageSize: number,
   page: number,
@@ -106,7 +106,7 @@ export async function fetchLeaderboardData(
   }
 ): Promise<{
   count: number;
-  data: LeaderboardItem[];
+  data: T[];
   url: string;
 }> {
   let walletFilter = "";
@@ -131,7 +131,7 @@ export async function fetchLeaderboardData(
     count: number;
     page: number;
     next: any;
-    data: LeaderboardItem[];
+    data: T[];
   }>({
     endpoint: url,
   });
@@ -145,7 +145,7 @@ export async function fetchLeaderboardData(
   };
 }
 
-export function useFetchLeaderboard(
+export function useFetchLeaderboard<T extends LeaderboardItem>(
   endpoint: string,
   page: number,
   sort: {
@@ -162,11 +162,11 @@ export function useFetchLeaderboard(
 ) {
   const [myFetchUrl, setMyFetchUrl] = useState("");
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+  const [leaderboard, setLeaderboard] = useState<T[]>([]);
 
   const fetchResults = useCallback(async () => {
     setIsLoading(true);
-    const data = await fetchLeaderboardData(
+    const data = await fetchLeaderboardData<T>(
       endpoint,
       LEADERBOARD_PAGE_SIZE,
       page,

@@ -38,22 +38,19 @@ export default function LeaderboardInteractionsComponent(
     sort_direction: SortDirection.DESC,
   });
 
-  const { myFetchUrl, totalResults, leaderboard } = useFetchLeaderboard(
-    "aggregated-activity",
-    page,
-    sort,
-    {
-      searchWallets: props.searchWallets,
-      content: props.content,
-      collector: props.collector,
-      selectedSeason: props.selectedSeason,
-    },
-    props.setIsLoading
-  ) as {
-    myFetchUrl: string;
-    totalResults: number;
-    leaderboard: LeaderboardInteractions[];
-  };
+  const { myFetchUrl, totalResults, leaderboard } =
+    useFetchLeaderboard<LeaderboardInteractions>(
+      "aggregated-activity",
+      page,
+      sort,
+      {
+        searchWallets: props.searchWallets,
+        content: props.content,
+        collector: props.collector,
+        selectedSeason: props.selectedSeason,
+      },
+      props.setIsLoading
+    );
 
   if (!leaderboard) {
     return <></>;

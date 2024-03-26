@@ -40,22 +40,19 @@ export default function LeaderboardCardsCollectedComponent(
     sort_direction: SortDirection.DESC,
   });
 
-  const { myFetchUrl, totalResults, leaderboard } = useFetchLeaderboard(
-    "tdh/consolidated_metrics",
-    page,
-    sort,
-    {
-      searchWallets: props.searchWallets,
-      content: props.content,
-      collector: props.collector,
-      selectedSeason: props.selectedSeason,
-    },
-    props.setIsLoading
-  ) as {
-    myFetchUrl: string;
-    totalResults: number;
-    leaderboard: LeaderboardMetrics[];
-  };
+  const { myFetchUrl, totalResults, leaderboard } =
+    useFetchLeaderboard<LeaderboardMetrics>(
+      "tdh/consolidated_metrics",
+      page,
+      sort,
+      {
+        searchWallets: props.searchWallets,
+        content: props.content,
+        collector: props.collector,
+        selectedSeason: props.selectedSeason,
+      },
+      props.setIsLoading
+    );
 
   function getTDHChange(lead: LeaderboardMetrics) {
     if (!lead.boosted_tdh) {
