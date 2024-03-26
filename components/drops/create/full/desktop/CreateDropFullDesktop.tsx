@@ -5,7 +5,7 @@ import {
   CreateDropViewType,
 } from "../../utils/CreateDropWrapper";
 import CreateDropContent from "../../utils/CreateDropContent";
-import CreateDropPfp from "../../utils/CreateDropPfp";
+import DropPfp from "../../utils/DropPfp";
 import CreateDropFullDesktopTitle from "./CreateDropFullDesktopTitle";
 import {
   DropMetadata,
@@ -49,7 +49,7 @@ export default function CreateDropFullDesktop({
   return (
     <div>
       <div className="tw-w-full tw-inline-flex tw-justify-between">
-        <CreateDropPfp profile={profile} />
+        <DropPfp pfpUrl={profile.profile?.pfp_url} />
         <CreateDropFullDesktopTitle title={title} onTitle={onTitle} />
       </div>
       <CreateDropContent
