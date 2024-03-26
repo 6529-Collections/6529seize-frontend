@@ -6,18 +6,21 @@ export default function ToggleViewButtonPlugin({
   return (
     <button
       onClick={onViewClick}
-      className="tw-absolute tw-top-[0.625rem] tw-right-2 tw-border-none tw-bg-transparent"
+      className="tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-group tw-absolute tw-inset-y-0 tw-mt-1.5 tw-right-3 tw-rounded-lg tw-border-none tw-bg-transparent"
     >
       <svg
-        className="tw-h-5 tw-w-5 tw-text-iron-300"
-        viewBox="0 0 512 512"
-        fill="currentColor"
-        aria-hidden="true"
+        className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <g id="ARROW_48" data-name="ARROW 48">
-          <path d="m487.84 272.85a24 24 0 0 0 -24 24v96.61a70.46 70.46 0 0 1 -70.38 70.38h-274.92a70.46 70.46 0 0 1 -70.38-70.38v-274.92a70.46 70.46 0 0 1 70.38-70.38h96.61a24 24 0 1 0 0-48h-96.61a118.52 118.52 0 0 0 -118.38 118.38v274.92a118.52 118.52 0 0 0 118.38 118.38h274.92a118.52 118.52 0 0 0 118.38-118.38v-96.61a24 24 0 0 0 -24-24z"></path>
-          <path d="m487.33 0h-149.2a24 24 0 0 0 -24 23.53c-.25 13.47 11.08 24.47 24.54 24.47h91.33l-191.14 191.2a24 24 0 0 0 0 33.94 24 24 0 0 0 33.94 0l191.2-191.14v91.66a24 24 0 0 0 48 0v-149a24.66 24.66 0 0 0 -24.67-24.66z"></path>
-        </g>
+        <path
+          d="M21 14V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H14M10 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V10M15 9L21 3M21 3H15M21 3V9M9 15L3 21M3 21H9M3 21L3 15"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </button>
   );

@@ -14,6 +14,7 @@ import {
 import CreateDropDesktopFooter from "../utils/CreateDropDesktopFooter";
 import CreateDropCompactTitle from "./CreateDropCompactTitle";
 import CreateDropMetadataItems from "../utils/metadata/CreateDropMetadataItems";
+import PrimaryButton from "../../../utils/buttons/PrimaryButton";
 
 export default function CreateDropCompact({
   profile,
@@ -45,18 +46,18 @@ export default function CreateDropCompact({
   readonly onDrop: () => void;
 }) {
   return (
-    <div>
+    <div className="tw-px-4 tw-py-6 lg:tw-px-6 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
       {title && (
         <CreateDropCompactTitle
           title={title}
           onEditClick={() => onViewChange(CreateDropViewType.FULL)}
         />
       )}
-      <div className="tw-inline-flex tw-w-full tw-items-center tw-space-x-2">
+      <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-3">
         {screenType === CreateDropScreenType.DESKTOP && (
           <CreateDropPfp profile={profile} />
         )}
-        <div className="tw-w-full tw-inline-flex tw-space-x-2">
+        <div className="tw-w-full tw-inline-flex tw-gap-x-3">
           <div className="tw-w-full">
             <CreateDropContent
               screenType={screenType}
@@ -69,26 +70,20 @@ export default function CreateDropCompact({
               onFileChange={onFileChange}
             />
           </div>
-          {screenType === CreateDropScreenType.MOBILE && (
-            <button onClick={onDrop}>Drop</button>
-          )}
+          <div className="tw-self-end">
+            <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
+          </div>
         </div>
       </div>
-      <CreateDropMetadataItems
-        items={metadata}
-        onMetadataRemove={onMetadataRemove}
-      />
-      {screenType === CreateDropScreenType.DESKTOP && (
-        <CreateDropDesktopFooter
-          file={file}
-          onFileChange={onFileChange}
-          onDrop={onDrop}
-        />
-      )}
 
-      {screenType === CreateDropScreenType.MOBILE && file && (
-        <div>
-          {file.name} <button onClick={() => onFileChange(null)}>X</button>
+      {file && (
+        <div className="tw-mt-2">
+          <div className="tw-py-2 tw-flex tw-items-center tw-gap-x-3">
+            <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-300">
+              {file.name}
+            </p>{" "}
+            <button onClick={() => onFileChange(null)}>X</button>
+          </div>
         </div>
       )}
     </div>
