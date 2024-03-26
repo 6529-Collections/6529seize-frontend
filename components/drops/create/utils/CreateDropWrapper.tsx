@@ -12,6 +12,8 @@ import {
 import { createBreakpoint } from "react-use";
 import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
 import { DropRequest } from "../CreateDrop";
+import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
+import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 
 export enum CreateDropViewType {
   COMPACT = "COMPACT",
@@ -92,15 +94,21 @@ export default function CreateDropWrapper({
   };
 
   const getMarkdown = () =>
-    editorState?.read(() => $convertToMarkdownString(TRANSFORMERS)) ?? null;
+    editorState?.read(() =>
+      $convertToMarkdownString([
+        ...TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        HASHTAG_TRANSFORMER,
+      ])
+    ) ?? null;
 
   const onDrop = () => {
     const markdown = getMarkdown();
     const mentions = mentionedUsers.filter((user) =>
-      markdown?.includes(`@${user.handle_in_content}`)
+      markdown?.includes(`@[${user.handle_in_content}]`)
     );
     const nfts = referencedNfts.filter((nft) =>
-      markdown?.includes(`#${nft.name}`)
+      markdown?.includes(`#[${nft.name}]`)
     );
 
     const drop: DropRequest = {
