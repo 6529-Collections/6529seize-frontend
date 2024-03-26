@@ -36,7 +36,7 @@ export default function SearchModal(props: Readonly<Props>) {
       centered={true}
       onHide={() => props.setShow(false)}>
       <Modal.Header>
-        <Modal.Title>Wallet Search</Modal.Title>
+        <Modal.Title>Search</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <InputGroup
@@ -53,7 +53,7 @@ export default function SearchModal(props: Readonly<Props>) {
             }}
             autoFocus
             className={`${styles.modalInput}`}
-            placeholder="Type wallet address or ENS and press '+'"
+            placeholder="Search for address, ENS or username"
           />
           <Button className={styles.modalButton} onClick={addSearchWallet}>
             +
@@ -79,7 +79,7 @@ export default function SearchModal(props: Readonly<Props>) {
         ))}
         {props.searchWallets.length === 0 && (
           <div className={styles.noSearchWalletsText}>
-            No search wallets added
+            No search queries added
           </div>
         )}
         <Button
@@ -107,7 +107,7 @@ export function SearchWalletsDisplay(
 ) {
   const { searchWallets, setSearchWallets, setShowSearchModal } = props;
   return (
-    <span className="d-flex flex-wrap align-items-center">
+    <span className="d-flex flex-wrap align-items-center justify-content-end">
       {searchWallets.length > 0 &&
         searchWallets.map((sw) => (
           <span className={styles.searchWalletDisplayWrapper} key={sw}>
