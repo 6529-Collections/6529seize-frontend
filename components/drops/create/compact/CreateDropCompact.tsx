@@ -3,7 +3,7 @@ import {
   CreateDropViewType,
 } from "../utils/CreateDropWrapper";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import CreateDropPfp from "../utils/CreateDropPfp";
+import DropPfp from "../utils/DropPfp";
 import CreateDropContent from "../utils/CreateDropContent";
 import { EditorState } from "lexical";
 import {
@@ -55,7 +55,7 @@ export default function CreateDropCompact({
       )}
       <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-3">
         {screenType === CreateDropScreenType.DESKTOP && (
-          <CreateDropPfp profile={profile} />
+          <DropPfp pfpUrl={profile.profile?.pfp_url} />
         )}
         <div className="tw-w-full tw-inline-flex tw-gap-x-3">
           <div className="tw-w-full">
