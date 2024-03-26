@@ -4,19 +4,22 @@ export default function UploadMediaButtonPlugin({
   readonly onFileChange: (file: File) => void;
 }) {
   return (
-    <div className="tw-absolute tw-top-[0.63rem] tw-right-9">
+    <div className="tw-h-8 tw-w-8 tw-group tw-absolute tw-inset-y-0 tw-mt-1.5 tw-flex tw-items-center tw-justify-center tw-right-12 tw-rounded-lg">
       <label htmlFor="create-drop-any-input">
         <svg
-          className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-300"
-          viewBox="0 0 512 512"
-          fill="currentColor"
+          className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          viewBox="0 0 24 24"
+          fill="none"
           aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <g>
-            <path d="m412 476h-312c-55.141 0-100-44.86-100-100v-240c0-55.14 44.859-100 100-100h312c55.141 0 100 44.86 100 100v240c0 55.14-44.859 100-100 100zm-312-400c-33.084 0-60 26.916-60 60v240c0 33.084 26.916 60 60 60h312c33.084 0 60-26.916 60-60v-240c0-33.084-26.916-60-60-60z"></path>
-            <path d="m176 236c-33.084 0-60-26.916-60-60s26.916-60 60-60 60 26.916 60 60-26.916 60-60 60zm0-80c-11.028 0-20 8.972-20 20s8.972 20 20 20 20-8.972 20-20-8.972-20-20-20z"></path>
-            <path d="m401.857 390.142-105.857-105.858-65.857 65.858c-7.811 7.811-20.475 7.811-28.285 0l-25.858-25.858-61.857 65.858c-18.697 18.697-47.008-9.559-28.285-28.284l76-80c7.811-7.811 20.475-7.811 28.285 0l25.857 25.858 65.857-65.858c7.811-7.811 20.475-7.811 28.285 0l120 120c18.955 18.957-9.835 46.733-28.285 28.284z"></path>
-          </g>
+          <path
+            d="M21.1525 10.8995L12.1369 19.9151C10.0866 21.9653 6.7625 21.9653 4.71225 19.9151C2.662 17.8648 2.662 14.5407 4.71225 12.4904L13.7279 3.47483C15.0947 2.108 17.3108 2.108 18.6776 3.47483C20.0444 4.84167 20.0444 7.05775 18.6776 8.42458L10.0156 17.0866C9.33213 17.7701 8.22409 17.7701 7.54068 17.0866C6.85726 16.4032 6.85726 15.2952 7.54068 14.6118L15.1421 7.01037"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         <input
           id="create-drop-any-input"

@@ -19,9 +19,14 @@ export default function UserPageDrops({
   );
 
   return (
-    <div className="tailwind-scope tw-space-y-4">
-      {isMyProfile && <CreateDrop profile={profile} />}
-      <Drops />
+    <div className="tailwind-scope">
+      <div className="tw-max-w-3xl tw-mx-auto">
+        <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
+          Users Drops
+        </h2>
+        {isMyProfile && <CreateDrop profile={profile} />}
+        <Drops />
+      </div>
     </div>
   );
 }

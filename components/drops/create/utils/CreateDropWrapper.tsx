@@ -51,7 +51,7 @@ export default function CreateDropWrapper({
   );
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
-  const [title, setTitle] = useState<string | null>("title");
+  const [title, setTitle] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<DropMetadata[]>([]);
 
   const [file, setFile] = useState<File | null>(null);
@@ -162,5 +162,5 @@ export default function CreateDropWrapper({
       />
     ),
   };
-  return <div>{components[viewType]}</div>;
+  return <div className="tw-mt-2 lg:tw-mt-4">{components[viewType]}</div>;
 }
