@@ -106,9 +106,9 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Level&nbsp;
                       <LeaderboardSort
+                        sort_option={LeaderboardCardsCollectedSort.level}
                         sort={sort}
                         setSort={setSort}
-                        s={LeaderboardCardsCollectedSort.level}
                       />
                     </span>
                   </th>
@@ -116,9 +116,9 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Cards Collected&nbsp;
                       <LeaderboardSort
+                        sort_option={LeaderboardCardsCollectedSort.balance}
                         sort={sort}
                         setSort={setSort}
-                        s={LeaderboardCardsCollectedSort.balance}
                       />
                     </span>
                   </th>
@@ -126,9 +126,9 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Unique Memes&nbsp;
                       <LeaderboardSort
+                        sort_option={LeaderboardCardsCollectedSort.unique_memes}
                         sort={sort}
                         setSort={setSort}
-                        s={LeaderboardCardsCollectedSort.unique_memes}
                       />
                     </span>
                   </th>
@@ -136,9 +136,11 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Sets&nbsp;
                       <LeaderboardSort
+                        sort_option={
+                          LeaderboardCardsCollectedSort.memes_cards_sets
+                        }
                         sort={sort}
                         setSort={setSort}
-                        s={LeaderboardCardsCollectedSort.memes_cards_sets}
                       />
                     </span>
                   </th>
@@ -146,9 +148,9 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       TDH&nbsp;
                       <LeaderboardSort
+                        sort_option={LeaderboardCardsCollectedSort.boosted_tdh}
                         sort={sort}
                         setSort={setSort}
-                        s={LeaderboardCardsCollectedSort.boosted_tdh}
                       />
                     </span>
                   </th>
@@ -156,9 +158,9 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Daily Change&nbsp; &nbsp;
                       <LeaderboardSort
+                        sort_option={LeaderboardCardsCollectedSort.day_change}
                         sort={sort}
                         setSort={setSort}
-                        s={LeaderboardCardsCollectedSort.day_change}
                       />
                     </span>
                   </th>

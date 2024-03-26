@@ -66,8 +66,10 @@ export default function LeaderboardInteractionsComponent(
     );
   }
 
-  function printHeader(s: LeaderboardInteractionsSort) {
-    return <LeaderboardSort sort={sort} setSort={setSort} s={s} />;
+  function printHeader(sortOption: LeaderboardInteractionsSort) {
+    return (
+      <LeaderboardSort sort_option={sortOption} sort={sort} setSort={setSort} />
+    );
   }
 
   return (
