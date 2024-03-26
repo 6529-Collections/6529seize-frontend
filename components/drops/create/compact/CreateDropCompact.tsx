@@ -46,7 +46,7 @@ export default function CreateDropCompact({
   readonly onDrop: () => void;
 }) {
   return (
-    <div className="tw-px-4 tw-py-6 lg:tw-px-6 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+    <div className="tw-px-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
       {title && (
         <CreateDropCompactTitle
           title={title}
