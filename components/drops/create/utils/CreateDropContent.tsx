@@ -18,9 +18,18 @@ import { MentionedUser, ReferencedNft } from "../../../../entities/IDrop";
 import OneLinerPlugin from "../lexical/plugins/OneLinerPlugin";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
-
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import UploadMediaButtonPlugin from "../lexical/plugins/UploadMediaButtonPlugin";
 import { CreateDropScreenType, CreateDropViewType } from "./CreateDropWrapper";
+import { TRANSFORMERS } from "@lexical/markdown";
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { AutoLinkNode, LinkNode } from "@lexical/link";
 
 export default function CreateDropContent({
   viewType,
@@ -43,7 +52,23 @@ export default function CreateDropContent({
 }) {
   const editorConfig: InitialConfigType = {
     namespace: "User Drop",
-    nodes: [MentionNode, HashtagNode, RootNode],
+    nodes: [
+      MentionNode,
+      HashtagNode,
+      RootNode,
+      HeadingNode,
+      ListNode,
+      ListItemNode,
+      QuoteNode,
+      CodeNode,
+      CodeHighlightNode,
+      TableNode,
+      TableCellNode,
+      TableRowNode,
+      AutoLinkNode,
+      LinkNode,
+      HorizontalRuleNode,
+    ],
     editorState,
     onError(error: Error): void {
       throw error;
@@ -95,6 +120,9 @@ export default function CreateDropContent({
             {showToggleViewButton && (
               <ToggleViewButtonPlugin onViewClick={onViewClick} />
             )}
+            <ListPlugin />
+            <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+            <TabIndentationPlugin />
           </div>
         </div>
       </LexicalComposer>
