@@ -137,6 +137,7 @@ type ReactQueryWrapperContextType = {
   }: {
     readonly filterId: string;
   }) => void;
+  onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -153,6 +154,7 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     onCurationFilterRemoved: () => {},
     onCurationFilterChanged: () => {},
+    onDropCreate: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -541,6 +543,18 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onDropCreate = ({
+    profile,
+  }: {
+    profile: IProfileAndConsolidations;
+  }) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_DROPS,
+      values: handles.map((handle) => ({ handleOrWallet: handle })),
+    });
+  };
+
   return (
     <ReactQueryWrapperContext.Provider
       value={{
@@ -556,6 +570,7 @@ export default function ReactQueryWrapper({
         initCommunityActivityPage,
         onCurationFilterRemoved,
         onCurationFilterChanged,
+        onDropCreate,
       }}
     >
       {children}

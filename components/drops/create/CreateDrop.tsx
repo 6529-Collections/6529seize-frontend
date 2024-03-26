@@ -9,6 +9,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiPostForm } from "../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export interface DropRequest {
   readonly title: string | null;
@@ -27,6 +28,7 @@ export default function CreateDrop({
   readonly profile: IProfileAndConsolidations;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
+  const { onDropCreate } = useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(false);
   useEffect(() => setInit(true), []);
 
@@ -46,6 +48,7 @@ export default function CreateDrop({
         type: "success",
       });
       setDropEditorRefreshKey((prev) => prev + 1);
+      onDropCreate({ profile });
     },
     onError: (error) => {
       setToast({

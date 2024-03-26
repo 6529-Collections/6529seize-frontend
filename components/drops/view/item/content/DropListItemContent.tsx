@@ -1,83 +1,80 @@
 import { ReactNode } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import DropListItemContentPart, {
   DropListItemContentHashtagProps,
   DropListItemContentMentionProps,
   DropListItemContentPartProps,
 } from "./DropListItemContentPart";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import {
+  assertUnreachable,
+  getRandomObjectId,
+} from "../../../../../helpers/AllowlistToolHelpers";
 export enum DropContentPartType {
   MENTION = "MENTION",
   HASHTAG = "HASHTAG",
 }
 
-const PART_STARTING_CHAR: Record<DropContentPartType, string> = {
-  [DropContentPartType.MENTION]: "@",
-  [DropContentPartType.HASHTAG]: "#",
-};
-
-const getRegex = (part: DropListItemContentPartProps) => {
-  switch (part.type) {
-    case DropContentPartType.MENTION:
-      return new RegExp(`@\\[${part.value.handle_in_content}\\]`, "g");
-    case DropContentPartType.HASHTAG:
-      return new RegExp(`#\\[${part.value.name}\\]`, "g");
-    default:
-      assertUnreachable(part);
-      return new RegExp("");
-  }
-};
-
-
 const customRenderer = ({
-  children,
+  content,
   drop,
 }: {
-  readonly children: ReactNode | undefined;
+  readonly content: ReactNode | undefined;
   readonly drop: DropFull;
 }) => {
-  if (typeof children !== "string") {
-    return children;
+  if (typeof content !== "string") {
+    return content;
   }
 
-  const mentions: DropListItemContentMentionProps[] = drop.mentioned_users.map(
-    (user) => ({
-      type: DropContentPartType.MENTION,
-      value: user,
-    })
-  );
+  const splitter = getRandomObjectId();
 
-  const hashtags: DropListItemContentHashtagProps[] = drop.referenced_nfts.map(
-    (nft) => ({
-      type: DropContentPartType.HASHTAG,
-      value: nft,
-    })
-  );
+  const values: Record<string, DropListItemContentPartProps> = {
+    ...drop.mentioned_users.reduce(
+      (acc, user) => ({
+        ...acc,
+        [`@[${user.handle_in_content}]`]: {
+          type: DropContentPartType.MENTION,
+          value: user,
+          match: `@[${user.handle_in_content}]`,
+        },
+      }),
+      {}
+    ),
+    ...drop.referenced_nfts.reduce(
+      (acc, nft) => ({
+        ...acc,
+        [`#[${nft.name}]`]: {
+          type: DropContentPartType.HASHTAG,
+          value: nft,
+          match: `#[${nft.name}]`,
+        },
+      }),
+      {}
+    ),
+  };
 
-  const parts: DropListItemContentPartProps[] = [...mentions, ...hashtags];
-  const initialNodes: (JSX.Element | string)[] = [children];
+  let currentContent = content;
 
-  const nodes = parts.reduce((currentNodes, part) => {
-    const regex = getRegex(part);
-    return currentNodes.flatMap((node) =>
-      typeof node === "string"
-        ? node
-            .split(regex)
-            .map((subnode, index) =>
-              index % 2 === 0 ? (
-                subnode
-              ) : (
-                <DropListItemContentPart
-                  key={`${part.type}-${index}`}
-                  part={part}
-                />
-              )
-            )
-        : [node]
+  for (const token of Object.values(values)) {
+    currentContent = currentContent.replaceAll(
+      token.match,
+      `${splitter}${token.match}${splitter}`
     );
-  }, initialNodes);
-  return nodes;
+  }
+
+  const parts = currentContent
+    .split(splitter)
+    .filter((part) => part !== "")
+    .map((part) => {
+      const partProps = values[part];
+      if (partProps) {
+        return <DropListItemContentPart key={part} part={partProps} />;
+      }
+      return part;
+    });
+
+  return parts;
 };
 
 export default function DropListItemContent({
@@ -87,29 +84,30 @@ export default function DropListItemContent({
 }) {
   return (
     <Markdown
+      remarkPlugins={[remarkGfm]}
       components={{
         h5: (params) => (
-          <h5>{customRenderer({ children: params.children, drop })}</h5>
+          <h5>{customRenderer({ content: params.children, drop })}</h5>
         ),
         h4: (params) => (
-          <h4>{customRenderer({ children: params.children, drop })}</h4>
+          <h4>{customRenderer({ content: params.children, drop })}</h4>
         ),
         h3: (params) => (
-          <h3>{customRenderer({ children: params.children, drop })}</h3>
+          <h3>{customRenderer({ content: params.children, drop })}</h3>
         ),
         h2: (params) => (
-          <h2>{customRenderer({ children: params.children, drop })}</h2>
+          <h2>{customRenderer({ content: params.children, drop })}</h2>
         ),
         h1: (params) => (
-          <h1>{customRenderer({ children: params.children, drop })}</h1>
+          <h1>{customRenderer({ content: params.children, drop })}</h1>
         ),
         p: (params) => (
           <p className="tw-text-base tw-text-iron-50 tw-font-normal">
-            {customRenderer({ children: params.children, drop })}
+            {customRenderer({ content: params.children, drop })}
           </p>
         ),
         li: (params) => (
-          <li>{customRenderer({ children: params.children, drop })}</li>
+          <li>{customRenderer({ content: params.children, drop })}</li>
         ),
       }}
     >
