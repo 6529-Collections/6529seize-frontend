@@ -51,6 +51,7 @@ export default function CreateDropWrapper({
   );
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
+
   const [title, setTitle] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<DropMetadata[]>([]);
 
