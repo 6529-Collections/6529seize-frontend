@@ -1,18 +1,19 @@
 import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { MEMES_CONTRACT } from "../../constants";
+import { useState, useEffect, useContext } from "react";
 import { NFT } from "../../entities/INFT";
-import { fetchAllPages, fetchUrl, postData } from "../../services/6529api";
+import { fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
 import { useAccount, useSignMessage } from "wagmi";
 import { useWeb3Modal } from "@web3modal/react";
 import { DBResponse } from "../../entities/IDBResponse";
-import { ConsolidatedTDHMetrics } from "../../entities/ITDH";
+import { ConsolidatedTDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { SeizeSettings } from "../../entities/ISeizeSettings";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AuthContext } from "../auth/Auth";
+import { commonApiFetch } from "../../services/api/common-api";
 
 interface CheckList {
   status: boolean;
@@ -21,6 +22,7 @@ interface CheckList {
 
 export default function RememeAddPage() {
   const accountResolution = useAccount();
+  const { connectedProfile } = useContext(AuthContext);
   const web3modal = useWeb3Modal();
 
   const [seizeSettings, setSeizeSettings] = useState<SeizeSettings>();
@@ -28,7 +30,7 @@ export default function RememeAddPage() {
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
-  const [userTDH, setUserTDH] = useState<ConsolidatedTDHMetrics>();
+  const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
   const [addRememe, setAddRememe] = useState<ProcessedRememe>();
   const [references, setReferences] = useState<number[]>();
@@ -118,20 +120,19 @@ export default function RememeAddPage() {
 
   useEffect(() => {
     async function fetchTdh() {
-      const url = `${process.env.API_ENDPOINT}/api/consolidated_owner_metrics/?wallet=${accountResolution.address}`;
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response && response.data.length === 1) {
-          setUserTDH(response.data[0]);
-        }
+      commonApiFetch<ConsolidatedTDH>({
+        endpoint: `tdh/consolidation/${connectedProfile?.consolidation.consolidation_key}`,
+      }).then((response) => {
+        setUserTDH(response);
       });
     }
 
-    if (accountResolution.isConnected) {
+    if (connectedProfile?.consolidation) {
       fetchTdh();
     } else {
       setCheckList([]);
     }
-  }, [accountResolution.isConnected]);
+  }, [connectedProfile]);
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {

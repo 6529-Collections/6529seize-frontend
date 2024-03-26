@@ -89,17 +89,6 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
           </h1>
           <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
-        {/* {lastTDH && (
-          <Col className={`text-right ${styles.lastTDH}`}>
-            * LAST TDH: {getDateDisplay(lastTDH.date)} BLOCK:{" "}
-            <a
-              href={`https://etherscan.io/block/${lastTDH.block}`}
-              rel="noreferrer"
-              target="_blank">
-              {lastTDH.block}
-            </a>
-          </Col>
-        )} */}
       </Row>
       {leaderboard && leaderboard.length > 0 && (
         <Row className={styles.scrollContainer}>

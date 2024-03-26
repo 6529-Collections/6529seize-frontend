@@ -1,11 +1,14 @@
-import { TDHBoostBreakdown } from "../../../entities/ITDH";
+import {
+  ConsolidatedTDH,
+  TDH,
+  TDHBoostBreakdown,
+} from "../../../entities/ITDH";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
-import { UserPageStatsTDHType } from "./UserPageStats";
 
 export default function UserPageStatsBoostBreakdown({
   tdh,
 }: {
-  readonly tdh: UserPageStatsTDHType;
+  readonly tdh: ConsolidatedTDH | TDH | undefined;
 }) {
   if (!tdh?.boost_breakdown || !tdh.boost) {
     return <></>;
