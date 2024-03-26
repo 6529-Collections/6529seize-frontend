@@ -10,14 +10,22 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 import { Web3Button } from "@web3modal/react";
-import { getTransactionLink } from "../../../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  getTransactionLink,
+} from "../../../../helpers/Helpers";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
 const MINT_PRICE = 0.06529;
 const CHAIN_ID = sepolia.id;
 
-export default function UserPageMintsSubscriptionsTopUp() {
+export default function UserPageMintsSubscriptionsTopUp(
+  props: Readonly<{
+    profile: IProfileAndConsolidations;
+  }>
+) {
   const account = useAccount();
-  const [trfValue, setTrfValue] = useState<string>("");
+  const [memeCount, setMemeCount] = useState<string>("1");
   const sendTransaction = useSendTransaction();
   const waitSendTransaction = useWaitForTransaction({
     confirmations: 1,
@@ -39,7 +47,7 @@ export default function UserPageMintsSubscriptionsTopUp() {
       setError("Invalid to address");
       return;
     }
-    const value = (MINT_PRICE * parseInt(trfValue)).toString();
+    const value = (MINT_PRICE * parseInt(memeCount)).toString();
     sendTransaction.sendTransaction({
       chainId: CHAIN_ID,
       to: useAddress.data,
@@ -74,7 +82,7 @@ export default function UserPageMintsSubscriptionsTopUp() {
           </h2>
         </Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="pt-1">
         <Col>
           <Form
             onSubmit={(e) => {
@@ -84,28 +92,28 @@ export default function UserPageMintsSubscriptionsTopUp() {
             <Form.Group className="mb-3">
               <Form.Label className="mb-1">Memes Count</Form.Label>
               <Row className="d-flex align-items-center">
-                <Col xs={6} sm={4} md={2}>
+                <Col xs={6} sm={4} md={3}>
                   <Form.Control
                     type="number"
                     placeholder="meme count"
-                    value={trfValue}
+                    value={memeCount}
                     onChange={(e) => {
                       const value = e.target.value;
                       try {
                         parseInt(value);
-                        setTrfValue(value);
+                        setMemeCount(value);
                       } catch {
-                        setTrfValue("");
+                        setMemeCount("");
                       }
                     }}
                   />
                 </Col>
-                <Col xs={6} sm={4} md={2}>
+                <Col xs={6} sm={4} md={3}>
                   {account.isConnected ? (
                     <Button
                       className="seize-btn btn-white btn-block"
                       type="submit"
-                      disabled={!trfValue || sendTransaction.isLoading}>
+                      disabled={!memeCount || sendTransaction.isLoading}>
                       Send
                     </Button>
                   ) : (
@@ -117,21 +125,15 @@ export default function UserPageMintsSubscriptionsTopUp() {
                     />
                   )}
                 </Col>
-                {error && (
-                  <Col
-                    xs={12}
-                    sm={4}
-                    md={8}
-                    className="d-flex align-items-center">
-                    {error}
-                  </Col>
-                )}
-                {sendTransaction.data && (
-                  <Col
-                    xs={12}
-                    sm={4}
-                    md={8}
-                    className="d-flex align-items-center gap-2">
+              </Row>
+              {error && (
+                <Row>
+                  <Col className="d-flex align-items-center pt-2">{error}</Col>
+                </Row>
+              )}
+              {sendTransaction.data && (
+                <Row>
+                  <Col className="d-flex align-items-center gap-2 pt-2">
                     Transaction {getStatusMessage()}
                     <a
                       href={getTransactionLink(
@@ -143,8 +145,8 @@ export default function UserPageMintsSubscriptionsTopUp() {
                       view
                     </a>
                   </Col>
-                )}
-              </Row>
+                </Row>
+              )}
             </Form.Group>
           </Form>
         </Col>

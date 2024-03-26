@@ -6,29 +6,17 @@ import { useState, useEffect } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import EthereumIcon from "../../utils/icons/EthereumIcon";
 import EtherscanIcon from "../../utils/icons/EtherscanIcon";
-import { getTransactionLink } from "../../../../helpers/Helpers";
+import {
+  getDateDisplay,
+  getTransactionLink,
+} from "../../../../helpers/Helpers";
 import { sepolia } from "wagmi";
 
 export default function UserPageMintsSubscriptionsTopUpHistory(
   props: Readonly<{
-    profile: IProfileAndConsolidations;
+    history: SubscriptionTopUp[];
   }>
 ) {
-  const [topUp, setTopUp] = useState<SubscriptionTopUp[]>([]);
-
-  useEffect(() => {
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionTopUp[];
-    }>({
-      endpoint: `subscriptions/consolidation-top-up/${props.profile.consolidation.consolidation_key}`,
-    }).then((data) => {
-      setTopUp(data.data);
-    });
-  }, []);
-
   return (
     <Container className="no-padding">
       <Row>
@@ -40,7 +28,7 @@ export default function UserPageMintsSubscriptionsTopUpHistory(
               </Accordion.Button>
               <Accordion.Body className={styles.topUpHistoryAccordionBody}>
                 <div className="d-flex flex-column gap-2">
-                  {topUp.map((topUp) => (
+                  {props.history.map((topUp) => (
                     <TopUpEntry key={topUp.hash} topUp={topUp} />
                   ))}
                 </div>
@@ -68,11 +56,12 @@ export function TopUpEntry(
               <EthereumIcon />
             </div>
           </div>
-          <span className="font-color-silver">
-            from: {props.topUp.from_wallet}
-          </span>
+          <span>from: {props.topUp.from_wallet}</span>
         </div>
-        <div className="d-flex align-items-center">
+        <div className="d-flex align-items-center gap-3">
+          <div className="font-color-silver">
+            {getDateDisplay(new Date(props.topUp.transaction_date))}
+          </div>
           <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
             <a
               className="d-flex align-items-center"
