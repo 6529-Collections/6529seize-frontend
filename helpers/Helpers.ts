@@ -91,8 +91,8 @@ export function numberWithCommasFromString(x: any) {
   return numberWithCommas(num);
 }
 
-export function numberWithCommas(x: number) {
-  if (x === null || isNaN(x)) return "-";
+export function numberWithCommas(x: number | undefined) {
+  if (!x || x === null || isNaN(x)) return "-";
   if (x === 0) return "-";
   const parts = x.toString().split(".");
   let integerPart = parts[0];

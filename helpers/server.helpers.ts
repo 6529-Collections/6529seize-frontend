@@ -10,7 +10,7 @@ import {
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
-import { areEqualAddresses, containsEmojis, formatAddress } from "./Helpers";
+import { areEqualAddresses } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
 import jwtDecode from "jwt-decode";
@@ -26,53 +26,6 @@ export interface CommonUserServerSideProps {
   title: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
 }
-
-const getConsolidatedTdh = async ({
-  consolidationKey,
-  headers,
-}: {
-  consolidationKey: string;
-  headers: Record<string, string>;
-}): Promise<ConsolidatedTDHMetrics | null> =>
-  await commonApiFetch<ConsolidatedTDHMetrics>({
-    endpoint: `consolidated_owner_metrics/${consolidationKey}`,
-    headers,
-  });
-
-export const getCommonUserServerSideProps = async ({
-  user,
-  headers,
-}: {
-  user: string;
-  headers: Record<string, string>;
-}): Promise<CommonUserServerSideProps> => {
-  const profile = await commonApiFetch<IProfileAndConsolidations>({
-    endpoint: `profiles/${user}`,
-    headers: headers,
-  });
-
-  const consolidatedTDH = profile?.consolidation?.consolidation_key
-    ? await getConsolidatedTdh({
-        consolidationKey: profile.consolidation.consolidation_key,
-        headers,
-      })
-    : null;
-
-  const display = profile?.consolidation?.consolidation_display ?? null;
-
-  const wallet = profile?.profile?.primary_wallet?.toLowerCase() ?? user;
-  const title = profile?.profile?.handle
-    ? profile.profile.handle
-    : display && !containsEmojis(display)
-    ? display
-    : formatAddress(wallet);
-
-  return {
-    profile,
-    title,
-    consolidatedTDH,
-  };
-};
 
 export const getUserProfile = async ({
   user,
