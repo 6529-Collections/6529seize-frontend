@@ -1,14 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { DropFull } from "../../../entities/IDrop";
 import { commonApiFetch } from "../../../services/api/common-api";
-import DropsList from "./DropsList";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { useEffect, useRef } from "react";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
-import { useIntersection } from "react-use";
+import { useEffect, useState } from "react";
+import DropListWrapper from "./DropListWrapper";
 
 const REQUEST_SIZE = 2;
 
@@ -41,18 +37,13 @@ export default function Drops() {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
   });
 
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const bottomIntersection = useIntersection(bottomRef, {
-    root: null,
-    rootMargin: "0px",
-    threshold: 1,
-  });
+  const [bottomIntersection, setBottomIntersection] = useState<boolean>(false);
 
   useEffect(() => {
-    if (status === "pending") {
+    if (!bottomIntersection) {
       return;
     }
-    if (!bottomIntersection?.isIntersecting) {
+    if (status === "pending") {
       return;
     }
     if (isFetching) {
@@ -68,14 +59,10 @@ export default function Drops() {
   }, [bottomIntersection, isFetching, status, hasNextPage, isFetchingNextPage]);
 
   return (
-    <div>
-      <DropsList drops={data?.pages.flat() ?? []} />
-      {isFetching && (
-        <div className="tw-w-full tw-text-center tw-mt-8">
-          <CircleLoader size={CircleLoaderSize.XXLARGE} />
-        </div>
-      )}
-      <div ref={bottomRef} />
-    </div>
+    <DropListWrapper
+      drops={data?.pages.flat() ?? []}
+      loading={isFetching}
+      onBottomIntersection={setBottomIntersection}
+    />
   );
 }
