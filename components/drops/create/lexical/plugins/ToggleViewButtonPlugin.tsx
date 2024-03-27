@@ -6,10 +6,10 @@ export default function ToggleViewButtonPlugin({
   return (
     <button
       onClick={onViewClick}
-      className="tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-group tw-absolute tw-inset-y-0 tw-mt-1.5 tw-right-3 tw-rounded-lg tw-border-none tw-bg-transparent"
+      className="tw-cursor-pointer tw-p-2 tw-group tw-absolute tw-top-1 md:tw-top-0 tw-right-3 tw-rounded-lg tw-border-none tw-bg-transparent"
     >
       <svg
-        className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+        className="tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
