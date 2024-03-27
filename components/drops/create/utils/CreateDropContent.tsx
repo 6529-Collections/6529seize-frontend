@@ -82,9 +82,7 @@ export default function CreateDropContent({
   const onMentionedUserAdded = (user: MentionedUser) => onMentionedUser(user);
   const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
-  const showToggleViewButton =
-    viewType === CreateDropViewType.COMPACT ||
-    screenType === CreateDropScreenType.DESKTOP;
+  const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
 
   return (
     <div className="tailwind-scope">
@@ -107,27 +105,7 @@ export default function CreateDropContent({
               }
               ErrorBoundary={LexicalErrorBoundary}
             />
-         <button
-              type="button"
-              className="tw-absolute tw-right-3.5 tw-top-3.5 tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <svg
-                className="tw-w-4 tw-h-4 tw-mr-2 -tw-ml-1"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 5V19M5 12H19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>Add title</span>
-            </button>
+
             <HistoryPlugin />
             <AutoFocusPlugin />
             <OnChangePlugin onChange={onEditorStateChange} />
@@ -140,7 +118,7 @@ export default function CreateDropContent({
             )}
             {showToggleViewButton && (
               <ToggleViewButtonPlugin onViewClick={onViewClick} />
-            )} 
+            )}
             <ListPlugin />
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
             <TabIndentationPlugin />
