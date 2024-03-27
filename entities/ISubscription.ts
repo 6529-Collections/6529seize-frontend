@@ -12,3 +12,10 @@ export interface SubscriptionTopUp {
   from_wallet: string;
   amount: number;
 }
+
+export interface NFTSubscription {
+  consolidation_key: string;
+  contract: string;
+  token_id: number;
+  subscribed: boolean;
+}

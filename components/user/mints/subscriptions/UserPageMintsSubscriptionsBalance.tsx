@@ -21,17 +21,14 @@ export default function UserPageMintsSubscriptionsBalance(
       {!props.details ? (
         <DotLoader />
       ) : (
-        <span className="d-flex align-items-center gap-1">
-          <b>
-            {numberWithCommas(
-              Math.round(props.details.balance * 1000000) / 1000000
-            )}
-          </b>
-          {props.details.balance > 0 && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
-              <EthereumIcon />
-            </div>
-          )}
+        <span className="d-flex align-items-center gap-3">
+          <span className="d-flex align-items-center gap-1">
+            <b>
+              {numberWithCommas(
+                Math.round(props.details.balance * 1000000) / 1000000
+              )}
+            </b>
+          </span>
           {props.show_refresh && (
             <>
               {props.fetching || isRefreshing ? (

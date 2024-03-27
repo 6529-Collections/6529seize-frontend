@@ -5,13 +5,14 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import UserPageMintsSubscriptionsTopUpHistory from "./UserPageMintsSubscriptionsTopUpHistory";
 import UserPageMintsSubscriptionsMode from "./UserPageMintsSubscriptionsMode";
 import { useContext, useEffect, useState } from "react";
-import { setBalance } from "viem/_types/actions/test/setBalance";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import {
+  NFTSubscription,
   SubscriptionDetails,
   SubscriptionTopUp,
 } from "../../../../entities/ISubscription";
 import { AuthContext } from "../../../auth/Auth";
+import UserPageMintsSubscriptionsNext from "./UserPageMintsSubscriptionsNext";
 
 export default function UserPageMintsSubscriptions(
   props: Readonly<{
@@ -19,11 +20,20 @@ export default function UserPageMintsSubscriptions(
   }>
 ) {
   const { connectedProfile } = useContext(AuthContext);
+
   const [details, setDetails] = useState<SubscriptionDetails>();
-  const [topUpHistory, setTopUpHistory] = useState<SubscriptionTopUp[]>([]);
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
+
+  const [topUpHistory, setTopUpHistory] = useState<SubscriptionTopUp[]>([]);
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
     useState<boolean>(true);
+
+  const [memeSubscriptions, setMemeSubscriptions] = useState<NFTSubscription[]>(
+    []
+  );
+  const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
+    useState<boolean>(true);
+
   const [isConnectedAccount, setIsConnectedAccount] = useState<boolean>(false);
 
   useEffect(() => {
@@ -35,18 +45,24 @@ export default function UserPageMintsSubscriptions(
     }
   }, [connectedProfile, props.profile]);
 
-  const refresh = (): void => {
+  function fetchDetails() {
     if (!props.profile.consolidation.consolidation_key) {
       return;
     }
     setFetchingDetails(true);
-    setFetchingTopUpHistory(true);
     commonApiFetch<SubscriptionDetails>({
       endpoint: `subscriptions/consolidation-details/${props.profile.consolidation.consolidation_key}`,
     }).then((data) => {
       setDetails(data);
       setFetchingDetails(false);
     });
+  }
+
+  function fetchTopUpHistory() {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    setFetchingTopUpHistory(true);
     commonApiFetch<{
       count: number;
       page: number;
@@ -58,6 +74,28 @@ export default function UserPageMintsSubscriptions(
       setTopUpHistory(data.data);
       setFetchingTopUpHistory(false);
     });
+  }
+
+  function fetchMemeSubscriptions() {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    setFetchingMemeSubscriptions(true);
+    commonApiFetch<NFTSubscription[]>({
+      endpoint: `subscriptions/consolidation-upcoming-memes/${props.profile.consolidation.consolidation_key}`,
+    }).then((data) => {
+      setMemeSubscriptions(data);
+      setFetchingMemeSubscriptions(false);
+    });
+  }
+
+  const refresh = (): void => {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    fetchDetails();
+    fetchTopUpHistory();
+    fetchMemeSubscriptions();
   };
 
   useEffect(() => {
@@ -80,10 +118,15 @@ export default function UserPageMintsSubscriptions(
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
-        <Col sm={12} md={6}>
+        <Col sm={12} md={6} className="d-flex flex-column gap-3">
           <UserPageMintsSubscriptionsMode
             profile={props.profile}
             details={details}
+            readonly={!isConnectedAccount}
+          />
+          <UserPageMintsSubscriptionsNext
+            profile={props.profile}
+            memes_subscriptions={memeSubscriptions}
             readonly={!isConnectedAccount}
           />
         </Col>

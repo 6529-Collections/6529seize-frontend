@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import Toggle from "react-toggle";
 import { AuthContext } from "../../../auth/Auth";
@@ -15,7 +14,6 @@ export default function UserPageMintsSubscriptionsMode(
     readonly: boolean;
   }>
 ) {
-  const account = useAccount();
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [isAuto, setIsAuto] = useState<boolean>(false);

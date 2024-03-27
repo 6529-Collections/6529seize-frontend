@@ -2,19 +2,19 @@ import { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { parseEther } from "viem";
 import {
-  mainnet,
   sepolia,
   useAccount,
-  useEnsAddress,
   useSendTransaction,
   useWaitForTransaction,
 } from "wagmi";
 import { Web3Button } from "@web3modal/react";
-import {
-  areEqualAddresses,
-  getTransactionLink,
-} from "../../../../helpers/Helpers";
+import { formatAddress, getTransactionLink } from "../../../../helpers/Helpers";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import {
+  SUBSCRIPTIONS_ADDRESS,
+  SUBSCRIPTIONS_ADDRESS_ENS,
+} from "../../../../constants";
+import Tippy from "@tippyjs/react";
 
 const MINT_PRICE = 0.06529;
 const CHAIN_ID = sepolia.id;
@@ -35,22 +35,13 @@ export default function UserPageMintsSubscriptionsTopUp(
 
   const [error, setError] = useState<string>("");
 
-  const useAddress = useEnsAddress({
-    chainId: mainnet.id,
-    name: "social.museum.6529.eth",
-  });
-
   function submit() {
     setError("");
     sendTransaction.reset();
-    if (!useAddress.data) {
-      setError("Invalid to address");
-      return;
-    }
     const value = (MINT_PRICE * parseInt(memeCount)).toString();
     sendTransaction.sendTransaction({
       chainId: CHAIN_ID,
-      to: useAddress.data,
+      to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther(value),
     });
   }
@@ -76,10 +67,23 @@ export default function UserPageMintsSubscriptionsTopUp(
   return (
     <Container className="no-padding">
       <Row>
-        <Col>
+        <Col className="d-flex align-items-center gap-2">
           <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-l sm:tw-tracking-tight">
             Top Up
           </h2>
+        </Col>
+      </Row>
+      <Row>
+        <Col className="font-color-silver font-smaller">
+          Sending to{" "}
+          <Tippy
+            content={
+              <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
+            }>
+            <span>
+              {SUBSCRIPTIONS_ADDRESS_ENS} {formatAddress(SUBSCRIPTIONS_ADDRESS)}
+            </span>
+          </Tippy>
         </Col>
       </Row>
       <Row className="pt-1">
@@ -90,7 +94,7 @@ export default function UserPageMintsSubscriptionsTopUp(
               submit();
             }}>
             <Form.Group className="mb-3">
-              <Form.Label className="mb-1">Memes Count</Form.Label>
+              <Form.Label className="mb-1">Card Count</Form.Label>
               <Row className="d-flex align-items-center">
                 <Col xs={6} sm={4} md={3}>
                   <Form.Control
