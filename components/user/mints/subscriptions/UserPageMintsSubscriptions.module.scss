@@ -32,3 +32,29 @@
   border: 1px solid rgb(55, 55, 61);
   padding: 10px;
 }
+
+.nftSubscriptionsTable {
+  td {
+    color: rgb(147, 147, 159);
+    border-top: 1px solid rgb(55, 55, 61) !important;
+    border-bottom: 1px solid rgb(55, 55, 61) !important;
+    padding: 10px 20px;
+    white-space: nowrap;
+  }
+}
+
+.subscribedTag {
+  color: #00ff00;
+  background-color: #004400;
+  border: 1px solid #00aa00;
+  padding: 2px 10px;
+  border-radius: 9999px;
+}
+
+.notSubscribedTag {
+  color: #ff0000;
+  background-color: #440000;
+  border: 1px solid #aa0000;
+  padding: 2px 10px;
+  border-radius: 9999px;
+}

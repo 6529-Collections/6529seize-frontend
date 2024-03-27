@@ -19,3 +19,10 @@ export interface NFTSubscription {
   token_id: number;
   subscribed: boolean;
 }
+
+export interface SubscriptionLog {
+  created_at: string;
+  id: number;
+  consolidation_key: string;
+  log: string;
+}

@@ -2,17 +2,20 @@ import { Col, Container, Row } from "react-bootstrap";
 import UserPageMintsSubscriptionsBalance from "./UserPageMintsSubscriptionsBalance";
 import UserPageMintsSubscriptionsTopUp from "./UserPageMintsSubscriptionsTopUp";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import UserPageMintsSubscriptionsTopUpHistory from "./UserPageMintsSubscriptionsTopUpHistory";
 import UserPageMintsSubscriptionsMode from "./UserPageMintsSubscriptionsMode";
 import { useContext, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import {
   NFTSubscription,
   SubscriptionDetails,
+  SubscriptionLog,
   SubscriptionTopUp,
 } from "../../../../entities/ISubscription";
 import { AuthContext } from "../../../auth/Auth";
-import UserPageMintsSubscriptionsNext from "./UserPageMintsSubscriptionsNext";
+import UserPageMintsSubscriptionsUpcoming from "./UserPageMintsSubscriptionsUpcoming";
+import UserPageMintsSubscriptionsHistory from "./UserPageMintsSubscriptionsHistory";
+
+const HISTORY_PAGE_SIZE = 10;
 
 export default function UserPageMintsSubscriptions(
   props: Readonly<{
@@ -32,6 +35,12 @@ export default function UserPageMintsSubscriptions(
     []
   );
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
+    useState<boolean>(true);
+
+  const [subscripiongLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
+    []
+  );
+  const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
 
   const [isConnectedAccount, setIsConnectedAccount] = useState<boolean>(false);
@@ -69,7 +78,7 @@ export default function UserPageMintsSubscriptions(
       next: boolean;
       data: SubscriptionTopUp[];
     }>({
-      endpoint: `subscriptions/consolidation-top-up/${props.profile.consolidation.consolidation_key}`,
+      endpoint: `subscriptions/consolidation-top-up/${props.profile.consolidation.consolidation_key}?page=1&size=${HISTORY_PAGE_SIZE}`,
     }).then((data) => {
       setTopUpHistory(data.data);
       setFetchingTopUpHistory(false);
@@ -89,6 +98,24 @@ export default function UserPageMintsSubscriptions(
     });
   }
 
+  function fetchLogs() {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    setFetchingSubscriptionLogs(true);
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: boolean;
+      data: SubscriptionLog[];
+    }>({
+      endpoint: `subscriptions/consolidation-logs/${props.profile.consolidation.consolidation_key}?page=1&size=${HISTORY_PAGE_SIZE}`,
+    }).then((data) => {
+      setSubscriptionLogs(data.data);
+      setFetchingSubscriptionLogs(false);
+    });
+  }
+
   const refresh = (): void => {
     if (!props.profile.consolidation.consolidation_key) {
       return;
@@ -96,6 +123,7 @@ export default function UserPageMintsSubscriptions(
     fetchDetails();
     fetchTopUpHistory();
     fetchMemeSubscriptions();
+    fetchLogs();
   };
 
   useEffect(() => {
@@ -111,7 +139,12 @@ export default function UserPageMintsSubscriptions(
           </h2>
           <UserPageMintsSubscriptionsBalance
             details={details}
-            fetching={fetchingDetails || fetchingTopUpHistory}
+            fetching={
+              fetchingDetails ||
+              fetchingTopUpHistory ||
+              fetchingMemeSubscriptions ||
+              fetchingSubscriptionLogs
+            }
             refresh={refresh}
             show_refresh={isConnectedAccount}
           />
@@ -123,11 +156,7 @@ export default function UserPageMintsSubscriptions(
             profile={props.profile}
             details={details}
             readonly={!isConnectedAccount}
-          />
-          <UserPageMintsSubscriptionsNext
-            profile={props.profile}
-            memes_subscriptions={memeSubscriptions}
-            readonly={!isConnectedAccount}
+            refresh={refresh}
           />
         </Col>
         {isConnectedAccount && (
@@ -138,7 +167,21 @@ export default function UserPageMintsSubscriptions(
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
-          <UserPageMintsSubscriptionsTopUpHistory history={topUpHistory} />
+          <UserPageMintsSubscriptionsUpcoming
+            profile={props.profile}
+            details={details}
+            memes_subscriptions={memeSubscriptions}
+            readonly={!isConnectedAccount}
+            refresh={refresh}
+          />
+        </Col>
+      </Row>
+      <Row className="pt-2 pb-2">
+        <Col>
+          <UserPageMintsSubscriptionsHistory
+            topups={topUpHistory}
+            logs={subscripiongLogs}
+          />
         </Col>
       </Row>
     </Container>

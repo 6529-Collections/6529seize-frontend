@@ -24,10 +24,15 @@ export default function UserPageMintsSubscriptionsBalance(
         <span className="d-flex align-items-center gap-3">
           <span className="d-flex align-items-center gap-1">
             <b>
-              {numberWithCommas(
-                Math.round(props.details.balance * 1000000) / 1000000
-              )}
+              {props.details.balance
+                ? numberWithCommas(
+                    Math.round(props.details.balance * 1000000) / 1000000
+                  )
+                : 0}
             </b>
+            <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+              <EthereumIcon />
+            </div>
           </span>
           {props.show_refresh && (
             <>

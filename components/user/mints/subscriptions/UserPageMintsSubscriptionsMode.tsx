@@ -1,17 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import Toggle from "react-toggle";
 import { AuthContext } from "../../../auth/Auth";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { SubscriptionDetails } from "../../../../entities/ISubscription";
+import { Spinner } from "../../../dotLoader/DotLoader";
 
 export default function UserPageMintsSubscriptionsMode(
   props: Readonly<{
     profile: IProfileAndConsolidations;
     details: SubscriptionDetails | undefined;
     readonly: boolean;
+    refresh: () => void;
   }>
 ) {
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -49,11 +50,16 @@ export default function UserPageMintsSubscriptionsMode(
       });
       const responseAuto = response.automatic;
       setIsAuto(responseAuto);
-      const detail = responseAuto ? `Automatic` : `Manual`;
+      const message = `Subscription Mode set to ${
+        responseAuto ? `Automatic` : `Manual`
+      } - ${
+        responseAuto ? `Subscribed for` : `Unsubscribed from`
+      } all upcoming drops`;
       setToast({
-        message: `Subscription mode set to ${detail}`,
+        message: message,
         type: "success",
       });
+      props.refresh();
     } catch (e) {
       setIsUpdating(false);
       setToast({
@@ -90,6 +96,7 @@ export default function UserPageMintsSubscriptionsMode(
           <label htmlFor={"subscription-mode"} className={"font-color"}>
             <b>Automatic</b>
           </label>
+          {isUpdating && <Spinner />}
         </Col>
       </Row>
     </Container>
