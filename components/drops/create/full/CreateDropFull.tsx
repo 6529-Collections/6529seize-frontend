@@ -66,6 +66,7 @@ export default function CreateDropFull({
     ),
     [CreateDropScreenType.MOBILE]: (
       <CreateDropFullMobile
+        profile={profile}
         title={title}
         editorState={editorState}
         metadata={metadata}

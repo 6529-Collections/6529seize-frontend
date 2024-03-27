@@ -8,7 +8,7 @@ import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
-import { UserPageRepPropsRepRates } from "../../pages/[user]";
+import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
 import { Page } from "../../helpers/Types";
 import {
   ActivityLogParams,

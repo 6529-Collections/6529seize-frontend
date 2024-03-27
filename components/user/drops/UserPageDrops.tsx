@@ -13,22 +13,25 @@ export default function UserPageDrops({
   const { address } = useAccount();
   const [canCreateDrop, setCanCreateDrop] = useState(false);
 
+  const haveProfile = !!profile.profile?.handle;
+
   useEffect(
-    () =>
-      setCanCreateDrop(
-        amIUser({ profile, address }) && !!profile.profile?.handle
-      ),
+    () => setCanCreateDrop(amIUser({ profile, address }) && haveProfile),
     [profile, address]
   );
 
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-3xl tw-mx-auto">
-        <h2 className="tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
-          {createPossessionStr(profile.profile?.handle ?? null)} Drops
-        </h2>
-        {canCreateDrop && <CreateDrop profile={profile} />}
-        <Drops />
+        {haveProfile && (
+          <div>
+            <h2 className="tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
+              {createPossessionStr(profile.profile?.handle ?? null)} Drops
+            </h2>
+            {canCreateDrop && <CreateDrop profile={profile} />}
+            <Drops />
+          </div>
+        )}
       </div>
     </div>
   );

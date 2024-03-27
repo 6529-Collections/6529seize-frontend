@@ -15,6 +15,8 @@ import CreateDropContent from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
 import PrimaryButton from "../../../../utils/buttons/PrimaryButton";
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import DropPfp from "../../utils/DropPfp";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -22,6 +24,7 @@ enum TITLE_STATE {
 }
 
 export default function CreateDropFullMobile({
+  profile,
   title,
   editorState,
   metadata,
@@ -36,6 +39,7 @@ export default function CreateDropFullMobile({
   onViewChange,
   onDrop,
 }: {
+  readonly profile: IProfileAndConsolidations;
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
@@ -67,31 +71,35 @@ export default function CreateDropFullMobile({
     >
       <div className="tw-relative tw-mt-2 sm:tw-mt-4 tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
         <div className="tw-px-4 sm:tw-px-6 tw-space-y-4">
-          {titleState === TITLE_STATE.BUTTON && (
-            <button
-              onClick={() => setTitleState(TITLE_STATE.INPUT)}
-              type="button"
-              className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 
+          <div className="tw-w-full tw-inline-flex tw-justify-between">
+            <DropPfp pfpUrl={profile.profile?.pfp_url} />
+            {titleState === TITLE_STATE.BUTTON && (
+              <button
+                onClick={() => setTitleState(TITLE_STATE.INPUT)}
+                type="button"
+                className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 
               tw-px-2.5 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <svg
-                className="tw-w-4 tw-h-4 tw-mr-1 -tw-ml-1"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  d="M12 5V19M5 12H19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>Add title</span>
-            </button>
-          )}
+                <svg
+                  className="tw-w-4 tw-h-4 tw-mr-1 -tw-ml-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Add title</span>
+              </button>
+            )}
+          </div>
+
           {titleState === TITLE_STATE.INPUT && (
             <input
               type="text"

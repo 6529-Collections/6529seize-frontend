@@ -274,6 +274,13 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <Link href="/stream">
+                      <h3>Stream</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <Link href="/community">
                       <h3>Community</h3>
                     </Link>
@@ -713,6 +720,12 @@ export default function Header(props: Readonly<Props>) {
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
                             >
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Stream",
+                                  path: "/stream",
+                                }}
+                              />
                               <HeaderDesktopLink
                                 link={{
                                   name: "Community",

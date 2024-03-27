@@ -56,7 +56,7 @@ export default function ProfileRatersTableItem({
         return `/${rating.handle}/identity`;
       case ProfileRatersTableType.REP_RECEIVED:
       case ProfileRatersTableType.REP_GIVEN:
-        return `/${rating.handle}/`;
+        return `/${rating.handle}/rep`;
       default:
         assertUnreachable(type);
         return "";
