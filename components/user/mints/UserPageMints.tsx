@@ -15,6 +15,7 @@ import { formatNameForUrl } from "../../nextGen/nextgen_helpers";
 import UserPageMintsPhasesPhase from "./UserPageMintsPhasesPhase";
 import UserPageMintsMintingAddresses from "./UserPageMintsMintingAddresses";
 import Image from "next/image";
+import UserPageMintsSubscriptions from "./subscriptions/UserPageMintsSubscriptions";
 
 export interface UserPageMintsPhaseSpotItem {
   readonly spots: number;
@@ -207,124 +208,122 @@ export default function UserPageMints({
     getMintingWallets()
   );
 
-  useEffect(() => {
-    setMintingWallets(getMintingWallets());
-  }, [delegations]);
+  // useEffect(() => {
+  //   setMintingWallets(getMintingWallets());
+  // }, [delegations]);
 
   return (
-    <div className="tailwind-scope">
-      <div className="tw-divide-y tw-divide-iron-800">
-        <div className="tw-flex">
-          <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
-            NextGen - Pebbles
-          </h2>
-        </div>
-        {phases.length ? (
-          <>
-            {!!phaseNames?.length && (
-              <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
-                Congratulations! You are eligible to mint Pebbles in{" "}
-                <span className="tw-pl-1 tw-font-semibold tw-text-iron-200">
-                  {phaseNames}.
+    <>
+      <UserPageMintsSubscriptions profile={profile} />
+      <div className="tailwind-scope">
+        <div className="tw-divide-y tw-divide-iron-800">
+          <div className="tw-flex">
+            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
+              NextGen - Pebbles
+            </h2>
+          </div>
+          {phases.length ? (
+            <>
+              {!!phaseNames?.length && (
+                <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
+                  Congratulations! You are eligible to mint Pebbles in{" "}
+                  <span className="tw-pl-1 tw-font-semibold tw-text-iron-200">
+                    {phaseNames}.
+                  </span>
+                </p>
+              )}
+              <div className="tw-mt-6 sm:tw-mt-8 tw-flex tw-flex-col">
+                <span className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+                  Minting Page
                 </span>
-              </p>
-            )}
-            <div className="tw-mt-6 sm:tw-mt-8 tw-flex tw-flex-col">
-              <span className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
-                Minting Page
-              </span>
-              <div className="tw-mt-1">
-                <a
-                  href={mintUrl}
-                  className="tw-group tw-inline-flex tw-items-center tw-text-primary-300 hover:tw-text-primary-400 tw-font-medium tw-text-base tw-duration-300 tw-transition tw-ease-out"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="tw-break-all">{mintUrl}</span>
-                  <svg
-                    className="tw-h-6 tw-w-6 tw-ml-2 tw-text-primary-300 group-hover:tw-text-primary-400 tw-duration-400 tw-transition tw-ease-out group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M7 17L17 7M17 7H7M17 7V17"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </a>
+                <div className="tw-mt-1">
+                  <a
+                    href={mintUrl}
+                    className="tw-group tw-inline-flex tw-items-center tw-text-primary-300 hover:tw-text-primary-400 tw-font-medium tw-text-base tw-duration-300 tw-transition tw-ease-out"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    <span className="tw-break-all">{mintUrl}</span>
+                    <svg
+                      className="tw-h-6 tw-w-6 tw-ml-2 tw-text-primary-300 group-hover:tw-text-primary-400 tw-duration-400 tw-transition tw-ease-out group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M7 17L17 7M17 7H7M17 7V17"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </a>
+                </div>
               </div>
-            </div>
-            {phases.map((phase) => (
-              <UserPageMintsPhasesPhase key={phase.name} phase={phase} />
-            ))}
+              {phases.map((phase) => (
+                <UserPageMintsPhasesPhase key={phase.name} phase={phase} />
+              ))}
 
-            <UserPageMintsMintingAddresses wallets={mintingWallets} />
-            <div className="tw-mt-6 tw-max-w-4xl">
-              <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
-                NextGen mints check{" "}
-                <a
-                  href="https://seize.io/delegation/delegation-center"
-                  rel="noopener noreferrer"
-                  className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
-                  target="_blank"
-                >
-                  Delegation Center
-                </a>{" "}
-                in realtime. You can update your delegated minting addresses at
-                any time before you mint. Configure your delegations at the{" "}
-                <a
-                  href="https://seize.io/delegation/delegation-center"
-                  rel="noopener noreferrer"
-                  className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
-                  target="_blank"
-                >
-                  Delegation Center
-                </a>{" "}
-                by creating a delegation for &quot;Any Collection&quot; or
-                &quot;The Memes&quot; with use-case &quot;#1 All&quot; or
-                &quot;#2 Minting / Allowlist&quot;
-              </p>
-            </div>
-            <div className="tw-mt-6 sm:tw-mt-8">
-              <div className="md:tw-max-w-5xl lg:tw-max-w-full">
-                <Image
-                  width={1379}
-                  height={594}
-                  src="/timezones.png"
-                  className="tw-w-2/3 tw-h-2/3 tw-object-contain tw-rounded-md"
-                  alt="NextGen Pebbles Minting Timezones"
-                />
+              <UserPageMintsMintingAddresses wallets={mintingWallets} />
+              <div className="tw-mt-6 tw-max-w-4xl">
+                <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
+                  NextGen mints check{" "}
+                  <a
+                    href="https://seize.io/delegation/delegation-center"
+                    rel="noopener noreferrer"
+                    className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
+                    target="_blank">
+                    Delegation Center
+                  </a>{" "}
+                  in realtime. You can update your delegated minting addresses
+                  at any time before you mint. Configure your delegations at the{" "}
+                  <a
+                    href="https://seize.io/delegation/delegation-center"
+                    rel="noopener noreferrer"
+                    className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
+                    target="_blank">
+                    Delegation Center
+                  </a>{" "}
+                  by creating a delegation for &quot;Any Collection&quot; or
+                  &quot;The Memes&quot; with use-case &quot;#1 All&quot; or
+                  &quot;#2 Minting / Allowlist&quot;
+                </p>
               </div>
+              <div className="tw-mt-6 sm:tw-mt-8">
+                <div className="md:tw-max-w-5xl lg:tw-max-w-full">
+                  <Image
+                    width={1379}
+                    height={594}
+                    src="/timezones.png"
+                    className="tw-w-2/3 tw-h-2/3 tw-object-contain tw-rounded-md"
+                    alt="NextGen Pebbles Minting Timezones"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
+              {getNotEligibleText()}
+            </p>
+          )}
+          <div className="tw-mt-8 tw-pt-8 md:tw-mt-10 md:tw-pt-10 tw-border-t tw-border-solid tw-border-x-0 tw-border-b tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
+            <div className="md:tw-max-w-5xl">
+              <span className="tw-text-iron-300">Note:</span> The Your Mints tab
+              will later be made available for Memes drops too, but is not
+              active yet. For now, please continue to use the Distribution Plan
+              page for each card (example:{" "}
+              <a
+                href="https://seize.io/the-memes/192/distribution"
+                rel="noopener noreferrer"
+                target="_blank"
+                className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out">
+                www.seize.io/the-memes/192/distribution
+              </a>{" "}
+              ).
             </div>
-          </>
-        ) : (
-          <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
-            {getNotEligibleText()}
-          </p>
-        )}
-        <div className="tw-mt-8 tw-pt-8 md:tw-mt-10 md:tw-pt-10 tw-border-t tw-border-solid tw-border-x-0 tw-border-b tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
-          <div className="md:tw-max-w-5xl">
-            <span className="tw-text-iron-300">Note:</span> The Your Mints tab
-            will later be made available for Memes drops too, but is not active
-            yet. For now, please continue to use the Distribution Plan page for
-            each card (example:{" "}
-            <a
-              href="https://seize.io/the-memes/192/distribution"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="tw-group tw-inline-flex tw-items-center tw-text-iron-200 hover:tw-text-primary-300 tw-font-medium tw-text-sm tw-duration-300 tw-transition tw-ease-out"
-            >
-              www.seize.io/the-memes/192/distribution
-            </a>{" "}
-            ).
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
