@@ -9,10 +9,11 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
       <div className="tw-flex tw-gap-x-3">
         <DropPfp pfpUrl={drop.author.pfp} />
         <div className="tw-flex tw-flex-col">
-          <div className="tw-flex tw-items-center tw-gap-x-3">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
             <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-iron-50">
               {drop.author.handle}
             </p>
+            <span className="tw-text-iron-500">&bull;</span>
             <p className="tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-text-md tw-leading-none tw-text-iron-500">
               {getTimeAgo(drop.created_at)}
             </p>

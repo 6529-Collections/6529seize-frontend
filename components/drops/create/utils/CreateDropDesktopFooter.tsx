@@ -11,9 +11,11 @@ export default function CreateDropDesktopFooter({
   readonly onDrop: () => void;
 }) {
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
+    <div>
       <CreateDropSelectFile onFileChange={onFileChange} file={file} />
-      <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
+      <div className="tw-mt-3 tw-flex tw-justify-end">
+        <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
+      </div>
     </div>
   );
 }
