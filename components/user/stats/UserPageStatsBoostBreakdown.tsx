@@ -40,7 +40,9 @@ export default function UserPageStatsBoostBreakdown({
       </tr>
     );
     if (tdh?.boost_breakdown) {
-      rows.push(getMemeRow("Card Sets", tdh.boost_breakdown?.memes_card_sets));
+      rows.push(
+        getMemeRow("Full Collection Sets", tdh.boost_breakdown?.memes_card_sets)
+      );
       if (tdh.boost_breakdown?.memes_card_sets?.acquired === 0) {
         rows.push(getMemeRow("SZN1", tdh.boost_breakdown?.memes_szn1));
         if (!tdh.boost_breakdown?.memes_szn1?.acquired) {
@@ -53,6 +55,7 @@ export default function UserPageStatsBoostBreakdown({
         rows.push(getMemeRow("SZN3", tdh.boost_breakdown?.memes_szn3));
         rows.push(getMemeRow("SZN4", tdh.boost_breakdown?.memes_szn4));
         rows.push(getMemeRow("SZN5", tdh.boost_breakdown?.memes_szn5));
+        rows.push(getMemeRow("SZN6", tdh.boost_breakdown?.memes_szn6));
       }
     }
 
@@ -100,12 +103,12 @@ export default function UserPageStatsBoostBreakdown({
                   <th
                     scope="col"
                     className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400  tw-text-center">
-                    Available Boost
+                    Potential Boost
                   </th>
                   <th
                     scope="col"
                     className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400 tw-text-center">
-                    Eligible Boost
+                    Actual Boost
                   </th>
                 </tr>
               </thead>
@@ -117,8 +120,6 @@ export default function UserPageStatsBoostBreakdown({
                       "Gradients",
                       tdh?.boost_breakdown.gradients
                     )}
-                    {getBaseBoostRow("ENS", tdh?.boost_breakdown.ens)}
-                    {getBaseBoostRow("Profile", tdh?.boost_breakdown.profile)}
                     <tr key={getRandomObjectId()}>
                       <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
                         TOTAL BOOST
