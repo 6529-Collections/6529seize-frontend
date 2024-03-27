@@ -37,7 +37,15 @@ export default function Drops() {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
   });
 
+  const [drops, setDrops] = useState<DropFull[]>([]);
+
+  useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
+
   const onBottomIntersection = (state: boolean) => {
+    if (drops.length < REQUEST_SIZE) {
+      return;
+    }
+
     if (!state) {
       return;
     }
@@ -56,10 +64,6 @@ export default function Drops() {
 
     fetchNextPage();
   };
-
-  const [drops, setDrops] = useState<DropFull[]>([]);
-
-  useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
 
   return (
     <DropListWrapper
