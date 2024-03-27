@@ -47,7 +47,7 @@ export default function CreateDropWrapper({
     }
   }, [breakpoint]);
   const [viewType, setViewType] = useState<CreateDropViewType>(
-    CreateDropViewType.FULL
+    CreateDropViewType.COMPACT
   );
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
