@@ -4,6 +4,7 @@ import styles from "./Leaderboard.module.scss";
 
 export default function LeaderboardSort<LeaderboardSortType>(
   props: Readonly<{
+    sort_option: LeaderboardSortType;
     sort: {
       sort: LeaderboardSortType;
       sort_direction: SortDirection;
@@ -12,7 +13,6 @@ export default function LeaderboardSort<LeaderboardSortType>(
       sort: LeaderboardSortType;
       sort_direction: SortDirection;
     }) => void;
-    s: LeaderboardSortType;
   }>
 ) {
   return (
@@ -21,13 +21,13 @@ export default function LeaderboardSort<LeaderboardSortType>(
         icon="square-caret-up"
         onClick={() =>
           props.setSort({
-            sort: props.s,
+            sort: props.sort_option,
             sort_direction: SortDirection.ASC,
           })
         }
         className={`${styles.caret} ${
-          props.sort.sort_direction != SortDirection.ASC ||
-          props.sort.sort != props.s
+          props.sort.sort_direction !== SortDirection.ASC ||
+          props.sort.sort !== props.sort_option
             ? styles.disabled
             : ""
         }`}
@@ -36,13 +36,13 @@ export default function LeaderboardSort<LeaderboardSortType>(
         icon="square-caret-down"
         onClick={() =>
           props.setSort({
-            sort: props.s,
+            sort: props.sort_option,
             sort_direction: SortDirection.DESC,
           })
         }
         className={`${styles.caret} ${
-          props.sort.sort_direction != SortDirection.DESC ||
-          props.sort.sort != props.s
+          props.sort.sort_direction !== SortDirection.DESC ||
+          props.sort.sort !== props.sort_option
             ? styles.disabled
             : ""
         }`}
