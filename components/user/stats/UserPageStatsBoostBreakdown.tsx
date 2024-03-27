@@ -55,7 +55,7 @@ export default function UserPageStatsBoostBreakdown({
         rows.push(getMemeRow("SZN3", tdh.boost_breakdown?.memes_szn3));
         rows.push(getMemeRow("SZN4", tdh.boost_breakdown?.memes_szn4));
         rows.push(getMemeRow("SZN5", tdh.boost_breakdown?.memes_szn5));
-        rows.push(getMemeRow("SZN5", tdh.boost_breakdown?.memes_szn5));
+        rows.push(getMemeRow("SZN6", tdh.boost_breakdown?.memes_szn6));
       }
     }
 
