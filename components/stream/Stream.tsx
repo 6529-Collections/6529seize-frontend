@@ -22,7 +22,7 @@ interface StreamQuery {
   readonly storm_id?: string;
 }
 
-const REQUEST_SIZE = 2;
+const REQUEST_SIZE = 10;
 
 const SEARCH_PARAMS_FIELDS = {
   curation: "curation",
@@ -115,10 +115,8 @@ export default function Stream() {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
   });
 
-  const [bottomIntersection, setBottomIntersection] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!bottomIntersection) {
+  const onBottomIntersection = (state: boolean) => {
+    if (!state) {
       return;
     }
     if (status === "pending") {
@@ -133,14 +131,19 @@ export default function Stream() {
     if (!hasNextPage) {
       return;
     }
+
     fetchNextPage();
-  }, [bottomIntersection, isFetching, status, hasNextPage, isFetchingNextPage]);
+  };
+
+  const [drops, setDrops] = useState<DropFull[]>([]);
+
+  useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
 
   return (
     <DropListWrapper
-      drops={data?.pages.flat() ?? []}
+      drops={drops}
       loading={isFetching}
-      onBottomIntersection={setBottomIntersection}
+      onBottomIntersection={onBottomIntersection}
     />
   );
 }

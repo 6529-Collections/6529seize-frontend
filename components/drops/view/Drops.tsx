@@ -6,7 +6,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import DropListWrapper from "./DropListWrapper";
 
-const REQUEST_SIZE = 2;
+const REQUEST_SIZE = 10;
 
 export default function Drops() {
   const router = useRouter();
@@ -53,7 +53,6 @@ export default function Drops() {
     if (!hasNextPage) {
       return;
     }
-    console.log("wtd");
 
     fetchNextPage();
   };

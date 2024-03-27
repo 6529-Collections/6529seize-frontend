@@ -1,18 +1,39 @@
+import Link from "next/link";
 import { DropFull } from "../../../../entities/IDrop";
 import { getTimeAgo } from "../../../../helpers/Helpers";
 import DropPfp from "../../create/utils/DropPfp";
 import DropListItemContent from "./content/DropListItemContent";
+import { useRouter } from "next/router";
+import DropListItemDiscussion from "./discussion/DropListItemDiscussion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
+  const router = useRouter();
+  const handleOrWallet = (router.query.user as string)?.toLowerCase();
+  const isMyDrop = drop.author.handle.toLowerCase() === handleOrWallet;
+  const [discussionOpen, setDiscussionOpen] = useState<boolean>(false);
+
   return (
     <div className="tw-border-solid tw-border tw-border-iron-700 tw-rounded-xl tw-bg-iron-900 tw-p-4 sm:tw-p-5">
       <div className="tw-flex tw-gap-x-3">
         <DropPfp pfpUrl={drop.author.pfp} />
         <div className="tw-flex tw-flex-col tw-w-full">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-iron-50">
-              {drop.author.handle}
-            </p>
+            {isMyDrop ? (
+              <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-iron-50">
+                {drop.author.handle}
+              </p>
+            ) : (
+              <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-iron-50">
+                <Link
+                  href={`/${drop.author.handle}`}
+                  className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
+                >
+                  {drop.author.handle}
+                </Link>
+              </p>
+            )}
             <span className="tw-text-iron-500">&bull;</span>
             <p className="tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-text-md tw-leading-none tw-text-iron-500">
               {getTimeAgo(drop.created_at)}
@@ -20,11 +41,13 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
           </div>
           <div className="tw-mt-1 tw-w-full">
             <DropListItemContent drop={drop} />
+  
           </div>
         </div>
       </div>
       <div className="tw-mt-4 tw-ml-12 tw-border-t tw-flex tw-items-center tw-justify-between sm:tw-justify-start tw-gap-x-8">
         <button
+          onClick={() => setDiscussionOpen(!discussionOpen)}
           type="button"
           className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition tw-ease-out tw-duration-300"
         >
@@ -103,6 +126,32 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
           </div>
         </button>
       </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {discussionOpen && (
+          <motion.div
+            key={drop.id}
+            initial={{ height: "0", opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: {
+                height: { duration: 0.3 },
+                opacity: { duration: 0.3, delay: 0.3 },
+              },
+            }}
+            exit={{
+              height: "0",
+              opacity: 0,
+              transition: {
+                opacity: { duration: 0 },
+                height: { duration: 0.3 },
+              },
+            }}
+          >
+            <DropListItemDiscussion />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
