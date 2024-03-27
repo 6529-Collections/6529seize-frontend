@@ -8,7 +8,7 @@ import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
-import { UserPageRepPropsRepRates } from "../../pages/[user]";
+import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
 import { Page } from "../../helpers/Types";
 import {
   ActivityLogParams,
@@ -28,6 +28,7 @@ export enum QueryKey {
   PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
+  PROFILE_DROPS = "PROFILE_DROPS",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -39,8 +40,10 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
+  COMMUNITY_DROPS = "COMMUNITY_DROPS",
   CURATION_FILTERS = "CURATION_FILTERS",
   CURATION_FILTER = "CURATION_FILTER",
+  RESERVOIR_NFT = "RESERVOIR_NFT",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -135,6 +138,7 @@ type ReactQueryWrapperContextType = {
   }: {
     readonly filterId: string;
   }) => void;
+  onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -151,6 +155,7 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     onCurationFilterRemoved: () => {},
     onCurationFilterChanged: () => {},
+    onDropCreate: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -539,6 +544,18 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onDropCreate = ({
+    profile,
+  }: {
+    profile: IProfileAndConsolidations;
+  }) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_DROPS,
+      values: handles.map((handle) => ({ handleOrWallet: handle })),
+    });
+  };
+
   return (
     <ReactQueryWrapperContext.Provider
       value={{
@@ -554,6 +571,7 @@ export default function ReactQueryWrapper({
         initCommunityActivityPage,
         onCurationFilterRemoved,
         onCurationFilterChanged,
+        onDropCreate,
       }}
     >
       {children}
