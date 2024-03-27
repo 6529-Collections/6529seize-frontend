@@ -37,10 +37,8 @@ export default function Drops() {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
   });
 
-  const [bottomIntersection, setBottomIntersection] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!bottomIntersection) {
+  const onBottomIntersection = (state: boolean) => {
+    if (!state) {
       return;
     }
     if (status === "pending") {
@@ -55,14 +53,20 @@ export default function Drops() {
     if (!hasNextPage) {
       return;
     }
+    console.log("wtd");
+
     fetchNextPage();
-  }, [bottomIntersection, isFetching, status, hasNextPage, isFetchingNextPage]);
+  };
+
+  const [drops, setDrops] = useState<DropFull[]>([]);
+
+  useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
 
   return (
     <DropListWrapper
-      drops={data?.pages.flat() ?? []}
+      drops={drops}
       loading={isFetching}
-      onBottomIntersection={setBottomIntersection}
+      onBottomIntersection={onBottomIntersection}
     />
   );
 }
