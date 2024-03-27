@@ -57,9 +57,9 @@ export default function HashtagsTypeaheadMenuItem({
               <div className="tw-text-sm tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
                 {option.name}
               </div>
-              <div className="tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
+              {/* <div className="tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
                 {option.display}
-              </div>
+              </div> */}
             </div>
           </div>
           {isSelected && (

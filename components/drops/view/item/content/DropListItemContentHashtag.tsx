@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ReferencedNft } from "../../../../../entities/IDrop";
 import NftTooltip from "../../../../utils/nft/NftTooltip";
-import { LazyTippy } from "../../../../utils/tooltip/LazyTippy";
+import LazyTippy from "../../../../utils/tooltip/LazyTippy";
 import {
   ReservoirTokensResponse,
   ReservoirTokensResponseTokenElement,

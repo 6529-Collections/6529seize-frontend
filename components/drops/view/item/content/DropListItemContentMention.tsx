@@ -1,7 +1,7 @@
 import { MentionedUser } from "../../../../../entities/IDrop";
 import UserProfileTooltip from "../../../../user/utils/profile/UserProfileTooltip";
 import Link from "next/link";
-import { LazyTippy } from "../../../../utils/tooltip/LazyTippy";
+import LazyTippy from "../../../../utils/tooltip/LazyTippy";
 
 export default function DropListItemContentMention({
   user,
