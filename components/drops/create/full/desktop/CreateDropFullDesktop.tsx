@@ -48,28 +48,7 @@ export default function CreateDropFullDesktop({
 }) {
   return (
     <div className="tw-px-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
-      <div className="tw-justify-end tw-flex tw-items-center tw-gap-x-4">
-        <button
-          type="button"
-          className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <svg
-            className="tw-w-4 tw-h-4 tw-mr-2 -tw-ml-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>Add title</span>
-        </button>
+      <div className="tw-justify-end tw-flex">
         <button
           type="button"
           className="tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
@@ -95,13 +74,13 @@ export default function CreateDropFullDesktop({
         <DropPfp pfpUrl={profile.profile?.pfp_url} />
         <div className="tw-flex tw-flex-col tw-space-y-4 tw-w-full">
           {/* <CreateDropFullDesktopTitle title={title} onTitle={onTitle} /> */}
-          <input
+        {/*   <input
             type="text"
             placeholder="Drop title"
             value={title ?? ""}
             maxLength={250}
             className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-          />
+          /> */}
           <CreateDropContent
             screenType={CreateDropScreenType.DESKTOP}
             viewType={CreateDropViewType.FULL}
