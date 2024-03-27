@@ -1,7 +1,7 @@
 import Tippy from "@tippyjs/react";
 import { forwardRef, useState } from "react";
 
-export const LazyTippy = forwardRef((props: any, ref: any) => {
+const LazyTippy = forwardRef((props: any, ref: any) => {
   const [mounted, setMounted] = useState(false);
 
   const lazyPlugin = {
@@ -24,3 +24,7 @@ export const LazyTippy = forwardRef((props: any, ref: any) => {
 
   return <Tippy {...computedProps} ref={ref} />;
 });
+
+
+LazyTippy.displayName = "LazyTippy";
+export default LazyTippy;
