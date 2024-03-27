@@ -22,7 +22,7 @@ export default function CreateDropSelectFile({
 
       {file && (
         <div className="tw-mt-2 tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
             <CreateDropSelectedFileIcon file={file} />
 
             <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-1 tw-truncate">
