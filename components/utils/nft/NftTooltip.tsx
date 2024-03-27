@@ -8,15 +8,15 @@ import { useEffect, useState } from "react";
 
 export default function NftTooltip({
   contract,
-  tokenId,
+  token,
 }: {
   readonly contract: string;
-  readonly tokenId: string;
+  readonly token: string;
 }) {
   const { data: nfts } = useQuery<ReservoirTokensResponseTokenElement[]>({
-    queryKey: [QueryKey.RESERVOIR_NFT, { contract, tokenId }],
+    queryKey: [QueryKey.RESERVOIR_NFT, { contract, token }],
     queryFn: async () => {
-      const url = `https://api.reservoir.tools/tokens/v7?tokens=${contract}%3A${tokenId}`;
+      const url = `https://api.reservoir.tools/tokens/v7?tokens=${contract}%3A${token}`;
       const response = await fetch(url);
       if (response.ok) {
         const data: ReservoirTokensResponse = await response.json();
@@ -24,7 +24,8 @@ export default function NftTooltip({
       }
       return [];
     },
-    enabled: !!contract && !!tokenId,
+    enabled: !!contract && !!token,
+    staleTime: 1000 * 60 * 5,
   });
 
   const [nft, setNft] = useState<ReservoirTokensResponseTokenElement | null>(
@@ -41,7 +42,6 @@ export default function NftTooltip({
   }
   return (
     <div>
-      <img src={nft.token.imageSmall} className="tw-rounded-t-lg" />
       <div>{nft.token.collection.name}</div>
       <div>{nft.token.name}</div>
       <div>ID: #{nft.token.tokenId}</div>
