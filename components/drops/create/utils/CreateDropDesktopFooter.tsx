@@ -13,7 +13,7 @@ export default function CreateDropDesktopFooter({
   return (
     <div>
       <CreateDropSelectFile onFileChange={onFileChange} file={file} />
-      <div className="tw-mt-3 tw-flex tw-justify-end">
+      <div className="tw-mt-4 tw-flex tw-justify-end">
         <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
       </div>
     </div>

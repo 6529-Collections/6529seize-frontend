@@ -16,7 +16,7 @@ export default function CreateDropFullMobileWrapper({
     <Transition.Root appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tw-relative tw-z-50 lg:tw-hidden"
+        className="tailwind-scope tw-relative tw-z-50 lg:tw-hidden"
         onClose={onClose}
       >
         <Transition.Child
@@ -84,7 +84,7 @@ export default function CreateDropFullMobileWrapper({
                     className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-py-6"
                     style={{ maxHeight: "calc(100vh - 4rem)" }}
                   >
-                    <div className="tw-px-6">
+                    <div className="tw-px-4 sm:tw-px-6">
                       <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
                         Create a drop
                       </Dialog.Title>
