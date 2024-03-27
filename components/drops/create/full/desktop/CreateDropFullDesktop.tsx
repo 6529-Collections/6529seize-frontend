@@ -57,7 +57,7 @@ export default function CreateDropFullDesktop({
 
   return (
     <div className="tw-px-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
-      <div className="tw-justify-end tw-flex">
+      <div className="tw-ml-14 tw-flex tw-justify-between">
         {titleState === TITLE_STATE.BUTTON && (
           <button
             onClick={() => setTitleState(TITLE_STATE.INPUT)}
@@ -86,7 +86,7 @@ export default function CreateDropFullDesktop({
         <button
           onClick={() => onViewChange(CreateDropViewType.COMPACT)}
           type="button"
-          className="tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+          className="tw-ml-auto tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-sr-only tw-text-sm">Cancel</span>
           <svg
@@ -105,7 +105,7 @@ export default function CreateDropFullDesktop({
           </svg>
         </button>
       </div>
-      <div className="tw-mt-2 tw-flex tw-w-full tw-gap-x-3">
+      <div className="tw-mt-2 tw-flex tw-w-full tw-gap-x-4">
         <DropPfp pfpUrl={profile.profile?.pfp_url} />
         <div className="tw-flex tw-flex-col tw-space-y-4 tw-w-full">
           {titleState === TITLE_STATE.INPUT && (
