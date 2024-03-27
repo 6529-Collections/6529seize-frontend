@@ -44,18 +44,18 @@ export default function CreateDropCompact({
   readonly onDrop: () => void;
 }) {
   return (
-    <div className="tw-px-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
+    <div className="tw-p-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
       {title && (
         <CreateDropCompactTitle
           title={title}
           onEditClick={() => onViewChange(CreateDropViewType.FULL)}
         />
       )}
-      <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-3">
-        {screenType === CreateDropScreenType.DESKTOP && (
+      <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
+        <div className="tw-mt-0.5">
           <DropPfp pfpUrl={profile.profile?.pfp_url} />
-        )}
-        <div className="tw-w-full tw-inline-flex tw-gap-x-3">
+        </div>
+        <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-w-full">
             <CreateDropContent
               screenType={screenType}

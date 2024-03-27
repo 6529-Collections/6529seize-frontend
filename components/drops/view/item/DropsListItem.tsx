@@ -5,30 +5,33 @@ import DropListItemContent from "./content/DropListItemContent";
 
 export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   return (
-    <div className="tw-border-solid tw-border tw-border-iron-700 tw-rounded-xl tw-bg-iron-900 tw-p-5">
+    <div className="tw-border-solid tw-border tw-border-iron-700 tw-rounded-xl tw-bg-iron-900 tw-p-4 sm:tw-p-5">
       <div className="tw-flex tw-gap-x-3">
         <DropPfp pfpUrl={drop.author.pfp} />
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            <p className="tw-mb-0 tw-text-base tw-font-semibold">
+            <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-iron-50">
               {drop.author.handle}
             </p>
-            <p className="tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-text-sm tw-text-iron-500">
+            <p className="tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-text-md tw-leading-none tw-text-iron-500">
               {getTimeAgo(drop.created_at)}
             </p>
           </div>
-          <DropListItemContent drop={drop} />
+          <div className="tw-mt-1">
+            <DropListItemContent drop={drop} />
+          </div>
         </div>
       </div>
-      <div className="tw-ml-12 tw-border-t tw-flex tw-items-center tw-gap-x-8">
+      <div className="tw-mt-4 tw-ml-12 tw-border-t tw-flex tw-items-center tw-justify-between sm:tw-justify-start tw-gap-x-8">
         <button
           type="button"
           className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition tw-ease-out tw-duration-300"
         >
           <svg
-            className="tw-w-5 tw-h-5 group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300"
+            className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -39,10 +42,10 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300">
+          <span className="tw-hidden sm:tw-block group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300">
             Discuss
           </span>
-          <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-rounded-full tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+          <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
             39
           </div>
         </button>
@@ -51,8 +54,9 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
           className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-text-iron-400"
         >
           <svg
-            className="tw-w-5 tw-h-5 group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300"
+            className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300"
             viewBox="0 0 512 512"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -64,10 +68,10 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
               d="m388.81 374.68-33.81-33.85c-9.51-9.51-25.31-9.74-34.64-.05a24 24 0 0 0 .32 33.61l74.72 74.78a24.67 24.67 0 0 0 34.9 0l74.7-74.76a24 24 0 0 0 -34-33.94l-34.21 34.21v-230a89.16 89.16 0 0 0 -89.06-89.08h-127.73a24 24 0 0 0 0 48h127.73a41.11 41.11 0 0 1 41.06 41.06z"
             ></path>
           </svg>
-          <span className="group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300">
+          <span className="tw-hidden sm:tw-block group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300">
             Redrop
           </span>
-          <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-rounded-full tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+          <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
             45
           </div>
         </button>
@@ -76,9 +80,10 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
           className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-text-iron-400"
         >
           <svg
-            className="tw-h-5 tw-w-5 group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300"
+            className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -89,10 +94,10 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300">
+          <span className="tw-hidden sm:tw-block group-hover:tw-text-iron-50 tw-transition tw-ease-out tw-duration-300">
             Share
           </span>
-          <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-rounded-full tw-h-5 tw-min-w-[1.25rem] tw-px-1 tw-text-iron-300 tw-text-xs tw-font-medium">
+          <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
             3
           </div>
         </button>

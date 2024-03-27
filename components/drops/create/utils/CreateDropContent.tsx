@@ -103,7 +103,7 @@ export default function CreateDropContent({
                 />
               }
               placeholder={
-                <span className="editor-placeholder">Your awesome drop...</span>
+                <span className="editor-placeholder">Start a drop...</span>
               }
               ErrorBoundary={LexicalErrorBoundary}
             />

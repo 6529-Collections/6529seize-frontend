@@ -102,7 +102,7 @@ export default function DropListItemContent({
           <h1>{customRenderer({ content: params.children, drop })}</h1>
         ),
         p: (params) => (
-          <p className="tw-text-base tw-text-iron-50 tw-font-normal">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal">
             {customRenderer({ content: params.children, drop })}
           </p>
         ),
