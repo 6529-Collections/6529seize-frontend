@@ -11,7 +11,7 @@ export default function CreateDropMetadataItem({
     <button
       onClick={() => onMetadataRemove(data_key)}
       type="button"
-      className="tw-border-0 tw-group tw-inline-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-px-3 tw-py-1.5 tw-text-sm tw-font-normal tw-text-iron-200 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-border-0 tw-group tw-inline-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-px-3 tw-py-1 tw-text-sm tw-font-normal tw-text-iron-200 tw-bg-iron-400/10 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out"
     >
       <span>
         {data_key}: {data_value}

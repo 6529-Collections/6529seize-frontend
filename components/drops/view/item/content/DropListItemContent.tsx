@@ -87,19 +87,29 @@ export default function DropListItemContent({
       remarkPlugins={[remarkGfm]}
       components={{
         h5: (params) => (
-          <h5>{customRenderer({ content: params.children, drop })}</h5>
+          <h5 className="tw-text-iron-50">
+            {customRenderer({ content: params.children, drop })}
+          </h5>
         ),
         h4: (params) => (
-          <h4>{customRenderer({ content: params.children, drop })}</h4>
+          <h4 className="tw-text-iron-50">
+            {customRenderer({ content: params.children, drop })}
+          </h4>
         ),
         h3: (params) => (
-          <h3>{customRenderer({ content: params.children, drop })}</h3>
+          <h3 className="tw-text-iron-50">
+            {customRenderer({ content: params.children, drop })}
+          </h3>
         ),
         h2: (params) => (
-          <h2>{customRenderer({ content: params.children, drop })}</h2>
+          <h2 className="tw-text-iron-50">
+            {customRenderer({ content: params.children, drop })}
+          </h2>
         ),
         h1: (params) => (
-          <h1>{customRenderer({ content: params.children, drop })}</h1>
+          <h1 className="tw-text-iron-50">
+            {customRenderer({ content: params.children, drop })}
+          </h1>
         ),
         p: (params) => (
           <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal">
@@ -107,7 +117,9 @@ export default function DropListItemContent({
           </p>
         ),
         li: (params) => (
-          <li>{customRenderer({ content: params.children, drop })}</li>
+          <li className="tw-text-iron-50">
+            {customRenderer({ content: params.children, drop })}
+          </li>
         ),
       }}
     >
