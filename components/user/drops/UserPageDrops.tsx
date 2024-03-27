@@ -24,7 +24,7 @@ export default function UserPageDrops({
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-3xl tw-mx-auto">
-        <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
+        <h2 className="tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
           {createPossessionStr(profile.profile?.handle ?? null)} Drops
         </h2>
         {canCreateDrop && <CreateDrop profile={profile} />}
