@@ -2,7 +2,9 @@ import { NftRank, NftTDH } from "./INFT";
 
 export interface TDHBoostBreakdown {
   available: number;
+  available_info: string[];
   acquired: number;
+  acquired_info: string[];
 }
 
 export interface BaseTDH {
@@ -16,11 +18,10 @@ export interface BaseTDH {
     memes_szn3: TDHBoostBreakdown;
     memes_szn4: TDHBoostBreakdown;
     memes_szn5: TDHBoostBreakdown;
+    memes_szn6: TDHBoostBreakdown;
     memes_genesis: TDHBoostBreakdown;
     memes_nakamoto: TDHBoostBreakdown;
     gradients: TDHBoostBreakdown;
-    ens: TDHBoostBreakdown;
-    profile: TDHBoostBreakdown;
   };
   boosted_tdh: number;
   tdh__raw: number;
