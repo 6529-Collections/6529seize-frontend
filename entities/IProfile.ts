@@ -302,6 +302,7 @@ export interface ProfilesMatterRating {
 }
 
 export interface CommunityMemberMinimal {
+  readonly profile_id: string;
   readonly handle: string | null;
   readonly normalised_handle: string | null;
   readonly primary_wallet: string | null;
@@ -416,4 +417,14 @@ export interface CommunityMemberOverview {
   readonly cic: number;
   readonly pfp: string | null;
   readonly last_activity: number | null;
+}
+
+export interface ProfileMinimal {
+  readonly id: string;
+  readonly handle: string;
+  readonly pfp: string | null;
+  readonly cic: number;
+  readonly rep: number;
+  readonly tdh: number;
+  readonly level: number;
 }
