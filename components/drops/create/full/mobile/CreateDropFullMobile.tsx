@@ -99,7 +99,6 @@ export default function CreateDropFullMobile({
               </button>
             )}
           </div>
-
           {titleState === TITLE_STATE.INPUT && (
             <input
               type="text"

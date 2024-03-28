@@ -13,7 +13,10 @@ export default function CreateDropSelectFile({
 }) {
   return (
     <div>
-      <div className="-tw-ml-2.5 tw-flex tw-items-center">
+      <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+        Upload Media
+      </label>
+      <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-2">
         <CreateDropSelectFileImage onFileChange={onFileChange} />
         <CreateDropSelectFileVideo onFileChange={onFileChange} />
         <CreateDropSelectFileGLB onFileChange={onFileChange} />
@@ -24,7 +27,6 @@ export default function CreateDropSelectFile({
         <div className="tw-mt-2 tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <CreateDropSelectedFileIcon file={file} />
-
             <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-1 tw-truncate">
               <p className="tw-mb-0 tw-max-w-xl tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
                 {file.name}

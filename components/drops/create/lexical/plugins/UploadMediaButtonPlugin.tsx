@@ -6,7 +6,7 @@ export default function UploadMediaButtonPlugin({
   return (
     <label
       htmlFor="create-drop-any-input"
-      className="tw-absolute tw-top-3 md:tw-top-2 tw-right-12"
+      className="tw-absolute tw-top-1 md:tw-top-0 tw-right-12 tw-p-2 tw-rounded-lg"
     >
       <svg
         className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-30"
