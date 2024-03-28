@@ -1,9 +1,11 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ConsolidatedTDH,
   TDH,
   TDHBoostBreakdown,
 } from "../../../entities/ITDH";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import Tippy from "@tippyjs/react";
 
 export default function UserPageStatsBoostBreakdown({
   tdh,
@@ -21,10 +23,24 @@ export default function UserPageStatsBoostBreakdown({
           {name}
         </td>
         <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-          {breakdown?.available}
+          {breakdown?.available ? (
+            <span className="d-flex align-items-center justify-content-center gap-2">
+              {breakdown.available.toFixed(2)}
+              <BoostBreakdownInfo info={breakdown.available_info} />
+            </span>
+          ) : (
+            "-"
+          )}
         </td>
         <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-          {breakdown?.acquired ?? "-"}
+          {breakdown?.acquired ? (
+            <span className="d-flex align-items-center justify-content-center gap-2">
+              {breakdown.acquired.toFixed(2)}
+              <BoostBreakdownInfo info={breakdown.acquired_info} />
+            </span>
+          ) : (
+            "-"
+          )}
         </td>
       </tr>
     );
@@ -41,12 +57,14 @@ export default function UserPageStatsBoostBreakdown({
     );
     if (tdh?.boost_breakdown) {
       rows.push(
-        getMemeRow("Full Collection Sets", tdh.boost_breakdown?.memes_card_sets)
+        getMemeRow("Full Collection Set", tdh.boost_breakdown?.memes_card_sets)
       );
       if (tdh.boost_breakdown?.memes_card_sets?.acquired === 0) {
         rows.push(getMemeRow("SZN1", tdh.boost_breakdown?.memes_szn1));
         if (!tdh.boost_breakdown?.memes_szn1?.acquired) {
-          rows.push(getMemeRow("Genesis", tdh.boost_breakdown?.memes_genesis));
+          rows.push(
+            getMemeRow("Genesis Set", tdh.boost_breakdown?.memes_genesis)
+          );
           rows.push(
             getMemeRow("Nakamoto", tdh.boost_breakdown?.memes_nakamoto)
           );
@@ -70,10 +88,24 @@ export default function UserPageStatsBoostBreakdown({
             {name}
           </td>
           <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-            {breakdown?.available}
+            {breakdown.available ? (
+              <span className="d-flex align-items-center justify-content-center gap-2">
+                {breakdown.available.toFixed(2)}
+                <BoostBreakdownInfo info={breakdown.available_info} />
+              </span>
+            ) : (
+              "-"
+            )}
           </td>
           <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
-            {breakdown?.acquired ?? "-"}
+            {breakdown.acquired ? (
+              <span className="d-flex align-items-center justify-content-center gap-2">
+                {breakdown.acquired.toFixed(2)}
+                <BoostBreakdownInfo info={breakdown.acquired_info} />
+              </span>
+            ) : (
+              "-"
+            )}
           </td>
         </tr>
       );
@@ -84,10 +116,17 @@ export default function UserPageStatsBoostBreakdown({
 
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
-      <div className="tw-flex">
+      <div className="d-flex align-items-center justify-content-between">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           Boost Breakdown
         </h3>
+        <span>
+          <a
+            href="/community-metrics#tdh-1.3"
+            className="decoration-hover-underline">
+            TDH Version: 1.3
+          </a>
+        </span>
       </div>
       <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-x-auto">
         <div className="tw-flow-root">
@@ -139,5 +178,31 @@ export default function UserPageStatsBoostBreakdown({
         </div>
       </div>
     </div>
+  );
+}
+
+function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
+  if (!info || info.length === 0) {
+    return <></>;
+  }
+
+  return (
+    <Tippy
+      content={
+        <ul className="mb-0" style={{ paddingLeft: "1rem", textAlign: "left" }}>
+          {info.map((i) => (
+            <li key={getRandomObjectId()} className="text-left">
+              {i}
+            </li>
+          ))}
+        </ul>
+      }
+      interactive={true}>
+      <FontAwesomeIcon
+        icon="info-circle"
+        height={16}
+        color="lightgrey"
+        cursor={"pointer"}></FontAwesomeIcon>
+    </Tippy>
   );
 }

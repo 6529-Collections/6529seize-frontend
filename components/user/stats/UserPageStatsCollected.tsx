@@ -7,6 +7,7 @@ import {
   UserPageStatsTableHead,
   UserPageStatsTableHr,
 } from "./UserPageStatsTableShared";
+import { Fragment } from "react";
 
 function getRankDisplay(balance: number | undefined, rank: number | undefined) {
   if (!balance || !rank) {
@@ -258,7 +259,8 @@ export function UserPageStatsCollectedMemes({
                     </thead>
                     <tbody>
                       {balanceMemes.map((balanceMeme) => (
-                        <>
+                        <Fragment
+                          key={`stats-collected-memes-${balanceMeme.season}`}>
                           <UserPageStatsTableHr span={6} />
                           <tr>
                             <td colSpan={2}>Season {balanceMeme.season}</td>
@@ -281,7 +283,7 @@ export function UserPageStatsCollectedMemes({
                               )}
                             </td>
                           </tr>
-                        </>
+                        </Fragment>
                       ))}
                     </tbody>
                   </Table>
