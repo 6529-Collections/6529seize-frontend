@@ -26,7 +26,10 @@ export default function CreateDropFullDesktopMetadata({
 
   return (
     <div>
-      <form onSubmit={onSubmit} className="tw-flex tw-gap-x-4 tw-w-full">
+      <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+        Metadata
+      </label>
+      <form onSubmit={onSubmit} className="tw-mt-1.5 tw-flex tw-gap-x-4 tw-w-full">
         <div className="tw-w-full">
           <input
             type="text"
