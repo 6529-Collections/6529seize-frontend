@@ -12,6 +12,7 @@ import {
   UserPageStatsTableHead,
   UserPageStatsTableHr,
 } from "./UserPageStatsTableShared";
+import { getStatsPath } from "./UserPageStats";
 
 function printEthValue(value: number | undefined) {
   if (value === undefined) {
@@ -33,12 +34,7 @@ export default function UserPageStatsActivityOverview({
   );
 
   useEffect(() => {
-    let url;
-    if (activeAddress) {
-      url = `aggregated-activity/wallet/${activeAddress}`;
-    } else {
-      url = `aggregated-activity/consolidation/${profile.consolidation.consolidation_key}`;
-    }
+    const url = `aggregated-activity/${getStatsPath(profile, activeAddress)}`;
     commonApiFetch<AggregatedActivity>({
       endpoint: url,
     })
@@ -51,12 +47,10 @@ export default function UserPageStatsActivityOverview({
   }, [activeAddress]);
 
   useEffect(() => {
-    let url;
-    if (activeAddress) {
-      url = `aggregated-activity/wallet/${activeAddress}/memes`;
-    } else {
-      url = `aggregated-activity/consolidation/${profile.consolidation.consolidation_key}/memes`;
-    }
+    const url = `aggregated-activity/${getStatsPath(
+      profile,
+      activeAddress
+    )}/memes`;
     commonApiFetch<AggregatedActivityMemes[]>({
       endpoint: url,
     }).then((response) => {
