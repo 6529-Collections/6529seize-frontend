@@ -1,11 +1,32 @@
+import { useContext } from "react";
 import PrimaryButton from "../../../../utils/buttons/PrimaryButton";
+import { AuthContext } from "../../../../auth/Auth";
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import DropPfp from "../../../create/utils/DropPfp";
 
-export default function DropListItemDiscussionInput() {
+export default function DropListItemDiscussionInput({
+  profile,
+}: {
+  readonly profile: IProfileAndConsolidations | null;
+}) {
+  const { setToast } = useContext(AuthContext);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setToast({
+      message: "Not implemented yet!",
+      type: "warning",
+    });
+  };
+
   return (
     <div>
       <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-        <div className="tw-w-10">img</div>
-        <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
+        <DropPfp pfpUrl={profile?.profile?.pfp_url} />
+        <form
+          className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3"
+          onSubmit={onSubmit}
+        >
           <div className="tw-w-full">
             <input
               type="text"
@@ -17,12 +38,10 @@ export default function DropListItemDiscussionInput() {
             />
           </div>
           <div className="tw-self-end">
-            <PrimaryButton>Send</PrimaryButton>
+            <PrimaryButton type="submit">Send</PrimaryButton>
           </div>
-        </div>
+        </form>
       </div>
-
-      
     </div>
   );
 }
