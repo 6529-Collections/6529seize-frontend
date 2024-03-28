@@ -10,6 +10,8 @@ import ReactDOM from "react-dom";
 import {
   ReservoirCollectionResponse,
   ReservoirCollectionResponseCollection,
+  ReservoirTokensResponseCollection,
+  ReservoirTokensResponseTokenElement,
 } from "../../../../../../entities/IReservoir";
 import { TextNode } from "lexical";
 import { $createNftNode } from "../../nodes/NftNode";
@@ -90,30 +92,74 @@ export default function NFTPlugin() {
   const [collections, setCollections] = useState<
     ReservoirCollectionResponseCollection[]
   >([]);
+  const [nfts, setNfts] = useState<ReservoirTokensResponseTokenElement[]>([]);
 
-  const collectionOptions = useMemo(
-    () =>
-      collections
+  const [selectedCollection, setSelectedCollection] =
+    useState<ReservoirCollectionResponseCollection | null>(null);
+
+  const collectionOptions = useMemo(() => {
+    if (nfts.length) {
+      return nfts
         .map(
-          (collection) =>
+          (nft) =>
             new NftTypeaheadOption({
-              name: collection.name,
+              name: nft.token.name,
             })
         )
-        .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
-    [collections]
-  );
+        .slice(0, SUGGESTION_LIST_LENGTH_LIMIT);
+    }
+    return collections
+      .map(
+        (collection) =>
+          new NftTypeaheadOption({
+            name: collection.name,
+          })
+      )
+      .slice(0, SUGGESTION_LIST_LENGTH_LIMIT);
+  }, [collections, nfts]);
 
-  const onQueryChange = async (query: string | null) => {
-    if (!query?.length) return;
-    console.log(query);
+  const getCollections = async (
+    query: string
+  ): Promise<ReservoirCollectionResponseCollection[]> => {
     const url = `https://api.reservoir.tools/search/collections/v2?name=${query}&limit=${SUGGESTION_LIST_LENGTH_LIMIT}`;
     const response = await fetch(url);
     if (!response.ok) {
-      return;
+      return [];
     }
     const data: ReservoirCollectionResponse = await response.json();
-    setCollections(data.collections);
+    return data.collections;
+  };
+
+  const getNfts = async ({
+    contract,
+    tokenId,
+  }: {
+    contract: string;
+    tokenId: string;
+  }): Promise<ReservoirTokensResponseTokenElement[]> => {
+    const url = `https://api.reservoir.tools/tokens/v7?tokens=${contract}%3A${tokenId}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      return [];
+    }
+    const data = await response.json();
+    return data.tokens;
+  };
+
+  const onQueryChange = async (query: string | null) => {
+    if (!query?.length) return;
+
+    if (!selectedCollection) {
+      const collections = await getCollections(query);
+      setCollections(collections);
+      return;
+    }
+
+    const contract = selectedCollection.contract;
+    const tokenId = query.split(":").at(-1);
+    if (!tokenId) return;
+    const nfts = await getNfts({ contract, tokenId });
+    setNfts(nfts);
   };
 
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
@@ -163,13 +209,12 @@ export default function NFTPlugin() {
     closeMenu: () => void
   ) => {
     editor.update(() => {
-      // const hashtagNode = $createNftNode(`!${selectedOption.name}`);
-      // if (nodeToReplace) {
-      //   nodeToReplace.replace(hashtagNode);
-      // }
       nodeToReplace?.setTextContent(`!${selectedOption.name}`);
       nodeToReplace?.selectEnd();
       nodeToReplace?.canInsertTextAfter();
+      setSelectedCollection(
+        collections.find((c) => c.name === selectedOption.name) ?? null
+      );
     });
   };
 
