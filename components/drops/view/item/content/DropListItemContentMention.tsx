@@ -17,7 +17,7 @@ export default function DropListItemContentMention({
       <Link
         href={`/${user.handle_in_content}`}
         target="_blank"
-        className="tw-no-underline tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-no-underline tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
       >
         @{user.handle_in_content}
       </Link>
