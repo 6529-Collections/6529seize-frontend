@@ -114,8 +114,6 @@ export default function CreateDrop({
     }
 
     await addDropMutation.mutateAsync(formData);
-    // setDropEditorRefreshKey((prev) => prev + 1);
-    // setSubmitting(false);
   };
 
   return (
