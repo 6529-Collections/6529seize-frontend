@@ -2,7 +2,9 @@ import { NftRank, NftTDH } from "./INFT";
 
 export interface TDHBoostBreakdown {
   available: number;
+  available_info: string[];
   acquired: number;
+  acquired_info: string[];
 }
 
 export interface BaseTDH {
