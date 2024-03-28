@@ -12,6 +12,19 @@ import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
 import { ConsolidatedTDH, TDH } from "../../../entities/ITDH";
 
+export function getStatsPath(
+  profile: IProfileAndConsolidations,
+  activeAddress: string | null
+) {
+  if (activeAddress) {
+    return `wallet/${activeAddress}`;
+  }
+  if (profile.consolidation.consolidation_key) {
+    return `consolidation/${profile.consolidation.consolidation_key}`;
+  }
+  return `wallet/${profile.consolidation.wallets[0].wallet.address}`;
+}
+
 export default function UserPageStats({
   profile,
 }: {
@@ -33,12 +46,7 @@ export default function UserPageStats({
   }, []);
 
   useEffect(() => {
-    let url;
-    if (activeAddress) {
-      url = `tdh/wallet/${activeAddress}`;
-    } else {
-      url = `tdh/consolidation/${profile.consolidation.consolidation_key}`;
-    }
+    const url = `tdh/${getStatsPath(profile, activeAddress)}`;
     commonApiFetch<ConsolidatedTDH | TDH>({
       endpoint: url,
     }).then((response) => {
@@ -47,12 +55,7 @@ export default function UserPageStats({
   }, [activeAddress]);
 
   useEffect(() => {
-    let url;
-    if (activeAddress) {
-      url = `owners-balances/wallet/${activeAddress}`;
-    } else {
-      url = `owners-balances/consolidation/${profile.consolidation.consolidation_key}`;
-    }
+    const url = `owners-balances/${getStatsPath(profile, activeAddress)}`;
     commonApiFetch<OwnerBalance>({
       endpoint: url,
     })
@@ -65,12 +68,7 @@ export default function UserPageStats({
   }, [activeAddress]);
 
   useEffect(() => {
-    let url;
-    if (activeAddress) {
-      url = `owners-balances/wallet/${activeAddress}/memes`;
-    } else {
-      url = `owners-balances/consolidation/${profile.consolidation.consolidation_key}/memes`;
-    }
+    const url = `owners-balances/${getStatsPath(profile, activeAddress)}/memes`;
     commonApiFetch<OwnerBalanceMemes[]>({
       endpoint: url,
     }).then((response) => {
