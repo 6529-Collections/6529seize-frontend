@@ -22,7 +22,7 @@ export default function UserPageDrops({
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-max-w-3xl tw-mx-auto">
+      <div className="tw-max-w-2xl tw-mx-auto">
         {haveProfile && (
           <div>
             <h2 className="tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
