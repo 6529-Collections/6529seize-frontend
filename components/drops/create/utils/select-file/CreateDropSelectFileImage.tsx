@@ -7,19 +7,25 @@ export default function CreateDropSelectFileImage({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="tw-group tw-p-2.5" role="button" aria-label="Select image file">
+    <div
+      className="tw-flex-shrink-0 tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+      role="button"
+      aria-label="Select image file"
+    >
       <label htmlFor="create-drop-image-input">
         <svg
-          className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
-          viewBox="0 0 512 512"
-          fill="currentColor"
-          aria-hidden="true"
+          className="tw-cursor-pointer tw-h-6 tw-w-6 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <g>
-            <path d="m412 476h-312c-55.141 0-100-44.86-100-100v-240c0-55.14 44.859-100 100-100h312c55.141 0 100 44.86 100 100v240c0 55.14-44.859 100-100 100zm-312-400c-33.084 0-60 26.916-60 60v240c0 33.084 26.916 60 60 60h312c33.084 0 60-26.916 60-60v-240c0-33.084-26.916-60-60-60z"></path>
-            <path d="m176 236c-33.084 0-60-26.916-60-60s26.916-60 60-60 60 26.916 60 60-26.916 60-60 60zm0-80c-11.028 0-20 8.972-20 20s8.972 20 20 20 20-8.972 20-20-8.972-20-20-20z"></path>
-            <path d="m401.857 390.142-105.857-105.858-65.857 65.858c-7.811 7.811-20.475 7.811-28.285 0l-25.858-25.858-61.857 65.858c-18.697 18.697-47.008-9.559-28.285-28.284l76-80c7.811-7.811 20.475-7.811 28.285 0l25.857 25.858 65.857-65.858c7.811-7.811 20.475-7.811 28.285 0l120 120c18.955 18.957-9.835 46.733-28.285 28.284z"></path>
-          </g>
+          <path
+            d="M4.27209 20.7279L10.8686 14.1314C11.2646 13.7354 11.4627 13.5373 11.691 13.4632C11.8918 13.3979 12.1082 13.3979 12.309 13.4632C12.5373 13.5373 12.7354 13.7354 13.1314 14.1314L19.6839 20.6839M14 15L16.8686 12.1314C17.2646 11.7354 17.4627 11.5373 17.691 11.4632C17.8918 11.3979 18.1082 11.3979 18.309 11.4632C18.5373 11.5373 18.7354 11.7354 19.1314 12.1314L22 15M10 9C10 10.1046 9.10457 11 8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9ZM6.8 21H17.2C18.8802 21 19.7202 21 20.362 20.673C20.9265 20.3854 21.3854 19.9265 21.673 19.362C22 18.7202 22 17.8802 22 16.2V7.8C22 6.11984 22 5.27976 21.673 4.63803C21.3854 4.07354 20.9265 3.6146 20.362 3.32698C19.7202 3 18.8802 3 17.2 3H6.8C5.11984 3 4.27976 3 3.63803 3.32698C3.07354 3.6146 2.6146 4.07354 2.32698 4.63803C2 5.27976 2 6.11984 2 7.8V16.2C2 17.8802 2 18.7202 2.32698 19.362C2.6146 19.9265 3.07354 20.3854 3.63803 20.673C4.27976 21 5.11984 21 6.8 21Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         <input
           id="create-drop-image-input"

@@ -30,6 +30,8 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
+import NFTPlugin from "../lexical/plugins/nft/NFTPlugin";
+// import { NftNode } from "../lexical/nodes/NftNode";
 
 export default function CreateDropContent({
   viewType,
@@ -55,6 +57,7 @@ export default function CreateDropContent({
     nodes: [
       MentionNode,
       HashtagNode,
+      // NftNode,
       RootNode,
       HeadingNode,
       ListNode,
@@ -88,6 +91,11 @@ export default function CreateDropContent({
     <div className="tailwind-scope">
       <LexicalComposer initialConfig={editorConfig}>
         <div>
+          {viewType === CreateDropViewType.FULL && (
+            <label className="tw-mb-1.5 tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+              Text
+            </label>
+          )}
           <div className="tw-relative">
             <RichTextPlugin
               contentEditable={
@@ -111,6 +119,7 @@ export default function CreateDropContent({
             <OnChangePlugin onChange={onEditorStateChange} />
             <NewMentionsPlugin onSelect={onMentionedUserAdded} />
             <NewHashtagsPlugin onSelect={onHashtagAdded} />
+            {/* <NFTPlugin /> */}
             {viewType === CreateDropViewType.COMPACT && <OneLinerPlugin />}
             <MaxLengthPlugin maxLength={25000} />
             {viewType === CreateDropViewType.COMPACT && (

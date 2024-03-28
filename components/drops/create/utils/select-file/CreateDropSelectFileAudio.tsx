@@ -8,13 +8,13 @@ export default function CreateDropSelectFileAudio({
   const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div
-      className="tw-group tw-p-2.5"
+      className="tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       role="button"
       aria-label="Select audio file"
     >
       <label htmlFor="create-drop-audio-input">
         <svg
-          className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          className="tw-cursor-pointer tw-h-6 tw-w-6 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
