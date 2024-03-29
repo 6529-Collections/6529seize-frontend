@@ -26,3 +26,15 @@ export interface SubscriptionLog {
   consolidation_key: string;
   log: string;
 }
+
+export interface RedeemedSubscription {
+  created_at: string;
+  contract: string;
+  token_id: number;
+  address: string;
+  consolidation_key: string;
+  value: number;
+  balance_after: number;
+  transaction: string;
+  transaction_date: string;
+}

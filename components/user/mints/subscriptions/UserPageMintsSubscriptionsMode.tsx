@@ -52,7 +52,7 @@ export default function UserPageMintsSubscriptionsMode(
       setIsAuto(responseAuto);
       const message = `Subscription Mode set to ${
         responseAuto ? `Automatic` : `Manual`
-      } - ${
+      }. ${
         responseAuto ? `Subscribed for` : `Unsubscribed from`
       } all upcoming drops`;
       setToast({
@@ -60,10 +60,10 @@ export default function UserPageMintsSubscriptionsMode(
         type: "success",
       });
       props.refresh();
-    } catch (e) {
+    } catch (e: any) {
       setIsUpdating(false);
       setToast({
-        message: `Failed to set subscription mode`,
+        message: e ?? "Failed to set subscription mode",
         type: "error",
       });
       return;

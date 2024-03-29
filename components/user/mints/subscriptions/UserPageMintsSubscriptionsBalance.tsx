@@ -18,13 +18,13 @@ export default function UserPageMintsSubscriptionsBalance(
   return (
     <span className="d-flex align-items-center gap-1">
       <span>Current Balance:</span>
-      {!props.details ? (
+      {props.fetching ? (
         <DotLoader />
       ) : (
         <span className="d-flex align-items-center gap-3">
           <span className="d-flex align-items-center gap-1">
             <b>
-              {props.details.balance
+              {props.details?.balance
                 ? numberWithCommas(
                     Math.round(props.details.balance * 1000000) / 1000000
                   )
@@ -45,7 +45,7 @@ export default function UserPageMintsSubscriptionsBalance(
                     setIsRefreshing(true);
                     setTimeout(() => {
                       setIsRefreshing(false);
-                    }, 1000);
+                    }, 500);
                     props.refresh();
                   }}
                   style={{

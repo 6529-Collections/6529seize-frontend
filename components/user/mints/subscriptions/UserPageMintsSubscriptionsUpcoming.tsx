@@ -32,7 +32,7 @@ export default function UserPageMintsSubscriptionsUpcoming(
         <Col>
           <Table className={styles.nftSubscriptionsTable}>
             <tbody>
-              {props.memes_subscriptions.map((subscription) => (
+              {props.memes_subscriptions.map((subscription, index) => (
                 <tr key={subscription.token_id}>
                   <td>
                     <SubscriptionRow
@@ -41,6 +41,7 @@ export default function UserPageMintsSubscriptionsUpcoming(
                       subscription={subscription}
                       readonly={props.readonly}
                       refresh={props.refresh}
+                      first={index === 0}
                     />
                   </td>
                 </tr>
@@ -59,6 +60,7 @@ function SubscriptionRow(
     title: string;
     subscription: NFTSubscription;
     readonly: boolean;
+    first?: boolean;
     refresh: () => void;
   }>
 ) {
@@ -112,10 +114,11 @@ function SubscriptionRow(
         type: "success",
       });
       props.refresh();
-    } catch (e) {
+    } catch (e: any) {
+      console.log(e);
       setIsSubmitting(false);
       setToast({
-        message: `Failed to change token subscription.`,
+        message: e ?? "Failed to change token subscription.",
         type: "error",
       });
       return;
@@ -127,23 +130,46 @@ function SubscriptionRow(
   return (
     <Container className="no-padding pt-2 pb-2">
       <Row>
-        <Col className="d-flex align-items-center justify-content-between">
+        <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
           <span>
             {props.title} #{props.subscription.token_id}
           </span>
           <span className="d-flex align-items-center gap-3">
             {isSubmitting && <Spinner />}
-            <div className={tagClass}>
-              {subscribed ? "Subscribed" : "Not Subscribed"}
-            </div>
-            {!props.readonly && (
-              <Button className="seize-btn btn-link" onClick={submit}>
-                {subscribed ? "Unsubscribe" : "Subscribe"}
-              </Button>
-            )}
+            <span className="d-flex align-items-center">
+              <div className={tagClass}>
+                {subscribed ? "Subscribed" : "Not Subscribed"}
+              </div>
+              {!props.readonly && (
+                <Button className="seize-btn-link" onClick={submit}>
+                  {subscribed ? "Unsubscribe" : "Subscribe"}
+                </Button>
+              )}
+            </span>
           </span>
         </Col>
       </Row>
+      {props.first && !props.readonly && (
+        <Row className="pt-2">
+          <Col
+            className="font-smaller font-color-silver"
+            style={{
+              whiteSpace: "pre-wrap",
+            }}>
+            Important: The subscriber list for Meme #
+            {props.subscription.token_id} is set at midnight and can be found{" "}
+            <a
+              href="/open-data/meme-subscriptions"
+              className="font-color-silver">
+              here
+            </a>
+            . If Meme #{props.subscription.token_id} is released today, any
+            changes you make now won&apos;t affect your subscription for this
+            drop. Make sure to subscribe/unsubscribe before midnight to be
+            counted for future drops!
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }
