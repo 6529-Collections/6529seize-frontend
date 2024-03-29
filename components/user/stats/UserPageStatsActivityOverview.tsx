@@ -6,7 +6,7 @@ import {
   AggregatedActivity,
   AggregatedActivityMemes,
 } from "../../../entities/IAggregatedActivity";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
 import {
   UserPageStatsTableHead,
@@ -349,7 +349,8 @@ export function UserPageStatsActivityOverviewMemes({
                     </thead>
                     <tbody>
                       {activity.map((activity) => (
-                        <>
+                        <Fragment
+                          key={`stats-activity-memes-${activity.season}`}>
                           <UserPageStatsTableHr span={10} />
                           <tr>
                             <td>Season {activity.season}</td>
@@ -387,7 +388,7 @@ export function UserPageStatsActivityOverviewMemes({
                               {printEthValue(activity.sales_value)}
                             </td>
                           </tr>
-                        </>
+                        </Fragment>
                       ))}
                     </tbody>
                   </Table>
