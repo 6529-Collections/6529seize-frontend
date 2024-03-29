@@ -94,6 +94,9 @@ export function numberWithCommasFromString(x: any) {
 export function numberWithCommas(x: number | undefined) {
   if (!x || x === null || isNaN(x)) return "-";
   if (x === 0) return "-";
+
+  const isNegative = x < 0;
+  x = Math.abs(x);
   const parts = x.toString().split(".");
   let integerPart = parts[0];
   let formattedInteger = "";
@@ -102,7 +105,9 @@ export function numberWithCommas(x: number | undefined) {
     integerPart = integerPart.slice(0, -3);
   }
   formattedInteger = integerPart + formattedInteger;
-  return formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
+  formattedInteger =
+    formattedInteger + (parts.length > 1 ? "." + parts[1] : "");
+  return isNegative ? `-${formattedInteger}` : formattedInteger;
 }
 
 export function formatNumberWithCommas(x: number) {

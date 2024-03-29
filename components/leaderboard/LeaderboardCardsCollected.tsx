@@ -68,7 +68,7 @@ export default function LeaderboardCardsCollectedComponent(
       return "-";
     }
     const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
-    return `${(tdhChange / props.globalTdhRateChange).toFixed(2)}x`;
+    return `${Math.abs(tdhChange / props.globalTdhRateChange).toFixed(2)}x`;
   }
 
   if (!leaderboard) {
