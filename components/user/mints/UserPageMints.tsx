@@ -208,9 +208,9 @@ export default function UserPageMints({
     getMintingWallets()
   );
 
-  // useEffect(() => {
-  //   setMintingWallets(getMintingWallets());
-  // }, [delegations]);
+  useEffect(() => {
+    setMintingWallets(getMintingWallets());
+  }, [delegations]);
 
   return (
     <>

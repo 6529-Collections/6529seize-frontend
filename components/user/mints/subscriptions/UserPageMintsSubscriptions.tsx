@@ -49,7 +49,7 @@ export default function UserPageMintsSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscripiongLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
+  const [subscripionLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
     []
   );
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
@@ -249,7 +249,7 @@ export default function UserPageMintsSubscriptions(
           <UserPageMintsSubscriptionsHistory
             topups={topUpHistory}
             redeemed={redeemedHistory}
-            logs={subscripiongLogs}
+            logs={subscripionLogs}
           />
         </Col>
       </Row>
