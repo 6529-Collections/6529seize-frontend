@@ -1,4 +1,8 @@
-export default function CommonInfoBox({ children }: { readonly children: React.ReactNode }) {
+export default function CommonInfoBox({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   return (
     <div className="tw-w-full sm:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
       <div className="tw-flex tw-items-center">
@@ -6,6 +10,7 @@ export default function CommonInfoBox({ children }: { readonly children: React.R
           className="tw-flex-shrink-0 tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
