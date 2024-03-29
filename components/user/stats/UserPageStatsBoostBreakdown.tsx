@@ -163,10 +163,19 @@ export default function UserPageStatsBoostBreakdown({
                       <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
                         TOTAL BOOST
                       </td>
-                      <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center"></td>
                       <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
                         {tdh?.boost
-                          ? `${Math.round((tdh.boost - 1) * 100) / 100}`
+                          ? `${(
+                              tdh.boost_breakdown.memes_card_sets.available +
+                              tdh.boost_breakdown.gradients.available
+                            ).toFixed(2)}`
+                          : "-"}
+                      </td>
+                      <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
+                        {tdh?.boost
+                          ? `${(
+                              Math.round((tdh.boost - 1) * 100) / 100
+                            ).toFixed(2)}`
                           : "-"}
                       </td>
                     </tr>
