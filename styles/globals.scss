@@ -405,8 +405,11 @@ h5:not(.tailwind-scope h5) {
   cursor: pointer;
   outline: inherit;
 
-  &:hover {
-    color: inherit;
+  &:hover,
+  &:focus,
+  &:active {
+    color: $font-color-h !important;
+    background-color: inherit !important;
   }
 }
 .horizontal-menu-hide-scrollbar {

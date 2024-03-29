@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import {
   NFTSubscription,
+  RedeemedSubscription,
   SubscriptionDetails,
   SubscriptionLog,
   SubscriptionTopUp,
@@ -14,6 +15,7 @@ import {
 import { AuthContext } from "../../../auth/Auth";
 import UserPageMintsSubscriptionsUpcoming from "./UserPageMintsSubscriptionsUpcoming";
 import UserPageMintsSubscriptionsHistory from "./UserPageMintsSubscriptionsHistory";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -22,7 +24,11 @@ export default function UserPageMintsSubscriptions(
     profile: IProfileAndConsolidations;
   }>
 ) {
+  const isMobile = useIsMobileScreen();
+
   const { connectedProfile } = useContext(AuthContext);
+
+  const [isFetching, setIsFetching] = useState<boolean>(true);
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
@@ -31,13 +37,19 @@ export default function UserPageMintsSubscriptions(
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
     useState<boolean>(true);
 
+  const [redeemedHistory, setRedeemedHistory] = useState<
+    RedeemedSubscription[]
+  >([]);
+  const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
+    useState<boolean>(true);
+
   const [memeSubscriptions, setMemeSubscriptions] = useState<NFTSubscription[]>(
     []
   );
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscripiongLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
+  const [subscripionLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
     []
   );
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
@@ -51,8 +63,26 @@ export default function UserPageMintsSubscriptions(
         connectedProfile.consolidation.consolidation_key ===
           props.profile.consolidation.consolidation_key
       );
+    } else {
+      setIsConnectedAccount(false);
     }
   }, [connectedProfile, props.profile]);
+
+  useEffect(() => {
+    setIsFetching(
+      fetchingDetails ||
+        fetchingTopUpHistory ||
+        fetchingMemeSubscriptions ||
+        fetchingSubscriptionLogs ||
+        fetchingRedeemedHistory
+    );
+  }, [
+    fetchingDetails,
+    fetchingTopUpHistory,
+    fetchingMemeSubscriptions,
+    fetchingSubscriptionLogs,
+    fetchingRedeemedHistory,
+  ]);
 
   function fetchDetails() {
     if (!props.profile.consolidation.consolidation_key) {
@@ -60,7 +90,7 @@ export default function UserPageMintsSubscriptions(
     }
     setFetchingDetails(true);
     commonApiFetch<SubscriptionDetails>({
-      endpoint: `subscriptions/consolidation-details/${props.profile.consolidation.consolidation_key}`,
+      endpoint: `subscriptions/consolidation/details/${props.profile.consolidation.consolidation_key}`,
     }).then((data) => {
       setDetails(data);
       setFetchingDetails(false);
@@ -78,10 +108,28 @@ export default function UserPageMintsSubscriptions(
       next: boolean;
       data: SubscriptionTopUp[];
     }>({
-      endpoint: `subscriptions/consolidation-top-up/${props.profile.consolidation.consolidation_key}?page=1&size=${HISTORY_PAGE_SIZE}`,
+      endpoint: `subscriptions/consolidation/top-up/${props.profile.consolidation.consolidation_key}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
     }).then((data) => {
       setTopUpHistory(data.data);
       setFetchingTopUpHistory(false);
+    });
+  }
+
+  function fetchRedeemHistory() {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    setFetchingRedeemedHistory(true);
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: boolean;
+      data: RedeemedSubscription[];
+    }>({
+      endpoint: `subscriptions/consolidation/redeemed/${props.profile.consolidation.consolidation_key}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+    }).then((data) => {
+      setRedeemedHistory(data.data);
+      setFetchingRedeemedHistory(false);
     });
   }
 
@@ -91,7 +139,7 @@ export default function UserPageMintsSubscriptions(
     }
     setFetchingMemeSubscriptions(true);
     commonApiFetch<NFTSubscription[]>({
-      endpoint: `subscriptions/consolidation-upcoming-memes/${props.profile.consolidation.consolidation_key}`,
+      endpoint: `subscriptions/consolidation/upcoming-memes/${props.profile.consolidation.consolidation_key}`,
     }).then((data) => {
       setMemeSubscriptions(data);
       setFetchingMemeSubscriptions(false);
@@ -109,7 +157,7 @@ export default function UserPageMintsSubscriptions(
       next: boolean;
       data: SubscriptionLog[];
     }>({
-      endpoint: `subscriptions/consolidation-logs/${props.profile.consolidation.consolidation_key}?page=1&size=${HISTORY_PAGE_SIZE}`,
+      endpoint: `subscriptions/consolidation/logs/${props.profile.consolidation.consolidation_key}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
     }).then((data) => {
       setSubscriptionLogs(data.data);
       setFetchingSubscriptionLogs(false);
@@ -123,12 +171,32 @@ export default function UserPageMintsSubscriptions(
     fetchDetails();
     fetchTopUpHistory();
     fetchMemeSubscriptions();
+    fetchRedeemHistory();
     fetchLogs();
   };
 
   useEffect(() => {
     refresh();
   }, [props.profile.consolidation.consolidation_key]);
+
+  if (!props.profile.consolidation.consolidation_key) {
+    return (
+      <Container className="no-padding pb-5">
+        <Row>
+          <Col className="d-flex align-items-center justify-content-between">
+            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
+              Subscribe
+            </h2>
+          </Col>
+        </Row>
+        <Row>
+          <Col className="font-color-silver">
+            This user is not eligible to Subscribe at this time.
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
 
   return (
     <Container className="no-padding pb-5">
@@ -137,33 +205,33 @@ export default function UserPageMintsSubscriptions(
           <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
             Subscribe
           </h2>
-          <UserPageMintsSubscriptionsBalance
-            details={details}
-            fetching={
-              fetchingDetails ||
-              fetchingTopUpHistory ||
-              fetchingMemeSubscriptions ||
-              fetchingSubscriptionLogs
-            }
-            refresh={refresh}
-            show_refresh={isConnectedAccount}
-          />
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
-        <Col sm={12} md={6} className="d-flex flex-column gap-3">
-          <UserPageMintsSubscriptionsMode
-            profile={props.profile}
-            details={details}
-            readonly={!isConnectedAccount}
-            refresh={refresh}
-          />
+        <Col
+          className={`d-flex ${
+            isMobile ? `flex-column gap-3` : "justify-content-between"
+          }`}>
+          <div className="d-flex flex-column gap-3">
+            <UserPageMintsSubscriptionsBalance
+              details={details}
+              fetching={isFetching}
+              refresh={refresh}
+              show_refresh={isConnectedAccount}
+            />
+            <UserPageMintsSubscriptionsMode
+              profile={props.profile}
+              details={details}
+              readonly={!isConnectedAccount}
+              refresh={refresh}
+            />
+          </div>
+          {isConnectedAccount && (
+            <div>
+              <UserPageMintsSubscriptionsTopUp profile={props.profile} />
+            </div>
+          )}
         </Col>
-        {isConnectedAccount && (
-          <Col sm={12} md={6}>
-            <UserPageMintsSubscriptionsTopUp profile={props.profile} />
-          </Col>
-        )}
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
@@ -180,7 +248,8 @@ export default function UserPageMintsSubscriptions(
         <Col>
           <UserPageMintsSubscriptionsHistory
             topups={topUpHistory}
-            logs={subscripiongLogs}
+            redeemed={redeemedHistory}
+            logs={subscripionLogs}
           />
         </Col>
       </Row>

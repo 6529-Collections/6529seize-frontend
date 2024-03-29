@@ -96,7 +96,7 @@ export default function UserPageMintsSubscriptionsTopUp(
             <Form.Group className="mb-3">
               <Form.Label className="mb-1">Card Count</Form.Label>
               <Row className="d-flex align-items-center">
-                <Col xs={6} sm={4} md={3}>
+                <Col xs={6}>
                   <Form.Control
                     type="number"
                     placeholder="meme count"
@@ -112,7 +112,7 @@ export default function UserPageMintsSubscriptionsTopUp(
                     }}
                   />
                 </Col>
-                <Col xs={6} sm={4} md={3}>
+                <Col xs={6}>
                   {account.isConnected ? (
                     <Button
                       className="seize-btn btn-white btn-block"

@@ -29,6 +29,7 @@
 }
 
 .topUpHistoryEntry {
+  overflow: scroll;
   border: 1px solid rgb(55, 55, 61);
   padding: 10px;
 }
@@ -52,9 +53,9 @@
 }
 
 .notSubscribedTag {
-  color: #ff0000;
-  background-color: #440000;
-  border: 1px solid #aa0000;
+  color: #999999;
+  background-color: #242430;
+  border: 1px solid #777777;
   padding: 2px 10px;
   border-radius: 9999px;
 }
