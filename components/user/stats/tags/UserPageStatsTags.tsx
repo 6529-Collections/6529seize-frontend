@@ -99,7 +99,7 @@ export default function UserPageStatsTags({
     }
 
     for (const balance of balanceMemes) {
-      if (balance.sets > 0) {
+      if (balance.sets > 0 && balance.season) {
         result.push({
           id: balance.season.toString(),
           title: `SZN${balance.season} Sets x${formatNumberWithCommasOrDash(
