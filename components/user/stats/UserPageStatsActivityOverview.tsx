@@ -337,6 +337,7 @@ export function UserPageStatsActivityOverviewMemes({
                       <tr>
                         <th colSpan={1}></th>
                         <th className="text-right">Transfers In</th>
+                        <th className="text-right">Airdrops</th>
                         <th className="text-right">Mints</th>
                         <th className="text-right">Mints (ETH)</th>
                         <th className="text-right">Purchases</th>
@@ -356,6 +357,9 @@ export function UserPageStatsActivityOverviewMemes({
                             <td>Season {activity.season}</td>
                             <td className={styles.collectedAccordionTableValue}>
                               {numberWithCommas(activity.transfers_in)}
+                            </td>
+                            <td className={styles.collectedAccordionTableValue}>
+                              {numberWithCommas(activity.airdrops)}
                             </td>
                             <td className={styles.collectedAccordionTableValue}>
                               {numberWithCommas(

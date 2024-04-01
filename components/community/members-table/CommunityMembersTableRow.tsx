@@ -68,17 +68,17 @@ export default function CommunityMembersTableRow({
         <UserLevel level={member.level} size="sm" />
       </td>
       <td
-        className={`tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
+        className={`tw-px-4 sm:tw-px-6 tw-text-right tw-tabular-nums tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
       >
         {formatNumberWithCommasOrDash(member.tdh)}
       </td>
       <td
-        className={`tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
+        className={`tw-px-4 sm:tw-px-6 tw-text-right tw-tabular-nums tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
       >
         {formatNumberWithCommasOrDash(member.rep)}
       </td>
       <td
-        className={`tw-px-4 sm:tw-px-6 tw-text-right tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
+        className={`tw-px-4 tw-text-right tw-tabular-nums tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-base tw-font-medium ${textColorClass}`}
       >
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
           {formatNumberWithCommasOrDash(member.cic)}
@@ -93,7 +93,7 @@ export default function CommunityMembersTableRow({
           </Tippy>
         </div>
       </td>
-      <td className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-py-3">
+      <td className="tw-px-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3">
         {member.last_activity && (
           <CommonTimeAgo timestamp={member.last_activity} />
         )}
