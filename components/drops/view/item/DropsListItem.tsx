@@ -6,6 +6,7 @@ import DropListItemActions from "./action/DropListItemActions";
 import DropListItemDiscussionWrapper from "./discussion/DropListItemDiscussionWrapper";
 import DropWrapper from "../../create/utils/DropWrapper";
 import DropListItemContent from "./content/DropListItemContent";
+import DropListItemRep from "./reps/DropListItemRep";
 
 export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   const [discussionOpen, setDiscussionOpen] = useState<boolean>(false);
@@ -14,8 +15,15 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   return (
     <div className="tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
       <div className="tw-p-4 sm:tw-p-5">
-        <DropWrapper pfpUrl={drop.author.pfp} handle={drop.author.handle} timestamp={drop.created_at}>
-          <DropListItemContent drop={drop} />
+        <DropWrapper
+          pfpUrl={drop.author.pfp}
+          handle={drop.author.handle}
+          timestamp={drop.created_at}
+        >
+          <div className="tw-w-full">
+            <DropListItemContent drop={drop} />
+            <DropListItemRep drop={drop} />
+          </div>
         </DropWrapper>
         {haveData && <DropListItemData drop={drop} />}
         <DropListItemActions
