@@ -352,7 +352,7 @@ export function UserPageStatsActivityOverviewMemes({
                       {activity.map((activity) => (
                         <Fragment
                           key={`stats-activity-memes-${activity.season}`}>
-                          <UserPageStatsTableHr span={10} />
+                          <UserPageStatsTableHr span={11} />
                           <tr>
                             <td>Season {activity.season}</td>
                             <td className={styles.collectedAccordionTableValue}>
