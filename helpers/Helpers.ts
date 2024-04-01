@@ -670,3 +670,21 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 };
+
+export const formatLargeNumber = (num: number): string => {
+  const isNegative = num < 0;
+  const absNum = Math.abs(num);
+
+  let formattedNum;
+  if (absNum < 1000) {
+    formattedNum = absNum.toString(); // less than 1000
+  } else if (absNum < 10000) {
+    formattedNum = (absNum / 1000).toFixed(1) + "k"; // less than 1 million
+  } else if (absNum < 1000000) {
+    formattedNum = (absNum / 1000).toFixed(0) + "k"; // less than 1 million
+  } else {
+    formattedNum = (absNum / 1000000).toFixed(1) + "M"; // 1 million or more
+  }
+
+  return isNegative ? "-" + formattedNum : formattedNum;
+};
