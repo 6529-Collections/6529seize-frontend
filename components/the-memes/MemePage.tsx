@@ -326,7 +326,6 @@ export default function MemePage() {
             <MemePageCollectorsSubMenu
               show={activeTab === MEME_FOCUS.COLLECTORS}
               nft={nft}
-              pageSize={ACTIVITY_PAGE_SIZE}
             />
           </Row>
         </Container>

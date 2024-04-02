@@ -7,7 +7,7 @@ import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { commonApiFetch } from "../../services/api/common-api";
-import { NftTDH } from "./NFTLeaderboard";
+import { NftTDH, fetchNftTdhResults } from "./NFTLeaderboard";
 
 interface Props {
   contract: string;
@@ -23,31 +23,26 @@ enum Sort {
 export default function MemeLabLeaderboard(props: Readonly<Props>) {
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<NftTDH[]>();
+  const [leaderboard, setLeaderboard] = useState<NftTDH[]>([]);
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
-  const [next, setNext] = useState(null);
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
   }>({ sort: Sort.card_balance, sort_direction: SortDirection.DESC });
 
   async function fetchResults() {
-    const url = `tdh/nft`;
-    let walletFilter = "";
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: NftTDH[];
-    }>({
-      endpoint: `${url}/${props.contract}/${props.nftId}?${walletFilter}&page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`,
-    }).then((response) => {
-      setTotalResults(response.count);
-      response.data.forEach((lead: NftTDH) => {
-        lead.cic_type = cicToType(lead.cic_score);
-      });
-      setLeaderboard(response.data);
-    });
+    setLeaderboardLoaded(false);
+    const response = await fetchNftTdhResults(
+      props.contract,
+      props.nftId,
+      "",
+      pageProps,
+      sort.sort,
+      sort.sort_direction
+    );
+    setTotalResults(response.count);
+    setLeaderboard(response.data);
+    setLeaderboardLoaded(true);
   }
 
   useEffect(() => {
@@ -72,7 +67,7 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
           <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
       </Row>
-      {leaderboard && leaderboard.length > 0 && (
+      {leaderboard.length > 0 && (
         <Row className={styles.scrollContainer}>
           <Col>
             <Table bordered={false} className={styles.memeLabLeaderboardTable}>
@@ -125,33 +120,30 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
               </thead>
               <tbody>
                 <tr className={styles.gap}></tr>
-                {leaderboard &&
-                  leaderboard.map((lead, index) => {
-                    return (
-                      <tr key={`${index}-${lead.consolidation_key}`}>
-                        <td className={styles.rank}>
-                          {index +
-                            1 +
-                            (pageProps.page - 1) * pageProps.pageSize}
-                        </td>
-                        <td className={styles.hodlerContainer}>
-                          <div className={styles.hodler}>
-                            <LeaderboardCollector
-                              handle={lead.handle}
-                              consolidationKey={lead.consolidation_key}
-                              consolidationDisplay={lead.consolidation_display}
-                              pfp={lead.pfp_url}
-                              cicType={lead.cic_type}
-                              level={lead.level}
-                            />
-                          </div>
-                        </td>
-                        <td className={styles.tdhSub}>
-                          {numberWithCommas(lead.balance)}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                {leaderboard.map((lead, index) => {
+                  return (
+                    <tr key={`${index}-${lead.consolidation_key}`}>
+                      <td className={styles.rank}>
+                        {index + 1 + (pageProps.page - 1) * pageProps.pageSize}
+                      </td>
+                      <td className={styles.hodlerContainer}>
+                        <div className={styles.hodler}>
+                          <LeaderboardCollector
+                            handle={lead.handle}
+                            consolidationKey={lead.consolidation_key}
+                            consolidationDisplay={lead.consolidation_display}
+                            pfp={lead.pfp_url}
+                            cicType={lead.cic_type}
+                            level={lead.level}
+                          />
+                        </div>
+                      </td>
+                      <td className={styles.tdhSub}>
+                        {numberWithCommas(lead.balance)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </Col>
@@ -169,9 +161,9 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
           />
         </Row>
       )}
-      {leaderboardLoaded && leaderboard?.length === 0 && (
+      {leaderboardLoaded && leaderboard.length === 0 && (
         <Row>
-          <Col>No TDH accrued</Col>
+          <Col>No Results found</Col>
         </Row>
       )}
     </Container>
