@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import DotLoader from "../dotLoader/DotLoader";
+import { MEMELAB_CONTRACT } from "../../constants";
 
 enum Sort {
   AGE = "age",
@@ -121,7 +122,9 @@ export default function MemeLabComponent(props: Readonly<Props>) {
       fetchAllPages(
         `${
           process.env.API_ENDPOINT
-        }/api/owners_memelab?wallet=${props.wallets.join(",")}`
+        }/api/owners?contract=${MEMELAB_CONTRACT}&wallet=${props.wallets.join(
+          ","
+        )}`
       ).then((owners: Owner[]) => {
         const mergedOwners = owners.reduce(
           (accumulator: Owner[], currentOwner: Owner) => {
