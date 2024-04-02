@@ -43,6 +43,16 @@ export async function fetchNftTdhResults(
   return results;
 }
 
+export function setScrollPosition() {
+  const top = document.getElementById("nft-leaderboard")?.offsetTop;
+  if (top && window.scrollY > 0) {
+    window.scrollTo({
+      top: top,
+      behavior: "smooth",
+    });
+  }
+}
+
 enum Sort {
   balance = "balance",
   tdh__raw = "tdh__raw",
@@ -83,7 +93,7 @@ export interface NftTDHRanked extends NftTDH {
 export default function NFTLeaderboard(props: Readonly<Props>) {
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<NftTDHRanked[]>();
+  const [leaderboard, setLeaderboard] = useState<NftTDHRanked[]>([]);
   const [fetchingLeaderboard, setFetchingLeaderboard] = useState(true);
   const [sort, setSort] = useState<{
     sort: Sort;
@@ -116,6 +126,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       return { ...lead, rank };
     });
     setLeaderboard(data);
+    setScrollPosition();
     setFetchingLeaderboard(false);
   }
 
@@ -132,7 +143,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   }, [page]);
 
   return (
-    <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
+    <Container className={`no-padding pt-3`} id="nft-leaderboard">
       <Row>
         <Col>
           <h1>
@@ -141,324 +152,316 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           <h1>&nbsp;Card {props.nftId}</h1>
         </Col>
       </Row>
-
-      {leaderboard && (
-        <>
-          <Row className="pt-2 pb-2">
-            <Col className="d-flex justify-content-end align-items-center">
-              <SearchWalletsDisplay
-                searchWallets={searchWallets}
-                setSearchWallets={setSearchWallets}
-                setShowSearchModal={setShowSearchModal}
-              />
-            </Col>
-          </Row>
-          <Row className={styles.scrollContainer}>
-            <Col>
-              <Table bordered={false} className={styles.leaderboardTable}>
-                <thead>
-                  <tr>
-                    <th className={styles.rank}></th>
-                    <th className={styles.hodlerContainer}></th>
-                    <th className={styles.gap}></th>
-                    <th
-                      colSpan={3}
-                      className={`${styles.tdh} ${styles.borderBottom}`}>
-                      <b>This Card</b>
-                    </th>
-                    <th className={styles.gap}></th>
-                    <th
-                      colSpan={3}
-                      className={`${styles.tdh} ${styles.borderBottom}`}>
-                      <b>Total</b>
-                    </th>
+      <Row className="pt-2 pb-2">
+        <Col className="d-flex justify-content-end align-items-center">
+          <SearchWalletsDisplay
+            searchWallets={searchWallets}
+            setSearchWallets={setSearchWallets}
+            setShowSearchModal={setShowSearchModal}
+          />
+        </Col>
+      </Row>
+      <Row className={styles.scrollContainer}>
+        <Col>
+          <Table bordered={false} className={styles.leaderboardTable}>
+            <thead>
+              <tr>
+                <th className={styles.rank}></th>
+                <th className={styles.hodlerContainer}></th>
+                <th className={styles.gap}></th>
+                <th
+                  colSpan={3}
+                  className={`${styles.tdh} ${styles.borderBottom}`}>
+                  <b>This Card</b>
+                </th>
+                <th className={styles.gap}></th>
+                <th
+                  colSpan={3}
+                  className={`${styles.tdh} ${styles.borderBottom}`}>
+                  <b>Total</b>
+                </th>
+              </tr>
+              <tr className={styles.gap}></tr>
+              <tr>
+                <th className={styles.rank}>Rank</th>
+                <th className={styles.hodlerContainer}>
+                  Collector{" "}
+                  {totalResults > 0 && `x${totalResults.toLocaleString()}`}
+                </th>
+                <th className={styles.gap}></th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Balance&nbsp;
+                    <span className="d-flex flex-column">
+                      <FontAwesomeIcon
+                        icon="square-caret-up"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.balance,
+                            sort_direction: SortDirection.ASC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.ASC ||
+                          sort.sort != Sort.balance
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                      <FontAwesomeIcon
+                        icon="square-caret-down"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.balance,
+                            sort_direction: SortDirection.DESC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.DESC ||
+                          sort.sort != Sort.balance
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                    </span>
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    TDH&nbsp;
+                    <span className="d-flex flex-column">
+                      <FontAwesomeIcon
+                        icon="square-caret-up"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.boosted_tdh,
+                            sort_direction: SortDirection.ASC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.ASC ||
+                          sort.sort != Sort.boosted_tdh
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                      <FontAwesomeIcon
+                        icon="square-caret-down"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.boosted_tdh,
+                            sort_direction: SortDirection.DESC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.DESC ||
+                          sort.sort != Sort.boosted_tdh
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                    </span>
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Unweighted TDH&nbsp;
+                    <span className="d-flex flex-column">
+                      <FontAwesomeIcon
+                        icon="square-caret-up"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.tdh__raw,
+                            sort_direction: SortDirection.ASC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.ASC ||
+                          sort.sort != Sort.tdh__raw
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                      <FontAwesomeIcon
+                        icon="square-caret-down"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.tdh__raw,
+                            sort_direction: SortDirection.DESC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.DESC ||
+                          sort.sort != Sort.tdh__raw
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                    </span>
+                  </span>
+                </th>
+                <th className={styles.gap}></th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Balance&nbsp;
+                    <span className="d-flex flex-column">
+                      <FontAwesomeIcon
+                        icon="square-caret-up"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.total_balance,
+                            sort_direction: SortDirection.ASC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.ASC ||
+                          sort.sort != Sort.total_balance
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                      <FontAwesomeIcon
+                        icon="square-caret-down"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.total_balance,
+                            sort_direction: SortDirection.DESC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.DESC ||
+                          sort.sort != Sort.total_balance
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                    </span>
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    TDH&nbsp;
+                    <span className="d-flex flex-column">
+                      <FontAwesomeIcon
+                        icon="square-caret-up"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.total_boosted_tdh,
+                            sort_direction: SortDirection.ASC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.ASC ||
+                          sort.sort != Sort.total_boosted_tdh
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                      <FontAwesomeIcon
+                        icon="square-caret-down"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.total_boosted_tdh,
+                            sort_direction: SortDirection.DESC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.DESC ||
+                          sort.sort != Sort.total_boosted_tdh
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                    </span>
+                  </span>
+                </th>
+                <th className={styles.tdhSub}>
+                  <span className="d-flex align-items-center justify-content-center">
+                    Unweighted TDH&nbsp;
+                    <span className="d-flex flex-column">
+                      <FontAwesomeIcon
+                        icon="square-caret-up"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.total_tdh__raw,
+                            sort_direction: SortDirection.ASC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.ASC ||
+                          sort.sort != Sort.total_tdh__raw
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                      <FontAwesomeIcon
+                        icon="square-caret-down"
+                        onClick={() =>
+                          setSort({
+                            sort: Sort.total_tdh__raw,
+                            sort_direction: SortDirection.DESC,
+                          })
+                        }
+                        className={`${styles.caret} ${
+                          sort.sort_direction != SortDirection.DESC ||
+                          sort.sort != Sort.total_tdh__raw
+                            ? styles.disabled
+                            : ""
+                        }`}
+                      />
+                    </span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((lead) => {
+                return (
+                  <tr key={lead.consolidation_key}>
+                    <td className={styles.rank}>
+                      {numberWithCommas(lead.rank)}
+                    </td>
+                    <td className={styles.hodlerContainer}>
+                      <LeaderboardCollector
+                        handle={lead.handle}
+                        consolidationKey={lead.consolidation_key}
+                        consolidationDisplay={lead.consolidation_display}
+                        pfp={lead.pfp_url}
+                        cicType={lead.cic_type}
+                        level={lead.level}
+                      />
+                    </td>
+                    <td className={styles.gap}></td>
+                    <td className={styles.tdhSub}>
+                      {numberWithCommas(lead.balance)}
+                    </td>
+                    <td className={styles.tdhSub}>
+                      {numberWithCommas(Math.round(lead.boosted_tdh))}
+                    </td>
+                    <td className={styles.tdhSub}>
+                      {numberWithCommas(Math.round(lead.tdh__raw))}
+                    </td>
+                    <td className={styles.gap}></td>
+                    <td className={styles.tdhSub}>
+                      {numberWithCommas(lead.total_balance)}
+                    </td>
+                    <td className={styles.tdhSub}>
+                      {numberWithCommas(Math.round(lead.total_boosted_tdh))}
+                    </td>
+                    <td className={styles.tdhSub}>
+                      {numberWithCommas(Math.round(lead.total_tdh__raw))}
+                    </td>
                   </tr>
-                  <tr className={styles.gap}></tr>
-                  <tr>
-                    <th className={styles.rank}>Rank</th>
-                    <th className={styles.hodlerContainer}>
-                      Collector{" "}
-                      {totalResults > 0 && `x${totalResults.toLocaleString()}`}
-                    </th>
-                    <th className={styles.gap}></th>
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        Balance&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.balance,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.balance
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.balance,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.balance
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                        </span>
-                      </span>
-                    </th>
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        TDH&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.boosted_tdh,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.boosted_tdh
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.boosted_tdh,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.boosted_tdh
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                        </span>
-                      </span>
-                    </th>
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        Unweighted TDH&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.tdh__raw,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.tdh__raw
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.tdh__raw,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.tdh__raw
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                        </span>
-                      </span>
-                    </th>
-                    <th className={styles.gap}></th>
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        Balance&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.total_balance,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.total_balance
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.total_balance,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.total_balance
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                        </span>
-                      </span>
-                    </th>
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        TDH&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.total_boosted_tdh,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.total_boosted_tdh
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.total_boosted_tdh,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.total_boosted_tdh
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                        </span>
-                      </span>
-                    </th>
-                    <th className={styles.tdhSub}>
-                      <span className="d-flex align-items-center justify-content-center">
-                        Unweighted TDH&nbsp;
-                        <span className="d-flex flex-column">
-                          <FontAwesomeIcon
-                            icon="square-caret-up"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.total_tdh__raw,
-                                sort_direction: SortDirection.ASC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.ASC ||
-                              sort.sort != Sort.total_tdh__raw
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                          <FontAwesomeIcon
-                            icon="square-caret-down"
-                            onClick={() =>
-                              setSort({
-                                sort: Sort.total_tdh__raw,
-                                sort_direction: SortDirection.DESC,
-                              })
-                            }
-                            className={`${styles.caret} ${
-                              sort.sort_direction != SortDirection.DESC ||
-                              sort.sort != Sort.total_tdh__raw
-                                ? styles.disabled
-                                : ""
-                            }`}
-                          />
-                        </span>
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard &&
-                    leaderboard.map((lead, index) => {
-                      return (
-                        <tr key={`${lead.consolidation_key}`}>
-                          <td className={styles.rank}>
-                            {numberWithCommas(lead.rank)}
-                          </td>
-                          <td className={styles.hodlerContainer}>
-                            <LeaderboardCollector
-                              handle={lead.handle}
-                              consolidationKey={lead.consolidation_key}
-                              consolidationDisplay={lead.consolidation_display}
-                              pfp={lead.pfp_url}
-                              cicType={lead.cic_type}
-                              level={lead.level}
-                            />
-                          </td>
-                          <td className={styles.gap}></td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(lead.balance)}
-                          </td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(Math.round(lead.boosted_tdh))}
-                          </td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(Math.round(lead.tdh__raw))}
-                          </td>
-                          <td className={styles.gap}></td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(lead.total_balance)}
-                          </td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(
-                              Math.round(lead.total_boosted_tdh)
-                            )}
-                          </td>
-                          <td className={styles.tdhSub}>
-                            {numberWithCommas(Math.round(lead.total_tdh__raw))}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-          {leaderboard.length === 0 && !fetchingLeaderboard && (
-            <Row>
-              <Col>No Results found</Col>
-            </Row>
-          )}
-        </>
+                );
+              })}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+      {leaderboard.length === 0 && !fetchingLeaderboard && (
+        <Row>
+          <Col>No Results found</Col>
+        </Row>
       )}
       {totalResults > 0 && (
         <Row className="text-center pt-2 pb-3">
