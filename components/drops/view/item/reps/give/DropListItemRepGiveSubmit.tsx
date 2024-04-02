@@ -18,10 +18,12 @@ export default function DropListItemRepGiveSubmit({
   originalRep,
   rep,
   drop,
+  repCategory,
 }: {
   readonly originalRep: number;
   readonly rep: number;
   readonly drop: DropFull;
+  readonly repCategory: string;
 }) {
   const { requestAuth, setToast, connectedProfile, connectionStatus } =
     useContext(AuthContext);
@@ -35,7 +37,7 @@ export default function DropListItemRepGiveSubmit({
         endpoint: `drops/${drop.id}/rep`,
         body: {
           amount: param.rep,
-          category: "Rep",
+          category: repCategory,
         },
       }),
     onSuccess: (response: DropFull) => {

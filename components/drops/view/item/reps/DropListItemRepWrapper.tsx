@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
 import DropListItemRepGive from "./give/DropListItemRepGive";
 import { AuthContext } from "../../../../auth/Auth";
@@ -27,18 +27,23 @@ export default function DropListItemRepWrapper({
         }),
       enabled: !!connectedProfile?.profile?.handle,
     });
+  const [activeCategory, setActiveCategory] = useState<string>("Rep");
   return (
     <div className="tw-mt-4 tw-flex tw-w-full tw-justify-between tw-items-end">
       <div className="tw-flex tw-flex-col">
         {!!drop.top_rep_givers.length && (
           <DropListItemRepTopGivers drop={drop} />
         )}
-        {!!drop.top_rep_categories.length && (
-          <DropListItemRepTopCategories drop={drop} />
-        )}
+        <DropListItemRepTopCategories
+          drop={drop}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+        />
       </div>
       <DropListItemRepGive
+        key={activeCategory}
         drop={drop}
+        activeCategory={activeCategory}
         availableRep={availableRepResponse?.available_tdh_for_rep ?? 0}
       />
     </div>
