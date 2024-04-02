@@ -6,12 +6,7 @@ import { numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import {
-  NftTDH,
-  fetchNftTdhResults,
-  PAGE_SIZE,
-  NftTDHRanked,
-} from "./NFTLeaderboard";
+import { fetchNftTdhResults, PAGE_SIZE, NftTDHRanked } from "./NFTLeaderboard";
 
 interface Props {
   contract: string;
