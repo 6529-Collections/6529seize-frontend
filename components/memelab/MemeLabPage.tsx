@@ -1221,8 +1221,6 @@ export default function LabPage(props: Readonly<Props>) {
             <MemeLabLeaderboard
               contract={nft.contract}
               nftId={parseInt(nftId)}
-              page={1}
-              pageSize={ACTIVITY_PAGE_SIZE}
             />
           </Col>
         </Row>
