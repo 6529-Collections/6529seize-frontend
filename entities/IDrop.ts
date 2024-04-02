@@ -16,6 +16,22 @@ export interface DropMetadata {
   readonly data_value: string;
 }
 
+export interface DropFullTopRepGiver {
+  readonly rep_given: number;
+  readonly profile: ProfileMinimal;
+}
+
+export interface DropFullTopRepCategory {
+  readonly rep_given: number;
+  readonly category: string;
+}
+
+export interface DropFullInputProfileCategory {
+  readonly category: string;
+  readonly rep_given: number;
+  readonly rep_given_by_input_profile: number;
+}
+
 export interface DropFull {
   readonly id: number;
   readonly author: ProfileMinimal;
@@ -29,6 +45,19 @@ export interface DropFull {
   readonly metadata: DropMetadata[];
   readonly media_url: string | null;
   readonly media_mime_type: string | null;
-  readonly storm_id: number;
+  readonly root_drop_id: number | null;
   readonly storm_sequence: number;
+  readonly max_storm_sequence: number;
+  readonly rep: number;
+  readonly top_rep_givers: DropFullTopRepGiver[]; // 5
+  readonly total_number_of_rep_givers: number;
+  readonly top_rep_categories: DropFullTopRepCategory[]; // 5
+  readonly total_number_of_categories: number;
+  readonly input_profile_categories: DropFullInputProfileCategory[] | null;
+  readonly rep_given_by_input_profile: number | null; // this drop's rep given by the input profile
+}
+
+export interface DropRepChangeRequest {
+  readonly amount: number;
+  readonly category: string;
 }

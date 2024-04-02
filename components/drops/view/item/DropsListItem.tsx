@@ -1,12 +1,11 @@
 import { DropFull } from "../../../../entities/IDrop";
 import { useState } from "react";
 import DropListItemData from "./data/DropListItemData";
-
 import DropListItemActions from "./action/DropListItemActions";
 import DropListItemDiscussionWrapper from "./discussion/DropListItemDiscussionWrapper";
 import DropWrapper from "../../create/utils/DropWrapper";
 import DropListItemContent from "./content/DropListItemContent";
-import DropListItemRep from "./reps/DropListItemRep";
+import DropListItemRepWrapper from "./reps/DropListItemRepWrapper";
 
 export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   const [discussionOpen, setDiscussionOpen] = useState<boolean>(false);
@@ -22,7 +21,7 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
         >
           <div className="tw-w-full">
             <DropListItemContent drop={drop} />
-            <DropListItemRep drop={drop} />
+            <DropListItemRepWrapper drop={drop} />
           </div>
         </DropWrapper>
         {haveData && <DropListItemData drop={drop} />}

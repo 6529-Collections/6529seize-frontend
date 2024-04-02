@@ -428,3 +428,14 @@ export interface ProfileMinimal {
   readonly tdh: number;
   readonly level: number;
 }
+
+
+export interface ProfileAvailableDropRepResponse {
+  readonly available_tdh_for_rep: number;
+}
+
+export enum ProfileConnectedStatus {
+  NOT_CONNECTED = "NOT_CONNECTED",
+  NO_PROFILE = "NO_PROFILE",
+  HAVE_PROFILE = "HAVE_PROFILE",
+}
