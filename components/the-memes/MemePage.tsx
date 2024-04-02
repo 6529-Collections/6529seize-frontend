@@ -71,9 +71,6 @@ export default function MemePage() {
   const [myTDH, setMyTDH] = useState<NftTDH>();
   const [myRank, setMyRank] = useState<NftRank>();
 
-  const [collectionCount, setCollectionCount] = useState(-1);
-  const [collectionRank, setCollectionRank] = useState(-1);
-
   const [userLoaded, setUserLoaded] = useState(false);
 
   const liveTab = {
@@ -229,36 +226,6 @@ export default function MemePage() {
     }
   }, [nftId, connectedWallets]);
 
-  useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchNfts(response.next, [...mynfts].concat(response.data));
-        } else {
-          const newnfts = [...mynfts]
-            .concat(response.data)
-            .filter((value, index, self) => {
-              return self.findIndex((v) => v.id === value.id) === index;
-            });
-
-          const rankedNFTs = newnfts.sort((a, b) =>
-            a.tdh_rank > b.tdh_rank ? 1 : -1
-          );
-          setCollectionCount(newnfts.length);
-          if (nftId) {
-            setCollectionRank(
-              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId))
-            );
-          }
-        }
-      });
-    }
-    if (router.isReady && nftId) {
-      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`;
-      fetchNfts(initialUrlNfts, []);
-    }
-  }, [router.isReady, nftId]);
-
   function printContent() {
     return (
       <>
@@ -306,8 +273,6 @@ export default function MemePage() {
                   <MemePageCollectorsRightMenu
                     show={activeTab === MEME_FOCUS.COLLECTORS}
                     nft={nft}
-                    collectionCount={collectionCount}
-                    collectionRank={collectionRank}
                   />
                 </>
               )}

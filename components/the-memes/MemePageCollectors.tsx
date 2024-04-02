@@ -7,8 +7,6 @@ import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
 export function MemePageCollectorsRightMenu(props: {
   show: boolean;
   nft: NFT | undefined;
-  collectionCount: number;
-  collectionRank: number;
 }) {
   if (props.show && props.nft) {
     return (
@@ -98,16 +96,7 @@ export function MemePageCollectorsRightMenu(props: {
                   <tr>
                     <td>Meme Rank</td>
                     <td>
-                      {props.nft.tdh && props.collectionCount ? (
-                        <>
-                          {props.collectionRank
-                            ? props.collectionRank
-                            : props.collectionCount}
-                          /{props.collectionCount}
-                        </>
-                      ) : (
-                        "-"
-                      )}
+                      {props.nft.tdh_rank ? `#${props.nft.tdh_rank}` : "-"}
                     </td>
                   </tr>
                 </tbody>
