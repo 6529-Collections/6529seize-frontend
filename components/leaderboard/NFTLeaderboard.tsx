@@ -57,7 +57,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<NftTDH[]>();
-  const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
+  const [fetchingLeaderboard, setFetchingLeaderboard] = useState(true);
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
@@ -67,6 +67,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   async function fetchResults() {
+    setFetchingLeaderboard(true);
     const url = `tdh/nft`;
     let walletFilter = "";
     if (searchWallets && searchWallets.length > 0) {
@@ -85,7 +86,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         lead.cic_type = cicToType(lead.cic_score);
       });
       setLeaderboard(response.data);
-      setLeaderboardLoaded(false);
+      setFetchingLeaderboard(false);
     });
   }
 
@@ -112,7 +113,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </Col>
       </Row>
 
-      {leaderboard && leaderboard.length > 0 && (
+      {leaderboard && (
         <>
           <Row className="pt-2 pb-2">
             <Col className="d-flex justify-content-end align-items-center">
@@ -429,6 +430,11 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               </Table>
             </Col>
           </Row>
+          {leaderboard.length === 0 && !fetchingLeaderboard && (
+            <Row>
+              <Col>No Results found</Col>
+            </Row>
+          )}
         </>
       )}
       {totalResults > 0 && (
@@ -443,19 +449,14 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               }}
             />
           </Row>
-          <SearchModalDisplay
-            show={showSearchModal}
-            setShow={setShowSearchModal}
-            searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
-          />
         </>
       )}
-      {leaderboardLoaded && leaderboard?.length === 0 && (
-        <Row>
-          <Col>No TDH accrued</Col>
-        </Row>
-      )}
+      <SearchModalDisplay
+        show={showSearchModal}
+        setShow={setShowSearchModal}
+        searchWallets={searchWallets}
+        setSearchWallets={setSearchWallets}
+      />
     </Container>
   );
 }

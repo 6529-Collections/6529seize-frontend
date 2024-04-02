@@ -13,7 +13,7 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import { Transaction } from "../../entities/ITransaction";
-import { TDHMetrics } from "../../entities/ITDH";
+import { ConsolidatedTDH, TDHMetrics } from "../../entities/ITDH";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 
 export function MemePageYourCardsRightMenu(props: {
@@ -22,7 +22,7 @@ export function MemePageYourCardsRightMenu(props: {
   wallets: string[];
   nft: NFT | undefined;
   nftBalance: number;
-  myOwner: TDHMetrics | undefined;
+  myOwner: ConsolidatedTDH | undefined;
   myTDH: NftTDH | undefined;
   myRank: NftRank | undefined;
 }) {
@@ -172,7 +172,7 @@ export function MemePageYourCardsRightMenu(props: {
                         </Col>
                       </Row>
                     ) : (
-                      <Row>
+                      <Row className="pb-3">
                         <Col className={`pt-1 ${styles.overviewColumn}`}>
                           No TDH accrued
                         </Col>

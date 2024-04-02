@@ -22,7 +22,6 @@ const MemePageComponent = dynamic(
 export default function MemePage(props: any) {
   const pageProps = props.pageProps;
   const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
     <>
@@ -45,8 +44,8 @@ export default function MemePage(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        <MemePageComponent wallets={connectedWallets} />
+        <Header />
+        <MemePageComponent />
       </main>
     </>
   );

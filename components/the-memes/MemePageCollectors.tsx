@@ -98,10 +98,16 @@ export function MemePageCollectorsRightMenu(props: {
                   <tr>
                     <td>Meme Rank</td>
                     <td>
-                      {props.collectionRank
-                        ? props.collectionRank
-                        : props.collectionCount}
-                      /{props.collectionCount}
+                      {props.nft.tdh && props.collectionCount ? (
+                        <>
+                          {props.collectionRank
+                            ? props.collectionRank
+                            : props.collectionCount}
+                          /{props.collectionCount}
+                        </>
+                      ) : (
+                        "-"
+                      )}
                     </td>
                   </tr>
                 </tbody>
