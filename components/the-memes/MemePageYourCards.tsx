@@ -13,7 +13,7 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import { Transaction } from "../../entities/ITransaction";
-import { ConsolidatedTDH, TDHMetrics } from "../../entities/ITDH";
+import { ConsolidatedTDH } from "../../entities/ITDH";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 
 export function MemePageYourCardsRightMenu(props: {

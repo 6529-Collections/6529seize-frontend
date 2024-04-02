@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { cicToType, numberWithCommas } from "../../helpers/Helpers";
+import { numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { commonApiFetch } from "../../services/api/common-api";
 import { NftTDH, fetchNftTdhResults } from "./NFTLeaderboard";
 
 interface Props {

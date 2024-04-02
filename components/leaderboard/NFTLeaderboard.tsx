@@ -455,18 +455,16 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </>
       )}
       {totalResults > 0 && (
-        <>
-          <Row className="text-center pt-2 pb-3">
-            <Pagination
-              page={pageProps.page}
-              pageSize={PAGE_SIZE}
-              totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPageProps({ ...pageProps, page: newPage });
-              }}
-            />
-          </Row>
-        </>
+        <Row className="text-center pt-2 pb-3">
+          <Pagination
+            page={pageProps.page}
+            pageSize={PAGE_SIZE}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPageProps({ ...pageProps, page: newPage });
+            }}
+          />
+        </Row>
       )}
       <SearchModalDisplay
         show={showSearchModal}

@@ -1,10 +1,7 @@
-import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import { MEMES_CONTRACT, MEMES_MINTING_HREF } from "../../../constants";
-import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import {
   SharedHead,
@@ -25,7 +22,6 @@ const DistributionComponent = dynamic(
 
 export default function MemeDistributionPage(props: any) {
   const pageProps = props.pageProps;
-  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
 
   return (
     <>
