@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../../constants";
+import { MEMELAB_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";
 
@@ -10,14 +10,26 @@ export interface SharedHeadProps {
 }
 
 export function SharedHead(
-  props: Readonly<{ props: SharedHeadProps; contract: string }>
+  props: Readonly<{
+    props: SharedHeadProps;
+    contract: string;
+    isDistribution?: boolean;
+  }>
 ) {
   let path = "the-memes";
   if (areEqualAddresses(props.contract, MEMELAB_CONTRACT)) {
     path = "meme-lab";
   }
+  path += `/${props.props.id}`;
+  if (props.isDistribution) {
+    path = `${path}/distribution`;
+  }
+
   const pageProps = props.props;
-  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
+  const pagenameFull = `${pageProps.name}${
+    props.isDistribution ? " Distribution" : ""
+  } | 6529 SEIZE`;
+
   return (
     <Head>
       <title>{pagenameFull}</title>
@@ -25,7 +37,7 @@ export function SharedHead(
       <meta name="description" content={pagenameFull} />
       <meta
         property="og:url"
-        content={`${process.env.BASE_ENDPOINT}/${path}/${pageProps.id}`}
+        content={`${process.env.BASE_ENDPOINT}/${path}`}
       />
       <meta property="og:title" content={pageProps.name} />
       <meta property="og:image" content={pageProps.image} />
@@ -51,13 +63,13 @@ export async function getSharedServerSideProps(req: any, contract: string) {
     `${process.env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
   );
   let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
-  if (response && response.data && response.data.length > 0) {
+  if (response?.data?.length > 0) {
     name = `${response.data[0].name} | ${name}`;
-    image = response.data[0].thumbnail
-      ? response.data[0].thumbnail
-      : response.data[0].image
-      ? response.data[0].image
-      : image;
+    if (response.data[0].thumbnail) {
+      image = response.data[0].thumbnail;
+    } else if (response.data[0].image) {
+      image = response.data[0].image;
+    }
   }
   return {
     props: {
