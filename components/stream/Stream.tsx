@@ -2,7 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { DropFull } from "../../entities/IDrop";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "../drops/view/DropListWrapper";
 import { useSelector } from "react-redux";
 import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
+import { AuthContext } from "../auth/Auth";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -20,6 +21,7 @@ interface StreamQuery {
   readonly curation_criteria_id?: string;
   readonly limit: string;
   readonly storm_id?: string;
+  readonly input_profile?: string;
 }
 
 const REQUEST_SIZE = 10;
@@ -33,6 +35,7 @@ export default function Stream() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const { connectedProfile } = useContext(AuthContext);
 
   const getParamsFromUrl = (): StreamQuery => {
     const curation = searchParams.get(SEARCH_PARAMS_FIELDS.curation);
@@ -41,6 +44,9 @@ export default function Stream() {
     };
     if (curation) {
       query.curation_criteria_id = curation;
+    }
+    if (connectedProfile?.profile?.handle) {
+      query.input_profile = connectedProfile.profile.handle;
     }
     return query;
   };
@@ -85,7 +91,10 @@ export default function Stream() {
   }, [activeCurationFilterId]);
 
   const [params, setParams] = useState(getParamsFromUrl());
-  useEffect(() => setParams(getParamsFromUrl()), [searchParams]);
+  useEffect(
+    () => setParams(getParamsFromUrl()),
+    [searchParams, connectedProfile]
+  );
 
   const [debouncedParams, setDebouncedParams] = useState<StreamQuery>(params);
   useDebounce(() => setDebouncedParams(params), 200, [params]);

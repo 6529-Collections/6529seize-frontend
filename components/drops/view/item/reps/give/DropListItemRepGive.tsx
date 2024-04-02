@@ -11,13 +11,16 @@ export enum RepChangeType {
 export default function DropListItemRepGive({
   drop,
   availableRep,
+  activeCategory,
 }: {
   readonly drop: DropFull;
   readonly availableRep: number;
+  readonly activeCategory: string;
 }) {
   const repCategory = drop.input_profile_categories?.find(
-    (category) => category.category === "Rep"
+    (category) => category.category === activeCategory
   );
+
   const repGiven = repCategory?.rep_given_by_input_profile ?? 0;
   const [rep, setRep] = useState<number>(repGiven);
   const maxRep = repGiven + availableRep;
@@ -106,7 +109,12 @@ export default function DropListItemRepGive({
         handleMouseDown={handleMouseDown}
         handleMouseUp={handleMouseUp}
       />
-      <DropListItemRepGiveSubmit rep={rep} drop={drop} originalRep={repGiven} />
+      <DropListItemRepGiveSubmit
+        rep={rep}
+        drop={drop}
+        originalRep={repGiven}
+        repCategory={activeCategory}
+      />
       <DropListItemRepGiveChangeButton
         availableRep={availableRep}
         type={RepChangeType.DECREASE}

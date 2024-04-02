@@ -3,14 +3,16 @@ import { DropFull } from "../../../entities/IDrop";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "./DropListWrapper";
+import { AuthContext } from "../../auth/Auth";
 
 const REQUEST_SIZE = 10;
 
 export default function Drops() {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string).toLowerCase();
+  const { connectedProfile } = useContext(AuthContext);
 
   const {
     data,
@@ -20,13 +22,22 @@ export default function Drops() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.PROFILE_DROPS, { handleOrWallet }],
+    queryKey: [
+      QueryKey.PROFILE_DROPS,
+      {
+        handleOrWallet,
+        inputProfile: connectedProfile?.profile?.handle ?? null,
+      },
+    ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         limit: `${REQUEST_SIZE}`,
       };
       if (pageParam) {
         params.id_less_than = `${pageParam}`;
+      }
+      if (connectedProfile?.profile?.handle) {
+        params.input_profile = connectedProfile.profile.handle;
       }
       return await commonApiFetch<DropFull[]>({
         endpoint: `profiles/${handleOrWallet}/drops`,
