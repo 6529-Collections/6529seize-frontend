@@ -1,8 +1,6 @@
-import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import { fetchUrl } from "../../../services/6529api";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { useState } from "react";
 import {

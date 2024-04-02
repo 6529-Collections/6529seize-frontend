@@ -183,6 +183,20 @@ export default function MemePage() {
     }
   }, [nftId]);
 
+  function updateNftBalances(data: Transaction[]) {
+    let countIn = 0;
+    let countOut = 0;
+    data.map((d: Transaction) => {
+      if (connectedWallets.some((w) => areEqualAddresses(w, d.from_address))) {
+        countOut += d.token_count;
+      }
+      if (connectedWallets.some((w) => areEqualAddresses(w, d.to_address))) {
+        countIn += d.token_count;
+      }
+    });
+    setNftBalance(countIn - countOut);
+  }
+
   useEffect(() => {
     if (connectedWallets.length && nftId) {
       fetchUrl(
@@ -193,21 +207,7 @@ export default function MemePage() {
         )}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
-        let countIn = 0;
-        let countOut = 0;
-        response.data.map((d: Transaction) => {
-          if (
-            connectedWallets.some((w) => areEqualAddresses(w, d.from_address))
-          ) {
-            countOut += d.token_count;
-          }
-          if (
-            connectedWallets.some((w) => areEqualAddresses(w, d.to_address))
-          ) {
-            countIn += d.token_count;
-          }
-        });
-        setNftBalance(countIn - countOut);
+        updateNftBalances(response.data);
         setUserLoaded(true);
       });
     } else {
