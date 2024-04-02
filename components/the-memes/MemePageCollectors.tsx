@@ -119,11 +119,7 @@ export function MemePageCollectorsSubMenu(props: {
     return (
       <Row className="pt-3">
         <Col>
-          <NFTLeaderboard
-            contract={props.nft.contract}
-            nftId={props.nft.id}
-            page={1}
-          />
+          <NFTLeaderboard contract={props.nft.contract} nftId={props.nft.id} />
         </Col>
       </Row>
     );

@@ -6,13 +6,16 @@ import { numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "../../entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { NftTDH, fetchNftTdhResults } from "./NFTLeaderboard";
+import {
+  NftTDH,
+  fetchNftTdhResults,
+  PAGE_SIZE,
+  NftTDHRanked,
+} from "./NFTLeaderboard";
 
 interface Props {
   contract: string;
   nftId: number;
-  page: number;
-  pageSize: number;
 }
 
 enum Sort {
@@ -20,9 +23,9 @@ enum Sort {
 }
 
 export default function MemeLabLeaderboard(props: Readonly<Props>) {
-  const [pageProps, setPageProps] = useState<Props>(props);
+  const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<NftTDH[]>([]);
+  const [leaderboard, setLeaderboard] = useState<NftTDHRanked[]>([]);
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
   const [sort, setSort] = useState<{
     sort: Sort;
@@ -35,26 +38,30 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
       props.contract,
       props.nftId,
       "",
-      pageProps,
+      page,
       sort.sort,
       sort.sort_direction
     );
     setTotalResults(response.count);
-    setLeaderboard(response.data);
+    const data: NftTDHRanked[] = response.data.map((lead, index) => {
+      const rank = index + 1 + (page - 1) * PAGE_SIZE;
+      return { ...lead, rank };
+    });
+    setLeaderboard(data);
     setLeaderboardLoaded(true);
   }
 
   useEffect(() => {
-    if (pageProps.page === 1) {
+    if (page === 1) {
       fetchResults();
     } else {
-      setPageProps({ ...pageProps, page: 1 });
+      setPage(1);
     }
   }, [sort]);
 
   useEffect(() => {
     fetchResults();
-  }, [pageProps.page]);
+  }, [page]);
 
   return (
     <Container className={`no-padding`} id={`leaderboard-${props.nftId}`}>
@@ -119,11 +126,11 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
               </thead>
               <tbody>
                 <tr className={styles.gap}></tr>
-                {leaderboard.map((lead, index) => {
+                {leaderboard.map((lead) => {
                   return (
-                    <tr key={`${index}-${lead.consolidation_key}`}>
+                    <tr key={lead.consolidation_key}>
                       <td className={styles.rank}>
-                        {index + 1 + (pageProps.page - 1) * pageProps.pageSize}
+                        {numberWithCommas(lead.rank)}
                       </td>
                       <td className={styles.hodlerContainer}>
                         <div className={styles.hodler}>
@@ -151,11 +158,11 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
       {totalResults > 0 && (
         <Row className="text-center pt-2 pb-3">
           <Pagination
-            page={pageProps.page}
-            pageSize={pageProps.pageSize}
+            page={page}
+            pageSize={PAGE_SIZE}
             totalResults={totalResults}
             setPage={function (newPage: number) {
-              setPageProps({ ...pageProps, page: newPage });
+              setPage(newPage);
             }}
           />
         </Row>
