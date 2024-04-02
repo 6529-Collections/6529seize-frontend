@@ -16,16 +16,15 @@ import { commonApiFetch } from "../../services/api/common-api";
 interface Props {
   contract: string;
   nftId: number;
-  page: number;
 }
 
-const PAGE_SIZE = 25;
+export const PAGE_SIZE = 25;
 
 export async function fetchNftTdhResults(
   contract: string,
   nftId: number,
   walletFilter: string,
-  props: Props,
+  page: number,
   sort: string,
   sort_direction: string
 ) {
@@ -36,7 +35,7 @@ export async function fetchNftTdhResults(
     next: any;
     data: NftTDH[];
   }>({
-    endpoint: `${url}/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${props.page}&sort=${sort}&sort_direction=${sort_direction}`,
+    endpoint: `${url}/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${page}&sort=${sort}&sort_direction=${sort_direction}`,
   });
   results.data.forEach((lead: NftTDH) => {
     lead.cic_type = cicToType(lead.cic_score);
@@ -77,10 +76,14 @@ export interface NftTDH {
   cic_type?: CICType;
 }
 
+export interface NftTDHRanked extends NftTDH {
+  rank: number;
+}
+
 export default function NFTLeaderboard(props: Readonly<Props>) {
-  const [pageProps, setPageProps] = useState<Props>(props);
+  const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<NftTDH[]>();
+  const [leaderboard, setLeaderboard] = useState<NftTDHRanked[]>();
   const [fetchingLeaderboard, setFetchingLeaderboard] = useState(true);
   const [sort, setSort] = useState<{
     sort: Sort;
@@ -100,26 +103,33 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       props.contract,
       props.nftId,
       walletFilter,
-      pageProps,
+      page,
       sort.sort,
       sort.sort_direction
     );
     setTotalResults(response.count);
-    setLeaderboard(response.data);
+    const data: NftTDHRanked[] = response.data.map((lead, index) => {
+      const rank =
+        searchWallets.length > 0
+          ? lead.tdh_rank
+          : index + 1 + (page - 1) * PAGE_SIZE;
+      return { ...lead, rank };
+    });
+    setLeaderboard(data);
     setFetchingLeaderboard(false);
   }
 
   useEffect(() => {
-    if (pageProps.page === 1) {
+    if (page === 1) {
       fetchResults();
     } else {
-      setPageProps({ ...pageProps, page: 1 });
+      setPage(1);
     }
   }, [sort, searchWallets]);
 
   useEffect(() => {
     fetchResults();
-  }, [pageProps.page]);
+  }, [page]);
 
   return (
     <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
@@ -399,14 +409,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 <tbody>
                   {leaderboard &&
                     leaderboard.map((lead, index) => {
-                      const rank =
-                        searchWallets.length > 0
-                          ? lead.tdh_rank
-                          : index + 1 + (pageProps.page - 1) * PAGE_SIZE;
                       return (
                         <tr key={`${lead.consolidation_key}`}>
                           <td className={styles.rank}>
-                            {numberWithCommas(rank)}
+                            {numberWithCommas(lead.rank)}
                           </td>
                           <td className={styles.hodlerContainer}>
                             <LeaderboardCollector
@@ -457,11 +463,11 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       {totalResults > 0 && (
         <Row className="text-center pt-2 pb-3">
           <Pagination
-            page={pageProps.page}
+            page={page}
             pageSize={PAGE_SIZE}
             totalResults={totalResults}
             setPage={function (newPage: number) {
-              setPageProps({ ...pageProps, page: newPage });
+              setPage(newPage);
             }}
           />
         </Row>
