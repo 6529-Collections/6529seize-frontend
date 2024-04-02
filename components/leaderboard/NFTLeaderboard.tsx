@@ -43,6 +43,16 @@ export async function fetchNftTdhResults(
   return results;
 }
 
+export function setScrollPosition() {
+  const top = document.getElementById("nft-leaderboard")?.offsetTop;
+  if (top && window.scrollY > 0) {
+    window.scrollTo({
+      top: top,
+      behavior: "smooth",
+    });
+  }
+}
+
 enum Sort {
   balance = "balance",
   tdh__raw = "tdh__raw",
@@ -116,6 +126,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       return { ...lead, rank };
     });
     setLeaderboard(data);
+    setScrollPosition();
     setFetchingLeaderboard(false);
   }
 
@@ -132,7 +143,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   }, [page]);
 
   return (
-    <Container className={`no-padding pt-3`} id={`leaderboard-${props.nftId}`}>
+    <Container className={`no-padding pt-3`} id="nft-leaderboard">
       <Row>
         <Col>
           <h1>
