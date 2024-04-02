@@ -1,6 +1,6 @@
 import styles from "./MemeLab.module.scss";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -465,7 +465,7 @@ export default function LabPage(props: Readonly<Props>) {
                         <td>Website</td>
                         <td>
                           {nftMeta.website.split(" ").map((w) => (
-                            <>
+                            <Fragment key={`meta-website-${w}`}>
                               <a
                                 href={addProtocol(w)}
                                 target="_blank"
@@ -473,7 +473,7 @@ export default function LabPage(props: Readonly<Props>) {
                                 {w}
                               </a>
                               &nbsp;&nbsp;
-                            </>
+                            </Fragment>
                           ))}
                         </td>
                       </tr>
@@ -1221,8 +1221,6 @@ export default function LabPage(props: Readonly<Props>) {
             <MemeLabLeaderboard
               contract={nft.contract}
               nftId={parseInt(nftId)}
-              page={1}
-              pageSize={ACTIVITY_PAGE_SIZE}
             />
           </Col>
         </Row>
