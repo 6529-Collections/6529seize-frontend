@@ -18,3 +18,9 @@ export interface OwnerRank extends Owner {
   tdh__raw: number;
   tdh_rank: number;
 }
+
+export interface NftOwner {
+  token_id: number;
+  contract: string;
+  balance: number;
+}

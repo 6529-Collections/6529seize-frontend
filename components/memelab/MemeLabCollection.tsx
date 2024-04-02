@@ -19,6 +19,7 @@ import { Owner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NFTImage from "../nft-image/NFTImage";
+import { MEMELAB_CONTRACT } from "../../constants";
 
 enum Sort {
   AGE = "age",
@@ -126,7 +127,9 @@ export default function LabCollection(props: Readonly<Props>) {
       fetchAllPages(
         `${
           process.env.API_ENDPOINT
-        }/api/owners_memelab?wallet=${props.wallets.join(",")}`
+        }/api/owners?contract=${MEMELAB_CONTRACT}&wallet=${props.wallets.join(
+          ","
+        )}`
       ).then((owners: Owner[]) => {
         const mergedOwners = owners.reduce(
           (accumulator: Owner[], currentOwner: Owner) => {
