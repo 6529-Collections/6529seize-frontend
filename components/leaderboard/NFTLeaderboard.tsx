@@ -17,7 +17,31 @@ interface Props {
   contract: string;
   nftId: number;
   page: number;
-  pageSize: number;
+}
+
+const PAGE_SIZE = 25;
+
+export async function fetchNftTdhResults(
+  contract: string,
+  nftId: number,
+  walletFilter: string,
+  props: Props,
+  sort: string,
+  sort_direction: string
+) {
+  const url = `tdh/nft`;
+  const results = await commonApiFetch<{
+    count: number;
+    page: number;
+    next: any;
+    data: NftTDH[];
+  }>({
+    endpoint: `${url}/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${props.page}&sort=${sort}&sort_direction=${sort_direction}`,
+  });
+  results.data.forEach((lead: NftTDH) => {
+    lead.cic_type = cicToType(lead.cic_score);
+  });
+  return results;
 }
 
 enum Sort {
@@ -57,7 +81,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   const [pageProps, setPageProps] = useState<Props>(props);
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<NftTDH[]>();
-  const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
+  const [fetchingLeaderboard, setFetchingLeaderboard] = useState(true);
   const [sort, setSort] = useState<{
     sort: Sort;
     sort_direction: SortDirection;
@@ -67,26 +91,22 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   async function fetchResults() {
-    const url = `tdh/nft`;
+    setFetchingLeaderboard(true);
     let walletFilter = "";
     if (searchWallets && searchWallets.length > 0) {
       walletFilter = `&search=${searchWallets.join(",")}`;
     }
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: any;
-      data: NftTDH[];
-    }>({
-      endpoint: `${url}/${props.contract}/${props.nftId}?${walletFilter}&page_size=${props.pageSize}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}`,
-    }).then((response) => {
-      setTotalResults(response.count);
-      response.data.forEach((lead: NftTDH) => {
-        lead.cic_type = cicToType(lead.cic_score);
-      });
-      setLeaderboard(response.data);
-      setLeaderboardLoaded(false);
-    });
+    const response = await fetchNftTdhResults(
+      props.contract,
+      props.nftId,
+      walletFilter,
+      pageProps,
+      sort.sort,
+      sort.sort_direction
+    );
+    setTotalResults(response.count);
+    setLeaderboard(response.data);
+    setFetchingLeaderboard(false);
   }
 
   useEffect(() => {
@@ -112,7 +132,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </Col>
       </Row>
 
-      {leaderboard && leaderboard.length > 0 && (
+      {leaderboard && (
         <>
           <Row className="pt-2 pb-2">
             <Col className="d-flex justify-content-end align-items-center">
@@ -382,9 +402,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                       const rank =
                         searchWallets.length > 0
                           ? lead.tdh_rank
-                          : index +
-                            1 +
-                            (pageProps.page - 1) * pageProps.pageSize;
+                          : index + 1 + (pageProps.page - 1) * PAGE_SIZE;
                       return (
                         <tr key={`${lead.consolidation_key}`}>
                           <td className={styles.rank}>
@@ -429,33 +447,31 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               </Table>
             </Col>
           </Row>
+          {leaderboard.length === 0 && !fetchingLeaderboard && (
+            <Row>
+              <Col>No Results found</Col>
+            </Row>
+          )}
         </>
       )}
       {totalResults > 0 && (
-        <>
-          <Row className="text-center pt-2 pb-3">
-            <Pagination
-              page={pageProps.page}
-              pageSize={pageProps.pageSize}
-              totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPageProps({ ...pageProps, page: newPage });
-              }}
-            />
-          </Row>
-          <SearchModalDisplay
-            show={showSearchModal}
-            setShow={setShowSearchModal}
-            searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
+        <Row className="text-center pt-2 pb-3">
+          <Pagination
+            page={pageProps.page}
+            pageSize={PAGE_SIZE}
+            totalResults={totalResults}
+            setPage={function (newPage: number) {
+              setPageProps({ ...pageProps, page: newPage });
+            }}
           />
-        </>
-      )}
-      {leaderboardLoaded && leaderboard?.length === 0 && (
-        <Row>
-          <Col>No TDH accrued</Col>
         </Row>
       )}
+      <SearchModalDisplay
+        show={showSearchModal}
+        setShow={setShowSearchModal}
+        searchWallets={searchWallets}
+        setSearchWallets={setSearchWallets}
+      />
     </Container>
   );
 }

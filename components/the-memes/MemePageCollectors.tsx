@@ -98,10 +98,16 @@ export function MemePageCollectorsRightMenu(props: {
                   <tr>
                     <td>Meme Rank</td>
                     <td>
-                      {props.collectionRank
-                        ? props.collectionRank
-                        : props.collectionCount}
-                      /{props.collectionCount}
+                      {props.nft.tdh && props.collectionCount ? (
+                        <>
+                          {props.collectionRank
+                            ? props.collectionRank
+                            : props.collectionCount}
+                          /{props.collectionCount}
+                        </>
+                      ) : (
+                        "-"
+                      )}
                     </td>
                   </tr>
                 </tbody>
@@ -119,7 +125,6 @@ export function MemePageCollectorsRightMenu(props: {
 export function MemePageCollectorsSubMenu(props: {
   show: boolean;
   nft: NFT | undefined;
-  pageSize: number;
 }) {
   if (props.show && props.nft) {
     return (
@@ -129,7 +134,6 @@ export function MemePageCollectorsSubMenu(props: {
             contract={props.nft.contract}
             nftId={props.nft.id}
             page={1}
-            pageSize={props.pageSize}
           />
         </Col>
       </Row>
