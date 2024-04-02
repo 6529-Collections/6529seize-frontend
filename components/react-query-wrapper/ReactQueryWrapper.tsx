@@ -15,6 +15,7 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { DropFull } from "../../entities/IDrop";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -29,6 +30,7 @@ export enum QueryKey {
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
   PROFILE_DROPS = "PROFILE_DROPS",
+  PROFILE_AVAILABLE_DROP_REP = "PROFILE_AVAILABLE_DROP_REP",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -139,6 +141,10 @@ type ReactQueryWrapperContextType = {
     readonly filterId: string;
   }) => void;
   onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
+  onDropChange: (params: {
+    readonly drop: DropFull;
+    readonly giverHandle: string | null;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -156,6 +162,7 @@ export const ReactQueryWrapperContext =
     onCurationFilterRemoved: () => {},
     onCurationFilterChanged: () => {},
     onDropCreate: () => {},
+    onDropChange: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -556,6 +563,72 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const dropChangeMutation = ({
+    oldData,
+    drop,
+  }: {
+    oldData:
+      | {
+          pages: DropFull[][];
+        }
+      | undefined;
+    drop: DropFull;
+  }) => {
+    if (!oldData) {
+      return oldData;
+    }
+    return {
+      ...oldData,
+      pages: oldData.pages.map((page) => {
+        return page.map((d) => {
+          if (d.id === drop.id) {
+            return drop;
+          }
+          return d;
+        });
+      }),
+    };
+  };
+
+  const onDropChange = ({
+    drop,
+    giverHandle,
+  }: {
+    readonly drop: DropFull;
+    readonly giverHandle: string | null;
+  }) => {
+    queryClient.setQueryData(
+      [
+        QueryKey.PROFILE_DROPS,
+        { handleOrWallet: drop.author.handle.toLowerCase() },
+      ],
+      (
+        oldData:
+          | {
+              pages: DropFull[][];
+            }
+          | undefined
+      ) => dropChangeMutation({ oldData, drop })
+    );
+    queryClient.setQueriesData(
+      {
+        queryKey: [QueryKey.COMMUNITY_DROPS],
+      },
+      (
+        oldData:
+          | {
+              pages: DropFull[][];
+            }
+          | undefined
+      ) => dropChangeMutation({ oldData, drop })
+    );
+    if (giverHandle) {
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_REP, giverHandle],
+      });
+    }
+  };
+
   return (
     <ReactQueryWrapperContext.Provider
       value={{
@@ -572,6 +645,7 @@ export default function ReactQueryWrapper({
         onCurationFilterRemoved,
         onCurationFilterChanged,
         onDropCreate,
+        onDropChange,
       }}
     >
       {children}
