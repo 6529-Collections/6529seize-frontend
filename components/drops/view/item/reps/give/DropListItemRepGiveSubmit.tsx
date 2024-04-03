@@ -15,12 +15,10 @@ import Tippy from "@tippyjs/react";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 
 export default function DropListItemRepGiveSubmit({
-  originalRep,
   rep,
   drop,
   repCategory,
 }: {
-  readonly originalRep: number;
   readonly rep: number;
   readonly drop: DropFull;
   readonly repCategory: string;
@@ -29,15 +27,15 @@ export default function DropListItemRepGiveSubmit({
     useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
   const [loading, setLoading] = useState<boolean>(false);
-  const isChanged = originalRep !== rep;
+  const isChanged = drop.rep !== rep;
 
   const repChangeMutation = useMutation({
-    mutationFn: async (param: { rep: number }) =>
+    mutationFn: async (param: { rep: number; category: string }) =>
       await commonApiPost<DropRepChangeRequest, DropFull>({
         endpoint: `drops/${drop.id}/rep`,
         body: {
           amount: param.rep,
-          category: repCategory,
+          category: param.category,
         },
       }),
     onSuccess: (response: DropFull) => {
@@ -60,6 +58,15 @@ export default function DropListItemRepGiveSubmit({
       setLoading(false);
     },
   });
+
+  const getRepAmount = () => {
+    const diff = rep - drop.rep;
+    const category = drop.input_profile_categories?.find(
+      (category) => category.category === repCategory
+    );
+    const categoryRep = category ? category.rep_given : 0;
+    return categoryRep + diff;
+  };
 
   const onRepSubmit = async () => {
     if (connectionStatus === ProfileConnectedStatus.NOT_CONNECTED) {
@@ -84,7 +91,10 @@ export default function DropListItemRepGiveSubmit({
       setLoading(false);
       return;
     }
-    await repChangeMutation.mutateAsync({ rep });
+    await repChangeMutation.mutateAsync({
+      rep: getRepAmount(),
+      category: repCategory,
+    });
   };
 
   return (

@@ -17,14 +17,10 @@ export default function DropListItemRepGive({
   readonly availableRep: number;
   readonly activeCategory: string;
 }) {
-  const repCategory = drop.input_profile_categories?.find(
-    (category) => category.category === activeCategory
-  );
 
-  const repGiven = repCategory?.rep_given_by_input_profile ?? 0;
-  const [rep, setRep] = useState<number>(repGiven);
-  const maxRep = repGiven + availableRep;
-  const minRep = repGiven - availableRep;
+  const [rep, setRep] = useState<number>(drop.rep);
+  const maxRep = drop.rep + availableRep;
+  const minRep = drop.rep - availableRep;
   const [onProgressRep, setOnProgressRep] = useState<number>(rep);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<Date | null>(null);
@@ -112,7 +108,6 @@ export default function DropListItemRepGive({
       <DropListItemRepGiveSubmit
         rep={rep}
         drop={drop}
-        originalRep={repGiven}
         repCategory={activeCategory}
       />
       <DropListItemRepGiveChangeButton
