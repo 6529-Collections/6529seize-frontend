@@ -146,58 +146,6 @@ export const getSeasons = async (
   return seasons;
 };
 
-export const getOwned = async ({
-  wallets,
-  headers,
-}: {
-  wallets: string[];
-  headers: Record<string, string>;
-}): Promise<NftOwner[]> => {
-  if (!wallets.length) {
-    return [];
-  }
-  const baseURL = `owners?wallet=${wallets.join(",")}`;
-  let page: number | null = null;
-  const allOwned: NftOwner[] = [];
-  do {
-    const ownedResponse: {
-      data: NftOwner[];
-      page: number;
-      next: string | null;
-    } = await commonApiFetch<{
-      data: NftOwner[];
-      page: number;
-      next: string | null;
-    }>({
-      endpoint: page ? `${baseURL}&page=${page}` : baseURL,
-      headers,
-    });
-    ownedResponse.data.forEach((o) =>
-      allOwned.push({
-        token_id: o.token_id,
-        contract: o.contract,
-        balance: o.balance,
-      })
-    );
-
-    page = ownedResponse.next ? ownedResponse.page + 1 : null;
-  } while (page);
-
-  return allOwned.reduce<NftOwner[]>((acc, curr) => {
-    const existing = acc.find(
-      (a) =>
-        a.token_id === curr.token_id &&
-        areEqualAddresses(a.contract, curr.contract)
-    );
-    if (existing) {
-      existing.balance += curr.balance;
-    } else {
-      acc.push(curr);
-    }
-    return acc;
-  }, []);
-};
-
 export const getProfileRatings = async ({
   user,
   headers,
