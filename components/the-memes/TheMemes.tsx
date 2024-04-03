@@ -44,6 +44,8 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   const router = useRouter();
 
   const { connectedProfile } = useContext(AuthContext);
+  const [connectedConsolidationKey, setConnectedConsolidationKey] =
+    useState("");
 
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
@@ -123,8 +125,10 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
   const [nftsNextPage, setNftsNextPage] = useState<string>(getNftsNextPage());
 
+  const [nftBalancesTokenIds, setNftBalancesTokenIds] = useState<Set<number>>(
+    new Set()
+  );
   const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
-  const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
 
   function getBalance(id: number) {
@@ -132,7 +136,11 @@ export default function TheMemesComponent(props: Readonly<Props>) {
     if (balance) {
       return balance.balance;
     }
-    return 0;
+    const isLoaded = nftBalancesTokenIds.has(id);
+    if (isLoaded) {
+      return 0;
+    }
+    return -1;
   }
 
   useEffect(() => {
@@ -237,16 +245,29 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   }, []);
 
   useEffect(() => {
-    if (connectedProfile?.consolidation.consolidation_key) {
+    const newTokenIds = [...nfts]
+      .map((nft) => nft.id)
+      .filter((id) => !nftBalances.some((b) => b.token_id === id));
+    if (connectedConsolidationKey && newTokenIds.length > 0) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation.consolidation_key}?contract=${MEMES_CONTRACT}`
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${
+          connectedProfile?.consolidation.consolidation_key
+        }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
       ).then((owners: NftOwner[]) => {
-        setNftBalances(owners);
-        setBalancesLoaded(true);
+        setNftBalances([...nftBalances, ...owners]);
+        setNftBalancesTokenIds(
+          new Set([...Array.from(nftBalancesTokenIds), ...newTokenIds])
+        );
       });
-    } else {
-      setNftBalances([]);
     }
+  }, [connectedConsolidationKey, nfts]);
+
+  useEffect(() => {
+    setNftBalances([]);
+    setNftBalancesTokenIds(new Set());
+    setConnectedConsolidationKey(
+      connectedProfile?.consolidation?.consolidation_key ?? ""
+    );
   }, [connectedProfile]);
 
   function getVolume(nft: NFTWithMemesExtendedData) {
@@ -290,7 +311,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                 nft={nft}
                 animation={false}
                 height={300}
-                balance={balancesLoaded ? getBalance(nft.id) : -1}
+                balance={getBalance(nft.id)}
                 showThumbnail={true}
                 showUnseized={!!connectedProfile}
               />
