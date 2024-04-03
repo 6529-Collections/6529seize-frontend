@@ -33,7 +33,7 @@ export default function DropListItemRepWrapper({
     DEFAULT_DROP_REP_CATEGORY
   );
   return (
-    <div className="tw-mt-4 tw-flex tw-w-full tw-justify-between tw-items-end">
+   /*  <div className="tw-mt-4 tw-flex tw-w-full tw-justify-between tw-items-end">
       <div className="tw-flex tw-flex-col">
         {!!drop.top_rep_givers.length && (
           <DropListItemRepTopGivers drop={drop} />
@@ -50,6 +50,12 @@ export default function DropListItemRepWrapper({
         activeCategory={activeCategory}
         availableRep={availableRepResponse?.available_tdh_for_rep ?? 0}
       />
-    </div>
+    </div> */
+    <DropListItemRepGive
+    key={activeCategory}
+    drop={drop}
+    activeCategory={activeCategory}
+    availableRep={availableRepResponse?.available_tdh_for_rep ?? 0}
+  />
   );
 }
