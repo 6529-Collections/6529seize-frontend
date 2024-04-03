@@ -1,22 +1,26 @@
+import { DropFull } from "../../../../entities/IDrop";
+import DropListItemRepState from "../../view/item/reps/give/DropListItemRepState";
 import DropAuthor from "./DropAuthor";
 import DropPfp from "./DropPfp";
 
 export default function DropWrapper({
-  pfpUrl,
-  handle,
-  timestamp,
+  drop,
   children,
 }: {
-  readonly pfpUrl?: string | null;
-  readonly handle: string;
-  readonly timestamp: number;
+  readonly drop: DropFull;
   readonly children: React.ReactNode;
 }) {
   return (
     <div className="tw-flex tw-gap-x-3">
-      <DropPfp pfpUrl={pfpUrl} />
+      <DropPfp pfpUrl={drop.author.pfp} />
       <div className="tw-flex tw-flex-col tw-w-full">
-        <DropAuthor handle={handle} timestamp={timestamp} />
+        <div className="tw-w-full tw-inline-flex tw-justify-between">
+          <DropAuthor handle={drop.author.handle} timestamp={drop.created_at} />
+          <DropListItemRepState
+            userRep={drop.rep_given_by_input_profile ?? 0}
+            totalRep={drop.rep}
+          />
+        </div>
         <div className="tw-mt-1 tw-w-full">{children}</div>
       </div>
     </div>

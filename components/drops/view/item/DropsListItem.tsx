@@ -14,13 +14,9 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   return (
     <div className="tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
       <div className="tw-p-4 sm:tw-p-5">
-        <div className="tw-flex tw-justify-between tw-items-end tw-gap-x-8">
+        <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-8">
           <div className="tw-flex-1">
-            <DropWrapper
-              pfpUrl={drop.author.pfp}
-              handle={drop.author.handle}
-              timestamp={drop.created_at}
-            >
+            <DropWrapper drop={drop}>
               <div className="tw-w-full">
                 <DropListItemContent drop={drop} />
               </div>
