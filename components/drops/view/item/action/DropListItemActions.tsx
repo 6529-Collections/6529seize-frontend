@@ -21,7 +21,7 @@ export default function DropListItemActions({
         } tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-transition tw-ease-out tw-duration-300`}
       >
         <svg
-          className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5  tw-transition tw-ease-out tw-duration-300"
+          className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-transition tw-ease-out tw-duration-300"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -38,7 +38,7 @@ export default function DropListItemActions({
         <span className="tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
           Discuss
         </span>
-        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
           39
         </div>
       </button>
@@ -64,7 +64,7 @@ export default function DropListItemActions({
         <span className="tw-hidden sm:tw-block group-hover:tw-text-primary-400 tw-transition tw-ease-out tw-duration-300">
           Redrop
         </span>
-        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
           45
         </div>
       </button>
@@ -90,7 +90,7 @@ export default function DropListItemActions({
         <span className="tw-hidden sm:tw-block group-hover:tw-text-primary-400 tw-transition tw-ease-out tw-duration-300">
           Share
         </span>
-        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
           3
         </div>
       </button>
