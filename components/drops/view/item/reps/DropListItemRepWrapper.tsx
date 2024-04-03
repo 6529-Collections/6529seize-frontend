@@ -9,6 +9,8 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import DropListItemRepTopGivers from "./top-givers/DropListItemRepTopGivers";
 import DropListItemRepTopCategories from "./top-categories/DropListItemRepTopCategories";
 
+export const DEFAULT_DROP_REP_CATEGORY = "Rep";
+
 export default function DropListItemRepWrapper({
   drop,
 }: {
@@ -27,7 +29,9 @@ export default function DropListItemRepWrapper({
         }),
       enabled: !!connectedProfile?.profile?.handle,
     });
-  const [activeCategory, setActiveCategory] = useState<string>("Rep");
+  const [activeCategory, setActiveCategory] = useState<string>(
+    DEFAULT_DROP_REP_CATEGORY
+  );
   return (
     <div className="tw-mt-4 tw-flex tw-w-full tw-justify-between tw-items-end">
       <div className="tw-flex tw-flex-col">

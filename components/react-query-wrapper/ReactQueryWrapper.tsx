@@ -600,7 +600,10 @@ export default function ReactQueryWrapper({
     queryClient.setQueryData(
       [
         QueryKey.PROFILE_DROPS,
-        { handleOrWallet: drop.author.handle.toLowerCase() },
+        {
+          handleOrWallet: drop.author.handle.toLowerCase(),
+          inputProfile: giverHandle,
+        },
       ],
       (
         oldData:
