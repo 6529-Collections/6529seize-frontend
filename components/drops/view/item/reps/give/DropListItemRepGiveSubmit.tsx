@@ -3,41 +3,40 @@ import {
   DropFull,
   DropRepChangeRequest,
 } from "../../../../../../entities/IDrop";
-import {
-  formatLargeNumber,
-  formatNumberWithCommas,
-} from "../../../../../../helpers/Helpers";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import Tippy from "@tippyjs/react";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
+import { DEFAULT_DROP_REP_CATEGORY } from "../DropListItemRepWrapper";
+import dynamic from "next/dynamic";
+
+const DropListItemRepGiveClap = dynamic(
+  () => import("./clap/DropListItemRepGiveClap"),
+  { ssr: false }
+);
 
 export default function DropListItemRepGiveSubmit({
-  originalRep,
   rep,
   drop,
-  repCategory,
+  onSuccessfulRepChange,
 }: {
-  readonly originalRep: number;
   readonly rep: number;
   readonly drop: DropFull;
-  readonly repCategory: string;
+  readonly onSuccessfulRepChange: () => void;
 }) {
   const { requestAuth, setToast, connectedProfile, connectionStatus } =
     useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
   const [loading, setLoading] = useState<boolean>(false);
-  const isChanged = originalRep !== rep;
 
   const repChangeMutation = useMutation({
-    mutationFn: async (param: { rep: number }) =>
+    mutationFn: async (param: { rep: number; category: string }) =>
       await commonApiPost<DropRepChangeRequest, DropFull>({
         endpoint: `drops/${drop.id}/rep`,
         body: {
           amount: param.rep,
-          category: repCategory,
+          category: param.category,
         },
       }),
     onSuccess: (response: DropFull) => {
@@ -49,6 +48,7 @@ export default function DropListItemRepGiveSubmit({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
       });
+      onSuccessfulRepChange();
     },
     onError: (error) => {
       setToast({
@@ -76,7 +76,7 @@ export default function DropListItemRepGiveSubmit({
       });
       return;
     }
-    if (!isChanged) return;
+    if (!rep) return;
     if (loading) return;
     setLoading(true);
     const { success } = await requestAuth();
@@ -84,31 +84,23 @@ export default function DropListItemRepGiveSubmit({
       setLoading(false);
       return;
     }
-    await repChangeMutation.mutateAsync({ rep });
+
+    const previousRep =
+      drop.input_profile_categories?.find(
+        (c) => c.category === DEFAULT_DROP_REP_CATEGORY
+      )?.rep_given_by_input_profile ?? 0;
+
+    const newRep = previousRep + rep;
+
+    await repChangeMutation.mutateAsync({
+      rep: newRep,
+      category: DEFAULT_DROP_REP_CATEGORY,
+    });
   };
 
   return (
-    <Tippy
-      content={formatNumberWithCommas(rep)}
-      placement="right"
-      hideOnClick={false}
-      disabled={Math.abs(rep) < 1000}
-    >
-      <button
-        onClick={onRepSubmit}
-        type="button"
-        aria-label="Give rep"
-        className={`${
-          rep >= 0
-            ? "tw-bg-green/[0.15] tw-ring-green/[0.20]"
-            : "tw-bg-red/[0.15] tw-ring-red/[0.20]"
-        } tw-flex tw-items-center tw-justify-center tw-text-xxs tw-font-medium tw-border-0 tw-rounded-full tw-ring-1 tw-ring-inset  tw-min-w-[2rem] 
-              tw-h-8 tw-text-white tw-shadow-sm hover:tw-scale-110 tw-transform focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-ring-300  tw-transition-all tw-duration-300 tw-ease-out`}
-      >
-        <span className={`${rep >= 0 ? "tw-text-green " : "tw-text-red "}`}>
-          {formatLargeNumber(rep)}
-        </span>
-      </button>
-    </Tippy>
+    <div className="tw-py-4 ">
+      <DropListItemRepGiveClap rep={rep} onSubmit={onRepSubmit} />
+    </div>
   );
 }

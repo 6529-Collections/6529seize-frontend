@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import DropListItemRepGiveChangeButton from "./DropListItemRepGiveChangeButton";
 import DropListItemRepGiveSubmit from "./DropListItemRepGiveSubmit";
 import { DropFull } from "../../../../../../entities/IDrop";
+import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import DropListItemRepState from "./DropListItemRepState";
 
 export enum RepChangeType {
   INCREASE = "INCREASE",
@@ -11,21 +13,16 @@ export enum RepChangeType {
 export default function DropListItemRepGive({
   drop,
   availableRep,
-  activeCategory,
 }: {
   readonly drop: DropFull;
   readonly availableRep: number;
-  readonly activeCategory: string;
 }) {
-  const repCategory = drop.input_profile_categories?.find(
-    (category) => category.category === activeCategory
-  );
+  const [onProgressRep, setOnProgressRep] = useState<number>(1);
 
-  const repGiven = repCategory?.rep_given_by_input_profile ?? 0;
-  const [rep, setRep] = useState<number>(repGiven);
-  const maxRep = repGiven + availableRep;
-  const minRep = repGiven - availableRep;
-  const [onProgressRep, setOnProgressRep] = useState<number>(rep);
+  const onSuccessfulRepChange = () => {
+    setOnProgressRep(1);
+  };
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<Date | null>(null);
 
@@ -63,11 +60,11 @@ export default function DropListItemRepGive({
           ? prevRep + increaseAmount
           : prevRep - increaseAmount;
       const newValue = Math.round(newRep / increaseAmount) * increaseAmount;
-      if (newValue > maxRep) {
-        return maxRep;
+      if (newValue > availableRep) {
+        return availableRep;
       }
-      if (newValue < minRep) {
-        return minRep;
+      if (newValue < 0 - availableRep) {
+        return 0 - availableRep;
       }
       return newValue;
     });
@@ -93,7 +90,6 @@ export default function DropListItemRepGive({
 
   const handleMouseUp = () => {
     startTimeRef.current = null;
-    setRep(onProgressRep);
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -102,23 +98,19 @@ export default function DropListItemRepGive({
 
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-1">
+
       <DropListItemRepGiveChangeButton
-        availableRep={availableRep}
         type={RepChangeType.INCREASE}
-        onProgressRep={onProgressRep}
         handleMouseDown={handleMouseDown}
         handleMouseUp={handleMouseUp}
       />
       <DropListItemRepGiveSubmit
-        rep={rep}
+        rep={onProgressRep}
         drop={drop}
-        originalRep={repGiven}
-        repCategory={activeCategory}
+        onSuccessfulRepChange={onSuccessfulRepChange}
       />
       <DropListItemRepGiveChangeButton
-        availableRep={availableRep}
         type={RepChangeType.DECREASE}
-        onProgressRep={onProgressRep}
         handleMouseDown={handleMouseDown}
         handleMouseUp={handleMouseUp}
       />

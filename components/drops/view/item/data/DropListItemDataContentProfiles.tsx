@@ -20,7 +20,9 @@ export default function DropListItemDataContentProfiles({
             >
               {profile.handle_in_content}
             </Link>{" "}
-            {i < profiles.length - 1 ? "•" : ""}
+            <span className="tw-text-iron-400">
+              {i < profiles.length - 1 ? "•" : ""}
+            </span>
           </li>
         ))}
       </ul>
