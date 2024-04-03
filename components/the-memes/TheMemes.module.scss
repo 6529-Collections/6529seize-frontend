@@ -59,6 +59,11 @@
   color: $font-color;
   cursor: pointer;
   margin-right: 15px;
+  text-decoration: none;
+
+  &:hover {
+    color: white !important;
+  }
 }
 
 .sortDirection {

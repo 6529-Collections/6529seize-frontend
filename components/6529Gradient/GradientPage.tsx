@@ -1,6 +1,6 @@
 import styles from "./6529Gradient.module.scss";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Table } from "react-bootstrap";
@@ -18,35 +18,33 @@ import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
-import { Owner } from "../../entities/IOwner";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
+import { AuthContext } from "../auth/Auth";
 
-interface Props {
-  wallets: string[];
+interface NftWithOwner extends NFT {
+  owner: string;
+  owner_display: string;
 }
 
-export default function GradientPage(props: Readonly<Props>) {
+export default function GradientPage() {
   const router = useRouter();
+  const { connectedProfile } = useContext(AuthContext);
+  const fullscreenElementId = "the-art-fullscreen-img";
 
   const [nftId, setNftId] = useState<string>();
-  const [fullscreenElementId, setFullscreenElementId] = useState<string>(
-    "the-art-fullscreen-img"
-  );
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
-  const [nft, setNft] = useState<NFT>();
+  const [nft, setNft] = useState<NftWithOwner>();
+  const [isOwner, setIsOwner] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [nftOwner, setNftOwner] = useState<Owner>();
-
+  const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
-
-  const [nfts, setNfts] = useState<NFT[]>([]);
 
   useEffect(() => {
     if (router.isReady) {
@@ -57,17 +55,12 @@ export default function GradientPage(props: Readonly<Props>) {
   }, [router.isReady]);
 
   useEffect(() => {
-    if (nftId) {
-      fetchUrl(
-        `${process.env.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${GRADIENT_CONTRACT}`
-      ).then((response: DBResponse) => {
-        setNft(response.data[0]);
-        setBreadcrumbs([
-          { display: "Home", href: "/" },
-          { display: "6529 Gradient", href: "/6529-gradient" },
-          { display: `${response.data[0].name}` },
-        ]);
-      });
+    if (nft) {
+      setBreadcrumbs([
+        { display: "Home", href: "/" },
+        { display: "6529 Gradient", href: "/6529-gradient" },
+        { display: `${nft.name}` },
+      ]);
     } else {
       setBreadcrumbs([
         { display: "Home", href: "/" },
@@ -75,20 +68,18 @@ export default function GradientPage(props: Readonly<Props>) {
         { display: `${nftId}` },
       ]);
     }
-  }, [nftId]);
+  }, [nft]);
 
   useEffect(() => {
-    if (nftId) {
-      fetchUrl(
-        `${process.env.API_ENDPOINT}/api/owners?id=${nftId}&contract=${GRADIENT_CONTRACT}`
-      ).then((response: DBResponse) => {
-        setNftOwner(response.data[0]);
-      });
-    }
-  }, [nftId]);
+    setIsOwner(
+      connectedProfile?.consolidation.wallets?.some((w) =>
+        areEqualAddresses(w.wallet.address, nft?.owner)
+      ) ?? false
+    );
+  }, [nft, connectedProfile]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
+    async function fetchNfts(url: string, mynfts: NftWithOwner[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
           fetchNfts(response.next, [...mynfts].concat(response.data));
@@ -98,17 +89,7 @@ export default function GradientPage(props: Readonly<Props>) {
             .filter((value, index, self) => {
               return self.findIndex((v) => v.id === value.id) === index;
             });
-
-          const rankedNFTs = newnfts.sort((a, b) =>
-            a.tdh_rank > b.tdh_rank ? 1 : -1
-          );
-          setNfts(newnfts);
-          setCollectionCount(newnfts.length);
-          if (nftId) {
-            setCollectionRank(
-              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId)) + 1
-            );
-          }
+          setAllNfts(newnfts);
         }
       });
     }
@@ -117,6 +98,19 @@ export default function GradientPage(props: Readonly<Props>) {
       fetchNfts(initialUrlNfts, []);
     }
   }, [router.isReady, nftId]);
+
+  useEffect(() => {
+    const rankedNFTs = allNfts.sort((a, b) =>
+      a.tdh_rank > b.tdh_rank ? 1 : -1
+    );
+    setCollectionCount(allNfts.length);
+    if (nftId) {
+      setNft(rankedNFTs.find((n) => n.id === parseInt(nftId)));
+      setCollectionRank(
+        rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId)) + 1
+      );
+    }
+  }, [allNfts, nftId]);
 
   useEffect(() => {
     if (nftId) {
@@ -138,7 +132,6 @@ export default function GradientPage(props: Readonly<Props>) {
             md={{ span: 6 }}
             lg={{ span: 6 }}
             className="pt-2 position-relative">
-            {nft && fullScreenSupported() && printFullScreen()}
             {nft && (
               <NFTImage
                 id={fullscreenElementId}
@@ -146,13 +139,7 @@ export default function GradientPage(props: Readonly<Props>) {
                 animation={false}
                 height={650}
                 balance={0}
-                showOwned={
-                  props.wallets.length > 0 &&
-                  nftOwner &&
-                  props.wallets.some((w) =>
-                    areEqualAddresses(w, nftOwner.wallet)
-                  )
-                }
+                showOwned={isOwner}
                 showUnseized={false}
               />
             )}
@@ -173,18 +160,11 @@ export default function GradientPage(props: Readonly<Props>) {
                 <Row>
                   <Col>
                     <h4 className={styles.subheading}>
-                      {nftOwner &&
-                      props.wallets.some((w) =>
-                        areEqualAddresses(w, nftOwner.wallet)
-                      )
-                        ? "*"
-                        : ""}
-                      {nftOwner && (
-                        <Address
-                          wallets={[nftOwner.wallet]}
-                          display={nftOwner.wallet_display}
-                        />
-                      )}
+                      {isOwner ? "*" : ""}
+                      <Address
+                        wallets={[nft.owner as `0x${string}`]}
+                        display={nft.owner_display}
+                      />
                     </h4>
                   </Col>
                 </Row>
@@ -329,7 +309,7 @@ export default function GradientPage(props: Readonly<Props>) {
                   <tbody>
                     {transactions.map((tr) => (
                       <LatestActivityRow
-                        nft={nfts.find((n) => n.id === tr.token_id)}
+                        nft={nft}
                         tr={tr}
                         key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                       />
@@ -378,32 +358,35 @@ export default function GradientPage(props: Readonly<Props>) {
               {nft && (
                 <>
                   <Row className="pt-2">
-                    <Col>
+                    <Col className="d-flex align-items-center justify-content-between">
                       {nftId && (
                         <>
-                          <h2>
-                            <a
-                              href={`/6529-gradient/${parseInt(nftId) - 1}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 0
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-left" />
-                            </a>
-                          </h2>
-                          <h2>
-                            &nbsp;
-                            <a
-                              href={`/6529-gradient/${parseInt(nftId) + 1}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 100
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-right" />
-                            </a>
-                          </h2>
+                          <span>
+                            <h2>
+                              <a
+                                href={`/6529-gradient/${parseInt(nftId) - 1}`}
+                                className={`${styles.nextPreviousNft} ${
+                                  parseInt(nftId) === 0
+                                    ? styles.nftPreviousdisabled
+                                    : ""
+                                }`}>
+                                <FontAwesomeIcon icon="chevron-circle-left" />
+                              </a>
+                            </h2>
+                            <h2>
+                              &nbsp;
+                              <a
+                                href={`/6529-gradient/${parseInt(nftId) + 1}`}
+                                className={`${styles.nextPreviousNft} ${
+                                  parseInt(nftId) === 100
+                                    ? styles.nftPreviousdisabled
+                                    : ""
+                                }`}>
+                                <FontAwesomeIcon icon="chevron-circle-right" />
+                              </a>
+                            </h2>
+                          </span>
+                          {fullScreenSupported() && printFullScreen()}
                         </>
                       )}
                     </Col>
