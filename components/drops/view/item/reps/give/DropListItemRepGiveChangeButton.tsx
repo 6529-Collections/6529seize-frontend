@@ -80,7 +80,7 @@ export default function DropListItemRepGiveChangeButton({
         onMouseUp={onMouseUpOrLeave}
         onMouseLeave={onMouseUpOrLeave}
         aria-label={ariaLabels[type]}
-        className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-h-6 tw-w-6 tw-text-white tw-shadow-sm hover:tw-bg-iron-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-600 tw-transition-all tw-duration-300 tw-ease-out"
+        className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-6 tw-w-6 tw-text-white tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition-all tw-duration-300 tw-ease-out"
       >
         <svg
           className="tw-flex-shrink-0 tw-h-4 tw-w-4"

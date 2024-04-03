@@ -13,7 +13,8 @@ export default function DropListItemData({
   return (
     <div className="tw-mt-2 tw-ml-[3.25rem]">
       <DropListItemDataTrigger open={showMoreOpen} setOpen={setShowMoreOpen} />
-      <DropListItemDataContent open={showMoreOpen} drop={drop} />
+        <DropListItemDataContent open={showMoreOpen} drop={drop} />
+
     </div>
   );
 }
