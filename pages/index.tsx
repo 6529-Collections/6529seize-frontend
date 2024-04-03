@@ -43,6 +43,8 @@ import {
   getFileTypeFromMetadata,
 } from "../components/the-memes/MemePageArt";
 import Link from "next/link";
+import { AuthContext } from "../components/auth/Auth";
+import { NftOwner } from "../entities/IOwner";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -91,8 +93,10 @@ export default function Home({
       params: INITIAL_ACTIVITY_LOGS_PARAMS,
     },
   });
+
+  const { connectedProfile } = useContext(AuthContext);
+
   const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 
@@ -115,22 +119,17 @@ export default function Home({
   }, [manifoldClaim]);
 
   useEffect(() => {
-    if (connectedWallets && connectedWallets.length > 0 && pageProps.nft) {
+    if (connectedProfile?.consolidation.consolidation_key && pageProps.nft) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/owners?contract=${
-          pageProps.nft.contract
-        }&wallet=${connectedWallets.join(",")}&id=${pageProps.nft.id}`
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation.consolidation_key}?contract=${pageProps.nft.contract}&token_id=${pageProps.nft.id}`
       ).then((response: DBResponse) => {
-        let balance = 0;
-        response.data.map((d) => {
-          balance += d.balance;
-        });
-        setNftBalance(balance);
+        const balanceObject: NftOwner = response.data[0];
+        setNftBalance(balanceObject?.balance ?? 0);
       });
     } else {
       setNftBalance(0);
     }
-  }, [connectedWallets, pageProps.nft]);
+  }, [connectedProfile]);
 
   const renderManifoldClaimEditionSize = () => {
     if (manifoldClaim) {
@@ -180,7 +179,6 @@ export default function Home({
 
       <main className={styles.main}>
         <Header
-          onSetWallets={(wallets) => setConnectedWallets(wallets)}
           onLoad={() => {
             setIsHeaderLoaded(true);
           }}
@@ -201,33 +199,34 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
                       {pageProps.nft.animation ? (
                         <span
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedProfile ? styles.nftImagePadding : ""
+                          }>
                           <NFTImage
                             nft={pageProps.nft}
                             animation={true}
                             height={650}
                             balance={nftBalance}
-                            showUnseized={connectedWallets.length > 0}
+                            showUnseized={!!connectedProfile}
                           />
                         </span>
                       ) : (
                         <Link
                           href={`/the-memes/${pageProps.nft.id}`}
-                          className={connectedWallets && styles.nftImagePadding}
-                        >
+                          className={
+                            connectedProfile ? styles.nftImagePadding : ""
+                          }>
                           <NFTImage
                             nft={pageProps.nft}
                             animation={true}
                             height={650}
                             balance={nftBalance}
-                            showUnseized={connectedWallets.length > 0}
+                            showUnseized={!!connectedProfile}
                           />
                         </Link>
                       )}
@@ -240,8 +239,7 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container>
                     <Row>
                       <Col>
@@ -361,8 +359,7 @@ export default function Home({
                           target={
                             pageProps.nft.has_distribution ? "_self" : "_blank"
                           }
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           Distribution Plan
                         </a>
                       </Col>
@@ -395,8 +392,7 @@ export default function Home({
                         <a
                           href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${pageProps.nft.id}`}
                           target="_blank"
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           <Image
                             className={styles.marketplace}
                             src="/opensea.png"
@@ -408,8 +404,7 @@ export default function Home({
                         <a
                           href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${pageProps.nft.id}`}
                           target="_blank"
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           <Image
                             className={styles.marketplace}
                             src="/x2y2.png"
@@ -437,8 +432,7 @@ export default function Home({
                         href={`/nextgen/collection/${formatNameForUrl(
                           pageProps.nextGenFeatured.name
                         )}`}
-                        className={styles.viewAllLink}
-                      >
+                        className={styles.viewAllLink}>
                         <span>View Collection</span>
                       </Link>
                     </Col>
@@ -457,16 +451,14 @@ export default function Home({
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}
-                  disableActiveCurationFilter={true}
-                >
+                  disableActiveCurationFilter={true}>
                   <span className="d-flex align-items-center gap-3">
                     <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                       <span className="font-lightest">Community</span> Activity{" "}
                     </h1>
                     <Link
                       href="/community-activity"
-                      className={styles.viewAllLink}
-                    >
+                      className={styles.viewAllLink}>
                       <span>View All</span>
                     </Link>
                   </span>
@@ -499,7 +491,7 @@ export async function getServerSideProps(
     const { nft, nftExtended } = await commonApiFetch<{
       data: MemesExtendedData[];
     }>({
-      endpoint: `memes_extended_data?page_size=1`,
+      endpoint: `memes_extended_data?sort=age&sort_direction=asc&page_size=1`,
       headers: headers,
     }).then(async (responseExtended) => {
       const nftExtended = responseExtended.data[0];

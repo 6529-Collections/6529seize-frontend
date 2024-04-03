@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { GRADIENT_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useState } from "react";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -21,7 +20,6 @@ const GradientPageComponent = dynamic(
 export default function GradientPageIndex(props: any) {
   const pageProps = props.pageProps;
   const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   return (
     <>
@@ -39,8 +37,8 @@ export default function GradientPageIndex(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        <GradientPageComponent wallets={connectedWallets} />
+        <Header />
+        <GradientPageComponent />
       </main>
     </>
   );
