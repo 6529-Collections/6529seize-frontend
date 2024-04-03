@@ -203,7 +203,6 @@ export default function TheMemesComponent(props: Readonly<Props>) {
     fetchUrl(nftsNextPage).then((responseNfts: DBResponse) => {
       setNfts([...nfts, ...responseNfts.data]);
       setNftsNextPage(responseNfts.next);
-      console.log("responseNfts.next", responseNfts.next);
       setFetching(false);
     });
   }
