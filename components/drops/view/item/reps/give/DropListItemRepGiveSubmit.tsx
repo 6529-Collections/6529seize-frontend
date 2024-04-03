@@ -14,6 +14,12 @@ import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/Rea
 import Tippy from "@tippyjs/react";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 
+enum SubmitState {
+  POSITIVE = "POSITIVE",
+  NEUTRAL = "NEUTRAL",
+  NEGATIVE = "NEGATIVE",
+}
+
 export default function DropListItemRepGiveSubmit({
   rep,
   drop,
@@ -97,6 +103,26 @@ export default function DropListItemRepGiveSubmit({
     });
   };
 
+  const getState = (): SubmitState => {
+    if (rep > 0) return SubmitState.POSITIVE;
+    if (rep < 0) return SubmitState.NEGATIVE;
+    return SubmitState.NEUTRAL;
+  };
+
+  const state = getState();
+
+  const buttonClasses: Record<SubmitState, string> = {
+    [SubmitState.POSITIVE]: "tw-bg-green/[0.15] tw-ring-green/[0.20]",
+    [SubmitState.NEUTRAL]: "tw-bg-iron-800 tw-ring-iron-700",
+    [SubmitState.NEGATIVE]: "tw-bg-red/[0.15] tw-ring-red/[0.20]",
+  };
+
+  const textClasses: Record<SubmitState, string> = {
+    [SubmitState.POSITIVE]: "tw-text-green",
+    [SubmitState.NEUTRAL]: "tw-text-iron-300",
+    [SubmitState.NEGATIVE]: "tw-text-red",
+  };
+
   return (
     <Tippy
       content={formatNumberWithCommas(rep)}
@@ -108,16 +134,10 @@ export default function DropListItemRepGiveSubmit({
         onClick={onRepSubmit}
         type="button"
         aria-label="Give rep"
-        className={`${
-          rep >= 0
-            ? "tw-bg-green/[0.15] tw-ring-green/[0.20]"
-            : "tw-bg-red/[0.15] tw-ring-red/[0.20]"
-        } tw-flex tw-items-center tw-justify-center tw-text-xxs tw-font-medium tw-border-0 tw-rounded-full tw-ring-1 tw-ring-inset  tw-min-w-[2rem] 
-              tw-h-8 tw-text-white tw-shadow-sm hover:tw-scale-110 tw-transform focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-ring-300  tw-transition-all tw-duration-300 tw-ease-out`}
+        className={`${buttonClasses[state]} tw-flex tw-items-center tw-justify-center tw-text-xxs tw-font-medium tw-border-0 tw-rounded-full tw-ring-1 tw-ring-inset  tw-min-w-[2rem] 
+              tw-h-8  tw-shadow-sm hover:tw-scale-110 tw-transform focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-ring-300  tw-transition-all tw-duration-300 tw-ease-out`}
       >
-        <span className={`${rep >= 0 ? "tw-text-green " : "tw-text-red "}`}>
-          {formatLargeNumber(rep)}
-        </span>
+        <span className={textClasses[state]}>{formatLargeNumber(rep)}</span>
       </button>
     </Tippy>
   );
