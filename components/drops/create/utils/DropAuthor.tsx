@@ -15,7 +15,7 @@ export default function DropAuthor({
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
       {amIAuthor ? (
-        <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-md tw-leading-none tw-font-semibold tw-text-white">
           {handle}
         </p>
       ) : (
