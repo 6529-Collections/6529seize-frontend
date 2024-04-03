@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { GRADIENT_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useState } from "react";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
