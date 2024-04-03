@@ -80,6 +80,8 @@ export interface MemesExtendedData extends ExtendedDataBase {
   meme_name: string;
 }
 
+export type NFTWithMemesExtendedData = NFT & MemesExtendedData;
+
 export interface NftRank {
   id: number;
   tdh_rank: number;
