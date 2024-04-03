@@ -8,11 +8,11 @@
   h4,
   h5,
   p {
-    color: $very-dark-grey;
+    color: $very-dark-grey !important;
   }
 
   a {
-    color: $very-dark-grey;
+    color: $very-dark-grey !important;
 
     &:hover {
       opacity: 0.8;
