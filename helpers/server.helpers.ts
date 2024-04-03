@@ -1,5 +1,5 @@
 import { NFT, NFTLite } from "../entities/INFT";
-import { OwnerLite } from "../entities/IOwner";
+import { NftOwner } from "../entities/IOwner";
 import {
   ApiProfileRepRatesState,
   CicStatement,
@@ -152,20 +152,20 @@ export const getOwned = async ({
 }: {
   wallets: string[];
   headers: Record<string, string>;
-}): Promise<OwnerLite[]> => {
+}): Promise<NftOwner[]> => {
   if (!wallets.length) {
     return [];
   }
   const baseURL = `owners?wallet=${wallets.join(",")}`;
   let page: number | null = null;
-  const allOwned: OwnerLite[] = [];
+  const allOwned: NftOwner[] = [];
   do {
     const ownedResponse: {
-      data: OwnerLite[];
+      data: NftOwner[];
       page: number;
       next: string | null;
     } = await commonApiFetch<{
-      data: OwnerLite[];
+      data: NftOwner[];
       page: number;
       next: string | null;
     }>({
@@ -183,7 +183,7 @@ export const getOwned = async ({
     page = ownedResponse.next ? ownedResponse.page + 1 : null;
   } while (page);
 
-  return allOwned.reduce<OwnerLite[]>((acc, curr) => {
+  return allOwned.reduce<NftOwner[]>((acc, curr) => {
     const existing = acc.find(
       (a) =>
         a.token_id === curr.token_id &&

@@ -4,14 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
-import { NftOwner, Owner } from "../../entities/IOwner";
+import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
-import {
-  areEqualAddresses,
-  numberWithCommas,
-  printMintDate,
-} from "../../helpers/Helpers";
+import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
