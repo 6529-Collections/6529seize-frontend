@@ -1,25 +1,23 @@
 import styles from "./MemeLab.module.scss";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import {
   addProtocol,
-  areEqualAddresses,
-  getDateDisplay,
   getValuesForVolumeType,
   numberWithCommas,
   printMintDate,
-  removeProtocol,
 } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
-import { Owner } from "../../entities/IOwner";
+import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NFTImage from "../nft-image/NFTImage";
-import { MEMELAB_CONTRACT } from "../../constants";
+import { MEMES_CONTRACT } from "../../constants";
+import { AuthContext } from "../auth/Auth";
 
 enum Sort {
   AGE = "age",
@@ -38,13 +36,15 @@ interface Props {
 
 export default function LabCollection(props: Readonly<Props>) {
   const router = useRouter();
+  const { connectedProfile } = useContext(AuthContext);
+
   const [collectionName, setCollectionName] = useState<string>();
   const [website, setWebsite] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
-  const [nftBalances, setNftBalances] = useState<Owner[]>([]);
+  const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<Sort>();
@@ -123,38 +123,16 @@ export default function LabCollection(props: Readonly<Props>) {
   }, [collectionName]);
 
   useEffect(() => {
-    if (props.wallets.length > 0 && nftMetas.length > 0) {
+    if (connectedProfile?.consolidation.consolidation_key) {
       fetchAllPages(
-        `${
-          process.env.API_ENDPOINT
-        }/api/owners?contract=${MEMELAB_CONTRACT}&wallet=${props.wallets.join(
-          ","
-        )}`
-      ).then((owners: Owner[]) => {
-        const mergedOwners = owners.reduce(
-          (accumulator: Owner[], currentOwner: Owner) => {
-            const existingOwner = accumulator.find(
-              (owner) =>
-                areEqualAddresses(owner.contract, currentOwner.contract) &&
-                owner.token_id === currentOwner.token_id
-            );
-
-            if (existingOwner) {
-              existingOwner.balance += currentOwner.balance;
-            } else {
-              accumulator.push(currentOwner);
-            }
-
-            return accumulator;
-          },
-          [] as Owner[]
-        );
-        setNftBalances(mergedOwners);
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation.consolidation_key}?contract=${MEMES_CONTRACT}`
+      ).then((owners: NftOwner[]) => {
+        setNftBalances(owners);
       });
     } else {
       setNftBalances([]);
     }
-  }, [nftMetas, props.wallets]);
+  }, [connectedProfile]);
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
