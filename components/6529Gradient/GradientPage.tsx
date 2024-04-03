@@ -1,6 +1,6 @@
 import styles from "./6529Gradient.module.scss";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Table } from "react-bootstrap";
@@ -22,18 +22,16 @@ import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
-
-interface Props {
-  wallets: string[];
-}
+import { AuthContext } from "../auth/Auth";
 
 interface NftWithOwner extends NFT {
   owner: string;
   owner_display: string;
 }
 
-export default function GradientPage(props: Readonly<Props>) {
+export default function GradientPage() {
   const router = useRouter();
+  const { connectedProfile } = useContext(AuthContext);
   const fullscreenElementId = "the-art-fullscreen-img";
 
   const [nftId, setNftId] = useState<string>();
@@ -41,8 +39,10 @@ export default function GradientPage(props: Readonly<Props>) {
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [nft, setNft] = useState<NftWithOwner>();
+  const [isOwner, setIsOwner] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+  const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
 
@@ -71,6 +71,14 @@ export default function GradientPage(props: Readonly<Props>) {
   }, [nft]);
 
   useEffect(() => {
+    setIsOwner(
+      connectedProfile?.consolidation.wallets?.some((w) =>
+        areEqualAddresses(w.wallet.address, nft?.owner)
+      ) ?? false
+    );
+  }, [nft, connectedProfile]);
+
+  useEffect(() => {
     async function fetchNfts(url: string, mynfts: NftWithOwner[]) {
       return fetchUrl(url).then((response: DBResponse) => {
         if (response.next) {
@@ -81,16 +89,7 @@ export default function GradientPage(props: Readonly<Props>) {
             .filter((value, index, self) => {
               return self.findIndex((v) => v.id === value.id) === index;
             });
-          const rankedNFTs = newnfts.sort((a, b) =>
-            a.tdh_rank > b.tdh_rank ? 1 : -1
-          );
-          setCollectionCount(newnfts.length);
-          if (nftId) {
-            setNft(rankedNFTs.find((n) => n.id === parseInt(nftId)));
-            setCollectionRank(
-              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId)) + 1
-            );
-          }
+          setAllNfts(newnfts);
         }
       });
     }
@@ -99,6 +98,19 @@ export default function GradientPage(props: Readonly<Props>) {
       fetchNfts(initialUrlNfts, []);
     }
   }, [router.isReady, nftId]);
+
+  useEffect(() => {
+    const rankedNFTs = allNfts.sort((a, b) =>
+      a.tdh_rank > b.tdh_rank ? 1 : -1
+    );
+    setCollectionCount(allNfts.length);
+    if (nftId) {
+      setNft(rankedNFTs.find((n) => n.id === parseInt(nftId)));
+      setCollectionRank(
+        rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId)) + 1
+      );
+    }
+  }, [allNfts, nftId]);
 
   useEffect(() => {
     if (nftId) {
@@ -127,10 +139,7 @@ export default function GradientPage(props: Readonly<Props>) {
                 animation={false}
                 height={650}
                 balance={0}
-                showOwned={
-                  props.wallets.length > 0 &&
-                  props.wallets.some((w) => areEqualAddresses(w, nft.owner))
-                }
+                showOwned={isOwner}
                 showUnseized={false}
               />
             )}
@@ -151,11 +160,7 @@ export default function GradientPage(props: Readonly<Props>) {
                 <Row>
                   <Col>
                     <h4 className={styles.subheading}>
-                      {props.wallets.some((w) =>
-                        areEqualAddresses(w, nft.owner)
-                      )
-                        ? "*"
-                        : ""}
+                      {isOwner ? "*" : ""}
                       <Address
                         wallets={[nft.owner as `0x${string}`]}
                         display={nft.owner_display}
