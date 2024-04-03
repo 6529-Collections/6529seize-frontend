@@ -22,8 +22,6 @@ export default function TheMemesPage() {
     { display: "The Memes" },
   ]);
 
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
-
   return (
     <>
       <Head>
@@ -43,10 +41,9 @@ export default function TheMemesPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <TheMemesComponent
-          wallets={connectedWallets}
           setCrumbs={function (crumbs: Crumb[]) {
             setBreadcrumbs(crumbs);
           }}
