@@ -12,12 +12,12 @@ export enum RepChangeType {
 
 export default function DropListItemRepGive({
   drop,
-}: //availableRep,
-{
+  availableRep,
+}: {
   readonly drop: DropFull;
   readonly availableRep: number;
 }) {
-  const availableRep = 1000000;
+  const memeticWaitTime = 1000;
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
@@ -134,7 +134,7 @@ export default function DropListItemRepGive({
 
     // Decrease interval time by 50%
     const newIntervalTime = Math.max(10, intervalTime * 0.9); // Minimum interval time is 10ms
-    const waitForMemetic = isMemetic ? 2000 : newIntervalTime;
+    const waitForMemetic = isMemetic ? memeticWaitTime : newIntervalTime;
 
     // Schedule next increase
     timeoutRef.current = setTimeout(
@@ -144,7 +144,7 @@ export default function DropListItemRepGive({
             isMemetic && newIntervalTime < 300 ? 300 : newIntervalTime,
           changeType,
           previousRep: memeticRep,
-          startTime: isMemetic ? startTime + 2000 : startTime,
+          startTime: isMemetic ? startTime + memeticWaitTime : startTime,
         }),
       waitForMemetic
     );

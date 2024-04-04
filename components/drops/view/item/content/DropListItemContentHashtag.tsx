@@ -43,14 +43,14 @@ export default function DropListItemContentHashtag({
       interactive={true}
       content={<NftTooltip contract={contract} token={token} />}
     >
-      <span className="tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
+      <div className="tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
         #{name}
         <div className="tw-mt-1 tw-overflow-hidden tw-flex tw-justify-center tw-w-full tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.10)] tw-bg-iron-700/20 tw-rounded-xl">
           <div className="tw-h-96">
             {nft && <img src={nft.token.imageSmall} height={384} />}
           </div>
         </div>
-      </span>
+      </div>
     </LazyTippy>
   );
 }
