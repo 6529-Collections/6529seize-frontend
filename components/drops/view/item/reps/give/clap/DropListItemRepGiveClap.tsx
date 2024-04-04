@@ -28,7 +28,6 @@ export default function DropListItemRepGiveClap({
   const [triangleBurst, setTriangleBurst] = useState<any>(null);
   const [circleBurst, setCircleBurst] = useState<any>(null);
   const [countAnimation, setCountAnimation] = useState<any>(null);
-  const [countTotalAnimation, setCountTotalAnimation] = useState<any>(null);
   const [scaleButton, setScaleButton] = useState<any>(null);
   const [init, setInit] = useState(false);
   const randomID = getRandomObjectId();
@@ -84,19 +83,6 @@ export default function DropListItemRepGiveClap({
       })
     );
 
-    setCountTotalAnimation(
-      new mojs.Html({
-        el: `#clap--count-total-${randomID}`,
-        opacity: { 1: 0 },
-        delay: (3 * tlDuration) / 2,
-        duration: tlDuration,
-        y: { 0: -3 },
-      }).then({
-        opacity: { 0: 1 },
-        y: { "-3": 0 },
-        delay: tlDuration / 2,
-      })
-    );
     setScaleButton(
       new mojs.Html({
         el: `#clap-${randomID}`,
@@ -116,7 +102,6 @@ export default function DropListItemRepGiveClap({
     const tempAnimationTimeline = new mojs.Timeline();
     tempAnimationTimeline.add([
       countAnimation,
-      countTotalAnimation,
       scaleButton,
       circleBurst,
       triangleBurst,
@@ -137,15 +122,9 @@ export default function DropListItemRepGiveClap({
     onSubmit();
   };
 
-  const getCount = () => `${rep > 0 ? "+" : ""}${formatNumberWithCommas(rep)}`;
-
-  const [count, setCount] = useState(getCount());
-
   const getCountShort = () => `${rep > 0 ? "+" : ""}${formatLargeNumber(rep)}`;
 
   const [countShort, setCountShort] = useState(getCountShort());
-
-  const countTotalRef = useRef<HTMLSpanElement | null>(null);
 
   const getClapClasses = () => {
     const repStatus = getRepStatus();
@@ -209,24 +188,10 @@ export default function DropListItemRepGiveClap({
   );
 
   useEffect(() => {
-    setCount(getCount());
     setCountShort(getCountShort());
     setClapClasses(getClapClasses());
     setTextClasses(getTextClasses());
     setClapCountClasses(getClapCountClasses());
-    if (!countTotalRef.current) return;
-    const absRep = Math.abs(rep);
-    if (absRep < 100) {
-      countTotalRef.current.style.left = "-1px";
-    } else if (absRep < 10000) {
-      countTotalRef.current.style.left = "-3px";
-    } else if (absRep < 1000000) {
-      countTotalRef.current.style.left = "-5px";
-    } else if (absRep < 100000000) {
-      countTotalRef.current.style.left = "-9px";
-    } else {
-      countTotalRef.current.style.left = "-11px";
-    }
     const burstColor = rep > 0 ? positiveRgba : negativeRgba;
     triangleBurst?.tune({
       children: {
@@ -245,27 +210,22 @@ export default function DropListItemRepGiveClap({
       <button
         disabled={!rep}
         id={`clap-${randomID}`}
-        className={`${clapClasses} tw-relative tw-outline-1 tw-outline-transparent tw-border tw-border-solid tw-border-iron-700  tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+        className={`${clapClasses} tw-flex-shrink-0 tw-relative tw-outline-1 tw-outline-transparent tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
         onClick={handleClick}
       >
         <span>
           <svg
             id={`clap--icon-${randomID}`}
-            className={`${textClasses} tw-w-8 tw-h-8 tw-transition tw-duration-300 tw-ease-out`}
-            fill="none"
+            className={`${textClasses} tw-w-7 tw-h-7 tw-transition tw-duration-300 tw-ease-out`}
+            height="512"
+            viewBox="0 0 51.2 51.2"
+            width="512"
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="-549 338 100.1 125"
+            data-name="Layer 1"
           >
-            <path
-              strokeWidth="2"
-              stroke="currentColor"
-              d="M-471.2 366.8c1.2 1.1 1.9 2.6 2.3 4.1.4-.3.8-.5 1.2-.7 1-1.9.7-4.3-1-5.9-2-1.9-5.2-1.9-7.2.1l-.2.2c1.8.1 3.6.9 4.9 2.2zm-28.8 14c.4.9.7 1.9.8 3.1l16.5-16.9c.6-.6 1.4-1.1 2.1-1.5 1-1.9.7-4.4-.9-6-2-1.9-5.2-1.9-7.2.1l-15.5 15.9c2.3 2.2 3.1 3 4.2 5.3zm-38.9 39.7c-.1-8.9 3.2-17.2 9.4-23.6l18.6-19c.7-2 .5-4.1-.1-5.3-.8-1.8-1.3-2.3-3.6-4.5l-20.9 21.4c-10.6 10.8-11.2 27.6-2.3 39.3-.6-2.6-1-5.4-1.1-8.3z"
-            />
-            <path
-              strokeWidth="2"
-              stroke="currentColor"
-              d="M-527.2 399.1l20.9-21.4c2.2 2.2 2.7 2.6 3.5 4.5.8 1.8 1 5.4-1.6 8l-11.8 12.2c-.5.5-.4 1.2 0 1.7.5.5 1.2.5 1.7 0l34-35c1.9-2 5.2-2.1 7.2-.1 2 1.9 2 5.2.1 7.2l-24.7 25.3c-.5.5-.4 1.2 0 1.7.5.5 1.2.5 1.7 0l28.5-29.3c2-2 5.2-2 7.1-.1 2 1.9 2 5.1.1 7.1l-28.5 29.3c-.5.5-.4 1.2 0 1.7.5.5 1.2.4 1.7 0l24.7-25.3c1.9-2 5.1-2.1 7.1-.1 2 1.9 2 5.2.1 7.2l-24.7 25.3c-.5.5-.4 1.2 0 1.7.5.5 1.2.5 1.7 0l14.6-15c2-2 5.2-2 7.2-.1 2 2 2.1 5.2.1 7.2l-27.6 28.4c-11.6 11.9-30.6 12.2-42.5.6-12-11.7-12.2-30.8-.6-42.7m18.1-48.4l-.7 4.9-2.2-4.4m7.6.9l-3.7 3.4 1.2-4.8m5.5 4.7l-4.8 1.6 3.1-3.9"
-            />
+            <path fill="currentColor"
+              d="m40.76 19.86a3 3 0 0 0 -5.49-.14l-.27-1a3 3 0 0 0 -5-.84l-2.86-2.88a3.23 3.23 0 0 0 -4.44 0 1.25 1.25 0 0 1 -.09.12l-1.24-1.24a3.21 3.21 0 0 0 -4.44 0 3.3 3.3 0 0 0 -.79 1.38l-.1-.1a3.23 3.23 0 0 0 -4.44 0 3.16 3.16 0 0 0 0 4.44l.11.1a3.12 3.12 0 0 0 -1.37.79 3.11 3.11 0 0 0 0 4.43l.32.32a3.06 3.06 0 0 0 -1.42.76 3.15 3.15 0 0 0 0 4.44l9.21 9.21a9.34 9.34 0 0 0 6.62 2.73 9.67 9.67 0 0 0 1.2-.08 9.33 9.33 0 0 0 4.61 1.22 10.15 10.15 0 0 0 6.58-2.48l3.11-3.04a7.83 7.83 0 0 0 2.27-5.05c.26-4.39-.84-8.83-2.08-13.09zm-16.92-3.68a1.57 1.57 0 0 1 2.16 0l3.24 3.25a3.37 3.37 0 0 0 0 .44v1.9l-5.47-5.47a1 1 0 0 1 .07-.12zm-4.25 22.37-9.21-9.21a1.52 1.52 0 0 1 0-2.16 1.56 1.56 0 0 1 2.16 0s0 0 0 0l5 5a.82.82 0 0 0 1.14 0 .81.81 0 0 0 0-1.14l-7.19-7.19a1.51 1.51 0 0 1 -.49-1.11 1.48 1.48 0 0 1 .46-1.08 1.53 1.53 0 0 1 2.16 0l7.19 7.2a.82.82 0 0 0 1.14 0 .81.81 0 0 0 0-1.14l-9.22-9.22a1.5 1.5 0 0 1 -.45-1.08 1.54 1.54 0 0 1 .45-1.09 1.57 1.57 0 0 1 2.16 0l2 2 7.18 7.19a.81.81 0 0 0 1.14-1.14l-7.19-7.19a1.52 1.52 0 0 1 0-2.16 1.55 1.55 0 0 1 2.17 0l9.21 9.21a.82.82 0 0 0 .88.17.81.81 0 0 0 .49-.74v-3.81a1.35 1.35 0 0 1 .07-.44 1.4 1.4 0 0 1 1.32-1 1.43 1.43 0 0 1 1.29.8c.6 2.15 1.08 4 1.45 5.81a26.38 26.38 0 0 1 .53 6.62 6.12 6.12 0 0 1 -1.81 4l-3.02 3.12a8.33 8.33 0 0 1 -4.29 2 7.73 7.73 0 0 1 -6.72-2.22zm21.65-5.74a6.21 6.21 0 0 1 -1.81 4l-3.06 3.09a8.26 8.26 0 0 1 -7.53 1.77 10.47 10.47 0 0 0 2.85-1.67l3.1-3.11a7.73 7.73 0 0 0 2.28-5.06 27.39 27.39 0 0 0 -.55-6.93l.06-3.9a1.41 1.41 0 0 1 1.42-1.42 1.39 1.39 0 0 1 1.26.8c1.18 4.21 2.23 8.33 1.98 12.43zm-20.54-21.14a.8.8 0 1 0 1.15-1.12l-1.69-1.76a.81.81 0 0 0 -1.16 1.12zm4-.46a.8.8 0 0 0 .8-.8v-2a.8.8 0 1 0 -1.6 0v2a.8.8 0 0 0 .77.8zm3.38.7a.82.82 0 0 0 .56-.23l1.67-1.68a.8.8 0 0 0 -1.12-1.14l-1.7 1.66a.79.79 0 0 0 0 1.13.78.78 0 0 0 .56.26z"
+            ></path>
           </svg>
         </span>
         <span
@@ -273,13 +233,6 @@ export default function DropListItemRepGiveClap({
           className={`${clapCountClasses} tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-xs tw-absolute ${styles.clapCount}`}
         >
           {countShort}
-        </span>
-        <span
-          ref={countTotalRef}
-          id={`clap--count-total-${randomID}`}
-          className={`${textClasses} tw-absolute -tw-top-5 tw-text-xs tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-        >
-          {!!rep && count}
         </span>
       </button>
     </div>

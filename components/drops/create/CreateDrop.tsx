@@ -15,7 +15,7 @@ export interface DropRequest {
   readonly title: string | null;
   readonly content: string | null;
   readonly stormId: string | null;
-  readonly quotedDropId: string | null;
+  readonly quotedDropId: number | null;
   readonly referencedNfts: ReferencedNft[];
   readonly mentionedUsers: MentionedUser[];
   readonly metadata: DropMetadata[];
@@ -24,12 +24,18 @@ export interface DropRequest {
 
 export default function CreateDrop({
   profile,
+  quotedDropId,
+  isClient = false,
+  onSuccessfulDrop
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly quotedDropId: number | null;
+    readonly isClient?: boolean;
+  readonly onSuccessfulDrop?: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onDropCreate } = useContext(ReactQueryWrapperContext);
-  const [init, setInit] = useState(false);
+  const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
 
   const [submitting, setSubmitting] = useState(false);
@@ -49,6 +55,9 @@ export default function CreateDrop({
       });
       setDropEditorRefreshKey((prev) => prev + 1);
       onDropCreate({ profile });
+      if (onSuccessfulDrop) {
+        onSuccessfulDrop();
+      }
     },
     onError: (error) => {
       setToast({
@@ -92,7 +101,7 @@ export default function CreateDrop({
     }
 
     if (dropRequest.quotedDropId) {
-      formData.append("quoted_drop_id", dropRequest.quotedDropId);
+      formData.append("quoted_drop_id", dropRequest.quotedDropId.toString());
     }
 
     if (dropRequest.referencedNfts.length) {
@@ -119,6 +128,7 @@ export default function CreateDrop({
   return (
     <CreateDropWrapper
       profile={profile}
+      quotedDropId={quotedDropId}
       onSubmitDrop={submitDrop}
       key={dropEditorRefreshKey}
     />
