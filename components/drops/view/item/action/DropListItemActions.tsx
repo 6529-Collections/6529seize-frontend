@@ -1,21 +1,26 @@
 import { DropFull } from "../../../../../entities/IDrop";
+import { RepActionExpandable } from "../DropsListItem";
 
 export default function DropListItemActions({
   drop,
-  discussionOpen,
-  setDiscussionOpen,
+  state,
+  setState,
 }: {
   readonly drop: DropFull;
-  readonly discussionOpen: boolean;
-  readonly setDiscussionOpen: (value: boolean) => void;
+  readonly state: RepActionExpandable;
+  readonly setState: (newState: RepActionExpandable) => void;
 }) {
+  const onActionClick = (action: RepActionExpandable) => {
+    setState(action === state ? RepActionExpandable.IDLE : action);
+  };
+
   return (
     <div className="tw-mt-4 tw-ml-12 tw-border-t tw-flex tw-items-center tw-gap-x-8">
       <button
-        onClick={() => setDiscussionOpen(!discussionOpen)}
+        onClick={() => onActionClick(RepActionExpandable.DISCUSSION)}
         type="button"
         className={`${
-          discussionOpen
+          state === RepActionExpandable.DISCUSSION
             ? "tw-text-primary-400 hover:text-primary-400"
             : "tw-text-iron-400 hover:tw-text-white"
         } tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-transition tw-ease-out tw-duration-300`}
@@ -43,8 +48,13 @@ export default function DropListItemActions({
         </div>
       </button>
       <button
+        onClick={() => onActionClick(RepActionExpandable.QUOTE)}
         type="button"
-        className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-text-iron-400"
+        className={`${
+          state === RepActionExpandable.QUOTE
+            ? "tw-text-primary-400 hover:text-primary-400"
+            : "tw-text-iron-400 hover:tw-text-white"
+        } tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-transition tw-ease-out tw-duration-300`}
       >
         <svg
           className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300"
