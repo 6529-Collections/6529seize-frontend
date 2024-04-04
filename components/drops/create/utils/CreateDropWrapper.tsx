@@ -29,10 +29,11 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function CreateDropWrapper({
   profile,
+  quotedDropId,
   onSubmitDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
-
+  readonly quotedDropId: number | null;
   readonly onSubmitDrop: (dropRequest: DropRequest) => void;
 }) {
   const breakpoint = useBreakpoint();
@@ -116,7 +117,7 @@ export default function CreateDropWrapper({
       title,
       content: markdown,
       stormId: null,
-      quotedDropId: null,
+      quotedDropId,
       mentionedUsers: mentions,
       referencedNfts: nfts,
       metadata,
