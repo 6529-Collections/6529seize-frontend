@@ -11,7 +11,6 @@ import { Distribution, DistributionPhoto } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
 import { capitalizeEveryWord, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
-import { SortDirection } from "../../entities/ISort";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -50,13 +49,25 @@ export default function Distribution(props: Readonly<Props>) {
   const [distributionPhotos, setDistributionPhotos] = useState<
     DistributionPhoto[]
   >([]);
-  const [loaded, setLoaded] = useState(false);
+
   const [totalResults, setTotalResults] = useState(0);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   const [fetching, setFetching] = useState(false);
+
+  function updateDistributionPhases(mydistributions: Distribution[]) {
+    const phasesSet = new Set<string>();
+    mydistributions.forEach((d) => {
+      d.phases.forEach((p) => {
+        phasesSet.add(p);
+      });
+    });
+    const phases = Array.from(phasesSet);
+    phases.sort((a, b) => a.localeCompare(b));
+    setDistributionsPhases(phases);
+  }
 
   function fetchDistribution() {
     setFetching(true);
@@ -67,15 +78,7 @@ export default function Distribution(props: Readonly<Props>) {
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
       setDistributions(mydistributions);
-      const phasesSet = new Set<string>();
-      mydistributions.forEach((d) => {
-        d.phases.forEach((p) => {
-          phasesSet.add(p);
-        });
-      });
-      const phases = Array.from(phasesSet);
-      phases.sort();
-      setDistributionsPhases(phases);
+      updateDistributionPhases(mydistributions);
       setFetching(false);
     });
   }
@@ -271,7 +274,7 @@ export default function Distribution(props: Readonly<Props>) {
                 </Col>
               </Row>
               <Row>
-                {loaded && distributions.length === 0 && (
+                {!fetching && distributions.length === 0 && (
                   <Col>
                     <Image
                       width="0"
@@ -280,7 +283,7 @@ export default function Distribution(props: Readonly<Props>) {
                       src="/SummerGlasses.svg"
                       alt="SummerGlasses"
                     />{" "}
-                    Nothing here yet
+                    Nothing found
                   </Col>
                 )}
               </Row>

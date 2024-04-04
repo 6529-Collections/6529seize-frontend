@@ -4,17 +4,13 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
-  numberWithCommas,
 } from "../../../../../helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
 } from "../../../../../constants";
-import {
-  assertUnreachable,
-  getRandomObjectId,
-} from "../../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import UserPageStatsActivityDistributionsTableItem from "./UserPageStatsActivityDistributionsTableItem";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
