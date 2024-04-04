@@ -84,7 +84,7 @@ export default function UserPageStatsActivityDistributions({
       {
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
-        wallet: walletsParam,
+        search: walletsParam,
       },
     ],
     queryFn: async () =>
@@ -93,7 +93,7 @@ export default function UserPageStatsActivityDistributions({
         params: {
           page_size: `${PAGE_SIZE}`,
           page: `${pageFilter}`,
-          wallet: walletsParam,
+          search: walletsParam,
         },
       }),
     placeholderData: keepPreviousData,
