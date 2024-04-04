@@ -46,6 +46,8 @@ export enum QueryKey {
   CURATION_FILTERS = "CURATION_FILTERS",
   CURATION_FILTER = "CURATION_FILTER",
   RESERVOIR_NFT = "RESERVOIR_NFT",
+  // TODO make sure to invalidate it when something related changes
+  DROP = "DROP",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -560,6 +562,9 @@ export default function ReactQueryWrapper({
     invalidateQueries({
       key: QueryKey.PROFILE_DROPS,
       values: handles.map((handle) => ({ handleOrWallet: handle })),
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMMUNITY_DROPS],
     });
   };
 

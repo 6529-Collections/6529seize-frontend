@@ -18,8 +18,8 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   const [repAction, setRepAction] = useState<RepActionExpandable>(
     RepActionExpandable.IDLE
   );
-
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
+  
 
   return (
     <div className="tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">

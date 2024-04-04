@@ -3,6 +3,8 @@ import { DropFull } from "../../../../../entities/IDrop";
 import { RepActionExpandable } from "../DropsListItem";
 import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
 import DropListItemQuote from "../quote/DropListItemQuote";
+import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
+import { useEffect, useState } from "react";
 
 export default function DropListItemExpandableWrapper({
   drop,
@@ -13,12 +15,21 @@ export default function DropListItemExpandableWrapper({
   readonly state: RepActionExpandable;
   readonly setState: (newState: RepActionExpandable) => void;
 }) {
+  const [init, setInit] = useState(false);
+  useEffect(() => setInit(true), []);
   const open = state !== RepActionExpandable.IDLE;
   const component: Record<RepActionExpandable, JSX.Element> = {
     [RepActionExpandable.DISCUSSION]: <DropListItemDiscussion />,
-    [RepActionExpandable.QUOTE]: <DropListItemQuote />,
+    [RepActionExpandable.QUOTE]: (
+      <DropListItemQuote
+        quotedDropId={drop.id}
+        init={init}
+        onSuccessfulDrop={() => setState(RepActionExpandable.IDLE)}
+      />
+    ),
     [RepActionExpandable.IDLE]: <></>,
   };
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       {open && (
@@ -42,7 +53,28 @@ export default function DropListItemExpandableWrapper({
             },
           }}
         >
-          {component[state]}
+          <CommonAnimationHeight>
+            <motion.div
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  duration: 0.3,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                transition: {
+                  duration: 0.3,
+                },
+              }}
+              key={state}
+            >
+              {component[state]}
+            </motion.div>
+          </CommonAnimationHeight>
         </motion.div>
       )}
     </AnimatePresence>
