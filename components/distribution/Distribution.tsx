@@ -7,15 +7,10 @@ import { DBResponse } from "../../entities/IDBResponse";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
-import {
-  DistributionPhase,
-  IDistribution,
-  IDistributionPhoto,
-} from "../../entities/IDistribution";
+import { Distribution, DistributionPhoto } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
 import { capitalizeEveryWord, numberWithCommas } from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
-import { SortDirection } from "../../entities/ISort";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -49,16 +44,12 @@ export default function Distribution(props: Readonly<Props>) {
   const [nftId, setNftId] = useState<string>();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
-  const [activePhase, setActivePhase] = useState("All");
-  const [phases, setPhases] = useState<string[]>([]);
-  const [distributions, setDistributions] = useState<IDistribution[]>([]);
-  const [distributionsPhases, setDistributionsPhases] = useState<
-    DistributionPhase[]
-  >([]);
+  const [distributions, setDistributions] = useState<Distribution[]>([]);
+  const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
-    IDistributionPhoto[]
+    DistributionPhoto[]
   >([]);
-  const [loaded, setLoaded] = useState(false);
+
   const [totalResults, setTotalResults] = useState(0);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -66,42 +57,28 @@ export default function Distribution(props: Readonly<Props>) {
 
   const [fetching, setFetching] = useState(false);
 
-  const [sort, setSort] = useState<{
-    sort: Sort;
-    sort_direction: SortDirection;
-  }>({ sort: Sort.phase, sort_direction: SortDirection.DESC });
+  function updateDistributionPhases(mydistributions: Distribution[]) {
+    const phasesSet = new Set<string>();
+    mydistributions.forEach((d) => {
+      d.phases.forEach((p) => {
+        phasesSet.add(p);
+      });
+    });
+    const phases = Array.from(phasesSet);
+    phases.sort((a, b) => a.localeCompare(b));
+    setDistributionsPhases(phases);
+  }
 
   function fetchDistribution() {
     setFetching(true);
-    const phasefilter = activePhase === "All" ? "" : `&phase=${activePhase}`;
     const walletFilter =
-      searchWallets.length === 0 ? "" : `&wallet=${searchWallets.join(",")}`;
-    // const distributionUrl = `${process.env.API_ENDPOINT}/api/distribution/${props.contract}/${nftId}?&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${phasefilter}${walletFilter}`;
-    const distributionUrl = `${process.env.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}&sort=${sort.sort}&sort_direction=${sort.sort_direction}${walletFilter}`;
+      searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
+    const distributionUrl = `${process.env.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
     fetchUrl(distributionUrl).then((r: DBResponse) => {
       setTotalResults(r.count);
-      const mydistributions = r.data;
+      const mydistributions: Distribution[] = r.data;
       setDistributions(mydistributions);
-      const phases = [];
-      if (mydistributions.some((d) => d.airdrop > 0)) {
-        phases.push(DistributionPhase.AIRDROP);
-      }
-      if (mydistributions.some((d) => d.allowlist > 0)) {
-        phases.push(DistributionPhase.ALLOWLIST);
-      }
-      if (mydistributions.some((d) => d.phase_0 > 0)) {
-        phases.push(DistributionPhase.PHASE_0);
-      }
-      if (mydistributions.some((d) => d.phase_1 > 0)) {
-        phases.push(DistributionPhase.PHASE_1);
-      }
-      if (mydistributions.some((d) => d.phase_2 > 0)) {
-        phases.push(DistributionPhase.PHASE_2);
-      }
-      if (mydistributions.some((d) => d.phase_3 > 0)) {
-        phases.push(DistributionPhase.PHASE_3);
-      }
-      setDistributionsPhases(phases);
+      updateDistributionPhases(mydistributions);
       setFetching(false);
     });
   }
@@ -127,11 +104,6 @@ export default function Distribution(props: Readonly<Props>) {
 
       fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
         setDistributionPhotos(distributionPhotos);
-        const distributionPhasesUrl = `${process.env.API_ENDPOINT}/api/distribution_phases/${props.contract}/${nftId}`;
-        fetchUrl(distributionPhasesUrl).then((result: DBResponse) => {
-          setPhases(result.data);
-          setLoaded(true);
-        });
         fetchDistribution();
       });
     }
@@ -141,7 +113,7 @@ export default function Distribution(props: Readonly<Props>) {
     if (nftId) {
       setPageProps({ ...pageProps, page: 1 });
     }
-  }, [activePhase, searchWallets, sort]);
+  }, [searchWallets]);
 
   useEffect(() => {
     if (nftId && pageProps) {
@@ -172,6 +144,19 @@ export default function Distribution(props: Readonly<Props>) {
         </Carousel>
       );
     }
+  }
+
+  function getCountForPhase(d: Distribution, phase: string) {
+    let count = 0;
+
+    if (phase.toUpperCase() === "AIRDROP") {
+      count = d.airdrops;
+    } else {
+      const p = d.allowlist.find((a) => a.phase === phase);
+      count = p?.spots ?? 0;
+    }
+
+    return count ? numberWithCommas(count) : "-";
   }
 
   function printDistribution() {
@@ -211,7 +196,9 @@ export default function Distribution(props: Readonly<Props>) {
                       {fetching ? (
                         <DotLoader />
                       ) : (
-                        <span className="font-larger">x{totalResults}</span>
+                        <span className="font-larger">
+                          x{totalResults.toLocaleString()}
+                        </span>
                       )}
                     </th>
                     {distributionsPhases.map((p) => (
@@ -230,26 +217,20 @@ export default function Distribution(props: Readonly<Props>) {
                       <td>
                         <Address
                           wallets={[d.wallet as `0x${string}`]}
-                          display={d.display}
+                          display={d.wallet_display}
                           hideCopy={true}
                         />
                       </td>
                       {distributionsPhases.map((p) => (
-                        <th
-                          key={`${p}-${d.contract}-${d.card_id}`}
-                          className="text-center">
-                          {d[p] === 0 ? "-" : numberWithCommas(d[p])}
-                        </th>
+                        <td key={`${p}-${d.wallet}`} className="text-center">
+                          {getCountForPhase(d, p)}
+                        </td>
                       ))}
                       <td className="text-center">
-                        {d.total_minted === 0
-                          ? "-"
-                          : numberWithCommas(d.total_minted)}
+                        {d.minted === 0 ? "-" : numberWithCommas(d.minted)}
                       </td>
                       <td className="text-center">
-                        {!d.total_minted && !d.airdrop
-                          ? "-"
-                          : numberWithCommas(d.total_minted + d.airdrop)}
+                        {!d.total_count ? "-" : numberWithCommas(d.total_count)}
                       </td>
                     </tr>
                   ))}
@@ -289,13 +270,11 @@ export default function Distribution(props: Readonly<Props>) {
               )}
               <Row>
                 <Col>
-                  {nftId &&
-                    (distributionPhotos.length > 0 || phases.length > 0) &&
-                    printDistribution()}
+                  {nftId && distributions.length > 0 && printDistribution()}
                 </Col>
               </Row>
               <Row>
-                {loaded && phases.length === 0 && (
+                {!fetching && distributions.length === 0 && (
                   <Col>
                     <Image
                       width="0"
@@ -304,7 +283,7 @@ export default function Distribution(props: Readonly<Props>) {
                       src="/SummerGlasses.svg"
                       alt="SummerGlasses"
                     />{" "}
-                    Nothing here yet
+                    Nothing found
                   </Col>
                 )}
               </Row>

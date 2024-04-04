@@ -1,29 +1,24 @@
-export enum DistributionPhase {
-  AIRDROP = "airdrop",
-  ALLOWLIST = "allowlist",
-  PHASE_0 = "phase_0",
-  PHASE_1 = "phase_1",
-  PHASE_2 = "phase_2",
-  PHASE_3 = "phase_3",
+interface DistributionPhaseEntry {
+  phase: string;
+  spots: number;
 }
 
-export interface IDistribution {
-  wallet: string;
-  display: string;
-  contract: string;
+export interface Distribution {
   card_id: number;
-  total_minted: number;
+  contract: string;
+  wallet: string;
+  wallet_display: string;
   card_name: string;
-  card_mint_date: string;
-  airdrop: number;
-  allowlist: number;
-  phase_0: number;
-  phase_1: number;
-  phase_2: number;
-  phase_3: number;
+  mint_date: string;
+  airdrops: number;
+  total_spots: number;
+  minted: number;
+  allowlist: DistributionPhaseEntry[];
+  total_count: number;
+  phases: string[];
 }
 
-export interface IDistributionPhoto {
+export interface DistributionPhoto {
   created_at: Date;
   updated_at: Date;
   id: number;
