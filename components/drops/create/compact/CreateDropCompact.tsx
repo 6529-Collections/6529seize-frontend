@@ -67,7 +67,7 @@ export default function CreateDropCompact({
               onFileChange={onFileChange}
             />
           </div>
-          <div className="tw-self-end">
+          {/* <div className="tw-self-end">
             <button
               type="button"
               className="tw-group tw-border-t tw-border-solid tw-border-white/[0.15] hover:tw-border-none hover:tw-shadow-drop-btn-active hover:tw-bg-gradient-radial tw-bg-iron-700 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
@@ -126,7 +126,7 @@ export default function CreateDropCompact({
                 </g>
               </svg>
             </button> 
-          </div>
+          </div> */}
           <div className="tw-self-end">
             <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
           </div>
