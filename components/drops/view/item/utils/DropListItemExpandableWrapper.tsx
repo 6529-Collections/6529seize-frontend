@@ -1,17 +1,27 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { DropFull } from "../../../../../entities/IDrop";
-import DropListItemDiscussion from "./DropListItemDiscussion";
+import { RepActionExpandable } from "../DropsListItem";
+import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
+import DropListItemQuote from "../quote/DropListItemQuote";
 
-export default function DropListItemDiscussionWrapper({
+export default function DropListItemExpandableWrapper({
   drop,
-  discussionOpen,
+  state,
+  setState,
 }: {
   readonly drop: DropFull;
-  readonly discussionOpen: boolean;
+  readonly state: RepActionExpandable;
+  readonly setState: (newState: RepActionExpandable) => void;
 }) {
+  const open = state !== RepActionExpandable.IDLE;
+  const component: Record<RepActionExpandable, JSX.Element> = {
+    [RepActionExpandable.DISCUSSION]: <DropListItemDiscussion />,
+    [RepActionExpandable.QUOTE]: <DropListItemQuote />,
+    [RepActionExpandable.IDLE]: <></>,
+  };
   return (
     <AnimatePresence mode="wait" initial={false}>
-      {discussionOpen && (
+      {open && (
         <motion.div
           key={drop.id}
           initial={{ height: "0", opacity: 0 }}
@@ -32,7 +42,7 @@ export default function DropListItemDiscussionWrapper({
             },
           }}
         >
-          <DropListItemDiscussion />
+          {component[state]}
         </motion.div>
       )}
     </AnimatePresence>
