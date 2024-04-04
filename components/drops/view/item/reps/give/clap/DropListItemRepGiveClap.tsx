@@ -28,7 +28,6 @@ export default function DropListItemRepGiveClap({
   const [triangleBurst, setTriangleBurst] = useState<any>(null);
   const [circleBurst, setCircleBurst] = useState<any>(null);
   const [countAnimation, setCountAnimation] = useState<any>(null);
-  const [countTotalAnimation, setCountTotalAnimation] = useState<any>(null);
   const [scaleButton, setScaleButton] = useState<any>(null);
   const [init, setInit] = useState(false);
   const randomID = getRandomObjectId();
@@ -84,19 +83,7 @@ export default function DropListItemRepGiveClap({
       })
     );
 
-    setCountTotalAnimation(
-      new mojs.Html({
-        el: `#clap--count-total-${randomID}`,
-        opacity: { 1: 0 },
-        delay: (3 * tlDuration) / 2,
-        duration: tlDuration,
-        y: { 0: -3 },
-      }).then({
-        opacity: { 0: 1 },
-        y: { "-3": 0 },
-        delay: tlDuration / 2,
-      })
-    );
+
     setScaleButton(
       new mojs.Html({
         el: `#clap-${randomID}`,
@@ -116,7 +103,6 @@ export default function DropListItemRepGiveClap({
     const tempAnimationTimeline = new mojs.Timeline();
     tempAnimationTimeline.add([
       countAnimation,
-      countTotalAnimation,
       scaleButton,
       circleBurst,
       triangleBurst,
@@ -137,15 +123,9 @@ export default function DropListItemRepGiveClap({
     onSubmit();
   };
 
-  const getCount = () => `${rep > 0 ? "+" : ""}${formatNumberWithCommas(rep)}`;
-
-  const [count, setCount] = useState(getCount());
-
   const getCountShort = () => `${rep > 0 ? "+" : ""}${formatLargeNumber(rep)}`;
 
   const [countShort, setCountShort] = useState(getCountShort());
-
-  const countTotalRef = useRef<HTMLSpanElement | null>(null);
 
   const getClapClasses = () => {
     const repStatus = getRepStatus();
@@ -209,24 +189,10 @@ export default function DropListItemRepGiveClap({
   );
 
   useEffect(() => {
-    setCount(getCount());
     setCountShort(getCountShort());
     setClapClasses(getClapClasses());
     setTextClasses(getTextClasses());
     setClapCountClasses(getClapCountClasses());
-    if (!countTotalRef.current) return;
-    const absRep = Math.abs(rep);
-    if (absRep < 100) {
-      countTotalRef.current.style.left = "-1px";
-    } else if (absRep < 10000) {
-      countTotalRef.current.style.left = "-3px";
-    } else if (absRep < 1000000) {
-      countTotalRef.current.style.left = "-5px";
-    } else if (absRep < 100000000) {
-      countTotalRef.current.style.left = "-9px";
-    } else {
-      countTotalRef.current.style.left = "-11px";
-    }
     const burstColor = rep > 0 ? positiveRgba : negativeRgba;
     triangleBurst?.tune({
       children: {
@@ -273,13 +239,6 @@ export default function DropListItemRepGiveClap({
           className={`${clapCountClasses} tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-xs tw-absolute ${styles.clapCount}`}
         >
           {countShort}
-        </span>
-        <span
-          ref={countTotalRef}
-          id={`clap--count-total-${randomID}`}
-          className={`${textClasses} tw-hidden tw-absolute -tw-left-9 tw-text-xs tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-        >
-          {!!rep && count}
         </span>
       </button>
     </div>
