@@ -171,7 +171,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   }, [selectedSeason]);
 
   useEffect(() => {
-    if (routerLoaded && sort && sortDir) {
+    if (routerLoaded) {
       if (selectedSeason > 0) {
         router.replace(
           {
@@ -190,20 +190,24 @@ export default function TheMemesComponent(props: Readonly<Props>) {
         );
       }
     }
-  }, [sort, sortDir, selectedSeason]);
+  }, [sort, sortDir, selectedSeason, routerLoaded]);
 
   useEffect(() => {
-    const myMemes: Meme[] = [];
+    const myMemesMap = new Map<number, Meme>();
     [...nfts].map((nftm) => {
-      if (!myMemes.some((m) => m.meme === nftm.meme)) {
-        myMemes.push({
-          meme: nftm.meme,
-          meme_name: nftm.meme_name,
-        });
-      }
+      myMemesMap.set(nftm.meme, {
+        meme: nftm.meme,
+        meme_name: nftm.meme_name,
+      });
     });
-
-    setNftMemes([...myMemes].sort((a, b) => (a.meme > b.meme ? 1 : -1)));
+    const myMemes = Array.from(myMemesMap.values());
+    if (sortDir === SortDirection.DESC) {
+      myMemes.sort((a, d) => d.meme - a.meme);
+    } else {
+      myMemes.sort((a, d) => a.meme - d.meme);
+    }
+    console.log("myMemes", myMemes);
+    setNftMemes(myMemes);
   }, [nfts]);
 
   function fetchNfts() {
@@ -227,10 +231,10 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   }, [sort, sortDir, volumeType, selectedSeason, routerLoaded]);
 
   useEffect(() => {
-    if (fetching && routerLoaded) {
+    if (fetching && routerLoaded && nftsNextPage) {
       fetchNfts();
     }
-  }, [fetching, routerLoaded]);
+  }, [fetching, routerLoaded, nftsNextPage]);
 
   useEffect(() => {
     const checkScrollPosition = () => {
