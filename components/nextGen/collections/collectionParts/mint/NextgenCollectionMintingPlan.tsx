@@ -222,7 +222,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           <Table className={styles.logsTable}>
             <thead>
               <tr>
-                <th>Address x{totalResults}</th>
+                <th>Address x{totalResults.toLocaleString()}</th>
                 <th className="text-center">Phase</th>
                 <th className="text-center">Spots</th>
                 <th className="text-center">Data</th>
