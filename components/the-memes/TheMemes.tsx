@@ -50,6 +50,8 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   const [selectedSeason, setSelectedSeason] = useState(0);
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
 
+  const [routerLoaded, setRouterLoaded] = useState(false);
+
   useEffect(() => {
     if (router.isReady) {
       let initialSortDir = SortDirection.ASC;
@@ -88,6 +90,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
       setSort(initialSort);
       setSortDir(initialSortDir);
       setSelectedSeason(initialSzn);
+      setRouterLoaded(true);
     }
   }, [router.isReady]);
 
@@ -123,7 +126,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   const [fetching, setFetching] = useState(true);
 
   const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
-  const [nftsNextPage, setNftsNextPage] = useState<string>(getNftsNextPage());
+  const [nftsNextPage, setNftsNextPage] = useState<string>();
 
   const [nftBalancesTokenIds, setNftBalancesTokenIds] = useState<Set<number>>(
     new Set()
@@ -168,7 +171,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   }, [selectedSeason]);
 
   useEffect(() => {
-    if (sort && sortDir) {
+    if (routerLoaded && sort && sortDir) {
       if (selectedSeason > 0) {
         router.replace(
           {
@@ -216,16 +219,18 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    setNfts([]);
-    setNftsNextPage(getNftsNextPage());
-    setFetching(true);
-  }, [sort, sortDir, volumeType, selectedSeason]);
+    if (routerLoaded) {
+      setNfts([]);
+      setNftsNextPage(getNftsNextPage());
+      setFetching(true);
+    }
+  }, [sort, sortDir, volumeType, selectedSeason, routerLoaded]);
 
   useEffect(() => {
-    if (fetching) {
+    if (fetching && routerLoaded) {
       fetchNfts();
     }
-  }, [fetching]);
+  }, [fetching, routerLoaded]);
 
   useEffect(() => {
     const checkScrollPosition = () => {
