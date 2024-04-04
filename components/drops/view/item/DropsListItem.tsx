@@ -12,7 +12,18 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
 
   return (
-    <div className="tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
+    <div className="tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
+      <div className="tw-relative tw-px-2 tw-hidden">
+        <div
+          className="tw-absolute tw-flex tw-mx-2 tw-top-0 tw-inset-x-0 tw-h-1 tw-bg-iron-700 tw-rounded-full tw-overflow-hidden"
+          role="progressbar"
+          aria-valuenow="25"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div className="tw-flex tw-flex-col tw-justify-center tw-overflow-hidden tw-bg-primary-500 tw-text-xs tw-text-white tw-text-center tw-whitespace-nowrap tw-transition tw-duration-500 tw-w-[25%]"></div>
+        </div>
+      </div>
       <div className="tw-p-4 sm:tw-p-5">
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">

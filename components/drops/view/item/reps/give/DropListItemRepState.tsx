@@ -23,7 +23,7 @@ export default function DropListItemRepState({
       ? negativeRepColor
       : neutralRepColor;
   return (
-    <div className="tw-inline-flex tw-space-x-2">
+    <div className="tw-min-w-[42px] tw-inline-flex tw-justify-center tw-text-center tw-absolute tw-right-5 tw-top-5">
       {!!userRep && (
         <>
           <div
