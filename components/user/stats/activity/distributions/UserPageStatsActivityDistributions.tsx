@@ -3,7 +3,7 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { Page } from "../../../../../helpers/Types";
-import { IDistribution } from "../../../../../entities/IDistribution";
+import { Distribution } from "../../../../../entities/IDistribution";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 import { useRouter } from "next/router";
@@ -78,7 +78,7 @@ export default function UserPageStatsActivityDistributions({
     isFetching,
     isLoading: isFirstLoading,
     data,
-  } = useQuery<Page<IDistribution>>({
+  } = useQuery<Page<Distribution>>({
     queryKey: [
       QueryKey.PROFILE_DISTRIBUTIONS,
       {
@@ -88,7 +88,7 @@ export default function UserPageStatsActivityDistributions({
       },
     ],
     queryFn: async () =>
-      await commonApiFetch<Page<IDistribution>>({
+      await commonApiFetch<Page<Distribution>>({
         endpoint: "distributions",
         params: {
           page_size: `${PAGE_SIZE}`,

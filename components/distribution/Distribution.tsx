@@ -45,8 +45,6 @@ export default function Distribution(props: Readonly<Props>) {
   const [nftId, setNftId] = useState<string>();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
-  const [activePhase, setActivePhase] = useState("All");
-  const [phases, setPhases] = useState<string[]>([]);
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
@@ -103,11 +101,6 @@ export default function Distribution(props: Readonly<Props>) {
 
       fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
         setDistributionPhotos(distributionPhotos);
-        const distributionPhasesUrl = `${process.env.API_ENDPOINT}/api/distribution_phases/${props.contract}/${nftId}`;
-        fetchUrl(distributionPhasesUrl).then((result: DBResponse) => {
-          setPhases(result.data);
-          setLoaded(true);
-        });
         fetchDistribution();
       });
     }
@@ -117,7 +110,7 @@ export default function Distribution(props: Readonly<Props>) {
     if (nftId) {
       setPageProps({ ...pageProps, page: 1 });
     }
-  }, [activePhase, searchWallets]);
+  }, [searchWallets]);
 
   useEffect(() => {
     if (nftId && pageProps) {
