@@ -245,13 +245,13 @@ export default function DropListItemRepGiveClap({
       <button
         disabled={!rep}
         id={`clap-${randomID}`}
-        className={`${clapClasses} tw-relative tw-outline-1 tw-outline-transparent tw-border tw-border-solid tw-border-iron-700  tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+        className={`${clapClasses} tw-flex-shrink-0 tw-relative tw-outline-1 tw-outline-transparent tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
         onClick={handleClick}
       >
         <span>
           <svg
             id={`clap--icon-${randomID}`}
-            className={`${textClasses} tw-w-8 tw-h-8 tw-transition tw-duration-300 tw-ease-out`}
+            className={`${textClasses} tw-w-6 tw-h-6 tw-transition tw-duration-300 tw-ease-out`}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="-549 338 100.1 125"
@@ -277,7 +277,7 @@ export default function DropListItemRepGiveClap({
         <span
           ref={countTotalRef}
           id={`clap--count-total-${randomID}`}
-          className={`${textClasses} tw-absolute -tw-top-5 tw-text-xs tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+          className={`${textClasses} tw-hidden tw-absolute -tw-left-9 tw-text-xs tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
         >
           {!!rep && count}
         </span>

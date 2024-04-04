@@ -99,7 +99,7 @@ export default function DropListItemRepGiveSubmit({
   };
 
   return (
-    <div className="tw-py-4 ">
+    <div>
       <DropListItemRepGiveClap rep={rep} onSubmit={onRepSubmit} />
     </div>
   );
