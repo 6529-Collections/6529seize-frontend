@@ -55,7 +55,7 @@ export default function Distribution(props: Readonly<Props>) {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
-  const [fetching, setFetching] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
   function updateDistributionPhases(mydistributions: Distribution[]) {
     const phasesSet = new Set<string>();
