@@ -31,12 +31,15 @@ import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import NFTPlugin from "../lexical/plugins/nft/NFTPlugin";
+import { CreateDropType } from "../CreateDrop";
+import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 // import { NftNode } from "../lexical/nodes/NftNode";
 
 export default function CreateDropContent({
   viewType,
   screenType,
   editorState,
+  type,
   onEditorState,
   onReferencedNft,
   onMentionedUser,
@@ -46,6 +49,7 @@ export default function CreateDropContent({
   readonly viewType: CreateDropViewType;
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
+  readonly type: CreateDropType;
   readonly onEditorState: (editorState: EditorState) => void;
   readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
   readonly onMentionedUser: (mentionedUser: MentionedUser) => void;
@@ -87,6 +91,18 @@ export default function CreateDropContent({
 
   const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
 
+  const getPlaceHolderText = () => {
+    switch (type) {
+      case CreateDropType.DROP:
+        return "Start a drop...";
+      case CreateDropType.QUOTE:
+        return "Quote this drop...";
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
+
   return (
     <div className="tailwind-scope">
       <LexicalComposer initialConfig={editorConfig}>
@@ -109,7 +125,9 @@ export default function CreateDropContent({
                 />
               }
               placeholder={
-                <span className="editor-placeholder">Start a drop...</span>
+                <span className="editor-placeholder">
+                  {getPlaceHolderText()}
+                </span>
               }
               ErrorBoundary={LexicalErrorBoundary}
             />

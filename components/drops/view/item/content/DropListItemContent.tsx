@@ -4,7 +4,7 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
 import DropWrapper from "../../../create/utils/DropWrapper";
-import { useEffect } from "react";
+
 export enum DropContentPartType {
   MENTION = "MENTION",
   HASHTAG = "HASHTAG",
@@ -29,7 +29,7 @@ export default function DropListItemContent({
       <DropListItemContentMarkdown drop={drop} />
       {quotedDrop && (
         <div className="tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-ml-4 tw-mt-4">
-          <DropWrapper drop={quotedDrop} isQuoted={true}>
+          <DropWrapper drop={quotedDrop}>
             <DropListItemContentMarkdown drop={quotedDrop} />
           </DropWrapper>
         </div>

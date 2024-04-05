@@ -14,6 +14,8 @@ import {
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { useState } from "react";
+import { CreateDropType } from "../../CreateDrop";
+import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -26,6 +28,8 @@ export default function CreateDropFullDesktop({
   editorState,
   metadata,
   file,
+  disabled,
+  type,
   onViewChange,
   onMetadataEdit,
   onMetadataRemove,
@@ -41,6 +45,8 @@ export default function CreateDropFullDesktop({
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
   readonly file: File | null;
+  readonly disabled: boolean;
+  readonly type: CreateDropType;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (data_key: string) => void;
@@ -55,8 +61,20 @@ export default function CreateDropFullDesktop({
     title?.length ? TITLE_STATE.INPUT : TITLE_STATE.BUTTON
   );
 
+  const getWrapperClasses = () => {
+    switch (type) {
+      case CreateDropType.DROP:
+        return "tw-px-4 sm:tw-p-5 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl";
+      case CreateDropType.QUOTE:
+        return "";
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
+
   return (
-    <div className="tw-relative tw-px-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
+    <div className={`${getWrapperClasses()} tw-relative tw-bg-iron-900`}>
       <button
         onClick={() => onViewChange(CreateDropViewType.COMPACT)}
         type="button"
@@ -131,6 +149,7 @@ export default function CreateDropFullDesktop({
             screenType={CreateDropScreenType.DESKTOP}
             viewType={CreateDropViewType.FULL}
             editorState={editorState}
+            type={type}
             onEditorState={onEditorState}
             onMentionedUser={onMentionedUser}
             onReferencedNft={onReferencedNft}
@@ -144,6 +163,8 @@ export default function CreateDropFullDesktop({
           />
           <CreateDropDesktopFooter
             file={file}
+            disabled={disabled}
+            type={type}
             onFileChange={onFileChange}
             onDrop={onDrop}
           />

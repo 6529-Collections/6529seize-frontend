@@ -1,6 +1,6 @@
 import { useAccount } from "wagmi";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import CreateDrop from "../../drops/create/CreateDrop";
+import CreateDrop, { CreateDropType } from "../../drops/create/CreateDrop";
 import { useEffect, useState } from "react";
 import { amIUser, createPossessionStr } from "../../../helpers/Helpers";
 import Drops from "../../drops/view/Drops";
@@ -29,7 +29,11 @@ export default function UserPageDrops({
               {createPossessionStr(profile.profile?.handle ?? null)} Drops
             </h2>
             {canCreateDrop && (
-              <CreateDrop profile={profile} quotedDropId={null} />
+              <CreateDrop
+                profile={profile}
+                quotedDropId={null}
+                type={CreateDropType.DROP}
+              />
             )}
             <Drops />
           </div>
