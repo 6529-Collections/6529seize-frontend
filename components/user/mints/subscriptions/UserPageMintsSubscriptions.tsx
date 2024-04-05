@@ -15,7 +15,6 @@ import {
 import { AuthContext } from "../../../auth/Auth";
 import UserPageMintsSubscriptionsUpcoming from "./UserPageMintsSubscriptionsUpcoming";
 import UserPageMintsSubscriptionsHistory from "./UserPageMintsSubscriptionsHistory";
-import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -24,8 +23,6 @@ export default function UserPageMintsSubscriptions(
     profile: IProfileAndConsolidations;
   }>
 ) {
-  const isMobile = useIsMobileScreen();
-
   const { connectedProfile } = useContext(AuthContext);
 
   const [isFetching, setIsFetching] = useState<boolean>(true);
@@ -49,7 +46,7 @@ export default function UserPageMintsSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscripionLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
+  const [subscriptionLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
     []
   );
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
@@ -243,7 +240,7 @@ export default function UserPageMintsSubscriptions(
           <UserPageMintsSubscriptionsHistory
             topups={topUpHistory}
             redeemed={redeemedHistory}
-            logs={subscripionLogs}
+            logs={subscriptionLogs}
           />
         </Col>
       </Row>
