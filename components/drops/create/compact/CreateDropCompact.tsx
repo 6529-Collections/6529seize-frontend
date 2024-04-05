@@ -67,13 +67,13 @@ export default function CreateDropCompact({
               onFileChange={onFileChange}
             />
           </div>
-          {/* <div className="tw-self-end">
+          <div className="tw-hidden tw-self-end">
             <button
               type="button"
-              className="tw-group tw-border-t tw-border-solid tw-border-white/[0.15] hover:tw-border-none hover:tw-shadow-drop-btn-active hover:tw-bg-gradient-radial tw-bg-iron-700 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+              className="tw-group tw-border-t tw-border-solid tw-border-white/[0.15] hover:tw-border-none hover:tw-shadow-drop-btn-active hover:tw-bg-gradient-radial tw-bg-iron-700 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-text-iron-400 group-hover:tw-text-iron-100 tw-h-4 tw-w-4 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-text-iron-600 group-hover:tw-text-iron-100 tw-h-4 tw-w-4 tw-transition tw-duration-300 tw-ease-out"
                 enable-background="new 0 0 512.026 512.026"
                 aria-hidden="true"
                 height="512"
@@ -99,7 +99,7 @@ export default function CreateDropCompact({
             </button>
             <button
               type="button"
-              className="tw-bg-gradient-radial tw-shadow-drop-btn-active tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+              className="tw-hidden tw-bg-gradient-radial tw-shadow-drop-btn-active tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
                 className="tw-text-iron-100 tw-h-4 tw-w-4"
@@ -126,7 +126,7 @@ export default function CreateDropCompact({
                 </g>
               </svg>
             </button> 
-          </div> */}
+          </div>
           <div className="tw-self-end">
             <PrimaryButton onClick={onDrop}>Drop</PrimaryButton>
           </div>
