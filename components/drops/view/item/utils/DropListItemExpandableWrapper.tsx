@@ -27,6 +27,7 @@ export default function DropListItemExpandableWrapper({
         onSuccessfulDrop={() => setState(RepActionExpandable.IDLE)}
       />
     ),
+    [RepActionExpandable.REP]: <DropListItemDiscussion />,
     [RepActionExpandable.IDLE]: <></>,
   };
 

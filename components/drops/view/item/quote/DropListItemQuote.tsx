@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../../../../auth/Auth";
-import CreateDrop from "../../../create/CreateDrop";
+import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
 
@@ -29,6 +29,7 @@ export default function DropListItemQuote({
             profile={connectedProfile}
             quotedDropId={quotedDropId}
             isClient={init}
+            type={CreateDropType.QUOTE}
             onSuccessfulDrop={onSuccessfulDrop}
           />
         )}

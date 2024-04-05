@@ -3,7 +3,9 @@ import { DropFull } from "../../../../../entities/IDrop";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
-import DropListItemContentPart, { DropListItemContentPartProps } from "./DropListItemContentPart";
+import DropListItemContentPart, {
+  DropListItemContentPartProps,
+} from "./DropListItemContentPart";
 import { DropContentPartType } from "./DropListItemContent";
 
 const customRenderer = ({
@@ -68,8 +70,8 @@ const customRenderer = ({
 };
 
 export default function DropListItemContentMarkdown({
-  drop
- }: {
+  drop,
+}: {
   readonly drop: DropFull;
 }) {
   return (

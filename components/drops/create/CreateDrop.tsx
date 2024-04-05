@@ -22,15 +22,22 @@ export interface DropRequest {
   readonly file: File | null;
 }
 
+export enum CreateDropType {
+  DROP = "DROP",
+  QUOTE = "QUOTE",
+}
+
 export default function CreateDrop({
   profile,
   quotedDropId,
   isClient = false,
-  onSuccessfulDrop
+  type,
+  onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly quotedDropId: number | null;
-    readonly isClient?: boolean;
+  readonly isClient?: boolean;
+  readonly type: CreateDropType;
   readonly onSuccessfulDrop?: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -129,6 +136,7 @@ export default function CreateDrop({
     <CreateDropWrapper
       profile={profile}
       quotedDropId={quotedDropId}
+      type={type}
       onSubmitDrop={submitDrop}
       key={dropEditorRefreshKey}
     />

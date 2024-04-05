@@ -11,6 +11,7 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
+import { CreateDropType } from "../CreateDrop";
 
 export default function CreateDropFull({
   screenType,
@@ -19,6 +20,8 @@ export default function CreateDropFull({
   editorState,
   metadata,
   file,
+  disabled,
+  type,
   onTitle,
   onMetadataEdit,
   onMetadataRemove,
@@ -35,6 +38,8 @@ export default function CreateDropFull({
   readonly metadata: DropMetadata[];
   readonly editorState: EditorState | null;
   readonly file: File | null;
+  readonly disabled: boolean;
+  readonly type: CreateDropType;
   readonly onTitle: (newV: string | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -53,6 +58,8 @@ export default function CreateDropFull({
         editorState={editorState}
         metadata={metadata}
         file={file}
+        disabled={disabled}
+        type={type}
         onTitle={onTitle}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}
@@ -71,6 +78,8 @@ export default function CreateDropFull({
         editorState={editorState}
         metadata={metadata}
         file={file}
+        disabled={disabled}
+        type={type}
         onEditorState={onEditorState}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}

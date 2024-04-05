@@ -1,15 +1,40 @@
+import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
 
+export enum DropPFPSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+  LARGE = "LARGE",
+}
+
 export default function DropPfp({
   pfpUrl,
+  size = DropPFPSize.MEDIUM,
 }: {
   readonly pfpUrl: string | null | undefined;
+  readonly size?: DropPFPSize;
 }) {
+  const getSizeClasses = (): string => {
+    switch (size) {
+      case DropPFPSize.SMALL:
+        return "tw-h-6 tw-w-6";
+      case DropPFPSize.MEDIUM:
+        return "tw-h-10 tw-w-10";
+      case DropPFPSize.LARGE:
+        return "tw-h-12 tw-w-12";
+      default:
+        assertUnreachable(size);
+        return "";
+    }
+  };
+
   return (
-    <div className="tw-flex-shrink-0 tw-h-10 tw-w-10 tw-rounded-lg tw-overflow-hidden tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-p-[1px]">
+    <div
+      className={`${getSizeClasses()} tw-flex-shrink-0 tw-rounded-lg tw-overflow-hidden tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-p-[1px]`}
+    >
       <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden">
         <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
           {pfpUrl && (
