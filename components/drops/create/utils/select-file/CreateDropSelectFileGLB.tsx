@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateDropSelectFileGLB({
   onFileChange,
@@ -6,15 +7,16 @@ export default function CreateDropSelectFileGLB({
   readonly onFileChange: (file: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const randomId = getRandomObjectId()
   return (
     <div
-      className="tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+      className="tw-cursor-pointer tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       role="button"
       aria-label="Select GLB file"
     >
-      <label htmlFor="create-drop-glb-input">
+      <label htmlFor={randomId}>
         <svg
-          className="tw-cursor-pointer tw-mt-1 tw-h-[1.875rem] tw-w-[1.875rem] tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          className="tw-cursor-pointer tw-mt-1 tw-h-[1.6rem] tw-w-[1.6rem] tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
           viewBox="0 0 512 512"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +34,7 @@ export default function CreateDropSelectFileGLB({
           </defs>
         </svg>
         <input
-          id="create-drop-glb-input"
+          id={randomId}
           ref={inputRef}
           type="file"
           className="tw-hidden"

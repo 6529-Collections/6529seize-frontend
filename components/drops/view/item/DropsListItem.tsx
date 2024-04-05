@@ -12,6 +12,7 @@ export enum RepActionExpandable {
   IDLE = "IDLE",
   DISCUSSION = "DISCUSSION",
   QUOTE = "QUOTE",
+  REP = "REP",
 }
 
 export default function DropsListItem({ drop }: { readonly drop: DropFull }) {

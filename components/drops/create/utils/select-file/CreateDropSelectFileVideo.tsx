@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateDropSelectFileVideo({
   onFileChange,
@@ -6,11 +7,12 @@ export default function CreateDropSelectFileVideo({
   readonly onFileChange: (file: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+    const randomId = getRandomObjectId();
   return (
-    <div className="tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out" role="button" aria-label="Select video file">
-      <label htmlFor="create-drop-video-input">
+    <div className="tw-cursor-pointer tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out" role="button" aria-label="Select video file">
+      <label htmlFor={randomId}>
         <svg
-          className="tw-cursor-pointer tw-h-6 tw-w-6 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +26,7 @@ export default function CreateDropSelectFileVideo({
           />
         </svg>
         <input
-          id="create-drop-video-input"
+          id={randomId}
           ref={inputRef}
           type="file"
           className="tw-hidden"

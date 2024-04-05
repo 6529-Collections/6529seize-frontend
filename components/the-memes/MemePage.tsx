@@ -28,6 +28,7 @@ import {
 } from "./MemePageYourCards";
 import { AuthContext } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -322,56 +323,15 @@ export default function MemePage() {
                     <span className="font-lightest">The</span> Memes
                   </h1>
                 </Col>
-                {/* {nft && (
-                  <Col className="d-flex align-items-center justify-content-end">
-                    <TwitterShareButton
-                      className="twitter-share-button"
-                      url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n\n#6529SEIZE\n\n`}>
-                      <TwitterIcon
-                        size={30}
-                        round
-                        iconFillColor="white"
-                        bgStyle={{ fill: "transparent" }}
-                      />
-                      Tweet
-                    </TwitterShareButton>
-                  </Col>
-                )} */}
               </Row>
               {nftMeta && nft && (
                 <>
-                  <Row className="pt-2">
-                    <Col>
+                  <Row className="pt-3 pb-3">
+                    <Col className="d-flex gap-2 align-items-center">
                       {nftId && (
                         <>
-                          <h2>
-                            <a
-                              href={`/the-memes/${
-                                parseInt(nftId) - 1
-                              }?focus=${activeTab}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 1
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-left" />
-                            </a>
-                          </h2>
-                          <h2>
-                            &nbsp;
-                            <a
-                              href={`/the-memes/${
-                                parseInt(nftId) + 1
-                              }?focus=${activeTab}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === nftMeta.collection_size
-                                  ? styles.nftNextdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-right" />
-                            </a>
-                          </h2>
+                          <MemeNavigationBtn nft={nftMeta} icon="previous" />
+                          <MemeNavigationBtn nft={nftMeta} icon="next" />
                         </>
                       )}
                     </Col>
@@ -391,16 +351,12 @@ export default function MemePage() {
                   <Row className="pt-3 pb-3">
                     <Col>
                       {MEME_TABS.map((tab) => (
-                        <span
+                        <TabButton
                           key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                          className={`${styles.tabFocus} ${
-                            activeTab === tab.focus ? styles.tabFocusActive : ""
-                          }`}
-                          onClick={() => {
-                            setActiveTab(tab.focus);
-                          }}>
-                          {tab.title}
-                        </span>
+                          tab={tab}
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
+                        />
                       ))}
                     </Col>
                   </Row>
@@ -412,5 +368,63 @@ export default function MemePage() {
         </Row>
       </Container>
     </>
+  );
+}
+
+function MemeNavigationBtn(
+  props: Readonly<{
+    nft: MemesExtendedData;
+    icon: "next" | "previous";
+  }>
+) {
+  const isMobile = useIsMobileScreen();
+
+  const width = isMobile ? 25 : 35;
+
+  const isDisabled =
+    props.icon === "previous"
+      ? props.nft.id === 1
+      : props.nft.id === props.nft.collection_size;
+
+  const icon = (
+    <FontAwesomeIcon
+      icon={
+        props.icon === "previous"
+          ? "chevron-circle-left"
+          : "chevron-circle-right"
+      }
+      width={width}
+      color={isDisabled ? "#9a9a9a" : "#fff"}
+      cursor={isDisabled ? "default" : "pointer"}
+    />
+  );
+
+  if (isDisabled) {
+    return icon;
+  } else {
+    const href = `/the-memes/${
+      props.icon === "previous" ? props.nft.id - 1 : props.nft.id + 1
+    }`;
+    return <a href={href}>{icon}</a>;
+  }
+}
+
+function TabButton(
+  props: Readonly<{
+    tab: MemeTab;
+    activeTab: MEME_FOCUS | undefined;
+    setActiveTab: (focus: MEME_FOCUS) => void;
+  }>
+) {
+  return (
+    <button
+      className={`btn-link ${styles.tabFocus} ${
+        props.activeTab === props.tab.focus ? styles.tabFocusActive : ""
+      }`}
+      onClick={() => {
+        props.setActiveTab(props.tab.focus);
+      }}>
+      {props.tab.title}
+    </button>
   );
 }

@@ -14,6 +14,8 @@ import {
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { useState } from "react";
+import { CreateDropType } from "../../CreateDrop";
+import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -26,6 +28,8 @@ export default function CreateDropFullDesktop({
   editorState,
   metadata,
   file,
+  disabled,
+  type,
   onViewChange,
   onMetadataEdit,
   onMetadataRemove,
@@ -41,6 +45,8 @@ export default function CreateDropFullDesktop({
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
   readonly file: File | null;
+  readonly disabled: boolean;
+  readonly type: CreateDropType;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (data_key: string) => void;
@@ -55,12 +61,24 @@ export default function CreateDropFullDesktop({
     title?.length ? TITLE_STATE.INPUT : TITLE_STATE.BUTTON
   );
 
+  const getWrapperClasses = () => {
+    switch (type) {
+      case CreateDropType.DROP:
+        return "tw-px-4 sm:tw-p-5 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl";
+      case CreateDropType.QUOTE:
+        return "";
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
+
   return (
-    <div className="tw-relative tw-px-4 sm:tw-p-5 tw-bg-iron-900 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl">
+    <div className={`${getWrapperClasses()} tw-relative tw-bg-iron-900`}>
       <button
         onClick={() => onViewChange(CreateDropViewType.COMPACT)}
         type="button"
-        className="tw-mb-4 tw-ml-auto tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+        className="tw-relative tw-ml-auto tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
       >
         <span className="tw-sr-only tw-text-sm">Cancel</span>
         <svg
@@ -78,7 +96,7 @@ export default function CreateDropFullDesktop({
           />
         </svg>
       </button>
-      <div className="tw-absolute tw-right-5 -tw-translate-y-4">
+      <div className="tw-relative tw-flex tw-justify-end -tw-mb-4 tw-mt-2">
         {titleState === TITLE_STATE.BUTTON && (
           <button
             onClick={() => setTitleState(TITLE_STATE.INPUT)}
@@ -131,6 +149,7 @@ export default function CreateDropFullDesktop({
             screenType={CreateDropScreenType.DESKTOP}
             viewType={CreateDropViewType.FULL}
             editorState={editorState}
+            type={type}
             onEditorState={onEditorState}
             onMentionedUser={onMentionedUser}
             onReferencedNft={onReferencedNft}
@@ -144,6 +163,8 @@ export default function CreateDropFullDesktop({
           />
           <CreateDropDesktopFooter
             file={file}
+            disabled={disabled}
+            type={type}
             onFileChange={onFileChange}
             onDrop={onDrop}
           />

@@ -1,11 +1,14 @@
+import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+
 export default function UploadMediaButtonPlugin({
   onFileChange,
 }: {
   readonly onFileChange: (file: File) => void;
 }) {
+  const id = getRandomObjectId();
   return (
     <label
-      htmlFor="create-drop-any-input"
+      htmlFor={id}
       className="tw-absolute tw-top-1 md:tw-top-0 tw-right-12 tw-p-2 tw-rounded-lg"
     >
       <svg
@@ -24,7 +27,7 @@ export default function UploadMediaButtonPlugin({
         />
       </svg>
       <input
-        id="create-drop-any-input"
+        id={id}
         type="file"
         className="tw-hidden"
         accept="image/*,video/*,.glb,audio/*"

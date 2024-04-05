@@ -11,9 +11,10 @@ import {
 } from "../../../../entities/IDrop";
 import { createBreakpoint } from "react-use";
 import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
-import { DropRequest } from "../CreateDrop";
+import { CreateDropType, DropRequest } from "../CreateDrop";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
+import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 export enum CreateDropViewType {
   COMPACT = "COMPACT",
@@ -30,10 +31,12 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 export default function CreateDropWrapper({
   profile,
   quotedDropId,
+  type,
   onSubmitDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly quotedDropId: number | null;
+  readonly type: CreateDropType;
   readonly onSubmitDrop: (dropRequest: DropRequest) => void;
 }) {
   const breakpoint = useBreakpoint();
@@ -104,6 +107,10 @@ export default function CreateDropWrapper({
       ])
     ) ?? null;
 
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => setCanSubmit(!!getMarkdown()), [editorState]);
+
   const onDrop = () => {
     const markdown = getMarkdown();
     const mentions = mentionedUsers.filter((user) =>
@@ -135,6 +142,8 @@ export default function CreateDropWrapper({
         file={file}
         title={title}
         metadata={metadata}
+        disabled={!canSubmit}
+        type={type}
         onViewChange={setViewType}
         onMetadataRemove={onMetadataRemove}
         onEditorState={setEditorState}
@@ -152,6 +161,8 @@ export default function CreateDropWrapper({
         metadata={metadata}
         editorState={editorState}
         file={file}
+        disabled={!canSubmit}
+        type={type}
         onTitle={setTitle}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}
@@ -164,5 +175,18 @@ export default function CreateDropWrapper({
       />
     ),
   };
-  return <div className="tw-mt-2 lg:tw-mt-4">{components[viewType]}</div>;
+
+  const getClasses = () => {
+    switch (type) {
+      case CreateDropType.DROP:
+        return "tw-mt-2 lg:tw-mt-4";
+      case CreateDropType.QUOTE:
+        return "";
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
+
+  return <div className={getClasses()}>{components[viewType]}</div>;
 }
