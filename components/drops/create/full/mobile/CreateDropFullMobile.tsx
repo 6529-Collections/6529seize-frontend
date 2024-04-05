@@ -14,9 +14,10 @@ import {
 import CreateDropContent from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
-import PrimaryButton from "../../../../utils/buttons/PrimaryButton";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import DropPfp from "../../utils/DropPfp";
+import { CreateDropType } from "../../CreateDrop";
+import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -29,6 +30,8 @@ export default function CreateDropFullMobile({
   editorState,
   metadata,
   file,
+  disabled,
+  type,
   onEditorState,
   onMetadataEdit,
   onMetadataRemove,
@@ -44,6 +47,8 @@ export default function CreateDropFullMobile({
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
   readonly file: File | null;
+  readonly disabled: boolean;
+  readonly type: CreateDropType;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -63,9 +68,22 @@ export default function CreateDropFullMobile({
     title?.length ? TITLE_STATE.INPUT : TITLE_STATE.BUTTON
   );
 
+  const getSubmitText = () => {
+    switch (type) {
+      case CreateDropType.DROP:
+        return "Drop";
+      case CreateDropType.QUOTE:
+        return "Quote";
+      default:
+        assertUnreachable(type);
+        return "";
+    }
+  };
+
   return (
     <CreateDropFullMobileWrapper
       isOpen={isOpen}
+      type={type}
       onClose={onClose}
       onViewClick={onViewClick}
     >
@@ -113,6 +131,7 @@ export default function CreateDropFullMobile({
             screenType={CreateDropScreenType.MOBILE}
             viewType={CreateDropViewType.FULL}
             editorState={editorState}
+            type={type}
             onEditorState={onEditorState}
             onMentionedUser={onMentionedUser}
             onReferencedNft={onReferencedNft}
@@ -130,10 +149,15 @@ export default function CreateDropFullMobile({
         <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
           <button
             type="button"
+            disabled={disabled}
             onClick={onDrop}
-            className="tw-w-full tw-block tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 hover:tw-ring-primary-600 placeholder:tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm hover:tw-bg-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            className={`${
+              disabled
+                ? "tw-opacity-50 tw-text-iron-200"
+                : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
+            } tw-w-full tw-block tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
           >
-            Drop
+            {getSubmitText()}
           </button>
         </div>
       </div>

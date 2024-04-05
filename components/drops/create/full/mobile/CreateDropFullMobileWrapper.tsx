@@ -1,17 +1,30 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { CreateDropType } from "../../CreateDrop";
 
 export default function CreateDropFullMobileWrapper({
   isOpen,
+  type,
   onClose,
   onViewClick,
   children,
 }: {
   readonly isOpen: boolean;
+  readonly type: CreateDropType;
   readonly onClose: () => void;
   readonly onViewClick: () => void;
   readonly children: React.ReactNode;
 }) {
+  const getTitle = () => {
+    switch (type) {
+      case CreateDropType.DROP:
+        return "Create a drop";
+      case CreateDropType.QUOTE:
+        return "Quote a drop";
+      default:
+        return "";
+    }
+  };
   return (
     <Transition.Root appear={true} show={isOpen} as={Fragment}>
       <Dialog
@@ -86,7 +99,7 @@ export default function CreateDropFullMobileWrapper({
                   >
                     <div className="tw-px-4 sm:tw-px-6">
                       <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
-                        Create a drop
+                        {getTitle()}
                       </Dialog.Title>
                     </div>
                     {children}
