@@ -425,16 +425,18 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                   <FontAwesomeIcon
                     icon="chevron-circle-up"
                     onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.ASC ? styles.disabled : ""
-                    }`}
+                    width={16}
+                    color={sortDir != SortDirection.ASC ? "#9a9a9a" : "#fff"}
+                    cursor={"pointer"}
+                    className={styles.sortDirection}
                   />{" "}
                   <FontAwesomeIcon
                     icon="chevron-circle-down"
                     onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.DESC ? styles.disabled : ""
-                    }`}
+                    width={16}
+                    color={sortDir != SortDirection.DESC ? "#9a9a9a" : "#fff"}
+                    cursor={"pointer"}
+                    className={styles.sortDirection}
                   />
                 </Col>
               </Row>
