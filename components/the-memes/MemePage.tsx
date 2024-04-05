@@ -354,7 +354,7 @@ export default function MemePage() {
                         <TabButton
                           key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
                           tab={tab}
-                          activeTab={activeTab!}
+                          activeTab={activeTab}
                           setActiveTab={setActiveTab}
                         />
                       ))}
@@ -412,7 +412,7 @@ function MemeNavigationBtn(
 function TabButton(
   props: Readonly<{
     tab: MemeTab;
-    activeTab: MEME_FOCUS;
+    activeTab: MEME_FOCUS | undefined;
     setActiveTab: (focus: MEME_FOCUS) => void;
   }>
 ) {
