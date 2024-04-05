@@ -67,8 +67,9 @@
 }
 
 .sortDirection {
-  width: $font-size;
-  cursor: pointer;
+  &:hover {
+    color: $off-white;
+  }
 }
 
 .disabled {
@@ -105,28 +106,6 @@
   .arweaveLink {
     font-size: 8px;
   }
-}
-
-.nextPreviousNft {
-  width: 35px;
-  svg {
-    width: 35px;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .nextPreviousNft {
-    width: 25px;
-    svg {
-      width: 25px;
-    }
-  }
-}
-
-.nftNextdisabled,
-.nftPreviousdisabled {
-  pointer-events: none !important;
-  color: darken($color: $font-color, $amount: $darken-percentage);
 }
 
 .transactionsTable {
@@ -234,6 +213,7 @@
   cursor: pointer;
   margin-right: 20px;
   color: $lightest-grey;
+  text-decoration: none;
 
   &:hover {
     color: white;
