@@ -1,4 +1,4 @@
-import { IDistribution } from "../../../../../entities/IDistribution";
+import { Distribution } from "../../../../../entities/IDistribution";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import CommonTablePagination from "../../../../utils/table/paginator/CommonTablePagination";
 import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
@@ -13,7 +13,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
   totalPages,
   setPage,
 }: {
-  readonly data: IDistribution[];
+  readonly data: Distribution[];
   readonly profile: IProfileAndConsolidations;
   readonly isFirstLoading: boolean;
   readonly loading: boolean;

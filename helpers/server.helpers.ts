@@ -1,5 +1,4 @@
 import { NFT, NFTLite } from "../entities/INFT";
-import { OwnerLite } from "../entities/IOwner";
 import {
   ApiProfileRepRatesState,
   CicStatement,
@@ -10,7 +9,6 @@ import {
 } from "../entities/IProfile";
 import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
-import { areEqualAddresses } from "./Helpers";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
 import jwtDecode from "jwt-decode";
@@ -144,58 +142,6 @@ export const getSeasons = async (
     headers,
   });
   return seasons;
-};
-
-export const getOwned = async ({
-  wallets,
-  headers,
-}: {
-  wallets: string[];
-  headers: Record<string, string>;
-}): Promise<OwnerLite[]> => {
-  if (!wallets.length) {
-    return [];
-  }
-  const baseURL = `owners?wallet=${wallets.join(",")}`;
-  let page: number | null = null;
-  const allOwned: OwnerLite[] = [];
-  do {
-    const ownedResponse: {
-      data: OwnerLite[];
-      page: number;
-      next: string | null;
-    } = await commonApiFetch<{
-      data: OwnerLite[];
-      page: number;
-      next: string | null;
-    }>({
-      endpoint: page ? `${baseURL}&page=${page}` : baseURL,
-      headers,
-    });
-    ownedResponse.data.forEach((o) =>
-      allOwned.push({
-        token_id: o.token_id,
-        contract: o.contract,
-        balance: o.balance,
-      })
-    );
-
-    page = ownedResponse.next ? ownedResponse.page + 1 : null;
-  } while (page);
-
-  return allOwned.reduce<OwnerLite[]>((acc, curr) => {
-    const existing = acc.find(
-      (a) =>
-        a.token_id === curr.token_id &&
-        areEqualAddresses(a.contract, curr.contract)
-    );
-    if (existing) {
-      existing.balance += curr.balance;
-    } else {
-      acc.push(curr);
-    }
-    return acc;
-  }, []);
 };
 
 export const getProfileRatings = async ({

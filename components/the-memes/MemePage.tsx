@@ -1,6 +1,6 @@
 import styles from "./TheMemes.module.scss";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
@@ -9,19 +9,10 @@ import { DBResponse } from "../../entities/IDBResponse";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
-import { TDHMetrics } from "../../entities/ITDH";
+import { ConsolidatedTDH } from "../../entities/ITDH";
 import { fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
-import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
-import Timeline from "../timeline/Timeline";
-import RememeImage from "../nft-image/RememeImage";
-import {
-  NFT,
-  MemesExtendedData,
-  NftTDH,
-  NftRank,
-  Rememe,
-} from "../../entities/INFT";
+import { NFT, MemesExtendedData, NftTDH, NftRank } from "../../entities/INFT";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { MemePageActivity } from "./MemePageActivity";
 import { MemePageArt } from "./MemePageArt";
@@ -35,6 +26,9 @@ import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
+import { AuthContext } from "../auth/Auth";
+import { commonApiFetch } from "../../services/api/common-api";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -52,12 +46,16 @@ export enum MEME_FOCUS {
 
 const ACTIVITY_PAGE_SIZE = 25;
 
-interface Props {
-  wallets: string[];
-}
-
-export default function MemePage(props: Readonly<Props>) {
+export default function MemePage() {
   const router = useRouter();
+  const { connectedProfile } = useContext(AuthContext);
+  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+
+  useEffect(() => {
+    setConnectedWallets(
+      connectedProfile?.consolidation.wallets.map((w) => w.wallet.address) ?? []
+    );
+  }, [connectedProfile]);
 
   const [nftId, setNftId] = useState<string>();
 
@@ -70,12 +68,9 @@ export default function MemePage(props: Readonly<Props>) {
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [myOwner, setMyOwner] = useState<TDHMetrics>();
+  const [myOwner, setMyOwner] = useState<ConsolidatedTDH>();
   const [myTDH, setMyTDH] = useState<NftTDH>();
   const [myRank, setMyRank] = useState<NftRank>();
-
-  const [collectionCount, setCollectionCount] = useState(-1);
-  const [collectionRank, setCollectionRank] = useState(-1);
 
   const [userLoaded, setUserLoaded] = useState(false);
 
@@ -186,27 +181,31 @@ export default function MemePage(props: Readonly<Props>) {
     }
   }, [nftId]);
 
+  function updateNftBalances(data: Transaction[]) {
+    let countIn = 0;
+    let countOut = 0;
+    data.map((d: Transaction) => {
+      if (connectedWallets.some((w) => areEqualAddresses(w, d.from_address))) {
+        countOut += d.token_count;
+      }
+      if (connectedWallets.some((w) => areEqualAddresses(w, d.to_address))) {
+        countIn += d.token_count;
+      }
+    });
+    setNftBalance(countIn - countOut);
+  }
+
   useEffect(() => {
-    if (props.wallets.length > 0 && nftId) {
+    if (connectedWallets.length && nftId) {
       fetchUrl(
         `${
           process.env.API_ENDPOINT
-        }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${props.wallets.join(
+        }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
           ","
         )}&id=${nftId}`
       ).then((response: DBResponse) => {
         setTransactions(response.data);
-        let countIn = 0;
-        let countOut = 0;
-        response.data.map((d: Transaction) => {
-          if (props.wallets.some((w) => areEqualAddresses(w, d.from_address))) {
-            countOut += d.token_count;
-          }
-          if (props.wallets.some((w) => areEqualAddresses(w, d.to_address))) {
-            countIn += d.token_count;
-          }
-        });
-        setNftBalance(countIn - countOut);
+        updateNftBalances(response.data);
         setUserLoaded(true);
       });
     } else {
@@ -214,53 +213,19 @@ export default function MemePage(props: Readonly<Props>) {
       setUserLoaded(true);
       setTransactions([]);
     }
-  }, [nftId, props.wallets]);
+  }, [nftId, connectedWallets]);
 
   useEffect(() => {
-    if (props.wallets.length > 0 && nftId) {
-      const url = `${process.env.API_ENDPOINT}/api/${
-        props.wallets.length > 1 ? "consolidated_tdh" : "tdh"
-      }/${MEMES_CONTRACT}/${nftId}?wallet=${props.wallets[0]}`;
-      fetchUrl(url).then((response: DBResponse) => {
-        if (response.data.length > 0) {
-          const mine: TDHMetrics = response.data[0];
-          setMyOwner(mine);
-          setMyTDH(mine.memes.find((m) => m.id === parseInt(nftId)));
-          setMyRank(mine.memes_ranks.find((m) => m.id === parseInt(nftId)));
-        }
+    if (connectedWallets.length > 0 && nftId) {
+      commonApiFetch<ConsolidatedTDH>({
+        endpoint: `tdh/consolidation/${connectedProfile?.consolidation.consolidation_key}`,
+      }).then((response) => {
+        setMyOwner(response);
+        setMyTDH(response.memes.find((m) => m.id === parseInt(nftId)));
+        setMyRank(response.memes_ranks.find((m) => m.id === parseInt(nftId)));
       });
     }
-  }, [props.wallets, nftId]);
-
-  useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NFT[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchNfts(response.next, [...mynfts].concat(response.data));
-        } else {
-          const newnfts = [...mynfts]
-            .concat(response.data)
-            .filter((value, index, self) => {
-              return self.findIndex((v) => v.id === value.id) === index;
-            });
-
-          const rankedNFTs = newnfts.sort((a, b) =>
-            a.tdh_rank > b.tdh_rank ? 1 : -1
-          );
-          setCollectionCount(newnfts.length);
-          if (nftId) {
-            setCollectionRank(
-              rankedNFTs.map((r) => r.id).indexOf(parseInt(nftId))
-            );
-          }
-        }
-      });
-    }
-    if (router.isReady && nftId) {
-      const initialUrlNfts = `${process.env.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}`;
-      fetchNfts(initialUrlNfts, []);
-    }
-  }, [router.isReady, nftId]);
+  }, [nftId, connectedWallets]);
 
   function printContent() {
     return (
@@ -285,7 +250,7 @@ export default function MemePage(props: Readonly<Props>) {
                       animation={true}
                       height={650}
                       balance={nftBalance}
-                      showUnseized={props.wallets.length > 0}
+                      showUnseized={connectedWallets.length > 0}
                     />
                   </Col>
                   <MemePageLiveRightMenu
@@ -298,7 +263,7 @@ export default function MemePage(props: Readonly<Props>) {
                     <MemePageYourCardsRightMenu
                       show={activeTab === MEME_FOCUS.YOUR_CARDS}
                       transactions={transactions}
-                      wallets={props.wallets}
+                      wallets={connectedWallets}
                       nft={nft}
                       nftBalance={nftBalance}
                       myOwner={myOwner}
@@ -309,8 +274,6 @@ export default function MemePage(props: Readonly<Props>) {
                   <MemePageCollectorsRightMenu
                     show={activeTab === MEME_FOCUS.COLLECTORS}
                     nft={nft}
-                    collectionCount={collectionCount}
-                    collectionRank={collectionRank}
                   />
                 </>
               )}
@@ -329,7 +292,6 @@ export default function MemePage(props: Readonly<Props>) {
             <MemePageCollectorsSubMenu
               show={activeTab === MEME_FOCUS.COLLECTORS}
               nft={nft}
-              pageSize={ACTIVITY_PAGE_SIZE}
             />
           </Row>
         </Container>
@@ -361,56 +323,15 @@ export default function MemePage(props: Readonly<Props>) {
                     <span className="font-lightest">The</span> Memes
                   </h1>
                 </Col>
-                {/* {nft && (
-                  <Col className="d-flex align-items-center justify-content-end">
-                    <TwitterShareButton
-                      className="twitter-share-button"
-                      url={window.location.href.split("?")[0]}
-                      title={`Meme Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n\n#6529SEIZE\n\n`}>
-                      <TwitterIcon
-                        size={30}
-                        round
-                        iconFillColor="white"
-                        bgStyle={{ fill: "transparent" }}
-                      />
-                      Tweet
-                    </TwitterShareButton>
-                  </Col>
-                )} */}
               </Row>
               {nftMeta && nft && (
                 <>
-                  <Row className="pt-2">
-                    <Col>
+                  <Row className="pt-3 pb-3">
+                    <Col className="d-flex gap-2 align-items-center">
                       {nftId && (
                         <>
-                          <h2>
-                            <a
-                              href={`/the-memes/${
-                                parseInt(nftId) - 1
-                              }?focus=${activeTab}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 1
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-left" />
-                            </a>
-                          </h2>
-                          <h2>
-                            &nbsp;
-                            <a
-                              href={`/the-memes/${
-                                parseInt(nftId) + 1
-                              }?focus=${activeTab}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === nftMeta.collection_size
-                                  ? styles.nftNextdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-right" />
-                            </a>
-                          </h2>
+                          <MemeNavigationBtn nft={nftMeta} icon="previous" />
+                          <MemeNavigationBtn nft={nftMeta} icon="next" />
                         </>
                       )}
                     </Col>
@@ -430,16 +351,12 @@ export default function MemePage(props: Readonly<Props>) {
                   <Row className="pt-3 pb-3">
                     <Col>
                       {MEME_TABS.map((tab) => (
-                        <span
+                        <TabButton
                           key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                          className={`${styles.tabFocus} ${
-                            activeTab === tab.focus ? styles.tabFocusActive : ""
-                          }`}
-                          onClick={() => {
-                            setActiveTab(tab.focus);
-                          }}>
-                          {tab.title}
-                        </span>
+                          tab={tab}
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
+                        />
                       ))}
                     </Col>
                   </Row>
@@ -451,5 +368,63 @@ export default function MemePage(props: Readonly<Props>) {
         </Row>
       </Container>
     </>
+  );
+}
+
+function MemeNavigationBtn(
+  props: Readonly<{
+    nft: MemesExtendedData;
+    icon: "next" | "previous";
+  }>
+) {
+  const isMobile = useIsMobileScreen();
+
+  const width = isMobile ? 25 : 35;
+
+  const isDisabled =
+    props.icon === "previous"
+      ? props.nft.id === 1
+      : props.nft.id === props.nft.collection_size;
+
+  const icon = (
+    <FontAwesomeIcon
+      icon={
+        props.icon === "previous"
+          ? "chevron-circle-left"
+          : "chevron-circle-right"
+      }
+      width={width}
+      color={isDisabled ? "#9a9a9a" : "#fff"}
+      cursor={isDisabled ? "default" : "pointer"}
+    />
+  );
+
+  if (isDisabled) {
+    return icon;
+  } else {
+    const href = `/the-memes/${
+      props.icon === "previous" ? props.nft.id - 1 : props.nft.id + 1
+    }`;
+    return <a href={href}>{icon}</a>;
+  }
+}
+
+function TabButton(
+  props: Readonly<{
+    tab: MemeTab;
+    activeTab: MEME_FOCUS | undefined;
+    setActiveTab: (focus: MEME_FOCUS) => void;
+  }>
+) {
+  return (
+    <button
+      className={`btn-link ${styles.tabFocus} ${
+        props.activeTab === props.tab.focus ? styles.tabFocusActive : ""
+      }`}
+      onClick={() => {
+        props.setActiveTab(props.tab.focus);
+      }}>
+      {props.tab.title}
+    </button>
   );
 }
