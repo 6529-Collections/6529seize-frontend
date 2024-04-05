@@ -16,7 +16,7 @@ export default function CreateDropSelectFile({
       <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
         Upload Media
       </label>
-      <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-1">
         <CreateDropSelectFileImage onFileChange={onFileChange} />
         <CreateDropSelectFileVideo onFileChange={onFileChange} />
         <CreateDropSelectFileGLB onFileChange={onFileChange} />

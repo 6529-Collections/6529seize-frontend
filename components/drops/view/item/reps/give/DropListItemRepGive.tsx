@@ -180,32 +180,30 @@ export default function DropListItemRepGive({
   };
 
   return (
-    <div className="tw-mt-7">
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div>
-          <span
-            className={`${getRepClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-          >
-            {getRepText()}
-          </span>
-        </div>
-        <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-[0.3125rem]">
-          <DropListItemRepGiveChangeButton
-            type={RepChangeType.INCREASE}
-            handleMouseDown={handleMouseDown}
-            handleMouseUp={handleMouseUp}
-          />
-          <DropListItemRepGiveSubmit
-            rep={onProgressRep}
-            drop={drop}
-            onSuccessfulRepChange={onSuccessfulRepChange}
-          />
-          <DropListItemRepGiveChangeButton
-            type={RepChangeType.DECREASE}
-            handleMouseDown={handleMouseDown}
-            handleMouseUp={handleMouseUp}
-          />
-        </div>
+    <div className="tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
+      <div className="tw-text-center">
+        <span
+          className={`${getRepClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+        >
+          {getRepText()}
+        </span>
+      </div>
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-[0.3125rem]">
+        <DropListItemRepGiveChangeButton
+          type={RepChangeType.INCREASE}
+          handleMouseDown={handleMouseDown}
+          handleMouseUp={handleMouseUp}
+        />
+        <DropListItemRepGiveSubmit
+          rep={onProgressRep}
+          drop={drop}
+          onSuccessfulRepChange={onSuccessfulRepChange}
+        />
+        <DropListItemRepGiveChangeButton
+          type={RepChangeType.DECREASE}
+          handleMouseDown={handleMouseDown}
+          handleMouseUp={handleMouseUp}
+        />
       </div>
     </div>
   );
