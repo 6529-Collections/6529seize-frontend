@@ -76,9 +76,7 @@ export default function UserPageMintsSubscriptionsMode(
     <Container className="no-padding">
       <Row>
         <Col>
-          <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-l sm:tw-tracking-tight">
-            Mode
-          </h2>
+          <h5>Mode</h5>
         </Col>
       </Row>
       <Row className="pt-1">

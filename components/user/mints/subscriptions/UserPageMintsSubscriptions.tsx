@@ -184,9 +184,7 @@ export default function UserPageMintsSubscriptions(
       <Container className="no-padding pb-5">
         <Row>
           <Col className="d-flex align-items-center justify-content-between">
-            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
-              Subscribe
-            </h2>
+            <h4>Subscribe</h4>
           </Col>
         </Row>
         <Row>
@@ -202,36 +200,32 @@ export default function UserPageMintsSubscriptions(
     <Container className="no-padding pb-5">
       <Row>
         <Col className="d-flex align-items-center justify-content-between">
-          <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
-            Subscribe
-          </h2>
+          <h4>Subscribe</h4>
         </Col>
       </Row>
-      <Row className="pt-2 pb-2">
+      <Row>
         <Col
-          className={`d-flex ${
-            isMobile ? `flex-column gap-3` : "justify-content-between"
-          }`}>
-          <div className="d-flex flex-column gap-3">
-            <UserPageMintsSubscriptionsBalance
-              details={details}
-              fetching={isFetching}
-              refresh={refresh}
-              show_refresh={isConnectedAccount}
-            />
-            <UserPageMintsSubscriptionsMode
-              profile={props.profile}
-              details={details}
-              readonly={!isConnectedAccount}
-              refresh={refresh}
-            />
-          </div>
-          {isConnectedAccount && (
-            <div>
-              <UserPageMintsSubscriptionsTopUp profile={props.profile} />
-            </div>
-          )}
+          sm={12}
+          md={6}
+          className="pt-2 pb-2 d-flex justify-content-between gap-5">
+          <UserPageMintsSubscriptionsBalance
+            details={details}
+            fetching={isFetching}
+            refresh={refresh}
+            show_refresh={isConnectedAccount}
+          />
+          <UserPageMintsSubscriptionsMode
+            profile={props.profile}
+            details={details}
+            readonly={!isConnectedAccount}
+            refresh={refresh}
+          />
         </Col>
+        {isConnectedAccount && (
+          <Col className="pt-2 pb-2" sm={12} md={{ span: 4, offset: 2 }}>
+            <UserPageMintsSubscriptionsTopUp profile={props.profile} />
+          </Col>
+        )}
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
