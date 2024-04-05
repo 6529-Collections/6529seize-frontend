@@ -60,7 +60,7 @@ export default function CreateDropFullDesktop({
       <button
         onClick={() => onViewChange(CreateDropViewType.COMPACT)}
         type="button"
-        className="tw-mb-4 tw-ml-auto tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+        className="tw-relative tw-ml-auto tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
       >
         <span className="tw-sr-only tw-text-sm">Cancel</span>
         <svg
@@ -78,7 +78,7 @@ export default function CreateDropFullDesktop({
           />
         </svg>
       </button>
-      <div className="tw-absolute tw-right-5 -tw-translate-y-4">
+      <div className="tw-relative tw-flex tw-justify-end -tw-mb-4 tw-mt-2">
         {titleState === TITLE_STATE.BUTTON && (
           <button
             onClick={() => setTitleState(TITLE_STATE.INPUT)}

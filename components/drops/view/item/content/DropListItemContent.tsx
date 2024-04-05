@@ -28,7 +28,7 @@ export default function DropListItemContent({
     <div className="tw-w-full">
       <DropListItemContentMarkdown drop={drop} />
       {quotedDrop && (
-        <div className="tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-rounded-xl tw-p-2 tw-ml-4 tw-mt-4">
+        <div className="tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-ml-4 tw-mt-4">
           <DropWrapper drop={quotedDrop} isQuoted={true}>
             <DropListItemContentMarkdown drop={quotedDrop} />
           </DropWrapper>

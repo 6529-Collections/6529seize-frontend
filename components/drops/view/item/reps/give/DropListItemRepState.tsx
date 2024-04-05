@@ -26,7 +26,7 @@ export default function DropListItemRepState({
   const totalRepColor = getRepColor(totalRep);
   return (
     <DropListItemVotesTooltip myVotes={userRep} current={totalRep}>
-      <div className="tw-min-w-[42px] tw-inline-flex tw-justify-center tw-text-center tw-absolute tw-right-5 tw-top-5">
+      <div className="tw-hidden tw-min-w-[42px] tw-inline-flex tw-justify-center tw-text-center tw-absolute tw-right-5 tw-top-5">
         {!!userRep && (
           <>
             <div
