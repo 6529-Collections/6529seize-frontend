@@ -17,7 +17,7 @@ export default function DropListItemActions({
   };
 
   return (
-    <div className="tw-mt-4 tw-ml-12 tw-border-t tw-flex tw-items-center tw-justify-between tw-gap-x-8">
+    <div className="tw-mt-4 tw-ml-12 tw-border-t tw-flex tw-items-center tw-justify-between tw-w-full lg:tw-gap-x-8">
       <DropListItemActionsItemWrapper
         state={RepActionExpandable.DISCUSSION}
         activeState={state}
