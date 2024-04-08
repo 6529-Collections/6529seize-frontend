@@ -56,7 +56,7 @@ export default function DropListItemActionsRep({
         >
           <>
             <svg
-              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300"
+              className="tw-flex-shrink-0 tw-w-5 tw-h-5 group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300"
               width="354"
               height="368"
               viewBox="0 0 354 368"
