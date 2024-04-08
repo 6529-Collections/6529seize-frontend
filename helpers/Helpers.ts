@@ -421,7 +421,7 @@ export const formatNumber = (num: number): string => {
   return parseFloat((num / 1000000).toFixed(2)).toString() + "M";
 };
 
-export function displayDecimal(value: number, places: number): string {
+export function displayDecimal(value: number, places?: number): string {
   if (0 >= value) {
     return "-";
   }
@@ -434,10 +434,10 @@ export function displayDecimal(value: number, places: number): string {
     return Number(value.toFixed(exponent)).toString();
   }
 
-  if (value >= 0.01) {
+  if (places) {
     return Number(value.toFixed(2)).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: places,
+      maximumFractionDigits: places,
     });
   }
 
