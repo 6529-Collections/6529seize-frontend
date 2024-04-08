@@ -5,6 +5,7 @@ import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
 import DropListItemQuote from "../quote/DropListItemQuote";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import { useEffect, useState } from "react";
+import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 
 export default function DropListItemExpandableWrapper({
   drop,
@@ -18,8 +19,15 @@ export default function DropListItemExpandableWrapper({
   const [init, setInit] = useState(false);
   useEffect(() => setInit(true), []);
   const open = state !== RepActionExpandable.IDLE;
+  const [animating, setAnimating] = useState(false);
   const component: Record<RepActionExpandable, JSX.Element> = {
-    [RepActionExpandable.DISCUSSION]: <DropListItemDiscussion />,
+    [RepActionExpandable.DISCUSSION]: (
+      <DropListItemDiscussion
+        drop={drop}
+        initialFilter={ProfileActivityLogType.DROP_COMMENT}
+        animating={animating}
+      />
+    ),
     [RepActionExpandable.QUOTE]: (
       <DropListItemQuote
         quotedDropId={drop.id}
@@ -27,7 +35,13 @@ export default function DropListItemExpandableWrapper({
         onSuccessfulDrop={() => setState(RepActionExpandable.IDLE)}
       />
     ),
-    [RepActionExpandable.REP]: <DropListItemDiscussion />,
+    [RepActionExpandable.REP]: (
+      <DropListItemDiscussion
+        drop={drop}
+        initialFilter={ProfileActivityLogType.DROP_REP_EDIT}
+        animating={animating}
+      />
+    ),
     [RepActionExpandable.IDLE]: <></>,
   };
 
@@ -71,6 +85,8 @@ export default function DropListItemExpandableWrapper({
                   duration: 0.3,
                 },
               }}
+              onAnimationStart={() => setAnimating(true)}
+              onAnimationComplete={() => setAnimating(false)}
               key={state}
             >
               {component[state]}

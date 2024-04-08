@@ -1,19 +1,35 @@
 import { RepChangeType } from "./DropListItemRepGive";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
-
+import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import { DropFull } from "../../../../../../entities/IDrop";
 
 export default function DropListItemRepGiveChangeButton({
+  drop,
   type,
+  availableRep,
   handleMouseDown,
   handleMouseUp,
 }: {
+  readonly drop: DropFull;
   readonly type: RepChangeType;
+  readonly availableRep: number;
   readonly handleMouseDown: (changeType: RepChangeType) => void;
   readonly handleMouseUp: () => void;
 }) {
-  const { connectionStatus } = useContext(AuthContext);
+  const { connectionStatus, connectedProfile } = useContext(AuthContext);
+
+  const getCanRate = () => {
+    return (
+      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
+      connectedProfile?.profile?.handle.toLowerCase() !==
+        drop.author.handle.toLowerCase() &&
+      !!availableRep
+    );
+  };
+
+  const [canRate, setCanRate] = useState(getCanRate());
 
   const svgpaths: Record<RepChangeType, string> = {
     [RepChangeType.INCREASE]: "M18 15L12 9L6 15",
@@ -39,14 +55,32 @@ export default function DropListItemRepGiveChangeButton({
     handleMouseUp();
   };
 
+  const getButtonClasses = (ratingAllowed: boolean) => {
+    if (ratingAllowed) {
+      return "hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-text-white";
+    }
+    return "tw-text-iron-500";
+  };
+
+  const [buttonClasses, setButtonClasses] = useState<string | null>(
+    getButtonClasses(canRate)
+  );
+
+  useEffect(() => {
+    const ratingAllowed = getCanRate();
+    setCanRate(ratingAllowed);
+    setButtonClasses(getButtonClasses(ratingAllowed));
+  }, [connectionStatus, connectedProfile, drop, availableRep]);
+
   return (
     <button
       type="button"
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUpOrLeave}
       onMouseLeave={onMouseUpOrLeave}
+      disabled={!canRate}
       aria-label={ariaLabels[type]}
-      className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-7 tw-w-7 tw-text-white tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition-all tw-duration-300 tw-ease-out"
+      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-7 tw-w-7  tw-shadow-sm tw-transition-all tw-duration-300 tw-ease-out`}
     >
       <svg
         className="tw-flex-shrink-0 tw-h-5 tw-w-5"

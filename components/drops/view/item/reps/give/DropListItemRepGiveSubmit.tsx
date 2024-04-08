@@ -19,10 +19,12 @@ const DropListItemRepGiveClap = dynamic(
 export default function DropListItemRepGiveSubmit({
   rep,
   drop,
+  availableRep,
   onSuccessfulRepChange,
 }: {
   readonly rep: number;
   readonly drop: DropFull;
+  readonly availableRep: number;
   readonly onSuccessfulRepChange: () => void;
 }) {
   const { requestAuth, setToast, connectedProfile, connectionStatus } =
@@ -100,7 +102,12 @@ export default function DropListItemRepGiveSubmit({
 
   return (
     <div>
-      <DropListItemRepGiveClap rep={rep} onSubmit={onRepSubmit} />
+      <DropListItemRepGiveClap
+        rep={rep}
+        onSubmit={onRepSubmit}
+        drop={drop}
+        availableRep={availableRep}
+      />
     </div>
   );
 }
