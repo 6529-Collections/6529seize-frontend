@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ApiProfileRepRatesState,
@@ -48,6 +48,7 @@ export enum QueryKey {
   RESERVOIR_NFT = "RESERVOIR_NFT",
   // TODO make sure to invalidate it when something related changes
   DROP = "DROP",
+  DROP_DISCUSSION = "DROP_DISCUSSION",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -147,6 +148,7 @@ type ReactQueryWrapperContextType = {
     readonly drop: DropFull;
     readonly giverHandle: string | null;
   }) => void;
+  onDropDiscussionChange: (params: { readonly dropId: number }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -165,6 +167,7 @@ export const ReactQueryWrapperContext =
     onCurationFilterChanged: () => {},
     onDropCreate: () => {},
     onDropChange: () => {},
+    onDropDiscussionChange: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -635,27 +638,58 @@ export default function ReactQueryWrapper({
         queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_REP, giverHandle],
       });
     }
+    invalidateQueries({
+      key: QueryKey.DROP_DISCUSSION,
+      values: [{ drop_id: drop.id }],
+    });
   };
 
+  const onDropDiscussionChange = ({ dropId }: { readonly dropId: number }) => {
+    invalidateQueries({
+      key: QueryKey.DROP_DISCUSSION,
+      values: [{ drop_id: dropId }],
+    });
+  };
+
+  const value = useMemo(
+    () => ({
+      setProfile,
+      onProfileCICModify,
+      onProfileRepModify,
+      onProfileEdit,
+      onProfileStatementAdd,
+      onProfileStatementRemove,
+      initProfileRepPage,
+      initProfileIdentityPage,
+      initLandingPage,
+      initCommunityActivityPage,
+      onCurationFilterRemoved,
+      onCurationFilterChanged,
+      onDropCreate,
+      onDropChange,
+      onDropDiscussionChange,
+    }),
+    [
+      setProfile,
+      onProfileCICModify,
+      onProfileRepModify,
+      onProfileEdit,
+      onProfileStatementAdd,
+      onProfileStatementRemove,
+      initProfileRepPage,
+      initProfileIdentityPage,
+      initLandingPage,
+      initCommunityActivityPage,
+      onCurationFilterRemoved,
+      onCurationFilterChanged,
+      onDropCreate,
+      onDropChange,
+      onDropDiscussionChange,
+    ]
+  );
+
   return (
-    <ReactQueryWrapperContext.Provider
-      value={{
-        setProfile,
-        onProfileCICModify,
-        onProfileRepModify,
-        onProfileEdit,
-        onProfileStatementAdd,
-        onProfileStatementRemove,
-        initProfileRepPage,
-        initProfileIdentityPage,
-        initLandingPage,
-        initCommunityActivityPage,
-        onCurationFilterRemoved,
-        onCurationFilterChanged,
-        onDropCreate,
-        onDropChange,
-      }}
-    >
+    <ReactQueryWrapperContext.Provider value={value}>
       {children}
     </ReactQueryWrapperContext.Provider>
   );

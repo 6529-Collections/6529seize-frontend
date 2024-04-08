@@ -15,7 +15,7 @@ export default function DropListWrapper({
   readonly onBottomIntersection: (state: boolean) => void;
 }) {
   return (
-    <div>
+    <div className="tw-overflow-hidden">
       <DropsList drops={drops} />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">

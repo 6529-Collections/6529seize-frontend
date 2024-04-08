@@ -49,6 +49,9 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogGeneralStatement log={log} />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogNFTAccount log={log} />;
+    case ProfileActivityLogType.DROP_REP_EDIT:
+    case ProfileActivityLogType.DROP_COMMENT:
+      return <div>TODO</div>;
     default:
       assertUnreachable(logType);
   }
