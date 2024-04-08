@@ -39,8 +39,13 @@ export default function DropListItemRepGive({
 
   useEffect(() => {
     setCanRate(getCanRate());
-    if (Math.abs(onProgressRep) > availableRep) {
+    if (
+      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
+      Math.abs(onProgressRep) > availableRep
+    ) {
       setOnProgressRep(onProgressRep > 0 ? availableRep : 0 - availableRep);
+    } else if (connectionStatus === ProfileConnectedStatus.HAVE_PROFILE) {
+      setOnProgressRep(1);
     }
   }, [connectionStatus, connectedProfile, drop, availableRep]);
 
