@@ -24,7 +24,7 @@ export default function DropAuthor({
   const getTextClasses = (): string => {
     switch (size) {
       case DropAuthorSize.SMALL:
-        return "tw-text-xs";
+        return "tw-text-sm";
       case DropAuthorSize.MEDIUM:
         return "tw-text-md";
       default:

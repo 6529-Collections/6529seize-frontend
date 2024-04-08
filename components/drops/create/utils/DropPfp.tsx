@@ -20,7 +20,7 @@ export default function DropPfp({
   const getSizeClasses = (): string => {
     switch (size) {
       case DropPFPSize.SMALL:
-        return "tw-h-6 tw-w-6";
+        return "tw-h-7 tw-w-7";
       case DropPFPSize.MEDIUM:
         return "tw-h-10 tw-w-10";
       case DropPFPSize.LARGE:
