@@ -11,7 +11,7 @@ import ProfileActivityLogsSocialMediaVerificationPostIcon from "./ProfileActivit
 import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
 import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
 import ProfileActivityLogsGeneralCICStatementIcon from "./ProfileActivityLogsGeneralCICStatementIcon";
-import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon"
+import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon";
 
 export default function ProfileActivityLogsIcon({
   logType,
@@ -45,6 +45,9 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsGeneralCICStatementIcon />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogsNFTAccountStatementIcon />;
+    case ProfileActivityLogType.DROP_REP_EDIT:
+    case ProfileActivityLogType.DROP_COMMENT:
+      return <ProfileActivityLogsCICRatingIcon />;
     default:
       assertUnreachable(logType);
   }

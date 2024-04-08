@@ -15,6 +15,7 @@ import { CreateDropType, DropRequest } from "../CreateDrop";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 
 export enum CreateDropViewType {
   COMPACT = "COMPACT",
@@ -188,5 +189,9 @@ export default function CreateDropWrapper({
     }
   };
 
-  return <div className={getClasses()}>{components[viewType]}</div>;
+  return (
+    <div className={getClasses()}>
+      <CommonAnimationHeight>{components[viewType]}</CommonAnimationHeight>
+    </div>
+  );
 }

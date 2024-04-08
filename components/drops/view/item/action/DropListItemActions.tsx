@@ -17,7 +17,7 @@ export default function DropListItemActions({
   };
 
   return (
-    <div className="tw-mt-4 tw-ml-12 tw-border-t tw-flex tw-items-center tw-justify-between tw-gap-x-8">
+    <div className="tw-mt-4 md:tw-ml-12 tw-border-t tw-flex tw-items-center tw-justify-between lg:tw-gap-x-8">
       <DropListItemActionsItemWrapper
         state={RepActionExpandable.DISCUSSION}
         activeState={state}
@@ -25,7 +25,7 @@ export default function DropListItemActions({
       >
         <>
           <svg
-            className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-transition tw-ease-out tw-duration-300"
+            className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -54,7 +54,7 @@ export default function DropListItemActions({
       >
         <>
           <svg
-            className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300"
+            className="tw-flex-shrink-0 tw-w-5 tw-h-5 group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300"
             viewBox="0 0 512 512"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
@@ -76,11 +76,13 @@ export default function DropListItemActions({
           </div>
         </>
       </DropListItemActionsItemWrapper>
-      <DropListItemActionsRep
-        drop={drop}
-        activeState={state}
-        setState={onActionClick}
-      />
+      <div className="tw-mt-0.5">
+        <DropListItemActionsRep
+          drop={drop}
+          activeState={state}
+          setState={onActionClick}
+        />
+      </div>
     </div>
   );
 }
