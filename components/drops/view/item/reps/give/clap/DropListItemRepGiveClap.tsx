@@ -155,7 +155,7 @@ export default function DropListItemRepGiveClap({
 
   useEffect(() => {
     setCanRate(getCanRate());
-  }, [connectionStatus, connectedProfile, drop]);
+  }, [connectionStatus, connectedProfile, drop, availableRep]);
 
   const getClapClasses = () => {
     if (!canRate) {
