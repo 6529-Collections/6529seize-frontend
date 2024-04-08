@@ -27,8 +27,8 @@ export default function DropWrapper({
           </div>
         </div>
         <div className="tw-mt-1">
-          <p className="tw-font-semibold tw-text-iron-50 tw-text-md tw-mb-0">
-            Title
+          <p className="tw-font-semibold tw-text-indigo-400 tw-text-md tw-mb-1">
+            My awesome title
           </p>
           <div className="tw-w-full">{children}</div>
         </div>

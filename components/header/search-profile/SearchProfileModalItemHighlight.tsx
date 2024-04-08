@@ -12,7 +12,7 @@ export default function SearchProfileModalItemHighlight({
   return parts.map((part) => (
     <React.Fragment key={getRandomObjectId()}>
       {part.toLowerCase() === highlight.toLowerCase() ? (
-        <b className="tw-text-blue-200">{part}</b>
+        <span className="tw-text-blue-200 tw-font-bold">{part}</span>
       ) : (
         part
       )}
