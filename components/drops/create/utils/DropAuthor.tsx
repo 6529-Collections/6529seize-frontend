@@ -38,7 +38,7 @@ export default function DropAuthor({
     <div className="tw-flex tw-items-center tw-gap-x-2">
       {amIAuthor ? (
         <p
-          className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-white`}
+          className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-iron-50`}
         >
           {handle}
         </p>
