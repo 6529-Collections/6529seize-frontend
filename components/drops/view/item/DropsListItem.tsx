@@ -30,7 +30,7 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
         myRep={drop.rep_given_by_input_profile}
       />
       <div className="tw-p-4 sm:tw-p-5">
-        <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-6">
+        <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropWrapper drop={drop}>
               <div className="tw-w-full">

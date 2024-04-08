@@ -11,12 +11,27 @@ export default function DropWrapper({
 }) {
   return (
     <div className="tw-flex tw-gap-x-3">
-      <DropPfp pfpUrl={drop.author.pfp} />
+      <div className="tw-hidden lg:tw-block">
+        <DropPfp pfpUrl={drop.author.pfp} />
+      </div>
       <div className="tw-flex tw-flex-col tw-w-full">
-        <div className="tw-w-full tw-inline-flex tw-justify-between">
-          <DropAuthor handle={drop.author.handle} timestamp={drop.created_at} />
+        <div className="tw-flex tw-gap-x-3">
+          <div className="lg:tw-hidden">
+            <DropPfp pfpUrl={drop.author.pfp} />
+          </div>
+          <div className="tw-w-full tw-inline-flex tw-justify-between">
+            <DropAuthor
+              handle={drop.author.handle}
+              timestamp={drop.created_at}
+            />
+          </div>
         </div>
-        <div className="tw-mt-1 tw-w-full">{children}</div>
+        <div className="tw-mt-1">
+          <p className="tw-font-semibold tw-text-iron-50 tw-text-md tw-mb-0">
+            Title
+          </p>
+          <div className="tw-w-full">{children}</div>
+        </div>
       </div>
     </div>
   );
