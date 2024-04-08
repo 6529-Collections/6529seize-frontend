@@ -15,6 +15,7 @@ import {
   SUBSCRIPTIONS_ADDRESS_ENS,
 } from "../../../../constants";
 import Tippy from "@tippyjs/react";
+import DotLoader from "../../../dotLoader/DotLoader";
 
 const MINT_PRICE = 0.06529;
 const CHAIN_ID = sepolia.id;
@@ -25,8 +26,9 @@ export default function UserPageMintsSubscriptionsTopUp(
   }>
 ) {
   const account = useAccount();
-  const [memeCount, setMemeCount] = useState<string>("1");
+  const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
+
   const waitSendTransaction = useWaitForTransaction({
     confirmations: 1,
     chainId: CHAIN_ID,
@@ -56,34 +58,31 @@ export default function UserPageMintsSubscriptionsTopUp(
 
   function getStatusMessage() {
     if (waitSendTransaction.isLoading) {
-      return "Submitted";
+      return "Transaction Submitted";
     } else if (waitSendTransaction.isSuccess) {
-      return "Successful";
+      return "Top Up Successful!";
     } else {
-      return `Failed - ${waitSendTransaction.error?.message}`;
+      return `Something went wrong`;
     }
   }
 
   return (
     <Container className="no-padding">
       <Row>
-        <Col className="d-flex align-items-center gap-2">
-          <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-l sm:tw-tracking-tight">
-            Top Up
-          </h2>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="font-color-silver font-smaller">
-          Sending to{" "}
-          <Tippy
-            content={
-              <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
-            }>
-            <span>
-              {SUBSCRIPTIONS_ADDRESS_ENS} {formatAddress(SUBSCRIPTIONS_ADDRESS)}
-            </span>
-          </Tippy>
+        <Col className="d-flex align-items-center gap-2 no-wrap">
+          <h5>Top Up</h5>
+          <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
+            Sending to{" "}
+            <Tippy
+              content={
+                <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
+              }>
+              <span>
+                {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
+                {formatAddress(SUBSCRIPTIONS_ADDRESS)}
+              </span>
+            </Tippy>
+          </span>
         </Col>
       </Row>
       <Row className="pt-1">
@@ -94,13 +93,14 @@ export default function UserPageMintsSubscriptionsTopUp(
               submit();
             }}>
             <Form.Group className="mb-3">
-              <Form.Label className="mb-1">Card Count</Form.Label>
               <Row className="d-flex align-items-center">
                 <Col xs={6}>
                   <Form.Control
                     type="number"
+                    min={1}
                     placeholder="meme count"
                     value={memeCount}
+                    className="font-smaller"
                     onChange={(e) => {
                       const value = e.target.value;
                       try {
@@ -117,8 +117,19 @@ export default function UserPageMintsSubscriptionsTopUp(
                     <Button
                       className="seize-btn btn-white btn-block"
                       type="submit"
-                      disabled={!memeCount || sendTransaction.isLoading}>
-                      Send
+                      disabled={
+                        !memeCount ||
+                        !parseInt(memeCount) ||
+                        sendTransaction.isLoading
+                      }>
+                      Send{" "}
+                      {parseInt(memeCount) ? (
+                        <span className="font-smaller font-color-h">
+                          {MINT_PRICE * parseInt(memeCount)} ETH
+                        </span>
+                      ) : (
+                        <></>
+                      )}
                     </Button>
                   ) : (
                     <Web3Button
@@ -138,7 +149,7 @@ export default function UserPageMintsSubscriptionsTopUp(
               {sendTransaction.data && (
                 <Row>
                   <Col className="d-flex align-items-center gap-2 pt-2">
-                    Transaction {getStatusMessage()}
+                    {getStatusMessage()}
                     <a
                       href={getTransactionLink(
                         CHAIN_ID,
@@ -148,6 +159,13 @@ export default function UserPageMintsSubscriptionsTopUp(
                       rel="noreferrer">
                       view
                     </a>
+                  </Col>
+                </Row>
+              )}
+              {waitSendTransaction.isLoading && (
+                <Row>
+                  <Col>
+                    Waiting for confirmation <DotLoader />
                   </Col>
                 </Row>
               )}

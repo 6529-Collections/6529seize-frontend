@@ -27,9 +27,7 @@ export default function UserPageMintsSubscriptionsHistory(
     <Container className="no-padding">
       <Row>
         <Col>
-          <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-l sm:tw-tracking-tight">
-            Subscription History
-          </h2>
+          <h5>Subscription History</h5>
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
