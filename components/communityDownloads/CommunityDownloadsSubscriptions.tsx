@@ -65,7 +65,7 @@ export default function CommunityDownloadsSubscriptions() {
                     </thead>
                     <tbody>
                       {downloads.map((download) => (
-                        <tr>
+                        <tr key={download.upload_url}>
                           <td>{download.date}</td>
                           <td>{download.token_id.toLocaleString()}</td>
                           <td>
