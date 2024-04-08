@@ -51,6 +51,7 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogNFTAccount log={log} />;
     case ProfileActivityLogType.DROP_REP_EDIT:
     case ProfileActivityLogType.DROP_COMMENT:
+      // TODO: Implement
       return <div>TODO</div>;
     default:
       assertUnreachable(logType);
