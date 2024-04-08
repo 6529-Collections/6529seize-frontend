@@ -1,9 +1,11 @@
-import { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import DropListItemRepGiveChangeButton from "./DropListItemRepGiveChangeButton";
 import DropListItemRepGiveSubmit from "./DropListItemRepGiveSubmit";
 import { DropFull } from "../../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
+import { AuthContext } from "../../../../../auth/Auth";
+import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 
 export enum RepChangeType {
   INCREASE = "INCREASE",
@@ -17,11 +19,30 @@ export default function DropListItemRepGive({
   readonly drop: DropFull;
   readonly availableRep: number;
 }) {
+  const { connectionStatus, connectedProfile } = useContext(AuthContext);
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
   const [onProgressRep, setOnProgressRep] = useState<number>(1);
+
+  const getCanRate = () => {
+    return (
+      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
+      connectedProfile?.profile?.handle.toLowerCase() !==
+        drop.author.handle.toLowerCase() &&
+      !!availableRep
+    );
+  };
+
+  const [canRate, setCanRate] = useState(getCanRate());
+
+  useEffect(() => {
+    setCanRate(getCanRate());
+    if (Math.abs(onProgressRep) > availableRep) {
+      setOnProgressRep(onProgressRep > 0 ? availableRep : 0 - availableRep);
+    }
+  }, [connectionStatus, connectedProfile, drop, availableRep]);
 
   const onSuccessfulRepChange = () => {
     setOnProgressRep(1);
@@ -181,26 +202,33 @@ export default function DropListItemRepGive({
 
   return (
     <div className="tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-      <div className="tw-text-center">
-        <span
-          className={`${getRepClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-        >
-          {getRepText()}
-        </span>
-      </div>
+      {canRate && (
+        <div className="tw-text-center">
+          <span
+            className={`${getRepClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+          >
+            {getRepText()}
+          </span>
+        </div>
+      )}
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-[0.3125rem]">
         <DropListItemRepGiveChangeButton
+          drop={drop}
           type={RepChangeType.INCREASE}
+          availableRep={availableRep}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
         />
         <DropListItemRepGiveSubmit
           rep={onProgressRep}
           drop={drop}
+          availableRep={availableRep}
           onSuccessfulRepChange={onSuccessfulRepChange}
         />
         <DropListItemRepGiveChangeButton
+          drop={drop}
           type={RepChangeType.DECREASE}
+          availableRep={availableRep}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
         />

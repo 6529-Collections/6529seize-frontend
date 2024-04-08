@@ -1,4 +1,9 @@
-import { ProfileMinimal } from "./IProfile";
+import {
+  ProfileActivityLog,
+  ProfileActivityLogDropComment,
+  ProfileActivityLogDropRepEdit,
+  ProfileMinimal,
+} from "./IProfile";
 
 export interface ReferencedNft {
   readonly contract: string;
@@ -61,3 +66,16 @@ export interface DropRepChangeRequest {
   readonly amount: number;
   readonly category: string;
 }
+
+export type DropActivityLogBase =
+  | ProfileActivityLogDropComment
+  | ProfileActivityLogDropRepEdit;
+
+  export interface DropActivityLogDiscussion extends ProfileActivityLogDropComment{
+  readonly author: ProfileMinimal | null;
+};
+
+export interface DropActivityLogRepEdit extends ProfileActivityLogDropRepEdit {
+  readonly author: ProfileMinimal | null;
+};
+export type DropActivityLog = DropActivityLogDiscussion | DropActivityLogRepEdit;

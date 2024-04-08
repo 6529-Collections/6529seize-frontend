@@ -27,9 +27,11 @@ export default function DropWrapper({
           </div>
         </div>
         <div className="tw-mt-1">
-          <p className="tw-font-semibold tw-text-indigo-400 tw-text-md tw-mb-1">
-            My awesome title
-          </p>
+          {drop.title && (
+            <p className="tw-font-semibold tw-text-indigo-400 tw-text-md tw-mb-1">
+              {drop.title}
+            </p>
+          )}
           <div className="tw-w-full">{children}</div>
         </div>
       </div>
