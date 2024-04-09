@@ -326,7 +326,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     if (isNullAddress(props.tr.from_address)) {
       return (
         <>
-          {!props.hideNextgenTokenId ? <>{tokenInfo} seized by</> : `seized by`}
+          {!props.hideNextgenTokenId ? <>{tokenInfo} seized by</> : `Seized by`}
           &nbsp;
           <Address
             wallets={[props.tr.to_address]}
