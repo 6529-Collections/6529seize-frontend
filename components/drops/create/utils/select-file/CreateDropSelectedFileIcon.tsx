@@ -37,7 +37,7 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
     case FILE_TYPES.IMAGE:
       return (
         <svg
-          className="tw-w-auto tw-h-6"
+          className="tw-flex-shrink-0 tw-w-auto tw-h-5 sm:tw-h-6"
           viewBox="0 0 384 512"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +66,7 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
     case FILE_TYPES.VIDEO:
       return (
         <svg
-          className="tw-w-auto tw-h-6"
+          className="tw-flex-shrink-0 tw-w-auto tw-h-5 sm:tw-h-6"
           viewBox="0 0 383 512"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +95,7 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
     case FILE_TYPES.GLB:
       return (
         <svg
-          className="tw-w-auto tw-h-6"
+          className="tw-flex-shrink-0 tw-w-auto tw-h-5 sm:tw-h-6"
           viewBox="0 0 383 512"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -130,7 +130,7 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
     case FILE_TYPES.AUDIO:
       return (
         <svg
-          className="tw-w-auto tw-h-6"
+          className="tw-flex-shrink-0 tw-w-auto tw-h-5 sm:tw-h-6"
           viewBox="0 0 383 512"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
