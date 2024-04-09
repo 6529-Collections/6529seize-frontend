@@ -16,7 +16,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
   const wallet = profile.consolidation.wallets.find((w) => {
     switch (type) {
       case TransactionType.RECEIVED_AIRDROP:
-      case TransactionType.MINTED:
+      case TransactionType.SEIZED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
         return (
@@ -32,7 +32,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
         );
       case TransactionType.RECEIVED_BURN:
       case TransactionType.AIRDROPPED:
-      case TransactionType.MINTED_TO:
+      case TransactionType.SEIZED_TO:
         return false;
       default:
         assertUnreachable(type);
@@ -44,7 +44,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
     if (
       type === TransactionType.RECEIVED_BURN ||
       type === TransactionType.AIRDROPPED ||
-      type === TransactionType.MINTED_TO
+      type === TransactionType.SEIZED_TO
     ) {
       return "Null Address";
     }
