@@ -1,6 +1,7 @@
+import dynamic from "next/dynamic";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
-import DropListItemContentMediaGLB from "./DropListItemContentMediaGLB";
+
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 
@@ -11,6 +12,13 @@ enum MediaType {
   GLB = "GLB",
   UNKNOWN = "UNKNOWN",
 }
+
+const DropListItemContentMediaGLB = dynamic(
+  () => import("./DropListItemContentMediaGLB"),
+  {
+    ssr: false,
+  }
+);
 
 export default function DropListItemContentMedia({
   media_mime_type,
@@ -39,11 +47,11 @@ export default function DropListItemContentMedia({
 
   switch (mediaType) {
     case MediaType.IMAGE:
-      return <DropListItemContentMediaImage />;
+      return <DropListItemContentMediaImage src={media_url} />;
     case MediaType.VIDEO:
-      return <DropListItemContentMediaVideo />;
+      return <DropListItemContentMediaVideo src={media_url} />;
     case MediaType.AUDIO:
-      return <DropListItemContentMediaAudio />;
+      return <DropListItemContentMediaAudio src={media_url} />;
     case MediaType.GLB:
       return <DropListItemContentMediaGLB src={media_url} />;
     case MediaType.UNKNOWN:

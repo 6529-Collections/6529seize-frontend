@@ -55,7 +55,7 @@ export default function DropListItemActionsRep({
           setState={setState}
         >
           <>
-            <svg
+            {/* <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
               width="346"
               height="361"
@@ -113,7 +113,7 @@ export default function DropListItemActionsRep({
                 d="M196.753 43.893C194.61 43.8784 192.56 43.0154 191.053 41.493C190.3 40.7572 189.701 39.8784 189.293 38.9081C188.884 37.9379 188.674 36.8957 188.674 35.843C188.674 34.7903 188.884 33.7482 189.293 32.7779C189.701 31.8076 190.3 30.9288 191.053 30.193L208.053 13.593C209.552 12.0969 211.584 11.2567 213.703 11.2567C215.821 11.2567 217.853 12.0969 219.353 13.593C220.105 14.3288 220.704 15.2076 221.112 16.1779C221.521 17.1482 221.731 18.1903 221.731 19.243C221.731 20.2957 221.521 21.3379 221.112 22.3081C220.704 23.2784 220.105 24.1572 219.353 24.893L202.353 41.493C201.624 42.2438 200.755 42.8426 199.793 43.2546C198.832 43.6666 197.798 43.8836 196.753 43.893Z"
                 fill="#528BFF"
               />
-            </svg>
+            </svg> */}
             <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
               width="350"
@@ -146,7 +146,6 @@ export default function DropListItemActionsRep({
               />
             </svg>
 
-            
             <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
               Rep
             </span>
