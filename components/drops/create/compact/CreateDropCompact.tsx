@@ -11,7 +11,9 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
-import PrimaryButton from "../../../utils/buttons/PrimaryButton";
+import PrimaryButton, {
+  PrimaryButtonSize,
+} from "../../../utils/buttons/PrimaryButton";
 import CreateDropSelectedFileIcon from "../utils/select-file/CreateDropSelectedFileIcon";
 import { CreateDropType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
@@ -100,7 +102,11 @@ export default function CreateDropCompact({
           </div>
           {/* <CreateDropChallengeAcceptButton /> */}
           <div className="tw-self-end">
-            <PrimaryButton onClick={onDrop} disabled={disabled}>
+            <PrimaryButton
+              onClick={onDrop}
+              disabled={disabled}
+              size={PrimaryButtonSize.SMALL}
+            >
               {getSubmitText()}
             </PrimaryButton>
           </div>
