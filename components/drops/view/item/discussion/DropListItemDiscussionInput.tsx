@@ -41,7 +41,10 @@ export default function DropListItemDiscussionInput({
         type: "success",
       });
       onComment(null);
-      onDropDiscussionChange({ dropId: drop.id });
+      onDropDiscussionChange({
+        dropId: drop.id,
+        dropAuthorHandle: drop.author.handle,
+      });
     },
     onError: (error) => {
       setToast({
