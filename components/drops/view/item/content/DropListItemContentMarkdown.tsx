@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -8,6 +8,7 @@ import DropListItemContentPart, {
 } from "./DropListItemContentPart";
 import { DropContentPartType } from "./DropListItemContent";
 import React from "react";
+import DropListItemContentMedia from "./media/DropListItemContentMedia";
 
 const customRenderer = ({
   content,
@@ -72,9 +73,27 @@ const customRenderer = ({
 
 const DropListItemContentMarkdown = React.memo(
   ({ drop }: { readonly drop: DropFull }) => {
-    const dropContent = drop.content?.slice(0, 1000);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const [isOverflowing, setIsOverflowing] = useState(false);
+
+    useEffect(() => {
+      setIsOverflowing(
+        !!containerRef.current &&
+          containerRef.current?.scrollHeight >
+            containerRef.current?.clientHeight
+      );
+    }, [containerRef]);
+
+    const [showMore, setShowMore] = useState(false);
+
     return (
-      <div className="tw-relative">
+      <div
+        ref={containerRef}
+        className={`${
+          !showMore ? "tw-max-h-72" : "tw-max-h-full"
+        } tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out`}
+      >
         <Markdown
           remarkPlugins={[remarkGfm]}
           className="tw-w-full"
@@ -121,18 +140,27 @@ const DropListItemContentMarkdown = React.memo(
             ),
           }}
         >
-          {dropContent}
+          {drop.content}
         </Markdown>
-        <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
-          <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">
-            <button
-              type="button"
-              className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Show more
-            </button>
+        {!!drop.media_url && !!drop.media_mime_type && (
+          <DropListItemContentMedia
+            media_mime_type={drop.media_mime_type}
+            media_url={drop.media_url}
+          />
+        )}
+        {isOverflowing && !showMore && (
+          <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
+            <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">
+              <button
+                onClick={() => setShowMore(!showMore)}
+                type="button"
+                className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+              >
+                Show full drop
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }
