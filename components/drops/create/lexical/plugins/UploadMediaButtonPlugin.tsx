@@ -9,7 +9,7 @@ export default function UploadMediaButtonPlugin({
   return (
     <label
       htmlFor={id}
-      className="tw-absolute tw-top-1 md:tw-top-0 tw-right-12 tw-p-2 tw-rounded-lg"
+      className="tw-absolute tw-flex tw-items-center tw-justify-center tw-inset-y-0 tw-right-12 tw-p-2 tw-rounded-lg"
     >
       <svg
         className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-30"

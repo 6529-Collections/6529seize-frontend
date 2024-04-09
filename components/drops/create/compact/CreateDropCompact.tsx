@@ -85,7 +85,9 @@ export default function CreateDropCompact({
   return (
     <div className={`${getWrapperClasses()}  tw-bg-iron-900 `}>
       <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-        <DropPfp pfpUrl={profile.profile?.pfp_url} />
+        <div className="tw-hidden sm:tw-block">
+          <DropPfp pfpUrl={profile.profile?.pfp_url} />
+        </div>
         <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-w-full">
             <CreateDropContent
@@ -115,7 +117,7 @@ export default function CreateDropCompact({
 
       {file && (
         <div>
-          <div className="tw-mt-3 tw-ml-[3.25rem]">
+          <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
             <div className="tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
               <div className="tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
                 <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">

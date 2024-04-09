@@ -44,7 +44,7 @@ export default function DropListItemDiscussionItemsItemRep({
   };
   const diffColor = getDiffColor();
   return (
-    <div className="tw-space-x-1.5 tw-inline-flex tw-items-center">
+    <div className="tw-space-x-1 tw-inline-flex tw-items-center">
       <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
         {REP_CHANGE_TEXT[action]}
       </span>

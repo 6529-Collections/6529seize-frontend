@@ -105,15 +105,15 @@ export default function DropListItemDiscussionItems({
 
   return (
     <div className="tw-space-y-4">
-      <div className="tw-max-h-72 tw-overflow-y-auto tw-space-y-4">
-        {logs.map((item) => (
-          <DropListItemDiscussionItemsItem key={item.id} item={item} />
-        ))}
-        {isFetching && (
-          <div className="tw-w-full tw-text-center tw-mt-8">
-            <CircleLoader size={CircleLoaderSize.XXLARGE} />
-          </div>
-        )}
+      <div className="tw-max-h-72 tw-overflow-y-auto">
+        <div className="tw-space-y-4">
+          {logs.map((item) => (
+            <DropListItemDiscussionItemsItem key={item.id} item={item} />
+          ))}
+        </div>
+        <div className="tw-text-center">
+          {isFetching && <CircleLoader size={CircleLoaderSize.SMALL} />}
+        </div>
         <DropListWrapperBottomTrigger
           onBottomIntersection={onBottomIntersection}
         />
