@@ -16,4 +16,7 @@ export interface Transaction {
   gas_price: number;
   gas_price_gwei: number;
   gas: number;
+  eth_price_usd: number;
+  value_usd: number;
+  gas_usd: number;
 }
