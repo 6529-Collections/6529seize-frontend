@@ -11,6 +11,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
+import CreateDrop, { CreateDropType } from "../drops/create/CreateDrop";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -200,7 +201,15 @@ export default function Stream() {
             </div>
           </div>
         </div>
+
         <div className="tw-mt-4 lg:tw-mt-6">
+          {connectedProfile && (
+            <CreateDrop
+              profile={connectedProfile}
+              quotedDropId={null}
+              type={CreateDropType.DROP}
+            />
+          )}
           <DropListWrapper
             drops={drops}
             loading={isFetching}
