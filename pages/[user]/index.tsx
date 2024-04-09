@@ -7,7 +7,6 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageDrops from "../../components/user/drops/UserPageDrops";
 import UserPageDropsWrapper from "../../components/user/drops/UserPageDropsWrapper";
 
 interface Props {

@@ -20,6 +20,9 @@ export default function DropListItemDiscussionItemsItem({
         return <DropListItemDiscussionItemsItemComment item={item} />;
       case ProfileActivityLogType.DROP_REP_EDIT:
         return <DropListItemDiscussionItemsItemRep item={item} />;
+      case ProfileActivityLogType.DROP_CREATED:
+        // TODO: Implement this
+        return <div>Drop created</div>;
       default:
         assertUnreachable(itemType);
     }

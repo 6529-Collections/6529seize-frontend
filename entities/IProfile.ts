@@ -113,6 +113,7 @@ export enum ProfileActivityLogType {
   GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
   DROP_COMMENT = "DROP_COMMENT",
   DROP_REP_EDIT = "DROP_REP_EDIT",
+  DROP_CREATED = "DROP_CREATED",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -133,8 +134,10 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
   [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "About",
+  // TODO: Implement these
   [ProfileActivityLogType.DROP_COMMENT]: "Drop Comment",
   [ProfileActivityLogType.DROP_REP_EDIT]: "Drop Rep",
+  [ProfileActivityLogType.DROP_CREATED]: "Drop Created",
 };
 
 export interface ProfileActivityLogBase {
@@ -290,6 +293,13 @@ export interface ProfileActivityLogDropRepEdit extends ProfileActivityLogBase {
     readonly old_rating: number;
     readonly rating_category: string;
     readonly rating_matter: RateMatter.DROP_REP;
+  };
+}
+
+export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_CREATED;
+  readonly contents: {
+    readonly drop_id: string;
   };
 }
 

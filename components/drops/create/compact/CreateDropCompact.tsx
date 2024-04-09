@@ -107,7 +107,11 @@ export default function CreateDropCompact({
             <PrimaryButton
               onClick={onDrop}
               disabled={disabled}
-              size={PrimaryButtonSize.SMALL}
+              size={
+                screenType === CreateDropScreenType.MOBILE
+                  ? PrimaryButtonSize.SMALL
+                  : PrimaryButtonSize.MEDIUM
+              }
             >
               {getSubmitText()}
             </PrimaryButton>

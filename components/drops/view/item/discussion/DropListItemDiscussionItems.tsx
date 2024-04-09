@@ -15,6 +15,7 @@ import DropListWrapperBottomTrigger from "../../DropListWrapperBottomTrigger";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../../distribution-plan-tool/common/CircleLoader";
+import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 
 export default function DropListItemDiscussionItems({
   drop,
@@ -76,7 +77,11 @@ export default function DropListItemDiscussionItems({
 
   const [logs, setLogs] = useState<DropActivityLog[]>([]);
   useEffect(() => {
-    setLogs(items?.pages.flatMap((page) => page.data) ?? []);
+    setLogs(
+      items?.pages
+        .flatMap((page) => page.data)
+        .filter((d) => d.type !== ProfileActivityLogType.DROP_CREATED) ?? []
+    );
   }, [items]);
 
   const onBottomIntersection = (state: boolean) => {
