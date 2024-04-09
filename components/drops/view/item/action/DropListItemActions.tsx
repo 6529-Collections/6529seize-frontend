@@ -43,7 +43,7 @@ export default function DropListItemActions({
             Discuss
           </span>
           <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
-            39
+            {drop.discussion_comments_count}
           </div>
         </>
       </DropListItemActionsItemWrapper>
