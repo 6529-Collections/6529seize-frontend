@@ -55,7 +55,7 @@ export default function DropListItemActionsRep({
           setState={setState}
         >
           <>
-            <svg
+          <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
               width="346"
               height="361"
@@ -145,8 +145,6 @@ export default function DropListItemActionsRep({
                 mask="url(#path-1-outside-1_1_539)"
               />
             </svg>
-
-            
             <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
               Rep
             </span>
