@@ -8,7 +8,7 @@ export default function DropListItemContentMediaGLB({
   return (
     <model-viewer
       src={src}
-      alt="A 3D model of an astronaut"
+      ar
       auto-rotate
       camera-controls
       className="tw-w-full tw-h-full"
