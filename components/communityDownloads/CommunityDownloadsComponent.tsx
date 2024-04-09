@@ -5,7 +5,7 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import styles from "./CommunityDownloads.module.scss";
 import Pagination from "../pagination/Pagination";
-import NothingHereYetSummer from "../nothingHereYet/nothingHereYetSummer";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 const PAGE_SIZE = 25;
 

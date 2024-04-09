@@ -43,7 +43,7 @@ import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "../the-memes/MemePageArt";
-import NothingHereYetSummer from "../nothingHereYet/nothingHereYetSummer";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 interface MemeTab {
   focus: MEME_FOCUS;

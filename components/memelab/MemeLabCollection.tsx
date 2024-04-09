@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NFTImage from "../nft-image/NFTImage";
 import { MEMES_CONTRACT } from "../../constants";
 import { AuthContext } from "../auth/Auth";
-import NothingHereYetSummer from "../nothingHereYet/nothingHereYetSummer";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 enum Sort {
   AGE = "age",

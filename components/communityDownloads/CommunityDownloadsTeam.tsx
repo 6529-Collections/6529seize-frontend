@@ -1,7 +1,7 @@
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./CommunityDownloads.module.scss";
 import { CommunityDownloadsComponentRow } from "./CommunityDownloadsComponent";
-import NothingHereYetSummer from "../nothingHereYet/nothingHereYetSummer";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 export default function CommunityDownloadsTeam() {
   const downloads = [

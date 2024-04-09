@@ -17,7 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../dotLoader/DotLoader";
-import NothingHereYetSummer from "../nothingHereYet/nothingHereYetSummer";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 const PAGE_SIZE = 40;
 

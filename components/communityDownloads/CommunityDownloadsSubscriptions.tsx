@@ -5,7 +5,7 @@ import styles from "./CommunityDownloads.module.scss";
 import Pagination from "../pagination/Pagination";
 import { commonApiFetch } from "../../services/api/common-api";
 import { MEMES_CONTRACT } from "../../constants";
-import NothingHereYetSummer from "../nothingHereYet/nothingHereYetSummer";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 const PAGE_SIZE = 25;
 
