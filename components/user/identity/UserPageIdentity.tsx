@@ -29,9 +29,10 @@ export default function UserPageIdentity({
       </div>
 
       <div className="tw-mt-8 lg:tw-mt-10">
-        <UserPageIdentityActivityLog
+        {/* TODO */}
+        {/* <UserPageIdentityActivityLog
           initialActivityLogParams={initialActivityLogParams}
-        />
+        /> */}
       </div>
     </div>
   );
