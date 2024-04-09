@@ -55,5 +55,9 @@ export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
 
 export const SUBSCRIPTIONS_ADDRESS =
   "0x924817154d311bd2de599f3d659d053ab0133e06";
+export const SUBSCRIPTIONS_ADDRESS_ENS = "seize.6529.eth";
 
-export const SUBSCRIPTIONS_ADDRESS_ENS = "social.museum.6529.eth";
+export const SUBSCRIPTIONS_ADMIN_WALLETS = [
+  "0x0187C9a182736ba18b44eE8134eE438374cf87DC",
+  "0xFe49A85E98941F1A115aCD4bEB98521023a25802",
+];

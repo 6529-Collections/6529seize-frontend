@@ -170,7 +170,7 @@ function LogEntry(
           <div className="d-flex align-items-center gap-1">{props.log.log}</div>
         </div>
         <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver">
+          <div className="font-color-silver no-wrap">
             {getDateDisplay(new Date(props.log.created_at))}
           </div>
         </div>
@@ -196,7 +196,7 @@ function RedeemedEntry(
           Balance after redemption: {props.redeem.balance_after} ETH
         </div>
         <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver">
+          <div className="font-color-silver no-wrap">
             {getDateDisplay(
               new Date(props.redeem.transaction_date ?? props.redeem.created_at)
             )}

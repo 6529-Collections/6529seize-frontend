@@ -108,7 +108,7 @@ function SubscriptionRow(
         ? `Subscribed for`
         : `Unsubscribed from`;
       setToast({
-        message: `${detail} ${props.title} #${props.subscription.token_id}`,
+        message: `${detail} ${props.title} #${response.token_id}`,
         type: "success",
       });
       props.refresh();

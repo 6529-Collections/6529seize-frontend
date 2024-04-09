@@ -249,8 +249,7 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
     </AuthContext.Provider>
