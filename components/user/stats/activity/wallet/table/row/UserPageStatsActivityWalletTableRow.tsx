@@ -136,7 +136,7 @@ export default function UserPageStatsActivityWalletTableRow({
         addresses: MINTING_ADDRESSES,
       })
     )
-      ? TransactionType.SEIZED
+      ? TransactionType.SEIZED_TO
       : TransactionType.SEIZED;
 
   const getBurnType = (): TransactionType =>
