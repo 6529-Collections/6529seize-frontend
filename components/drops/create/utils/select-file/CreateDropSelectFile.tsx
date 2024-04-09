@@ -16,7 +16,7 @@ export default function CreateDropSelectFile({
       <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
         Upload Media
       </label>
-      <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-1">
+      <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-1">
         <CreateDropSelectFileImage onFileChange={onFileChange} />
         <CreateDropSelectFileVideo onFileChange={onFileChange} />
         <CreateDropSelectFileGLB onFileChange={onFileChange} />
@@ -38,7 +38,7 @@ export default function CreateDropSelectFile({
                   className="tw-group tw-bg-transparent tw-border-none"
                 >
                   <svg
-                    className="tw-w-5 tw-h-6 tw-text-red group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-w-5 tw-h-5 tw-text-red group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"

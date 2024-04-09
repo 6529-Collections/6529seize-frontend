@@ -62,9 +62,9 @@ a:hover {
 @media only screen and (max-width: 1200px) {
   body,
   button:not(.tailwind-scope button),
-  textarea,
+  textarea:not(.tailwind-scope textarea),
   select,
-  input,
+  input:not(.tailwind-scope input),
   button:not(.tailwind-scope button),
   video,
   select {
@@ -75,7 +75,7 @@ a:hover {
 @media only screen and (max-width: 800px) {
   body,
   button:not(.tailwind-scope button),
-  textarea,
+  textarea:not(.tailwind-scope textarea),
   select,
   input:not(.tailwind-scope input),
   button:not(.tailwind-scope button),
@@ -438,4 +438,10 @@ h5:not(.tailwind-scope h5) {
 .react-toggle--checked .react-toggle-thumb,
 .react-toggle--focus .react-toggle-thumb {
   box-shadow: none;
+}
+
+@media(hover: hover) and (pointer: fine) {
+  .icon:hover {
+    color: #ffffff;
+  }
 }

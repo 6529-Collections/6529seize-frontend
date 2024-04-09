@@ -1,5 +1,7 @@
 import { useContext, useState } from "react";
-import PrimaryButton from "../../../../utils/buttons/PrimaryButton";
+import PrimaryButton, {
+  PrimaryButtonSize,
+} from "../../../../utils/buttons/PrimaryButton";
 import { AuthContext } from "../../../../auth/Auth";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import DropPfp from "../../../create/utils/DropPfp";
@@ -67,7 +69,9 @@ export default function DropListItemDiscussionInput({
   return (
     <div>
       <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-        <DropPfp pfpUrl={profile?.profile?.pfp_url} />
+        <div className="tw-hidden sm:tw-block">
+          <DropPfp pfpUrl={profile?.profile?.pfp_url} />
+        </div>
         <form
           className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3"
           onSubmit={onSubmit}
@@ -83,7 +87,11 @@ export default function DropListItemDiscussionInput({
             />
           </div>
           <div className="tw-self-end">
-            <PrimaryButton type="submit" disabled={!comment || mutating}>
+            <PrimaryButton
+              type="submit"
+              disabled={!comment || mutating}
+              size={PrimaryButtonSize.SMALL}
+            >
               Send
             </PrimaryButton>
           </div>

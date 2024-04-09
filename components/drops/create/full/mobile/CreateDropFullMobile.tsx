@@ -87,10 +87,10 @@ export default function CreateDropFullMobile({
       onClose={onClose}
       onViewClick={onViewClick}
     >
-      <div className="tw-relative tw-mt-2 sm:tw-mt-4 tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
-        <div className="tw-px-4 sm:tw-px-6 tw-space-y-4">
-          <div className="tw-w-full tw-inline-flex tw-justify-between">
-            <DropPfp pfpUrl={profile.profile?.pfp_url} />
+      <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
+        <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
+          <div className="tw-absolute tw-right-4 -tw-top-4">
+           {/*  <DropPfp pfpUrl={profile.profile?.pfp_url} /> */}
             {titleState === TITLE_STATE.BUTTON && (
               <button
                 onClick={() => setTitleState(TITLE_STATE.INPUT)}

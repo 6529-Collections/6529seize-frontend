@@ -16,7 +16,7 @@ export default function CreateDropSelectFileAudio({
     >
       <label htmlFor={randomId}>
         <svg
-          className="tw-cursor-pointer tw-h-5 tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          className="tw-cursor-pointer tw-h-6 tw-w-6 lg:tw-h-5 lg:tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

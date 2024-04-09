@@ -23,9 +23,9 @@ export default function DropListItemDiscussion({
     useState<DropItemDiscussionFilterType>(initialFilter);
 
   return (
-    <div className="tw-min-h-[18rem] tw-w-full tw-py-5 tw-px-4 sm:tw-px-5 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-700">
+    <div className="tw-w-full tw-py-5 tw-px-4 sm:tw-px-5 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-700">
       <DropListItemDiscussionInputWrapper drop={drop} />
-      <div className="tw-pt-4 tw-pl-12 tw-space-y-4">
+      <div className="tw-pt-4 sm:tw-pl-12 tw-space-y-4">
         <DropListItemDiscussionFilter
           activeFilter={filter}
           setFilter={setFilter}

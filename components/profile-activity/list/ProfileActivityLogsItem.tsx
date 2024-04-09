@@ -6,6 +6,7 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
+import ProfileActivityLogDropRepEdit from "./items/ProfileActivityLogDropRepEdit";
 import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGeneralStatement";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
 import ProfileActivityLogNFTAccount from "./items/ProfileActivityLogNFTAccount";
@@ -50,8 +51,10 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogNFTAccount log={log} />;
     case ProfileActivityLogType.DROP_REP_EDIT:
+      return <ProfileActivityLogDropRepEdit log={log} />;
     case ProfileActivityLogType.DROP_COMMENT:
-      return <div>TODO</div>;
+      // TODO: Implement
+      return <div>Drop comment (TODO)</div>;
     default:
       assertUnreachable(logType);
   }
