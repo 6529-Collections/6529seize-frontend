@@ -28,7 +28,7 @@ export default function DropListItemDiscussionItemsItem({
   return (
     <div className="tw-flex tw-items-start tw-gap-x-3">
       <DropPfp pfpUrl={item.author?.pfp} size={DropPFPSize.SMALL} />
-      <div className="-tw-mt-1.5 tw-flex tw-flex-col tw-w-full">
+      <div className="sm:-tw-mt-1 tw-flex tw-flex-col tw-w-full">
         <DropAuthor
           handle={item.author?.handle ?? "Unknown"}
           timestamp={new Date(item.created_at).getTime()}

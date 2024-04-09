@@ -14,7 +14,7 @@ export default function DropListItemDiscussionFilterItem({
   const isActive = activeFilter === filter;
   const classes = isActive
     ? "tw-bg-iron-700 tw-text-iron-100 tw-border-iron-700"
-    : "tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-500 hover:tw-text-iron-100 tw-border-iron-900";
+    : "tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-500 hover:tw-text-iron-100 tw-border-iron-900 hover:tw-border-iron-800";
   return (
     <nav className="tw-flex">
       <button
