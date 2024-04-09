@@ -25,6 +25,7 @@ export interface SubscriptionLog {
   id: number;
   consolidation_key: string;
   log: string;
+  additional_info?: string;
 }
 
 export interface RedeemedSubscription {

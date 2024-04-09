@@ -271,6 +271,7 @@ function SubscriptionLinks(
         name={`${fileName}.zip`}
         url={`${subscriptionsEndpoint}`}
         use_custom_downloader={true}
+        confirm_info={`${props.phase.name} for Meme #${tokenId}`}
       />
     );
   }
