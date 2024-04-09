@@ -19,8 +19,8 @@ export default function PrimaryButton({
   readonly onClick?: () => void;
 }) {
   const BUTTON_CLASSES: Record<PrimaryButtonSize, string> = {
-    [PrimaryButtonSize.SMALL]: "",
-    [PrimaryButtonSize.MEDIUM]: "",
+    [PrimaryButtonSize.SMALL]: "tw-px-3",
+    [PrimaryButtonSize.MEDIUM]: "tw-px-4",
   };
 
   const DISABLED_CLASSES = "tw-opacity-50 tw-text-iron-200";
@@ -36,7 +36,7 @@ export default function PrimaryButton({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${classes} tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
+      className={`${classes} tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
     >
       {children}
     </button>
