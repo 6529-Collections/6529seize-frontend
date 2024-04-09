@@ -20,8 +20,8 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   const TYPE_TO_ACTION: Record<TransactionType, string> = {
     [TransactionType.AIRDROPPED]: "to",
     [TransactionType.RECEIVED_AIRDROP]: "from",
-    [TransactionType.MINTED]: "",
-    [TransactionType.MINTED_TO]: "to",
+    [TransactionType.SEIZED]: "",
+    [TransactionType.SEIZED_TO]: "to",
     [TransactionType.SALE]: "to",
     [TransactionType.PURCHASE]: "from",
     [TransactionType.TRANSFER_IN]: "from",
@@ -35,7 +35,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
     address: string;
   } => {
     switch (type) {
-      case TransactionType.MINTED:
+      case TransactionType.SEIZED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
       case TransactionType.RECEIVED_BURN:
@@ -51,7 +51,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
       case TransactionType.SALE:
       case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
-      case TransactionType.MINTED_TO:
+      case TransactionType.SEIZED_TO:
         return {
           display:
             transaction.to_display ??
@@ -78,7 +78,9 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   return (
     <span className="tw-inline-flex tw-space-x-1">
       <span className="tw-text-iron-400">{TYPE_TO_ACTION[type]}</span>
-      <Link href={path} className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+      <Link
+        href={path}
+        className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
         {display}
       </Link>
     </span>
