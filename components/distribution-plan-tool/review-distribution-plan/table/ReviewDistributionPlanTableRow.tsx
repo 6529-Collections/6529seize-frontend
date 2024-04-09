@@ -267,7 +267,7 @@ function SubscriptionLinks(
   ) {
     return (
       <DownloadUrlWidget
-        preview="Subscriptions"
+        preview="Subscription Lists"
         name={`${fileName}.zip`}
         url={`${subscriptionsEndpoint}`}
         use_custom_downloader={true}
