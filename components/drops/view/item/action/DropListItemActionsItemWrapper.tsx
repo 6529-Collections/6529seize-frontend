@@ -20,7 +20,7 @@ export default function DropListItemActionsItemWrapper({
       className={`${
         state === activeState
           ? "tw-text-primary-400"
-          : "tw-text-iron-400 hover:hover-hover:tw-text-white"
+          : "tw-text-iron-400"
       } tw-px-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-transition tw-ease-out tw-duration-300`}
     >
       {children}
