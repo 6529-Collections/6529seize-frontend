@@ -18,6 +18,13 @@ interface Props {
   onLoad?: () => void;
 }
 
+function getId(nft: BaseNFT | NFTLite, id?: string) {
+  if (id) {
+    return id;
+  }
+  return `nft-image-${nft.contract}-${nft.id}`;
+}
+
 export default function NFTImage(props: Readonly<Props>) {
   useEffect(() => {
     if (props.onLoad) {
@@ -31,22 +38,7 @@ export default function NFTImage(props: Readonly<Props>) {
     "metadata" in props.nft &&
     props.nft.metadata.animation_details?.format === "HTML"
   ) {
-    return (
-      <Col
-        className={`${styles.nftAnimation} ${
-          props.transparentBG ? styles.transparentBG : ""
-        } d-flex justify-content-center align-items-center`}>
-        <NFTImageBalance {...props} />
-        <iframe
-          src={
-            props.nft.metadata.animation
-              ? props.nft.metadata.animation
-              : props.nft.metadata.animation_url
-          }
-          id={`${props.id && `${props.id}`}`}
-        />
-      </Col>
-    );
+    return <NFTImageHTML {...props} />;
   }
 
   if (
@@ -56,85 +48,10 @@ export default function NFTImage(props: Readonly<Props>) {
     (props.nft.metadata.animation_details?.format === "MP4" ||
       props.nft.metadata.animation_details?.format === "MOV")
   ) {
-    return (
-      <Col
-        className={`${styles.nftAnimation} ${
-          props.height === 650 ? styles.height650 : styles.height300
-        } ${
-          props.transparentBG ? styles.transparentBG : ""
-        } d-flex justify-content-center align-items-center`}>
-        <NFTImageBalance {...props} />
-        <video
-          id={`${props.id && `${props.id}`}`}
-          autoPlay
-          muted
-          controls
-          loop
-          playsInline
-          src={
-            !props.showOriginal && props.nft.compressed_animation
-              ? props.nft.compressed_animation
-              : props.nft.animation
-          }
-          poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
-          onError={({ currentTarget }) => {
-            if (
-              "metadata" in props.nft &&
-              currentTarget.src === props.nft.compressed_animation
-            ) {
-              currentTarget.src = props.nft.animation;
-            } else if ("metadata" in props.nft) {
-              currentTarget.src = props.nft.metadata.animation;
-            }
-          }}></video>
-      </Col>
-    );
+    return <NFTImageVideo {...props} />;
   }
 
-  return (
-    <Col
-      xs={12}
-      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
-        styles.imageWrapper
-      } ${props.height === 300 ? styles.height300 : ""} ${
-        props.transparentBG && styles.transparentBG
-      }`}>
-      <Image
-        loading="eager"
-        priority
-        width="0"
-        height="0"
-        style={{
-          height: "auto",
-          width: "auto",
-          maxWidth: "100%",
-          maxHeight: "100%",
-        }}
-        id={`${props.id && `${props.id}`}`}
-        src={
-          props.showThumbnail
-            ? props.nft.thumbnail
-            : props.nft.scaled && !props.showOriginal
-            ? props.nft.scaled
-            : props.nft.image
-        }
-        onError={({ currentTarget }) => {
-          if (currentTarget.src === props.nft.thumbnail) {
-            currentTarget.src = props.nft.scaled
-              ? props.nft.scaled
-              : props.nft.image;
-          } else if (currentTarget.src === props.nft.scaled) {
-            currentTarget.src = props.nft.image;
-          } else if ("metadata" in props.nft) {
-            currentTarget.src = props.nft.metadata.image;
-          }
-        }}
-        alt={props.nft.name}
-        className={props.height === 650 ? styles.height650 : ""}
-      />
-      <NFTImageBalance {...props} />
-    </Col>
-  );
+  return <NFTImageImage {...props} />;
 }
 
 export function NFTImageBalance(props: Readonly<Props>) {
@@ -155,5 +72,114 @@ export function NFTImageBalance(props: Readonly<Props>) {
         <span className={`${styles.balance}`}>...</span>
       )}
     </>
+  );
+}
+
+export function NFTImageHTML(props: Readonly<Props>) {
+  const id = getId(props.nft, props.id);
+  let src = (props.nft as any).metadata?.animation;
+  if (!src) {
+    src = (props.nft as any).metadata?.animation_url;
+  }
+  return (
+    <Col
+      className={`${styles.nftAnimation} ${
+        props.transparentBG ? styles.transparentBG : ""
+      } d-flex justify-content-center align-items-center`}>
+      <NFTImageBalance {...props} />
+      <iframe title={props.nft.name} height={props.height} src={src} id={id} />
+    </Col>
+  );
+}
+
+export function NFTImageVideo(props: Readonly<Props>) {
+  const id = getId(props.nft, props.id);
+  let src = (props.nft as any).metadata?.animation;
+  if (!src) {
+    src = (props.nft as any).metadata?.animation_url;
+  }
+  if (!props.showOriginal && (props.nft as any).compressed_animation) {
+    src = (props.nft as any).compressed_animation;
+  }
+
+  return (
+    <Col
+      className={`${styles.nftAnimation} ${
+        props.height === 650 ? styles.height650 : styles.height300
+      } ${
+        props.transparentBG ? styles.transparentBG : ""
+      } d-flex justify-content-center align-items-center`}>
+      <NFTImageBalance {...props} />
+      <video
+        id={id}
+        autoPlay
+        muted
+        controls
+        loop
+        playsInline
+        src={src}
+        poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
+        onError={({ currentTarget }) => {
+          if (
+            "metadata" in props.nft &&
+            currentTarget.src === props.nft.compressed_animation
+          ) {
+            currentTarget.src = props.nft.animation;
+          } else if ("metadata" in props.nft) {
+            currentTarget.src = props.nft.metadata.animation;
+          }
+        }}></video>
+    </Col>
+  );
+}
+
+export function NFTImageImage(props: Readonly<Props>) {
+  const id = getId(props.nft, props.id);
+  let imgSrc = "";
+  if (props.showThumbnail) {
+    imgSrc = props.nft.thumbnail;
+  } else if (props.nft.scaled && !props.showOriginal) {
+    imgSrc = props.nft.scaled;
+  } else {
+    imgSrc = props.nft.image;
+  }
+
+  return (
+    <Col
+      xs={12}
+      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
+        styles.imageWrapper
+      } ${props.height === 300 ? styles.height300 : ""} ${
+        props.transparentBG && styles.transparentBG
+      }`}>
+      <Image
+        id={id}
+        loading="eager"
+        priority
+        width="0"
+        height="0"
+        style={{
+          height: "auto",
+          width: "auto",
+          maxWidth: "100%",
+          maxHeight: "100%",
+        }}
+        src={imgSrc}
+        onError={({ currentTarget }) => {
+          if (currentTarget.src === props.nft.thumbnail) {
+            currentTarget.src = props.nft.scaled
+              ? props.nft.scaled
+              : props.nft.image;
+          } else if (currentTarget.src === props.nft.scaled) {
+            currentTarget.src = props.nft.image;
+          } else if ("metadata" in props.nft) {
+            currentTarget.src = props.nft.metadata.image;
+          }
+        }}
+        alt={props.nft.name}
+        className={props.height === 650 ? styles.height650 : ""}
+      />
+      <NFTImageBalance {...props} />
+    </Col>
   );
 }
