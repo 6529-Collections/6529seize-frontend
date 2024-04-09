@@ -25,7 +25,7 @@ export default function DropListItemActions({
       >
         <>
           <svg
-            className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
+            className="tw-flex-shrink-0 tw-w-5 tw-h-5 group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -39,7 +39,7 @@ export default function DropListItemActions({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
+          <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
             Discuss
           </span>
           <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
@@ -68,7 +68,7 @@ export default function DropListItemActions({
               d="m388.81 374.68-33.81-33.85c-9.51-9.51-25.31-9.74-34.64-.05a24 24 0 0 0 .32 33.61l74.72 74.78a24.67 24.67 0 0 0 34.9 0l74.7-74.76a24 24 0 0 0 -34-33.94l-34.21 34.21v-230a89.16 89.16 0 0 0 -89.06-89.08h-127.73a24 24 0 0 0 0 48h127.73a41.11 41.11 0 0 1 41.06 41.06z"
             ></path>
           </svg>
-          <span className="tw-hidden sm:tw-block group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300">
+          <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
             Redrop
           </span>
           <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">

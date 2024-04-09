@@ -10,7 +10,7 @@ export default function DropListItemDiscussionFilter({
   readonly setFilter: (filter: DropItemDiscussionFilterType) => void;
 }) {
   return (
-    <nav className="tw-flex">
+    <nav className="tw-flex tw-gap-x-2">
       <DropListItemDiscussionFilterItem
         filter={null}
         setFilter={setFilter}

@@ -92,7 +92,7 @@ export default function DropListItemActionsRep({
                 mask="url(#path-1-outside)"
               />
             </svg>
-            <span className="tw-hidden sm:tw-block group-hover:tw-text-white tw-transition tw-ease-out tw-duration-300">
+            <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
               Rep
             </span>
             <div
