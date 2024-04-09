@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import PrimaryButton, {
   PrimaryButtonSize,
 } from "../../../../utils/buttons/PrimaryButton";
@@ -9,6 +9,14 @@ import { DropFull } from "../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { createBreakpoint } from "react-use";
+
+enum ScreenType {
+  DESKTOP = "DESKTOP",
+  MOBILE = "MOBILE",
+}
+
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function DropListItemDiscussionInput({
   profile,
@@ -21,6 +29,16 @@ export default function DropListItemDiscussionInput({
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
   const [comment, onComment] = useState<string | null>(null);
   const [mutating, setMutating] = useState<boolean>(false);
+
+  const breakpoint = useBreakpoint();
+  const [screenType, setScreenType] = useState<ScreenType>(ScreenType.DESKTOP);
+  useEffect(() => {
+    if (breakpoint === "LG") {
+      setScreenType(ScreenType.DESKTOP);
+    } else {
+      setScreenType(ScreenType.MOBILE);
+    }
+  }, [breakpoint]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onComment(e.target.value);
@@ -41,7 +59,10 @@ export default function DropListItemDiscussionInput({
         type: "success",
       });
       onComment(null);
-      onDropDiscussionChange({ dropId: drop.id });
+      onDropDiscussionChange({
+        dropId: drop.id,
+        dropAuthorHandle: drop.author.handle,
+      });
     },
     onError: (error) => {
       setToast({
@@ -90,7 +111,11 @@ export default function DropListItemDiscussionInput({
             <PrimaryButton
               type="submit"
               disabled={!comment || mutating}
-              size={PrimaryButtonSize.SMALL}
+              size={
+                screenType === ScreenType.MOBILE
+                  ? PrimaryButtonSize.SMALL
+                  : PrimaryButtonSize.MEDIUM
+              }
             >
               Send
             </PrimaryButton>

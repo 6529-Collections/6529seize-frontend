@@ -148,7 +148,10 @@ type ReactQueryWrapperContextType = {
     readonly drop: DropFull;
     readonly giverHandle: string | null;
   }) => void;
-  onDropDiscussionChange: (params: { readonly dropId: number }) => void;
+  onDropDiscussionChange: (params: {
+    readonly dropId: number;
+    readonly dropAuthorHandle: string;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -644,10 +647,27 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const onDropDiscussionChange = ({ dropId }: { readonly dropId: number }) => {
+  const onDropDiscussionChange = ({
+    dropId,
+    dropAuthorHandle,
+  }: {
+    readonly dropId: number;
+    dropAuthorHandle: string;
+  }) => {
     invalidateQueries({
       key: QueryKey.DROP_DISCUSSION,
       values: [{ drop_id: dropId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMMUNITY_DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [
+        QueryKey.PROFILE_DROPS,
+        {
+          handleOrWallet: dropAuthorHandle.toLowerCase(),
+        },
+      ],
     });
   };
 

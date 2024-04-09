@@ -1,5 +1,5 @@
 import {
-  ProfileActivityLog,
+  ProfileActivityLogDropCreated,
   ProfileActivityLogDropComment,
   ProfileActivityLogDropRepEdit,
   ProfileMinimal,
@@ -64,6 +64,7 @@ export interface DropFull {
   readonly rep_logs_count: number;
   readonly input_profile_discussion_comments_count: number | null;
   readonly quote_count: number;
+  readonly quote_count_by_input_profile: number | null;
 }
 
 export interface DropRepChangeRequest {
@@ -75,11 +76,20 @@ export type DropActivityLogBase =
   | ProfileActivityLogDropComment
   | ProfileActivityLogDropRepEdit;
 
-  export interface DropActivityLogDiscussion extends ProfileActivityLogDropComment{
+export interface DropActivityLogDiscussion
+  extends ProfileActivityLogDropComment {
   readonly author: ProfileMinimal | null;
-};
+}
 
 export interface DropActivityLogRepEdit extends ProfileActivityLogDropRepEdit {
   readonly author: ProfileMinimal | null;
-};
-export type DropActivityLog = DropActivityLogDiscussion | DropActivityLogRepEdit;
+}
+
+export interface DropActivityLogDropCreated
+  extends ProfileActivityLogDropCreated {
+  readonly author: ProfileMinimal | null;
+}
+export type DropActivityLog =
+  | DropActivityLogDiscussion
+  | DropActivityLogRepEdit
+  | DropActivityLogDropCreated;
