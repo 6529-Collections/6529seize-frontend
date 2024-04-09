@@ -261,8 +261,7 @@ export default function Auth({
         setToast,
         connectedProfile: connectedProfile ?? null,
         connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
     </AuthContext.Provider>

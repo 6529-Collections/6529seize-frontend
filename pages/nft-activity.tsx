@@ -18,7 +18,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
 export default function TheMemesPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Nft Activity" },
+    { display: "NFT Activity" },
   ];
 
   return (
@@ -44,8 +44,7 @@ export default function TheMemesPage() {
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container
           fluid
-          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}
-        >
+          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}>
           <Row>
             <Col>
               <LatestActivity page={1} pageSize={50} showMore={true} />

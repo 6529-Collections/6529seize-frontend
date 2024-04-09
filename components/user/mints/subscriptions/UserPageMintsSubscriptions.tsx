@@ -204,7 +204,7 @@ export default function UserPageMintsSubscriptions(
         <Col
           sm={12}
           md={6}
-          className="pt-2 pb-2 d-flex justify-content-between gap-5">
+          className="pt-2 pb-2 d-flex justify-content-between gap-2">
           <UserPageMintsSubscriptionsBalance
             details={details}
             fetching={isFetching}

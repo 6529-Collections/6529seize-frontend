@@ -4,8 +4,8 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import styles from "./CommunityDownloads.module.scss";
-import Image from "next/image";
 import Pagination from "../pagination/Pagination";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 const PAGE_SIZE = 25;
 
@@ -100,16 +100,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
               </Row>
             )}
             {downloads != undefined && downloads.length === 0 && (
-              <>
-                <Image
-                  width="0"
-                  height="0"
-                  style={{ height: "auto", width: "100px" }}
-                  src="/SummerGlasses.svg"
-                  alt="SummerGlasses"
-                />{" "}
-                Nothing here yet
-              </>
+              <NothingHereYetSummer />
             )}
             {totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
               <Row className="text-center pt-2 pb-3">

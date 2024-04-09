@@ -20,7 +20,7 @@ export default function UserPageMintsSubscriptionsBalance(
     <Container className="no-padding">
       <Row>
         <Col>
-          <h5>Current Balance</h5>
+          <h5 className="no-wrap">Current Balance</h5>
         </Col>
       </Row>
       <Row className="pt-1">

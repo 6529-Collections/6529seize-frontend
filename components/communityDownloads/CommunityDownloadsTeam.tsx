@@ -1,7 +1,7 @@
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./CommunityDownloads.module.scss";
-import Image from "next/image";
 import { CommunityDownloadsComponentRow } from "./CommunityDownloadsComponent";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 export default function CommunityDownloadsTeam() {
   const downloads = [
@@ -45,16 +45,7 @@ export default function CommunityDownloadsTeam() {
               </Row>
             )}
             {downloads != undefined && downloads.length === 0 && (
-              <>
-                <Image
-                  width="0"
-                  height="0"
-                  style={{ height: "auto", width: "100px" }}
-                  src="/SummerGlasses.svg"
-                  alt="SummerGlasses"
-                />{" "}
-                Nothing here yet
-              </>
+              <NothingHereYetSummer />
             )}
           </Container>
         </Col>

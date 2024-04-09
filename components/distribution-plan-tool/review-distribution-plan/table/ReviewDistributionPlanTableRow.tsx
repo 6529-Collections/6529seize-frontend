@@ -9,18 +9,28 @@ import {
 } from "./ReviewDistributionPlanTable";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
+import {
+  AllowlistDescription,
+  AllowlistResult,
+} from "../../../allowlist-tool/allowlist-tool.types";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
 import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { AuthContext } from "../../../auth/Auth";
+import { areEqualAddresses } from "../../../../helpers/Helpers";
+import {
+  MEMES_CONTRACT,
+  SUBSCRIPTIONS_ADMIN_WALLETS,
+} from "../../../../constants";
+import DownloadUrlWidget from "../../../downloadUrlWidget/DownloadUrlWidget";
 
 export default function ReviewDistributionPlanTableRow({
   item,
   rows,
 }: {
-  item: ReviewDistributionPlanTableItem;
-  rows: ReviewDistributionPlanTablePhase[];
+  readonly item: ReviewDistributionPlanTableItem;
+  readonly rows: ReviewDistributionPlanTablePhase[];
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
 
@@ -191,7 +201,7 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>{item.description}</td>
       <td className={commonClasses}>{item.walletsCount}</td>
       <td className={commonClasses}>{item.spotsCount}</td>
-      <td className={`${commonClasses} tw-flex tw-justify-end tw-gap-x-3`}>
+      <td className={`${commonClasses} tw-flex tw-justify-start tw-gap-x-3`}>
         <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}
           loading={isLoadingJson}
@@ -204,7 +214,65 @@ export default function ReviewDistributionPlanTableRow({
           onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
           loading={isLoadingManifold}
         />
+        {distributionPlan && (
+          <SubscriptionLinks plan={distributionPlan} phase={item} />
+        )}
       </td>
     </DistributionPlanTableRowWrapper>
   );
+}
+
+function SubscriptionLinks(
+  props: Readonly<{
+    plan: AllowlistDescription;
+    phase: ReviewDistributionPlanTableItem;
+  }>
+) {
+  const { connectedProfile } = useContext(AuthContext);
+
+  let subscriptionsEndpoint;
+  const distrTokens = extractAllNumbers(props.plan.name);
+  const tokenId = distrTokens[0];
+  if (tokenId) {
+    subscriptionsEndpoint = `${process.env.API_ENDPOINT}/api/subscriptions/allowlists/${MEMES_CONTRACT}/${tokenId}/${props.plan.id}/${props.phase.id}`;
+  }
+  const fileName = props.phase.name.replaceAll(" ", "_").toLowerCase();
+
+  function extractAllNumbers(str: string): number[] {
+    const regex = /\d+/g;
+    const numbers = [];
+    let match;
+
+    while ((match = regex.exec(str)) !== null) {
+      numbers.push(parseInt(match[0]));
+    }
+
+    return numbers;
+  }
+
+  const isSubscriptionsAdmin = () => {
+    const connectedWallets =
+      connectedProfile?.consolidation.wallets.map(
+        (wallet) => wallet.wallet.address
+      ) ?? [];
+    return connectedWallets.some((w) =>
+      SUBSCRIPTIONS_ADMIN_WALLETS.some((a) => areEqualAddresses(a, w))
+    );
+  };
+
+  if (
+    subscriptionsEndpoint &&
+    isSubscriptionsAdmin() &&
+    props.phase.type === ReviewDistributionPlanTableItemType.PHASE
+  ) {
+    return (
+      <DownloadUrlWidget
+        preview="Subscriptions"
+        name={`${fileName}.zip`}
+        url={`${subscriptionsEndpoint}`}
+        use_custom_downloader={true}
+        confirm_info={`${props.phase.name} for Meme #${tokenId}`}
+      />
+    );
+  }
 }

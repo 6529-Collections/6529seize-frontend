@@ -1,5 +1,4 @@
 import styles from "./MemeLab.module.scss";
-import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
@@ -17,6 +16,7 @@ import NFTImage from "../nft-image/NFTImage";
 import DotLoader from "../dotLoader/DotLoader";
 import { MEMES_CONTRACT } from "../../constants";
 import { AuthContext } from "../auth/Auth";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 enum Sort {
   AGE = "age",
@@ -647,14 +647,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                   )
                 ) : (
                   <Col>
-                    <Image
-                      width="0"
-                      height="0"
-                      style={{ height: "auto", width: "100px" }}
-                      src="/SummerGlasses.svg"
-                      alt="SummerGlasses"
-                    />{" "}
-                    Nothing here yet
+                    <NothingHereYetSummer />
                   </Col>
                 )
               ) : (

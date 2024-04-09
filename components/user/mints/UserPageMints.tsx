@@ -204,13 +204,7 @@ export default function UserPageMints({
     return new Set(wallets);
   };
 
-  const [mintingWallets, setMintingWallets] = useState<Set<string>>(
-    getMintingWallets()
-  );
-
-  // useEffect(() => {
-  //   setMintingWallets(getMintingWallets());
-  // }, [delegations]);
+  const mintingWallets = getMintingWallets();
 
   return (
     <>

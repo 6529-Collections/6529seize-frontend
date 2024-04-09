@@ -129,7 +129,7 @@ function TopUpEntry(
 ) {
   return (
     <div className={styles.topUpHistoryEntry}>
-      <div className="d-flex align-items-center justify-content-between gap-3">
+      <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex align-items-center gap-3">
           <div className="d-flex align-items-center gap-1 no-wrap">
             <b>+ {props.topUp.amount}</b>
@@ -165,12 +165,17 @@ function LogEntry(
 ) {
   return (
     <div className={styles.topUpHistoryEntry}>
-      <div className="d-flex align-items-center justify-content-between">
-        <div className="d-flex align-items-center gap-3">
-          <div className="d-flex align-items-center gap-1">{props.log.log}</div>
+      <div className="d-flex align-items-center justify-content-between gap-2">
+        <div className="d-flex flex-column gap-1">
+          <div>{props.log.log}</div>
+          {props.log.additional_info && (
+            <div className="font-smaller font-color-silver">
+              {props.log.additional_info}
+            </div>
+          )}
         </div>
         <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver">
+          <div className="font-color-silver no-wrap">
             {getDateDisplay(new Date(props.log.created_at))}
           </div>
         </div>
@@ -190,13 +195,17 @@ function RedeemedEntry(
 
   return (
     <div className={styles.topUpHistoryEntry}>
-      <div className="d-flex align-items-center justify-content-between">
-        <div className="d-flex align-items-center gap-3">
-          Redeemed Subscription for {contractName} #{props.redeem.token_id}.
-          Balance after redemption: {props.redeem.balance_after} ETH
+      <div className="d-flex align-items-center justify-content-between gap-2">
+        <div className="d-flex flex-column gap-1">
+          <div>
+            Redeemed Subscription for {contractName} #{props.redeem.token_id}
+          </div>
+          <div className="font-smaller font-color-silver">
+            Balance after redemption: {props.redeem.balance_after} ETH
+          </div>
         </div>
         <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver">
+          <div className="font-color-silver no-wrap">
             {getDateDisplay(
               new Date(props.redeem.transaction_date ?? props.redeem.created_at)
             )}
