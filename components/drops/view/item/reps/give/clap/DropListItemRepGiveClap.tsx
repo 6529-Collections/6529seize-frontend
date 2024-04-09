@@ -275,7 +275,7 @@ export default function DropListItemRepGiveClap({
         <button
           disabled={!rep || !canRate}
           id={`clap-${randomID}`}
-          className={`${clapClasses} tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+          className={`${clapClasses} tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-600 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={handleClick}
         >
           <span>
