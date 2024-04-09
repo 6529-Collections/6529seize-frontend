@@ -80,7 +80,7 @@ export default function DropListItemRepGiveChangeButton({
       onMouseLeave={onMouseUpOrLeave}
       disabled={!canRate}
       aria-label={ariaLabels[type]}
-      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-7 tw-w-7  tw-shadow-sm tw-transition-all tw-duration-300 tw-ease-out`}
+      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-iron-900 tw-ring-2 tw-ring-inset tw-ring-iron-700 tw-h-7 tw-w-7  tw-shadow-sm tw-transition-all tw-duration-300 tw-ease-out`}
     >
       <svg
         className="tw-flex-shrink-0 tw-h-5 tw-w-5"

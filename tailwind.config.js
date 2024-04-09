@@ -27,9 +27,6 @@ module.exports = {
       },
       screens: {
         "3xl": "2048px",
-        'hover-hover': {
-          'raw': '(hover: hover) and (pointer: fine)',
-        },
       },
       fontSize: {
         xxs: ["0.8125rem", "20px"],

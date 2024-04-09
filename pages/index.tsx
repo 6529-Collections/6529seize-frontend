@@ -199,14 +199,16 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}>
+                  lg={{ span: 6 }}
+                >
                   <Container className="no-padding">
                     <Row>
                       {pageProps.nft.animation ? (
                         <span
                           className={
                             connectedProfile ? styles.nftImagePadding : ""
-                          }>
+                          }
+                        >
                           <NFTImage
                             nft={pageProps.nft}
                             animation={true}
@@ -220,7 +222,8 @@ export default function Home({
                           href={`/the-memes/${pageProps.nft.id}`}
                           className={
                             connectedProfile ? styles.nftImagePadding : ""
-                          }>
+                          }
+                        >
                           <NFTImage
                             nft={pageProps.nft}
                             animation={true}
@@ -239,7 +242,8 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}>
+                  lg={{ span: 6 }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -359,7 +363,8 @@ export default function Home({
                           target={
                             pageProps.nft.has_distribution ? "_self" : "_blank"
                           }
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           Distribution Plan
                         </a>
                       </Col>
@@ -392,7 +397,8 @@ export default function Home({
                         <a
                           href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${pageProps.nft.id}`}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           <Image
                             className={styles.marketplace}
                             src="/opensea.png"
@@ -404,7 +410,8 @@ export default function Home({
                         <a
                           href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${pageProps.nft.id}`}
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           <Image
                             className={styles.marketplace}
                             src="/x2y2.png"
@@ -432,7 +439,8 @@ export default function Home({
                         href={`/nextgen/collection/${formatNameForUrl(
                           pageProps.nextGenFeatured.name
                         )}`}
-                        className={styles.viewAllLink}>
+                        className={styles.viewAllLink}
+                      >
                         <span>View Collection</span>
                       </Link>
                     </Col>
@@ -446,7 +454,8 @@ export default function Home({
                   </Row>
                 </Container>
               )}
-            <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+            {/* TODO */}
+            {/* <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
               <div className="tw-px-2">
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
@@ -464,7 +473,7 @@ export default function Home({
                   </span>
                 </ProfileActivityLogs>
               </div>
-            </div>
+            </div> */}
             <Container className={styles.mainContainer}>
               <Row className="pt-3">
                 <Col xs={12} sm={12} md={12} lg={12}>
