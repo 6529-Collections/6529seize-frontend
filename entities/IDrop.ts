@@ -60,6 +60,10 @@ export interface DropFull {
   readonly total_number_of_categories: number;
   readonly input_profile_categories: DropFullInputProfileCategory[] | null;
   readonly rep_given_by_input_profile: number | null; // this drop's rep given by the input profile
+  readonly discussion_comments_count: number;
+  readonly rep_logs_count: number;
+  readonly input_profile_discussion_comments_count: number | null;
+  readonly quote_count: number;
 }
 
 export interface DropRepChangeRequest {
