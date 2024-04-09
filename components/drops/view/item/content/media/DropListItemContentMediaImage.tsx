@@ -1,3 +1,12 @@
-export default function DropListItemContentMediaImage() {
-  return <div className="tw-bg-red">IMAGE</div>;
+export default function DropListItemContentMediaImage({
+  src,
+}: {
+  readonly src: string;
+}) {
+  return (
+    <img
+      src={src}
+      className="tw-w-full tw-h-full tw-object-center tw-object-contain"
+    />
+  );
 }
