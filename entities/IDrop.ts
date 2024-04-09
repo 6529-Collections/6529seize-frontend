@@ -1,5 +1,5 @@
 import {
-  ProfileActivityLog,
+  ProfileActivityLogDropCreated,
   ProfileActivityLogDropComment,
   ProfileActivityLogDropRepEdit,
   ProfileMinimal,
@@ -84,6 +84,12 @@ export interface DropActivityLogDiscussion
 export interface DropActivityLogRepEdit extends ProfileActivityLogDropRepEdit {
   readonly author: ProfileMinimal | null;
 }
+
+export interface DropActivityLogDropCreated
+  extends ProfileActivityLogDropCreated {
+  readonly author: ProfileMinimal | null;
+}
 export type DropActivityLog =
   | DropActivityLogDiscussion
-  | DropActivityLogRepEdit;
+  | DropActivityLogRepEdit
+  | DropActivityLogDropCreated;
