@@ -48,9 +48,13 @@ export enum ChallengeVotingMetricType {
   INDIVIDUAL_POST = "INDIVIDUAL_POST",
 }
 
+export type ChallengeIndividualPostVotingType = ChallengeVotingType.HIGHEST_POINTS;
+export type ChallengeIndividualPostVotingMetricType = ChallengeVotingMetricType.TDH;
+
 export interface ChallengeIndividualPost {
   readonly type: ChallengeType.INDIVIDUAL_POST;
-  readonly votingMetricType: ChallengeVotingMetricType;
+  readonly votingType: ChallengeIndividualPostVotingType;
+  readonly votingMetricType: ChallengeIndividualPostVotingMetricType;
 }
 
 export interface Challenge {
