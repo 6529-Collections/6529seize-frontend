@@ -13,18 +13,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import Download from "../download/Download";
 import ArtistProfileHandle from "./ArtistProfileHandle";
-
-export function getFileTypeFromMetadata(metadata: any) {
-  return metadata.animation_details?.format ?? metadata.image_details.format;
-}
-
-export function getDimensionsFromMetadata(metadata: any) {
-  return `${numberWithCommas(
-    metadata.animation_details?.width ?? metadata.image_details.width
-  )} x ${numberWithCommas(
-    metadata.animation_details?.height ?? metadata.image_details.height
-  )}`;
-}
+import {
+  getFileTypeFromMetadata,
+  getDimensionsFromMetadata,
+} from "../../helpers/nft.helplers";
 
 export function MemePageArt(props: {
   show: boolean;
