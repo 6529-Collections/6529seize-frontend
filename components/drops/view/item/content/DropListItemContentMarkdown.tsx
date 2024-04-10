@@ -81,11 +81,34 @@ const DropListItemContentMarkdown = React.memo(
     const [isOverflowing, setIsOverflowing] = useState(false);
 
     useEffect(() => {
-      setIsOverflowing(
-        !!containerRef.current &&
-          containerRef.current?.scrollHeight >
-            containerRef.current?.clientHeight
-      );
+      const checkOverflow = () => {
+        setIsOverflowing(
+          !!containerRef.current &&
+            containerRef.current.scrollHeight >
+              containerRef.current.clientHeight
+        );
+      };
+
+      // Check overflow initially
+      checkOverflow();
+
+      // Check overflow on window resize
+      window.addEventListener("resize", checkOverflow);
+
+      // Set up a MutationObserver to check overflow when the container's content changes
+      const observer = new MutationObserver(checkOverflow);
+      if (containerRef.current) {
+        observer.observe(containerRef.current, {
+          childList: true,
+          subtree: true,
+        });
+      }
+
+      // Clean up event listeners and observer
+      return () => {
+        window.removeEventListener("resize", checkOverflow);
+        observer.disconnect();
+      };
     }, [containerRef]);
 
     const [showMore, setShowMore] = useState(false);
