@@ -31,8 +31,8 @@ import { getNextGenIconUrl } from "../../../../../../nextGen/collections/nextgen
 export enum TransactionType {
   AIRDROPPED = "AIRDROPPED",
   RECEIVED_AIRDROP = "RECEIVED_AIRDROP",
-  MINTED = "MINTED",
-  MINTED_TO = "MINTED_TO",
+  SEIZED = "SEIZED",
+  SEIZED_TO = "SEIZED_TO",
   SALE = "SALE",
   PURCHASE = "PURCHASE",
   TRANSFER_IN = "TRANSFER_IN",
@@ -43,8 +43,8 @@ export enum TransactionType {
 
 const TYPE_TP_ACTION: Record<TransactionType, string> = {
   [TransactionType.RECEIVED_AIRDROP]: "received airdrop",
-  [TransactionType.MINTED]: "minted",
-  [TransactionType.MINTED_TO]: "minted",
+  [TransactionType.SEIZED]: "seized",
+  [TransactionType.SEIZED_TO]: "seized",
   [TransactionType.SALE]: "sold",
   [TransactionType.PURCHASE]: "purchased",
   [TransactionType.TRANSFER_IN]: "received",
@@ -136,8 +136,8 @@ export default function UserPageStatsActivityWalletTableRow({
         addresses: MINTING_ADDRESSES,
       })
     )
-      ? TransactionType.MINTED_TO
-      : TransactionType.MINTED;
+      ? TransactionType.SEIZED_TO
+      : TransactionType.SEIZED;
 
   const getBurnType = (): TransactionType =>
     profile.consolidation.wallets.some((w) =>
@@ -207,7 +207,7 @@ export default function UserPageStatsActivityWalletTableRow({
     TransactionType.TRANSFER_OUT,
     TransactionType.RECEIVED_BURN,
     TransactionType.AIRDROPPED,
-    TransactionType.MINTED_TO,
+    TransactionType.SEIZED_TO,
   ].includes(type);
 
   const value = transaction.value;

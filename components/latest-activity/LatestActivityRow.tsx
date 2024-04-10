@@ -190,7 +190,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
                   wallets={[props.tr.to_address]}
                   display={props.tr.to_display}
                 />
-                minted
+                seized
               </>
             ) : (
               "Airdrop"
@@ -284,7 +284,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     if (isNullAddress(props.tr.from_address)) {
       return (
         <>
-          {!props.hideNextgenTokenId ? <>{tokenInfo} minted to</> : `Minted to`}
+          {!props.hideNextgenTokenId ? <>{tokenInfo} seized by</> : `Seized by`}
           &nbsp;
           <Address
             wallets={[props.tr.to_address]}
