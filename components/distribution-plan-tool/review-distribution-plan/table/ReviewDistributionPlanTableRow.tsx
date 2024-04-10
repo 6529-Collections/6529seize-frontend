@@ -9,21 +9,12 @@ import {
 } from "./ReviewDistributionPlanTable";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import {
-  AllowlistDescription,
-  AllowlistResult,
-} from "../../../allowlist-tool/allowlist-tool.types";
+import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
 import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
 import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
-import { AuthContext } from "../../../auth/Auth";
-import { areEqualAddresses } from "../../../../helpers/Helpers";
-import {
-  MEMES_CONTRACT,
-  SUBSCRIPTIONS_ADMIN_WALLETS,
-} from "../../../../constants";
-import DownloadUrlWidget from "../../../downloadUrlWidget/DownloadUrlWidget";
+import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 
 export default function ReviewDistributionPlanTableRow({
   item,
@@ -220,67 +211,4 @@ export default function ReviewDistributionPlanTableRow({
       </td>
     </DistributionPlanTableRowWrapper>
   );
-}
-
-function SubscriptionLinks(
-  props: Readonly<{
-    plan: AllowlistDescription;
-    phase: ReviewDistributionPlanTableItem;
-  }>
-) {
-  const { connectedProfile } = useContext(AuthContext);
-
-  let subscriptionsEndpoint;
-  const distrTokens = extractAllNumbers(props.plan.name);
-  const tokenId = distrTokens[0];
-  if (tokenId) {
-    subscriptionsEndpoint = `${process.env.API_ENDPOINT}/api/subscriptions/allowlists/${MEMES_CONTRACT}/${tokenId}/${props.plan.id}/${props.phase.id}`;
-  }
-  const fileName = props.phase.name.replaceAll(" ", "_").toLowerCase();
-
-  function extractAllNumbers(str: string): number[] {
-    const regex = /\d+/g;
-    const numbers = [];
-    let match;
-
-    while ((match = regex.exec(str)) !== null) {
-      numbers.push(parseInt(match[0]));
-    }
-
-    return numbers;
-  }
-
-  const isSubscriptionsAdmin = () => {
-    const connectedWallets =
-      connectedProfile?.consolidation.wallets.map(
-        (wallet) => wallet.wallet.address
-      ) ?? [];
-    return connectedWallets.some((w) =>
-      SUBSCRIPTIONS_ADMIN_WALLETS.some((a) => areEqualAddresses(a, w))
-    );
-  };
-
-  if (
-    subscriptionsEndpoint &&
-    isSubscriptionsAdmin() &&
-    props.phase.type === ReviewDistributionPlanTableItemType.PHASE
-  ) {
-    return (
-      <span
-        className="d-flex align-items-center"
-        style={{
-          border: "1px solid #767676",
-          borderRadius: "20px",
-          padding: "0px 5px",
-        }}>
-        <DownloadUrlWidget
-          preview="Subscription Lists"
-          name={`${fileName}.zip`}
-          url={`${subscriptionsEndpoint}`}
-          use_custom_downloader={true}
-          confirm_info={`${props.phase.name} for Meme #${tokenId}`}
-        />
-      </span>
-    );
-  }
 }
