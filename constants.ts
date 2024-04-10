@@ -54,7 +54,7 @@ export const MEMES_MINTING_HREF = "https://thememes.seize.io";
 export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
 
 export const SUBSCRIPTIONS_ADDRESS =
-  "0xc6400A5584db71e41B0E5dFbdC769b54B91256CD";
+  "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";
 export const SUBSCRIPTIONS_ADDRESS_ENS = "seize.6529.eth";
 
 export const SUBSCRIPTIONS_ADMIN_WALLETS = [

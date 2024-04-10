@@ -266,13 +266,21 @@ function SubscriptionLinks(
     props.phase.type === ReviewDistributionPlanTableItemType.PHASE
   ) {
     return (
-      <DownloadUrlWidget
-        preview="Subscription Lists"
-        name={`${fileName}.zip`}
-        url={`${subscriptionsEndpoint}`}
-        use_custom_downloader={true}
-        confirm_info={`${props.phase.name} for Meme #${tokenId}`}
-      />
+      <span
+        className="d-flex align-items-center"
+        style={{
+          border: "1px solid #767676",
+          borderRadius: "20px",
+          padding: "0px 5px",
+        }}>
+        <DownloadUrlWidget
+          preview="Subscription Lists"
+          name={`${fileName}.zip`}
+          url={`${subscriptionsEndpoint}`}
+          use_custom_downloader={true}
+          confirm_info={`${props.phase.name} for Meme #${tokenId}`}
+        />
+      </span>
     );
   }
 }
