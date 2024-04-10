@@ -44,7 +44,7 @@ export default function UserPageStatsActivityOverview({
       .catch((error) => {
         setActivity(undefined);
       });
-  }, [activeAddress]);
+  }, [activeAddress, profile]);
 
   useEffect(() => {
     const url = `aggregated-activity/${getStatsPath(
@@ -56,7 +56,7 @@ export default function UserPageStatsActivityOverview({
     }).then((response) => {
       setActivityMemes(response);
     });
-  }, [activeAddress]);
+  }, [activeAddress, profile]);
 
   return (
     <div className="pt-2 pb-2">
