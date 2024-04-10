@@ -33,6 +33,7 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import NFTPlugin from "../lexical/plugins/nft/NFTPlugin";
 import { CreateDropType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 // import { NftNode } from "../lexical/nodes/NftNode";
 
 export default function CreateDropContent({
@@ -103,6 +104,13 @@ export default function CreateDropContent({
     }
   };
 
+  const urlRegExp = new RegExp(
+    /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/
+  );
+  function validateUrl(url: string): boolean {
+    return url === "https://" || urlRegExp.test(url);
+  }
+
   return (
     <div className="tailwind-scope">
       <LexicalComposer initialConfig={editorConfig}>
@@ -149,6 +157,7 @@ export default function CreateDropContent({
             <ListPlugin />
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
             <TabIndentationPlugin />
+            <LinkPlugin validateUrl={validateUrl} />
           </div>
         </div>
       </LexicalComposer>

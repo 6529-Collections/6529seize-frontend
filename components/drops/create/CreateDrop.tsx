@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
 import {
+  CreateDropRequest,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -54,19 +55,7 @@ export default function CreateDrop({
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: {
-      readonly title: string | null;
-      readonly content: string | null;
-      readonly root_drop_id: number | null;
-      readonly quoted_drop_id: number | null;
-      readonly referenced_nfts: ReferencedNft[];
-      readonly mentioned_users: MentionedUser[];
-      readonly metadata: DropMetadata[];
-      drop_media: {
-        readonly url: string;
-        readonly mimetype: string;
-      } | null;
-    }) =>
+    mutationFn: async (body: CreateDropRequest) =>
       await commonApiPost({
         endpoint: `drops`,
         body,
@@ -107,29 +96,7 @@ export default function CreateDrop({
       setSubmitting(false);
       return;
     }
-
-    // drop-media/prep
-    // content_type
-    // file_name
-
-    // RESPONSE
-    // upload_url; -> upload file here
-    // content_type; -> to drop body
-    // media_url; -> to drop body
-
-    const formData: {
-      readonly title: string | null;
-      readonly content: string | null;
-      readonly root_drop_id: number | null;
-      readonly quoted_drop_id: number | null;
-      readonly referenced_nfts: ReferencedNft[];
-      readonly mentioned_users: MentionedUser[];
-      readonly metadata: DropMetadata[];
-      drop_media: {
-        readonly url: string;
-        readonly mimetype: string;
-      } | null;
-    } = {
+    const requestBody: CreateDropRequest = {
       title: dropRequest.title,
       content: dropRequest.content,
       root_drop_id: dropRequest.stormId ? parseInt(dropRequest.stormId) : null,
@@ -141,7 +108,6 @@ export default function CreateDrop({
     };
 
     if (dropRequest.file) {
-      console.log("file", dropRequest.file.type, dropRequest.file.name);
       const prep = await commonApiPost<
         {
           content_type: string;
@@ -159,23 +125,19 @@ export default function CreateDrop({
           file_name: dropRequest.file.name,
         },
       });
-      console.log("prep");
-      console.log(prep);
       const myHeaders = new Headers({ "Content-Type": prep.content_type });
-      const response = await fetch(prep.upload_url, {
+      await fetch(prep.upload_url, {
         method: "PUT",
         headers: myHeaders,
         body: dropRequest.file,
       });
-      console.log("response");
-      console.log(response);
-      formData.drop_media = {
+      requestBody.drop_media = {
         url: prep.media_url,
         mimetype: prep.content_type,
       };
     }
 
-    await addDropMutation.mutateAsync(formData);
+    await addDropMutation.mutateAsync(requestBody);
   };
 
   return (

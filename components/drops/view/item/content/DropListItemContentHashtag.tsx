@@ -40,7 +40,7 @@ export default function DropListItemContentHashtag({
   return (
     <LazyTippy
       placement={"top"}
-      interactive={true}
+      interactive={false}
       content={<NftTooltip contract={contract} token={token} />}
     >
       <div className="tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
