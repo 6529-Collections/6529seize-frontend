@@ -2,13 +2,18 @@ import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
 import {
+  CreateDropRequest,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
-import { commonApiPostForm } from "../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+  commonApiPostForm,
+} from "../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export interface DropRequest {
@@ -50,8 +55,8 @@ export default function CreateDrop({
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: FormData) =>
-      await commonApiPostForm<any>({
+    mutationFn: async (body: CreateDropRequest) =>
+      await commonApiPost({
         endpoint: `drops`,
         body,
       }),
@@ -88,48 +93,51 @@ export default function CreateDrop({
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
-      setSubmitting(true);
+      setSubmitting(false);
       return;
     }
-    const formData = new FormData();
+    const requestBody: CreateDropRequest = {
+      title: dropRequest.title,
+      content: dropRequest.content,
+      root_drop_id: dropRequest.stormId ? parseInt(dropRequest.stormId) : null,
+      quoted_drop_id: dropRequest.quotedDropId,
+      referenced_nfts: dropRequest.referencedNfts,
+      mentioned_users: dropRequest.mentionedUsers,
+      metadata: dropRequest.metadata,
+      drop_media: null,
+    };
+
     if (dropRequest.file) {
-      formData.append("drop_media", dropRequest.file);
-    }
-    if (dropRequest.title) {
-      formData.append("title", dropRequest.title);
-    }
-
-    if (dropRequest.content) {
-      formData.append("content", dropRequest.content);
-    }
-
-    if (dropRequest.stormId) {
-      formData.append("storm_id", dropRequest.stormId);
-    }
-
-    if (dropRequest.quotedDropId) {
-      formData.append("quoted_drop_id", dropRequest.quotedDropId.toString());
-    }
-
-    if (dropRequest.referencedNfts.length) {
-      formData.append(
-        "referenced_nfts",
-        JSON.stringify(dropRequest.referencedNfts)
-      );
-    }
-
-    if (dropRequest.mentionedUsers.length) {
-      formData.append(
-        "mentioned_users",
-        JSON.stringify(dropRequest.mentionedUsers)
-      );
+      const prep = await commonApiPost<
+        {
+          content_type: string;
+          file_name: string;
+        },
+        {
+          upload_url: string;
+          content_type: string;
+          media_url: string;
+        }
+      >({
+        endpoint: "drop-media/prep",
+        body: {
+          content_type: dropRequest.file.type,
+          file_name: dropRequest.file.name,
+        },
+      });
+      const myHeaders = new Headers({ "Content-Type": prep.content_type });
+      await fetch(prep.upload_url, {
+        method: "PUT",
+        headers: myHeaders,
+        body: dropRequest.file,
+      });
+      requestBody.drop_media = {
+        url: prep.media_url,
+        mimetype: prep.content_type,
+      };
     }
 
-    if (dropRequest.metadata.length) {
-      formData.append("metadata", JSON.stringify(dropRequest.metadata));
-    }
-
-    await addDropMutation.mutateAsync(formData);
+    await addDropMutation.mutateAsync(requestBody);
   };
 
   return (

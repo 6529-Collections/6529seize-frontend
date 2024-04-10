@@ -303,6 +303,8 @@ export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
   };
 }
 
+
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
   | ProfileActivityLogHandleEdit
@@ -318,7 +320,8 @@ export type ProfileActivityLog =
   | ProfileActivityLogGeneralCicStatementEdit
   | ProfileActivityLogNftAccountsEdit
   | ProfileActivityLogDropComment
-  | ProfileActivityLogDropRepEdit;
+  | ProfileActivityLogDropRepEdit
+  | ProfileActivityLogDropCreated;
 
 export enum RateMatter {
   CIC = "CIC",

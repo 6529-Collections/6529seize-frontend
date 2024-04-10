@@ -454,26 +454,27 @@ export default function Home({
                   </Row>
                 </Container>
               )}
-            {/* TODO */}
-            {/* <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+            <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
               <div className="tw-px-2">
                 <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}
-                  disableActiveCurationFilter={true}>
+                  disableActiveCurationFilter={true}
+                >
                   <span className="d-flex align-items-center gap-3">
                     <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
                       <span className="font-lightest">Community</span> Activity{" "}
                     </h1>
                     <Link
                       href="/community-activity"
-                      className={styles.viewAllLink}>
+                      className={styles.viewAllLink}
+                    >
                       <span>View All</span>
                     </Link>
                   </span>
                 </ProfileActivityLogs>
               </div>
-            </div> */}
+            </div>
             <Container className={styles.mainContainer}>
               <Row className="pt-3">
                 <Col xs={12} sm={12} md={12} lg={12}>
