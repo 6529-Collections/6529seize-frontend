@@ -77,11 +77,7 @@ export default function DropListItemDiscussionItems({
 
   const [logs, setLogs] = useState<DropActivityLog[]>([]);
   useEffect(() => {
-    setLogs(
-      items?.pages
-        .flatMap((page) => page.data)
-        .filter((d) => d.type !== ProfileActivityLogType.DROP_CREATED) ?? []
-    );
+    setLogs(items?.pages.flatMap((page) => page.data) ?? []);
   }, [items]);
 
   const onBottomIntersection = (state: boolean) => {
