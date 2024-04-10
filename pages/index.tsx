@@ -38,13 +38,13 @@ import useManifoldClaim, {
 } from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
-import {
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
-} from "../components/the-memes/MemePageArt";
 import Link from "next/link";
 import { AuthContext } from "../components/auth/Auth";
 import { NftOwner } from "../entities/IOwner";
+import {
+  getFileTypeFromMetadata,
+  getDimensionsFromMetadata,
+} from "../helpers/nft.helplers";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
