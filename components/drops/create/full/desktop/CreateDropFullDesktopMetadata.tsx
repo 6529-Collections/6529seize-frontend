@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DropMetadata } from "../../../../../entities/IDrop";
 import CreateDropMetadataItems from "../../utils/metadata/CreateDropMetadataItems";
 
@@ -14,12 +14,15 @@ export default function CreateDropFullDesktopMetadata({
   const [key, setKey] = useState<string | null>(null);
   const [value, setValue] = useState<string | null>(null);
 
+  const metadataKeyRef = useRef<HTMLInputElement>(null);
+
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (key && value) {
       onMetadataEdit({ data_key: key, data_value: value });
       setKey(null);
       setValue(null);
+      metadataKeyRef.current?.focus();
     }
   };
 
@@ -34,6 +37,7 @@ export default function CreateDropFullDesktopMetadata({
       >
         <div className="tw-w-full">
           <input
+            ref={metadataKeyRef}
             type="text"
             placeholder="Metadata Key"
             value={key ?? ""}

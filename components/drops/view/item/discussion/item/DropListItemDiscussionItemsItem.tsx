@@ -6,6 +6,7 @@ import DropAuthor, {
 } from "../../../../create/utils/DropAuthor";
 import DropPfp, { DropPFPSize } from "../../../../create/utils/DropPfp";
 import DropListItemDiscussionItemsItemComment from "./DropListItemDiscussionItemsItemComment";
+import DropListItemDiscussionItemsItemDropCreated from "./DropListItemDiscussionItemsItemDropCreated";
 import DropListItemDiscussionItemsItemRep from "./DropListItemDiscussionItemsItemRep";
 
 export default function DropListItemDiscussionItemsItem({
@@ -21,8 +22,7 @@ export default function DropListItemDiscussionItemsItem({
       case ProfileActivityLogType.DROP_REP_EDIT:
         return <DropListItemDiscussionItemsItemRep item={item} />;
       case ProfileActivityLogType.DROP_CREATED:
-        // TODO: Implement this
-        return <div>Drop created</div>;
+        return <DropListItemDiscussionItemsItemDropCreated />;
       default:
         assertUnreachable(itemType);
     }
