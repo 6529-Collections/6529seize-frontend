@@ -96,7 +96,7 @@ export default function DownloadUrlWidget(props: Readonly<Props>) {
         }}
         disabled={downloading}>
         {downloading ? <Spinner /> : <FontAwesomeIcon icon="download" />}
-        {downloading ? `Downloading` : `Download`} {props.preview}
+        {downloading ? `Downloading` : props.preview}
       </button>
       {props.confirm_info && (
         <DownloadUrlWidgetConfirm
