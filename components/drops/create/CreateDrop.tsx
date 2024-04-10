@@ -54,8 +54,20 @@ export default function CreateDrop({
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: FormData) =>
-      await commonApiPostForm<any>({
+    mutationFn: async (body: {
+      readonly title: string | null;
+      readonly content: string | null;
+      readonly root_drop_id: number | null;
+      readonly quoted_drop_id: number | null;
+      readonly referenced_nfts: ReferencedNft[];
+      readonly mentioned_users: MentionedUser[];
+      readonly metadata: DropMetadata[];
+      drop_media: {
+        readonly url: string;
+        readonly mimetype: string;
+      } | null;
+    }) =>
+      await commonApiPost({
         endpoint: `drops`,
         body,
       }),
@@ -92,7 +104,7 @@ export default function CreateDrop({
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
-      setSubmitting(true);
+      setSubmitting(false);
       return;
     }
 
@@ -104,6 +116,29 @@ export default function CreateDrop({
     // upload_url; -> upload file here
     // content_type; -> to drop body
     // media_url; -> to drop body
+
+    const formData: {
+      readonly title: string | null;
+      readonly content: string | null;
+      readonly root_drop_id: number | null;
+      readonly quoted_drop_id: number | null;
+      readonly referenced_nfts: ReferencedNft[];
+      readonly mentioned_users: MentionedUser[];
+      readonly metadata: DropMetadata[];
+      drop_media: {
+        readonly url: string;
+        readonly mimetype: string;
+      } | null;
+    } = {
+      title: dropRequest.title,
+      content: dropRequest.content,
+      root_drop_id: dropRequest.stormId ? parseInt(dropRequest.stormId) : null,
+      quoted_drop_id: dropRequest.quotedDropId,
+      referenced_nfts: dropRequest.referencedNfts,
+      mentioned_users: dropRequest.mentionedUsers,
+      metadata: dropRequest.metadata,
+      drop_media: null,
+    };
 
     if (dropRequest.file) {
       console.log("file", dropRequest.file.type, dropRequest.file.name);
@@ -134,50 +169,13 @@ export default function CreateDrop({
       });
       console.log("response");
       console.log(response);
+      formData.drop_media = {
+        url: prep.media_url,
+        mimetype: prep.content_type,
+      };
     }
 
-    setSubmitting(false);
-
-    //const formData = new FormData();
-
-    // if (dropRequest.file) {
-    //   formData.append("drop_media", dropRequest.file);
-    // }
-    // if (dropRequest.title) {
-    //   formData.append("title", dropRequest.title);
-    // }
-
-    // if (dropRequest.content) {
-    //   formData.append("content", dropRequest.content);
-    // }
-
-    // if (dropRequest.stormId) {
-    //   formData.append("storm_id", dropRequest.stormId);
-    // }
-
-    // if (dropRequest.quotedDropId) {
-    //   formData.append("quoted_drop_id", dropRequest.quotedDropId.toString());
-    // }
-
-    // if (dropRequest.referencedNfts.length) {
-    //   formData.append(
-    //     "referenced_nfts",
-    //     JSON.stringify(dropRequest.referencedNfts)
-    //   );
-    // }
-
-    // if (dropRequest.mentionedUsers.length) {
-    //   formData.append(
-    //     "mentioned_users",
-    //     JSON.stringify(dropRequest.mentionedUsers)
-    //   );
-    // }
-
-    // if (dropRequest.metadata.length) {
-    //   formData.append("metadata", JSON.stringify(dropRequest.metadata));
-    // }
-
-    // await addDropMutation.mutateAsync(formData);
+    await addDropMutation.mutateAsync(formData);
   };
 
   return (
