@@ -39,11 +39,9 @@ import NFTImage from "../nft-image/NFTImage";
 import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 import Timeline from "../timeline/Timeline";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
-import {
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
-} from "../the-memes/MemePageArt";
+import { getFileTypeFromMetadata } from "../the-memes/MemePageArt";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import { getDimensionsFromMetadata } from "../../helpers/nft.helplers";
 
 interface MemeTab {
   focus: MEME_FOCUS;
