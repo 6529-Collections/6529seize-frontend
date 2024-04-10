@@ -52,7 +52,7 @@ export default function UserPageStats({
     }).then((response) => {
       setTdh(response);
     });
-  }, [activeAddress]);
+  }, [activeAddress, profile]);
 
   useEffect(() => {
     const url = `owners-balances/${getStatsPath(profile, activeAddress)}`;
@@ -65,7 +65,7 @@ export default function UserPageStats({
       .catch((error) => {
         setOwnerBalance(undefined);
       });
-  }, [activeAddress]);
+  }, [activeAddress, profile]);
 
   useEffect(() => {
     const url = `owners-balances/${getStatsPath(profile, activeAddress)}/memes`;
@@ -74,7 +74,7 @@ export default function UserPageStats({
     }).then((response) => {
       setBalanceMemes(response);
     });
-  }, [activeAddress]);
+  }, [activeAddress, profile]);
 
   return (
     <div className="tailwind-scope">
