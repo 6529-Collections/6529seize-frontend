@@ -21,7 +21,7 @@ export default function CreateDropMetadataItem({
               className="tw-group tw-bg-transparent tw-border-none"
             >
               <svg
-                className="tw-w-5 tw-h-5 tw-text-red group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

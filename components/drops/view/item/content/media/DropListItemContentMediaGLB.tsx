@@ -6,12 +6,14 @@ export default function DropListItemContentMediaGLB({
   readonly src: string;
 }) {
   return (
-    <model-viewer
-      src={src}
-      ar
-      auto-rotate
-      camera-controls
-      className="tw-w-full tw-h-full"
-    ></model-viewer>
+    <div className="tw-mt-1">
+      <model-viewer
+        src={src}
+        ar
+        auto-rotate
+        camera-controls
+        className="tw-w-full tw-h-full"
+      ></model-viewer>
+    </div>
   );
 }
