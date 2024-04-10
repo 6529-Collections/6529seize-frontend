@@ -1,28 +1,20 @@
-import { ReactElement, useContext } from "react";
+import { ReactElement } from "react";
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
-  ProfileActivityLogRatingEdit,
   RateMatter,
-  RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getInitialRatersParams,
-  getProfileRatings,
-  getProfileRatingsByRater,
-  getSignedWalletOrNull,
   getUserProfile,
-  getUserProfileActivityLogs,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import { Page as PageType } from "../../helpers/Types";
+
 import {
-  ActivityLogParams,
-  convertActivityLogParams,
+  ActivityLogParams
 } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
@@ -35,10 +27,6 @@ export interface UserPageRepPropsRepRates {
 export interface UserPageRepProps {
   readonly profile: IProfileAndConsolidations;
   readonly handleOrWallet: string;
-  readonly repRates: UserPageRepPropsRepRates;
-  readonly repLogs: PageType<ProfileActivityLogRatingEdit>;
-  readonly repGivenToUsers: PageType<RatingWithProfileInfoAndLevel>;
-  readonly repReceivedFromUsers: PageType<RatingWithProfileInfoAndLevel>;
 }
 
 const MATTER_TYPE = RateMatter.REP;
@@ -71,25 +59,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
   });
   const initialActivityLogParams = getInitialActivityLogParams(
     pageProps.handleOrWallet
-  );
-  const { initProfileRepPage } = useContext(ReactQueryWrapperContext);
-  initProfileRepPage({
-    profile: pageProps.profile,
-    repRates: pageProps.repRates,
-    repLogs: {
-      data: pageProps.repLogs,
-      params: initialActivityLogParams,
-    },
-    repGivenToUsers: {
-      data: pageProps.repGivenToUsers,
-      params: initialRepGivenParams,
-    },
-    repReceivedFromUsers: {
-      data: pageProps.repReceivedFromUsers,
-      params: initialRepReceivedParams,
-    },
-    handleOrWallet: pageProps.handleOrWallet,
-  });
+  ); 
 
   return (
     <div className="tailwind-scope">
@@ -124,40 +94,8 @@ export async function getServerSideProps(
 }> {
   try {
     const headers = getCommonHeaders(req);
-    const signedWalletOrNull = getSignedWalletOrNull(req);
     const handleOrWallet = req.query.user.toLowerCase() as string;
-    const [profile, repLogs, repRates, repGivenToUsers, repReceivedFromUsers] =
-      await Promise.all([
-        getUserProfile({ user: handleOrWallet, headers }),
-        getUserProfileActivityLogs<ProfileActivityLogRatingEdit>({
-          headers,
-          params: convertActivityLogParams({
-            params: getInitialActivityLogParams(handleOrWallet),
-            disableActiveCurationFilter: true,
-          }),
-        }),
-        getProfileRatings({
-          user: handleOrWallet,
-          headers,
-          signedWallet: signedWalletOrNull,
-        }),
-        getProfileRatingsByRater({
-          params: getInitialRatersParams({
-            handleOrWallet,
-            matter: MATTER_TYPE,
-            given: false,
-          }),
-          headers,
-        }),
-        getProfileRatingsByRater({
-          params: getInitialRatersParams({
-            handleOrWallet,
-            matter: MATTER_TYPE,
-            given: true,
-          }),
-          headers,
-        }),
-      ]);
+    const profile = await getUserProfile({ user: handleOrWallet, headers });
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -173,10 +111,6 @@ export async function getServerSideProps(
       props: {
         profile,
         handleOrWallet,
-        repRates,
-        repLogs,
-        repGivenToUsers,
-        repReceivedFromUsers,
       },
     };
   } catch (e: any) {

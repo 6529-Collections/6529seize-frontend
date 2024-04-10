@@ -40,9 +40,9 @@ import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 import Timeline from "../timeline/Timeline";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import {
-  getDimensionsFromMetadata,
   getFileTypeFromMetadata,
-} from "../the-memes/MemePageArt";
+  getDimensionsFromMetadata,
+} from "../../helpers/nft.helplers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 interface MemeTab {
