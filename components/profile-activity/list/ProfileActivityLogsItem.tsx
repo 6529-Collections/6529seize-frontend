@@ -55,7 +55,11 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.DROP_COMMENT:
       // TODO: Implement
       return <div>Drop comment (TODO)</div>;
+    case ProfileActivityLogType.DROP_CREATED:
+      // TODO: Implement
+      return <div>Drop created (TODO)</div>;
     default:
+      console.log("logType", logType);
       assertUnreachable(logType);
   }
 }

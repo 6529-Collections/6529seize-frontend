@@ -93,3 +93,17 @@ export type DropActivityLog =
   | DropActivityLogDiscussion
   | DropActivityLogRepEdit
   | DropActivityLogDropCreated;
+
+export interface CreateDropRequest {
+  readonly title: string | null;
+  readonly content: string | null;
+  readonly root_drop_id: number | null;
+  readonly quoted_drop_id: number | null;
+  readonly referenced_nfts: ReferencedNft[];
+  readonly mentioned_users: MentionedUser[];
+  readonly metadata: DropMetadata[];
+  drop_media: {
+    readonly url: string;
+    readonly mimetype: string;
+  } | null;
+}
