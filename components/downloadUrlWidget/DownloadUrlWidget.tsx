@@ -4,8 +4,6 @@ import useDownloader from "react-use-downloader";
 import { API_AUTH_COOKIE, WALLET_AUTH_COOKIE } from "../../constants";
 import Cookies from "js-cookie";
 import { Spinner } from "../dotLoader/DotLoader";
-import { useContext } from "react";
-import { AuthContext } from "../auth/Auth";
 import { Button, Modal } from "react-bootstrap";
 
 interface Props {
@@ -34,17 +32,15 @@ export default function DownloadUrlWidget(props: Readonly<Props>) {
   }
 
   return (
-    <>
-      <button
-        className={styles.downloadUrlWidget}
-        onClick={() => {
-          startDownload();
-        }}
-        disabled={isInProgress}>
-        {isInProgress ? <Spinner /> : <FontAwesomeIcon icon="download" />}
-        {isInProgress ? `Downloading` : props.preview}
-      </button>
-    </>
+    <button
+      className={styles.downloadUrlWidget}
+      onClick={() => {
+        startDownload();
+      }}
+      disabled={isInProgress}>
+      {isInProgress ? <Spinner /> : <FontAwesomeIcon icon="download" />}
+      {isInProgress ? `Downloading` : props.preview}
+    </button>
   );
 }
 
