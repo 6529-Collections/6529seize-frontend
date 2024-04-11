@@ -23,7 +23,7 @@ export default function CreateDropChallengeAcceptButton() {
       <button
         onClick={() => setIsAccepted(!isAccepted)}
         type="button"
-        className={`${getButtonClasses()} tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-transform active:tw-scale-95`}
+        className={`${getButtonClasses()} tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-transform active:tw-scale-95`}
       >
         <svg
           className={`${getSvgClasses()} tw-h-4 tw-w-4 tw-transition tw-duration-300 tw-ease-out`}
