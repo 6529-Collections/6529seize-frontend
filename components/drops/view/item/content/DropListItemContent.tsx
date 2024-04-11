@@ -25,10 +25,10 @@ export default function DropListItemContent({
   });
 
   return (
-    <div className="tw-w-full tw-max-w-[275px]">
+    <div>
       <DropListItemContentMarkdown drop={drop} />
       {quotedDrop && (
-        <div className="  tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-2">
+        <div className="tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-2">
           <DropWrapper drop={quotedDrop}>
             <DropListItemContentMarkdown drop={quotedDrop} />
           </DropWrapper>
