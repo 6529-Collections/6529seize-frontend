@@ -1,9 +1,6 @@
-import Cookies from "js-cookie";
 import { useContext, useState } from "react";
 import { Modal, Button, Col, Container, Row } from "react-bootstrap";
 import {
-  API_AUTH_COOKIE,
-  WALLET_AUTH_COOKIE,
   SUBSCRIPTIONS_ADMIN_WALLETS,
   MEMES_CONTRACT,
 } from "../../../../constants";
