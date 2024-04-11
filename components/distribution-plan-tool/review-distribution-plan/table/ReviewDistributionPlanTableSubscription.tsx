@@ -15,6 +15,17 @@ import {
   ReviewDistributionPlanTableItemType,
 } from "./ReviewDistributionPlanTable";
 import { Spinner } from "../../../dotLoader/DotLoader";
+import { commonApiFetch } from "../../../../services/api/common-api";
+
+interface WalletResult {
+  wallet: string;
+  amount: number;
+}
+
+interface SubscriptionResult {
+  airdrops: WalletResult[];
+  allowlists: WalletResult[];
+}
 
 export function SubscriptionLinks(
   props: Readonly<{
@@ -39,8 +50,6 @@ export function SubscriptionLinks(
 
   const [downloading, setDownloading] = useState(false);
 
-  const fileName = props.phase.name.replaceAll(" ", "_").toLowerCase();
-
   const isSubscriptionsAdmin = () => {
     const connectedWallets =
       connectedProfile?.consolidation.wallets.map(
@@ -51,31 +60,45 @@ export function SubscriptionLinks(
     );
   };
 
+  function convertToCSV(arr: WalletResult[]): string {
+    const headers = "address,value";
+
+    if (arr.length === 0) {
+      return headers;
+    }
+    const rows = arr.map(({ wallet, amount }) => `${wallet},${amount}`);
+    return [headers, ...rows].join("\n");
+  }
+
+  function downloadCSV(results: WalletResult[], filename: string) {
+    const csv = convertToCSV(results);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute(
+      "download",
+      `${props.phase.name.replaceAll(" ", "_").toLowerCase()}_${filename}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  const processResults = (results: SubscriptionResult) => {
+    downloadCSV(results.airdrops, "airdrops");
+    downloadCSV(results.allowlists, "allowlists");
+  };
+
   const download = async (contract: string, tokenId: string) => {
     setShowConfirm(false);
     setDownloading(true);
     try {
-      const url = `${process.env.API_ENDPOINT}/api/subscriptions/allowlists/${contract}/${tokenId}/${props.plan.id}/${props.phase.id}`;
-      const response = await fetch(url, {
+      const response = await commonApiFetch<SubscriptionResult>({
+        endpoint: `/subscriptions/allowlists/${contract}/${tokenId}/${props.plan.id}/${props.phase.id}`,
         headers,
       });
-      if (!response.ok) {
-        const json = await response.json();
-        setToast({
-          type: "error",
-          message: json.message ?? json.error,
-        });
-        return;
-      }
 
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `${fileName}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      processResults(response);
     } catch (error: any) {
       console.error("Download failed", error);
       setToast({
@@ -93,26 +116,20 @@ export function SubscriptionLinks(
   ) {
     return (
       <>
-        <span
-          className="d-flex align-items-center"
-          style={{
-            border: "1px solid #767676",
-            borderRadius: "20px",
-            padding: "5px 10px",
-          }}>
-          <button
-            className="btn-link decoration-none"
-            onClick={() => setShowConfirm(true)}>
-            {downloading ? (
-              <span className="d-flex gap-2 align-items-center">
-                <Spinner dimension={18} />
-                <span>Downloading</span>
-              </span>
-            ) : (
-              <>Subscription Lists</>
-            )}
-          </button>
-        </span>
+        <button
+          onClick={() => setShowConfirm(true)}
+          disabled={downloading}
+          type="button"
+          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
+          {downloading ? (
+            <span className="d-flex gap-2 align-items-center">
+              <Spinner dimension={18} />
+              <span>Downloading</span>
+            </span>
+          ) : (
+            <>Subscription Lists</>
+          )}
+        </button>
         <SubscriptionConfirm
           plan={props.plan}
           show={showConfirm}
