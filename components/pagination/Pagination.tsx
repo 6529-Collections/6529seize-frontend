@@ -84,7 +84,7 @@ export default function Pagination(props: Readonly<Props>) {
           <span
             onClick={goToLast}
             className={isLastPage() ? styles.goToLast : ""}>
-            {Math.ceil(props.totalResults / props.pageSize)}
+            {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
           </span>{" "}
           <FontAwesomeIcon
             icon="caret-right"
