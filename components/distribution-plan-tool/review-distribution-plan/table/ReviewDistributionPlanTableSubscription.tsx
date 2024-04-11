@@ -11,8 +11,8 @@ import {
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTableItemType,
 } from "./ReviewDistributionPlanTable";
-import { Spinner } from "../../../dotLoader/DotLoader";
 import { commonApiFetch } from "../../../../services/api/common-api";
+import CircleLoader from "../../common/CircleLoader";
 
 interface WalletResult {
   wallet: string;
@@ -107,7 +107,7 @@ export function SubscriptionLinks(
           className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
           {downloading ? (
             <span className="d-flex gap-2 align-items-center">
-              <Spinner dimension={18} />
+              <CircleLoader />
               <span>Downloading</span>
             </span>
           ) : (
