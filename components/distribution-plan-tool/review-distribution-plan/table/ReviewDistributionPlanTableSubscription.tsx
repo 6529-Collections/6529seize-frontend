@@ -36,18 +36,6 @@ export function SubscriptionLinks(
   const { connectedProfile, setToast } = useContext(AuthContext);
 
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const apiAuth = Cookies.get(API_AUTH_COOKIE);
-  let headers: any = {};
-  if (apiAuth) {
-    headers["x-6529-auth"] = apiAuth;
-  }
-
-  const allowlistAuth = Cookies.get(WALLET_AUTH_COOKIE);
-  if (allowlistAuth) {
-    headers["Authorization"] = `Bearer ${allowlistAuth}`;
-  }
-
   const [downloading, setDownloading] = useState(false);
 
   const isSubscriptionsAdmin = () => {
@@ -95,7 +83,6 @@ export function SubscriptionLinks(
     try {
       const response = await commonApiFetch<SubscriptionResult>({
         endpoint: `/subscriptions/allowlists/${contract}/${tokenId}/${props.plan.id}/${props.phase.id}`,
-        headers,
       });
 
       processResults(response);
