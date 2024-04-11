@@ -442,3 +442,9 @@ h5:not(.tailwind-scope h5) {
     color: #ffffff;
   }
 }
+
+.break-word-pre-wrap {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}

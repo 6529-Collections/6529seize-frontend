@@ -162,7 +162,7 @@ const DropListItemContentMarkdown = React.memo(
                 </h1>
               ),
               p: (params) => (
-                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal">
+                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-break-words">
                   {customRenderer({ content: params.children, drop })}
                 </p>
               ),
@@ -172,7 +172,10 @@ const DropListItemContentMarkdown = React.memo(
                 </li>
               ),
               code: (params) => (
-                <code className="tw-text-iron-50 tw-whitespace-pre-wrap">
+                <code
+                  style={{ textOverflow: "unset"}}
+                  className="tw-text-iron-50 tw-whitespace-pre-wrap"
+                >
                   {customRenderer({ content: params.children, drop })}
                 </code>
               ),
