@@ -5,9 +5,9 @@ export default function CreateDropChallengeAcceptButton() {
 
   const getButtonClasses = () => {
     if (isAccepted) {
-      return "tw-bg-gradient-radial tw-shadow-drop-btn-active tw-text-white";
+      return "tw-bg-gradient-radial hover:tw-shadow-drop-btn-active tw-text-white";
     } else {
-      return "tw-group tw-border-t tw-border-solid tw-border-white/[0.15] hover:tw-border-none hover:tw-shadow-drop-btn-active hover:tw-bg-gradient-radial tw-bg-iron-700";
+      return "tw-group hover:tw-border-none hover:tw-shadow-drop-btn-active hover:tw-bg-gradient-radial tw-bg-iron-700";
     }
   };
 
@@ -23,7 +23,7 @@ export default function CreateDropChallengeAcceptButton() {
       <button
         onClick={() => setIsAccepted(!isAccepted)}
         type="button"
-        className={`${getButtonClasses()} tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+        className={`${getButtonClasses()} tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-h-[44px] tw-text-sm tw-font-semibold tw-border-0 focus:tw-outline-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-transform active:tw-scale-95`}
       >
         <svg
           className={`${getSvgClasses()} tw-h-4 tw-w-4 tw-transition tw-duration-300 tw-ease-out`}

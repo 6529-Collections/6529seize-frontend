@@ -139,7 +139,7 @@ export default function DropListItemRepGiveClap({
   const CLAP_CLASSES: Record<RepStatus, string> = {
     [RepStatus.POSITIVE]: `hover:tw-border-green ${styles.clapPositive}`,
     [RepStatus.NEGATIVE]: `hover:tw-border-red ${styles.clapNegative}`,
-    [RepStatus.NEUTRAL]: `hover:tw-border-iron-700`,
+    [RepStatus.NEUTRAL]: `hover:tw-border-iron-500`,
   };
 
   const getCanRate = () => {
