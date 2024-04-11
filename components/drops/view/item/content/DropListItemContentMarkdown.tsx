@@ -137,44 +137,44 @@ const DropListItemContentMarkdown = React.memo(
             className="tw-w-full"
             components={{
               h5: (params) => (
-                <h5 className="tw-text-iron-50">
+                <h5 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h5>
               ),
               h4: (params) => (
-                <h4 className="tw-text-iron-50">
+                <h4 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h4>
               ),
               h3: (params) => (
-                <h3 className="tw-text-iron-50">
+                <h3 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h3>
               ),
               h2: (params) => (
-                <h2 className="tw-text-iron-50">
+                <h2 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h2>
               ),
               h1: (params) => (
-                <h1 className="tw-text-iron-50">
+                <h1 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h1>
               ),
               p: (params) => (
-                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-break-words">
+                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </p>
               ),
               li: (params) => (
-                <li className="tw-text-iron-50">
+                <li className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </li>
               ),
               code: (params) => (
                 <code
                   style={{ textOverflow: "unset"}}
-                  className="tw-text-iron-50 tw-whitespace-pre-wrap"
+                  className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
                 >
                   {customRenderer({ content: params.children, drop })}
                 </code>

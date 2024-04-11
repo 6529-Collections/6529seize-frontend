@@ -9,7 +9,7 @@ export default function CreateDropMetadataItems({
   readonly onMetadataRemove: (data_key: string) => void;
 }) {
   return (
-    <div className="tw-my-2 tw-flex tw-flex-wrap tw-gap-y-2 tw-gap-x-2">
+    <div className="tw-mb-2 lg:tw-mt-2 tw-flex tw-flex-wrap tw-gap-y-2 tw-gap-x-2">
       {items.map((item) => (
         <CreateDropMetadataItem
           key={item.data_key}

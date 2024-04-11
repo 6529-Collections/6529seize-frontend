@@ -443,8 +443,10 @@ h5:not(.tailwind-scope h5) {
   }
 }
 
-.break-word-pre-wrap {
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-  white-space: pre-wrap !important;
+pre code {
+  word-break: break-word;
+}
+
+.word-break {
+  word-break: break-word;
 }
