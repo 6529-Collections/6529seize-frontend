@@ -157,7 +157,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             />
             <DelegationFormDelegateAddressFormGroup
               setAddress={setNewDelegationToAddress}
-              title="Delegate Address"
+              title="Delegate Manager"
               tooltip="Delegation Manager Address"
             />
             <DelegationSubmitGroups
