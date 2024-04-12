@@ -3,7 +3,6 @@ import EthereumIcon from "../utils/icons/EthereumIcon";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import { SubscriptionDetails } from "../../../entities/ISubscription";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_MINT_PRICE } from "../../../constants";
 

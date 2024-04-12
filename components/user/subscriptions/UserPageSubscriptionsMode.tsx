@@ -6,7 +6,6 @@ import { AuthContext } from "../../auth/Auth";
 import { commonApiPost } from "../../../services/api/common-api";
 import { SubscriptionDetails } from "../../../entities/ISubscription";
 import { Spinner } from "../../dotLoader/DotLoader";
-import Tippy from "@tippyjs/react";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{
