@@ -17,6 +17,7 @@ import {
   SearchWalletsDisplay,
 } from "../../../../searchModal/SearchModal";
 import PdfViewer from "../../../../pdfViewer/PdfViewer";
+import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -96,42 +97,56 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     }
   }, [selectedPhase, searchWallets]);
 
+  function printPhaseDateTime(date: Time) {
+    if (date.toMillis() === 0) {
+      return <b>N/A</b>;
+    }
+    return (
+      <b>
+        {date.toIsoDateString()} {date.toIsoTimeString()}
+      </b>
+    );
+  }
+
   function printPhase(phaseName: string, start: number, end: number) {
     const startTime = Time.seconds(start);
     const endTime = Time.seconds(end);
     return (
-      <Col>
-        <span className="d-flex align-items-center justify-content-center pb-4">
-          <h4 className="font-color mb-0">{phaseName}</h4>
-        </span>
-        <Table>
-          <tbody>
-            <tr>
-              <td className="d-flex justify-content-center gap-3">
-                <span>
-                  <b>Start</b>
-                </span>
-                <span>
-                  <b>
-                    {startTime.toIsoDateString()} {startTime.toIsoTimeString()}
-                  </b>
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td className="d-flex justify-content-center gap-3">
-                <span>
-                  <b>End</b>
-                </span>
-                <span>
-                  <b>
-                    {endTime.toIsoDateString()} {endTime.toIsoTimeString()}
-                  </b>
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </Table>
+      <Col
+        xs={12}
+        sm={6}
+        md={4}
+        key={getRandomObjectId()}
+        className="pt-2 pb-2 d-flex flex-column">
+        <Container className={styles.phaseBox}>
+          <Row>
+            <Col>
+              <span className="d-flex align-items-center justify-content-center pb-4">
+                <h4 className="font-color mb-0">{phaseName}</h4>
+              </span>
+              <Table>
+                <tbody>
+                  <tr>
+                    <td className="d-flex justify-content-center gap-3">
+                      <span>
+                        <b>Start</b>
+                      </span>
+                      <span>{printPhaseDateTime(startTime)}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="d-flex justify-content-center gap-3">
+                      <span>
+                        <b>End</b>
+                      </span>
+                      <span>{printPhaseDateTime(endTime)}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        </Container>
       </Col>
     );
   }
@@ -156,33 +171,15 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
         <Col xs={12}>
           <h2>Phases</h2>
         </Col>
-        {phases.map((phase) => (
-          <Col
-            xs={12}
-            sm={6}
-            md={4}
-            key={phase.merkle_root}
-            className="pt-2 pb-2 d-flex flex-column">
-            <Container className={styles.phaseBox}>
-              <Row>
-                {printPhase(phase.phase, phase.start_time, phase.end_time)}
-              </Row>
-            </Container>
-          </Col>
-        ))}
-        {phasesSet && (
-          <Col xs={12} sm={6} md={4} className="pt-2 pb-2 d-flex flex-column">
-            <Container className={styles.phaseBox}>
-              <Row>
-                {printPhase(
-                  "Public Phase",
-                  props.collection.public_start,
-                  props.collection.public_end
-                )}
-              </Row>
-            </Container>
-          </Col>
+        {phases.map((phase) =>
+          printPhase(phase.phase, phase.start_time, phase.end_time)
         )}
+        {phasesSet &&
+          printPhase(
+            "Public Phase",
+            props.collection.public_start,
+            props.collection.public_end
+          )}
       </Row>
       {props.collection.distribution_plan && (
         <Row className="pt-3">
