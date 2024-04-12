@@ -1,22 +1,22 @@
-import styles from "./UserPageMintsSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.scss";
 import { Container, Row, Col, Accordion } from "react-bootstrap";
 import {
   RedeemedSubscription,
   SubscriptionLog,
   SubscriptionTopUp,
-} from "../../../../entities/ISubscription";
-import EthereumIcon from "../../utils/icons/EthereumIcon";
-import EtherscanIcon from "../../utils/icons/EtherscanIcon";
+} from "../../../entities/ISubscription";
+import EthereumIcon from "../utils/icons/EthereumIcon";
+import EtherscanIcon from "../utils/icons/EtherscanIcon";
 import {
   areEqualAddresses,
   formatAddress,
   getDateDisplay,
   getTransactionLink,
-} from "../../../../helpers/Helpers";
+} from "../../../helpers/Helpers";
 import { sepolia } from "wagmi";
-import { MEMES_CONTRACT } from "../../../../constants";
+import { MEMES_CONTRACT } from "../../../constants";
 
-export default function UserPageMintsSubscriptionsHistory(
+export default function UserPageSubscriptionsHistory(
   props: Readonly<{
     topups: SubscriptionTopUp[];
     redeemed: RedeemedSubscription[];

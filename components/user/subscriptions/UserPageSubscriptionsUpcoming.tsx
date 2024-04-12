@@ -1,16 +1,20 @@
-import styles from "./UserPageMintsSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.scss";
 import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col, Table, Button } from "react-bootstrap";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { AuthContext } from "../../../auth/Auth";
+import { Container, Row, Col, Table } from "react-bootstrap";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { AuthContext } from "../../auth/Auth";
 import {
   NFTSubscription,
   SubscriptionDetails,
-} from "../../../../entities/ISubscription";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { Spinner } from "../../../dotLoader/DotLoader";
+} from "../../../entities/ISubscription";
+import { commonApiPost } from "../../../services/api/common-api";
+import { Spinner } from "../../dotLoader/DotLoader";
+import Toggle from "react-toggle";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Tippy from "@tippyjs/react";
+import { isMintingToday } from "../../../helpers/meme_calendar.helplers";
 
-export default function UserPageMintsSubscriptionsUpcoming(
+export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
     profile: IProfileAndConsolidations;
     details: SubscriptionDetails | undefined;
@@ -39,7 +43,7 @@ export default function UserPageMintsSubscriptionsUpcoming(
                       subscription={subscription}
                       readonly={props.readonly}
                       refresh={props.refresh}
-                      first={index === 0}
+                      minting_today={index === 0 && isMintingToday()}
                     />
                   </td>
                 </tr>
@@ -58,27 +62,26 @@ function SubscriptionRow(
     title: string;
     subscription: NFTSubscription;
     readonly: boolean;
-    first?: boolean;
+    minting_today?: boolean;
     refresh: () => void;
   }>
 ) {
+  const id = `subscription-${props.subscription.token_id}`;
+
   const { requestAuth, setToast } = useContext(AuthContext);
 
-  const [subscribed, setSubscribed] = useState<boolean>();
-  const [tagClass, setTagClass] = useState<string>();
+  const [subscribed, setSubscribed] = useState<boolean>(
+    props.subscription.subscribed
+  );
 
   useEffect(() => {
     setSubscribed(props.subscription.subscribed);
-  }, [props.subscription]);
-
-  useEffect(() => {
-    setTagClass(subscribed ? styles.subscribedTag : styles.notSubscribedTag);
-  }, [subscribed]);
+  }, [props.subscription.subscribed]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submit = async (): Promise<void> => {
-    if (isSubmitting) {
+    if (isSubmitting || props.minting_today) {
       return;
     }
     setIsSubmitting(true);
@@ -129,45 +132,32 @@ function SubscriptionRow(
     <Container className="no-padding pt-2 pb-2">
       <Row>
         <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-          <span>
-            {props.title} #{props.subscription.token_id}
+          <span className="d-flex align-items-center gap-2">
+            {props.title} #{props.subscription.token_id}{" "}
+            {props.minting_today && (
+              <Tippy
+                placement="right"
+                theme="light"
+                content="No changes allowed on minting day">
+                <span>
+                  - Minting Today{" "}
+                  <FontAwesomeIcon icon="info-circle" height={"20px"} />
+                </span>
+              </Tippy>
+            )}
           </span>
-          <span className="d-flex align-items-center gap-3">
+          <span className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
-            <span className="d-flex align-items-center">
-              <div className={tagClass}>
-                {subscribed ? "Subscribed" : "Not Subscribed"}
-              </div>
-              {!props.readonly && (
-                <Button className="seize-btn-link" onClick={submit}>
-                  {subscribed ? "Unsubscribe" : "Subscribe"}
-                </Button>
-              )}
-            </span>
+            <Toggle
+              disabled={props.readonly || isSubmitting || props.minting_today}
+              id={id}
+              checked={subscribed}
+              icons={false}
+              onChange={submit}
+            />
           </span>
         </Col>
       </Row>
-      {props.first && !props.readonly && (
-        <Row className="pt-2">
-          <Col
-            className="font-smaller font-color-silver"
-            style={{
-              whiteSpace: "pre-wrap",
-            }}>
-            Important: The subscriber list for Meme #
-            {props.subscription.token_id} is set at midnight and can be found{" "}
-            <a
-              href="/open-data/meme-subscriptions"
-              className="font-color-silver">
-              here
-            </a>
-            . If Meme #{props.subscription.token_id} is released today, any
-            changes you make now won&apos;t affect your subscription for this
-            drop. Make sure to subscribe/unsubscribe before midnight to be
-            counted for future drops!
-          </Col>
-        </Row>
-      )}
     </Container>
   );
 }

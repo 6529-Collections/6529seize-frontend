@@ -1,24 +1,24 @@
 import { Col, Container, Row } from "react-bootstrap";
-import UserPageMintsSubscriptionsBalance from "./UserPageMintsSubscriptionsBalance";
-import UserPageMintsSubscriptionsTopUp from "./UserPageMintsSubscriptionsTopUp";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import UserPageMintsSubscriptionsMode from "./UserPageMintsSubscriptionsMode";
+import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
+import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import { useContext, useEffect, useState } from "react";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { commonApiFetch } from "../../../services/api/common-api";
 import {
   NFTSubscription,
   RedeemedSubscription,
   SubscriptionDetails,
   SubscriptionLog,
   SubscriptionTopUp,
-} from "../../../../entities/ISubscription";
-import { AuthContext } from "../../../auth/Auth";
-import UserPageMintsSubscriptionsUpcoming from "./UserPageMintsSubscriptionsUpcoming";
-import UserPageMintsSubscriptionsHistory from "./UserPageMintsSubscriptionsHistory";
+} from "../../../entities/ISubscription";
+import { AuthContext } from "../../auth/Auth";
+import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
+import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 
 const HISTORY_PAGE_SIZE = 10;
 
-export default function UserPageMintsSubscriptions(
+export default function UserPageSubscriptions(
   props: Readonly<{
     profile: IProfileAndConsolidations;
   }>
@@ -195,38 +195,41 @@ export default function UserPageMintsSubscriptions(
 
   return (
     <Container className="no-padding pb-5">
-      <Row>
-        <Col className="d-flex align-items-center justify-content-between">
-          <h4>Subscribe</h4>
-        </Col>
-      </Row>
-      <Row>
-        <Col
-          sm={12}
-          md={6}
-          className="pt-2 pb-2 d-flex justify-content-between gap-2">
-          <UserPageMintsSubscriptionsBalance
-            details={details}
-            fetching={isFetching}
-            refresh={refresh}
-            show_refresh={isConnectedAccount}
-          />
-          <UserPageMintsSubscriptionsMode
-            profile={props.profile}
-            details={details}
-            readonly={!isConnectedAccount}
-            refresh={refresh}
-          />
+      <Row className="pt-2 pb-2">
+        <Col sm={12} md={6}>
+          <Container className="no-padding">
+            <Row>
+              <Col className="d-flex align-items-center justify-content-between">
+                <h4>Subscribe</h4>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="pt-2 pb-2 d-flex flex-column gap-4">
+                <UserPageSubscriptionsBalance
+                  details={details}
+                  fetching={isFetching}
+                  refresh={refresh}
+                  show_refresh={isConnectedAccount}
+                />
+                <UserPageSubscriptionsMode
+                  profile={props.profile}
+                  details={details}
+                  readonly={!isConnectedAccount}
+                  refresh={refresh}
+                />
+              </Col>
+            </Row>
+          </Container>
         </Col>
         {isConnectedAccount && (
-          <Col className="pt-2 pb-2" sm={12} md={{ span: 4, offset: 2 }}>
-            <UserPageMintsSubscriptionsTopUp profile={props.profile} />
+          <Col className="pt-2 pb-2" sm={12} md={6}>
+            <UserPageSubscriptionsTopUp profile={props.profile} />
           </Col>
         )}
       </Row>
-      <Row className="pt-2 pb-2">
+      <Row className="pt-4 pb-2">
         <Col>
-          <UserPageMintsSubscriptionsUpcoming
+          <UserPageSubscriptionsUpcoming
             profile={props.profile}
             details={details}
             memes_subscriptions={memeSubscriptions}
@@ -237,7 +240,7 @@ export default function UserPageMintsSubscriptions(
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
-          <UserPageMintsSubscriptionsHistory
+          <UserPageSubscriptionsHistory
             topups={topUpHistory}
             redeemed={redeemedHistory}
             logs={subscriptionLogs}
