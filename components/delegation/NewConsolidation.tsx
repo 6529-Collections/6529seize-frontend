@@ -159,7 +159,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             />
             <DelegationFormDelegateAddressFormGroup
               setAddress={setNewDelegationToAddress}
-              title="Delegate Address"
+              title="Consolidating With"
               tooltip="Consolidate with Address e.g. your hot wallet"
             />
             <Form.Group as={Row} className="pb-4">
