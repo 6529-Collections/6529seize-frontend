@@ -21,18 +21,15 @@ export default function DropListItemActions({
     <div className="tw-relative tw-z-[1] sm:tw-ml-12 tw-mt-4 tw-border-t tw-flex tw-items-center tw-justify-between lg:tw-gap-x-8">
       <DropListItemActionsDiscussion
         drop={drop}
-        activeState={state}
         setState={onActionClick}
       />
       <DropListItemActionsQuote
         drop={drop}
-        activeState={state}
         setState={onActionClick}
       />
       <div className="tw-mt-0.5">
         <DropListItemActionsRep
           drop={drop}
-          activeState={state}
           setState={onActionClick}
         />
       </div>

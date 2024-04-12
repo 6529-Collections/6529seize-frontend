@@ -157,47 +157,49 @@ export default function Stream() {
       <div className="tw-max-w-2xl tw-mx-auto">
         <h1 className="tw-block tw-float-none">Stream</h1>
         <div className="tw-flow-root">
-          <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
-            <div
-              className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-              aria-label="Tabs"
-            >
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-pointer-events-none tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+          <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
+            <div className="tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-pb-[1px]">
+              <div
+                className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
+                aria-label="Tabs"
               >
-                Live
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2  tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Trending
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Pool
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Pre-mint
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Auction
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Minted
-              </button>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-pointer-events-none tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+                >
+                  Live
+                </button>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-border-transparent tw-text-iron-500  hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2  tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+                >
+                  Trending
+                </button>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-border-transparent tw-text-iron-500  hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+                >
+                  Pool
+                </button>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-border-transparent tw-text-iron-500  hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+                >
+                  Pre-mint
+                </button>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-border-transparent tw-text-iron-500  hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+                >
+                  Auction
+                </button>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-border-transparent tw-text-iron-500  hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
+                >
+                  Minted
+                </button>
+              </div>
             </div>
           </div>
         </div>
