@@ -61,7 +61,7 @@ export function DelegationAddressInput(
 
   return (
     <Form.Control
-      placeholder={"Consolidate with - 0x... or ENS"}
+      placeholder={"0x... or ENS"}
       className={`${styles.formInput}`}
       type="text"
       value={newDelegationInput}
