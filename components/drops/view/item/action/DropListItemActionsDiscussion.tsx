@@ -5,18 +5,15 @@ import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 
 export default function DropListItemActionsDiscussion({
   drop,
-  activeState,
   setState,
 }: {
   readonly drop: DropFull;
-  readonly activeState: RepActionExpandable;
   readonly setState: (state: RepActionExpandable) => void;
 }) {
   const userHaveDiscussed = !!drop.input_profile_discussion_comments_count;
   return (
     <DropListItemActionsItemWrapper
       state={RepActionExpandable.DISCUSSION}
-      activeState={activeState}
       setState={setState}
     >
       <>
@@ -27,6 +24,7 @@ export default function DropListItemActionsDiscussion({
             height="24"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -60,9 +58,11 @@ export default function DropListItemActionsDiscussion({
         <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
           Discuss
         </span>
-        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
-          {drop.discussion_comments_count}
-        </div>
+        {!!drop.discussion_comments_count && (
+          <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+            {drop.discussion_comments_count}
+          </div>
+        )}
       </>
     </DropListItemActionsItemWrapper>
   );
