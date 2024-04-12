@@ -440,3 +440,7 @@ h5 {
 .react-toggle--focus .react-toggle-thumb {
   box-shadow: none;
 }
+
+.react-toggle--disabled {
+  opacity: 0.75;
+}
