@@ -270,6 +270,7 @@ h5:not(.tailwind-scope h5) {
 
 .no-wrap {
   white-space: nowrap;
+  min-width: fit-content;
 }
 
 .icon-black {

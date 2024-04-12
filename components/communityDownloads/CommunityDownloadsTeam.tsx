@@ -13,6 +13,10 @@ export default function CommunityDownloadsTeam() {
       created_at: "2023-03-02 10:42:49",
       url: "https://arweave.net/iDa7cvYLdS95XNnISou4h3Zzvt0qu6w7BUXJiGrCyVE",
     },
+    {
+      created_at: "2024-04-11 16:02:56",
+      url: "https://arweave.net/Q1asRH7r36XAbAghCL_PbI0eZufThkMMnhYiD55KYc4",
+    },
   ];
 
   return (

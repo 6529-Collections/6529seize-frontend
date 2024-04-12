@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import Toggle from "react-toggle";
-import { AuthContext } from "../../../auth/Auth";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { SubscriptionDetails } from "../../../../entities/ISubscription";
-import { Spinner } from "../../../dotLoader/DotLoader";
+import { AuthContext } from "../../auth/Auth";
+import { commonApiPost } from "../../../services/api/common-api";
+import { SubscriptionDetails } from "../../../entities/ISubscription";
+import { Spinner } from "../../dotLoader/DotLoader";
 
-export default function UserPageMintsSubscriptionsMode(
+export default function UserPageSubscriptionsMode(
   props: Readonly<{
     profile: IProfileAndConsolidations;
     details: SubscriptionDetails | undefined;
@@ -74,15 +74,18 @@ export default function UserPageMintsSubscriptionsMode(
 
   return (
     <Container className="no-padding">
-      <Row>
+      <Row className="pb-2">
         <Col>
-          <h5>Mode</h5>
+          <h5 className="mb-0">Mode</h5>
         </Col>
       </Row>
       <Row className="pt-1">
         <Col className="d-flex align-items-center gap-2">
-          <label htmlFor={"subscription-mode"} className={"font-color"}>
+          {/* <label htmlFor={"subscription-mode"} className={"font-color"}>
             <b>Manual</b>
+          </label> */}
+          <label htmlFor={"subscription-mode"} className={"font-color"}>
+            <b>Automatic</b>
           </label>
           <Toggle
             disabled={props.readonly || isUpdating}
@@ -91,12 +94,18 @@ export default function UserPageMintsSubscriptionsMode(
             icons={false}
             onChange={toggleMode}
           />
-          <label htmlFor={"subscription-mode"} className={"font-color"}>
-            <b>Automatic</b>
-          </label>
           {isUpdating && <Spinner />}
         </Col>
       </Row>
+      {!props.readonly && (
+        <Row className="pt-1">
+          <Col className="no-wrap">
+            {isAuto
+              ? "Automatic airdrops of all eligible cards unless you opt-out"
+              : "You have to opt-in to each specific card"}
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }
