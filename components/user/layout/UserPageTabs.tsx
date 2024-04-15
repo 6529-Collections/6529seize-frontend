@@ -9,7 +9,7 @@ export enum UserPageTabType {
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
   STATS = "STATS",
-  MINTS = "MINTS",
+  SUBSCRIPTIONS = "SUBSCRIPTIONS",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -42,10 +42,10 @@ export const USER_PAGE_TAB_META: Record<
     title: "Stats",
     route: "stats",
   },
-  [UserPageTabType.MINTS]: {
-    tab: UserPageTabType.MINTS,
-    title: "Mints",
-    route: "mints",
+  [UserPageTabType.SUBSCRIPTIONS]: {
+    tab: UserPageTabType.SUBSCRIPTIONS,
+    title: "Subscriptions",
+    route: "subscriptions",
   },
 };
 
