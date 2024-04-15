@@ -180,10 +180,11 @@ export default function AboutSubscriptions() {
                   </li>
                   <li className="mt-1">
                     If you have a single address (not consolidated) that has
-                    delegated all to a minting address and you want to send ETH
-                    from that address and also have the airdrop received by that
-                    address, then you should change your delegation to "Minting"
-                    otherwise the airdrop will go to your minting address
+                    delegated &quot;All&quot; to a minting address and you want
+                    to send ETH from the original address and have the airdrop
+                    received by that same address, then you should change your
+                    delegation to "Minting" otherwise the airdrop will go to
+                    your minting address.
                   </li>
                 </ul>
               </li>
