@@ -5,9 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-
-import type { Spread } from "lexical";
-
 import {
   type DOMConversionMap,
   type DOMConversionOutput,
@@ -16,6 +13,7 @@ import {
   type LexicalNode,
   type NodeKey,
   type SerializedTextNode,
+  type Spread,
   $applyNodeReplacement,
   TextNode,
 } from "lexical";

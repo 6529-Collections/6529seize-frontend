@@ -10,11 +10,9 @@ import ReactDOM from "react-dom";
 import {
   ReservoirCollectionResponse,
   ReservoirCollectionResponseCollection,
-  ReservoirTokensResponseCollection,
   ReservoirTokensResponseTokenElement,
 } from "../../../../../../entities/IReservoir";
 import { TextNode } from "lexical";
-import { $createNftNode } from "../../nodes/NftNode";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";

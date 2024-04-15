@@ -28,10 +28,14 @@ export default function CreateDropFullDesktopMetadata({
 
   return (
     <div>
-      <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+      <label
+        htmlFor="metadata-form"
+        className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm"
+      >
         Metadata
       </label>
       <form
+        id="metadata-form"
         onSubmit={onSubmit}
         className="tw-mt-1.5 tw-flex tw-gap-x-4 tw-w-full"
       >

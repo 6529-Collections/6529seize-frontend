@@ -1,24 +1,18 @@
 import { useState } from "react";
 import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
-import {
-  CreateDropScreenType,
-  CreateDropViewType,
-} from "../../utils/CreateDropWrapper";
+import { CreateDropViewType } from "../../utils/CreateDropWrapper";
 import { EditorState } from "lexical";
 import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "../../../../../entities/IDrop";
-
 import CreateDropContent from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import DropPfp from "../../utils/DropPfp";
 import { CreateDropType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import CreateDropChallengeAcceptButton from "../../utils/challenge/CreateDropChallengeAcceptButton";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -91,7 +85,6 @@ export default function CreateDropFullMobile({
       <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
         <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
           <div className="tw-absolute tw-right-4 -tw-top-4">
-            {/*  <DropPfp pfpUrl={profile.profile?.pfp_url} /> */}
             {titleState === TITLE_STATE.BUTTON && (
               <button
                 onClick={() => setTitleState(TITLE_STATE.INPUT)}
@@ -129,7 +122,6 @@ export default function CreateDropFullMobile({
             />
           )}
           <CreateDropContent
-            screenType={CreateDropScreenType.MOBILE}
             viewType={CreateDropViewType.FULL}
             editorState={editorState}
             type={type}
@@ -149,7 +141,6 @@ export default function CreateDropFullMobile({
         </div>
         <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
           <div className="tw-flex tw-gap-x-3">
-            {/* <CreateDropChallengeAcceptButton /> */}
             <button
               type="button"
               disabled={disabled}
