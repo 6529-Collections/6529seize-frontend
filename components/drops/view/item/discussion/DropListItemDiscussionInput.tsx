@@ -27,7 +27,7 @@ export default function DropListItemDiscussionInput({
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
-  const [comment, onComment] = useState<string | null>(null);
+  const [comment, setComment] = useState<string | null>(null);
   const [mutating, setMutating] = useState<boolean>(false);
 
   const breakpoint = useBreakpoint();
@@ -41,7 +41,7 @@ export default function DropListItemDiscussionInput({
   }, [breakpoint]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onComment(e.target.value);
+    setComment(e.target.value);
   };
 
   const commentMutation = useMutation({
@@ -58,7 +58,7 @@ export default function DropListItemDiscussionInput({
         message: "Comment submitted",
         type: "success",
       });
-      onComment(null);
+      setComment(null);
       onDropDiscussionChange({
         dropId: drop.id,
         dropAuthorHandle: drop.author.handle,

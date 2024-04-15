@@ -1,8 +1,4 @@
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQuery,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import DropListItemDiscussionItemsItem from "./item/DropListItemDiscussionItemsItem";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { DropActivityLog, DropFull } from "../../../../../entities/IDrop";
@@ -15,7 +11,6 @@ import DropListWrapperBottomTrigger from "../../DropListWrapperBottomTrigger";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../../distribution-plan-tool/common/CircleLoader";
-import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 
 export default function DropListItemDiscussionItems({
   drop,

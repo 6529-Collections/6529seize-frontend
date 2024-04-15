@@ -2,7 +2,6 @@ import { RepChangeType } from "./DropListItemRepGive";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 import { DropFull } from "../../../../../../entities/IDrop";
 
 export default function DropListItemRepGiveChangeButton({

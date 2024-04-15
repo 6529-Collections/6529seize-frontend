@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -7,7 +7,6 @@ import DropListItemContentPart, {
   DropListItemContentPartProps,
 } from "./DropListItemContentPart";
 import { DropContentPartType } from "./DropListItemContent";
-import React from "react";
 import DropListItemContentMedia from "./media/DropListItemContentMedia";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import rehypeExternalLinks from "rehype-external-links";
@@ -74,7 +73,7 @@ const customRenderer = ({
   return parts;
 };
 
-const DropListItemContentMarkdown = React.memo(
+const DropListItemContentMarkdown = memo(
   ({
     drop,
     showFull = false,
