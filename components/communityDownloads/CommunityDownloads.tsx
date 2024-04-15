@@ -28,6 +28,13 @@ export default function CommunityDownloads() {
                 </a>
               </Col>
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
+                <a href="/open-data/meme-subscriptions">
+                  <span className={styles.downloadLink}>
+                    Meme Subscriptions
+                  </span>
+                </a>
+              </Col>
+              <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
                 <a href="/open-data/rememes">
                   <span className={styles.downloadLink}>Rememes</span>
                 </a>

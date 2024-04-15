@@ -1,66 +1,35 @@
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
 import styles from "./CommunityDownloads.module.scss";
 import Pagination from "../pagination/Pagination";
+import { commonApiFetch } from "../../services/api/common-api";
+import { MEMES_CONTRACT } from "../../constants";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 const PAGE_SIZE = 25;
 
-interface RowProps {
+interface SubscriptionDownload {
   date: string;
-  url: string;
+  contract: string;
+  token_id: number;
+  upload_url: string;
 }
 
-export function CommunityDownloadsComponentRow(props: Readonly<RowProps>) {
-  function isYYYYMMDDFormat(str: string): boolean {
-    return /^\d{8}$/.test(str);
-  }
-
-  function printDate(dateString: any) {
-    if (isYYYYMMDDFormat(dateString)) {
-      const d = new Date(
-        dateString.substring(0, 4),
-        dateString.substring(4, 6) - 1,
-        dateString.substring(6, 8)
-      );
-
-      return d.toDateString();
-    } else {
-      const d = new Date(dateString);
-      return `${d.toDateString()}`;
-    }
-  }
-
-  return (
-    <tr>
-      <td>{printDate(props.date)}</td>
-      <td>
-        <a href={props.url} target="_blank" rel="noreferrer">
-          {props.url}
-        </a>
-      </td>
-    </tr>
-  );
-}
-
-interface Props {
-  title: string;
-  url: string;
-}
-
-export default function CommunityDownloadsComponent(props: Readonly<Props>) {
+export default function CommunityDownloadsSubscriptions() {
   const router = useRouter();
 
-  const [downloads, setDownloads] = useState<any[]>();
+  const [downloads, setDownloads] = useState<SubscriptionDownload[]>();
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
   function fetchResults(mypage: number) {
-    let url = `${props.url}?page_size=${PAGE_SIZE}&page=${mypage}`;
-    fetchUrl(url).then((response: DBResponse) => {
+    commonApiFetch<{
+      count: number;
+      data: SubscriptionDownload[];
+    }>({
+      endpoint: `subscriptions/uploads?contract=${MEMES_CONTRACT}&page_size=${PAGE_SIZE}&page=${mypage}`,
+    }).then(async (response) => {
       setTotalResults(response.count);
       setDownloads(response.data);
     });
@@ -78,7 +47,8 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
             <Row>
               <Col>
                 <h1>
-                  <span className="font-lightest">{props.title}</span> Downloads
+                  <span className="font-lightest">Meme</span> Subscriptions
+                  Downloads
                 </h1>
               </Col>
             </Row>
@@ -86,13 +56,27 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
               <Row className={`pt-3 ${styles.downloadsScrollContainer}`}>
                 <Col>
                   <Table bordered={false} className={styles.downloadsTable}>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Token ID</th>
+                        <th>URL</th>
+                      </tr>
+                    </thead>
                     <tbody>
                       {downloads.map((download) => (
-                        <CommunityDownloadsComponentRow
-                          key={download.date}
-                          date={download.date}
-                          url={download.url}
-                        />
+                        <tr key={download.upload_url}>
+                          <td>{download.date}</td>
+                          <td>{download.token_id.toLocaleString()}</td>
+                          <td>
+                            <a
+                              href={download.upload_url}
+                              target="_blank"
+                              rel="noreferrer">
+                              {download.upload_url}
+                            </a>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                   </Table>

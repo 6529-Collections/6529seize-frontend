@@ -8,7 +8,7 @@ export enum UserPageTabType {
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
   STATS = "STATS",
-  MINTS = "MINTS",
+  SUBSCRIPTIONS = "SUBSCRIPTIONS",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -35,10 +35,10 @@ export const USER_PAGE_TAB_META: Record<
     title: "Stats",
     route: "stats",
   },
-  [UserPageTabType.MINTS]: {
-    tab: UserPageTabType.MINTS,
-    title: "Mints",
-    route: "mints",
+  [UserPageTabType.SUBSCRIPTIONS]: {
+    tab: UserPageTabType.SUBSCRIPTIONS,
+    title: "Subscriptions",
+    route: "subscriptions",
   },
 };
 
@@ -69,8 +69,7 @@ export default function UserPageTabs() {
     <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div
         className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-        aria-label="Tabs"
-      >
+        aria-label="Tabs">
         {Object.values(UserPageTabType).map((tabType) => (
           <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
         ))}

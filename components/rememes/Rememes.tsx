@@ -1,9 +1,9 @@
 import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchUrl } from "../../services/6529api";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { useEffect, useState } from "react";
-import { NFT, NFTLite, Rememe } from "../../entities/INFT";
+import { NFTLite, Rememe } from "../../entities/INFT";
 import { DBResponse } from "../../entities/IDBResponse";
 import { useRouter } from "next/router";
 import RememeImage from "../nft-image/RememeImage";
@@ -17,6 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../dotLoader/DotLoader";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 const PAGE_SIZE = 40;
 
@@ -182,15 +183,7 @@ export default function Rememes() {
       return (
         <Row>
           <Col>
-            <Image
-              loading={"eager"}
-              width="0"
-              height="0"
-              style={{ height: "auto", width: "100px" }}
-              src="/SummerGlasses.svg"
-              alt="SummerGlasses"
-            />{" "}
-            Nothing here yet
+            <NothingHereYetSummer />
           </Col>
         </Row>
       );

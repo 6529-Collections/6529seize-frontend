@@ -14,13 +14,14 @@ import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
 import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
 import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 
 export default function ReviewDistributionPlanTableRow({
   item,
   rows,
 }: {
-  item: ReviewDistributionPlanTableItem;
-  rows: ReviewDistributionPlanTablePhase[];
+  readonly item: ReviewDistributionPlanTableItem;
+  readonly rows: ReviewDistributionPlanTablePhase[];
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
 
@@ -191,7 +192,7 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>{item.description}</td>
       <td className={commonClasses}>{item.walletsCount}</td>
       <td className={commonClasses}>{item.spotsCount}</td>
-      <td className={`${commonClasses} tw-flex tw-justify-end tw-gap-x-3`}>
+      <td className={`${commonClasses} tw-flex tw-justify-start tw-gap-x-3`}>
         <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}
           loading={isLoadingJson}
@@ -204,6 +205,9 @@ export default function ReviewDistributionPlanTableRow({
           onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
           loading={isLoadingManifold}
         />
+        {distributionPlan && (
+          <SubscriptionLinks plan={distributionPlan} phase={item} />
+        )}
       </td>
     </DistributionPlanTableRowWrapper>
   );
