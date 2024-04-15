@@ -35,7 +35,7 @@ export async function getServerSideProps(
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: "mints",
+      subroute: "subscriptions",
     });
 
     if (needsRedirect) {
