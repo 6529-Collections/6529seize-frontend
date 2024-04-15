@@ -231,6 +231,13 @@ export class Time {
     return this.formatAsDuration();
   };
 
+  public toMonthAndDayString(): string {
+    return this.toDate().toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+    });
+  }
+
   public formatAsDuration() {
     let left = this.ms;
     const daydf = Math.floor(Time.millis(left).toDays());
