@@ -173,8 +173,8 @@ export default function AboutSubscriptions() {
                         sending ETH to seize.6529.eth from warm or hot address
                       </li>
                       <li className="mt-1">
-                        adding delegation case "Airdrop" for the "The Memes"
-                        from that address to your vault
+                        adding delegation case &quot;Airdrop&quot; for the
+                        &quot;The Memes&quot; from that address to your vault
                       </li>
                     </ul>
                   </li>
@@ -183,8 +183,8 @@ export default function AboutSubscriptions() {
                     delegated &quot;All&quot; to a minting address and you want
                     to send ETH from the original address and have the airdrop
                     received by that same address, then you should change your
-                    delegation to "Minting" otherwise the airdrop will go to
-                    your minting address.
+                    delegation to &quot;Minting&quot; otherwise the airdrop will
+                    go to your minting address.
                   </li>
                 </ul>
               </li>
