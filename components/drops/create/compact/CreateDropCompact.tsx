@@ -91,7 +91,6 @@ export default function CreateDropCompact({
         <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-w-full">
             <CreateDropContent
-              screenType={screenType}
               viewType={CreateDropViewType.COMPACT}
               editorState={editorState}
               type={type}
