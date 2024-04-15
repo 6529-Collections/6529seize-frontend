@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import UserPageMints from "../../components/user/mints/UserPageMints";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
@@ -8,13 +7,14 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
+import UserPageSubscriptions from "../../components/user/subscriptions/UserPageSubscriptions";
 
 interface Props {
   readonly profile: IProfileAndConsolidations;
 }
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
-  <UserPageMints profile={pageProps.profile} />
+  <UserPageSubscriptions profile={pageProps.profile} />
 );
 Page.getLayout = (page: ReactElement<{ pageProps: Props }>) => (
   <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
