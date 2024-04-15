@@ -43,6 +43,7 @@ import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
 } from "../../helpers/nft.helplers";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -404,14 +405,7 @@ export default function LabPage(props: Readonly<Props>) {
               </Row>
             ) : (
               <Col>
-                <Image
-                  width="0"
-                  height="0"
-                  style={{ height: "auto", width: "100px" }}
-                  src="/SummerGlasses.svg"
-                  alt="SummerGlasses"
-                />{" "}
-                No Meme References
+                <NothingHereYetSummer />
               </Col>
             )}
           </>
@@ -1362,14 +1356,7 @@ export default function LabPage(props: Readonly<Props>) {
         ) : (
           <Row>
             <Col>
-              <Image
-                width="0"
-                height="0"
-                style={{ height: "auto", width: "100px" }}
-                src="/SummerGlasses.svg"
-                alt="SummerGlasses"
-              />{" "}
-              Nothing here yet
+              <NothingHereYetSummer />
             </Col>
           </Row>
         )}

@@ -14,7 +14,7 @@ function LeaderboardDownload(
   return (
     <>
       <DownloadUrlWidget
-        preview="Page"
+        preview="Download Page"
         name={getLeaderboardDownloadFileName(
           props.name,
           props.block ?? 0,
@@ -23,7 +23,7 @@ function LeaderboardDownload(
         url={`${props.url}&download_page=true`}
       />
       <DownloadUrlWidget
-        preview="All Pages"
+        preview="Download All Pages"
         name={getLeaderboardDownloadFileName(props.name, props.block ?? 0, 0)}
         url={`${props.url}&download_all=true`}
       />

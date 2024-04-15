@@ -227,7 +227,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
             <span>
               {!props.fetching && props.results_count > 0 && (
                 <DownloadUrlWidget
-                  preview=""
+                  preview="Download"
                   name={getFileName()}
                   url={`${props.getUrl()}&download=true`}
                 />
