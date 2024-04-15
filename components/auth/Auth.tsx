@@ -259,8 +259,6 @@ export default function Auth({
       });
       return { success: false };
     }
-    // removeAuthJwt();
-    // await requestSignIn({ signerAddress: address });
     const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
     if (!isAuth) {
       removeAuthJwt();

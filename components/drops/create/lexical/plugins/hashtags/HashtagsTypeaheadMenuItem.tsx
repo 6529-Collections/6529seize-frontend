@@ -18,12 +18,11 @@ export default function HashtagsTypeaheadMenuItem({
   readonly option: HashtagsTypeaheadOption;
 }) {
   return (
-    <li
+    <option
       key={option.key}
       tabIndex={-1}
       className="tw-h-full"
       ref={option.setRefElement}
-      role="option"
       aria-selected={isSelected}
       id={"typeahead-item-" + index}
     >
@@ -46,7 +45,7 @@ export default function HashtagsTypeaheadMenuItem({
                         option.picture,
                         ImageScale.W_AUTO_H_50
                       )}
-                      alt="Community Table Profile Picture"
+                      alt="Community Table Profile"
                       className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                     />
                   </div>
@@ -81,6 +80,6 @@ export default function HashtagsTypeaheadMenuItem({
           )}
         </div>
       </button>
-    </li>
+    </option>
   );
 }
