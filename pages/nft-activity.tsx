@@ -18,7 +18,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
 export default function TheMemesPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Nft Activity" },
+    { display: "NFT Activity" },
   ];
 
   return (

@@ -179,7 +179,7 @@ export default function CommunityMetrics() {
                     </p>
                     <h5 className="text-white float-none pt-3" id="tdh-1.3">
                       <a href="#tdh-1.3">
-                        <u>TDH 1.3 (March 29, 2023 - present)</u>
+                        <u>TDH 1.3 (March 29, 2024 - present)</u>
                       </a>
                     </h5>
                     <br />
@@ -228,7 +228,7 @@ export default function CommunityMetrics() {
                     </ol>
                     <h5 className="text-white float-none pt-3" id="tdh-1.2">
                       <a href="#tdh-1.2">
-                        <u>TDH 1.2 (December 30, 2023 - March 28, 2023)</u>
+                        <u>TDH 1.2 (December 30, 2023 - March 28, 2024)</u>
                       </a>
                     </h5>
                     <br />
