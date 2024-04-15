@@ -6,7 +6,7 @@ export default function AboutSubscriptions() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Meme</span> Subscriptions
+            <span className="font-lightest">Subscription</span> Minting
           </h1>
         </Col>
       </Row>
@@ -118,17 +118,17 @@ export default function AboutSubscriptions() {
                         not
                       </li>
                       <li className="mt-1">
-                        This means that you can opt out on Sunday (for Monday’s
-                        card), Tuesday (for Wednesday&apos;s card) and Thursday
-                        (for Friday&apos;s card)
+                        This means that you can opt out on Sunday (for
+                        Monday&apos;s card), Tuesday (for Wednesday&apos;s card)
+                        and Thursday (for Friday&apos;s card)
                       </li>
                     </ul>
                   </li>
                   <li className="mt-1">
                     You can choose to move your whole profile to
                     &quot;manual&quot; as opposed to &quot;automatic&quot;. In
-                    this case, you will not mint any cards unless you mint that
-                    specific card
+                    this case, you will not mint any cards unless you manully
+                    opt-in to that specific card
                   </li>
                 </ul>
               </li>
@@ -165,15 +165,25 @@ export default function AboutSubscriptions() {
                     </ul>
                   </li>
                   <li className="mt-1">
-                    For folks who have a vault and have delegated to minting
-                    wallet using use case &quot;All&quot; and would prefer their
-                    airdrop to go directly to their vault, we recommend they:
+                    If you have a typical vault/warm/hot consolidation with your
+                    vault delegating ALL to warm or hot, and you would like your
+                    airdrops directly to your vault, we recommend:
                     <ul>
                       <li className="mt-1">
-                        Change their &quot;All&quot; delegation to a more
-                        specific use case eg &quot;Minting&quot;
+                        sending ETH to seize.6529.eth from warm or hot address
+                      </li>
+                      <li className="mt-1">
+                        adding delegation case "Airdrop" for the "The Memes"
+                        from that address to your vault
                       </li>
                     </ul>
+                  </li>
+                  <li className="mt-1">
+                    If you have a single address (not consolidated) that has
+                    delegated all to a minting address and you want to send ETH
+                    from that address and also have the airdrop received by that
+                    address, then you should change your delegation to "Minting"
+                    otherwise the airdrop will go to your minting address
                   </li>
                 </ul>
               </li>
@@ -226,13 +236,13 @@ export default function AboutSubscriptions() {
               <li className="mt-2">
                 Meme Cards are relatively inexpensive (0.06529ETH) so in periods
                 of high Ethereum gas, minting costs can become a substantial %
-                of the cards cost
+                of the card&apos;s cost
                 <ul>
                   <li className="mt-1">
-                    At gwei of 20, they make up 3.4% of the card’s cost.
+                    At gwei of 20, they make up 3.4% of the card&apos;s cost.
                   </li>
                   <li className="mt-1">
-                    At gwei of 200, they make up 33.7% of the card’s cost
+                    At gwei of 200, they make up 33.7% of the card&apos;s cost
                   </li>
                 </ul>
               </li>
