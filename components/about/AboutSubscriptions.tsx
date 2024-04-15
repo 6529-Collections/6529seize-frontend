@@ -1,5 +1,4 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { MEMES_CALENDARS } from "../../helpers/meme_calendar.helplers";
 
 export default function AboutSubscriptions() {
   return (
@@ -157,11 +156,11 @@ export default function AboutSubscriptions() {
                       </li>
                       <li className="mt-1">
                         The delegated address for All for use case
-                        &quot;airdrop&quot;
+                        &quot;Airdrop&quot;
                       </li>
                       <li className="mt-1">
                         The delegated address for All for use case
-                        &quot;all&quot;
+                        &quot;All&quot;
                       </li>
                     </ul>
                   </li>
