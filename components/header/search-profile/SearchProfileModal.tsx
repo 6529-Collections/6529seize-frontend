@@ -249,7 +249,7 @@ export default function SearchProfileModal({
                 <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
                   {searchValue.length >= MIN_SEARCH_LENGTH
                     ? "No results found"
-                    : "Type at least 3 characters"}
+                    : "Type at least 3 characters or NFT Id"}
                 </p>
               </div>
             )}
