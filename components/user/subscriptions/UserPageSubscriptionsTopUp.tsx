@@ -211,7 +211,7 @@ export default function UserPageSubscriptionsTopUp(
                 </Col>
                 <Col xs={6} className="text-right">
                   <Button
-                    style={{ padding: "5px 75px" }}
+                    style={{ padding: "2px 75px" }}
                     size="lg"
                     type="submit"
                     disabled={
@@ -262,7 +262,7 @@ function CardCountTopup(
           </Col>
           <Col xs={6} className="text-right">
             <Button
-              style={{ padding: "5px 75px" }}
+              style={{ padding: "2px 75px" }}
               size="lg"
               type="submit"
               disabled={props.disabled}>
