@@ -160,6 +160,17 @@ export function isMintingToday() {
   });
 }
 
+function getRemainingMintsInBlock(block: CalendarBlock, now: Time) {
+  let mintsInBlock = 0;
+  const start = block.start.gt(now) ? block.start : now.plusDays(1);
+
+  for (let i = start; i.lt(block.end); i = i.plusDays(1)) {
+    if (MEMES_MINTING_DAYS.includes(i.toDate().getUTCDay())) {
+      mintsInBlock++;
+    }
+  }
+  return mintsInBlock;
+}
 export function numberOfCardsForSeasonEnd() {
   const now = Time.now();
   const upcomingBlock: CalendarBlock | undefined = MEMES_CALENDARS.flatMap(
@@ -175,18 +186,42 @@ export function numberOfCardsForSeasonEnd() {
     };
   }
 
-  let mintsInBlock = 0;
-  const start = upcomingBlock.start.gt(now)
-    ? upcomingBlock.start
-    : now.plusDays(1);
+  const mintsInBlock = getRemainingMintsInBlock(upcomingBlock, now);
 
-  for (let i = start; i.lt(upcomingBlock.end); i = i.plusDays(1)) {
-    if (MEMES_MINTING_DAYS.includes(i.toDate().getUTCDay())) {
-      mintsInBlock++;
-    }
-  }
   return {
     szn: upcomingBlock.szn,
     count: mintsInBlock,
+  };
+}
+
+export function numberOfCardsForCalendarEnd() {
+  const now = Time.now();
+  const currentCalendar = MEMES_CALENDARS.find((calendar) => {
+    return (
+      calendar.blocks.some((block) => {
+        return now.gt(block.start);
+      }) &&
+      calendar.blocks.some((block) => {
+        return now.lt(block.end);
+      })
+    );
+  });
+  if (!currentCalendar) {
+    return {
+      year: "",
+      count: 0,
+    };
+  }
+
+  const blocks = currentCalendar.blocks.filter(
+    (block) => block.end.gt(now) && block.szn
+  );
+  let mintsInBlocks = 0;
+  for (const block of blocks) {
+    mintsInBlocks += getRemainingMintsInBlock(block, now);
+  }
+  return {
+    year: currentCalendar.title,
+    count: mintsInBlocks,
   };
 }

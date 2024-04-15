@@ -11,7 +11,10 @@ import {
 } from "../../../constants";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../../dotLoader/DotLoader";
-import { numberOfCardsForSeasonEnd } from "../../../helpers/meme_calendar.helplers";
+import {
+  numberOfCardsForCalendarEnd,
+  numberOfCardsForSeasonEnd,
+} from "../../../helpers/meme_calendar.helplers";
 
 const CHAIN_ID = sepolia.id;
 
@@ -24,6 +27,7 @@ export default function UserPageSubscriptionsTopUp(
   const sendTransaction = useSendTransaction();
 
   const remainingMintsForSeason = numberOfCardsForSeasonEnd();
+  const remainingMintsForYear = numberOfCardsForCalendarEnd();
 
   const waitSendTransaction = useWaitForTransaction({
     chainId: CHAIN_ID,
@@ -133,12 +137,28 @@ export default function UserPageSubscriptionsTopUp(
           />
         </Col>
       </Row>
-      {remainingMintsForSeason && (
+      {remainingMintsForSeason.count > 0 && (
         <Row className="pt-2">
           <Col>
             <CardCountTopup
               count={remainingMintsForSeason.count ?? 0}
               display={`Remaining SZN${remainingMintsForSeason.szn}`}
+              disabled={
+                sendTransaction.isLoading || waitSendTransaction.isLoading
+              }
+              submit={(value: number) => {
+                submit(value);
+              }}
+            />
+          </Col>
+        </Row>
+      )}
+      {remainingMintsForYear.count > 0 && (
+        <Row className="pt-2">
+          <Col>
+            <CardCountTopup
+              count={remainingMintsForYear.count ?? 0}
+              display={`Remaining ${remainingMintsForYear.year}`}
               disabled={
                 sendTransaction.isLoading || waitSendTransaction.isLoading
               }

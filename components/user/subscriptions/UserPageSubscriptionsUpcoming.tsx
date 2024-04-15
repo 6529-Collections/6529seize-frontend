@@ -4,15 +4,20 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
 import {
+  NFTFinalSubscription,
   NFTSubscription,
   SubscriptionDetails,
 } from "../../../entities/ISubscription";
-import { commonApiPost } from "../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../services/api/common-api";
 import { Spinner } from "../../dotLoader/DotLoader";
 import Toggle from "react-toggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { isMintingToday } from "../../../helpers/meme_calendar.helplers";
+import { useQuery } from "@tanstack/react-query";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -44,6 +49,7 @@ export default function UserPageSubscriptionsUpcoming(
                       readonly={props.readonly}
                       refresh={props.refresh}
                       minting_today={index === 0 && isMintingToday()}
+                      first={index === 0}
                     />
                   </td>
                 </tr>
@@ -63,6 +69,7 @@ function SubscriptionRow(
     subscription: NFTSubscription;
     readonly: boolean;
     minting_today?: boolean;
+    first: boolean;
     refresh: () => void;
   }>
 ) {
@@ -73,6 +80,18 @@ function SubscriptionRow(
   const [subscribed, setSubscribed] = useState<boolean>(
     props.subscription.subscribed
   );
+
+  const { data: final } = useQuery<NFTFinalSubscription>({
+    queryKey: [
+      "consolidation-final-subscription",
+      `${props.profile.consolidation.consolidation_key}-${props.subscription.contract}-${props.subscription.token_id}`,
+    ],
+    queryFn: async () =>
+      await commonApiFetch<NFTFinalSubscription>({
+        endpoint: `subscriptions/consolidation/final/${props.profile.consolidation.consolidation_key}/${props.subscription.contract}/${props.subscription.token_id}`,
+      }),
+    enabled: props.first,
+  });
 
   useEffect(() => {
     setSubscribed(props.subscription.subscribed);
@@ -158,6 +177,14 @@ function SubscriptionRow(
           </span>
         </Col>
       </Row>
+      {props.first && final && (
+        <Row className="pt-2">
+          <Col className="font-smaller font-color-silver">
+            Phase: {final.phase} - Subscription Position: {final.phase_position}{" "}
+            / {final.phase_subscriptions}
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }
