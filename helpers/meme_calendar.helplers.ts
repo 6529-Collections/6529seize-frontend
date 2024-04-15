@@ -1,4 +1,3 @@
-import { title } from "process";
 import { Time } from "./time";
 
 interface CalendarBlock {
