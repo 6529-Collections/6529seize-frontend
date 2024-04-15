@@ -111,7 +111,7 @@ export default function UserPageSubscriptionsTopUp(
           </span>
         </Col>
       </Row>
-      <Row className="pt-1">
+      <Row className="pt-2">
         <Col>
           <CardCountTopup
             count={1}
@@ -124,7 +124,7 @@ export default function UserPageSubscriptionsTopUp(
           />
         </Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="pt-3">
         <Col>
           <CardCountTopup
             count={10}
@@ -138,7 +138,7 @@ export default function UserPageSubscriptionsTopUp(
         </Col>
       </Row>
       {remainingMintsForSeason.count > 0 && (
-        <Row className="pt-2">
+        <Row className="pt-3">
           <Col>
             <CardCountTopup
               count={remainingMintsForSeason.count ?? 0}
@@ -154,7 +154,7 @@ export default function UserPageSubscriptionsTopUp(
         </Row>
       )}
       {remainingMintsForYear.count > 0 && (
-        <Row className="pt-2">
+        <Row className="pt-3">
           <Col>
             <CardCountTopup
               count={remainingMintsForYear.count ?? 0}
@@ -169,7 +169,7 @@ export default function UserPageSubscriptionsTopUp(
           </Col>
         </Row>
       )}
-      <Row className="pt-2">
+      <Row className="pt-3">
         <Col>
           <Form
             onSubmit={(e) => {
@@ -190,7 +190,7 @@ export default function UserPageSubscriptionsTopUp(
                     min={1}
                     placeholder="count"
                     value={memeCount}
-                    style={{ width: "100px", padding: "5px 10px" }}
+                    style={{ width: "100px", padding: "2px 10px" }}
                     className="font-smaller"
                     onChange={(e) => {
                       setError("");
@@ -211,7 +211,7 @@ export default function UserPageSubscriptionsTopUp(
                 </Col>
                 <Col xs={6} className="text-right">
                   <Button
-                    style={{ padding: "5px 75px" }}
+                    style={{ padding: "2px 75px" }}
                     size="lg"
                     type="submit"
                     disabled={
@@ -262,7 +262,7 @@ function CardCountTopup(
           </Col>
           <Col xs={6} className="text-right">
             <Button
-              style={{ padding: "5px 75px" }}
+              style={{ padding: "2px 75px" }}
               size="lg"
               type="submit"
               disabled={props.disabled}>
