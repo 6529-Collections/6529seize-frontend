@@ -21,7 +21,7 @@
     line-height: 40px;
   }
 
-  tr:nth-child(odd) {
+  tbody tr:nth-child(odd) {
     background-color: $almost-very-dark-grey;
   }
 }

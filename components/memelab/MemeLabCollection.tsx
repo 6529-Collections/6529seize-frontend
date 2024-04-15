@@ -1,7 +1,6 @@
 import styles from "./MemeLab.module.scss";
 
 import { useContext, useEffect, useState } from "react";
-import Image from "next/image";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import {
@@ -18,6 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NFTImage from "../nft-image/NFTImage";
 import { MEMES_CONTRACT } from "../../constants";
 import { AuthContext } from "../auth/Auth";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
 enum Sort {
   AGE = "age",
@@ -595,14 +595,7 @@ export default function LabCollection(props: Readonly<Props>) {
                   printNfts()
                 ) : (
                   <Col>
-                    <Image
-                      width="0"
-                      height="0"
-                      style={{ height: "auto", width: "100px" }}
-                      src="/SummerGlasses.svg"
-                      alt="SummerGlasses"
-                    />{" "}
-                    Nothing here yet
+                    <NothingHereYetSummer />
                   </Col>
                 ))}
             </Container>

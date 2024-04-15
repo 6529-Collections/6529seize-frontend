@@ -1,7 +1,8 @@
 @import "../../styles/variables.scss";
 
 .downloadUrlWidget {
-  cursor: pointer;
+  background-color: transparent;
+  border: none !important;
   display: flex;
   align-items: center;
   width: fit-content;
@@ -9,7 +10,6 @@
 
   &:hover {
     color: darken($color: $font-color, $amount: $darken-percentage);
-    text-decoration: underline;
     svg {
       color: darken($color: $font-color, $amount: $darken-percentage);
     }

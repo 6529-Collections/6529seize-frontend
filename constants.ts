@@ -52,3 +52,14 @@ export const ETHEREUM_ICON_TEXT = "Ξ";
 export const MEMES_MINTING_HREF = "https://thememes.seize.io";
 
 export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
+
+export const SUBSCRIPTIONS_ADDRESS =
+  "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";
+export const SUBSCRIPTIONS_ADDRESS_ENS = "seize.6529.eth";
+
+export const SUBSCRIPTIONS_ADMIN_WALLETS = [
+  "0x0187C9a182736ba18b44eE8134eE438374cf87DC",
+  "0xFe49A85E98941F1A115aCD4bEB98521023a25802",
+];
+
+export const MEMES_MINT_PRICE = 0.06529;
