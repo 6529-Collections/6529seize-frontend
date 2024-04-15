@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { parseEther } from "viem";
-import { sepolia, useSendTransaction, useWaitForTransaction } from "wagmi";
+import { mainnet, useSendTransaction, useWaitForTransaction } from "wagmi";
 import { formatAddress, getTransactionLink } from "../../../helpers/Helpers";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import {
@@ -16,7 +16,7 @@ import {
   numberOfCardsForSeasonEnd,
 } from "../../../helpers/meme_calendar.helplers";
 
-const CHAIN_ID = sepolia.id;
+const CHAIN_ID = mainnet.id;
 
 export default function UserPageSubscriptionsTopUp(
   props: Readonly<{

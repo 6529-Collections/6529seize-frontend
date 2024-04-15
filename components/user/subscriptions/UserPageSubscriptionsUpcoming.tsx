@@ -180,8 +180,9 @@ function SubscriptionRow(
       {props.first && final && (
         <Row className="pt-2">
           <Col className="font-smaller font-color-silver">
-            Phase: {final.phase} - Subscription Position: {final.phase_position}{" "}
-            / {final.phase_subscriptions}
+            Phase: {final.phase} - Subscription Position:{" "}
+            {final.phase_position.toLocaleString()} /{" "}
+            {final.phase_subscriptions.toLocaleString()}
           </Col>
         </Row>
       )}
