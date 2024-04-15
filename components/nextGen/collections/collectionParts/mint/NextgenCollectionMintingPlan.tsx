@@ -230,7 +230,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                 <tr key={`${al.address}-${al.spots}-${al.info}`}>
                   <td>
                     <a
-                      href={`/${al.address}/mints`}
+                      href={`/${al.address}`}
                       target="_blank"
                       rel="noreferrer"
                       className="decoration-hover-underline">
