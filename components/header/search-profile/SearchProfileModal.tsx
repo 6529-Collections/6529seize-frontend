@@ -85,7 +85,9 @@ export default function SearchProfileModal({
       });
       return memesResponse.data ?? [];
     },
-    enabled: debouncedValue.length >= MIN_SEARCH_LENGTH,
+    enabled:
+      debouncedValue.length >= MIN_SEARCH_LENGTH ||
+      (debouncedValue.length > 0 && !isNaN(Number(debouncedValue))),
   });
 
   const onHover = (index: number, state: boolean) => {
