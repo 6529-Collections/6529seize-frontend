@@ -5,7 +5,6 @@ import DropListItemActions from "./action/DropListItemActions";
 import DropWrapper from "../../create/utils/DropWrapper";
 import DropListItemContent from "./content/DropListItemContent";
 import DropListItemRepWrapper from "./reps/DropListItemRepWrapper";
-import DropsListItemChallengeBar from "./challenge/DropsListItemChallengeBar";
 import DropListItemExpandableWrapper from "./utils/DropListItemExpandableWrapper";
 
 export enum RepActionExpandable {
@@ -15,7 +14,13 @@ export enum RepActionExpandable {
   REP = "REP",
 }
 
-export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
+export default function DropsListItem({
+  drop,
+  showFull = false,
+}: {
+  readonly drop: DropFull;
+  readonly showFull?: boolean;
+}) {
   const [repAction, setRepAction] = useState<RepActionExpandable>(
     RepActionExpandable.IDLE
   );
@@ -23,17 +28,17 @@ export default function DropsListItem({ drop }: { readonly drop: DropFull }) {
 
   return (
     <div className="tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
-      <DropsListItemChallengeBar
+      {/* <DropsListItemChallengeBar
         maxValue={100000}
         current={drop.rep}
         myRep={drop.rep_given_by_input_profile}
-      />
+      /> */}
       <div className="tw-p-4 sm:tw-p-5">
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropWrapper drop={drop}>
               <div className="tw-w-full">
-                <DropListItemContent drop={drop} />
+                <DropListItemContent drop={drop} showFull={showFull} />
               </div>
             </DropWrapper>
             {haveData && <DropListItemData drop={drop} />}

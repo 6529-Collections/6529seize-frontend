@@ -149,7 +149,7 @@ export default function CreateDropFullMobile({
         </div>
         <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
           <div className="tw-flex tw-gap-x-3">
-            <CreateDropChallengeAcceptButton />
+            {/* <CreateDropChallengeAcceptButton /> */}
             <button
               type="button"
               disabled={disabled}

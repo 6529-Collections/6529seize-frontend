@@ -75,7 +75,13 @@ const customRenderer = ({
 };
 
 const DropListItemContentMarkdown = React.memo(
-  ({ drop }: { readonly drop: DropFull }) => {
+  ({
+    drop,
+    showFull = false,
+  }: {
+    readonly drop: DropFull;
+    readonly showFull?: boolean;
+  }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -111,7 +117,7 @@ const DropListItemContentMarkdown = React.memo(
       };
     }, [containerRef]);
 
-    const [showMore, setShowMore] = useState(false);
+    const [showMore, setShowMore] = useState(showFull);
 
     return (
       <CommonAnimationHeight>
@@ -173,7 +179,7 @@ const DropListItemContentMarkdown = React.memo(
               ),
               code: (params) => (
                 <code
-                  style={{ textOverflow: "unset"}}
+                  style={{ textOverflow: "unset" }}
                   className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
                 >
                   {customRenderer({ content: params.children, drop })}

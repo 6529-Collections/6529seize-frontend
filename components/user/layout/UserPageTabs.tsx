@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import UserPageTab from "./UserPageTab";
+import { AuthContext } from "../../auth/Auth";
 
 export enum UserPageTabType {
   DROPS = "DROPS",
@@ -50,6 +51,7 @@ export const USER_PAGE_TAB_META: Record<
 
 export default function UserPageTabs() {
   const router = useRouter();
+  const { canSeeDrops } = useContext(AuthContext);
 
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
@@ -71,6 +73,18 @@ export default function UserPageTabs() {
     setTab(pathnameToTab(router.pathname));
   }, [router.query]);
 
+  const getTabs = (): UserPageTabType[] => {
+    const items = Object.values(UserPageTabType);
+    if (canSeeDrops) {
+      return items;
+    }
+    return items.filter((item) => item !== UserPageTabType.DROPS);
+  };
+  const [tabs, setTabs] = useState<UserPageTabType[]>(getTabs());
+  useEffect(() => {
+    setTabs(getTabs());
+  }, [canSeeDrops]);
+
   return (
     <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div className="tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-pb-[1px]">
@@ -78,7 +92,7 @@ export default function UserPageTabs() {
           className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
           aria-label="Tabs"
         >
-          {Object.values(UserPageTabType).map((tabType) => (
+          {tabs.map((tabType) => (
             <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
           ))}
         </div>

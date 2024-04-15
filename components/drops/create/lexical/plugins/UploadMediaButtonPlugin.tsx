@@ -30,7 +30,7 @@ export default function UploadMediaButtonPlugin({
         id={id}
         type="file"
         className="tw-hidden"
-        accept="image/*,video/*,.glb,audio/*"
+        accept="image/*,video/*,audio/*"
         onChange={(e: any) => {
           if (e.target.files) {
             const f = e.target.files[0];

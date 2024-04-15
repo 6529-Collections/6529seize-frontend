@@ -12,8 +12,10 @@ export enum DropContentPartType {
 
 export default function DropListItemContent({
   drop,
+  showFull = false,
 }: {
   readonly drop: DropFull;
+  readonly showFull?: boolean;
 }) {
   const { data: quotedDrop } = useQuery<DropFull>({
     queryKey: [QueryKey.DROP, drop.quoted_drop_id],
@@ -26,11 +28,14 @@ export default function DropListItemContent({
 
   return (
     <div>
-      <DropListItemContentMarkdown drop={drop} />
+      <DropListItemContentMarkdown drop={drop} showFull={showFull} />
       {quotedDrop && (
         <div className="tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-2">
           <DropWrapper drop={quotedDrop}>
-            <DropListItemContentMarkdown drop={quotedDrop} />
+            <DropListItemContentMarkdown
+              drop={quotedDrop}
+              showFull={showFull}
+            />
           </DropWrapper>
         </div>
       )}

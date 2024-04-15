@@ -102,7 +102,7 @@ export default function CreateDropCompact({
               onFileChange={onFileChange}
             />
           </div>
-          <CreateDropChallengeAcceptButton />
+          {/* <CreateDropChallengeAcceptButton /> */}
           <div className="tw-self-end">
             <PrimaryButton
               onClick={onDrop}

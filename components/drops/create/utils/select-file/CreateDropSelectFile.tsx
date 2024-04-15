@@ -1,6 +1,6 @@
 import CreateDropSelectedFileIcon from "./CreateDropSelectedFileIcon";
 import CreateDropSelectFileAudio from "./CreateDropSelectFileAudio";
-import CreateDropSelectFileGLB from "./CreateDropSelectFileGLB";
+
 import CreateDropSelectFileImage from "./CreateDropSelectFileImage";
 import CreateDropSelectFileVideo from "./CreateDropSelectFileVideo";
 
@@ -19,7 +19,6 @@ export default function CreateDropSelectFile({
       <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-1">
         <CreateDropSelectFileImage onFileChange={onFileChange} />
         <CreateDropSelectFileVideo onFileChange={onFileChange} />
-        <CreateDropSelectFileGLB onFileChange={onFileChange} />
         <CreateDropSelectFileAudio onFileChange={onFileChange} />
       </div>
 
