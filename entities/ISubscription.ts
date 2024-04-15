@@ -39,3 +39,17 @@ export interface RedeemedSubscription {
   transaction: string;
   transaction_date: string;
 }
+
+export interface NFTFinalSubscription {
+  id: number;
+  consolidation_key: string;
+  contract: string;
+  token_id: number;
+  airdrop_address: string;
+  balance: number;
+  subscribed_at: string;
+  phase: string;
+  redeemed: number;
+  phase_subscriptions: number;
+  phase_position: number;
+}

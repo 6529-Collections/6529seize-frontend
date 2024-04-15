@@ -79,7 +79,7 @@ export function SubscriptionLinks(
     setDownloading(true);
     try {
       const response = await commonApiFetch<SubscriptionResult>({
-        endpoint: `/subscriptions/allowlists/${contract}/${tokenId}/${props.plan.id}/${props.phase.id}`,
+        endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${props.plan.id}/${props.phase.id}`,
       });
 
       processResults(response);
