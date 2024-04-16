@@ -52,7 +52,7 @@ export default function AboutSubscriptions() {
                 process:
                 <ul>
                   <li className="mt-1">
-                    You can still mint in the normal manner if you don't subscribe
+                    You can still mint in the normal manner if you don&apos;t subscribe
                   </li>
                   <li className="mt-1">
                     Subscriptions are an alternative method of minting for those
