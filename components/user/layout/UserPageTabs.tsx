@@ -66,13 +66,16 @@ export default function UserPageTabs() {
   }, [router.query]);
 
   return (
-    <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
-      <div
-        className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-        aria-label="Tabs">
-        {Object.values(UserPageTabType).map((tabType) => (
-          <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
-        ))}
+    <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
+      <div className="tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-pb-[1px]">
+        <div
+          className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
+          aria-label="Tabs"
+        >
+          {Object.values(UserPageTabType).map((tabType) => (
+            <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
+          ))}
+        </div>
       </div>
     </div>
   );
