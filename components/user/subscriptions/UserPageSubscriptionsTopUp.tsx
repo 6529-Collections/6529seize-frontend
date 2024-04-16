@@ -1,3 +1,4 @@
+import styles from "./UserPageSubscriptions.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { parseEther } from "viem";
@@ -183,7 +184,7 @@ export default function UserPageSubscriptionsTopUp(
             }}>
             <Form.Group className="mb-3">
               <Row className="d-flex align-items-center">
-                <Col xs={6} className="d-flex align-items-center gap-2">
+                <Col xs={9} sm={8} className="d-flex align-items-center gap-2">
                   <span>Other</span>
                   <Form.Control
                     type="number"
@@ -209,9 +210,9 @@ export default function UserPageSubscriptionsTopUp(
                     )}
                   </span>
                 </Col>
-                <Col xs={6} className="text-right">
+                <Col xs={3} sm={4}>
                   <Button
-                    style={{ padding: "2px 75px" }}
+                    className={styles.sendBtn}
                     size="lg"
                     type="submit"
                     disabled={
@@ -255,14 +256,14 @@ function CardCountTopup(
       }}>
       <Form.Group>
         <Row className="d-flex align-items-center no-wrap">
-          <Col xs={6}>
+          <Col xs={9} sm={8} className="d-flex">
             {props.display && <span>{props.display} - </span>}
             {props.count} Card{props.count > 1 && "s"} (
             {MEMES_MINT_PRICE * props.count} ETH)
           </Col>
-          <Col xs={6} className="text-right">
+          <Col xs={3} sm={4}>
             <Button
-              style={{ padding: "2px 75px" }}
+              className={styles.sendBtn}
               size="lg"
               type="submit"
               disabled={props.disabled}>

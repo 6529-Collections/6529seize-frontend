@@ -177,7 +177,7 @@ function SubscriptionRow(
           </span>
         </Col>
       </Row>
-      {props.first && final && (
+      {props.first && final?.phase && final?.phase_position && (
         <Row className="pt-2">
           <Col className="font-smaller font-color-silver">
             Phase: {final.phase} - Subscription Position:{" "}
