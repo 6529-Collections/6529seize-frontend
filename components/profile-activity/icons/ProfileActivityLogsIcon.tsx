@@ -12,7 +12,6 @@ import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
 import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
 import ProfileActivityLogsGeneralCICStatementIcon from "./ProfileActivityLogsGeneralCICStatementIcon";
 import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon";
-import DropIcon from "../../drops/view/item/action/DropIcon";
 import ProfileActivityLogsRepClapIcon from "./ProfileActivityLogsRepClapIcon";
 import ProfileActivityLogsDiscussIcon from "./ProfileActivityLogsDiscussIcon";
 import ProfileActivityLogsDropIcon from "./ProfileActivityLogsDropIcon";
