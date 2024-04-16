@@ -96,6 +96,8 @@ import {
   faMinusSquare,
   faChevronDown,
   faEdit,
+  faDollar,
+  faFileInvoiceDollar,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { Web3Modal } from "@web3modal/react";
@@ -106,6 +108,7 @@ import { ReactElement, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
+import "../components/drops/create/lexical/lexical.styles.scss";
 
 library.add(
   faArrowUp,
@@ -184,7 +187,9 @@ library.add(
   faPlusSquare,
   faMinusSquare,
   faChevronDown,
-  faEdit
+  faEdit,
+  faDollar,
+  faFileInvoiceDollar
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
@@ -233,39 +238,37 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout ?? ((page) => page);
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <Head>
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1.0, maximum-scale=1"
-            />
-          </Head>
-
-          <WagmiConfig config={wagmiConfig}>
-            <ReactQueryWrapper>
-              <Auth>{getLayout(<Component {...props} />)}</Auth>
-            </ReactQueryWrapper>
-          </WagmiConfig>
-          <Web3Modal
-            defaultChain={mainnet}
-            projectId={CW_PROJECT_ID}
-            ethereumClient={ethereumClient}
-            themeMode={"dark"}
-            themeVariables={{
-              "--w3m-background-color": "#282828",
-              "--w3m-logo-image-url":
-                "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-              "--w3m-accent-color": "#fff",
-              "--w3m-accent-fill-color": "#000",
-              "--w3m-button-border-radius": "0",
-              "--w3m-font-family": "Arial",
-            }}
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <Head>
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1"
           />
-        </Provider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </>
+        </Head>
+
+        <WagmiConfig config={wagmiConfig}>
+          <ReactQueryWrapper>
+            <Auth>{getLayout(<Component {...props} />)}</Auth>
+          </ReactQueryWrapper>
+        </WagmiConfig>
+        <Web3Modal
+          defaultChain={mainnet}
+          projectId={CW_PROJECT_ID}
+          ethereumClient={ethereumClient}
+          themeMode={"dark"}
+          themeVariables={{
+            "--w3m-background-color": "#282828",
+            "--w3m-logo-image-url":
+              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+            "--w3m-accent-color": "#fff",
+            "--w3m-accent-fill-color": "#000",
+            "--w3m-button-border-radius": "0",
+            "--w3m-font-family": "Arial",
+          }}
+        />
+      </Provider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }

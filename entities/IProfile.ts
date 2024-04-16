@@ -111,6 +111,9 @@ export enum ProfileActivityLogType {
   PFP_EDIT = "PFP_EDIT",
   PROFILE_ARCHIVED = "PROFILE_ARCHIVED",
   GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
+  DROP_COMMENT = "DROP_COMMENT",
+  DROP_REP_EDIT = "DROP_REP_EDIT",
+  DROP_CREATED = "DROP_CREATED",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -131,6 +134,10 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
   [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "About",
+  // TODO: Implement these
+  [ProfileActivityLogType.DROP_COMMENT]: "Drop Comment",
+  [ProfileActivityLogType.DROP_REP_EDIT]: "Drop Rep",
+  [ProfileActivityLogType.DROP_CREATED]: "Drop Created",
 };
 
 export interface ProfileActivityLogBase {
@@ -271,6 +278,33 @@ export interface ProfileActivityLogGeneralCicStatementEdit
   };
 }
 
+export interface ProfileActivityLogDropComment extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_COMMENT;
+  readonly contents: {
+    readonly content: string;
+  };
+}
+
+export interface ProfileActivityLogDropRepEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_REP_EDIT;
+  readonly contents: {
+    readonly change_reason: string;
+    readonly new_rating: number;
+    readonly old_rating: number;
+    readonly rating_category: string;
+    readonly rating_matter: RateMatter.DROP_REP;
+  };
+}
+
+export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_CREATED;
+  readonly contents: {
+    readonly drop_id: string;
+  };
+}
+
+
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
   | ProfileActivityLogHandleEdit
@@ -284,11 +318,15 @@ export type ProfileActivityLog =
   | ProfileActivityLogPfpEdit
   | ProfileActivityLogArchived
   | ProfileActivityLogGeneralCicStatementEdit
-  | ProfileActivityLogNftAccountsEdit;
+  | ProfileActivityLogNftAccountsEdit
+  | ProfileActivityLogDropComment
+  | ProfileActivityLogDropRepEdit
+  | ProfileActivityLogDropCreated;
 
 export enum RateMatter {
   CIC = "CIC",
   REP = "REP",
+  DROP_REP = "DROP_REP",
 }
 
 export interface ProfilesMatterRating {
@@ -302,6 +340,7 @@ export interface ProfilesMatterRating {
 }
 
 export interface CommunityMemberMinimal {
+  readonly profile_id: string;
   readonly handle: string | null;
   readonly normalised_handle: string | null;
   readonly primary_wallet: string | null;
@@ -416,4 +455,24 @@ export interface CommunityMemberOverview {
   readonly cic: number;
   readonly pfp: string | null;
   readonly last_activity: number | null;
+}
+
+export interface ProfileMinimal {
+  readonly id: string;
+  readonly handle: string;
+  readonly pfp: string | null;
+  readonly cic: number;
+  readonly rep: number;
+  readonly tdh: number;
+  readonly level: number;
+}
+
+export interface ProfileAvailableDropRepResponse {
+  readonly available_tdh_for_rep: number;
+}
+
+export enum ProfileConnectedStatus {
+  NOT_CONNECTED = "NOT_CONNECTED",
+  NO_PROFILE = "NO_PROFILE",
+  HAVE_PROFILE = "HAVE_PROFILE",
 }

@@ -14,6 +14,7 @@ import { getCommonHeaders } from "../../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
+import { getNextGenTokenScene } from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenScene";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 
 const Header = dynamic(
@@ -49,8 +50,10 @@ export default function NextGenCollectionToken(props: any) {
   const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
   const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
-  const pageImage = token?.image_url ?? collection.image;
+  let pageImage = token?.image_url ?? collection.image;
+  pageImage = pageImage.replace("/png/", "/png0.5k/");
   const tokenView = props.pageProps.view;
+  const tokenMode = props.pageProps.mode;
 
   const breadcrumbs = [
     { display: "Home", href: "/" },
@@ -98,6 +101,7 @@ export default function NextGenCollectionToken(props: any) {
             traits={traits}
             tokenCount={tokenCount}
             view={tokenView}
+            mode={tokenMode}
           />
         ) : (
           <NextGenTokenOnChainComponent
@@ -157,6 +161,16 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     }
   }
 
+  let scene: any = req.query.scene as string;
+  let mode = null;
+
+  if (scene) {
+    const tokenScene = getNextGenTokenScene(scene.replaceAll("-", " "));
+    if (tokenScene) {
+      mode = tokenScene.mode;
+    }
+  }
+
   if (isEmptyObject(collection)) {
     return {
       redirect: {
@@ -175,6 +189,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       tokenCount: tokenCount,
       collection: collection,
       view: tokenView,
+      mode: mode,
     },
   };
 }

@@ -1,4 +1,4 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -10,14 +10,19 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import jwtDecode from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  ProfileConnectedStatus,
+} from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
 
 type AuthContextType = {
-  connectedProfile: IProfileAndConsolidations | null;
-  requestAuth: () => Promise<{ success: boolean }>;
-  setToast: ({
+  readonly connectedProfile: IProfileAndConsolidations | null;
+  readonly connectionStatus: ProfileConnectedStatus;
+  readonly requestAuth: () => Promise<{ success: boolean }>;
+  readonly setToast: ({
     message,
     type,
   }: {
@@ -33,6 +38,7 @@ interface NonceResponse {
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -44,6 +50,9 @@ export default function Auth({
 }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
+  const [connectionStatus, setConnectionSatus] =
+    useState<ProfileConnectedStatus>(ProfileConnectedStatus.NOT_CONNECTED);
+
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
     queryFn: async () =>
@@ -235,6 +244,8 @@ export default function Auth({
       });
       return { success: false };
     }
+    // removeAuthJwt();
+    // await requestSignIn({ signerAddress: address });
     const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
     if (!isAuth) {
       removeAuthJwt();
@@ -249,6 +260,7 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
+        connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
       }}>
       {children}
       <ToastContainer />

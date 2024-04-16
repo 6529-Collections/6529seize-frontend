@@ -27,6 +27,7 @@ import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalle
 import { NextGenCollection } from "../../../../../../../entities/INextgen";
 import { normalizeNextgenTokenID } from "../../../../../../nextGen/nextgen_helpers";
 import { getNextGenIconUrl } from "../../../../../../nextGen/collections/nextgenToken/NextGenTokenImage";
+import UserPageStatsActivityWalletTableRowEthPrice from "./UserPageStatsActivityWalletTableRowEthPrice";
 
 export enum TransactionType {
   AIRDROPPED = "AIRDROPPED",
@@ -356,6 +357,11 @@ export default function UserPageStatsActivityWalletTableRow({
               royalties={transaction.royalties}
             />
           )}
+          <UserPageStatsActivityWalletTableRowEthPrice
+            ethPrice={transaction.eth_price_usd}
+            value={transaction.value_usd}
+            gas={transaction.gas_usd}
+          />
           <UserPageStatsActivityWalletTableRowGas
             gas={transaction.gas}
             gasGwei={transaction.gas_gwei}

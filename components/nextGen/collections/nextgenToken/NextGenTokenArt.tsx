@@ -10,6 +10,12 @@ import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
+import { NextGenTokenImageMode } from "../../nextgen_helpers";
+import {
+  NextGenTokenArtImageCanvas,
+  getNextGenTokenScene,
+} from "./NextGenTokenScene";
+import useDownloader from "react-use-downloader";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import NextGenZoomableImage, {
   MAX_ZOOM_SCALE,
@@ -20,25 +26,35 @@ import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
-}
-
-enum Mode {
-  LIVE = "Live",
-  IMAGE = "Image",
-  HIGH_RES = "High Res",
+  mode: NextGenTokenImageMode;
+  setMode: (mode: NextGenTokenImageMode) => void;
 }
 
 export function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
-    mode: Mode;
+    mode: NextGenTokenImageMode;
     is_fullscreen: boolean;
+    setCanvasUrl: (url: string) => void;
+    is_zoom: boolean;
     zoom_scale: number;
     setZoomScale: (scale: number) => void;
     onImageLoaded: () => void;
   }>
 ) {
-  if (props.mode === Mode.HIGH_RES) {
+  const scene = getNextGenTokenScene(props.mode);
+  if (scene) {
+    return (
+      <NextGenTokenArtImageCanvas
+        scene={scene}
+        token={props.token}
+        is_fullscreen={props.is_fullscreen}
+        setCanvasUrl={props.setCanvasUrl}
+      />
+    );
+  }
+
+  if (props.mode === NextGenTokenImageMode.HIGH_RES) {
     return (
       <NextGenZoomableImage
         token={props.token}
@@ -57,7 +73,7 @@ export function NextGenTokenArtImage(
       show_original
       hide_info={true}
       hide_link={true}
-      show_animation={props.mode === Mode.LIVE}
+      show_animation={props.mode === NextGenTokenImageMode.LIVE}
       is_fullscreen={props.is_fullscreen}
       token_art={true}
     />
@@ -65,9 +81,10 @@ export function NextGenTokenArtImage(
 }
 
 export default function NextGenTokenArt(props: Readonly<Props>) {
+  const downloader = useDownloader();
+  const mode = props.mode;
   const isMobileDevice = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
-  const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
@@ -76,6 +93,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   const [showZoomControls, setShowZoomControls] = useState(false);
 
   const tokenImageRef = useRef(null);
+
+  const [canvasUrl, setCanvasUrl] = useState<string>("");
+
+  useEffect(() => {
+    setCanvasUrl("");
+  }, [mode]);
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -108,7 +131,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     };
   }, []);
 
-  function getModeStyle(m: Mode) {
+  function getModeStyle(m: NextGenTokenImageMode) {
     let s = `${styles.modeIcon}`;
     if (m === mode) {
       s += ` ${styles.modeIconSelected}`;
@@ -117,10 +140,14 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   }
 
   function getCurrentHref() {
-    if (mode === Mode.LIVE) {
+    if (mode === NextGenTokenImageMode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
     }
-    if (mode === Mode.HIGH_RES) {
+    if (canvasUrl) {
+      return canvasUrl;
+    }
+
+    if (mode === NextGenTokenImageMode.HIGH_RES) {
       if (isMobileDevice) {
         return get8KUrl(props.token.id);
       }
@@ -142,22 +169,33 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
       <>
         <Col
           xs={12}
-          sm={mode === Mode.HIGH_RES ? 4 : 6}
+          sm={
+            mode === NextGenTokenImageMode.HIGH_RES ||
+            (props.mode !== NextGenTokenImageMode.IMAGE &&
+              props.mode !== NextGenTokenImageMode.LIVE &&
+              props.mode !== NextGenTokenImageMode.HIGH_RES)
+              ? 4
+              : 6
+          }
           className={`pt-2 pb-2 d-flex gap-3 ${
             isMobileScreen ? "justify-content-center" : "justify-content-start"
           }`}>
           <button
             className={`unselectable ${styles.imageResolutionBtn} ${
-              mode === Mode.IMAGE ? styles.imageResolutionBtnSelected : ""
+              mode === NextGenTokenImageMode.IMAGE
+                ? styles.imageResolutionBtnSelected
+                : ""
             }`}
-            onClick={() => setMode(Mode.IMAGE)}>
+            onClick={() => props.setMode(NextGenTokenImageMode.IMAGE)}>
             2K
           </button>
           <button
             className={`unselectable ${styles.imageResolutionBtn} ${
-              mode === Mode.HIGH_RES ? styles.imageResolutionBtnSelected : ""
+              mode === NextGenTokenImageMode.HIGH_RES
+                ? styles.imageResolutionBtnSelected
+                : ""
             }`}
-            onClick={() => setMode(Mode.HIGH_RES)}>
+            onClick={() => props.setMode(NextGenTokenImageMode.HIGH_RES)}>
             {isMobileDevice ? "8K" : "16K"}
           </button>
           <Tippy
@@ -167,13 +205,13 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             theme="light"
             delay={100}>
             <FontAwesomeIcon
-              className={getModeStyle(Mode.LIVE)}
-              onClick={() => setMode(Mode.LIVE)}
+              className={getModeStyle(NextGenTokenImageMode.LIVE)}
+              onClick={() => props.setMode(NextGenTokenImageMode.LIVE)}
               icon="play-circle"
             />
           </Tippy>
         </Col>
-        {mode === Mode.HIGH_RES && (
+        {mode === NextGenTokenImageMode.HIGH_RES && (
           <Col
             xs={6}
             sm={4}
@@ -210,9 +248,26 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             )}
           </Col>
         )}
+        {props.mode !== NextGenTokenImageMode.IMAGE &&
+          props.mode !== NextGenTokenImageMode.LIVE &&
+          props.mode !== NextGenTokenImageMode.HIGH_RES && (
+            <Col
+              xs={12}
+              sm={4}
+              className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center">
+              Scene: {props.mode}
+            </Col>
+          )}
         <Col
-          xs={mode === Mode.HIGH_RES ? 6 : 12}
-          sm={mode === Mode.HIGH_RES ? 4 : 6}
+          xs={mode === NextGenTokenImageMode.HIGH_RES ? 6 : 12}
+          sm={
+            mode === NextGenTokenImageMode.HIGH_RES ||
+            (props.mode !== NextGenTokenImageMode.IMAGE &&
+              props.mode !== NextGenTokenImageMode.LIVE &&
+              props.mode !== NextGenTokenImageMode.HIGH_RES)
+              ? 4
+              : 6
+          }
           className={`pt-2 pb-2 d-flex gap-3 ${
             isMobileScreen ? "justify-content-center" : "justify-content-end"
           }`}>
@@ -238,6 +293,17 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               </Tippy>
             </Dropdown.Toggle>
             <Dropdown.Menu>
+              {canvasUrl && (
+                <Dropdown.Item
+                  onClick={() => {
+                    downloader.download(
+                      canvasUrl,
+                      `${props.token.name} - ${mode}.jpeg`
+                    );
+                  }}>
+                  Scene
+                </Dropdown.Item>
+              )}
               {Object.values(Resolution)
                 .filter(
                   (r) => ![Resolution["0.5K"], Resolution.Thumbnail].includes(r)
@@ -252,7 +318,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             </Dropdown.Menu>
           </Dropdown>
           <Tippy
-            content="Open in new tab"
+            content={`Open in new tab${
+              canvasUrl ? " (Not Supported for Scenes)" : ""
+            }`}
             hideOnClick={true}
             placement="bottom"
             theme="light"
@@ -260,6 +328,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             <FontAwesomeIcon
               className={styles.modeIcon}
               onClick={() => {
+                if (canvasUrl) return;
                 const href = getCurrentHref();
                 window.open(href, "_blank");
               }}
@@ -323,13 +392,15 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                     className={
                       showLightbox || showBlackbox
                         ? styles.lightBoxContent
-                        : "col pt-3"
+                        : "col pt-3 text-center"
                     }
                     ref={tokenImageRef}>
                     <NextGenTokenArtImage
                       token={props.token}
                       mode={mode}
                       is_fullscreen={isFullScreen}
+                      setCanvasUrl={setCanvasUrl}
+                      is_zoom={mode === NextGenTokenImageMode.HIGH_RES}
                       zoom_scale={zoomScale}
                       setZoomScale={setZoomScale}
                       onImageLoaded={() => {
@@ -350,7 +421,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
-      {mode === Mode.LIVE && (
+      {mode === NextGenTokenImageMode.LIVE && (
         <Row className="pt-2 font-color-h font-smaller">
           <Col>
             * Live view generates the image dynamically from scratch in your

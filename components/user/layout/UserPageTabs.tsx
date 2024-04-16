@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
+  DROPS = "DROPS",
   REP = "REP",
-
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
   STATS = "STATS",
@@ -15,11 +15,17 @@ export const USER_PAGE_TAB_META: Record<
   UserPageTabType,
   { tab: UserPageTabType; title: string; route: string }
 > = {
+  [UserPageTabType.DROPS]: {
+    tab: UserPageTabType.DROPS,
+    title: "Drops",
+    route: "",
+  },
   [UserPageTabType.REP]: {
     tab: UserPageTabType.REP,
     title: "Rep",
-    route: "",
+    route: "rep",
   },
+
   [UserPageTabType.IDENTITY]: {
     tab: UserPageTabType.IDENTITY,
     title: "Identity",
@@ -66,13 +72,15 @@ export default function UserPageTabs() {
   }, [router.query]);
 
   return (
-    <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
-      <div
-        className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-        aria-label="Tabs">
-        {Object.values(UserPageTabType).map((tabType) => (
-          <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
-        ))}
+    <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
+      <div className="tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-pb-[1px]">
+        <div
+          className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
+          aria-label="Tabs">
+          {Object.values(UserPageTabType).map((tabType) => (
+            <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
+          ))}
+        </div>
       </div>
     </div>
   );

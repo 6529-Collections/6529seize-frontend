@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ApiProfileRepRatesState,
@@ -8,13 +8,14 @@ import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
-import { UserPageRepPropsRepRates } from "../../pages/[user]";
+import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
 import { Page } from "../../helpers/Types";
 import {
   ActivityLogParams,
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { DropFull } from "../../entities/IDrop";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -28,6 +29,8 @@ export enum QueryKey {
   PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
+  PROFILE_DROPS = "PROFILE_DROPS",
+  PROFILE_AVAILABLE_DROP_REP = "PROFILE_AVAILABLE_DROP_REP",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -39,8 +42,13 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
+  COMMUNITY_DROPS = "COMMUNITY_DROPS",
   CURATION_FILTERS = "CURATION_FILTERS",
   CURATION_FILTER = "CURATION_FILTER",
+  RESERVOIR_NFT = "RESERVOIR_NFT",
+  // TODO make sure to invalidate it when something related changes
+  DROP = "DROP",
+  DROP_DISCUSSION = "DROP_DISCUSSION",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -135,6 +143,15 @@ type ReactQueryWrapperContextType = {
   }: {
     readonly filterId: string;
   }) => void;
+  onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
+  onDropChange: (params: {
+    readonly drop: DropFull;
+    readonly giverHandle: string | null;
+  }) => void;
+  onDropDiscussionChange: (params: {
+    readonly dropId: number;
+    readonly dropAuthorHandle: string;
+  }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -151,6 +168,9 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     onCurationFilterRemoved: () => {},
     onCurationFilterChanged: () => {},
+    onDropCreate: () => {},
+    onDropChange: () => {},
+    onDropDiscussionChange: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -539,23 +559,157 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onDropCreate = ({
+    profile,
+  }: {
+    profile: IProfileAndConsolidations;
+  }) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_DROPS,
+      values: handles.map((handle) => ({ handleOrWallet: handle })),
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMMUNITY_DROPS],
+    });
+  };
+
+  const dropChangeMutation = ({
+    oldData,
+    drop,
+  }: {
+    oldData:
+      | {
+          pages: DropFull[][];
+        }
+      | undefined;
+    drop: DropFull;
+  }) => {
+    if (!oldData) {
+      return oldData;
+    }
+    return {
+      ...oldData,
+      pages: oldData.pages.map((page) => {
+        return page.map((d) => {
+          if (d.id === drop.id) {
+            return drop;
+          }
+          return d;
+        });
+      }),
+    };
+  };
+
+  const onDropChange = ({
+    drop,
+    giverHandle,
+  }: {
+    readonly drop: DropFull;
+    readonly giverHandle: string | null;
+  }) => {
+    queryClient.setQueryData(
+      [
+        QueryKey.PROFILE_DROPS,
+        {
+          handleOrWallet: drop.author.handle.toLowerCase(),
+          inputProfile: giverHandle,
+        },
+      ],
+      (
+        oldData:
+          | {
+              pages: DropFull[][];
+            }
+          | undefined
+      ) => dropChangeMutation({ oldData, drop })
+    );
+    queryClient.setQueriesData(
+      {
+        queryKey: [QueryKey.COMMUNITY_DROPS],
+      },
+      (
+        oldData:
+          | {
+              pages: DropFull[][];
+            }
+          | undefined
+      ) => dropChangeMutation({ oldData, drop })
+    );
+    if (giverHandle) {
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_REP, giverHandle],
+      });
+    }
+    invalidateQueries({
+      key: QueryKey.DROP_DISCUSSION,
+      values: [{ drop_id: drop.id }],
+    });
+  };
+
+  const onDropDiscussionChange = ({
+    dropId,
+    dropAuthorHandle,
+  }: {
+    readonly dropId: number;
+    dropAuthorHandle: string;
+  }) => {
+    invalidateQueries({
+      key: QueryKey.DROP_DISCUSSION,
+      values: [{ drop_id: dropId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMMUNITY_DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [
+        QueryKey.PROFILE_DROPS,
+        {
+          handleOrWallet: dropAuthorHandle.toLowerCase(),
+        },
+      ],
+    });
+  };
+
+  const value = useMemo(
+    () => ({
+      setProfile,
+      onProfileCICModify,
+      onProfileRepModify,
+      onProfileEdit,
+      onProfileStatementAdd,
+      onProfileStatementRemove,
+      initProfileRepPage,
+      initProfileIdentityPage,
+      initLandingPage,
+      initCommunityActivityPage,
+      onCurationFilterRemoved,
+      onCurationFilterChanged,
+      onDropCreate,
+      onDropChange,
+      onDropDiscussionChange,
+    }),
+    [
+      setProfile,
+      onProfileCICModify,
+      onProfileRepModify,
+      onProfileEdit,
+      onProfileStatementAdd,
+      onProfileStatementRemove,
+      initProfileRepPage,
+      initProfileIdentityPage,
+      initLandingPage,
+      initCommunityActivityPage,
+      onCurationFilterRemoved,
+      onCurationFilterChanged,
+      onDropCreate,
+      onDropChange,
+      onDropDiscussionChange,
+    ]
+  );
+
   return (
-    <ReactQueryWrapperContext.Provider
-      value={{
-        setProfile,
-        onProfileCICModify,
-        onProfileRepModify,
-        onProfileEdit,
-        onProfileStatementAdd,
-        onProfileStatementRemove,
-        initProfileRepPage,
-        initProfileIdentityPage,
-        initLandingPage,
-        initCommunityActivityPage,
-        onCurationFilterRemoved,
-        onCurationFilterChanged,
-      }}
-    >
+    <ReactQueryWrapperContext.Provider value={value}>
       {children}
     </ReactQueryWrapperContext.Provider>
   );

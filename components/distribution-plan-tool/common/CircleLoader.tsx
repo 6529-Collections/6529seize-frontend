@@ -1,6 +1,9 @@
 export enum CircleLoaderSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
+  LARGE = "LARGE",
+  XLARGE = "XLARGE",
+  XXLARGE = "XXLARGE",
 }
 
 export default function CircleLoader({
@@ -11,6 +14,9 @@ export default function CircleLoader({
   const classes: Record<CircleLoaderSize, string> = {
     [CircleLoaderSize.SMALL]: "tw-w-4 tw-h-4",
     [CircleLoaderSize.MEDIUM]: "tw-w-5 tw-h-5",
+    [CircleLoaderSize.LARGE]: "tw-w-6 tw-h-6",
+    [CircleLoaderSize.XLARGE]: "tw-w-8 tw-h-8",
+    [CircleLoaderSize.XXLARGE]: "tw-w-10 tw-h-10",
   };
 
   return (

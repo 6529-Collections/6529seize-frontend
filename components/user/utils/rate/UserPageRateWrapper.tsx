@@ -9,6 +9,7 @@ import { amIUser } from "../../../../helpers/Helpers";
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.CIC]: "CIC rate",
   [RateMatter.REP]: "give Rep for",
+  [RateMatter.DROP_REP]: "give Drop Rep for",
 };
 
 export default function UserPageRateWrapper({

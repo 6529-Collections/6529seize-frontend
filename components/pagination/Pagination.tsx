@@ -1,6 +1,7 @@
 import styles from "./Pagination.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
+import { numberWithCommas } from "../../helpers/Helpers";
 
 interface Props {
   page: number;
@@ -81,11 +82,13 @@ export default function Pagination(props: Readonly<Props>) {
             value={inputPage}
           />
           {" of "}
-          <span
+          <button
             onClick={goToLast}
-            className={isLastPage() ? styles.goToLast : ""}>
-            {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
-          </span>{" "}
+            className={`btn-link decoration-hover-underline ${
+              isLastPage() ? styles.goToLast : ""
+            }`}>
+            {numberWithCommas(getLastPage())}
+          </button>{" "}
           <FontAwesomeIcon
             icon="caret-right"
             onClick={pageNext}

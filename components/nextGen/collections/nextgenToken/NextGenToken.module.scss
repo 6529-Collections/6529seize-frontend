@@ -103,6 +103,50 @@
   background-color: $nextgen-grey;
 }
 
+.sceneBtn {
+  background-color: transparent;
+  border: 2px solid white !important;
+
+  &:hover {
+    background-color: white;
+    color: black;
+  }
+}
+
+.sceneBtnSelected {
+  background-color: white;
+  color: black;
+}
+
+.customRenderDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 10px;
+  margin-right: 20px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    @media only screen and (max-width: 800px) {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+.customRenderInput {
+  color: black;
+  width: fit-content;
+}
+
 .imageResolutionBtn {
   font-weight: bolder;
   font-size: smaller !important;

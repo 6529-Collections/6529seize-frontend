@@ -4,11 +4,14 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import SearchProfileModalItem from "./SearchProfileModalItem";
+import SearchProfileModalItem, {
+  SearchProfileModalItemType,
+} from "./SearchProfileModalItem";
 import { useRouter } from "next/router";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
+import { MemeLite } from "../../user/settings/UserSettingsImgSelectMeme";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -65,9 +68,29 @@ export default function SearchProfileModal({
     enabled: debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
+  const { isFetching: isFetchingMemes, data: memes } = useQuery({
+    queryKey: [QueryKey.MEMES_LITE, debouncedValue],
+    queryFn: async () => {
+      const memesResponse = await commonApiFetch<{
+        count: number;
+        data: MemeLite[];
+        next: string | null;
+        page: number;
+      }>({
+        endpoint: "memes_lite",
+        params: {
+          search: debouncedValue,
+          page_size: "5",
+        },
+      });
+      return memesResponse.data ?? [];
+    },
+    enabled: debouncedValue.length >= MIN_SEARCH_LENGTH,
+  });
+
   const onHover = (index: number, state: boolean) => {
     if (!state) return;
-    setSelectedProfileIndex(index);
+    setSelectedItemIndex(index);
   };
 
   const goToProfile = async (profile: CommunityMemberMinimal) => {
@@ -81,18 +104,34 @@ export default function SearchProfileModal({
     onClose();
   };
 
-  const [selectedProfileIndex, setSelectedProfileIndex] = useState<number>(0);
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
+
   useKeyPressEvent("ArrowDown", () =>
-    setSelectedProfileIndex((i) =>
-      profiles && profiles.length >= i + 2 ? i + 1 : i
-    )
+    setSelectedItemIndex((i) => {
+      const itemCount = (profiles?.length ?? 0) + (memes?.length ?? 0);
+      alert(itemCount >= i + 2 ? i + 1 : i);
+      return itemCount >= i + 2 ? i + 1 : i;
+    })
   );
+
   useKeyPressEvent("ArrowUp", () =>
-    setSelectedProfileIndex((i) => (i > 0 ? i - 1 : i))
+    setSelectedItemIndex((i) => (i > 0 ? i - 1 : i))
   );
+
   useKeyPressEvent("Enter", () => {
+    let index = selectedItemIndex;
+    if (memes && memes.length > 0 && memes.length > index) {
+      const meme = memes[selectedItemIndex];
+      if (!meme) {
+        return;
+      }
+      const path = `/the-memes/${meme.id}`;
+      router.push(path);
+      onClose();
+    }
+    index -= memes?.length ?? 0;
     if (profiles && profiles.length > 0) {
-      const profile = profiles[selectedProfileIndex];
+      const profile = profiles[index];
       if (!profile) {
         return;
       }
@@ -103,17 +142,20 @@ export default function SearchProfileModal({
   const [state, setState] = useState<STATE>(STATE.INITIAL);
 
   useEffect(() => {
-    setSelectedProfileIndex(0);
-    if (isFetching) {
+    setSelectedItemIndex(0);
+    if (isFetching || isFetchingMemes) {
       setState(STATE.LOADING);
-    } else if (profiles?.length === 0) {
+    } else if (profiles?.length === 0 && memes?.length === 0) {
       setState(STATE.NO_RESULTS);
-    } else if (profiles && profiles?.length > 0) {
+    } else if (
+      (profiles && profiles?.length > 0) ||
+      (memes && memes?.length > 0)
+    ) {
       setState(STATE.SUCCESS);
     } else {
       setState(STATE.INITIAL);
     }
-  }, [isFetching, profiles]);
+  }, [isFetching, isFetchingMemes, profiles, memes]);
 
   const activeElementRef = useRef<HTMLDivElement>(null);
 
@@ -125,7 +167,28 @@ export default function SearchProfileModal({
         inline: "start",
       });
     }
-  }, [selectedProfileIndex]);
+  }, [selectedItemIndex]);
+
+  const renderItems = (
+    items: SearchProfileModalItemType[],
+    baseIndex: number
+  ) =>
+    items.map((item, index) => {
+      const currentIndex = baseIndex + index;
+      return (
+        <div
+          ref={currentIndex === selectedItemIndex ? activeElementRef : null}
+          key={getRandomObjectId()}>
+          <SearchProfileModalItem
+            content={item}
+            searchValue={debouncedValue}
+            isSelected={currentIndex === selectedItemIndex}
+            onHover={(state) => onHover(currentIndex, state)}
+            onClose={onClose}
+          />
+        </div>
+      );
+    });
 
   return (
     <div className="tw-cursor-default tw-relative tw-z-10">
@@ -134,16 +197,14 @@ export default function SearchProfileModal({
         <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden"
-          >
+            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden">
             <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4">
               <div className="tw-relative">
                 <svg
                   className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
-                  aria-hidden="true"
-                >
+                  aria-hidden="true">
                   <path
                     fillRule="evenodd"
                     d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
@@ -165,20 +226,8 @@ export default function SearchProfileModal({
 
             {state === STATE.SUCCESS && (
               <div className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-text-sm tw-text-iron-200">
-                {profiles?.map((profile, i) => (
-                  <div
-                    ref={i === selectedProfileIndex ? activeElementRef : null}
-                    key={getRandomObjectId()}
-                  >
-                    <SearchProfileModalItem
-                      profile={profile}
-                      searchValue={debouncedValue}
-                      isSelected={i === selectedProfileIndex}
-                      onHover={(state) => onHover(i, state)}
-                      onClose={onClose}
-                    />
-                  </div>
-                ))}
+                {memes && renderItems(memes, 0)}
+                {profiles && renderItems(profiles, memes?.length ?? 0)}
               </div>
             )}
             {state === STATE.LOADING && (

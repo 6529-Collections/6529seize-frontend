@@ -1,0 +1,44 @@
+import { ButtonHTMLAttributes } from "react";
+
+export enum PrimaryButtonSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+}
+
+export default function PrimaryButton({
+  children,
+  onClick,
+  disabled = false,
+  type = "button",
+  size = PrimaryButtonSize.MEDIUM,
+}: {
+  readonly type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
+  readonly disabled?: boolean;
+  readonly children: React.ReactNode;
+  readonly size?: PrimaryButtonSize;
+  readonly onClick?: () => void;
+}) {
+  const BUTTON_CLASSES: Record<PrimaryButtonSize, string> = {
+    [PrimaryButtonSize.SMALL]: "tw-px-3",
+    [PrimaryButtonSize.MEDIUM]: "tw-px-4",
+  };
+
+  const DISABLED_CLASSES = "tw-opacity-50 tw-text-iron-200";
+  const ENABLED_CLASSES =
+    "tw-text-white  hover:tw-ring-primary-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset hover:tw-bg-primary-600";
+
+  const classes = `${BUTTON_CLASSES[size]} ${
+    disabled ? DISABLED_CLASSES : ENABLED_CLASSES
+  }`;
+
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onClick={onClick}
+      className={`${classes} tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
+    >
+      {children}
+    </button>
+  );
+}
