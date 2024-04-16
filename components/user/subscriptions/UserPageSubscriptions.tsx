@@ -180,8 +180,15 @@ export default function UserPageSubscriptions(
     return (
       <Container className="no-padding pb-5">
         <Row>
-          <Col className="d-flex align-items-center justify-content-between">
-            <h4>Subscribe</h4>
+          <Col className="d-flex align-items-center gap-2">
+            <h4 className="mb-0">Subscribe</h4>
+            <span>
+              <a
+                href="/about/subscriptions"
+                className="font-smaller font-color-silver decoration-hover-underline">
+                Learn More
+              </a>
+            </span>
           </Col>
         </Row>
         <Row>
@@ -199,8 +206,15 @@ export default function UserPageSubscriptions(
         <Col sm={12} md={6}>
           <Container className="no-padding">
             <Row>
-              <Col className="d-flex align-items-center justify-content-between">
-                <h4>Subscribe</h4>
+              <Col className="d-flex align-items-center gap-2">
+                <h4 className="mb-0">Subscribe</h4>
+                <span>
+                  <a
+                    href="/about/subscriptions"
+                    className="font-smaller font-color-silver decoration-hover-underline">
+                    Learn More
+                  </a>
+                </span>
               </Col>
             </Row>
             <Row>

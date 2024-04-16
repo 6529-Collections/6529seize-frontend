@@ -24,6 +24,7 @@ import AboutDataDecentral from "../../components/about/AboutDataDecentral";
 import AboutGDRC1 from "../../components/about/AboutGDRC1";
 import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
 import AboutHTML from "../../components/about/AboutHTML";
+import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -44,6 +45,7 @@ export enum AboutSection {
   GDRC1 = "gdrc1",
   NFT_DELEGATION = "nft-delegation",
   ENS = "ens",
+  SUBSCRIPTIONS = "subscriptions",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -132,6 +134,8 @@ export default function About(props: any) {
         return <AboutNFTDelegation />;
       case AboutSection.ENS:
         return <AboutHTML title="ENS" html={pageProps.ensText} />;
+      case AboutSection.SUBSCRIPTIONS:
+        return <AboutSubscriptions />;
     }
   }
 
@@ -179,6 +183,19 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           The Memes
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.SUBSCRIPTIONS)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.SUBSCRIPTIONS
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Subscriptions
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -421,6 +438,19 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           The Memes
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.SUBSCRIPTIONS)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.SUBSCRIPTIONS
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Subscriptions
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
