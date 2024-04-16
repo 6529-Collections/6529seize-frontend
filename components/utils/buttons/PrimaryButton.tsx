@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes } from "react";
+import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 
 export enum PrimaryButtonSize {
   SMALL = "SMALL",
@@ -11,12 +12,14 @@ export default function PrimaryButton({
   disabled = false,
   type = "button",
   size = PrimaryButtonSize.MEDIUM,
+  loading = false,
 }: {
   readonly type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
   readonly disabled?: boolean;
   readonly children: React.ReactNode;
   readonly size?: PrimaryButtonSize;
   readonly onClick?: () => void;
+  readonly loading?: boolean;
 }) {
   const BUTTON_CLASSES: Record<PrimaryButtonSize, string> = {
     [PrimaryButtonSize.SMALL]: "tw-px-3",
@@ -34,11 +37,16 @@ export default function PrimaryButton({
   return (
     <button
       type={type}
-      disabled={disabled}
+      disabled={disabled || loading}
       onClick={onClick}
-      className={`${classes} tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
+      className={`${classes} tw-relative tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
     >
-      {children}
+      <div className={loading ? "tw-opacity-0" : ""}>{children}</div>
+      {loading && (
+        <div className="tw-absolute">
+          <CircleLoader />
+        </div>
+      )}
     </button>
   );
 }

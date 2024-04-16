@@ -17,11 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-
-const CAN_SEE_DROPS_CONFIG = {
-  minLevel: 1,
-  minTDH: 1,
-};
+import { getCanProfileSeeDrops } from "../../helpers/Helpers";
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
@@ -83,10 +79,7 @@ export default function Auth({
       setCanSeeDrops(false);
       return;
     }
-    setCanSeeDrops(
-      connectedProfile.level >= CAN_SEE_DROPS_CONFIG.minLevel &&
-        connectedProfile.consolidation.tdh >= CAN_SEE_DROPS_CONFIG.minTDH
-    );
+    setCanSeeDrops(getCanProfileSeeDrops({ profile: connectedProfile }));
   }, [connectedProfile]);
 
   const getNonce = async ({

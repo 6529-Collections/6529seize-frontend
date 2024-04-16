@@ -13,6 +13,7 @@ import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { CreateDropType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -27,6 +28,7 @@ export default function CreateDropFullMobile({
   file,
   disabled,
   type,
+  loading,
   onEditorState,
   onMetadataEdit,
   onMetadataRemove,
@@ -44,6 +46,7 @@ export default function CreateDropFullMobile({
   readonly file: File | null;
   readonly disabled: boolean;
   readonly type: CreateDropType;
+  readonly loading: boolean;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -143,15 +146,22 @@ export default function CreateDropFullMobile({
           <div className="tw-flex tw-gap-x-3">
             <button
               type="button"
-              disabled={disabled}
+              disabled={disabled || loading}
               onClick={onDrop}
               className={`${
                 disabled
                   ? "tw-opacity-50 tw-text-iron-200"
                   : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
-              } tw-w-full tw-block tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
+              } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
             >
-              {getSubmitText()}
+              <div className={loading ? "tw-opacity-0" : ""}>
+                {getSubmitText()}
+              </div>
+              {loading && (
+                <div className="tw-absolute">
+                  <CircleLoader />
+                </div>
+              )}
             </button>
           </div>
         </div>

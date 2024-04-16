@@ -17,8 +17,8 @@ const ACTION: Record<ProfileActivityLogType, string> = {
 };
 
 const TO_FROM: Record<ProfileActivityLogType, string> = {
-  [ProfileActivityLogType.ADDED]: "to",
-  [ProfileActivityLogType.REMOVED]: "from",
+  [ProfileActivityLogType.ADDED]: "to Drop",
+  [ProfileActivityLogType.REMOVED]: "from Drop",
 };
 
 export default function ProfileActivityLogDropRepEdit({
@@ -29,7 +29,6 @@ export default function ProfileActivityLogDropRepEdit({
   const isSystemAdjustment =
     log.contents.change_reason ===
     ProfileActivityLogRatingEditContentChangeReason.LOST_TDH;
-
 
   const getRatingType = (): ProfileActivityLogType =>
     log.contents.new_rating < log.contents.old_rating
@@ -72,9 +71,9 @@ export default function ProfileActivityLogDropRepEdit({
         (total {newRatingStr})
       </span>
       <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
-        {log.contents.rating_category}
+        Votes
       </span>
-      <ProfileActivityLogItemAction action="to Drop" />
+      <ProfileActivityLogItemAction action={TO_FROM[ratingType]} />
       <Link href={`/brain/${log.target_id}`} className="tw-leading-4 tw-p-0">
         <span className="tw-cursor-pointer tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
           #{log.target_id}
