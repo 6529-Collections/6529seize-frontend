@@ -64,7 +64,7 @@ export default function DropListItemDiscussionItems({
       case "DROP_COMMENT":
         return "No comments to display";
       case "DROP_REP_EDIT":
-        return "No reputation edits to display";
+        return "No votes to display";
       default:
         return "No logs to display";
     }

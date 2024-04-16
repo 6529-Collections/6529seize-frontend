@@ -29,25 +29,27 @@ export default function UserPageDropsWrapper({
     initialData: initialProfile,
   });
 
-  const [loaded, setLoaded] = useState(false);
+  // TODO
+  const [loaded, setLoaded] = useState(true);
 
-  useEffect(() => {
-    console.log(address);
-    if (!address) {
-      router.push(`/${user}/rep`);
-    }
-    if (!connectedProfile) {
-      return;
-    }
-    if (
-      !getCanProfileSeeDrops({
-        profile: connectedProfile,
-      })
-    ) {
-      router.push(`/${user}/rep`);
-    }
-    setLoaded(true);
-  }, [canSeeDrops, address, connectedProfile]);
+  // TODO
+  // useEffect(() => {
+
+  //   if (!address) {
+  //     router.push(`/${user}/rep`);
+  //   }
+  //   if (!connectedProfile) {
+  //     return;
+  //   }
+  //   if (
+  //     !getCanProfileSeeDrops({
+  //       profile: connectedProfile,
+  //     })
+  //   ) {
+  //     router.push(`/${user}/rep`);
+  //   }
+  //   setLoaded(true);
+  // }, [canSeeDrops, address, connectedProfile]);
 
   if (!profile.profile) {
     return <UserPageNoProfile profile={profile} />;

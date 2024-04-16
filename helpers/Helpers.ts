@@ -694,19 +694,21 @@ const CAN_SEE_DROPS_CONFIG = {
   minTDH: 30000,
 };
 
+// TODO
 export const getCanProfileSeeDrops = ({
   profile,
 }: {
   profile: IProfileAndConsolidations | null;
 }): boolean => {
-  if (!profile?.profile?.handle) {
-    return false;
-  }
-  return (
-    (profile.level >= CAN_SEE_DROPS_CONFIG.minLevel &&
-      profile.consolidation.tdh >= CAN_SEE_DROPS_CONFIG.minTDH) ||
-    ["simo", "ragne", "gelato2"].includes(
-      profile.profile?.handle.toLocaleLowerCase()
-    )
-  );
+  return true;
+  // if (!profile?.profile?.handle) {
+  //   return false;
+  // }
+  // return (
+  //   (profile.level >= CAN_SEE_DROPS_CONFIG.minLevel &&
+  //     profile.consolidation.tdh >= CAN_SEE_DROPS_CONFIG.minTDH) ||
+  //   ["simo", "ragne", "gelato2"].includes(
+  //     profile.profile?.handle.toLocaleLowerCase()
+  //   )
+  // );
 };
