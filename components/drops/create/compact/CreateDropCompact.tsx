@@ -33,6 +33,7 @@ export default function CreateDropCompact({
   title,
   metadata,
   disabled,
+  loading,
   type,
   onViewChange,
   onMetadataRemove,
@@ -49,6 +50,7 @@ export default function CreateDropCompact({
   readonly file: File | null;
   readonly metadata: DropMetadata[];
   readonly disabled: boolean;
+  readonly loading: boolean;
   readonly type: CreateDropType;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -106,6 +108,7 @@ export default function CreateDropCompact({
             <PrimaryButton
               onClick={onDrop}
               disabled={disabled}
+              loading={loading}
               size={
                 screenType === CreateDropScreenType.MOBILE
                   ? PrimaryButtonSize.SMALL

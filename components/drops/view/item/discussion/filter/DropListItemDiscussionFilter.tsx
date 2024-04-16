@@ -30,7 +30,7 @@ export default function DropListItemDiscussionFilter({
         setFilter={setFilter}
         activeFilter={activeFilter}
       >
-        Rep
+        Votes
       </DropListItemDiscussionFilterItem>
     </nav>
   );

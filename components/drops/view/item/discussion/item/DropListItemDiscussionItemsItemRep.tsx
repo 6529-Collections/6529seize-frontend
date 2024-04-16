@@ -54,10 +54,10 @@ export default function DropListItemDiscussionItemsItemRep({
       <span
         className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
       >
-        (total {item.contents.new_rating})
+        (total {formatNumberWithCommas(item.contents.new_rating)})
       </span>
       <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
-        Rep
+        Votes
       </span>
     </div>
   );

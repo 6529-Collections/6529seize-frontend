@@ -5,8 +5,10 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageNoProfile from "../utils/no-profile/UserPageNoProfile";
 import UserPageDrops from "./UserPageDrops";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
+import { useAccount } from "wagmi";
+import { getCanProfileSeeDrops } from "../../../helpers/Helpers";
 
 export default function UserPageDropsWrapper({
   profile: initialProfile,
@@ -15,8 +17,8 @@ export default function UserPageDropsWrapper({
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
-  const { canSeeDrops } = useContext(AuthContext);
-
+  const { canSeeDrops, connectedProfile } = useContext(AuthContext);
+  const { address } = useAccount();
   const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, user.toLowerCase()],
     queryFn: async () =>
@@ -27,14 +29,32 @@ export default function UserPageDropsWrapper({
     initialData: initialProfile,
   });
 
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
-    if (!canSeeDrops) {
-      router.push(`${user}/rep`);
+    console.log(address);
+    if (!address) {
+      router.push(`/${user}/rep`);
     }
-  }, [canSeeDrops]);
+    if (!connectedProfile) {
+      return;
+    }
+    if (
+      !getCanProfileSeeDrops({
+        profile: connectedProfile,
+      })
+    ) {
+      router.push(`/${user}/rep`);
+    }
+    setLoaded(true);
+  }, [canSeeDrops, address, connectedProfile]);
 
   if (!profile.profile) {
     return <UserPageNoProfile profile={profile} />;
+  }
+
+  if (!loaded) {
+    return <></>;
   }
 
   return <UserPageDrops profile={profile} />;

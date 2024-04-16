@@ -228,7 +228,7 @@ export default function DropListItemRepGiveClap({
     switch (connectionStatus) {
       case ProfileConnectedStatus.HAVE_PROFILE:
         if (!availableRep) {
-          return "You don't have any available rep";
+          return "You don't have any available credits to vote";
         }
         return null;
       case ProfileConnectedStatus.NOT_CONNECTED:

@@ -43,7 +43,7 @@ export default function DropListItemRepGiveSubmit({
       }),
     onSuccess: (response: DropFull) => {
       setToast({
-        message: "Rep given.",
+        message: "Voted successfully.",
         type: "success",
       });
       onDropChange({
@@ -66,14 +66,14 @@ export default function DropListItemRepGiveSubmit({
   const onRepSubmit = async () => {
     if (connectionStatus === ProfileConnectedStatus.NOT_CONNECTED) {
       setToast({
-        message: "Connect your wallet to give rep",
+        message: "Connect your wallet to vote",
         type: "warning",
       });
       return;
     }
     if (connectionStatus === ProfileConnectedStatus.NO_PROFILE) {
       setToast({
-        message: "Create a profile to give rep",
+        message: "Create a profile to vote",
         type: "warning",
       });
       return;

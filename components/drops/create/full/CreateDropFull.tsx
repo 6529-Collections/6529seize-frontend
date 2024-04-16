@@ -21,6 +21,7 @@ export default function CreateDropFull({
   metadata,
   file,
   disabled,
+  loading,
   type,
   onTitle,
   onMetadataEdit,
@@ -39,6 +40,7 @@ export default function CreateDropFull({
   readonly editorState: EditorState | null;
   readonly file: File | null;
   readonly disabled: boolean;
+  readonly loading: boolean;
   readonly type: CreateDropType;
   readonly onTitle: (newV: string | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
@@ -60,6 +62,7 @@ export default function CreateDropFull({
         file={file}
         disabled={disabled}
         type={type}
+        loading={loading}
         onTitle={onTitle}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}
@@ -80,6 +83,7 @@ export default function CreateDropFull({
         file={file}
         disabled={disabled}
         type={type}
+        loading={loading}
         onEditorState={onEditorState}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}
