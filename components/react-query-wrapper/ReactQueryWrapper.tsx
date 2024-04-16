@@ -46,7 +46,6 @@ export enum QueryKey {
   CURATION_FILTERS = "CURATION_FILTERS",
   CURATION_FILTER = "CURATION_FILTER",
   RESERVOIR_NFT = "RESERVOIR_NFT",
-  // TODO make sure to invalidate it when something related changes
   DROP = "DROP",
   DROP_DISCUSSION = "DROP_DISCUSSION",
 }

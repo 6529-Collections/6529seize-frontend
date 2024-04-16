@@ -1,12 +1,9 @@
-import { useRouter } from "next/router";
 import {
   ProfileActivityLogRatingEditContentChangeReason,
   type ProfileActivityLogDropRepEdit,
 } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { UserPageTabType } from "../../../user/layout/UserPageTabs";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import CommonProfileLink from "../../../user/utils/CommonProfileLink";
 import Link from "next/link";
 
 enum ProfileActivityLogType {
@@ -33,7 +30,6 @@ export default function ProfileActivityLogDropRepEdit({
     log.contents.change_reason ===
     ProfileActivityLogRatingEditContentChangeReason.LOST_TDH;
 
-  const router = useRouter();
 
   const getRatingType = (): ProfileActivityLogType =>
     log.contents.new_rating < log.contents.old_rating

@@ -5,11 +5,13 @@ import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import ProfileRatersTableWrapper, {
   ProfileRatersParams,
 } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 
 export default function UserPageIdentity({
   profile,
   initialCICReceivedParams,
   initialCICGivenParams,
+  initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly initialCICReceivedParams: ProfileRatersParams;
@@ -27,10 +29,9 @@ export default function UserPageIdentity({
       </div>
 
       <div className="tw-mt-8 lg:tw-mt-10">
-        {/* TODO */}
-        {/* <UserPageIdentityActivityLog
+        <UserPageIdentityActivityLog
           initialActivityLogParams={initialActivityLogParams}
-        /> */}
+        />
       </div>
     </div>
   );
