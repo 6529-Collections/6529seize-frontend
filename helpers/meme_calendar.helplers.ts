@@ -14,7 +14,7 @@ interface YearCalendar {
 }
 
 const CALENDAR_2022: YearCalendar = {
-  year: 2023,
+  year: 2022,
   title: "Year 0 GENESIS",
   blocks: [
     {
