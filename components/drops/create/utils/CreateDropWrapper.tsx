@@ -33,11 +33,13 @@ export default function CreateDropWrapper({
   profile,
   quotedDropId,
   type,
+  loading,
   onSubmitDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly quotedDropId: number | null;
   readonly type: CreateDropType;
+  readonly loading: boolean;
   readonly onSubmitDrop: (dropRequest: DropRequest) => void;
 }) {
   const breakpoint = useBreakpoint();
@@ -144,6 +146,7 @@ export default function CreateDropWrapper({
         title={title}
         metadata={metadata}
         disabled={!canSubmit}
+        loading={loading}
         type={type}
         onViewChange={setViewType}
         onMetadataRemove={onMetadataRemove}
@@ -163,6 +166,7 @@ export default function CreateDropWrapper({
         editorState={editorState}
         file={file}
         disabled={!canSubmit}
+        loading={loading}
         type={type}
         onTitle={setTitle}
         onMetadataEdit={onMetadataEdit}

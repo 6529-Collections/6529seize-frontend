@@ -36,8 +36,8 @@ export default function DropListItemRepGiveChangeButton({
   };
 
   const ariaLabels: Record<RepChangeType, string> = {
-    [RepChangeType.INCREASE]: "Choose positive rep",
-    [RepChangeType.DECREASE]: "Choose negative rep",
+    [RepChangeType.INCREASE]: "Choose positive votes",
+    [RepChangeType.DECREASE]: "Choose negative votes",
   };
 
   const onMouseDown = () => {

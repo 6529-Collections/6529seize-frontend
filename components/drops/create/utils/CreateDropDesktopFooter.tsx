@@ -8,12 +8,14 @@ export default function CreateDropDesktopFooter({
   file,
   disabled,
   type,
+  loading,
   onFileChange,
   onDrop,
 }: {
   readonly file: File | null;
   readonly disabled: boolean;
   readonly type: CreateDropType;
+  readonly loading: boolean;
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
 }) {
@@ -32,8 +34,8 @@ export default function CreateDropDesktopFooter({
     <div>
       <CreateDropSelectFile onFileChange={onFileChange} file={file} />
       <div className="tw-mt-4 tw-gap-x-3 tw-flex tw-justify-end">
-        <CreateDropChallengeAcceptButton />
-        <PrimaryButton onClick={onDrop} disabled={disabled}>
+        {/* <CreateDropChallengeAcceptButton /> */}
+        <PrimaryButton onClick={onDrop} disabled={disabled} loading={loading}>
           {getText()}
         </PrimaryButton>
       </div>

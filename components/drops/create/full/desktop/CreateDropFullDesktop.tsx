@@ -27,6 +27,7 @@ export default function CreateDropFullDesktop({
   file,
   disabled,
   type,
+  loading,
   onViewChange,
   onMetadataEdit,
   onMetadataRemove,
@@ -43,7 +44,8 @@ export default function CreateDropFullDesktop({
   readonly metadata: DropMetadata[];
   readonly file: File | null;
   readonly disabled: boolean;
-  readonly type: CreateDropType;
+    readonly type: CreateDropType;
+  readonly loading: boolean;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (data_key: string) => void;
@@ -165,6 +167,7 @@ export default function CreateDropFullDesktop({
             file={file}
             disabled={disabled}
             type={type}
+            loading={loading}
             onFileChange={onFileChange}
             onDrop={onDrop}
           />
