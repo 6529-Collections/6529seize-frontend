@@ -49,7 +49,6 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsGeneralCICStatementIcon />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogsNFTAccountStatementIcon />;
-    // TODO
     case ProfileActivityLogType.DROP_REP_EDIT:
       return <ProfileActivityLogsRepClapIcon />;
     case ProfileActivityLogType.DROP_COMMENT:

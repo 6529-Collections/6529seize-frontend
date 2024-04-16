@@ -6,6 +6,8 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
+import ProfileActivityLogDropCommented from "./items/ProfileActivityLogDropCommented";
+import ProfileActivityLogDropCreated from "./items/ProfileActivityLogDropCreated";
 import ProfileActivityLogDropRepEdit from "./items/ProfileActivityLogDropRepEdit";
 import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGeneralStatement";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
@@ -53,11 +55,9 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.DROP_REP_EDIT:
       return <ProfileActivityLogDropRepEdit log={log} />;
     case ProfileActivityLogType.DROP_COMMENT:
-      // TODO: Implement
-      return <div>Drop comment (TODO)</div>;
+      return <ProfileActivityLogDropCommented log={log} />;
     case ProfileActivityLogType.DROP_CREATED:
-      // TODO: Implement
-      return <div>Drop created (TODO)</div>;
+      return <ProfileActivityLogDropCreated log={log} />;
     default:
       console.log("logType", logType);
       assertUnreachable(logType);

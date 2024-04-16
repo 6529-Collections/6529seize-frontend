@@ -134,7 +134,6 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
   [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "About",
-  // TODO: Implement these
   [ProfileActivityLogType.DROP_COMMENT]: "Drop Comment",
   [ProfileActivityLogType.DROP_REP_EDIT]: "Drop Rep",
   [ProfileActivityLogType.DROP_CREATED]: "Drop Created",
@@ -302,8 +301,6 @@ export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
     readonly drop_id: string;
   };
 }
-
-
 
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
