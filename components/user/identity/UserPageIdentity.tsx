@@ -1,7 +1,6 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
-import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import ProfileRatersTableWrapper, {
   ProfileRatersParams,
@@ -11,7 +10,6 @@ export default function UserPageIdentity({
   profile,
   initialCICReceivedParams,
   initialCICGivenParams,
-  initialActivityLogParams,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly initialCICReceivedParams: ProfileRatersParams;
