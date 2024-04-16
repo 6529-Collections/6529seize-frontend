@@ -19,10 +19,11 @@ const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.REMOVED]: "reduced",
 };
 
-const LOG_MATTER_STR: Record<RateMatter, string> = {
+type RateMatters = RateMatter.REP | RateMatter.CIC;
+
+const LOG_MATTER_STR: Record<RateMatters, string> = {
   [RateMatter.REP]: "Rep",
   [RateMatter.CIC]: "CIC",
-  [RateMatter.DROP_REP]: "Drop Rep",
 };
 
 const TO_FROM: Record<ProfileActivityLogRateType, string> = {
