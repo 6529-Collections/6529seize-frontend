@@ -18,6 +18,11 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
 
+const CAN_SEE_DROPS_CONFIG = {
+  minLevel: 1,
+  minTDH: 1,
+};
+
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
   readonly connectionStatus: ProfileConnectedStatus;
@@ -79,10 +84,8 @@ export default function Auth({
       return;
     }
     setCanSeeDrops(
-      (connectedProfile.level >= 16 &&
-        connectedProfile.consolidation.tdh >= 30000) ||
-        (!!connectedProfile.profile?.handle &&
-          ["simo"].includes(connectedProfile.profile.handle.toLowerCase()))
+      connectedProfile.level >= CAN_SEE_DROPS_CONFIG.minLevel &&
+        connectedProfile.consolidation.tdh >= CAN_SEE_DROPS_CONFIG.minTDH
     );
   }, [connectedProfile]);
 
