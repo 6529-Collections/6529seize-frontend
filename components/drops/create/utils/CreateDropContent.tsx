@@ -20,7 +20,7 @@ import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import UploadMediaButtonPlugin from "../lexical/plugins/UploadMediaButtonPlugin";
-import { CreateDropScreenType, CreateDropViewType } from "./CreateDropWrapper";
+import { CreateDropViewType } from "./CreateDropWrapper";
 import { TRANSFORMERS } from "@lexical/markdown";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -30,15 +30,12 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
-import NFTPlugin from "../lexical/plugins/nft/NFTPlugin";
 import { CreateDropType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-// import { NftNode } from "../lexical/nodes/NftNode";
 
 export default function CreateDropContent({
   viewType,
-  screenType,
   editorState,
   type,
   onEditorState,
@@ -48,7 +45,6 @@ export default function CreateDropContent({
   onViewClick,
 }: {
   readonly viewType: CreateDropViewType;
-  readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
   readonly type: CreateDropType;
   readonly onEditorState: (editorState: EditorState) => void;
@@ -145,7 +141,6 @@ export default function CreateDropContent({
             <OnChangePlugin onChange={onEditorStateChange} />
             <NewMentionsPlugin onSelect={onMentionedUserAdded} />
             <NewHashtagsPlugin onSelect={onHashtagAdded} />
-            {/* <NFTPlugin /> */}
             {viewType === CreateDropViewType.COMPACT && <OneLinerPlugin />}
             <MaxLengthPlugin maxLength={25000} />
             {viewType === CreateDropViewType.COMPACT && (

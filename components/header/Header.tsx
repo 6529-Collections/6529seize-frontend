@@ -1,7 +1,7 @@
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,6 +13,7 @@ import SearchProfileButton from "./search-profile/SearchProfileButton";
 import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
+import { AuthContext } from "../auth/Auth";
 
 interface Props {
   onLoad?: () => void;
@@ -28,7 +29,7 @@ export interface HeaderLink {
 export default function Header(props: Readonly<Props>) {
   const router = useRouter();
   const account = useAccount();
-
+  const { canSeeDrops } = useContext(AuthContext);
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 
@@ -138,13 +139,15 @@ export default function Header(props: Readonly<Props>) {
               </h3>
             </Col>
           </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <Link href="/">
-                <h3>Home</h3>
-              </Link>
-            </Col>
-          </Row>
+          {canSeeDrops && (
+            <Row className="pt-3 pb-3">
+              <Col>
+                <Link href="/brain">
+                  <h3>Brain</h3>
+                </Link>
+              </Col>
+            </Row>
+          )}
           <Row className="pt-3 pb-3">
             <Col>
               <h3
@@ -265,13 +268,6 @@ export default function Header(props: Readonly<Props>) {
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/stream">
-                      <h3>Stream</h3>
-                    </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
@@ -667,13 +663,16 @@ export default function Header(props: Readonly<Props>) {
                           id="seize-navbar-nav"
                           className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/" ? "active" : ""
-                              }`}
-                              onClick={() => goTo("/")}>
-                              Home
-                            </Nav.Link>
+                            {canSeeDrops && (
+                              <Nav.Link
+                                className={`${styles.mainNavLink} ${
+                                  router.pathname === "/brain" ? "active" : ""
+                                }`}
+                                onClick={() => goTo("/brain")}
+                              >
+                                Brain
+                              </Nav.Link>
+                            )}
 
                             <NavDropdown
                               title="Collections"
@@ -717,12 +716,6 @@ export default function Header(props: Readonly<Props>) {
                               title="Community"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Stream",
-                                  path: "/stream",
-                                }}
-                              />
                               <HeaderDesktopLink
                                 link={{
                                   name: "Community",

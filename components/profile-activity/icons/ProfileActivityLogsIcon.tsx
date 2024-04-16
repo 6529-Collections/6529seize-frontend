@@ -12,6 +12,10 @@ import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
 import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
 import ProfileActivityLogsGeneralCICStatementIcon from "./ProfileActivityLogsGeneralCICStatementIcon";
 import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon";
+import DropIcon from "../../drops/view/item/action/DropIcon";
+import ProfileActivityLogsRepClapIcon from "./ProfileActivityLogsRepClapIcon";
+import ProfileActivityLogsDiscussIcon from "./ProfileActivityLogsDiscussIcon";
+import ProfileActivityLogsDropIcon from "./ProfileActivityLogsDropIcon";
 
 export default function ProfileActivityLogsIcon({
   logType,
@@ -45,11 +49,12 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsGeneralCICStatementIcon />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogsNFTAccountStatementIcon />;
-    // TODO
     case ProfileActivityLogType.DROP_REP_EDIT:
+      return <ProfileActivityLogsRepClapIcon />;
     case ProfileActivityLogType.DROP_COMMENT:
+      return <ProfileActivityLogsDiscussIcon />;
     case ProfileActivityLogType.DROP_CREATED:
-      return <ProfileActivityLogsCICRatingIcon />;
+      return <ProfileActivityLogsDropIcon />;
     default:
       assertUnreachable(logType);
   }

@@ -1,11 +1,11 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
-import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import ProfileRatersTableWrapper, {
   ProfileRatersParams,
 } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 
 export default function UserPageIdentity({
   profile,
@@ -29,10 +29,9 @@ export default function UserPageIdentity({
       </div>
 
       <div className="tw-mt-8 lg:tw-mt-10">
-        {/* TODO */}
-        {/* <UserPageIdentityActivityLog
+        <UserPageIdentityActivityLog
           initialActivityLogParams={initialActivityLogParams}
-        /> */}
+        />
       </div>
     </div>
   );

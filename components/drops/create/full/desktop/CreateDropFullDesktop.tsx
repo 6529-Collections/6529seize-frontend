@@ -1,9 +1,6 @@
 import { EditorState } from "lexical";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import {
-  CreateDropScreenType,
-  CreateDropViewType,
-} from "../../utils/CreateDropWrapper";
+import { CreateDropViewType } from "../../utils/CreateDropWrapper";
 import CreateDropContent from "../../utils/CreateDropContent";
 import DropPfp from "../../utils/DropPfp";
 import {
@@ -130,11 +127,15 @@ export default function CreateDropFullDesktop({
         <div className="tw-flex tw-flex-col tw-space-y-5 tw-w-full">
           {titleState === TITLE_STATE.INPUT && (
             <div>
-              <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+              <label
+                htmlFor="title"
+                className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm"
+              >
                 Title
               </label>
               <div className="tw-mt-1 5">
                 <input
+                  id="title"
                   type="text"
                   placeholder="Drop title"
                   value={title ?? ""}
@@ -146,7 +147,6 @@ export default function CreateDropFullDesktop({
             </div>
           )}
           <CreateDropContent
-            screenType={CreateDropScreenType.DESKTOP}
             viewType={CreateDropViewType.FULL}
             editorState={editorState}
             type={type}

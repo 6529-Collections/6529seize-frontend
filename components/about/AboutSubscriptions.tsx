@@ -37,9 +37,9 @@ export default function AboutSubscriptions() {
                     You can decide to mint or not mint any specific Meme Card
                   </li>
                   <li className="mt-1">
-                    Subscriptions respect the allowlist and phase process. A
+                    Subscriptions respect the allowlist and phase process: A
                     subscription only allows you to mint within the Phase you
-                    would otherwise be eligible for.
+                    would otherwise be eligible for
                   </li>
                   <li className="mt-1">
                     It is better to think about subscriptions as &quot;remote
@@ -78,8 +78,8 @@ export default function AboutSubscriptions() {
                   </li>
                   <li className="mt-1">
                     Any amount sent to seize.6529.eth is{" "}
-                    <b>completely non-refundable</b>. You can choose which cards
-                    to mint but we do not have the capacity to send ETH back.
+                    <b>completely non-refundable</b>: you can choose which cards
+                    to mint but we do not have the capacity to send ETH back
                   </li>
                   <li className="mt-1">
                     The calculator on your profile will calculate the correct
@@ -126,9 +126,9 @@ export default function AboutSubscriptions() {
                   </li>
                   <li className="mt-1">
                     You can choose to move your whole profile to
-                    &quot;manual&quot; as opposed to &quot;automatic&quot;. In
+                    &quot;manual&quot; as opposed to &quot;automatic&quot;: in
                     this case, you will not mint any cards unless you manully
-                    opt-in to that specific card
+                    opt-in to the specific cards you want to selectively mint
                   </li>
                 </ul>
               </li>
@@ -247,7 +247,7 @@ export default function AboutSubscriptions() {
                 of the card&apos;s cost
                 <ul>
                   <li className="mt-1">
-                    At gwei of 20, they make up 3.4% of the card&apos;s cost.
+                    At gwei of 20, they make up 3.4% of the card&apos;s cost
                   </li>
                   <li className="mt-1">
                     At gwei of 200, they make up 33.7% of the card&apos;s cost

@@ -441,6 +441,19 @@ h5:not(.tailwind-scope h5) {
   box-shadow: none;
 }
 
+@media(hover: hover) and (pointer: fine) {
+  .icon:hover {
+    color: #ffffff;
+  }
+}
+
+pre code {
+  word-break: break-word;
+}
+
+.word-break {
+  word-break: break-word;
+}
 .react-toggle--disabled {
   opacity: 0.75;
 }

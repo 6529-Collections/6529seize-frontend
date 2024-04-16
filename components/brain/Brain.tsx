@@ -18,7 +18,7 @@ interface QueryUpdateInput {
   value: string | null;
 }
 
-interface StreamQuery {
+interface BrainQuery {
   readonly curation_criteria_id?: string;
   readonly limit: string;
   readonly storm_id?: string;
@@ -31,16 +31,16 @@ const SEARCH_PARAMS_FIELDS = {
   curation: "curation",
 } as const;
 
-export default function Stream() {
+export default function Brain() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, canSeeDrops } = useContext(AuthContext);
 
-  const getParamsFromUrl = (): StreamQuery => {
+  const getParamsFromUrl = (): BrainQuery => {
     const curation = searchParams.get(SEARCH_PARAMS_FIELDS.curation);
-    const query: Mutable<StreamQuery> = {
+    const query: Mutable<BrainQuery> = {
       limit: `${REQUEST_SIZE}`,
     };
     if (curation) {
@@ -97,7 +97,7 @@ export default function Stream() {
     [searchParams, connectedProfile]
   );
 
-  const [debouncedParams, setDebouncedParams] = useState<StreamQuery>(params);
+  const [debouncedParams, setDebouncedParams] = useState<BrainQuery>(params);
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
   const {
@@ -123,6 +123,7 @@ export default function Stream() {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
+    enabled: canSeeDrops,
   });
 
   const [drops, setDrops] = useState<DropFull[]>([]);
@@ -151,56 +152,14 @@ export default function Stream() {
 
     fetchNextPage();
   };
+  if (!canSeeDrops) {
+    return null;
+  }
 
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-2xl tw-mx-auto">
-        <h1 className="tw-block tw-float-none">Stream</h1>
-        <div className="tw-flow-root">
-          <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
-            <div
-              className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-              aria-label="Tabs"
-            >
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-pointer-events-none tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Live
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2  tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Trending
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Pool
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Pre-mint
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Auction
-              </button>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-border-x-0 tw-border-t-0 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold"
-              >
-                Minted
-              </button>
-            </div>
-          </div>
-        </div>
+        <h1 className="tw-block tw-float-none">Brain</h1>
 
         <div className="tw-mt-4 lg:tw-mt-6">
           {connectedProfile && (

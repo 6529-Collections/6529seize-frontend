@@ -1,5 +1,4 @@
 import { useState } from "react";
-import CommonInput from "../../../../utils/input/CommonInput";
 import { DropMetadata } from "../../../../../entities/IDrop";
 import CreateDropMetadataItems from "../../utils/metadata/CreateDropMetadataItems";
 

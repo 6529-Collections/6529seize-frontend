@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -7,7 +7,6 @@ import DropListItemContentPart, {
   DropListItemContentPartProps,
 } from "./DropListItemContentPart";
 import { DropContentPartType } from "./DropListItemContent";
-import React from "react";
 import DropListItemContentMedia from "./media/DropListItemContentMedia";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import rehypeExternalLinks from "rehype-external-links";
@@ -74,8 +73,14 @@ const customRenderer = ({
   return parts;
 };
 
-const DropListItemContentMarkdown = React.memo(
-  ({ drop }: { readonly drop: DropFull }) => {
+const DropListItemContentMarkdown = memo(
+  ({
+    drop,
+    showFull = false,
+  }: {
+    readonly drop: DropFull;
+    readonly showFull?: boolean;
+  }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -111,7 +116,7 @@ const DropListItemContentMarkdown = React.memo(
       };
     }, [containerRef]);
 
-    const [showMore, setShowMore] = useState(false);
+    const [showMore, setShowMore] = useState(showFull);
 
     return (
       <CommonAnimationHeight>
@@ -137,42 +142,45 @@ const DropListItemContentMarkdown = React.memo(
             className="tw-w-full"
             components={{
               h5: (params) => (
-                <h5 className="tw-text-iron-50">
+                <h5 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h5>
               ),
               h4: (params) => (
-                <h4 className="tw-text-iron-50">
+                <h4 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h4>
               ),
               h3: (params) => (
-                <h3 className="tw-text-iron-50">
+                <h3 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h3>
               ),
               h2: (params) => (
-                <h2 className="tw-text-iron-50">
+                <h2 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h2>
               ),
               h1: (params) => (
-                <h1 className="tw-text-iron-50">
+                <h1 className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </h1>
               ),
               p: (params) => (
-                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal">
+                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </p>
               ),
               li: (params) => (
-                <li className="tw-text-iron-50">
+                <li className="tw-text-iron-50 tw-break-words word-break">
                   {customRenderer({ content: params.children, drop })}
                 </li>
               ),
               code: (params) => (
-                <code className="tw-text-iron-50 tw-whitespace-pre-wrap">
+                <code
+                  style={{ textOverflow: "unset" }}
+                  className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
+                >
                   {customRenderer({ content: params.children, drop })}
                 </code>
               ),

@@ -1,21 +1,16 @@
 import { useState } from "react";
 import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
-import {
-  CreateDropScreenType,
-  CreateDropViewType,
-} from "../../utils/CreateDropWrapper";
+import { CreateDropViewType } from "../../utils/CreateDropWrapper";
 import { EditorState } from "lexical";
 import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "../../../../../entities/IDrop";
-
 import CreateDropContent from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import DropPfp from "../../utils/DropPfp";
 import { CreateDropType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 
@@ -90,7 +85,6 @@ export default function CreateDropFullMobile({
       <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
         <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
           <div className="tw-absolute tw-right-4 -tw-top-4">
-           {/*  <DropPfp pfpUrl={profile.profile?.pfp_url} /> */}
             {titleState === TITLE_STATE.BUTTON && (
               <button
                 onClick={() => setTitleState(TITLE_STATE.INPUT)}
@@ -128,7 +122,6 @@ export default function CreateDropFullMobile({
             />
           )}
           <CreateDropContent
-            screenType={CreateDropScreenType.MOBILE}
             viewType={CreateDropViewType.FULL}
             editorState={editorState}
             type={type}
@@ -147,18 +140,20 @@ export default function CreateDropFullMobile({
           <CreateDropSelectFile onFileChange={onFileChange} file={file} />
         </div>
         <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={onDrop}
-            className={`${
-              disabled
-                ? "tw-opacity-50 tw-text-iron-200"
-                : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
-            } tw-w-full tw-block tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
-          >
-            {getSubmitText()}
-          </button>
+          <div className="tw-flex tw-gap-x-3">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={onDrop}
+              className={`${
+                disabled
+                  ? "tw-opacity-50 tw-text-iron-200"
+                  : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
+              } tw-w-full tw-block tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
+            >
+              {getSubmitText()}
+            </button>
+          </div>
         </div>
       </div>
     </CreateDropFullMobileWrapper>

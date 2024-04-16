@@ -3,11 +3,14 @@ import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 enum FILE_TYPES {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
-  GLB = "GLB",
   AUDIO = "AUDIO",
 }
 
-export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
+export default function CreateDropSelectedFileIcon({
+  file,
+}: {
+  readonly file: File;
+}) {
   const getFileType = (file: File | null): FILE_TYPES | null => {
     if (!file) {
       return null;
@@ -17,9 +20,6 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
     }
     if (file.type.includes("video")) {
       return FILE_TYPES.VIDEO;
-    }
-    if (file.name.endsWith(".glb")) {
-      return FILE_TYPES.GLB;
     }
     if (file.type.includes("audio")) {
       return FILE_TYPES.AUDIO;
@@ -92,41 +92,6 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
           />
         </svg>
       );
-    case FILE_TYPES.GLB:
-      return (
-        <svg
-          className="tw-flex-shrink-0 tw-w-auto tw-h-5 sm:tw-h-6"
-          viewBox="0 0 383 512"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M66.679 0H237.923L382.971 151.327V445.321C382.971 482.124 353.095 512 316.292 512H66.679C29.8756 512 0 482.124 0 445.321V66.679C0 29.8756 29.8756 0 66.679 0Z"
-            fill="#60606C"
-          />
-          <path
-            d="M195.197 214.174C192.413 212.596 189.002 212.61 186.23 214.21L113.03 256.472C125.427 263.629 184.486 297.727 191.223 301.616L269.441 256.245L195.197 214.174Z"
-            fill="white"
-          />
-          <path
-            d="M104.001 356.636C104.001 359.863 105.722 362.843 108.515 364.457L182.203 407V317.263L104 272.112L104.001 356.636Z"
-            fill="white"
-          />
-          <path
-            d="M278.466 356.636V271.889L200.264 317.251V407L273.951 364.457C276.746 362.843 278.466 359.863 278.466 356.636Z"
-            fill="white"
-          />
-          <path
-            opacity="0.302"
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M237.707 0V150.028H382.972L237.707 0Z"
-            fill="white"
-          />
-        </svg>
-      );
     case FILE_TYPES.AUDIO:
       return (
         <svg
@@ -148,7 +113,7 @@ export default function CreateDropSelectedFileIcon({ file }: { file: File }) {
             d="M237.707 0V150.028H382.972L237.707 0Z"
             fill="white"
           />
-          <g clip-path="url(#clip0_8489_2290)">
+          <g clipPath="url(#clip0_8489_2290)">
             <path
               d="M209.766 231.665C207.655 230.658 205.168 230.924 203.348 232.393L144.331 279.603H116.133C109.448 279.603 104 285.051 104 291.737V340.27C104 346.968 109.448 352.403 116.133 352.403H144.331L203.336 399.614C204.44 400.488 205.787 400.937 207.133 400.937C208.031 400.937 208.929 400.73 209.766 400.33C211.865 399.323 213.2 397.2 213.2 394.87V237.137C213.2 234.807 211.865 232.684 209.766 231.665Z"
               fill="white"

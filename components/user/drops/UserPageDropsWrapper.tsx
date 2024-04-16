@@ -5,6 +5,8 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageNoProfile from "../utils/no-profile/UserPageNoProfile";
 import UserPageDrops from "./UserPageDrops";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../auth/Auth";
 
 export default function UserPageDropsWrapper({
   profile: initialProfile,
@@ -13,6 +15,7 @@ export default function UserPageDropsWrapper({
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
+  const { canSeeDrops } = useContext(AuthContext);
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, user.toLowerCase()],
@@ -23,6 +26,12 @@ export default function UserPageDropsWrapper({
     enabled: !!user,
     initialData: initialProfile,
   });
+
+  useEffect(() => {
+    if (!canSeeDrops) {
+      router.push(`${user}/rep`);
+    }
+  }, [canSeeDrops]);
 
   if (!profile.profile) {
     return <UserPageNoProfile profile={profile} />;

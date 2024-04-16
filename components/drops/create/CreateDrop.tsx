@@ -9,11 +9,7 @@ import {
 } from "../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
-import {
-  commonApiFetch,
-  commonApiPost,
-  commonApiPostForm,
-} from "../../../services/api/common-api";
+import { commonApiPost } from "../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export interface DropRequest {
