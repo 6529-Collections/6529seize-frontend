@@ -48,6 +48,7 @@ export enum QueryKey {
   RESERVOIR_NFT = "RESERVOIR_NFT",
   DROP = "DROP",
   DROP_DISCUSSION = "DROP_DISCUSSION",
+  NFTS_SEARCH = "NFTS_SEARCH",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
