@@ -19,7 +19,7 @@ const CommunityDownloadsSubscriptions = dynamic(
   }
 );
 
-export default function TeamDownloads() {
+export default function MemeSubscriptions() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Open Data", href: "/open-data" },
@@ -39,7 +39,7 @@ export default function TeamDownloads() {
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/open-data/meme-subscriptions`}
         />
-        <meta property="og:title" content={`Team Downloads`} />
+        <meta property="og:title" content={`Meme Subscriptions Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
