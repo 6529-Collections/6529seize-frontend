@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { USER_PAGE_TAB_META, UserPageTabType } from "./UserPageTabs";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function UserPageTab({
   tab,
+  parentRef,
   activeTab,
 }: {
   readonly tab: UserPageTabType;
+  readonly parentRef: React.RefObject<HTMLDivElement>;
   readonly activeTab: UserPageTabType;
 }) {
   const router = useRouter();
@@ -29,12 +31,35 @@ export default function UserPageTab({
     isActive ? activeClasses : inActiveClasses
   );
 
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  const isVisibleInViewportSide = () => {
+    if (!parentRef.current || !ref.current) {
+      return true;
+    }
+    const parentRect = parentRef.current.getBoundingClientRect();
+    const rect = ref.current.getBoundingClientRect();
+    const parentRight = parentRect.right;
+    const parentLeft = parentRect.left;
+    const elementRight = rect.right;
+    const elementLeft = rect.left;
+    return elementRight <= parentRight && elementLeft >= parentLeft;
+  };
+
   useEffect(() => {
     setClasses(isActive ? activeClasses : inActiveClasses);
+    if (ref.current && isActive && !isVisibleInViewportSide()) {
+      ref.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
   }, [isActive]);
 
   return (
     <Link
+      ref={ref}
       href={{
         pathname: path,
         query: router.query.address ? { address: router.query.address } : {},
