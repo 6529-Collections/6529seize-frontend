@@ -72,15 +72,17 @@ export default function Auth({
     }
   }, [address]);
 
-  const [canSeeDrops, setCanSeeDrops] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!connectedProfile) {
-      setCanSeeDrops(false);
-      return;
-    }
-    setCanSeeDrops(getCanProfileSeeDrops({ profile: connectedProfile }));
-  }, [connectedProfile]);
+  // TODO: Implement getCanProfileSeeDrops
+  const [canSeeDrops, setCanSeeDrops] = useState<boolean>(true);
+ 
+  // TODO: Implement getCanProfileSeeDrops
+  // useEffect(() => {
+  //   if (!connectedProfile) {
+  //     setCanSeeDrops(false);
+  //     return;
+  //   }
+  //   setCanSeeDrops(getCanProfileSeeDrops({ profile: connectedProfile }));
+  // }, [connectedProfile]);
 
   const getNonce = async ({
     signerAddress,
