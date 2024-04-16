@@ -1,13 +1,12 @@
 import { useHoverDirty } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import {
-  areEqualAddresses,
   cicToType,
   formatNumberWithCommas,
   getProfileTargetRoute,
 } from "../../../helpers/Helpers";
 import { useEffect, useRef } from "react";
-import SearchProfileModalItemHighlight from "./SearchProfileModalItemHighlight";
+import HeaderSearchModalItemHighlight from "./HeaderSearchModalItemHighlight";
 import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
 import { useRouter } from "next/router";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
@@ -32,11 +31,11 @@ export interface NFTSearchResult {
   image_url: string;
 }
 
-export type SearchProfileModalItemType =
+export type HeaderSearchModalItemType =
   | CommunityMemberMinimal
   | NFTSearchResult;
 
-export default function SearchProfileModalItem({
+export default function HeaderSearchModalItem({
   content,
   searchValue,
   isSelected,
@@ -45,7 +44,7 @@ export default function SearchProfileModalItem({
 }: {
   readonly isSelected: boolean;
   readonly searchValue: string;
-  readonly content: SearchProfileModalItemType;
+  readonly content: HeaderSearchModalItemType;
   readonly onHover: (state: boolean) => void;
   readonly onClose: () => void;
 }) {
@@ -162,7 +161,7 @@ export default function SearchProfileModalItem({
         <div className="tw-w-full">
           <div className="tw-inline-flex tw-justify-between tw-w-full">
             <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
-              <SearchProfileModalItemHighlight
+              <HeaderSearchModalItemHighlight
                 text={getPrimaryText()}
                 highlight={searchValue}
               />
@@ -177,7 +176,7 @@ export default function SearchProfileModalItem({
             )}
           </div>
           <p className="tw-break-all tw-mb-0 tw-text-sm tw-text-iron-400">
-            <SearchProfileModalItemHighlight
+            <HeaderSearchModalItemHighlight
               text={getSecondaryText()}
               highlight={searchValue}
             />
