@@ -1,6 +1,7 @@
 import { useHoverDirty } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import {
+  areEqualAddresses,
   cicToType,
   formatNumberWithCommas,
   getProfileTargetRoute,
@@ -11,10 +12,29 @@ import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
 import { useRouter } from "next/router";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
 import Link from "next/link";
-import { MemeLite } from "../../user/settings/UserSettingsImgSelectMeme";
 import Image from "next/image";
+import {
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "../../../constants";
+import {
+  NEXTGEN_CORE,
+  NEXTGEN_CHAIN_ID,
+} from "../../nextGen/nextgen_contracts";
 
-export type SearchProfileModalItemType = CommunityMemberMinimal | MemeLite;
+export interface NFTSearchResult {
+  id: number;
+  name: string;
+  contract: string;
+  icon_url: string;
+  thumbnail_url: string;
+  image_url: string;
+}
+
+export type SearchProfileModalItemType =
+  | CommunityMemberMinimal
+  | NFTSearchResult;
 
 export default function SearchProfileModalItem({
   content,
@@ -41,8 +61,29 @@ export default function SearchProfileModalItem({
     return content as CommunityMemberMinimal;
   };
 
-  const getMeme = () => {
-    return content as MemeLite;
+  const getNft = () => {
+    return content as NFTSearchResult;
+  };
+
+  const getNftCollectionMap = () => {
+    return {
+      [MEMES_CONTRACT.toLowerCase()]: {
+        title: "The Memes",
+        path: "/the-memes",
+      },
+      [MEMELAB_CONTRACT.toLowerCase()]: {
+        title: "Meme Lab",
+        path: "/meme-lab",
+      },
+      [GRADIENT_CONTRACT.toLowerCase()]: {
+        title: "6529 Gradient",
+        path: "/6529-gradient",
+      },
+      [NEXTGEN_CORE[NEXTGEN_CHAIN_ID].toLowerCase()]: {
+        title: "NextGen",
+        path: "/nextgen/token/",
+      },
+    };
   };
 
   const getMedia = () => {
@@ -51,8 +92,8 @@ export default function SearchProfileModalItem({
       const cicType = cicToType(profile.cic_rating);
       return <UserCICAndLevel level={profile.level} cicType={cicType} />;
     } else {
-      const meme = getMeme();
-      const imgSrc = meme.icon ?? meme.thumbnail ?? meme.scaled ?? meme.image;
+      const nft = getNft();
+      const imgSrc = nft.icon_url ?? nft.thumbnail_url ?? nft.image_url;
       if (!imgSrc) {
         return <></>;
       }
@@ -64,7 +105,7 @@ export default function SearchProfileModalItem({
           height={25}
           style={{ height: "25px", width: "auto" }}
           src={imgSrc}
-          alt={meme.name ?? `Meme ${meme.id}`}
+          alt={nft.name ?? `#${nft.id}`}
         />
       );
     }
@@ -83,7 +124,9 @@ export default function SearchProfileModalItem({
         defaultPath: UserPageTabType.IDENTITY,
       });
     } else {
-      return `/the-memes/${getMeme().id}`;
+      const nft = getNft();
+      const collectionMap = getNftCollectionMap();
+      return `${collectionMap[nft.contract].path}/${nft.id}`;
     }
   };
 
@@ -91,9 +134,7 @@ export default function SearchProfileModalItem({
     if (isProfile()) {
       return getProfile().handle ?? "-";
     } else {
-      const meme = getMeme();
-      const name = meme.name ?? `Meme ${meme.id}`;
-      return `#${meme.id} - ${name}`;
+      return getNft().name;
     }
   };
 
@@ -101,7 +142,9 @@ export default function SearchProfileModalItem({
     if (isProfile()) {
       return getProfile().display ?? "";
     } else {
-      return `by ${getMeme().artist}` ?? `-`;
+      const nft = getNft();
+      const collectionMap = getNftCollectionMap();
+      return `${collectionMap[nft.contract].title} #${nft.id}`;
     }
   };
 

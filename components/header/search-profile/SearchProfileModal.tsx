@@ -5,13 +5,13 @@ import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SearchProfileModalItem, {
+  NFTSearchResult,
   SearchProfileModalItemType,
 } from "./SearchProfileModalItem";
 import { useRouter } from "next/router";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
-import { MemeLite } from "../../user/settings/UserSettingsImgSelectMeme";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -69,21 +69,15 @@ export default function SearchProfileModal({
   });
 
   const { isFetching: isFetchingMemes, data: memes } = useQuery({
-    queryKey: [QueryKey.MEMES_LITE, debouncedValue],
+    queryKey: [QueryKey.NFTS_SEARCH, debouncedValue],
     queryFn: async () => {
-      const memesResponse = await commonApiFetch<{
-        count: number;
-        data: MemeLite[];
-        next: string | null;
-        page: number;
-      }>({
-        endpoint: "memes_lite",
+      return await commonApiFetch<NFTSearchResult[]>({
+        endpoint: "nfts_search",
         params: {
           search: debouncedValue,
           page_size: "5",
         },
       });
-      return memesResponse.data ?? [];
     },
     enabled:
       debouncedValue.length >= MIN_SEARCH_LENGTH ||
@@ -111,7 +105,6 @@ export default function SearchProfileModal({
   useKeyPressEvent("ArrowDown", () =>
     setSelectedItemIndex((i) => {
       const itemCount = (profiles?.length ?? 0) + (memes?.length ?? 0);
-      alert(itemCount >= i + 2 ? i + 1 : i);
       return itemCount >= i + 2 ? i + 1 : i;
     })
   );
@@ -247,9 +240,7 @@ export default function SearchProfileModal({
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
                 <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
-                  {searchValue.length >= MIN_SEARCH_LENGTH
-                    ? "No results found"
-                    : "Type at least 3 characters or NFT Id"}
+                  Type at least 3 characters or NFT Id
                 </p>
               </div>
             )}
