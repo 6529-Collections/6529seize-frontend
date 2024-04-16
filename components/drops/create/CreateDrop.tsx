@@ -141,6 +141,7 @@ export default function CreateDrop({
       profile={profile}
       quotedDropId={quotedDropId}
       type={type}
+      loading={submitting}
       onSubmitDrop={submitDrop}
       key={dropEditorRefreshKey}
     />

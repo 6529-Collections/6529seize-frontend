@@ -57,7 +57,7 @@ export default function DropListItemActionsRep({
           <>
             {userHaveVoted ? <RepClapSolidIcon /> : <RepClapOutlineIcon />}
             <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
-              Rep
+              Votes
             </span>
             {!!drop.rep && (
               <div
