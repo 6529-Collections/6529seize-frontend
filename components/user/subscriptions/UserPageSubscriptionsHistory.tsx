@@ -128,7 +128,7 @@ function TopUpEntry(
   }>
 ) {
   return (
-    <div className={styles.topUpHistoryEntry}>
+    <div className={styles.subscriptionHistoryEntry}>
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex align-items-center gap-3">
           <div className="d-flex align-items-center gap-1 no-wrap">
@@ -164,7 +164,7 @@ function LogEntry(
   }>
 ) {
   return (
-    <div className={styles.topUpHistoryEntry}>
+    <div className={styles.subscriptionHistoryEntry}>
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex flex-column gap-1">
           <div>{props.log.log}</div>
@@ -194,7 +194,7 @@ function RedeemedEntry(
     : `Contract ${formatAddress(props.redeem.contract)}`;
 
   return (
-    <div className={styles.topUpHistoryEntry}>
+    <div className={styles.subscriptionHistoryEntry}>
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex flex-column gap-1">
           <div>
