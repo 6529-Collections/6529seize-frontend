@@ -257,7 +257,7 @@ function CardCountTopup(
       <Form.Group>
         <Row className="d-flex align-items-center no-wrap">
           <Col xs={9} sm={8} className="d-flex">
-            {props.display && <span>{props.display} - </span>}
+            {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
             {props.count} Card{props.count > 1 && "s"} (
             {MEMES_MINT_PRICE * props.count} ETH)
           </Col>
