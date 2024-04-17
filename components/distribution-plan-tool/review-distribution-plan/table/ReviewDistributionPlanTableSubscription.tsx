@@ -70,6 +70,8 @@ export function SubscriptionLinks(
   }
 
   const processResults = (results: SubscriptionResult) => {
+    const merged = [...results.airdrops, ...results.allowlists];
+    downloadCSV(merged, "merged");
     downloadCSV(results.airdrops, "airdrops");
     downloadCSV(results.allowlists, "allowlists");
   };
