@@ -119,107 +119,112 @@ const DropListItemContentMarkdown = memo(
     const [showMore, setShowMore] = useState(showFull);
 
     return (
-      <CommonAnimationHeight>
-        <div
-          ref={containerRef}
-          className={`${
-            !showMore ? "tw-max-h-72" : "tw-max-h-full"
-          } tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out`}
-        >
-          <Markdown
-            rehypePlugins={[
-              [
-                rehypeExternalLinks,
-                {
-                  target: "_blank",
-                  rel: ["noopener", "noreferrer", "nofollow'"],
-                  protocols: ["http", "https"],
-                },
-              ],
-              [rehypeSanitize],
-            ]}
-            remarkPlugins={[remarkGfm]}
-            className="tw-w-full"
-            components={{
-              h5: (params) => (
-                <h5 className="tw-text-iron-50 tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </h5>
-              ),
-              h4: (params) => (
-                <h4 className="tw-text-iron-50 tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </h4>
-              ),
-              h3: (params) => (
-                <h3 className="tw-text-iron-50 tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </h3>
-              ),
-              h2: (params) => (
-                <h2 className="tw-text-iron-50 tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </h2>
-              ),
-              h1: (params) => (
-                <h1 className="tw-text-iron-50 tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </h1>
-              ),
-              p: (params) => (
-                <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </p>
-              ),
-              li: (params) => (
-                <li className="tw-text-iron-50 tw-break-words word-break">
-                  {customRenderer({ content: params.children, drop })}
-                </li>
-              ),
-              code: (params) => (
-                <code
-                  style={{ textOverflow: "unset" }}
-                  className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
-                >
-                  {customRenderer({ content: params.children, drop })}
-                </code>
-              ),
-              a: ({ node, ...props }) => {
-                const { href } = props;
-                if (
-                  href?.startsWith("..") ||
-                  href?.startsWith("/") ||
-                  !href?.includes(".")
-                ) {
-                  return <p>[invalid link]</p>;
-                }
-                return <a {...props} />;
-              },
-            }}
+      <>
+        <CommonAnimationHeight>
+          <div
+            ref={containerRef}
+            className={`${
+              !showMore ? "tw-max-h-72" : "tw-max-h-full"
+            } tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out`}
           >
-            {drop.content}
-          </Markdown>
-          {!!drop.media_url && !!drop.media_mime_type && (
+            <Markdown
+              rehypePlugins={[
+                [
+                  rehypeExternalLinks,
+                  {
+                    target: "_blank",
+                    rel: ["noopener", "noreferrer", "nofollow'"],
+                    protocols: ["http", "https"],
+                  },
+                ],
+                [rehypeSanitize],
+              ]}
+              remarkPlugins={[remarkGfm]}
+              className="tw-w-full"
+              components={{
+                h5: (params) => (
+                  <h5 className="tw-text-iron-50 tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </h5>
+                ),
+                h4: (params) => (
+                  <h4 className="tw-text-iron-50 tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </h4>
+                ),
+                h3: (params) => (
+                  <h3 className="tw-text-iron-50 tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </h3>
+                ),
+                h2: (params) => (
+                  <h2 className="tw-text-iron-50 tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </h2>
+                ),
+                h1: (params) => (
+                  <h1 className="tw-text-iron-50 tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </h1>
+                ),
+                p: (params) => (
+                  <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </p>
+                ),
+                li: (params) => (
+                  <li className="tw-text-iron-50 tw-break-words word-break">
+                    {customRenderer({ content: params.children, drop })}
+                  </li>
+                ),
+                code: (params) => (
+                  <code
+                    style={{ textOverflow: "unset" }}
+                    className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
+                  >
+                    {customRenderer({ content: params.children, drop })}
+                  </code>
+                ),
+                a: ({ node, ...props }) => {
+                  const { href } = props;
+                  if (
+                    href?.startsWith("..") ||
+                    href?.startsWith("/") ||
+                    !href?.includes(".")
+                  ) {
+                    return <p>[invalid link]</p>;
+                  }
+                  return <a {...props} />;
+                },
+              }}
+            >
+              {drop.content}
+            </Markdown>
+
+            {isOverflowing && !showMore && (
+              <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
+                <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">
+                  <button
+                    onClick={() => setShowMore(!showMore)}
+                    type="button"
+                    className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+                  >
+                    Show full drop
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CommonAnimationHeight>
+        {!!drop.media_url && !!drop.media_mime_type && (
+          <div className="tw-mt-8">
             <DropListItemContentMedia
               media_mime_type={drop.media_mime_type}
               media_url={drop.media_url}
             />
-          )}
-          {isOverflowing && !showMore && (
-            <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
-              <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">
-                <button
-                  onClick={() => setShowMore(!showMore)}
-                  type="button"
-                  className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-                >
-                  Show full drop
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </CommonAnimationHeight>
+          </div>
+        )}
+      </>
     );
   }
 );
