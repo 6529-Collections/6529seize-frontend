@@ -70,6 +70,8 @@ export function SubscriptionLinks(
   }
 
   const processResults = (results: SubscriptionResult) => {
+    const merged = mergeResults([...results.airdrops, ...results.allowlists]);
+    downloadCSV(merged, "merged");
     downloadCSV(results.airdrops, "airdrops");
     downloadCSV(results.allowlists, "allowlists");
   };
@@ -196,3 +198,15 @@ function SubscriptionConfirm(
     </Modal>
   );
 }
+
+const mergeResults = (results: WalletResult[]): WalletResult[] => {
+  const mergedResults = new Map<string, number>();
+  for (const r of results) {
+    const currentAmount = mergedResults.get(r.wallet) ?? 0;
+    mergedResults.set(r.wallet, currentAmount + r.amount);
+  }
+  return Array.from(mergedResults).map(([wallet, amount]) => ({
+    wallet,
+    amount,
+  }));
+};
