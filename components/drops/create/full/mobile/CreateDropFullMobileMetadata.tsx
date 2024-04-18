@@ -35,7 +35,7 @@ export default function CreateDropFullMobileMetadata({
       <form onSubmit={onSubmit} className="tw-space-y-3 lg:tw-space-y-0">
         <input
           type="text"
-          placeholder="Metadata Key"
+          placeholder="Category"
           value={key ?? ""}
           onChange={(e) => setKey(e.target.value)}
           maxLength={100}
