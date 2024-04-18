@@ -23,11 +23,11 @@ export type DropListItemContentPartProps =
 export default function DropListItemContentPart({
   part,
   container,
-  addToContainerHeight,
+  onImageLoaded,
 }: {
   readonly part: DropListItemContentPartProps;
   readonly container: React.RefObject<HTMLDivElement>;
-  readonly addToContainerHeight: (toAdd: number) => void;
+  readonly onImageLoaded: () => void;
 }) {
   const { type, value } = part;
   switch (type) {
@@ -38,7 +38,7 @@ export default function DropListItemContentPart({
         <DropListItemContentHashtag
           nft={value}
           container={container}
-          addToContainerHeight={addToContainerHeight}
+          onImageLoaded={onImageLoaded}
         />
       );
     default:

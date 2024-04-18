@@ -25,12 +25,12 @@ const customRenderer = ({
   content,
   drop,
   container,
-  addToContainerHeight,
+  onImageLoaded,
 }: {
   readonly content: ReactNode | undefined;
   readonly drop: DropFull;
   readonly container: React.RefObject<HTMLDivElement>;
-  readonly addToContainerHeight: (toAdd: number) => void;
+  readonly onImageLoaded: () => void;
 }) => {
   if (typeof content !== "string") {
     return content;
@@ -83,7 +83,7 @@ const customRenderer = ({
             key={part}
             part={partProps}
             container={container}
-            addToContainerHeight={addToContainerHeight}
+            onImageLoaded={onImageLoaded}
           />
         );
       }
@@ -151,12 +151,7 @@ const DropListItemContentMarkdown = memo(
 
     const [showMore, setShowMore] = useState(showFull);
 
-    const addToContainerHeight = (toAdd: number) => {
-      if (!containerRef.current) return;
-      containerRef.current?.style.setProperty(
-        "max-height",
-        `${288 + toAdd + 288}px`
-      );
+    const onImageLoaded = () => {
       checkOverflow(containerRef);
     };
 
@@ -166,7 +161,7 @@ const DropListItemContentMarkdown = memo(
           <div
             ref={containerRef}
             className={`${
-              !showMore ? "tw-max-h-72" : "tw-max-h-full"
+              !showMore ? "tw-max-h-72" : "!tw-max-h-full"
             } tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out`}
           >
             <Markdown
@@ -190,7 +185,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </h5>
                 ),
@@ -200,7 +195,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </h4>
                 ),
@@ -210,7 +205,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </h3>
                 ),
@@ -220,7 +215,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </h2>
                 ),
@@ -230,7 +225,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </h1>
                 ),
@@ -240,7 +235,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </p>
                 ),
@@ -250,7 +245,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </li>
                 ),
@@ -263,7 +258,7 @@ const DropListItemContentMarkdown = memo(
                       content: params.children,
                       drop,
                       container: containerRef,
-                      addToContainerHeight,
+                      onImageLoaded,
                     })}
                   </code>
                 ),
