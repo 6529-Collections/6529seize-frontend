@@ -1,11 +1,8 @@
-import { areEqualAddresses, formatAddress } from "../../../helpers/Helpers";
+import { formatAddress } from "../../../helpers/Helpers";
 import { Container, Row, Col } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
 import { MEMES_CONTRACT } from "../../../constants";
 import { AIRDROPS_USE_CASE } from "../../../pages/delegation/[...section]";
-import { useContext } from "react";
-import { AuthContext } from "../../auth/Auth";
-import { useAccount } from "wagmi";
 
 export interface AirdropAddress {
   address: string;
