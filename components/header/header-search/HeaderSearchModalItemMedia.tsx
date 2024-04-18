@@ -21,4 +21,6 @@ const HeaderSearchModalItemMedia = memo(
   }
 );
 
+HeaderSearchModalItemMedia.displayName = "HeaderSearchModalItemMedia";
+
 export default HeaderSearchModalItemMedia;
