@@ -111,11 +111,6 @@ export default function CreateDropContent({
     <div className="tailwind-scope">
       <LexicalComposer initialConfig={editorConfig}>
         <div>
-          {viewType === CreateDropViewType.FULL && (
-            <label className="tw-mb-1.5 tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
-              Text
-            </label>
-          )}
           <div className="tw-relative">
             <RichTextPlugin
               contentEditable={

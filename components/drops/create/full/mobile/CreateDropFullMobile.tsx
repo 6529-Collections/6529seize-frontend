@@ -87,7 +87,7 @@ export default function CreateDropFullMobile({
     >
       <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
         <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
-          <div className="tw-absolute tw-right-4 -tw-top-4">
+          <div className="tw-flex tw-justify-end -tw-mb-2">
             {titleState === TITLE_STATE.BUTTON && (
               <button
                 onClick={() => setTitleState(TITLE_STATE.INPUT)}
