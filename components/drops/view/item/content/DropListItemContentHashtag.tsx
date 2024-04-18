@@ -10,7 +10,7 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 
 export default function DropListItemContentHashtag({
-  nft: { contract, token, name },
+  nft: { contract, token },
 }: {
   readonly nft: ReferencedNft;
 }) {
@@ -44,10 +44,9 @@ export default function DropListItemContentHashtag({
       content={<NftTooltip contract={contract} token={token} />}
     >
       <div className="tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
-        #{name}
+   
         <div className="tw-mt-1 md:tw-flex md:tw-justify-center tw-w-full md:tw-p-[1px] tw-ring-1 tw-ring-inset tw-ring-iron-700 md:tw-rounded-xl">
-          <div className="tw-w-full md:tw-max-h-96">
-            {/*  height={384}  */}
+          <div className="tw-w-full tw-h-full">
             {nft && (
               <img
                 src={nft.token.imageSmall}
