@@ -258,6 +258,7 @@ export default function UserPageSubscriptions(
                   refresh={refresh}
                 />
                 <UserPageSubscriptionsAirdropAddress
+                  show_edit={isConnectedAccount}
                   airdrop_address={airdropAddress}
                 />
               </Col>
