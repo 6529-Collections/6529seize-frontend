@@ -211,6 +211,7 @@ createWeb3Modal({
   wagmiConfig,
   projectId: CW_PROJECT_ID,
   enableAnalytics: true,
+  themeMode: "dark",
 });
 
 const queryClient = new QueryClient({
