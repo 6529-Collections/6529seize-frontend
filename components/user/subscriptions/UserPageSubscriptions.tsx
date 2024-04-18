@@ -15,8 +15,14 @@ import {
 import { AuthContext } from "../../auth/Auth";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
+import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
 
 const HISTORY_PAGE_SIZE = 10;
+
+interface AirdropAddress {
+  address: string;
+  ens: string;
+}
 
 export default function UserPageSubscriptions(
   props: Readonly<{
@@ -29,6 +35,10 @@ export default function UserPageSubscriptions(
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
+
+  const [airdropAddress, setAirdropAddress] = useState<AirdropAddress>();
+  const [fetchingAirdropAddress, setFetchingAirdropAddress] =
+    useState<boolean>(true);
 
   const [topUpHistory, setTopUpHistory] = useState<SubscriptionTopUp[]>([]);
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
@@ -68,6 +78,7 @@ export default function UserPageSubscriptions(
   useEffect(() => {
     setIsFetching(
       fetchingDetails ||
+        fetchingAirdropAddress ||
         fetchingTopUpHistory ||
         fetchingMemeSubscriptions ||
         fetchingSubscriptionLogs ||
@@ -75,6 +86,7 @@ export default function UserPageSubscriptions(
     );
   }, [
     fetchingDetails,
+    fetchAirdropAddress,
     fetchingTopUpHistory,
     fetchingMemeSubscriptions,
     fetchingSubscriptionLogs,
@@ -91,6 +103,19 @@ export default function UserPageSubscriptions(
     }).then((data) => {
       setDetails(data);
       setFetchingDetails(false);
+    });
+  }
+
+  function fetchAirdropAddress() {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    setFetchingAirdropAddress(true);
+    commonApiFetch<AirdropAddress>({
+      endpoint: `subscriptions/consolidation/${props.profile.consolidation.consolidation_key}/airdrop-address`,
+    }).then((data) => {
+      setAirdropAddress(data);
+      setFetchingAirdropAddress(false);
     });
   }
 
@@ -166,6 +191,7 @@ export default function UserPageSubscriptions(
       return;
     }
     fetchDetails();
+    fetchAirdropAddress();
     fetchTopUpHistory();
     fetchMemeSubscriptions();
     fetchRedeemHistory();
@@ -230,6 +256,9 @@ export default function UserPageSubscriptions(
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
+                />
+                <UserPageSubscriptionsAirdropAddress
+                  airdrop_address={airdropAddress}
                 />
               </Col>
             </Row>
