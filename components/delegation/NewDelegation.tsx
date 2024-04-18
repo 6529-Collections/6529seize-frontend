@@ -186,7 +186,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               collection={newDelegationCollection}
               setCollection={(c: string) => {
                 setNewDelegationCollection(c);
-                props.setCollectionQuery(c);
+                if (props.setCollectionQuery) {
+                  props.setCollectionQuery(c);
+                }
               }}
               subdelegation={props.subdelegation}
             />
@@ -207,7 +209,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                   onChange={(e) => {
                     const newCase = parseInt(e.target.value);
                     setNewDelegationUseCase(newCase);
-                    props.setUseCaseQuery(newCase);
+                    if (props.setUseCaseQuery) {
+                      props.setUseCaseQuery(newCase);
+                    }
                     clearErrors();
                   }}>
                   <option value={0} disabled>
