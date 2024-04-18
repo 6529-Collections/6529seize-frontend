@@ -110,9 +110,11 @@ export default function CreateDropWrapper({
       ])
     ) ?? null;
 
-  const [canSubmit, setCanSubmit] = useState(false);
+  const getCanSubmit = () => !!getMarkdown() || !!file;
 
-  useEffect(() => setCanSubmit(!!getMarkdown()), [editorState]);
+  const [canSubmit, setCanSubmit] = useState(getCanSubmit());
+
+  useEffect(() => setCanSubmit(getCanSubmit()), [editorState, file]);
 
   const onDrop = () => {
     const markdown = getMarkdown();

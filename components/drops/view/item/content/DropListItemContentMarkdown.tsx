@@ -1,6 +1,14 @@
-import { memo, ReactNode, useEffect, useRef, useState } from "react";
+import {
+  AnchorHTMLAttributes,
+  ClassAttributes,
+  memo,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { DropFull } from "../../../../../entities/IDrop";
-import Markdown from "react-markdown";
+import Markdown, { ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import DropListItemContentPart, {
@@ -71,6 +79,23 @@ const customRenderer = ({
     });
 
   return parts;
+};
+
+const aHrefRenderer = ({
+  node,
+  ...props
+}: ClassAttributes<HTMLAnchorElement> &
+  AnchorHTMLAttributes<HTMLAnchorElement> &
+  ExtraProps) => {
+  const { href } = props;
+  const isValidLink =
+    href?.startsWith("..") || href?.startsWith("/") || !href?.includes(".");
+  
+  
+  if (!isValidLink) {
+    return <p>[invalid link]</p>;
+  }
+  return <a {...props} />;
 };
 
 const DropListItemContentMarkdown = memo(
@@ -185,17 +210,7 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({ content: params.children, drop })}
                   </code>
                 ),
-                a: ({ node, ...props }) => {
-                  const { href } = props;
-                  if (
-                    href?.startsWith("..") ||
-                    href?.startsWith("/") ||
-                    !href?.includes(".")
-                  ) {
-                    return <p>[invalid link]</p>;
-                  }
-                  return <a {...props} />;
-                },
+                a: (params) => aHrefRenderer(params),
               }}
             >
               {drop.content}
