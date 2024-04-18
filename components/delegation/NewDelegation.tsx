@@ -30,6 +30,10 @@ interface Props {
     collection: DelegationCollection;
   };
   ens: string | null | undefined;
+  collection_query?: string;
+  setCollectionQuery?(collection: string): any;
+  use_case_query?: number;
+  setUseCaseQuery?(useCase: number): any;
   onHide(): any;
   onSetToast(toast: any): any;
 }
@@ -44,9 +48,11 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
   const [newDelegationToken, setNewDelegationToken] = useState<
     number | undefined
   >(undefined);
-  const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(0);
+  const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(
+    props.use_case_query ?? 0
+  );
   const [newDelegationCollection, setNewDelegationCollection] =
-    useState<string>("0");
+    useState<string>(props.collection_query ?? "0");
 
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
@@ -178,7 +184,12 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             <DelegationFormCollectionFormGroup
               collection={newDelegationCollection}
-              setCollection={setNewDelegationCollection}
+              setCollection={(c: string) => {
+                setNewDelegationCollection(c);
+                if (props.setCollectionQuery) {
+                  props.setCollectionQuery(c);
+                }
+              }}
               subdelegation={props.subdelegation}
             />
             <DelegationFormDelegateAddressFormGroup
@@ -198,6 +209,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                   onChange={(e) => {
                     const newCase = parseInt(e.target.value);
                     setNewDelegationUseCase(newCase);
+                    if (props.setUseCaseQuery) {
+                      props.setUseCaseQuery(newCase);
+                    }
                     clearErrors();
                   }}>
                   <option value={0} disabled>
