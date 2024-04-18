@@ -5,16 +5,16 @@ import DropListItemActions from "./action/DropListItemActions";
 import DropWrapper from "../../create/utils/DropWrapper";
 import DropListItemContent from "./content/DropListItemContent";
 import DropListItemRateWrapper from "./rate/DropListItemRateWrapper";
-import DropListItemExpandableWrapper from "./utils/DropListItemExpandableWrapper";
 import DropsListItemChallengeBar from "./challenge/DropsListItemChallengeBar";
 import Tippy from "@tippyjs/react";
 import { useRouter } from "next/router";
 import OutsideLinkIcon from "../../../utils/icons/OutsideLinkIcon";
+import DropListItemLogsWrapper from "./logs/DropListItemLogsWrapper";
+import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 
-export enum DropActionExpandable {
+export enum DropDiscussionExpandableState {
   IDLE = "IDLE",
   DISCUSSION = "DISCUSSION",
-  QUOTE = "QUOTE",
   RATES = "RATES",
 }
 
@@ -32,9 +32,11 @@ export default function DropsListItem({
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
   }, [router.isReady]);
-  const [rateAction, setRateAction] = useState<DropActionExpandable>(
-    DropActionExpandable.IDLE
-  );
+  const [discussionExpandableState, setDiscussionExpandableState] =
+    useState<DropDiscussionExpandableState>(DropDiscussionExpandableState.IDLE);
+
+  const [isQuoteMode, setIsQuoteMode] = useState(false);
+
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
 
   return (
@@ -43,6 +45,11 @@ export default function DropsListItem({
         maxValue={100000}
         current={drop.rep}
         myRate={drop.rep_given_by_input_profile}
+      />
+      <DropListItemCreateQuote
+        drop={drop}
+        isOpen={isQuoteMode}
+        setIsOpen={setIsQuoteMode}
       />
       <div className="tw-p-4 sm:tw-p-5">
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
@@ -55,8 +62,10 @@ export default function DropsListItem({
             {haveData && <DropListItemData drop={drop} />}
             <DropListItemActions
               drop={drop}
-              state={rateAction}
-              setState={setRateAction}
+              discussionExpandableState={discussionExpandableState}
+              setDiscussionExpandableState={setDiscussionExpandableState}
+              isQuoteMode={isQuoteMode}
+              setIsQuoteMode={setIsQuoteMode}
             />
           </div>
           <div>
@@ -83,10 +92,9 @@ export default function DropsListItem({
           </div>
         </div>
       </div>
-      <DropListItemExpandableWrapper
+      <DropListItemLogsWrapper
         drop={drop}
-        state={rateAction}
-        setState={setRateAction}
+        discussionExpandableState={discussionExpandableState}
       />
     </div>
   );
