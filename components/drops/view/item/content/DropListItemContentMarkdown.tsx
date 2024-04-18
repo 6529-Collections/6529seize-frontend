@@ -3,6 +3,7 @@ import {
   ClassAttributes,
   memo,
   ReactNode,
+  RefObject,
   useEffect,
   useRef,
   useState,
@@ -23,9 +24,13 @@ import rehypeSanitize from "rehype-sanitize";
 const customRenderer = ({
   content,
   drop,
+  container,
+  addToContainerHeight,
 }: {
   readonly content: ReactNode | undefined;
   readonly drop: DropFull;
+  readonly container: React.RefObject<HTMLDivElement>;
+  readonly addToContainerHeight: (toAdd: number) => void;
 }) => {
   if (typeof content !== "string") {
     return content;
@@ -73,7 +78,14 @@ const customRenderer = ({
     .map((part) => {
       const partProps = values[part];
       if (partProps) {
-        return <DropListItemContentPart key={part} part={partProps} />;
+        return (
+          <DropListItemContentPart
+            key={part}
+            part={partProps}
+            container={container}
+            addToContainerHeight={addToContainerHeight}
+          />
+        );
       }
       return part;
     });
@@ -90,8 +102,7 @@ const aHrefRenderer = ({
   const { href } = props;
   const isValidLink =
     href?.startsWith("..") || href?.startsWith("/") || !href?.includes(".");
-  
-  
+
   if (!isValidLink) {
     return <p>[invalid link]</p>;
   }
@@ -107,26 +118,23 @@ const DropListItemContentMarkdown = memo(
     readonly showFull?: boolean;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
-
     const [isOverflowing, setIsOverflowing] = useState(false);
+    const checkOverflow = (container: RefObject<HTMLDivElement>) => {
+      setIsOverflowing(
+        !!containerRef.current &&
+          containerRef.current.scrollHeight > containerRef.current.clientHeight
+      );
+    };
 
     useEffect(() => {
-      const checkOverflow = () => {
-        setIsOverflowing(
-          !!containerRef.current &&
-            containerRef.current.scrollHeight >
-              containerRef.current.clientHeight
-        );
-      };
-
       // Check overflow initially
-      checkOverflow();
+      checkOverflow(containerRef);
 
       // Check overflow on window resize
-      window.addEventListener("resize", checkOverflow);
+      window.addEventListener("resize", () => checkOverflow(containerRef));
 
       // Set up a MutationObserver to check overflow when the container's content changes
-      const observer = new MutationObserver(checkOverflow);
+      const observer = new MutationObserver(() => checkOverflow(containerRef));
       if (containerRef.current) {
         observer.observe(containerRef.current, {
           childList: true,
@@ -136,12 +144,21 @@ const DropListItemContentMarkdown = memo(
 
       // Clean up event listeners and observer
       return () => {
-        window.removeEventListener("resize", checkOverflow);
+        window.removeEventListener("resize", () => checkOverflow(containerRef));
         observer.disconnect();
       };
     }, [containerRef]);
 
     const [showMore, setShowMore] = useState(showFull);
+
+    const addToContainerHeight = (toAdd: number) => {
+      if (!containerRef.current) return;
+      containerRef.current?.style.setProperty(
+        "max-height",
+        `${288 + toAdd + 288}px`
+      );
+      checkOverflow(containerRef);
+    };
 
     return (
       <>
@@ -169,37 +186,72 @@ const DropListItemContentMarkdown = memo(
               components={{
                 h5: (params) => (
                   <h5 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </h5>
                 ),
                 h4: (params) => (
                   <h4 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </h4>
                 ),
                 h3: (params) => (
                   <h3 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </h3>
                 ),
                 h2: (params) => (
                   <h2 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </h2>
                 ),
                 h1: (params) => (
                   <h1 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </h1>
                 ),
                 p: (params) => (
                   <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </p>
                 ),
                 li: (params) => (
                   <li className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </li>
                 ),
                 code: (params) => (
@@ -207,7 +259,12 @@ const DropListItemContentMarkdown = memo(
                     style={{ textOverflow: "unset" }}
                     className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
                   >
-                    {customRenderer({ content: params.children, drop })}
+                    {customRenderer({
+                      content: params.children,
+                      drop,
+                      container: containerRef,
+                      addToContainerHeight,
+                    })}
                   </code>
                 ),
                 a: (params) => aHrefRenderer(params),

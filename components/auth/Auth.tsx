@@ -17,7 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-import { connect } from "http2";
+
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
