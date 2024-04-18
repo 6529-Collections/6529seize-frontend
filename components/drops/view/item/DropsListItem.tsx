@@ -1,5 +1,5 @@
 import { DropFull } from "../../../../entities/IDrop";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DropListItemData from "./data/DropListItemData";
 import DropListItemActions from "./action/DropListItemActions";
 import DropWrapper from "../../create/utils/DropWrapper";
@@ -7,6 +7,9 @@ import DropListItemContent from "./content/DropListItemContent";
 import DropListItemRateWrapper from "./rate/DropListItemRateWrapper";
 import DropListItemExpandableWrapper from "./utils/DropListItemExpandableWrapper";
 import DropsListItemChallengeBar from "./challenge/DropsListItemChallengeBar";
+import Tippy from "@tippyjs/react";
+import { useRouter } from "next/router";
+import OutsideLinkIcon from "../../../utils/icons/OutsideLinkIcon";
 
 export enum DropActionExpandable {
   IDLE = "IDLE",
@@ -24,6 +27,11 @@ export default function DropsListItem({
   readonly showFull?: boolean;
   readonly showExternalLink?: boolean;
 }) {
+  const router = useRouter();
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  useEffect(() => {
+    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
+  }, [router.isReady]);
   const [rateAction, setRateAction] = useState<DropActionExpandable>(
     DropActionExpandable.IDLE
   );
@@ -39,7 +47,7 @@ export default function DropsListItem({
       <div className="tw-p-4 sm:tw-p-5">
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
-            <DropWrapper drop={drop} showExternalLink={showExternalLink}>
+            <DropWrapper drop={drop}>
               <div className="tw-w-full">
                 <DropListItemContent drop={drop} showFull={showFull} />
               </div>
@@ -51,7 +59,28 @@ export default function DropsListItem({
               setState={setRateAction}
             />
           </div>
-          <DropListItemRateWrapper drop={drop} />
+          <div>
+            {showExternalLink && (
+              <div className="tw-inline-flex">
+                <Tippy
+                  content="Open"
+                  theme="dark"
+                  placement="top"
+                  disabled={isTouchScreen}
+                >
+                  <a
+                    href={`/brain/${drop.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`tw-block tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-600 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+                  >
+                    <OutsideLinkIcon />
+                  </a>
+                </Tippy>
+              </div>
+            )}
+            <DropListItemRateWrapper drop={drop} />
+          </div>
         </div>
       </div>
       <DropListItemExpandableWrapper
