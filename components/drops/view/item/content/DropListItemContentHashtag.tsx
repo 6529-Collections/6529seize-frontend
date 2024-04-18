@@ -7,12 +7,16 @@ import {
   ReservoirTokensResponseTokenElement,
 } from "../../../../../entities/IReservoir";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function DropListItemContentHashtag({
   nft: { contract, token },
+  container,
+  addToContainerHeight,
 }: {
   readonly nft: ReferencedNft;
+  readonly container: React.RefObject<HTMLDivElement>;
+  readonly addToContainerHeight: (toAdd: number) => void;
 }) {
   const { data: nfts } = useQuery<ReservoirTokensResponseTokenElement[]>({
     queryKey: [QueryKey.RESERVOIR_NFT, { contract, token }],
@@ -37,19 +41,39 @@ export default function DropListItemContentHashtag({
       setNft(nfts[0]);
     }
   }, [nfts]);
+
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  const handleImageLoad = () => {
+    if (elementRef.current && container.current) {
+      const containerRect = container.current.getBoundingClientRect();
+      const elementRect = elementRef.current.getBoundingClientRect();
+      const inViewPort = elementRect.top <= containerRect.bottom;
+      if (token === "4") return;
+      if (inViewPort) {
+        const toAdd = elementRect.bottom - containerRect.bottom;
+        if (toAdd > 0) {
+          console.log(toAdd, token);
+          addToContainerHeight(toAdd);
+        }
+      }
+    }
+  };
+
   return (
     <LazyTippy
       placement={"top"}
       interactive={false}
       content={<NftTooltip contract={contract} token={token} />}
     >
-      <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col">
+      <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col" ref={elementRef}>
         <div className="tw-w-full tw-h-full">
           {nft && (
             <img
               src={nft.token.imageSmall}
               alt="NFT token"
               className="tw-w-full tw-h-full tw-object-center tw-object-contain"
+              onLoad={handleImageLoad}
             />
           )}
         </div>

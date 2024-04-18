@@ -7,13 +7,13 @@ import DropListItemContentMention from "./DropListItemContentMention";
 export interface DropListItemContentMentionProps {
   readonly type: DropContentPartType.MENTION;
   readonly value: MentionedUser;
-  readonly match: string
+  readonly match: string;
 }
 
 export interface DropListItemContentHashtagProps {
   readonly type: DropContentPartType.HASHTAG;
   readonly value: ReferencedNft;
-  readonly match: string
+  readonly match: string;
 }
 
 export type DropListItemContentPartProps =
@@ -22,15 +22,25 @@ export type DropListItemContentPartProps =
 
 export default function DropListItemContentPart({
   part,
+  container,
+  addToContainerHeight,
 }: {
   readonly part: DropListItemContentPartProps;
+  readonly container: React.RefObject<HTMLDivElement>;
+  readonly addToContainerHeight: (toAdd: number) => void;
 }) {
   const { type, value } = part;
   switch (type) {
     case DropContentPartType.MENTION:
       return <DropListItemContentMention user={value} />;
     case DropContentPartType.HASHTAG:
-      return <DropListItemContentHashtag nft={value} />;
+      return (
+        <DropListItemContentHashtag
+          nft={value}
+          container={container}
+          addToContainerHeight={addToContainerHeight}
+        />
+      );
     default:
       assertUnreachable(type);
   }
