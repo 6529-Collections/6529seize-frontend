@@ -54,9 +54,16 @@ export default function DropListItemContentHashtag({
           )}
         </div>
         <div className="tw-gap-x-2 tw-flex tw-items-center">
-          <img alt="Seize" src="Seize_Logo_2.png" className="tw-flex-shrink-0 tw-h-3 tw-w-3" />
-          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-50">
+          <img
+            alt="Seize"
+            src="Seize_Logo_2.png"
+            className="tw-flex-shrink-0 tw-h-3 tw-w-3"
+          />
+          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-50">
             Venus's Love for Transactions
+          </span>
+          <span className="w-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-bg-[#B884FF]/10 tw-text-[#B884FF] tw-ring-[#B884FF]/20">
+            SZN1
           </span>
           <span className="tw-whitespace-nowrap inline-flex items-center tw-rounded-full tw-bg-green/10 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-green tw-ring-1 tw-ring-inset tw-ring-green/20">
             <svg
@@ -76,7 +83,7 @@ export default function DropListItemContentHashtag({
             </svg>
             <span>simo</span>
           </span>
-          <span className="tw-whitespace-nowrap inline-flex items-center tw-rounded-full tw-bg-neutral-800 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-neutral-700">
+          <span className="tw-whitespace-nowrap inline-flex items-center tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-iron-700">
             <span>simo.eth</span>
           </span>
         </div>
