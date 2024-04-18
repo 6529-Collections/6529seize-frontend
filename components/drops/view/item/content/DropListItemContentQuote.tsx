@@ -20,7 +20,7 @@ export default function DropListItemContentQuote({
   return (
     <div
       onClick={onClick}
-      className="tw-cursor-pointer tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-2"
+      className="tw-cursor-pointer tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-4"
     >
       <DropWrapper drop={drop} showExternalLink={false}>
         <DropListItemContentMarkdown drop={drop} showFull={showFull} />

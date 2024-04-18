@@ -217,7 +217,7 @@ const DropListItemContentMarkdown = memo(
           </div>
         </CommonAnimationHeight>
         {!!drop.media_url && !!drop.media_mime_type && (
-          <div className="tw-mt-8">
+          <div>
             <DropListItemContentMedia
               media_mime_type={drop.media_mime_type}
               media_url={drop.media_url}

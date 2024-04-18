@@ -208,7 +208,7 @@ export default function DropListItemRateGive({
   };
 
   return (
-    <div className="tw-gap-y-1 tw-flex tw-flex-col tw-items-center tw-mt-10">
+    <div className="tw-mt-1 tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
       {canRate && (
         <div className="tw-text-center">
           <span

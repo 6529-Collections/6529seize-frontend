@@ -54,7 +54,7 @@ export default function DropListItemActionsRate({
         />
       }
     >
-      <div>
+      <div className="-tw-mb-1">
         <DropListItemActionsItemWrapper
           state={DropActionExpandable.RATES}
           setState={setState}
