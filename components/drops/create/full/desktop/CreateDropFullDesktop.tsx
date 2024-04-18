@@ -95,7 +95,7 @@ export default function CreateDropFullDesktop({
           />
         </svg>
       </button>
-      <div className="tw-relative tw-flex tw-justify-end -tw-mb-4 tw-mt-2">
+      <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-4">
         {titleState === TITLE_STATE.BUTTON && (
           <button
             onClick={() => setTitleState(TITLE_STATE.INPUT)}
@@ -129,12 +129,6 @@ export default function CreateDropFullDesktop({
         <div className="tw-flex tw-flex-col tw-space-y-5 tw-w-full">
           {titleState === TITLE_STATE.INPUT && (
             <div>
-              <label
-                htmlFor="title"
-                className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm"
-              >
-                Title
-              </label>
               <div className="tw-mt-1 5">
                 <input
                   id="title"

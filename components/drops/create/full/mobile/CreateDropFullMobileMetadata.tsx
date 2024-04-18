@@ -25,6 +25,9 @@ export default function CreateDropFullMobileMetadata({
 
   return (
     <div>
+      <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+        Metadata
+      </label>
       <CreateDropMetadataItems
         items={metadata}
         onMetadataRemove={onMetadataRemove}
