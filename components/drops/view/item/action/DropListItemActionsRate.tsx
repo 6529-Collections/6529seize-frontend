@@ -1,12 +1,12 @@
 import Tippy from "@tippyjs/react";
 import { DropFull } from "../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
-import { DropActionExpandable } from "../DropsListItem";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 import DropListItemActionsRateTooltip from "./DropListItemActionsRateTooltip";
 import RateClapOutlineIcon from "../../../../utils/icons/RateClapOutlineIcon";
 import RateClapSolidIcon from "./RateClapSolidIcon";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { DropDiscussionExpandableState } from "../DropsListItem";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",
@@ -19,7 +19,7 @@ export default function DropListItemActionsRate({
   setState,
 }: {
   readonly drop: DropFull;
-  readonly setState: (state: DropActionExpandable) => void;
+  readonly setState: (state: DropDiscussionExpandableState) => void;
 }) {
   const userHaveRated = !!drop.rep_given_by_input_profile;
   const getRateStatus = (): RateStatus => {
@@ -56,7 +56,7 @@ export default function DropListItemActionsRate({
     >
       <div className="-tw-mb-1">
         <DropListItemActionsItemWrapper
-          state={DropActionExpandable.RATES}
+          state={DropDiscussionExpandableState.RATES}
           setState={setState}
         >
           <>
