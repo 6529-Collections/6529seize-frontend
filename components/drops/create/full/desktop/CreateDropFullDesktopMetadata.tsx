@@ -43,7 +43,7 @@ export default function CreateDropFullDesktopMetadata({
           <input
             ref={metadataKeyRef}
             type="text"
-            placeholder="Metadata Key"
+            placeholder="Category"
             value={key ?? ""}
             onChange={(e) => setKey(e.target.value)}
             maxLength={100}

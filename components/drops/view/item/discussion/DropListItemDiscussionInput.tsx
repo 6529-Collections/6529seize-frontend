@@ -54,10 +54,6 @@ export default function DropListItemDiscussionInput({
       });
     },
     onSuccess: () => {
-      setToast({
-        message: "Comment submitted",
-        type: "success",
-      });
       setComment(null);
       onDropDiscussionChange({
         dropId: drop.id,
