@@ -21,6 +21,7 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_CHAIN_ID,
 } from "../../nextGen/nextgen_contracts";
+import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 
 export interface NFTSearchResult {
   id: number;
@@ -92,21 +93,7 @@ export default function HeaderSearchModalItem({
       return <UserCICAndLevel level={profile.level} cicType={cicType} />;
     } else {
       const nft = getNft();
-      const imgSrc = nft.icon_url ?? nft.thumbnail_url ?? nft.image_url;
-      if (!imgSrc) {
-        return <></>;
-      }
-      return (
-        <Image
-          priority
-          loading="eager"
-          width={0}
-          height={25}
-          style={{ height: "25px", width: "auto" }}
-          src={imgSrc}
-          alt={nft.name ?? `#${nft.id}`}
-        />
-      );
+      return <HeaderSearchModalItemMedia nft={nft} />;
     }
   };
 
@@ -152,11 +139,13 @@ export default function HeaderSearchModalItem({
       ref={ref}
       className={`${
         isSelected ? "tw-bg-iron-800" : ""
-      } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
+      } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}
+    >
       <Link
         href={getPath()}
         onClick={onClose}
-        className="tw-group tw-no-underline tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left tw-text-sm tw-font-medium">
+        className="tw-group tw-no-underline tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left tw-text-sm tw-font-medium"
+      >
         {getMedia()}
         <div className="tw-w-full">
           <div className="tw-inline-flex tw-justify-between tw-w-full">

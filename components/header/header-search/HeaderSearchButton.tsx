@@ -2,9 +2,16 @@ import { useState } from "react";
 import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../utils/animation/CommonAnimationOpacity";
 import HeaderSearchModal from "./HeaderSearchModal";
+import { useKey } from "react-use";
 
 export default function HeaderSearchButton() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  useKey(
+    (event) => event.metaKey && event.key === "k",
+    () => setIsOpen(true),
+    { event: "keydown" }
+  );
 
   return (
     <div className="tailwind-scope">
