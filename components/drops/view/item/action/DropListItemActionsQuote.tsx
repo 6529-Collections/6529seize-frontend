@@ -1,19 +1,20 @@
 import { DropFull } from "../../../../../entities/IDrop";
-import { DropActionExpandable } from "../DropsListItem";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 
 export default function DropListItemActionsQuote({
   drop,
-  setState,
+  isQuoteMode,
+  setIsQuoteMode,
 }: {
   readonly drop: DropFull;
-  readonly setState: (state: DropActionExpandable) => void;
+  readonly isQuoteMode: boolean;
+  readonly setIsQuoteMode: (newState: boolean) => void;
 }) {
   const userHaveQuoted = !!drop.quote_count_by_input_profile;
   return (
     <DropListItemActionsItemWrapper
-      state={DropActionExpandable.QUOTE}
-      setState={setState}
+      state={!isQuoteMode}
+      setState={setIsQuoteMode}
     >
       <>
         <svg
