@@ -12,11 +12,11 @@ import { useEffect, useRef, useState } from "react";
 export default function DropListItemContentHashtag({
   nft: { contract, token },
   container,
-  addToContainerHeight,
+  onImageLoaded,
 }: {
   readonly nft: ReferencedNft;
   readonly container: React.RefObject<HTMLDivElement>;
-  readonly addToContainerHeight: (toAdd: number) => void;
+  readonly onImageLoaded: () => void;
 }) {
   const { data: nfts } = useQuery<ReservoirTokensResponseTokenElement[]>({
     queryKey: [QueryKey.RESERVOIR_NFT, { contract, token }],
@@ -45,19 +45,7 @@ export default function DropListItemContentHashtag({
   const elementRef = useRef<HTMLDivElement>(null);
 
   const handleImageLoad = () => {
-    if (elementRef.current && container.current) {
-      const containerRect = container.current.getBoundingClientRect();
-      const elementRect = elementRef.current.getBoundingClientRect();
-      const inViewPort = elementRect.top <= containerRect.bottom;
-      if (token === "4") return;
-      if (inViewPort) {
-        const toAdd = elementRect.bottom - containerRect.bottom;
-        if (toAdd > 0) {
-          console.log(toAdd, token);
-          addToContainerHeight(toAdd);
-        }
-      }
-    }
+    onImageLoaded();
   };
 
   return (
