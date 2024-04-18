@@ -11,21 +11,21 @@ import { ProfileConnectedStatus } from "../../../../../../../entities/IProfile";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
 import { DropFull } from "../../../../../../../entities/IDrop";
 
-enum RepStatus {
+enum RateStatus {
   POSITIVE = "POSITIVE",
   NEUTRAL = "NEUTRAL",
   NEGATIVE = "NEGATIVE",
 }
 
-export default function DropListItemRepGiveClap({
+export default function DropListItemRateGiveClap({
   drop,
-  rep,
-  availableRep,
+  rate,
+  availableRates,
   onSubmit,
 }: {
   readonly drop: DropFull;
-  readonly rep: number;
-  readonly availableRep: number;
+  readonly rate: number;
+  readonly availableRates: number;
   readonly onSubmit: () => void;
 }) {
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
@@ -118,28 +118,28 @@ export default function DropListItemRepGiveClap({
     setAnimationTimeline(tempAnimationTimeline);
   }, [init]);
 
-  const getRepStatus = (): RepStatus => {
-    if (rep > 0) return RepStatus.POSITIVE;
-    if (rep < 0) return RepStatus.NEGATIVE;
-    return RepStatus.NEUTRAL;
+  const getRateStatus = (): RateStatus => {
+    if (rate > 0) return RateStatus.POSITIVE;
+    if (rate < 0) return RateStatus.NEGATIVE;
+    return RateStatus.NEUTRAL;
   };
 
   const handleClick = () => {
     if (connectionStatus !== ProfileConnectedStatus.HAVE_PROFILE) return;
-    const status = getRepStatus();
-    if (status === RepStatus.NEUTRAL) return;
+    const status = getRateStatus();
+    if (status === RateStatus.NEUTRAL) return;
     animationTimeline.replay();
     onSubmit();
   };
 
-  const getCountShort = () => `${rep > 0 ? "+" : ""}${formatLargeNumber(rep)}`;
+  const getCountShort = () => `${rate > 0 ? "+" : ""}${formatLargeNumber(rate)}`;
 
   const [countShort, setCountShort] = useState(getCountShort());
 
-  const CLAP_CLASSES: Record<RepStatus, string> = {
-    [RepStatus.POSITIVE]: `hover:tw-border-green ${styles.clapPositive}`,
-    [RepStatus.NEGATIVE]: `hover:tw-border-red ${styles.clapNegative}`,
-    [RepStatus.NEUTRAL]: `hover:tw-border-iron-500`,
+  const CLAP_CLASSES: Record<RateStatus, string> = {
+    [RateStatus.POSITIVE]: `hover:tw-border-green ${styles.clapPositive}`,
+    [RateStatus.NEGATIVE]: `hover:tw-border-red ${styles.clapNegative}`,
+    [RateStatus.NEUTRAL]: `hover:tw-border-iron-500`,
   };
 
   const getCanRate = () => {
@@ -147,7 +147,7 @@ export default function DropListItemRepGiveClap({
       connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
       connectedProfile?.profile?.handle.toLowerCase() !==
         drop.author.handle.toLowerCase() &&
-      !!availableRep
+      !!availableRates
     );
   };
 
@@ -155,53 +155,53 @@ export default function DropListItemRepGiveClap({
 
   useEffect(() => {
     setCanRate(getCanRate());
-  }, [connectionStatus, connectedProfile, drop, availableRep]);
+  }, [connectionStatus, connectedProfile, drop, availableRates]);
 
   const getClapClasses = () => {
     if (!canRate) {
-      return CLAP_CLASSES[RepStatus.NEUTRAL];
+      return CLAP_CLASSES[RateStatus.NEUTRAL];
     }
-    const repStatus = getRepStatus();
-    return CLAP_CLASSES[repStatus];
+    const rateStatus = getRateStatus();
+    return CLAP_CLASSES[rateStatus];
   };
 
-  const TEXT_CLASSES: Record<RepStatus, string> = {
-    [RepStatus.POSITIVE]: "tw-text-green",
-    [RepStatus.NEGATIVE]: "tw-text-red",
-    [RepStatus.NEUTRAL]: "tw-text-iron-500",
+  const TEXT_CLASSES: Record<RateStatus, string> = {
+    [RateStatus.POSITIVE]: "tw-text-green",
+    [RateStatus.NEGATIVE]: "tw-text-red",
+    [RateStatus.NEUTRAL]: "tw-text-iron-500",
   };
 
   const getTextClasses = () => {
     if (!canRate) {
-      return TEXT_CLASSES[RepStatus.NEUTRAL];
+      return TEXT_CLASSES[RateStatus.NEUTRAL];
     }
-    const repStatus = getRepStatus();
-    return TEXT_CLASSES[repStatus];
+    const rateStatus = getRateStatus();
+    return TEXT_CLASSES[rateStatus];
   };
 
-  const CLAP_COUNT_COLOR_CLASSES: Record<RepStatus, string> = {
-    [RepStatus.POSITIVE]: "tw-bg-green",
-    [RepStatus.NEGATIVE]: "tw-bg-red",
-    [RepStatus.NEUTRAL]: "tw-bg-iron-900",
+  const CLAP_COUNT_COLOR_CLASSES: Record<RateStatus, string> = {
+    [RateStatus.POSITIVE]: "tw-bg-green",
+    [RateStatus.NEGATIVE]: "tw-bg-red",
+    [RateStatus.NEUTRAL]: "tw-bg-iron-900",
   };
 
   const getClapCountColorClasses = () => {
     if (!canRate) {
-      return CLAP_COUNT_COLOR_CLASSES[RepStatus.NEUTRAL];
+      return CLAP_COUNT_COLOR_CLASSES[RateStatus.NEUTRAL];
     }
-    const repStatus = getRepStatus();
-    return CLAP_COUNT_COLOR_CLASSES[repStatus];
+    const rateStatus = getRateStatus();
+    return CLAP_COUNT_COLOR_CLASSES[rateStatus];
   };
 
   const getClapCountSizeAndPositionClasses = () => {
-    const absRep = Math.abs(rep);
-    if (absRep < 100) {
+    const absRate = Math.abs(rate);
+    if (absRate < 100) {
       return "tw-w-7 tw-h-7 tw-left-[12px]";
-    } else if (absRep < 1000) {
+    } else if (absRate < 1000) {
       return "tw-w-8 tw-h-8 tw-left-[8px]";
-    } else if (absRep < 100000) {
+    } else if (absRate < 100000) {
       return "tw-w-9 tw-h-9 tw-left-[6px]";
-    } else if (absRep < 10000000) {
+    } else if (absRate < 10000000) {
       return "tw-w-9 tw-h-9 tw-left-[6px]";
     } else {
       return "tw-w-11 tw-h-11 tw-left-[2px]";
@@ -227,7 +227,7 @@ export default function DropListItemRepGiveClap({
     }
     switch (connectionStatus) {
       case ProfileConnectedStatus.HAVE_PROFILE:
-        if (!availableRep) {
+        if (!availableRates) {
           return "You don't have any available credits to vote";
         }
         return null;
@@ -251,7 +251,7 @@ export default function DropListItemRepGiveClap({
     setTextClasses(getTextClasses());
     setClapCountClasses(getClapCountClasses());
     setTooltipContent(getTooltipContent());
-    const burstColor = rep > 0 ? positiveRgba : negativeRgba;
+    const burstColor = rate > 0 ? positiveRgba : negativeRgba;
     triangleBurst?.tune({
       children: {
         stroke: burstColor,
@@ -262,7 +262,7 @@ export default function DropListItemRepGiveClap({
         fill: burstColor,
       },
     });
-  }, [rep, canRate, connectedProfile, availableRep]);
+  }, [rate, canRate, connectedProfile, availableRates]);
 
   return (
     <LazyTippy
@@ -273,7 +273,7 @@ export default function DropListItemRepGiveClap({
     >
       <div className="tailwind-scope">
         <button
-          disabled={!rep || !canRate}
+          disabled={!rate || !canRate}
           id={`clap-${randomID}`}
           className={`${clapClasses} tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-600 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={handleClick}

@@ -67,7 +67,7 @@ export interface DropFull {
   readonly quote_count_by_input_profile: number | null;
 }
 
-export interface DropRepChangeRequest {
+export interface DropRateChangeRequest {
   readonly amount: number;
   readonly category: string;
 }

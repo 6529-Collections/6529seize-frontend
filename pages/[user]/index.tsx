@@ -7,7 +7,7 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageDropsWrapper from "../../components/user/drops/UserPageDropsWrapper";
+import UserPageBrainWrapper from "../../components/user/brain/UserPageBrainWrapper";
 
 interface Props {
   readonly profile: IProfileAndConsolidations;
@@ -15,7 +15,7 @@ interface Props {
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
   <div className="tailwind-scope">
-    <UserPageDropsWrapper profile={pageProps.profile} />
+    <UserPageBrainWrapper profile={pageProps.profile} />
   </div>
 );
 Page.getLayout = (page: ReactElement<{ pageProps: Props }>) => (

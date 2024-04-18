@@ -7,7 +7,7 @@ import DropAuthor, {
 import DropPfp, { DropPFPSize } from "../../../../create/utils/DropPfp";
 import DropListItemDiscussionItemsItemComment from "./DropListItemDiscussionItemsItemComment";
 import DropListItemDiscussionItemsItemDropCreated from "./DropListItemDiscussionItemsItemDropCreated";
-import DropListItemDiscussionItemsItemRep from "./DropListItemDiscussionItemsItemRep";
+import DropListItemDiscussionItemsItemRate from "./DropListItemDiscussionItemsItemRate";
 
 export default function DropListItemDiscussionItemsItem({
   item,
@@ -20,7 +20,7 @@ export default function DropListItemDiscussionItemsItem({
       case ProfileActivityLogType.DROP_COMMENT:
         return <DropListItemDiscussionItemsItemComment item={item} />;
       case ProfileActivityLogType.DROP_REP_EDIT:
-        return <DropListItemDiscussionItemsItemRep item={item} />;
+        return <DropListItemDiscussionItemsItemRate item={item} />;
       case ProfileActivityLogType.DROP_CREATED:
         return <DropListItemDiscussionItemsItemDropCreated />;
       default:

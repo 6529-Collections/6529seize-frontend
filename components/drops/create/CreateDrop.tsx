@@ -57,10 +57,6 @@ export default function CreateDrop({
         body,
       }),
     onSuccess: (response) => {
-      setToast({
-        message: "Drop created.",
-        type: "success",
-      });
       setDropEditorRefreshKey((prev) => prev + 1);
       onDropCreate({ profile });
       if (onSuccessfulDrop) {

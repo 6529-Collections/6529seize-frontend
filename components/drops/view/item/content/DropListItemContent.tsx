@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
-import DropWrapper from "../../../create/utils/DropWrapper";
+import DropListItemContentQuote from "./DropListItemContentQuote";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -30,14 +30,7 @@ export default function DropListItemContent({
     <div>
       <DropListItemContentMarkdown drop={drop} showFull={showFull} />
       {quotedDrop && (
-        <div className="tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-2">
-          <DropWrapper drop={quotedDrop}>
-            <DropListItemContentMarkdown
-              drop={quotedDrop}
-              showFull={showFull}
-            />
-          </DropWrapper>
-        </div>
+        <DropListItemContentQuote drop={quotedDrop} showFull={showFull} />
       )}
     </div>
   );

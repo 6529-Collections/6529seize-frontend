@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { DropFull } from "../../../../../entities/IDrop";
-import { RepActionExpandable } from "../DropsListItem";
+import { DropActionExpandable } from "../DropsListItem";
 import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
 import DropListItemQuote from "../quote/DropListItemQuote";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
@@ -13,36 +13,36 @@ export default function DropListItemExpandableWrapper({
   setState,
 }: {
   readonly drop: DropFull;
-  readonly state: RepActionExpandable;
-  readonly setState: (newState: RepActionExpandable) => void;
+  readonly state: DropActionExpandable;
+  readonly setState: (newState: DropActionExpandable) => void;
 }) {
   const [init, setInit] = useState(false);
   useEffect(() => setInit(true), []);
-  const open = state !== RepActionExpandable.IDLE;
+  const open = state !== DropActionExpandable.IDLE;
   const [animating, setAnimating] = useState(false);
-  const component: Record<RepActionExpandable, JSX.Element> = {
-    [RepActionExpandable.DISCUSSION]: (
+  const component: Record<DropActionExpandable, JSX.Element> = {
+    [DropActionExpandable.DISCUSSION]: (
       <DropListItemDiscussion
         drop={drop}
         initialFilter={ProfileActivityLogType.DROP_COMMENT}
         animating={animating}
       />
     ),
-    [RepActionExpandable.QUOTE]: (
+    [DropActionExpandable.QUOTE]: (
       <DropListItemQuote
         quotedDropId={drop.id}
         init={init}
-        onSuccessfulDrop={() => setState(RepActionExpandable.IDLE)}
+        onSuccessfulDrop={() => setState(DropActionExpandable.IDLE)}
       />
     ),
-    [RepActionExpandable.REP]: (
+    [DropActionExpandable.RATES]: (
       <DropListItemDiscussion
         drop={drop}
         initialFilter={ProfileActivityLogType.DROP_REP_EDIT}
         animating={animating}
       />
     ),
-    [RepActionExpandable.IDLE]: <></>,
+    [DropActionExpandable.IDLE]: <></>,
   };
 
   return (

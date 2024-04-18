@@ -2,11 +2,8 @@ import Head from "next/head";
 import { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
 import Brain from "../../components/brain/Brain";
-import { useContext } from "react";
-import { AuthContext } from "../../components/auth/Auth";
 
 export default function BrainPage() {
-  const { canSeeDrops } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Brain" },
@@ -29,11 +26,9 @@ export default function BrainPage() {
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      {canSeeDrops && (
-        <SidebarLayout breadcrumbs={breadcrumbs}>
-          <Brain />
-        </SidebarLayout>
-      )}
+      <SidebarLayout breadcrumbs={breadcrumbs}>
+        <Brain />
+      </SidebarLayout>
     </>
   );
 }

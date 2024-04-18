@@ -2,32 +2,32 @@ import { DropActivityLogRepEdit } from "../../../../../../entities/IDrop";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 
-enum RepChangeType {
+enum RateChangeType {
   ADDED = "ADDED",
   REMOVED = "REMOVED",
 }
 
-const REP_CHANGE_TEXT: Record<RepChangeType, string> = {
-  [RepChangeType.ADDED]: "Added",
-  [RepChangeType.REMOVED]: "Reduced",
+const RATE_CHANGE_TEXT: Record<RateChangeType, string> = {
+  [RateChangeType.ADDED]: "Added",
+  [RateChangeType.REMOVED]: "Reduced",
 };
 
-export default function DropListItemDiscussionItemsItemRep({
+export default function DropListItemDiscussionItemsItemRate({
   item,
 }: {
   readonly item: DropActivityLogRepEdit;
 }) {
-  const getRepChangeType = (): RepChangeType =>
+  const getRateChangeType = (): RateChangeType =>
     item.contents.new_rating < item.contents.old_rating
-      ? RepChangeType.REMOVED
-      : RepChangeType.ADDED;
-  const action = getRepChangeType();
+      ? RateChangeType.REMOVED
+      : RateChangeType.ADDED;
+  const action = getRateChangeType();
   const diff = Math.abs(item.contents.new_rating - item.contents.old_rating);
   const getDiffColor = () => {
     switch (action) {
-      case RepChangeType.ADDED:
+      case RateChangeType.ADDED:
         return "tw-text-green";
-      case RepChangeType.REMOVED:
+      case RateChangeType.REMOVED:
         return "tw-text-red";
       default:
         assertUnreachable(action);
@@ -46,7 +46,7 @@ export default function DropListItemDiscussionItemsItemRep({
   return (
     <div className="tw-space-x-1 tw-inline-flex tw-items-center">
       <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-font-medium">
-        {REP_CHANGE_TEXT[action]}
+        {RATE_CHANGE_TEXT[action]}
       </span>
       <span className={`${diffColor} tw-text-sm tw-font-medium`}>
         {formatNumberWithCommas(diff)}

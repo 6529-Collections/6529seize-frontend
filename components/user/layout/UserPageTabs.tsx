@@ -1,10 +1,9 @@
 import { useRouter } from "next/router";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
-import { AuthContext } from "../../auth/Auth";
 
 export enum UserPageTabType {
-  DROPS = "DROPS",
+  BRAIN = "BRAIN",
   REP = "REP",
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
@@ -16,9 +15,9 @@ export const USER_PAGE_TAB_META: Record<
   UserPageTabType,
   { tab: UserPageTabType; title: string; route: string }
 > = {
-  [UserPageTabType.DROPS]: {
-    tab: UserPageTabType.DROPS,
-    title: "Drops",
+  [UserPageTabType.BRAIN]: {
+    tab: UserPageTabType.BRAIN,
+    title: "Brain",
     route: "",
   },
   [UserPageTabType.REP]: {
@@ -51,7 +50,6 @@ export const USER_PAGE_TAB_META: Record<
 
 export default function UserPageTabs() {
   const router = useRouter();
-  const { canSeeDrops } = useContext(AuthContext);
 
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
@@ -73,18 +71,6 @@ export default function UserPageTabs() {
     setTab(pathnameToTab(router.pathname));
   }, [router.query]);
 
-  const getTabs = (): UserPageTabType[] => {
-    const items = Object.values(UserPageTabType);
-    if (canSeeDrops) {
-      return items;
-    }
-    return items.filter((item) => item !== UserPageTabType.DROPS);
-  };
-  const [tabs, setTabs] = useState<UserPageTabType[]>(getTabs());
-  useEffect(() => {
-    setTabs(getTabs());
-  }, [canSeeDrops]);
-
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -97,7 +83,7 @@ export default function UserPageTabs() {
           className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
           aria-label="Tabs"
         >
-          {tabs.map((tabType) => (
+          {Object.values(UserPageTabType).map((tabType) => (
             <UserPageTab
               key={tabType}
               tab={tabType}
