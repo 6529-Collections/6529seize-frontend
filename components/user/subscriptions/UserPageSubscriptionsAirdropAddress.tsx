@@ -17,6 +17,16 @@ export interface AirdropAddressResult {
   airdrop_address: AirdropAddress;
 }
 
+export interface AirdropAddress {
+  address: string;
+  ens: string;
+}
+
+export interface AirdropAddressResult {
+  tdh_wallet: AirdropAddress;
+  airdrop_address: AirdropAddress;
+}
+
 export default function UserPageSubscriptionsAirdropAddress(
   props: Readonly<{
     show_edit: boolean;
@@ -67,9 +77,10 @@ export default function UserPageSubscriptionsAirdropAddress(
             )}
           </span>
           {props.airdrop?.airdrop_address && props.show_edit && (
-            <button className="btn-link" onClick={onClick}>
+            <a
+              href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}>
               Change
-            </button>
+            </a>
           )}
         </Col>
       </Row>
