@@ -55,10 +55,10 @@ export default function DropListItemContentHashtag({
         </div>
         <div className="tw-gap-x-2 tw-flex tw-items-center">
           <img alt="Seize" src="Seize_Logo_2.png" className="tw-flex-shrink-0 tw-h-3 tw-w-3" />
-          <span className="tw-text-md tw-font-medium tw-text-neutral-50">
+          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-50">
             Venus's Love for Transactions
           </span>
-          <span className="inline-flex items-center tw-rounded-full tw-bg-green/10 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-green tw-ring-1 tw-ring-inset tw-ring-green/20">
+          <span className="tw-whitespace-nowrap inline-flex items-center tw-rounded-full tw-bg-green/10 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-green tw-ring-1 tw-ring-inset tw-ring-green/20">
             <svg
               className="tw-h-2.5 tw-w-auto tw-mr-1"
               width="17"
@@ -76,7 +76,7 @@ export default function DropListItemContentHashtag({
             </svg>
             <span>simo</span>
           </span>
-          <span className="inline-flex items-center tw-rounded-full tw-bg-neutral-800 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-neutral-700">
+          <span className="tw-whitespace-nowrap inline-flex items-center tw-rounded-full tw-bg-neutral-800 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-neutral-700">
             <span>simo.eth</span>
           </span>
         </div>
