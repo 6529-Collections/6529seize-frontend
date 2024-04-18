@@ -263,7 +263,7 @@ export default function HeaderSearchModal({
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
                 <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
-                  Start typing to search
+                  Search for NFTs (by ID or name) and Profiles
                 </p>
               </div>
             )}

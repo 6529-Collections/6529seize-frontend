@@ -80,7 +80,7 @@ export default function HeaderSearchModalItem({
       },
       [NEXTGEN_CORE[NEXTGEN_CHAIN_ID].toLowerCase()]: {
         title: "NextGen",
-        path: "/nextgen/token/",
+        path: "/nextgen/token",
       },
     };
   };
