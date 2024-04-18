@@ -13,7 +13,7 @@ import {
   getDateDisplay,
   getTransactionLink,
 } from "../../../helpers/Helpers";
-import { sepolia } from "wagmi";
+import { mainnet } from "wagmi";
 import { MEMES_CONTRACT } from "../../../constants";
 
 export default function UserPageSubscriptionsHistory(
@@ -148,7 +148,7 @@ function TopUpEntry(
               className="d-flex align-items-center"
               target="_blank"
               rel="noreferrer"
-              href={getTransactionLink(sepolia.id, props.topUp.hash)}>
+              href={getTransactionLink(mainnet.id, props.topUp.hash)}>
               <EtherscanIcon />
             </a>
           </div>
@@ -215,7 +215,7 @@ function RedeemedEntry(
               className="d-flex align-items-center"
               target="_blank"
               rel="noreferrer"
-              href={getTransactionLink(sepolia.id, props.redeem.transaction)}>
+              href={getTransactionLink(mainnet.id, props.redeem.transaction)}>
               <EtherscanIcon />
             </a>
           </div>
