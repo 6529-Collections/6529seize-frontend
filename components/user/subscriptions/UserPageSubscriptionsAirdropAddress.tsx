@@ -1,9 +1,12 @@
 import { formatAddress } from "../../../helpers/Helpers";
 import { Container, Row, Col } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
+import { MEMES_CONTRACT } from "../../../constants";
+import { AIRDROPS_USE_CASE } from "../../../pages/delegation/[...section]";
 
 export default function UserPageSubscriptionsAirdropAddress(
   props: Readonly<{
+    show_edit: boolean;
     airdrop_address?: {
       address: string;
       ens: string;
@@ -18,18 +21,26 @@ export default function UserPageSubscriptionsAirdropAddress(
         </Col>
       </Row>
       <Row className="pt-1">
-        <Col>
-          {props.airdrop_address && (
-            <>
-              <Tippy
-                content={props.airdrop_address.address}
-                placement="top-end">
-                <span>{formatAddress(props.airdrop_address.address)}</span>
-              </Tippy>
-              {props.airdrop_address.ens && (
-                <span> - {props.airdrop_address.ens}</span>
-              )}
-            </>
+        <Col className="d-flex gap-3">
+          <span>
+            {props.airdrop_address && (
+              <>
+                <Tippy
+                  content={props.airdrop_address.address}
+                  placement="top-end">
+                  <span>{formatAddress(props.airdrop_address.address)}</span>
+                </Tippy>
+                {props.airdrop_address.ens && (
+                  <span> - {props.airdrop_address.ens}</span>
+                )}
+              </>
+            )}
+          </span>
+          {props.show_edit && (
+            <a
+              href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}>
+              Change
+            </a>
           )}
         </Col>
       </Row>

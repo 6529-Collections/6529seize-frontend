@@ -176,6 +176,12 @@ export default function DelegationsDocumentation(props: any) {
   const [addressQuery, setAddressQuery] = useState<string>(
     pageProps.addressQuery
   );
+  const [collectionQuery, setCollectionQuery] = useState<string>(
+    pageProps.collectionQuery
+  );
+  const [useCaseQuery, setUseCaseQuery] = useState<number>(
+    pageProps.useCaseQuery
+  );
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
@@ -222,6 +228,18 @@ export default function DelegationsDocumentation(props: any) {
         } else {
           setAddressQuery("");
         }
+        if (activeSection === DelegationCenterSection.REGISTER_DELEGATION) {
+          if (collectionQuery) {
+            queryParam = { ...queryParam, collection: collectionQuery };
+          }
+          if (useCaseQuery) {
+            queryParam = { ...queryParam, use_case: useCaseQuery };
+          }
+        } else {
+          setCollectionQuery("");
+          setUseCaseQuery(0);
+        }
+
         router.push(
           {
             pathname: `${activeSection}`,
@@ -245,7 +263,7 @@ export default function DelegationsDocumentation(props: any) {
       }
       window.scrollTo(0, 0);
     }
-  }, [activeSection, addressQuery]);
+  }, [activeSection, addressQuery, collectionQuery, useCaseQuery]);
 
   return (
     <>
@@ -271,13 +289,13 @@ export default function DelegationsDocumentation(props: any) {
         <DelegationCenterMenu
           section={activeSection}
           path={pageProps.path}
-          setActiveSection={(section: DelegationCenterSection) => {
-            setActiveSection(section);
-          }}
+          setActiveSection={setActiveSection}
           address_query={addressQuery}
-          setAddressQuery={(address: string) => {
-            setAddressQuery(address);
-          }}
+          setAddressQuery={setAddressQuery}
+          collection_query={collectionQuery}
+          setCollectionQuery={setCollectionQuery}
+          use_case_query={useCaseQuery}
+          setUseCaseQuery={setUseCaseQuery}
         />
       </main>
     </>
@@ -289,6 +307,11 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   const mySection = sectionPath.length > 1 ? sectionPath : sectionPath[0];
 
   const addressQuery = req.query.address;
+  const collectionQuery = req.query.collection;
+  const useCaseQuery = req.query.use_case;
+  const useCaseQueryInt = !isNaN(parseInt(useCaseQuery))
+    ? parseInt(useCaseQuery)
+    : 0;
 
   if (
     mySection &&
@@ -302,6 +325,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       props: {
         section,
         addressQuery: addressQuery ?? null,
+        collectionQuery: collectionQuery ?? null,
+        useCaseQuery: useCaseQueryInt,
       },
     };
   } else {
