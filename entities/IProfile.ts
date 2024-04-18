@@ -464,7 +464,7 @@ export interface ProfileMinimal {
   readonly level: number;
 }
 
-export interface ProfileAvailableDropRepResponse {
+export interface ProfileAvailableDropRateResponse {
   readonly available_tdh_for_rep: number;
 }
 

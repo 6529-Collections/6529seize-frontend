@@ -1,4 +1,4 @@
-export default function RepClapOutlineIcon() {
+export default function RateClapOutlineIcon() {
   return (
     <svg
       className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"

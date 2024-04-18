@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -17,12 +17,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-import { getCanProfileSeeDrops } from "../../helpers/Helpers";
+import { connect } from "http2";
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
   readonly connectionStatus: ProfileConnectedStatus;
-  readonly canSeeDrops: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: ({
     message,
@@ -41,7 +40,6 @@ interface NonceResponse {
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
-  canSeeDrops: false,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
 });
@@ -71,18 +69,6 @@ export default function Auth({
       if (!isAuth) removeAuthJwt();
     }
   }, [address]);
-
-  // TODO: Implement getCanProfileSeeDrops
-  const [canSeeDrops, setCanSeeDrops] = useState<boolean>(true);
- 
-  // TODO: Implement getCanProfileSeeDrops
-  // useEffect(() => {
-  //   if (!connectedProfile) {
-  //     setCanSeeDrops(false);
-  //     return;
-  //   }
-  //   setCanSeeDrops(getCanProfileSeeDrops({ profile: connectedProfile }));
-  // }, [connectedProfile]);
 
   const getNonce = async ({
     signerAddress,
@@ -265,16 +251,18 @@ export default function Auth({
     return { success: !!getAuthJwt() };
   };
 
+  const value = useMemo(
+    () => ({
+      requestAuth,
+      setToast,
+      connectedProfile: connectedProfile ?? null,
+      connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
+    }),
+    [requestAuth, setToast, connectedProfile]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        requestAuth,
-        setToast,
-        connectedProfile: connectedProfile ?? null,
-        connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
-        canSeeDrops,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
       <ToastContainer />
     </AuthContext.Provider>

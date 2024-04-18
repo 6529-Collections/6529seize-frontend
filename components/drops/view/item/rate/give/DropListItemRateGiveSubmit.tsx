@@ -1,43 +1,44 @@
 import { useContext, useState } from "react";
 import {
   DropFull,
-  DropRepChangeRequest,
+  DropRateChangeRequest,
 } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
-import { DEFAULT_DROP_REP_CATEGORY } from "../DropListItemRepWrapper";
 import dynamic from "next/dynamic";
 
-const DropListItemRepGiveClap = dynamic(
-  () => import("./clap/DropListItemRepGiveClap"),
+const DropListItemRateGiveClap = dynamic(
+  () => import("./clap/DropListItemRateGiveClap"),
   { ssr: false }
 );
 
-export default function DropListItemRepGiveSubmit({
-  rep,
+const DEFAULT_DROP_RATE_CATEGORY = "Rep";
+
+export default function DropListItemRateGiveSubmit({
+  rate,
   drop,
-  availableRep,
-  onSuccessfulRepChange,
+  availableRates,
+  onSuccessfulRateChange,
 }: {
-  readonly rep: number;
+  readonly rate: number;
   readonly drop: DropFull;
-  readonly availableRep: number;
-  readonly onSuccessfulRepChange: () => void;
+  readonly availableRates: number;
+  readonly onSuccessfulRateChange: () => void;
 }) {
   const { requestAuth, setToast, connectedProfile, connectionStatus } =
     useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const repChangeMutation = useMutation({
-    mutationFn: async (param: { rep: number; category: string }) =>
-      await commonApiPost<DropRepChangeRequest, DropFull>({
+  const rateChangeMutation = useMutation({
+    mutationFn: async (param: { rate: number; category: string }) =>
+      await commonApiPost<DropRateChangeRequest, DropFull>({
         endpoint: `drops/${drop.id}/rep`,
         body: {
-          amount: param.rep,
+          amount: param.rate,
           category: param.category,
         },
       }),
@@ -50,7 +51,7 @@ export default function DropListItemRepGiveSubmit({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
       });
-      onSuccessfulRepChange();
+      onSuccessfulRateChange();
     },
     onError: (error) => {
       setToast({
@@ -63,7 +64,7 @@ export default function DropListItemRepGiveSubmit({
     },
   });
 
-  const onRepSubmit = async () => {
+  const onRateSubmit = async () => {
     if (connectionStatus === ProfileConnectedStatus.NOT_CONNECTED) {
       setToast({
         message: "Connect your wallet to vote",
@@ -78,7 +79,7 @@ export default function DropListItemRepGiveSubmit({
       });
       return;
     }
-    if (!rep) return;
+    if (!rate) return;
     if (loading) return;
     setLoading(true);
     const { success } = await requestAuth();
@@ -87,26 +88,26 @@ export default function DropListItemRepGiveSubmit({
       return;
     }
 
-    const previousRep =
+    const previousRate =
       drop.input_profile_categories?.find(
-        (c) => c.category === DEFAULT_DROP_REP_CATEGORY
+        (c) => c.category === DEFAULT_DROP_RATE_CATEGORY
       )?.rep_given_by_input_profile ?? 0;
 
-    const newRep = previousRep + rep;
+    const newRate = previousRate + rate;
 
-    await repChangeMutation.mutateAsync({
-      rep: newRep,
-      category: DEFAULT_DROP_REP_CATEGORY,
+    await rateChangeMutation.mutateAsync({
+      rate: newRate,
+      category: DEFAULT_DROP_RATE_CATEGORY,
     });
   };
 
   return (
     <div>
-      <DropListItemRepGiveClap
-        rep={rep}
-        onSubmit={onRepSubmit}
+      <DropListItemRateGiveClap
+        rate={rate}
+        onSubmit={onRateSubmit}
         drop={drop}
-        availableRep={availableRep}
+        availableRates={availableRates}
       />
     </div>
   );

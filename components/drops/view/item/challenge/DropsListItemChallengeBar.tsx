@@ -3,15 +3,15 @@ import DropListItemVotesTooltip from "../utils/DropListItemVotesTooltip";
 export default function DropsListItemChallengeBar({
   current,
   maxValue,
-  myRep,
+  myRate,
 }: {
   readonly current: number;
   readonly maxValue: number;
-  readonly myRep: number | null;
+  readonly myRate: number | null;
 }) {
   const width = (current / maxValue) * 100;
   return (
-    <DropListItemVotesTooltip myVotes={myRep} current={current}>
+    <DropListItemVotesTooltip myVotes={myRate} current={current}>
       <div className="tw-relative tw-px-2">
         <div className="tw-absolute tw-flex tw-mx-2 tw-top-0 tw-inset-x-0 tw-h-1 tw-bg-iron-700 tw-rounded-full tw-overflow-hidden">
           <div

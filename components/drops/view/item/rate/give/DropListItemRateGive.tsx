@@ -1,37 +1,37 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import DropListItemRepGiveChangeButton from "./DropListItemRepGiveChangeButton";
-import DropListItemRepGiveSubmit from "./DropListItemRepGiveSubmit";
+import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
+import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { DropFull } from "../../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 
-export enum RepChangeType {
+export enum RateChangeType {
   INCREASE = "INCREASE",
   DECREASE = "DECREASE",
 }
 
-export default function DropListItemRepGive({
+export default function DropListItemRateGive({
   drop,
-  availableRep,
+  availableRates,
 }: {
   readonly drop: DropFull;
-  readonly availableRep: number;
+  readonly availableRates: number;
 }) {
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
-  const [onProgressRep, setOnProgressRep] = useState<number>(1);
+  const [onProgressRate, setOnProgressRate] = useState<number>(1);
 
   const getCanRate = () => {
     return (
       connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
       connectedProfile?.profile?.handle.toLowerCase() !==
         drop.author.handle.toLowerCase() &&
-      !!availableRep
+      !!availableRates
     );
   };
 
@@ -41,16 +41,18 @@ export default function DropListItemRepGive({
     setCanRate(getCanRate());
     if (
       connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
-      Math.abs(onProgressRep) > availableRep
+      Math.abs(onProgressRate) > availableRates
     ) {
-      setOnProgressRep(onProgressRep > 0 ? availableRep : 0 - availableRep);
+      setOnProgressRate(
+        onProgressRate > 0 ? availableRates : 0 - availableRates
+      );
     } else if (connectionStatus === ProfileConnectedStatus.HAVE_PROFILE) {
-      setOnProgressRep(1);
+      setOnProgressRate(1);
     }
-  }, [connectionStatus, connectedProfile, drop, availableRep]);
+  }, [connectionStatus, connectedProfile, drop, availableRates]);
 
-  const onSuccessfulRepChange = () => {
-    setOnProgressRep(1);
+  const onSuccessfulRateChange = () => {
+    setOnProgressRate(1);
   };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -70,93 +72,93 @@ export default function DropListItemRepGive({
     return 1000;
   };
 
-  const getCorrectedNewRep = (newValue: number) => {
-    if (newValue > availableRep) {
-      return availableRep;
+  const getCorrectedNewRate = (newValue: number) => {
+    if (newValue > availableRates) {
+      return availableRates;
     }
-    if (newValue < 0 - availableRep) {
-      return 0 - availableRep;
+    if (newValue < 0 - availableRates) {
+      return 0 - availableRates;
     }
     return newValue;
   };
 
-  const getMemeticNewRep = ({
-    previousRep,
-    newRep,
+  const getMemeticNewRate = ({
+    previousRate,
+    newRate,
     changeType,
   }: {
-    readonly previousRep: number;
-    readonly newRep: number;
-    readonly changeType: RepChangeType;
+    readonly previousRate: number;
+    readonly newRate: number;
+    readonly changeType: RateChangeType;
   }): {
-    readonly rep: number;
+    readonly rate: number;
     readonly isMemetic: boolean;
   } => {
-    let finalVal = newRep; // Start with the new value
+    let finalVal = newRate; // Start with the new value
     const values =
-      changeType === RepChangeType.DECREASE
+      changeType === RateChangeType.DECREASE
         ? memeticValues.toReversed()
         : memeticValues;
     for (const memeticVal of values) {
       if (
-        (previousRep < memeticVal && memeticVal < newRep) || // memeticVal is between oldVal and newVal
-        (newRep < memeticVal && memeticVal < previousRep) // memeticVal is between newVal and oldVal
+        (previousRate < memeticVal && memeticVal < newRate) || // memeticVal is between oldVal and newVal
+        (newRate < memeticVal && memeticVal < previousRate) // memeticVal is between newVal and oldVal
       ) {
         finalVal = memeticVal; // Set the final value to the memetic value
         break; // Exit the loop
       }
     }
     return {
-      rep: finalVal,
+      rate: finalVal,
       isMemetic: values.includes(finalVal),
     };
   };
 
-  const getNewRepConfig = ({
+  const getNewRateConfig = ({
     changeType,
-    previousRep,
+    previousRate,
     startTime,
   }: {
-    readonly changeType: RepChangeType;
-    readonly previousRep: number;
+    readonly changeType: RateChangeType;
+    readonly previousRate: number;
     readonly startTime: number;
   }): {
-    readonly rep: number;
+    readonly rate: number;
   } => {
     const increaseAmount = getIncreaseAmount(startTime);
-    const newRep =
-      changeType === RepChangeType.INCREASE
-        ? previousRep + increaseAmount
-        : previousRep - increaseAmount;
-    const newValue = Math.round(newRep / increaseAmount) * increaseAmount;
-    const correctedNewRep = getCorrectedNewRep(newValue);
+    const newRate =
+      changeType === RateChangeType.INCREASE
+        ? previousRate + increaseAmount
+        : previousRate - increaseAmount;
+    const newValue = Math.round(newRate / increaseAmount) * increaseAmount;
+    const correctedNewRate = getCorrectedNewRate(newValue);
     return {
-      rep: correctedNewRep,
+      rate: correctedNewRate,
     };
   };
 
-  const modifyRep = ({
+  const modifyRate = ({
     changeType,
     intervalTime,
-    previousRep,
+    previousRate,
     startTime,
   }: {
     readonly intervalTime: number;
-    readonly changeType: RepChangeType;
-    readonly previousRep: number;
+    readonly changeType: RateChangeType;
+    readonly previousRate: number;
     readonly startTime: number;
   }) => {
-    const { rep: newRep } = getNewRepConfig({
+    const { rate: newRate } = getNewRateConfig({
       changeType,
-      previousRep,
+      previousRate,
       startTime,
     });
-    const { rep: memeticRep, isMemetic } = getMemeticNewRep({
-      previousRep,
-      newRep,
+    const { rate: memeticRate, isMemetic } = getMemeticNewRate({
+      previousRate,
+      newRate,
       changeType,
     });
-    setOnProgressRep(memeticRep);
+    setOnProgressRate(memeticRate);
 
     // Decrease interval time by 50%
     const newIntervalTime = Math.max(10, intervalTime * 0.9); // Minimum interval time is 10ms
@@ -165,22 +167,22 @@ export default function DropListItemRepGive({
     // Schedule next increase
     timeoutRef.current = setTimeout(
       () =>
-        modifyRep({
+        modifyRate({
           intervalTime:
             isMemetic && newIntervalTime < 300 ? 300 : newIntervalTime,
           changeType,
-          previousRep: memeticRep,
+          previousRate: memeticRate,
           startTime: isMemetic ? startTime + memeticWaitTime : startTime,
         }),
       waitForMemetic
     );
   };
 
-  const handleMouseDown = (changeType: RepChangeType) => {
-    modifyRep({
+  const handleMouseDown = (changeType: RateChangeType) => {
+    modifyRate({
       intervalTime: 500,
       changeType,
-      previousRep: onProgressRep,
+      previousRate: onProgressRate,
       startTime: Time.now().toMillis(),
     });
   };
@@ -192,14 +194,14 @@ export default function DropListItemRepGive({
     }
   };
 
-  const getRepText = () =>
-    `${onProgressRep > 0 ? "+" : ""}${formatNumberWithCommas(onProgressRep)}`;
+  const getRateText = () =>
+    `${onProgressRate > 0 ? "+" : ""}${formatNumberWithCommas(onProgressRate)}`;
 
-  const getRepClasses = () => {
-    if (onProgressRep > 0) {
+  const getRateClasses = () => {
+    if (onProgressRate > 0) {
       return "tw-text-green";
     }
-    if (onProgressRep < 0) {
+    if (onProgressRate < 0) {
       return "tw-text-red";
     }
     return "tw-text-iron-500";
@@ -210,30 +212,30 @@ export default function DropListItemRepGive({
       {canRate && (
         <div className="tw-text-center">
           <span
-            className={`${getRepClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+            className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
           >
-            {getRepText()}
+            {getRateText()}
           </span>
         </div>
       )}
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-[0.3125rem]">
-        <DropListItemRepGiveChangeButton
+        <DropListItemRateGiveChangeButton
           drop={drop}
-          type={RepChangeType.INCREASE}
-          availableRep={availableRep}
+          type={RateChangeType.INCREASE}
+          availableRates={availableRates}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
         />
-        <DropListItemRepGiveSubmit
-          rep={onProgressRep}
+        <DropListItemRateGiveSubmit
+          rate={onProgressRate}
           drop={drop}
-          availableRep={availableRep}
-          onSuccessfulRepChange={onSuccessfulRepChange}
+          availableRates={availableRates}
+          onSuccessfulRateChange={onSuccessfulRateChange}
         />
-        <DropListItemRepGiveChangeButton
+        <DropListItemRateGiveChangeButton
           drop={drop}
-          type={RepChangeType.DECREASE}
-          availableRep={availableRep}
+          type={RateChangeType.DECREASE}
+          availableRates={availableRates}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
         />
