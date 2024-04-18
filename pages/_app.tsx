@@ -248,21 +248,6 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
             <Auth>{getLayout(<Component {...props} />)}</Auth>
           </ReactQueryWrapper>
         </WagmiConfig>
-        {/* <Web3Modal
-          defaultChain={mainnet}
-          projectId={CW_PROJECT_ID}
-          ethereumClient={ethereumClient}
-          themeMode={"dark"}
-          themeVariables={{
-            "--w3m-background-color": "#282828",
-            "--w3m-logo-image-url":
-              "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-            "--w3m-accent-color": "#fff",
-            "--w3m-accent-fill-color": "#000",
-            "--w3m-button-border-radius": "0",
-            "--w3m-font-family": "Arial",
-          }}
-        /> */}
       </Provider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
