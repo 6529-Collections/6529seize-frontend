@@ -30,10 +30,10 @@ interface Props {
     collection: DelegationCollection;
   };
   ens: string | null | undefined;
-  collection_query: string;
-  setCollectionQuery(collection: string): any;
-  use_case_query: number;
-  setUseCaseQuery(useCase: number): any;
+  collection_query?: string;
+  setCollectionQuery?(collection: string): any;
+  use_case_query?: number;
+  setUseCaseQuery?(useCase: number): any;
   onHide(): any;
   onSetToast(toast: any): any;
 }
