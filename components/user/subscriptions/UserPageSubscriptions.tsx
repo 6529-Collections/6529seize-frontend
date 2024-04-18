@@ -15,14 +15,11 @@ import {
 import { AuthContext } from "../../auth/Auth";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
-import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
+import UserPageSubscriptionsAirdropAddress, {
+  AirdropAddressResult,
+} from "./UserPageSubscriptionsAirdropAddress";
 
 const HISTORY_PAGE_SIZE = 10;
-
-interface AirdropAddress {
-  address: string;
-  ens: string;
-}
 
 export default function UserPageSubscriptions(
   props: Readonly<{
@@ -36,7 +33,7 @@ export default function UserPageSubscriptions(
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
 
-  const [airdropAddress, setAirdropAddress] = useState<AirdropAddress>();
+  const [airdropResult, setAirdropResult] = useState<AirdropAddressResult>();
   const [fetchingAirdropAddress, setFetchingAirdropAddress] =
     useState<boolean>(true);
 
@@ -111,10 +108,10 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingAirdropAddress(true);
-    commonApiFetch<AirdropAddress>({
+    commonApiFetch<AirdropAddressResult>({
       endpoint: `subscriptions/consolidation/${props.profile.consolidation.consolidation_key}/airdrop-address`,
     }).then((data) => {
-      setAirdropAddress(data);
+      setAirdropResult(data);
       setFetchingAirdropAddress(false);
     });
   }
@@ -259,7 +256,7 @@ export default function UserPageSubscriptions(
                 />
                 <UserPageSubscriptionsAirdropAddress
                   show_edit={isConnectedAccount}
-                  airdrop_address={airdropAddress}
+                  airdrop={airdropResult}
                 />
               </Col>
             </Row>
