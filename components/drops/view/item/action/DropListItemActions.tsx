@@ -18,12 +18,10 @@ export default function DropListItemActions({
   };
 
   return (
-    <div className="tw-relative tw-z-[1] sm:tw-ml-12 tw-mt-4 tw-border-t tw-flex tw-items-center tw-justify-between lg:tw-gap-x-8">
+    <div className="tw-relative tw-z-[1] sm:tw-ml-12 tw-mt-4 tw-border-t tw-flex tw-items-center tw-justify-between sm:tw-justify-start sm:tw-gap-x-12">
       <DropListItemActionsDiscussion drop={drop} setState={onActionClick} />
       <DropListItemActionsQuote drop={drop} setState={onActionClick} />
-      <div className="tw-mt-0.5">
-        <DropListItemActionsRate drop={drop} setState={onActionClick} />
-      </div>
+      <DropListItemActionsRate drop={drop} setState={onActionClick} />
     </div>
   );
 }

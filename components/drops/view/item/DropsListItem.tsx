@@ -59,9 +59,9 @@ export default function DropsListItem({
               setState={setRateAction}
             />
           </div>
-          <div>
+          <div className="tw-flex tw-flex-col tw-items-center tw-min-h-full">
             {showExternalLink && (
-              <div className="tw-inline-flex">
+              <div className="tw-inline-flex -tw-mt-2">
                 <Tippy
                   content="Open"
                   theme="dark"
@@ -79,7 +79,9 @@ export default function DropsListItem({
                 </Tippy>
               </div>
             )}
-            <DropListItemRateWrapper drop={drop} />
+            <div className="tw-flex-grow tw-flex tw-flex-col tw-justify-center tw-items-center">
+              <DropListItemRateWrapper drop={drop} />
+            </div>
           </div>
         </div>
       </div>
