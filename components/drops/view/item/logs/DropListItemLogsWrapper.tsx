@@ -1,48 +1,36 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 import { DropFull } from "../../../../../entities/IDrop";
-import { DropActionExpandable } from "../DropsListItem";
 import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
-import DropListItemQuote from "../quote/DropListItemQuote";
-import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
-import { useEffect, useState } from "react";
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
+import { AnimatePresence, motion } from "framer-motion";
+import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
+import { DropDiscussionExpandableState } from "../DropsListItem";
 
-export default function DropListItemExpandableWrapper({
+export default function DropListItemLogsWrapper({
   drop,
-  state,
-  setState,
+  discussionExpandableState,
 }: {
   readonly drop: DropFull;
-  readonly state: DropActionExpandable;
-  readonly setState: (newState: DropActionExpandable) => void;
+  readonly discussionExpandableState: DropDiscussionExpandableState;
 }) {
-  const [init, setInit] = useState(false);
-  useEffect(() => setInit(true), []);
-  const open = state !== DropActionExpandable.IDLE;
+  const open = discussionExpandableState !== DropDiscussionExpandableState.IDLE;
   const [animating, setAnimating] = useState(false);
-  const component: Record<DropActionExpandable, JSX.Element> = {
-    [DropActionExpandable.DISCUSSION]: (
+  const component: Record<DropDiscussionExpandableState, JSX.Element> = {
+    [DropDiscussionExpandableState.DISCUSSION]: (
       <DropListItemDiscussion
         drop={drop}
         initialFilter={ProfileActivityLogType.DROP_COMMENT}
         animating={animating}
       />
     ),
-    [DropActionExpandable.QUOTE]: (
-      <DropListItemQuote
-        quotedDropId={drop.id}
-        init={init}
-        onSuccessfulDrop={() => setState(DropActionExpandable.IDLE)}
-      />
-    ),
-    [DropActionExpandable.RATES]: (
+    [DropDiscussionExpandableState.RATES]: (
       <DropListItemDiscussion
         drop={drop}
         initialFilter={ProfileActivityLogType.DROP_REP_EDIT}
         animating={animating}
       />
     ),
-    [DropActionExpandable.IDLE]: <></>,
+    [DropDiscussionExpandableState.IDLE]: <></>,
   };
 
   return (
@@ -87,9 +75,9 @@ export default function DropListItemExpandableWrapper({
               }}
               onAnimationStart={() => setAnimating(true)}
               onAnimationComplete={() => setAnimating(false)}
-              key={state}
+              key={discussionExpandableState}
             >
-              {component[state]}
+              {component[discussionExpandableState]}
             </motion.div>
           </CommonAnimationHeight>
         </motion.div>
