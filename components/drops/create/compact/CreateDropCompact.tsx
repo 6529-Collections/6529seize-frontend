@@ -124,11 +124,10 @@ export default function CreateDropCompact({
       {file && (
         <div>
           <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
-            <div className="tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
               <div className="tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
                 <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
-                  <CreateDropSelectedFileIcon file={file} />
-
+                  {/*   <CreateDropSelectedFileIcon file={file} /> */}
                   <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
                     {file.name}
                   </p>
@@ -153,6 +152,15 @@ export default function CreateDropCompact({
                     />
                   </svg>
                 </button>
+              </div>
+              <div className="tw-mt-2 tw-flex tw-gap-x-3">
+                <div className="tw-h-full tw-w-full">
+                  <img
+                    src="https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7c6c885e-87b2-11ee-9661-02424e2c14ad/9aecc1ce-14ba-4266-8644-3aca20639bc6.gif"
+                    alt=""
+                    className="tw-w-full tw-h-full tw-object-center tw-object-contain"
+                  />
+                </div>
               </div>
             </div>
           </div>
