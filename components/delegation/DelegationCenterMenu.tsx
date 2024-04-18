@@ -42,6 +42,10 @@ interface Props {
   setActiveSection(section: DelegationCenterSection): any;
   address_query: string;
   setAddressQuery(address: string): any;
+  collection_query: string;
+  setCollectionQuery(collection: string): any;
+  use_case_query: number;
+  setUseCaseQuery(use_case: number): any;
 }
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
@@ -83,6 +87,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           <NewDelegationComponent
             address={accountResolution.address as string}
             ens={ensResolution.data}
+            collection_query={props.collection_query}
+            setCollectionQuery={props.setCollectionQuery}
+            use_case_query={props.use_case_query}
+            setUseCaseQuery={props.setUseCaseQuery}
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
