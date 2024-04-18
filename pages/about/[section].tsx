@@ -25,6 +25,7 @@ import AboutGDRC1 from "../../components/about/AboutGDRC1";
 import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
 import AboutHTML from "../../components/about/AboutHTML";
 import AboutSubscriptions from "../../components/about/AboutSubscriptions";
+import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -46,6 +47,7 @@ export enum AboutSection {
   NFT_DELEGATION = "nft-delegation",
   ENS = "ens",
   SUBSCRIPTIONS = "subscriptions",
+  NAKAMOTO_THRESHOLD = "nakamoto-threshold",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -136,6 +138,8 @@ export default function About(props: any) {
         return <AboutHTML title="ENS" html={pageProps.ensText} />;
       case AboutSection.SUBSCRIPTIONS:
         return <AboutSubscriptions />;
+      case AboutSection.NAKAMOTO_THRESHOLD:
+        return <AboutNakamotoThreshold />;
     }
   }
 
@@ -303,6 +307,17 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           Minting
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setNewSection(AboutSection.NAKAMOTO_THRESHOLD)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.NAKAMOTO_THRESHOLD
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Nakamoto Threshold
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -558,6 +573,17 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           Minting
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setNewSection(AboutSection.NAKAMOTO_THRESHOLD)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.NAKAMOTO_THRESHOLD
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Nakamoto Threshold
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
