@@ -31,7 +31,7 @@ export default function DropListItemActions({
   };
 
   return (
-    <div className="tw-relative tw-z-[1] sm:tw-ml-12 tw-mt-4 tw-border-t tw-flex tw-items-center tw-justify-between lg:tw-gap-x-8">
+    <div className="tw-relative tw-z-[1] sm:tw-ml-12 tw-mt-4 tw-border-t tw-flex tw-items-center tw-justify-between  sm:tw-justify-start sm:tw-gap-x-12">
       <DropListItemActionsDiscussion
         drop={drop}
         setState={onDiscussionExpandableStateChange}
