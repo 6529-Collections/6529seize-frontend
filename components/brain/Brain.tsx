@@ -11,7 +11,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
-import CreateDrop, { CreateDropType } from "../drops/create/CreateDrop";
+import BrainCreateADrop from "./BrainCreateADrop";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -36,7 +36,7 @@ export default function Brain() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
-  const { connectedProfile, canSeeDrops } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
 
   const getParamsFromUrl = (): BrainQuery => {
     const curation = searchParams.get(SEARCH_PARAMS_FIELDS.curation);
@@ -123,7 +123,6 @@ export default function Brain() {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
-    enabled: canSeeDrops,
   });
 
   const [drops, setDrops] = useState<DropFull[]>([]);
@@ -149,12 +148,8 @@ export default function Brain() {
     if (!hasNextPage) {
       return;
     }
-
     fetchNextPage();
   };
-  if (!canSeeDrops) {
-    return null;
-  }
 
   return (
     <div className="tailwind-scope">
@@ -162,13 +157,7 @@ export default function Brain() {
         <h1 className="tw-block tw-float-none">Brain</h1>
 
         <div className="tw-mt-4 lg:tw-mt-6">
-          {connectedProfile && (
-            <CreateDrop
-              profile={connectedProfile}
-              quotedDropId={null}
-              type={CreateDropType.DROP}
-            />
-          )}
+          <BrainCreateADrop />
           <DropListWrapper
             drops={drops}
             loading={isFetching}

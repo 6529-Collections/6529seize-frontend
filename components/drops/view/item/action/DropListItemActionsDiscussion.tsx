@@ -1,7 +1,7 @@
 import { DropFull } from "../../../../../entities/IDrop";
 import DiscussSolidIcon from "../../../../utils/icons/DiscussSolidIcon";
 import DiscussOutlineIcon from "../../../../utils/icons/DiscussOutlineIcon";
-import { RepActionExpandable } from "../DropsListItem";
+import { DropActionExpandable } from "../DropsListItem";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 
 export default function DropListItemActionsDiscussion({
@@ -9,12 +9,12 @@ export default function DropListItemActionsDiscussion({
   setState,
 }: {
   readonly drop: DropFull;
-  readonly setState: (state: RepActionExpandable) => void;
+  readonly setState: (state: DropActionExpandable) => void;
 }) {
   const userHaveDiscussed = !!drop.input_profile_discussion_comments_count;
   return (
     <DropListItemActionsItemWrapper
-      state={RepActionExpandable.DISCUSSION}
+      state={DropActionExpandable.DISCUSSION}
       setState={setState}
     >
       <>

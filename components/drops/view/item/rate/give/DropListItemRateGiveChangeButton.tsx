@@ -1,20 +1,20 @@
-import { RepChangeType } from "./DropListItemRepGive";
+import { RateChangeType } from "./DropListItemRateGive";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 import { DropFull } from "../../../../../../entities/IDrop";
 
-export default function DropListItemRepGiveChangeButton({
+export default function DropListItemRateGiveChangeButton({
   drop,
   type,
-  availableRep,
+  availableRates,
   handleMouseDown,
   handleMouseUp,
 }: {
   readonly drop: DropFull;
-  readonly type: RepChangeType;
-  readonly availableRep: number;
-  readonly handleMouseDown: (changeType: RepChangeType) => void;
+  readonly type: RateChangeType;
+  readonly availableRates: number;
+  readonly handleMouseDown: (changeType: RateChangeType) => void;
   readonly handleMouseUp: () => void;
 }) {
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
@@ -24,20 +24,20 @@ export default function DropListItemRepGiveChangeButton({
       connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
       connectedProfile?.profile?.handle.toLowerCase() !==
         drop.author.handle.toLowerCase() &&
-      !!availableRep
+      !!availableRates
     );
   };
 
   const [canRate, setCanRate] = useState(getCanRate());
 
-  const svgpaths: Record<RepChangeType, string> = {
-    [RepChangeType.INCREASE]: "M18 15L12 9L6 15",
-    [RepChangeType.DECREASE]: "M6 9L12 15L18 9",
+  const svgpaths: Record<RateChangeType, string> = {
+    [RateChangeType.INCREASE]: "M18 15L12 9L6 15",
+    [RateChangeType.DECREASE]: "M6 9L12 15L18 9",
   };
 
-  const ariaLabels: Record<RepChangeType, string> = {
-    [RepChangeType.INCREASE]: "Choose positive votes",
-    [RepChangeType.DECREASE]: "Choose negative votes",
+  const ariaLabels: Record<RateChangeType, string> = {
+    [RateChangeType.INCREASE]: "Choose positive votes",
+    [RateChangeType.DECREASE]: "Choose negative votes",
   };
 
   const onMouseDown = () => {
@@ -69,7 +69,7 @@ export default function DropListItemRepGiveChangeButton({
     const ratingAllowed = getCanRate();
     setCanRate(ratingAllowed);
     setButtonClasses(getButtonClasses(ratingAllowed));
-  }, [connectionStatus, connectedProfile, drop, availableRep]);
+  }, [connectionStatus, connectedProfile, drop, availableRates]);
 
   return (
     <button

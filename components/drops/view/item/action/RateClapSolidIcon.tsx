@@ -1,4 +1,4 @@
-export default function RepClapSolidIcon() {
+export default function RateClapSolidIcon() {
   return (
     <svg
       className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"

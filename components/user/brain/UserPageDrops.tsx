@@ -25,9 +25,6 @@ export default function UserPageDrops({
       <div className="tw-max-w-2xl mx-auto">
         {haveProfile && (
           <div>
-            <h3 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
-              {createPossessionStr(profile.profile?.handle ?? null)} Drops
-            </h3>
             {canCreateDrop && (
               <CreateDrop
                 profile={profile}

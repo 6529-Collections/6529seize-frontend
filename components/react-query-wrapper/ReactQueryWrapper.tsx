@@ -30,7 +30,7 @@ export enum QueryKey {
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
   PROFILE_DROPS = "PROFILE_DROPS",
-  PROFILE_AVAILABLE_DROP_REP = "PROFILE_AVAILABLE_DROP_REP",
+  PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -637,7 +637,7 @@ export default function ReactQueryWrapper({
     );
     if (giverHandle) {
       queryClient.invalidateQueries({
-        queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_REP, giverHandle],
+        queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_RATE, giverHandle],
       });
     }
     invalidateQueries({

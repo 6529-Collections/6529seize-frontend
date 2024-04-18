@@ -4,7 +4,7 @@ export default function CommonInfoBox({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="tw-w-full sm:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
+    <div className="tw-w-full  tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
       <div className="tw-flex tw-items-center">
         <svg
           className="tw-flex-shrink-0 tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"

@@ -1,5 +1,5 @@
 import { DropFull } from "../../../../../entities/IDrop";
-import { RepActionExpandable } from "../DropsListItem";
+import { DropActionExpandable } from "../DropsListItem";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 
 export default function DropListItemActionsQuote({
@@ -7,12 +7,12 @@ export default function DropListItemActionsQuote({
   setState,
 }: {
   readonly drop: DropFull;
-  readonly setState: (state: RepActionExpandable) => void;
+  readonly setState: (state: DropActionExpandable) => void;
 }) {
   const userHaveQuoted = !!drop.quote_count_by_input_profile;
   return (
     <DropListItemActionsItemWrapper
-      state={RepActionExpandable.QUOTE}
+      state={DropActionExpandable.QUOTE}
       setState={setState}
     >
       <>

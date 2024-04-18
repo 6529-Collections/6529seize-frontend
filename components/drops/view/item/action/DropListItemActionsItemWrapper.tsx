@@ -1,13 +1,13 @@
-import { RepActionExpandable } from "../DropsListItem";
+import { DropActionExpandable } from "../DropsListItem";
 
 export default function DropListItemActionsItemWrapper({
   state,
   children,
   setState,
 }: {
-  readonly state: RepActionExpandable;
+  readonly state: DropActionExpandable;
   readonly children: JSX.Element;
-  readonly setState: (state: RepActionExpandable) => void;
+  readonly setState: (state: DropActionExpandable) => void;
 }) {
   const onState = () => setState(state);
 
