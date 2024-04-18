@@ -30,10 +30,10 @@ interface Props {
     collection: DelegationCollection;
   };
   ens: string | null | undefined;
-  collection_query: string;
-  setCollectionQuery(collection: string): any;
-  use_case_query: number;
-  setUseCaseQuery(useCase: number): any;
+  collection_query?: string;
+  setCollectionQuery?(collection: string): any;
+  use_case_query?: number;
+  setUseCaseQuery?(useCase: number): any;
   onHide(): any;
   onSetToast(toast: any): any;
 }
@@ -186,7 +186,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               collection={newDelegationCollection}
               setCollection={(c: string) => {
                 setNewDelegationCollection(c);
-                props.setCollectionQuery(c);
+                if (props.setCollectionQuery) {
+                  props.setCollectionQuery(c);
+                }
               }}
               subdelegation={props.subdelegation}
             />
@@ -207,7 +209,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                   onChange={(e) => {
                     const newCase = parseInt(e.target.value);
                     setNewDelegationUseCase(newCase);
-                    props.setUseCaseQuery(newCase);
+                    if (props.setUseCaseQuery) {
+                      props.setUseCaseQuery(newCase);
+                    }
                     clearErrors();
                   }}>
                   <option value={0} disabled>
