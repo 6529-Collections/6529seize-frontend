@@ -21,7 +21,9 @@ export default function UserPageSubscriptionsAirdropAddress(
         <Col>
           {props.airdrop_address && (
             <>
-              <Tippy content={props.airdrop_address.address}>
+              <Tippy
+                content={props.airdrop_address.address}
+                placement="top-end">
                 <span>{formatAddress(props.airdrop_address.address)}</span>
               </Tippy>
               {props.airdrop_address.ens && (
