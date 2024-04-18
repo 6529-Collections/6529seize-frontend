@@ -154,7 +154,7 @@ export default function Brain() {
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-2xl tw-mx-auto">
-        <h1 className="tw-block tw-float-none">Brain</h1>
+        <h1 className="tw-block tw-float-none">Stream</h1>
 
         <div className="tw-mt-4 lg:tw-mt-6">
           <BrainCreateADrop />
