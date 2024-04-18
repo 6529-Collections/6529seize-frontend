@@ -43,6 +43,9 @@ export default function HeaderConnect() {
     setDisplay("Connect");
   }, [profile, account.address]);
 
+
+  useEffect(() => console.log(account), [account]);
+
   return (
     <>
       {isLoading ? (
