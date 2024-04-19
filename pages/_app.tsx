@@ -101,6 +101,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import "../components/drops/create/lexical/lexical.styles.scss";
+import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 
 library.add(
   faArrowUp,
@@ -198,12 +199,13 @@ if (
   CONTRACT_CHAINS.push(goerli);
 }
 
-import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
-
 const metadata = {
   name: "Seize",
   description: "6529 Seize",
   url: process.env.BASE_ENDPOINT,
+  icons: [
+    "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+  ],
 };
 
 export const wagmiConfig = defaultWagmiConfig({
