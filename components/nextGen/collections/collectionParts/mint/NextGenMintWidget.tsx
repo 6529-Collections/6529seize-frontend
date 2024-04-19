@@ -26,7 +26,7 @@ import {
 import { useEffect, useState } from "react";
 import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
-import { useWeb3Modal } from "@web3modal/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import {
   getStatusFromDates,
   useMintSharedState,
@@ -217,7 +217,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           setIsMinting(true);
         }
       } else {
-        web3Modal.open({ route: "SelectNetwork" });
+        web3Modal.open();
       }
     } else {
       web3Modal.open();
