@@ -27,6 +27,7 @@ import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
+import { Time } from "../../helpers/time";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
   return Math.round((royalties / value) * 10000) / 10000;
@@ -73,6 +74,47 @@ export function printRoyalties(value: number, royalties: number, from: string) {
   );
 }
 
+export function printEthPrice(ethPrice: number, value: number, gas: number) {
+  return (
+    <Tippy
+      content={
+        <Container>
+          <Row>
+            <Col className="no-wrap">ETH PRICE</Col>
+            <Col className="text-right">&#36;{displayDecimal(ethPrice)}</Col>
+          </Row>
+          {value > 0 && (
+            <Row>
+              <Col className="no-wrap">VALUE</Col>
+              <Col className="text-right">&#36;{displayDecimal(value)}</Col>
+            </Row>
+          )}
+          <Row>
+            <Col className="no-wrap">GAS</Col>
+            <Col className="text-right">&#36;{displayDecimal(gas)}</Col>
+          </Row>
+          {value > 0 && (
+            <Row>
+              <Col className="no-wrap">
+                <b>TOTAL</b>
+              </Col>
+              <Col className="text-right">
+                <b>&#36;{displayDecimal(value + gas)}</b>
+              </Col>
+            </Row>
+          )}
+        </Container>
+      }
+      placement={"top-end"}
+      theme={"light"}
+      hideOnClick={false}>
+      <FontAwesomeIcon
+        className={styles.gasIcon}
+        icon="dollar"></FontAwesomeIcon>
+    </Tippy>
+  );
+}
+
 export function printGas(
   gas: number,
   gas_gwei: number,
@@ -83,7 +125,7 @@ export function printGas(
       content={
         <Container>
           <Row>
-            <Col className="no-wrap">Gas</Col>
+            <Col className="no-wrap">GAS</Col>
             <Col className="text-right">{displayDecimal(gas, 5)}</Col>
           </Row>
           <Row>
@@ -91,7 +133,7 @@ export function printGas(
             <Col className="text-right">{numberWithCommas(gas_gwei)}</Col>
           </Row>
           <Row>
-            <Col className="no-wrap">Gas Price</Col>
+            <Col className="no-wrap">GAS PRICE</Col>
             <Col className="text-right">
               {displayDecimal(gas_price_gwei, 2)}
             </Col>
@@ -357,6 +399,11 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           props.tr.royalties,
           props.tr.from_address
         )}
+        {printEthPrice(
+          props.tr.eth_price_usd,
+          props.tr.value_usd,
+          props.tr.gas_usd
+        )}
         {printGas(props.tr.gas, props.tr.gas_gwei, props.tr.gas_price_gwei)}
         <a
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
@@ -384,6 +431,19 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function isAirdrop() {
     return isNullAddress(props.tr.from_address);
+  }
+
+  function getIconTippy() {
+    if (isBurn()) {
+      return "Burn";
+    }
+    if (props.tr.value > 0) {
+      return isMint() ? "Mint" : "Sale";
+    }
+    if (isAirdrop()) {
+      return "Airdrop";
+    }
+    return "Transfer";
   }
 
   function getIconClass() {
@@ -419,15 +479,27 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return <></>;
   }
 
+  const date = new Date(props.tr.transaction_date);
+  const dateDisplay = getDateDisplay(date);
+  const dateString = Time.millis(date.getTime()).toIsoDateTimeString();
+
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
       className={styles.latestActivityRow}>
       <td className="align-middle text-center">
-        {getDateDisplay(new Date(props.tr.transaction_date))}
+        <Tippy content={dateString} placement={"top"} theme={"light"}>
+          <span>{dateDisplay}</span>
+        </Tippy>
       </td>
       <td className="align-middle text-center">
-        <FontAwesomeIcon className={getIconClass()} icon={getIcon()} />
+        <Tippy
+          content={getIconTippy()}
+          placement={"top"}
+          theme={"light"}
+          delay={250}>
+          <FontAwesomeIcon className={getIconClass()} icon={getIcon()} />
+        </Tippy>
       </td>
       <td className="d-flex align-items-center justify-content-between gap-2">
         {areEqualAddresses(props.tr.contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID])

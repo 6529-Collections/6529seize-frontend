@@ -6,6 +6,9 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
+import ProfileActivityLogDropCommented from "./items/ProfileActivityLogDropCommented";
+import ProfileActivityLogDropCreated from "./items/ProfileActivityLogDropCreated";
+import ProfileActivityLogDropRepEdit from "./items/ProfileActivityLogDropRepEdit";
 import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGeneralStatement";
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
 import ProfileActivityLogNFTAccount from "./items/ProfileActivityLogNFTAccount";
@@ -49,7 +52,14 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogGeneralStatement log={log} />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogNFTAccount log={log} />;
+    case ProfileActivityLogType.DROP_REP_EDIT:
+      return <ProfileActivityLogDropRepEdit log={log} />;
+    case ProfileActivityLogType.DROP_COMMENT:
+      return <ProfileActivityLogDropCommented log={log} />;
+    case ProfileActivityLogType.DROP_CREATED:
+      return <ProfileActivityLogDropCreated log={log} />;
     default:
+      console.log("logType", logType);
       assertUnreachable(logType);
   }
 }

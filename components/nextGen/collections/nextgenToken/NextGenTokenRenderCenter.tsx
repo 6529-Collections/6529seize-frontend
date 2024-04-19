@@ -1,16 +1,24 @@
 import styles from "./NextGenToken.module.scss";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { NextGenTokenImageMode } from "../../nextgen_helpers";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
-import { NextGenToken } from "../../../../entities/INextgen";
-import { useState } from "react";
-import { mainnet } from "wagmi";
+import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { NEXTGEN_TOKEN_SCENES } from "./NextGenTokenScene";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import { useState } from "react";
 import { numberWithCommas } from "../../../../helpers/Helpers";
-import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NEXTGEN_GENERATOR_BASE_URL } from "../../../../constants";
+import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
+import { mainnet } from "wagmi";
 
 export default function NextgenTokenRenderCenter(
-  props: Readonly<{ token: NextGenToken }>
+  props: Readonly<{
+    collection: NextGenCollection;
+    token: NextGenToken;
+    mode: NextGenTokenImageMode;
+    setMode: (mode: NextGenTokenImageMode) => void;
+  }>
 ) {
   return (
     <Container className="no-padding">
@@ -20,6 +28,21 @@ export default function NextgenTokenRenderCenter(
         </Col>
       </Row>
       <Row>
+        <Col className="pb-3 d-flex flex-column gap-2">
+          <span className="font-color-h">Scenes:</span>
+          <span className="d-flex flex-wrap gap-3">
+            {NEXTGEN_TOKEN_SCENES.map((scene) => (
+              <SceneButton
+                key={getRandomObjectId()}
+                mode={scene.mode}
+                selecedMode={props.mode}
+                setMode={props.setMode}
+              />
+            ))}
+          </span>
+        </Col>
+      </Row>
+      <Row className="pt-3">
         <Col sm={12} md={6} className="pb-3 d-flex flex-wrap gap-2">
           <span className="font-color-h">Rendered Versions:</span>
           <NextGenTokenDownload
@@ -59,6 +82,26 @@ export default function NextgenTokenRenderCenter(
         <CustomRender token={props.token} />
       </Row>
     </Container>
+  );
+}
+
+function SceneButton(
+  props: Readonly<{
+    mode: NextGenTokenImageMode;
+    selecedMode: NextGenTokenImageMode;
+    setMode: (mode: NextGenTokenImageMode) => void;
+  }>
+) {
+  return (
+    <button
+      className={`pt-2 pb-2 seize-btn no-wrap ${styles.sceneBtn} ${
+        props.mode == props.selecedMode ? styles.sceneBtnSelected : ""
+      }`}
+      onClick={() => {
+        props.setMode(props.mode);
+      }}>
+      <span className="font-larger">{props.mode}</span>
+    </button>
   );
 }
 

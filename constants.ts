@@ -45,13 +45,13 @@ export const OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER = `0x5b3256965e7c3cf26e11fcaf
 export const NEXTGEN_MEDIA_BASE_URL =
   "https://media.generator.seize.io/mainnet";
 
+export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
+
 export const ROYALTIES_PERCENTAGE = 0.069;
 
 export const ETHEREUM_ICON_TEXT = "Ξ";
 
 export const MEMES_MINTING_HREF = "https://thememes.seize.io";
-
-export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
 
 export const SUBSCRIPTIONS_ADDRESS =
   "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";

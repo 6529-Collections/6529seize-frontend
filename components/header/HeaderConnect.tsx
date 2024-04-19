@@ -2,15 +2,17 @@ import styles from "./Header.module.scss";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Web3Button } from "@web3modal/react";
 import WalletModal from "./walletModal/WalletModal";
 import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 export default function HeaderConnect() {
   const account = useAccount();
+  const { open } = useWeb3Modal();
+
   const { isLoading, data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
     queryFn: async () =>
@@ -43,6 +45,8 @@ export default function HeaderConnect() {
     setDisplay("Connect");
   }, [profile, account.address]);
 
+  useEffect(() => console.log(account), [account]);
+
   return (
     <>
       {isLoading ? (
@@ -69,7 +73,9 @@ export default function HeaderConnect() {
           </button>
         </>
       ) : (
-        <Web3Button label="Connect" icon="hide" avatar="hide" balance="hide" />
+        <button className={`${styles.userProfileBtn}`} onClick={() => open()}>
+          <b>&nbsp; Connect &nbsp;</b>
+        </button>
       )}
       {account.address && (
         <WalletModal

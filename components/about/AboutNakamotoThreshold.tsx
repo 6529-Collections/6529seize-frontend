@@ -123,7 +123,6 @@ export default function AboutNakamotoThreshold() {
           </p>
           <p>Edition sizes were 500, 1,000, 2,000.</p>
           <p>Seemed like a safe hurdle.</p>
-          <p>The Nakamoto Threshold: all others will exceed 300 </p>
         </Col>
       </Row>
       <Row className="pt-3">

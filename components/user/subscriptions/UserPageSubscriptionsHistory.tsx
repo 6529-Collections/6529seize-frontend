@@ -201,7 +201,8 @@ function RedeemedEntry(
             Redeemed Subscription for {contractName} #{props.redeem.token_id}
           </div>
           <div className="font-smaller font-color-silver">
-            Balance after redemption: {props.redeem.balance_after} ETH
+            Airdrop Address: {props.redeem.address} - Balance after redemption:{" "}
+            {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="d-flex align-items-center gap-3">

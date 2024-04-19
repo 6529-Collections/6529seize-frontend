@@ -40,8 +40,8 @@ import MemeLabLeaderboard from "../leaderboard/MemeLabLeaderboard";
 import Timeline from "../timeline/Timeline";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import {
-  getFileTypeFromMetadata,
   getDimensionsFromMetadata,
+  getFileTypeFromMetadata,
 } from "../../helpers/nft.helplers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 
