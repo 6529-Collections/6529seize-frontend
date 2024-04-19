@@ -11,7 +11,6 @@ import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
 import { useRouter } from "next/router";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
 import Link from "next/link";
-import Image from "next/image";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -139,13 +138,11 @@ export default function HeaderSearchModalItem({
       ref={ref}
       className={`${
         isSelected ? "tw-bg-iron-800" : ""
-      } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}
-    >
+      } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
       <Link
         href={getPath()}
         onClick={onClose}
-        className="tw-group tw-no-underline tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left tw-text-sm tw-font-medium"
-      >
+        className="tw-group tw-no-underline tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left tw-text-sm tw-font-medium">
         {getMedia()}
         <div className="tw-w-full">
           <div className="tw-inline-flex tw-justify-between tw-w-full">
