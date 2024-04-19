@@ -9,7 +9,7 @@ import {
 } from "../../../../../entities/IDrop";
 import CreateDropContent from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
-import CreateDropSelectFile from "../../utils/select-file/CreateDropSelectFile";
+import CreateDropSelectFile from "../../utils/file/CreateDropSelectFile";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { CreateDropType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";

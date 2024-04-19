@@ -14,11 +14,12 @@ import {
 import PrimaryButton, {
   PrimaryButtonSize,
 } from "../../../utils/buttons/PrimaryButton";
-import CreateDropSelectedFileIcon from "../utils/select-file/CreateDropSelectedFileIcon";
+import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import { CreateDropType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 import dynamic from "next/dynamic";
+import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 
 const CreateDropChallengeAcceptButton = dynamic(
   () => import("../utils/challenge/CreateDropChallengeAcceptButton"),
@@ -122,47 +123,37 @@ export default function CreateDropCompact({
       </div>
 
       {file && (
-        <div>
-          <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
-            <div className="tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
-              <div className="tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
-                <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
-                  {/*   <CreateDropSelectedFileIcon file={file} /> */}
-                  <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
-                    {file.name}
-                  </p>
-                </div>
-                <button
-                  onClick={() => onFileChange(null)}
-                  type="button"
-                  className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+        <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
+          <div className="tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
+              <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
+                {/*   <CreateDropSelectedFileIcon file={file} /> */}
+                <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+                  {file.name}
+                </p>
+              </div>
+              <button
+                onClick={() => onFileChange(null)}
+                type="button"
+                className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+              >
+                <svg
+                  className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <svg
-                    className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M18 6L6 18M6 6L18 18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div className="tw-mt-2 tw-flex tw-gap-x-3">
-                <div className="tw-h-full tw-w-full">
-                  <img
-                    src="https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7c6c885e-87b2-11ee-9661-02424e2c14ad/9aecc1ce-14ba-4266-8644-3aca20639bc6.gif"
-                    alt=""
-                    className="tw-w-full tw-h-full tw-object-center tw-object-contain"
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                </div>
-              </div>
+                </svg>
+              </button>
             </div>
+            <CreateDropSelectedFilePreview file={file} />
           </div>
         </div>
       )}
