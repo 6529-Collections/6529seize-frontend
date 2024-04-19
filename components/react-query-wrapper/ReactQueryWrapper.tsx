@@ -41,6 +41,7 @@ export enum QueryKey {
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
   CURATION_FILTERS = "CURATION_FILTERS",
   CURATION_FILTER = "CURATION_FILTER",
+  NFTS_SEARCH = "NFTS_SEARCH",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -554,8 +555,7 @@ export default function ReactQueryWrapper({
         initCommunityActivityPage,
         onCurationFilterRemoved,
         onCurationFilterChanged,
-      }}
-    >
+      }}>
       {children}
     </ReactQueryWrapperContext.Provider>
   );
