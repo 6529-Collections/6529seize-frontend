@@ -61,6 +61,11 @@ export default function AboutNakamotoThreshold() {
               alt="6529 Gradient"
             />
           </p>
+        </Col>
+      </Row>
+      <Row className="pt-3">
+        <Col>
+          <p className="font-larger font-bolder">Edition Sizes Matter</p>
           <p>
             The Memes were deliberately designed to be relatively low unit price
             and relatively high edition count.
@@ -70,10 +75,6 @@ export default function AboutNakamotoThreshold() {
             ways. There is no way the mission works with a small number of rich
             collectors.
           </p>
-        </Col>
-      </Row>
-      <Row className="pt-3">
-        <Col>
           <p>
             Interestingly, because people like eye-catching sales, this is one
             of the things that leads people to still underestimate The Memes a
@@ -81,7 +82,7 @@ export default function AboutNakamotoThreshold() {
           </p>
           <p>
             The Naka has the highest unit price because it is an awesome card
-            (trades around 6ETH now, ATH &gt; 20ETH) but..
+            (trades around 6ETH now, ATH &gt; 20ETH) but...
           </p>
         </Col>
       </Row>
@@ -122,10 +123,12 @@ export default function AboutNakamotoThreshold() {
           </p>
           <p>Edition sizes were 500, 1,000, 2,000.</p>
           <p>Seemed like a safe hurdle.</p>
+          <p>The Nakamoto Threshold: all others will exceed 300 </p>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Testing the Threshold</p>
           <p>Bear market came.</p>
           <p>
             Instead of people yelling me for being &quot;elitist&quot; for only
@@ -161,8 +164,8 @@ export default function AboutNakamotoThreshold() {
         <Col>
           <p>
             Now, low three hundreds for art editions, three times a week, across
-            many artists, in an NFT bear markets isn&apos;t &quot;good&quot;, it is
-            &quot;awesome&quot;
+            many artists, in an NFT bear markets isn&apos;t &quot;good&quot;, it
+            is &quot;awesome&quot;
           </p>
           <p>
             More individual pieces of art are minted on The Memes each week than
@@ -173,9 +176,9 @@ export default function AboutNakamotoThreshold() {
       <Row className="pt-3">
         <Col>
           <p>
-            Let&apos;s say, depending on the artist and how the crypto world feels
-            that day, a meme card would mint out between 275 to 350 on average
-            right now (exceptions exist on both sides).
+            Let&apos;s say, depending on the artist and how the crypto world
+            feels that day, a meme card would mint out between 275 to 350 on
+            average right now (exceptions exist on both sides).
           </p>
           <p>
             Is this a problem? It is not a problem at all. It is great, awesome!
@@ -192,6 +195,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Consider the Options</p>
           <p>
             If 2 years ago I had not said &quot;Card 4 will be the lowest
             edition count&quot;, we would not even be thinking about this at
@@ -318,6 +322,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Maintaining the Commitment</p>
           <p>
             I decided that the correct answer is that those two absolutes never
             change.
@@ -345,7 +350,9 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
-          <p>Isn&apos;t this a totally absurd arbitrary number? Of course it is!</p>
+          <p>
+            Isn&apos;t this a totally absurd arbitrary number? Of course it is!
+          </p>
           <p>
             So is 21 million BTC. 21M BTC does not mean anything. It is an idea,
             it is a myth, it is a meme. It could be 10M or 100M.
@@ -358,6 +365,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Managing Tradeoffs</p>
           <p>
             BTC sacrifices many many other things to 21M and its other ideal
             (small blocks for decentralization).
@@ -387,6 +395,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Implementation Pathways</p>
           <p>
             Once this decision was made, we go to step 2: &quot;how do we
             implement staying above 300 edition size&quot;.
@@ -419,8 +428,9 @@ export default function AboutNakamotoThreshold() {
             collectors.
           </p>
           <p>
-            Even if we used the &apos;fairest&apos; possible formula in the world for
-            allocating the airdrops (there is no perfectly fair formula).
+            Even if we used the &apos;fairest&apos; possible formula in the
+            world for allocating the airdrops (there is no perfectly fair
+            formula).
           </p>
         </Col>
       </Row>
@@ -429,11 +439,11 @@ export default function AboutNakamotoThreshold() {
           <p>I am 100% sure that:</p>
           <ul>
             <li>
-              the happiness of 10-20-30 collectors getting a 0.06529 ETH free
+              ✅ the happiness of 10-20-30 collectors getting a 0.06529 ETH free
               airdrop of a card they might have not even wanted
             </li>
             <li>...would be much less than...</li>
-            <li>the annoyance of the other 9,500 who did not get it.</li>
+            <li>✅ the annoyance of the other 9,500 who did not get it.</li>
           </ul>
         </Col>
       </Row>
@@ -452,6 +462,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Decision Time</p>
           <p>
             So time was running out, I was watching a card that would not mint
             out.
@@ -478,6 +489,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Count the Costs</p>
           <p>
             Now what are the costs (beyond ETH)? Some say it is cringe to mint
             your own drops.
@@ -487,8 +499,8 @@ export default function AboutNakamotoThreshold() {
             cringe. I am doing it openly. I like Meme Cards.
           </p>
           <p>
-            But even if some people don&apos;t like it, it goes in the &apos;sacrifice&apos;
-            bucket.
+            But even if some people don&apos;t like it, it goes in the
+            &apos;sacrifice&apos; bucket.
           </p>
         </Col>
       </Row>
@@ -530,6 +542,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Bigger Plans</p>
           <p>
             Now, along the way, I was still thinking about what the long-term
             solution could be.
@@ -572,6 +585,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Research What?</p>
           <p>
             &quot;Wait, what research does an art edition collection need?&quot;
             Imagine thinking that is the goal.
@@ -580,24 +594,25 @@ export default function AboutNakamotoThreshold() {
             Where we are going, we will need our own NSF, NIH, ERC, Horizon.
           </p>
           <p>
-            We don&apos;t need them now, but we will. So we can start planting the
-            seeds now, let them grow.
+            We don&apos;t need them now, but we will. So we can start planting
+            the seeds now, let them grow.
           </p>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Evaluating the Outcome</p>
           <p>
             I am very happy with this solution.
             <ul>
               <li>
-                It correctly establishes a hierarchy of priorities, of
+                ✅ It correctly establishes a hierarchy of priorities, of
                 absolutes.
               </li>
-              <li>It removes dependency on me.</li>
-              <li>It plants a seed for the future.</li>
-              <li>No real negatives.</li>
-              <li>It is aesthetically extremely pleasing.</li>
+              <li>✅ It removes dependency on me.</li>
+              <li>✅ It plants a seed for the future.</li>
+              <li>✅ No real negatives.</li>
+              <li>✅ It is aesthetically extremely pleasing.</li>
             </ul>
           </p>
           <p></p>
@@ -606,21 +621,28 @@ export default function AboutNakamotoThreshold() {
       <Row className="pt-3">
         <Col>
           <p>
-            I am also very happy with the process. It took several months to get
-            here, to figure this out.
+            I am also very happy with the process.
+            <ul>
+              <li>
+                ✅ it took several months to get here, to figure this out.
+              </li>
+              <li>
+                ✅ In the interim, I had to decide what to do and I took the
+                decision to mint out until we find a good permanent solution.
+              </li>
+              <li>✅ Group discussion was very good faith and civilized.</li>
+            </ul>
           </p>
-          <p>
-            In the interim, I had to decide what to do and I took the decision
-            to mint out until we find a good permanent solution.
-          </p>
-          <p>Group discussion was very good faith and civilized.</p>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">
+            Good Decision Making is Hard
+          </p>
           <p>
-            Someone in Discord told me I &quot;overthink&quot; things and I laughed. This
-            is literally my defining characteristic.
+            Someone in Discord told me I &quot;overthink&quot; things and I
+            laughed. This is literally my defining characteristic.
           </p>
           <p>
             Excellent decisions are hard, they need, in fact, a lot of thinking,
@@ -643,6 +665,7 @@ export default function AboutNakamotoThreshold() {
       </Row>
       <Row className="pt-3">
         <Col>
+          <p className="font-larger font-bolder">Stacking Goods</p>
           <p>
             Coming back to the aesthetically pleasing part, what is currently
             happening in The Memes is pure utter magic of stacking public goods
@@ -660,21 +683,22 @@ export default function AboutNakamotoThreshold() {
           <p>
             <ul>
               <li>
-                Collectors mint incredible art from great artists, beautifully
-                curated.
+                ✅ Collectors mint incredible art from great artists,
+                beautifully curated.
               </li>
-              <li>Art enters the public domain.</li>
+              <li>✅ Art enters the public domain.</li>
               <li>
-                We (voluntarily) build software also in the public domain.
+                ✅ We (voluntarily) build software also in the public domain.
               </li>
-              <li>Sometimes, the art will support science.</li>
-              <li>[Redacted] A 4th public good we will show soon.</li>
+              <li>✅ Sometimes, the art will support science.</li>
+              <li>✅ [Redacted] A 4th public good we will show soon.</li>
             </ul>
           </p>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
+          <p>Was lowering the mint cost an option at all?</p>
           <p>
             This is an independent question. You could pick a lower price and
             still not mint out so you still have to resolve the absolute
