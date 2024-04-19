@@ -526,6 +526,13 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <Link href={`/about/${AboutSection.NAKAMOTO_THRESHOLD}`}>
+                      <h3>Nakamoto Threshold</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <Link href={`/about/${AboutSection.LICENSE}`}>
                       <h3>License</h3>
                     </Link>
@@ -879,6 +886,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Minting",
                                   path: `/about/${AboutSection.MINTING}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Nakamoto Threshold",
+                                  path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
                                 }}
                               />
                               <HeaderDesktopLink
