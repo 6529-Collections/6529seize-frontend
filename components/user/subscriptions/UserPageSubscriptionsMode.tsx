@@ -81,11 +81,8 @@ export default function UserPageSubscriptionsMode(
       </Row>
       <Row className="pt-1">
         <Col className="d-flex align-items-center gap-2">
-          {/* <label htmlFor={"subscription-mode"} className={"font-color"}>
-            <b>Manual</b>
-          </label> */}
           <label htmlFor={"subscription-mode"} className={"font-color"}>
-            <b>Automatic</b>
+            <b>Manual</b>
           </label>
           <Toggle
             disabled={props.readonly || isUpdating}
@@ -94,6 +91,9 @@ export default function UserPageSubscriptionsMode(
             icons={false}
             onChange={toggleMode}
           />
+          <label htmlFor={"subscription-mode"} className={"font-color"}>
+            <b>Automatic</b>
+          </label>
           {isUpdating && <Spinner />}
         </Col>
       </Row>
