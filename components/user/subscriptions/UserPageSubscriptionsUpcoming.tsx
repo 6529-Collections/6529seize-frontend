@@ -182,7 +182,8 @@ function SubscriptionRow(
           <Col className="font-smaller font-color-silver">
             Phase: {final.phase} - Subscription Position:{" "}
             {final.phase_position.toLocaleString()} /{" "}
-            {final.phase_subscriptions.toLocaleString()}
+            {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
+            {final.airdrop_address}
           </Col>
         </Row>
       )}
