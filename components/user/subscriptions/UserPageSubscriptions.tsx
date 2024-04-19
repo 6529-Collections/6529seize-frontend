@@ -15,6 +15,9 @@ import {
 import { AuthContext } from "../../auth/Auth";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
+import UserPageSubscriptionsAirdropAddress, {
+  AirdropAddressResult,
+} from "./UserPageSubscriptionsAirdropAddress";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -29,6 +32,10 @@ export default function UserPageSubscriptions(
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
+
+  const [airdropResult, setAirdropResult] = useState<AirdropAddressResult>();
+  const [fetchingAirdropAddress, setFetchingAirdropAddress] =
+    useState<boolean>(true);
 
   const [topUpHistory, setTopUpHistory] = useState<SubscriptionTopUp[]>([]);
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
@@ -68,6 +75,7 @@ export default function UserPageSubscriptions(
   useEffect(() => {
     setIsFetching(
       fetchingDetails ||
+        fetchingAirdropAddress ||
         fetchingTopUpHistory ||
         fetchingMemeSubscriptions ||
         fetchingSubscriptionLogs ||
@@ -75,6 +83,7 @@ export default function UserPageSubscriptions(
     );
   }, [
     fetchingDetails,
+    fetchAirdropAddress,
     fetchingTopUpHistory,
     fetchingMemeSubscriptions,
     fetchingSubscriptionLogs,
@@ -91,6 +100,19 @@ export default function UserPageSubscriptions(
     }).then((data) => {
       setDetails(data);
       setFetchingDetails(false);
+    });
+  }
+
+  function fetchAirdropAddress() {
+    if (!props.profile.consolidation.consolidation_key) {
+      return;
+    }
+    setFetchingAirdropAddress(true);
+    commonApiFetch<AirdropAddressResult>({
+      endpoint: `subscriptions/consolidation/${props.profile.consolidation.consolidation_key}/airdrop-address`,
+    }).then((data) => {
+      setAirdropResult(data);
+      setFetchingAirdropAddress(false);
     });
   }
 
@@ -166,6 +188,7 @@ export default function UserPageSubscriptions(
       return;
     }
     fetchDetails();
+    fetchAirdropAddress();
     fetchTopUpHistory();
     fetchMemeSubscriptions();
     fetchRedeemHistory();
@@ -230,6 +253,10 @@ export default function UserPageSubscriptions(
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
+                />
+                <UserPageSubscriptionsAirdropAddress
+                  show_edit={isConnectedAccount}
+                  airdrop={airdropResult}
                 />
               </Col>
             </Row>
