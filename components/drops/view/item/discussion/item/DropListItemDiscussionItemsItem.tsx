@@ -3,7 +3,7 @@ import { ProfileActivityLogType } from "../../../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 import DropAuthor, {
   DropAuthorSize,
-} from "../../../../create/utils/DropAuthor";
+} from "../../../../create/utils/author/DropAuthor";
 import DropPfp, { DropPFPSize } from "../../../../create/utils/DropPfp";
 import DropListItemDiscussionItemsItemComment from "./DropListItemDiscussionItemsItemComment";
 import DropListItemDiscussionItemsItemDropCreated from "./DropListItemDiscussionItemsItemDropCreated";
@@ -28,12 +28,14 @@ export default function DropListItemDiscussionItemsItem({
     }
   };
 
+  if (!item.author) return null;
+
   return (
     <div className="tw-flex tw-items-start tw-gap-x-3">
       <DropPfp pfpUrl={item.author?.pfp} size={DropPFPSize.SMALL} />
       <div className="sm:-tw-mt-1 tw-flex tw-flex-col tw-w-full">
         <DropAuthor
-          handle={item.author?.handle ?? "Unknown"}
+          profile={item.author}
           timestamp={new Date(item.created_at).getTime()}
           size={DropAuthorSize.SMALL}
         />

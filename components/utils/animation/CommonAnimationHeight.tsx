@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 export default function CommonAnimationHeight({
   className,
   children,
+  onAnimationCompleted,
 }: {
   readonly children: React.ReactNode;
   readonly className?: string;
+  readonly onAnimationCompleted?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number | "auto">("auto");
@@ -34,6 +36,7 @@ export default function CommonAnimationHeight({
       style={{ height }}
       animate={{ height }}
       transition={{ duration: 0.3 }}
+      onAnimationComplete={onAnimationCompleted}
     >
       <div ref={containerRef}>{children}</div>
     </motion.div>

@@ -1,7 +1,7 @@
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import PrimaryButton from "../../../utils/buttons/PrimaryButton";
 import { CreateDropType } from "../CreateDrop";
-import CreateDropSelectFile from "./select-file/CreateDropSelectFile";
+import CreateDropSelectFile from "./file/CreateDropSelectFile";
 import CreateDropChallengeAcceptButton from "./challenge/CreateDropChallengeAcceptButton";
 
 export default function CreateDropDesktopFooter({

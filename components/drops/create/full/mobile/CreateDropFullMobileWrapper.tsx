@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { CreateDropType } from "../../CreateDrop";
+import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 
 export default function CreateDropFullMobileWrapper({
   isOpen,
@@ -102,7 +103,7 @@ export default function CreateDropFullMobileWrapper({
                         {getTitle()}
                       </Dialog.Title>
                     </div>
-                    {children}
+                    <CommonAnimationHeight>{children}</CommonAnimationHeight>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
