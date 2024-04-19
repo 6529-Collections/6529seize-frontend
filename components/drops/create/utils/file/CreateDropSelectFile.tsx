@@ -1,4 +1,5 @@
 import CreateDropSelectedFileIcon from "./CreateDropSelectedFileIcon";
+import CreateDropSelectedFilePreview from "./CreateDropSelectedFilePreview";
 import CreateDropSelectFileAudio from "./CreateDropSelectFileAudio";
 
 import CreateDropSelectFileImage from "./CreateDropSelectFileImage";
@@ -54,11 +55,7 @@ export default function CreateDropSelectFile({
           </div>
           <div className="tw-mt-2 tw-flex tw-gap-x-3">
             <div className="tw-h-full tw-w-full">
-              <img
-                src="https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7c6c885e-87b2-11ee-9661-02424e2c14ad/9aecc1ce-14ba-4266-8644-3aca20639bc6.gif"
-                alt=""
-                className="tw-w-full tw-h-full tw-object-center tw-object-contain"
-              />
+              <CreateDropSelectedFilePreview file={file} />
             </div>
             {/*   <CreateDropSelectedFileIcon file={file} /> */}
           </div>

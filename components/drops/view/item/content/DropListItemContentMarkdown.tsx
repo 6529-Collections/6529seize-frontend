@@ -24,12 +24,10 @@ import rehypeSanitize from "rehype-sanitize";
 const customRenderer = ({
   content,
   drop,
-  container,
   onImageLoaded,
 }: {
   readonly content: ReactNode | undefined;
   readonly drop: DropFull;
-  readonly container: React.RefObject<HTMLDivElement>;
   readonly onImageLoaded: () => void;
 }) => {
   if (typeof content !== "string") {
@@ -78,16 +76,17 @@ const customRenderer = ({
     .map((part) => {
       const partProps = values[part];
       if (partProps) {
+        const randomId = getRandomObjectId();
         return (
           <DropListItemContentPart
-            key={part}
+            key={randomId}
             part={partProps}
-            container={container}
             onImageLoaded={onImageLoaded}
           />
         );
+      } else {
+        return part;
       }
-      return part;
     });
 
   return parts;
@@ -119,7 +118,7 @@ const DropListItemContentMarkdown = memo(
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
-    const checkOverflow = (container: RefObject<HTMLDivElement>) => {
+    const checkOverflow = () => {
       setIsOverflowing(
         !!containerRef.current &&
           containerRef.current.scrollHeight > containerRef.current.clientHeight
@@ -127,42 +126,46 @@ const DropListItemContentMarkdown = memo(
     };
 
     useEffect(() => {
-      // Check overflow initially
-      checkOverflow(containerRef);
-
-      // Check overflow on window resize
-      window.addEventListener("resize", () => checkOverflow(containerRef));
-
-      // Set up a MutationObserver to check overflow when the container's content changes
-      const observer = new MutationObserver(() => checkOverflow(containerRef));
-      if (containerRef.current) {
-        observer.observe(containerRef.current, {
-          childList: true,
-          subtree: true,
-        });
-      }
-
-      // Clean up event listeners and observer
-      return () => {
-        window.removeEventListener("resize", () => checkOverflow(containerRef));
-        observer.disconnect();
-      };
+      checkOverflow();
     }, [containerRef]);
 
     const [showMore, setShowMore] = useState(showFull);
 
+    const [containerHeight, setContainerHeight] = useState(288);
+
+    useEffect(() => {
+      if (showMore) {
+        containerRef.current?.style.setProperty("max-height", "100%");
+      } else {
+        containerRef.current?.style.setProperty(
+          "max-height",
+          `${containerHeight}px`
+        );
+      }
+    }, [showMore, containerRef, containerHeight]);
+
     const onImageLoaded = () => {
-      checkOverflow(containerRef);
+      if (!containerRef.current) return;
+      const imgs = containerRef.current.querySelectorAll("img");
+      if (imgs.length) {
+        const firstImg = imgs[0];
+        if (firstImg.complete) {
+          const imgRect = firstImg.getBoundingClientRect();
+          const containerRect = containerRef.current.getBoundingClientRect();
+          const isTopVisible = imgRect.top <= containerRect.bottom;
+          if (isTopVisible) {
+            setContainerHeight(288 + firstImg.height + 288);
+          }
+        }
+      }
     };
 
     return (
       <>
-        <CommonAnimationHeight>
+        <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
           <div
             ref={containerRef}
-            className={`${
-              !showMore ? "tw-max-h-72" : "!tw-max-h-full"
-            } tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out`}
+            className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
           >
             <Markdown
               rehypePlugins={[
@@ -184,7 +187,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </h5>
@@ -194,7 +196,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </h4>
@@ -204,7 +205,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </h3>
@@ -214,7 +214,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </h2>
@@ -224,7 +223,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </h1>
@@ -234,7 +232,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </p>
@@ -244,7 +241,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </li>
@@ -257,7 +253,6 @@ const DropListItemContentMarkdown = memo(
                     {customRenderer({
                       content: params.children,
                       drop,
-                      container: containerRef,
                       onImageLoaded,
                     })}
                   </code>

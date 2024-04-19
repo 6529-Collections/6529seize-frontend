@@ -1,6 +1,5 @@
-
 import { DropFull } from "../../../../entities/IDrop";
-import DropAuthor from "./DropAuthor";
+import DropAuthor from "./author/DropAuthor";
 import DropPfp from "./DropPfp";
 
 export default function DropWrapper({
@@ -21,11 +20,7 @@ export default function DropWrapper({
             <DropPfp pfpUrl={drop.author.pfp} />
           </div>
           <div className="tw-w-full tw-inline-flex tw-justify-between">
-            <DropAuthor
-              handle={drop.author.handle}
-              timestamp={drop.created_at}
-            />
- 
+            <DropAuthor profile={drop.author} timestamp={drop.created_at} />
           </div>
         </div>
         <div className="tw-mt-1.5 lg:tw-mt-1">

@@ -1,7 +1,7 @@
 import { MentionedUser, ReferencedNft } from "../../../../../entities/IDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { DropContentPartType } from "./DropListItemContent";
-import DropListItemContentHashtag from "./DropListItemContentHashtag";
+import DropListItemContentNft from "./nft-tag/DropListItemContentNft";
 import DropListItemContentMention from "./DropListItemContentMention";
 
 export interface DropListItemContentMentionProps {
@@ -22,11 +22,9 @@ export type DropListItemContentPartProps =
 
 export default function DropListItemContentPart({
   part,
-  container,
   onImageLoaded,
 }: {
   readonly part: DropListItemContentPartProps;
-  readonly container: React.RefObject<HTMLDivElement>;
   readonly onImageLoaded: () => void;
 }) {
   const { type, value } = part;
@@ -35,9 +33,8 @@ export default function DropListItemContentPart({
       return <DropListItemContentMention user={value} />;
     case DropContentPartType.HASHTAG:
       return (
-        <DropListItemContentHashtag
+        <DropListItemContentNft
           nft={value}
-          container={container}
           onImageLoaded={onImageLoaded}
         />
       );
