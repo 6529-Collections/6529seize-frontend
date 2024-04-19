@@ -9,7 +9,7 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import HeaderConnect from "./HeaderConnect";
 import { useAccount } from "wagmi";
-import SearchProfileButton from "./search-profile/SearchProfileButton";
+import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
@@ -646,7 +646,7 @@ export default function Header(props: Readonly<Props>) {
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}>
                           <UserSetUpProfileCta />
-                          <SearchProfileButton />
+                          <HeaderSearchButton />
                           <Image
                             loading="eager"
                             priority
@@ -931,7 +931,7 @@ export default function Header(props: Readonly<Props>) {
                             </NavDropdown>
                             <HeaderConnect />
                             <UserSetUpProfileCta />
-                            <SearchProfileButton />
+                            <HeaderSearchButton />
                           </Nav>
                         </Navbar>
                         <Image

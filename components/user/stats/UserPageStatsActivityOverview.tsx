@@ -96,6 +96,26 @@ export function UserPageStatsActivityOverviewTotals({
                     <UserPageStatsTableHr span={6} />
                     <tr>
                       <td>
+                        <b>Airdrops</b>
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.airdrops)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.airdrops_memes)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.airdrops_nextgen)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.airdrops_gradients)}
+                      </td>
+                      <td className={styles.collectedAccordionTableValue}>
+                        {numberWithCommas(activity?.airdrops_memelab)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
                         <b>Transfers In</b>
                       </td>
                       <td className={styles.collectedAccordionTableValue}>
