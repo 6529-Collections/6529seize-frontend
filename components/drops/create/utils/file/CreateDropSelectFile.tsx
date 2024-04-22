@@ -24,11 +24,14 @@ export default function CreateDropSelectFile({
       </div>
 
       {file && (
-        <div className="tw-mt-2 tw-w-full tw-px-2 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
-          <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-1 tw-truncate">
-            <p className="tw-mb-0 tw-max-w-xl tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
-              {file.name}
-            </p>
+        <div className="tw-mt-2 tw-w-full">
+          <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-1 tw-truncate">
+            <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
+              <CreateDropSelectedFileIcon file={file} />
+              <p className="tw-mb-0 tw-max-w-xl tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+                {file.name}
+              </p>
+            </div>
             <div className="tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
               <button
                 onClick={() => onFileChange(null)}
@@ -57,7 +60,6 @@ export default function CreateDropSelectFile({
             <div className="tw-h-full tw-w-full">
               <CreateDropSelectedFilePreview file={file} />
             </div>
-            {/*   <CreateDropSelectedFileIcon file={file} /> */}
           </div>
         </div>
       )}

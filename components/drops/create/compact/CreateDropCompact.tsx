@@ -124,10 +124,10 @@ export default function CreateDropCompact({
 
       {file && (
         <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
-          <div className="tw-w-full tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
-            <div className="tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
+          <div className="tw-w-full">
+            <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
-                {/*   <CreateDropSelectedFileIcon file={file} /> */}
+                <CreateDropSelectedFileIcon file={file} />
                 <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
                   {file.name}
                 </p>
