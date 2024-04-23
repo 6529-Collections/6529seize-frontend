@@ -26,6 +26,8 @@ import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
 import AboutHTML from "../../components/about/AboutHTML";
 import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
+import AboutSubscriptionsUpcoming from "../../components/about/AboutSubscriptionsUpcoming";
+import AboutCopyright from "../../components/about/AboutCopyright";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -47,7 +49,9 @@ export enum AboutSection {
   NFT_DELEGATION = "nft-delegation",
   ENS = "ens",
   SUBSCRIPTIONS = "subscriptions",
+  SUBSCRIPTIONS_UPCOMING = "upcoming-drops",
   NAKAMOTO_THRESHOLD = "nakamoto-threshold",
+  COPYRIGHT = "copyright",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -72,15 +76,18 @@ export default function About(props: any) {
     { display: "About" },
   ]);
 
-  const [section, setSection] = useState<AboutSection>(pageProps.section);
-  const [sectionTitle, setSectionTitle] = useState<string>(
-    pageProps.sectionTitle
-  );
+  const [section, setSection] = useState<AboutSection>();
+  const [sectionTitle, setSectionTitle] = useState<string>();
 
   function setNewSection(section: AboutSection) {
     setSection(section);
     setSectionTitle(section.toUpperCase().replaceAll("-", " "));
   }
+
+  useEffect(() => {
+    setSection(pageProps.section);
+    setSectionTitle(pageProps.sectionTitle);
+  }, [pageProps]);
 
   useEffect(() => {
     if (section && sectionTitle) {
@@ -138,8 +145,12 @@ export default function About(props: any) {
         return <AboutHTML title="ENS" html={pageProps.ensText} />;
       case AboutSection.SUBSCRIPTIONS:
         return <AboutSubscriptions />;
+      case AboutSection.SUBSCRIPTIONS_UPCOMING:
+        return <AboutSubscriptionsUpcoming />;
       case AboutSection.NAKAMOTO_THRESHOLD:
         return <AboutNakamotoThreshold />;
+      case AboutSection.COPYRIGHT:
+        return <AboutCopyright />;
     }
   }
 
@@ -172,263 +183,10 @@ export default function About(props: any) {
               <Container className="pt-4">
                 <Row>
                   <Col className={menuStyles.aboutMenuLeft}>
-                    <Container>
-                      <Row>
-                        <Col>
-                          <h3>About</h3>
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.MEMES)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MEMES
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          The Memes
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.SUBSCRIPTIONS)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.SUBSCRIPTIONS
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Subscriptions
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.MEMES_CALENDAR)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MEMES_CALENDAR
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Memes Calendar
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.MEME_LAB)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MEME_LAB
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Meme Lab
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.GRADIENTS)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.GRADIENTS
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Gradient
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.GDRC1)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.GDRC1
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          GDRC1
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.NFT_DELEGATION)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.NFT_DELEGATION
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          NFT Delegation
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.FAQ)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.FAQ
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          FAQ
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.ENS)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.ENS
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          ENS
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.MINTING)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MINTING
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Minting
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.NAKAMOTO_THRESHOLD)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.NAKAMOTO_THRESHOLD
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Nakamoto Threshold
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.LICENSE)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.LICENSE
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          License
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.APPLY)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.APPLY
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Apply
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.CONTACT_US)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.CONTACT_US
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Contact Us
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.RELEASE_NOTES)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.RELEASE_NOTES
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Release Notes
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.DATA_DECENTR)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.DATA_DECENTR
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Data Decentralization
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.TERMS_OF_SERVICE)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.TERMS_OF_SERVICE
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Terms of Service
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.PRIVACY_POLICY)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.PRIVACY_POLICY
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Privacy Policy
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.COOKIE_POLICY)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.COOKIE_POLICY
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Cookie Policy
-                        </Col>
-                      </Row>
-                    </Container>
+                    <AboutMenu
+                      currentSection={section}
+                      setSection={setNewSection}
+                    />
                   </Col>
                   {section && (
                     <Col className={menuStyles.aboutMenuRight}>
@@ -438,263 +196,10 @@ export default function About(props: any) {
                 </Row>
                 <Row className="pt-4">
                   <Col className={menuStyles.aboutMenuLeftFull}>
-                    <Container>
-                      <Row>
-                        <Col>
-                          <h3 className="float-none">About</h3>
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.MEMES)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MEMES
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          The Memes
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.SUBSCRIPTIONS)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.SUBSCRIPTIONS
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Subscriptions
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.MEMES_CALENDAR)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MEMES_CALENDAR
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Memes Calendar
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.MEME_LAB)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MEME_LAB
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          MemeLab
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.GRADIENTS)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.GRADIENTS
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Gradient
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.GDRC1)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.GDRC1
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          GDRC1
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.NFT_DELEGATION)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.NFT_DELEGATION
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          NFT Delegation
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.FAQ)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.FAQ
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          FAQ
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.ENS)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.ENS
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          ENS
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.MINTING)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.MINTING
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Minting
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.NAKAMOTO_THRESHOLD)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.NAKAMOTO_THRESHOLD
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Nakamoto Threshold
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.LICENSE)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.LICENSE
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          License
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.APPLY)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.APPLY
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Apply
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() => setNewSection(AboutSection.CONTACT_US)}
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.CONTACT_US
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Contact Us
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.RELEASE_NOTES)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.RELEASE_NOTES
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Release Notes
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.DATA_DECENTR)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.DATA_DECENTR
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Data Decentralization
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.TERMS_OF_SERVICE)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.TERMS_OF_SERVICE
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Terms of Service
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.PRIVACY_POLICY)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.PRIVACY_POLICY
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Privacy Policy
-                        </Col>
-                      </Row>
-                      <Row className="pt-1 pb-1">
-                        <Col
-                          onClick={() =>
-                            setNewSection(AboutSection.COOKIE_POLICY)
-                          }
-                          className={`${menuStyles.aboutMenuLeftItem} ${
-                            section === AboutSection.COOKIE_POLICY
-                              ? menuStyles.aboutMenuLeftItemActive
-                              : ""
-                          }`}>
-                          Cookie Policy
-                        </Col>
-                      </Row>
-                    </Container>
+                    <AboutMenu
+                      currentSection={section}
+                      setSection={setNewSection}
+                    />
                   </Col>
                 </Row>
               </Container>
@@ -768,4 +273,197 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       props: {},
     };
   }
+}
+
+function AboutMenu(
+  props: Readonly<{
+    currentSection: AboutSection | undefined;
+    setSection: (section: AboutSection) => void;
+  }>
+) {
+  const { currentSection, setSection } = props;
+
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <h3>About</h3>
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.MEMES}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="The Memes"
+      />
+      <AboutRow
+        section={AboutSection.SUBSCRIPTIONS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Subscriptions"
+      />
+      <AboutRow
+        section={AboutSection.SUBSCRIPTIONS_UPCOMING}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Upcoming Drops"
+      />
+      <AboutRow
+        section={AboutSection.MEMES_CALENDAR}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Memes Calendar"
+      />
+      <AboutRow
+        section={AboutSection.MEME_LAB}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Meme Lab"
+      />
+      <AboutRow
+        section={AboutSection.GRADIENTS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Gradient"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.GDRC1}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="GDRC1"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.NFT_DELEGATION}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="NFT Delegation"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.FAQ}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="FAQ"
+      />
+      <AboutRow
+        section={AboutSection.ENS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="ENS"
+      />
+      <AboutRow
+        section={AboutSection.MINTING}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Minting"
+      />
+      <AboutRow
+        section={AboutSection.NAKAMOTO_THRESHOLD}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Nakamoto Threshold"
+      />
+      <AboutRow
+        section={AboutSection.LICENSE}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="License"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.APPLY}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Apply"
+      />
+      <AboutRow
+        section={AboutSection.CONTACT_US}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Contact Us"
+      />
+      <AboutRow
+        section={AboutSection.RELEASE_NOTES}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Release Notes"
+      />
+      <AboutRow
+        section={AboutSection.DATA_DECENTR}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Data Decentralization"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.TERMS_OF_SERVICE}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Terms of Service"
+      />
+      <AboutRow
+        section={AboutSection.PRIVACY_POLICY}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Privacy Policy"
+      />
+      <AboutRow
+        section={AboutSection.COPYRIGHT}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Copyright"
+      />
+      <AboutRow
+        section={AboutSection.COOKIE_POLICY}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Cookie Policy"
+      />
+    </Container>
+  );
+}
+
+function AboutRow(
+  props: Readonly<{
+    section: AboutSection;
+    currentSection: AboutSection | undefined;
+    setSection: (section: AboutSection) => void;
+    title: string;
+  }>
+) {
+  return (
+    <Row className="pt-1 pb-1">
+      <Col
+        onClick={() => props.setSection(props.section)}
+        className={`${menuStyles.aboutMenuLeftItem} ${
+          props.currentSection === props.section
+            ? menuStyles.aboutMenuLeftItemActive
+            : ""
+        }`}>
+        {props.title}
+      </Col>
+    </Row>
+  );
 }
