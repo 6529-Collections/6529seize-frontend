@@ -16,8 +16,12 @@ import { Spinner } from "../../dotLoader/DotLoader";
 import Toggle from "react-toggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
-import { isMintingToday } from "../../../helpers/meme_calendar.helplers";
+import {
+  getMintingDates,
+  isMintingToday,
+} from "../../../helpers/meme_calendar.helplers";
 import { useQuery } from "@tanstack/react-query";
+import { Time } from "../../../helpers/time";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -28,18 +32,33 @@ export default function UserPageSubscriptionsUpcoming(
     refresh: () => void;
   }>
 ) {
+  const [expanded, setExpanded] = useState<boolean>(false);
+
+  const [subscriptions, setSubscriptions] = useState<NFTSubscription[]>([]);
+
+  useEffect(() => {
+    const subs = props.memes_subscriptions;
+    if (expanded) {
+      setSubscriptions(subs);
+    } else {
+      setSubscriptions(subs.slice(0, 3));
+    }
+  }, [props.memes_subscriptions, expanded]);
+
+  const dates = getMintingDates(subscriptions.length);
+
   return (
     <Container className="no-padding">
       <Row>
         <Col>
-          <h5>Upcoming Drops</h5>
+          <h5 className="mb-0">Upcoming Drops</h5>
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
           <Table className={styles.nftSubscriptionsTable}>
             <tbody>
-              {props.memes_subscriptions.map((subscription, index) => (
+              {subscriptions.map((subscription, index) => (
                 <tr key={subscription.token_id}>
                   <td>
                     <SubscriptionRow
@@ -50,15 +69,52 @@ export default function UserPageSubscriptionsUpcoming(
                       refresh={props.refresh}
                       minting_today={index === 0 && isMintingToday()}
                       first={index === 0}
+                      date={dates[index]}
                     />
                   </td>
                 </tr>
               ))}
+              {props.memes_subscriptions.length > 0 && (
+                <tr>
+                  <td>
+                    <div className="d-flex align-items-center justify-content-center gap-1">
+                      <SubscriptionExpandButton
+                        expanded={expanded}
+                        setExpanded={setExpanded}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </Table>
         </Col>
       </Row>
     </Container>
+  );
+}
+
+function SubscriptionExpandButton(
+  props: Readonly<{
+    expanded: boolean;
+    setExpanded: (expanded: boolean) => void;
+  }>
+) {
+  return (
+    <button
+      className="btn-link decoration-none"
+      onClick={() => props.setExpanded(!props.expanded)}>
+      {props.expanded ? (
+        <>
+          Show Less <FontAwesomeIcon icon="circle-chevron-up" height={"20px"} />
+        </>
+      ) : (
+        <>
+          Show More{" "}
+          <FontAwesomeIcon icon="circle-chevron-down" height={"20px"} />
+        </>
+      )}
+    </button>
   );
 }
 
@@ -70,6 +126,7 @@ function SubscriptionRow(
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
+    date: Time;
     refresh: () => void;
   }>
 ) {
@@ -153,7 +210,7 @@ function SubscriptionRow(
         <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
           <span className="d-flex align-items-center gap-2">
             {props.title} #{props.subscription.token_id}{" "}
-            {props.minting_today && (
+            {props.minting_today ? (
               <Tippy
                 placement="right"
                 theme="light"
@@ -163,6 +220,10 @@ function SubscriptionRow(
                   <FontAwesomeIcon icon="info-circle" height={"20px"} />
                 </span>
               </Tippy>
+            ) : (
+              <span className="font-color-silver">
+                {props.date.toIsoDateString()} / {props.date.toDayName()}
+              </span>
             )}
           </span>
           <span className="d-flex align-items-center gap-2">
@@ -177,7 +238,7 @@ function SubscriptionRow(
           </span>
         </Col>
       </Row>
-      {props.first && final?.phase && final?.phase_position && (
+      {props.first && final?.phase && final?.phase_position > 0 && (
         <Row className="pt-2">
           <Col className="font-smaller font-color-silver">
             Phase: {final.phase} - Subscription Position:{" "}
