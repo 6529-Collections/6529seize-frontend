@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { DropFull } from "../../../entities/IDrop";
+import { Drop } from "../../../entities/IDrop";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -26,7 +26,7 @@ export default function Drops() {
       QueryKey.PROFILE_DROPS,
       {
         handleOrWallet,
-        inputProfile: connectedProfile?.profile?.handle ?? null,
+        context_profile: connectedProfile?.profile?.handle ?? null,
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -34,21 +34,21 @@ export default function Drops() {
         limit: `${REQUEST_SIZE}`,
       };
       if (pageParam) {
-        params.id_less_than = `${pageParam}`;
+        params.serial_no_less_than = `${pageParam}`;
       }
       if (connectedProfile?.profile?.handle) {
-        params.input_profile = connectedProfile.profile.handle;
+        params.context_profile = connectedProfile.profile.handle;
       }
-      return await commonApiFetch<DropFull[]>({
+      return await commonApiFetch<Drop[]>({
         endpoint: `profiles/${handleOrWallet}/drops`,
         params,
       });
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
+    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
   });
 
-  const [drops, setDrops] = useState<DropFull[]>([]);
+  const [drops, setDrops] = useState<Drop[]>([]);
 
   useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
 

@@ -59,7 +59,6 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.DROP_CREATED:
       return <ProfileActivityLogDropCreated log={log} />;
     default:
-      console.log("logType", logType);
       assertUnreachable(logType);
   }
 }

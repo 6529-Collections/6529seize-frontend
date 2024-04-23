@@ -15,7 +15,7 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { DropFull } from "../../entities/IDrop";
+import { Drop } from "../../entities/IDrop";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -48,6 +48,7 @@ export enum QueryKey {
   RESERVOIR_NFT = "RESERVOIR_NFT",
   DROP = "DROP",
   DROP_DISCUSSION = "DROP_DISCUSSION",
+  NFTS_SEARCH = "NFTS_SEARCH",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -144,11 +145,11 @@ type ReactQueryWrapperContextType = {
   }) => void;
   onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
   onDropChange: (params: {
-    readonly drop: DropFull;
+    readonly drop: Drop;
     readonly giverHandle: string | null;
   }) => void;
   onDropDiscussionChange: (params: {
-    readonly dropId: number;
+    readonly dropId: string;
     readonly dropAuthorHandle: string;
   }) => void;
 };
@@ -579,10 +580,10 @@ export default function ReactQueryWrapper({
   }: {
     oldData:
       | {
-          pages: DropFull[][];
+          pages: Drop[][];
         }
       | undefined;
-    drop: DropFull;
+    drop: Drop;
   }) => {
     if (!oldData) {
       return oldData;
@@ -604,7 +605,7 @@ export default function ReactQueryWrapper({
     drop,
     giverHandle,
   }: {
-    readonly drop: DropFull;
+    readonly drop: Drop;
     readonly giverHandle: string | null;
   }) => {
     queryClient.setQueryData(
@@ -618,7 +619,7 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: DropFull[][];
+              pages: Drop[][];
             }
           | undefined
       ) => dropChangeMutation({ oldData, drop })
@@ -630,7 +631,7 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: DropFull[][];
+              pages: Drop[][];
             }
           | undefined
       ) => dropChangeMutation({ oldData, drop })
@@ -650,7 +651,7 @@ export default function ReactQueryWrapper({
     dropId,
     dropAuthorHandle,
   }: {
-    readonly dropId: number;
+    readonly dropId: string;
     dropAuthorHandle: string;
   }) => {
     invalidateQueries({

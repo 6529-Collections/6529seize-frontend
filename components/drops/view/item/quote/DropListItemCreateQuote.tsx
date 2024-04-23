@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropListItemQuote from "./DropListItemQuote";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import { useEffect, useState } from "react";
 
 export default function DropListItemCreateQuote({
@@ -9,7 +9,7 @@ export default function DropListItemCreateQuote({
   isOpen,
   setIsOpen,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly isOpen: boolean;
   readonly setIsOpen: (newState: boolean) => void;
 }) {

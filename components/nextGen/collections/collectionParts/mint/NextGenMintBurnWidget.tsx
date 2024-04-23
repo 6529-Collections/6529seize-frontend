@@ -21,7 +21,7 @@ import {
 import { useAccount, useChainId, useContractWrite } from "wagmi";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../../../../services/6529api";
-import { useWeb3Modal } from "@web3modal/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 import {
   getStatusFromDates,
@@ -174,7 +174,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           setIsMinting(true);
         }
       } else {
-        web3Modal.open({ route: "SelectNetwork" });
+        web3Modal.open();
       }
     } else {
       web3Modal.open();

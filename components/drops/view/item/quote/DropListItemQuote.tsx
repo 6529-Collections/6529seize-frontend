@@ -9,7 +9,7 @@ export default function DropListItemQuote({
   init,
   onSuccessfulDrop,
 }: {
-  readonly quotedDropId: number;
+  readonly quotedDropId: string;
   readonly init: boolean;
   readonly onSuccessfulDrop: () => void;
 }) {

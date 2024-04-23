@@ -50,7 +50,9 @@ export default function CreateDropFullMobile({
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
-  readonly onMentionedUser: (newUser: MentionedUser) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onTitle: (newV: string | null) => void;
   readonly onFileChange: (file: File | null) => void;

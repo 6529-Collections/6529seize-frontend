@@ -1,4 +1,4 @@
-import { DropFull } from "../../../entities/IDrop";
+import { Drop } from "../../../entities/IDrop";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
@@ -10,7 +10,7 @@ export default function DropListWrapper({
   loading,
   onBottomIntersection,
 }: {
-  readonly drops: DropFull[];
+  readonly drops: Drop[];
   readonly loading: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
 }) {

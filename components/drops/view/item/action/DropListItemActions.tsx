@@ -1,4 +1,4 @@
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import { DropDiscussionExpandableState } from "../DropsListItem";
 
 import DropListItemActionsDiscussion from "./DropListItemActionsDiscussion";
@@ -12,7 +12,7 @@ export default function DropListItemActions({
   setDiscussionExpandableState,
   setIsQuoteMode,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly discussionExpandableState: DropDiscussionExpandableState;
   readonly isQuoteMode: boolean;
   readonly setDiscussionExpandableState: (

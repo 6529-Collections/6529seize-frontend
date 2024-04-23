@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import {
-  DropFull,
+  Drop,
   DropRateChangeRequest,
 } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
@@ -24,7 +24,7 @@ export default function DropListItemRateGiveSubmit({
   onSuccessfulRateChange,
 }: {
   readonly rate: number;
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly availableRates: number;
   readonly onSuccessfulRateChange: () => void;
 }) {
@@ -35,14 +35,14 @@ export default function DropListItemRateGiveSubmit({
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
-      await commonApiPost<DropRateChangeRequest, DropFull>({
+      await commonApiPost<DropRateChangeRequest, Drop>({
         endpoint: `drops/${drop.id}/rep`,
         body: {
           amount: param.rate,
           category: param.category,
         },
       }),
-    onSuccess: (response: DropFull) => {
+    onSuccess: (response: Drop) => {
       setToast({
         message: "Voted successfully.",
         type: "success",
@@ -89,9 +89,9 @@ export default function DropListItemRateGiveSubmit({
     }
 
     const previousRate =
-      drop.input_profile_categories?.find(
+      drop.context_profile_context?.categories?.find(
         (c) => c.category === DEFAULT_DROP_RATE_CATEGORY
-      )?.rep_given_by_input_profile ?? 0;
+      )?.rating ?? 0;
 
     const newRate = previousRate + rate;
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import DropListItemDiscussionInputWrapper from "./DropListItemDiscussionInputWrapper";
 import DropListItemDiscussionItems from "./DropListItemDiscussionItems";
@@ -15,7 +15,7 @@ export default function DropListItemDiscussion({
   initialFilter,
   animating,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly initialFilter: DropItemDiscussionFilterType;
   readonly animating: boolean;
 }) {

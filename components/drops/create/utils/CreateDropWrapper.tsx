@@ -37,7 +37,7 @@ export default function CreateDropWrapper({
   onSubmitDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly quotedDropId: number | null;
+  readonly quotedDropId: string | null;
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly onSubmitDrop: (dropRequest: DropRequest) => void;
@@ -63,7 +63,9 @@ export default function CreateDropWrapper({
   const [metadata, setMetadata] = useState<DropMetadata[]>([]);
 
   const [file, setFile] = useState<File | null>(null);
-  const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
+  const [mentionedUsers, setMentionedUsers] = useState<
+    Omit<MentionedUser, "current_handle">[]
+  >([]);
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 
   const onMetadataEdit = ({ data_key, data_value }: DropMetadata) => {
@@ -83,7 +85,7 @@ export default function CreateDropWrapper({
     setMetadata((prev) => prev.filter((m) => m.data_key !== data_key));
   };
 
-  const onMentionedUser = (newUser: MentionedUser) => {
+  const onMentionedUser = (newUser: Omit<MentionedUser, "current_handle">) => {
     setMentionedUsers((prev) => [
       ...prev.filter(
         (i) => i.mentioned_profile_id !== newUser.mentioned_profile_id
