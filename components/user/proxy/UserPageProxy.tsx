@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import ProxyList from "./list/ProxyList";
-import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper";
-import { motion } from "framer-motion";
 import ProxyCreate from "./create/ProxyCreate";
+import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 
 export enum ProxyMode {
   LIST = "LIST",
   CREATE = "CREATE",
+}
+
+export enum ProxyAction {
+  ALLOCATE_REP = "ALLOCATE_REP",
+  ALLOCATE_CATEGORY_REP = "ALLOCATE_CATEGORY_REP",
+  ALLOCATE_CIC = "ALLOCATE_CIC",
 }
 
 export default function UserPageProxy({
@@ -24,16 +29,7 @@ export default function UserPageProxy({
 
   return (
     <div>
-      <CommonAnimationWrapper>
-        <motion.div
-          key={mode}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          {components[mode]}
-        </motion.div>
-      </CommonAnimationWrapper>
+      <CommonChangeAnimation>{components[mode]}</CommonChangeAnimation>
     </div>
   );
 }
