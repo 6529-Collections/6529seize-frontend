@@ -11,6 +11,7 @@ export interface MemeLite {
   name: string | null;
   scaled: string | null;
   thumbnail: string | null;
+  artist: string | null;
 }
 
 export default function UserSettingsImgSelectMeme({
@@ -46,7 +47,9 @@ export default function UserSettingsImgSelectMeme({
   };
   return (
     <div ref={listRef} className="tw-max-w-full tw-relative">
-      <label htmlFor="search-meme" className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
+      <label
+        htmlFor="search-meme"
+        className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
         Select Meme
       </label>
       <div className="tw-mt-2 tw-relative">
@@ -64,8 +67,7 @@ export default function UserSettingsImgSelectMeme({
             className="tw-h-5 tw-w-5 tw-text-iron-50"
             viewBox="0 0 24 24"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
               stroke="currentColor"
@@ -83,8 +85,7 @@ export default function UserSettingsImgSelectMeme({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
+            transition={{ duration: 0.2 }}>
             <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-max-h-[calc(20rem+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
@@ -92,8 +93,7 @@ export default function UserSettingsImgSelectMeme({
                     <li
                       onClick={() => setMemeAndCloseDropdown(meme)}
                       key={meme.id}
-                      className="tw-group tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
-                    >
+                      className="tw-group tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
                       <img
                         src={meme.thumbnail ?? meme.image ?? meme.scaled ?? ""}
                         alt=""

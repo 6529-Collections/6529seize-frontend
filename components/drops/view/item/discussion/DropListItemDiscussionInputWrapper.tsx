@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import DropListItemDiscussionInput from "./DropListItemDiscussionInput";
 import { AuthContext } from "../../../../auth/Auth";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 
 enum STATE {
   NOT_CONNECTED = "NOT_CONNECTED",
@@ -13,7 +13,7 @@ enum STATE {
 export default function DropListItemDiscussionInputWrapper({
   drop,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
 }) {
   const { connectedProfile } = useContext(AuthContext);
   const [state, setState] = useState<STATE>(STATE.NOT_CONNECTED);

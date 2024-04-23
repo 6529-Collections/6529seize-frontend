@@ -1,4 +1,4 @@
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import DropWrapper from "../../../create/utils/DropWrapper";
 import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
 
@@ -6,7 +6,7 @@ export default function DropListItemContentQuote({
   drop,
   showFull = false,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly showFull?: boolean;
 }) {
   const onClick = (e: React.MouseEvent) => {
@@ -22,7 +22,7 @@ export default function DropListItemContentQuote({
       onClick={onClick}
       className="tw-cursor-pointer tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-bg-iron-900 tw-rounded-xl tw-p-2 tw-mt-4"
     >
-      <DropWrapper drop={drop} showExternalLink={false}>
+      <DropWrapper drop={drop}>
         <DropListItemContentMarkdown drop={drop} showFull={showFull} />
       </DropWrapper>
     </div>

@@ -4,11 +4,15 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import SearchProfileModalItem from "./SearchProfileModalItem";
+import HeaderSearchModalItem, {
+  NFTSearchResult,
+  HeaderSearchModalItemType,
+} from "./HeaderSearchModalItem";
 import { useRouter } from "next/router";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
+import { createPortal } from "react-dom";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -19,7 +23,7 @@ enum STATE {
 
 const MIN_SEARCH_LENGTH = 3;
 
-export default function SearchProfileModal({
+export default function HeaderSearchModal({
   onClose,
 }: {
   readonly onClose: () => void;
@@ -30,6 +34,8 @@ export default function SearchProfileModal({
   useKeyPressEvent("Escape", onClose);
 
   const [searchValue, setSearchValue] = useState<string>("");
+  const [showNfts, setShowNfts] = useState<boolean>(true);
+  const [showProfiles, setShowProfiles] = useState<boolean>(true);
 
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
@@ -62,12 +68,28 @@ export default function SearchProfileModal({
           param: debouncedValue,
         },
       }),
-    enabled: debouncedValue.length >= MIN_SEARCH_LENGTH,
+    enabled: showProfiles && debouncedValue.length >= MIN_SEARCH_LENGTH,
+  });
+
+  const { isFetching: isFetchingNfts, data: nfts } = useQuery({
+    queryKey: [QueryKey.NFTS_SEARCH, debouncedValue],
+    queryFn: async () => {
+      return await commonApiFetch<NFTSearchResult[]>({
+        endpoint: "nfts_search",
+        params: {
+          search: debouncedValue,
+        },
+      });
+    },
+    enabled:
+      showNfts &&
+      (debouncedValue.length >= MIN_SEARCH_LENGTH ||
+        (debouncedValue.length > 0 && !isNaN(Number(debouncedValue)))),
   });
 
   const onHover = (index: number, state: boolean) => {
     if (!state) return;
-    setSelectedProfileIndex(index);
+    setSelectedItemIndex(index);
   };
 
   const goToProfile = async (profile: CommunityMemberMinimal) => {
@@ -81,18 +103,33 @@ export default function SearchProfileModal({
     onClose();
   };
 
-  const [selectedProfileIndex, setSelectedProfileIndex] = useState<number>(0);
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
+
   useKeyPressEvent("ArrowDown", () =>
-    setSelectedProfileIndex((i) =>
-      profiles && profiles.length >= i + 2 ? i + 1 : i
-    )
+    setSelectedItemIndex((i) => {
+      const itemCount = (profiles?.length ?? 0) + (nfts?.length ?? 0);
+      return itemCount >= i + 2 ? i + 1 : i;
+    })
   );
+
   useKeyPressEvent("ArrowUp", () =>
-    setSelectedProfileIndex((i) => (i > 0 ? i - 1 : i))
+    setSelectedItemIndex((i) => (i > 0 ? i - 1 : i))
   );
+
   useKeyPressEvent("Enter", () => {
+    let index = selectedItemIndex;
+    if (nfts && nfts.length > 0 && nfts.length > index) {
+      const meme = nfts[selectedItemIndex];
+      if (!meme) {
+        return;
+      }
+      const path = `/the-memes/${meme.id}`;
+      router.push(path);
+      onClose();
+    }
+    index -= nfts?.length ?? 0;
     if (profiles && profiles.length > 0) {
-      const profile = profiles[selectedProfileIndex];
+      const profile = profiles[index];
       if (!profile) {
         return;
       }
@@ -103,17 +140,20 @@ export default function SearchProfileModal({
   const [state, setState] = useState<STATE>(STATE.INITIAL);
 
   useEffect(() => {
-    setSelectedProfileIndex(0);
-    if (isFetching) {
+    setSelectedItemIndex(0);
+    if (isFetching || isFetchingNfts) {
       setState(STATE.LOADING);
-    } else if (profiles?.length === 0) {
+    } else if (profiles?.length === 0 && nfts?.length === 0) {
       setState(STATE.NO_RESULTS);
-    } else if (profiles && profiles?.length > 0) {
+    } else if (
+      (profiles && profiles?.length > 0) ||
+      (nfts && nfts?.length > 0)
+    ) {
       setState(STATE.SUCCESS);
     } else {
       setState(STATE.INITIAL);
     }
-  }, [isFetching, profiles]);
+  }, [isFetching, isFetchingNfts, profiles, nfts]);
 
   const activeElementRef = useRef<HTMLDivElement>(null);
 
@@ -125,10 +165,29 @@ export default function SearchProfileModal({
         inline: "start",
       });
     }
-  }, [selectedProfileIndex]);
+  }, [selectedItemIndex]);
 
-  return (
-    <div className="tw-cursor-default tw-relative tw-z-10">
+  const renderItems = (items: HeaderSearchModalItemType[], baseIndex: number) =>
+    items.map((item, index) => {
+      const currentIndex = baseIndex + index;
+      return (
+        <div
+          ref={currentIndex === selectedItemIndex ? activeElementRef : null}
+          key={getRandomObjectId()}
+        >
+          <HeaderSearchModalItem
+            content={item}
+            searchValue={debouncedValue}
+            isSelected={currentIndex === selectedItemIndex}
+            onHover={(state) => onHover(currentIndex, state)}
+            onClose={onClose}
+          />
+        </div>
+      );
+    });
+
+  return createPortal(
+    <div className="tailwind-scope tw-cursor-default tw-relative tw-z-50">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
@@ -161,24 +220,36 @@ export default function SearchProfileModal({
                   placeholder="Search"
                 />
               </div>
+              <div className="pt-3 d-flex gap-3">
+                <div>
+                  <label className="unselectable">
+                    <input
+                      type="checkbox"
+                      checked={showNfts}
+                      onChange={() => setShowNfts(!showNfts)}
+                    />{" "}
+                    NFTs
+                  </label>
+                </div>
+                <div>
+                  <label className="unselectable">
+                    <input
+                      type="checkbox"
+                      checked={showProfiles}
+                      onChange={() => setShowProfiles(!showProfiles)}
+                    />{" "}
+                    Profiles
+                  </label>
+                </div>
+              </div>
             </div>
 
             {state === STATE.SUCCESS && (
               <div className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-text-sm tw-text-iron-200">
-                {profiles?.map((profile, i) => (
-                  <div
-                    ref={i === selectedProfileIndex ? activeElementRef : null}
-                    key={getRandomObjectId()}
-                  >
-                    <SearchProfileModalItem
-                      profile={profile}
-                      searchValue={debouncedValue}
-                      isSelected={i === selectedProfileIndex}
-                      onHover={(state) => onHover(i, state)}
-                      onClose={onClose}
-                    />
-                  </div>
-                ))}
+                {nfts && showNfts && renderItems(nfts, 0)}
+                {profiles &&
+                  showProfiles &&
+                  renderItems(profiles, nfts?.length ?? 0)}
               </div>
             )}
             {state === STATE.LOADING && (
@@ -196,15 +267,14 @@ export default function SearchProfileModal({
             {state === STATE.INITIAL && (
               <div className="tw-h-72 tw-flex tw-items-center tw-justify-center">
                 <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
-                  {searchValue.length >= MIN_SEARCH_LENGTH
-                    ? "No results found"
-                    : "Type at least 3 characters"}
+                  Search for NFTs (by ID or name) and Profiles
                 </p>
               </div>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

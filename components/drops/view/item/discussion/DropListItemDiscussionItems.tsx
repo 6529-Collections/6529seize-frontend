@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import DropListItemDiscussionItemsItem from "./item/DropListItemDiscussionItemsItem";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { DropActivityLog, DropFull } from "../../../../../entities/IDrop";
+import { DropActivityLog, Drop } from "../../../../../entities/IDrop";
 import { Page } from "../../../../../helpers/Types";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { DropItemDiscussionFilterType } from "./DropListItemDiscussion";
@@ -17,7 +17,7 @@ export default function DropListItemDiscussionItems({
   filter,
   animating,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly filter: DropItemDiscussionFilterType;
   readonly animating: boolean;
 }) {

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import DropListItemDataContentProfiles from "./DropListItemDataContentProfiles";
 import DropListItemDataContentMetadata from "./DropListItemDataContentMetadata";
 
@@ -8,7 +8,7 @@ export default function DropListItemDataContent({
   drop,
 }: {
   readonly open: boolean;
-  readonly drop: DropFull;
+  readonly drop: Drop;
 }) {
   return (
     <AnimatePresence mode="wait" initial={false}>

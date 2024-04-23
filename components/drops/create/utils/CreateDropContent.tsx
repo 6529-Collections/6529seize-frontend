@@ -49,7 +49,7 @@ export default function CreateDropContent({
   readonly type: CreateDropType;
   readonly onEditorState: (editorState: EditorState) => void;
   readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
-  readonly onMentionedUser: (mentionedUser: MentionedUser) => void;
+  readonly onMentionedUser: (mentionedUser: Omit<MentionedUser, 'current_handle'>) => void;
   readonly onFileChange: (file: File) => void;
   readonly onViewClick: () => void;
 }) {
@@ -83,7 +83,7 @@ export default function CreateDropContent({
   const onEditorStateChange = (editorState: EditorState) =>
     onEditorState(editorState);
 
-  const onMentionedUserAdded = (user: MentionedUser) => onMentionedUser(user);
+  const onMentionedUserAdded = (user: Omit<MentionedUser, 'current_handle'>) => onMentionedUser(user);
   const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
   const showToggleViewButton = viewType === CreateDropViewType.COMPACT;

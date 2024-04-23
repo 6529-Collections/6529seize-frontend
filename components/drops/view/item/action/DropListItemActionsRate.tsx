@@ -1,5 +1,5 @@
 import Tippy from "@tippyjs/react";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 import DropListItemActionsRateTooltip from "./DropListItemActionsRateTooltip";
@@ -18,13 +18,13 @@ export default function DropListItemActionsRate({
   drop,
   setState,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly setState: (state: DropDiscussionExpandableState) => void;
 }) {
-  const userHaveRated = !!drop.rep_given_by_input_profile;
+  const userHaveRated = !!drop.context_profile_context?.rating;
   const getRateStatus = (): RateStatus => {
-    if (drop.rep > 0) return RateStatus.POSITIVE;
-    if (drop.rep < 0) return RateStatus.NEGATIVE;
+    if (drop.rating > 0) return RateStatus.POSITIVE;
+    if (drop.rating < 0) return RateStatus.NEGATIVE;
     return RateStatus.NEUTRAL;
   };
 
@@ -49,8 +49,8 @@ export default function DropListItemActionsRate({
       interactive={true}
       content={
         <DropListItemActionsRateTooltip
-          current={drop.rep}
-          myRates={drop.rep_given_by_input_profile}
+          current={drop.rating}
+          myRates={drop.context_profile_context?.rating ?? null}
         />
       }
     >
@@ -64,11 +64,11 @@ export default function DropListItemActionsRate({
             <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
               Rates
             </span>
-            {!!drop.rep && (
+            {!!drop.rating && (
               <div
                 className={`${getRateColor()} tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-xs tw-font-medium`}
               >
-                {formatNumberWithCommas(drop.rep)}
+                {formatNumberWithCommas(drop.rating)}
               </div>
             )}
           </>

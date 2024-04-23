@@ -1,4 +1,4 @@
-import { DropFull } from "../../../../entities/IDrop";
+import { Drop } from "../../../../entities/IDrop";
 import DropAuthor from "./author/DropAuthor";
 import DropPfp from "./DropPfp";
 
@@ -6,7 +6,7 @@ export default function DropWrapper({
   drop,
   children,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly children: React.ReactNode;
 }) {
   return (

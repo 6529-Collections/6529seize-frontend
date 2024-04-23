@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
-import { DropFull } from "../../entities/IDrop";
+import { Drop } from "../../entities/IDrop";
 import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "../drops/view/DropListWrapper";
 import { useSelector } from "react-redux";
@@ -22,7 +22,7 @@ interface BrainQuery {
   readonly curation_criteria_id?: string;
   readonly limit: string;
   readonly storm_id?: string;
-  readonly input_profile?: string;
+  readonly context_profile?: string;
 }
 
 const REQUEST_SIZE = 10;
@@ -47,7 +47,7 @@ export default function Brain() {
       query.curation_criteria_id = curation;
     }
     if (connectedProfile?.profile?.handle) {
-      query.input_profile = connectedProfile.profile.handle;
+      query.context_profile = connectedProfile.profile.handle;
     }
     return query;
   };
@@ -116,16 +116,16 @@ export default function Brain() {
       if (pageParam) {
         params.id_less_than = `${pageParam}`;
       }
-      return await commonApiFetch<DropFull[]>({
+      return await commonApiFetch<Drop[]>({
         endpoint: `drops/`,
         params,
       });
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.id ?? null,
+    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
   });
 
-  const [drops, setDrops] = useState<DropFull[]>([]);
+  const [drops, setDrops] = useState<Drop[]>([]);
 
   useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
 

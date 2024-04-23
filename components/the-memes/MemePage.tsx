@@ -111,7 +111,6 @@ export default function MemePage() {
   useEffect(() => {
     if (router.isReady) {
       let initialFocus = MEME_FOCUS.LIVE;
-
       const routerFocus = router.query.focus;
       if (routerFocus) {
         const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
@@ -123,10 +122,23 @@ export default function MemePage() {
       }
       if (router.query.id) {
         setNftId(router.query.id as string);
-        setActiveTab(initialFocus);
+        if (activeTab !== initialFocus) {
+          setActiveTab(initialFocus);
+        } else {
+          router.replace(
+            {
+              query: {
+                id: router.query.id,
+                focus: initialFocus,
+              },
+            },
+            undefined,
+            { shallow: true }
+          );
+        }
       }
     }
-  }, [router.isReady]);
+  }, [router.isReady, router.query.id]);
 
   useEffect(() => {
     if (activeTab && router.isReady) {

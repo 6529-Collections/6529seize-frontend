@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { DropFull } from "../../entities/IDrop";
+import { Drop } from "../../entities/IDrop";
 
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
@@ -9,6 +9,8 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { useContext } from "react";
+import { AuthContext } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -16,21 +18,28 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function BrainDropPage() {
+  const { connectedProfile } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Brain", href: "/brain" },
     { display: "Drop" },
   ];
   const router = useRouter();
-  const dropId = (router.query.drop as string)?.toLowerCase();
+  const drop_id = (router.query.drop as string)?.toLowerCase();
 
-  const { data: drop } = useQuery<DropFull>({
-    queryKey: [QueryKey.DROP, +dropId],
+  const { data: drop } = useQuery<Drop>({
+    queryKey: [
+      QueryKey.DROP,
+      { drop_id, context_profile: connectedProfile?.profile?.handle },
+    ],
     queryFn: async () =>
-      await commonApiFetch<DropFull>({
-        endpoint: `drops/${dropId}`,
+      await commonApiFetch<Drop>({
+        endpoint: `drops/${drop_id}`,
+        params: connectedProfile?.profile?.handle
+          ? { context_profile: connectedProfile.profile.handle }
+          : {},
       }),
-    enabled: !!dropId,
+    enabled: !!drop_id,
   });
 
   return (

@@ -1,4 +1,4 @@
-import { DropFull } from "../../../../entities/IDrop";
+import { Drop } from "../../../../entities/IDrop";
 import { useEffect, useState } from "react";
 import DropListItemData from "./data/DropListItemData";
 import DropListItemActions from "./action/DropListItemActions";
@@ -23,7 +23,7 @@ export default function DropsListItem({
   showFull = false,
   showExternalLink = true,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly showFull?: boolean;
   readonly showExternalLink?: boolean;
 }) {
@@ -38,13 +38,12 @@ export default function DropsListItem({
   const [isQuoteMode, setIsQuoteMode] = useState(false);
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
-
   return (
     <div className="tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
       <DropsListItemChallengeBar
         maxValue={100000}
-        current={drop.rep}
-        myRate={drop.rep_given_by_input_profile}
+        current={drop.rating}
+        myRate={drop.context_profile_context?.rating ?? null}
       />
       <DropListItemCreateQuote
         drop={drop}
