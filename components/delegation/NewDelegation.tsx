@@ -129,10 +129,10 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
       newErrors.push("Missing or invalid Address");
     } else if (
       (props.subdelegation &&
-        newDelegationToAddress.toUpperCase() ==
-          props.subdelegation.originalDelegator.toUpperCase()) ||
+        newDelegationToAddress?.toUpperCase() ==
+          props.subdelegation.originalDelegator?.toUpperCase()) ||
       (!props.subdelegation &&
-        newDelegationToAddress.toUpperCase() === props.address.toUpperCase())
+        newDelegationToAddress?.toUpperCase() === props.address?.toUpperCase())
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }
