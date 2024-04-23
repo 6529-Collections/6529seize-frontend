@@ -18,6 +18,7 @@ import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsAirdropAddress, {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
+import { numberOfCardsForSeasonEnd } from "../../../helpers/meme_calendar.helplers";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -47,6 +48,7 @@ export default function UserPageSubscriptions(
   const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
     useState<boolean>(true);
 
+  const remainingMintsForSeason = numberOfCardsForSeasonEnd();
   const [memeSubscriptions, setMemeSubscriptions] = useState<NFTSubscription[]>(
     []
   );
@@ -158,7 +160,7 @@ export default function UserPageSubscriptions(
     }
     setFetchingMemeSubscriptions(true);
     commonApiFetch<NFTSubscription[]>({
-      endpoint: `subscriptions/consolidation/upcoming-memes/${props.profile.consolidation.consolidation_key}`,
+      endpoint: `subscriptions/consolidation/upcoming-memes/${props.profile.consolidation.consolidation_key}?card_count=${remainingMintsForSeason.count}`,
     }).then((data) => {
       setMemeSubscriptions(data);
       setFetchingMemeSubscriptions(false);
