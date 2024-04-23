@@ -46,7 +46,7 @@ export default function CreateDropFullMobileWrapper({
           <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity" />
         </Transition.Child>
 
-        <div className="tw-fixed tw-inset-0 tw-overflow-hidden">
+        <div className="tw-fixed tw-inset-0">
           <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
               <Transition.Child
