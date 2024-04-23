@@ -1,6 +1,5 @@
 import styles from "./About.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
-import { AboutSection } from "../../pages/about/[section]";
 
 export default function AboutCopyright() {
   return (
