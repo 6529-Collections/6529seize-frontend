@@ -4,11 +4,11 @@ import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
   REP = "REP",
-
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
   STATS = "STATS",
   SUBSCRIPTIONS = "SUBSCRIPTIONS",
+  PROXY = "PROXY",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -40,6 +40,11 @@ export const USER_PAGE_TAB_META: Record<
     title: "Subscriptions",
     route: "subscriptions",
   },
+  [UserPageTabType.PROXY]: {
+    tab: UserPageTabType.PROXY,
+    title: "Proxy",
+    route: "proxy",
+  },
 };
 
 export default function UserPageTabs() {
@@ -69,7 +74,8 @@ export default function UserPageTabs() {
     <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div
         className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-        aria-label="Tabs">
+        aria-label="Tabs"
+      >
         {Object.values(UserPageTabType).map((tabType) => (
           <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
         ))}
