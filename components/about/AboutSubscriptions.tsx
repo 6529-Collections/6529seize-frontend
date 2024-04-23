@@ -3,10 +3,7 @@ import {
   numberOfCardsForSeasonEnd,
   getMintingDates,
 } from "../../helpers/meme_calendar.helplers";
-import {
-  NFTSubscription,
-  SubscriptionCounts,
-} from "../../entities/ISubscription";
+import { SubscriptionCounts } from "../../entities/ISubscription";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useEffect, useState } from "react";
 import { Time } from "../../helpers/time";
