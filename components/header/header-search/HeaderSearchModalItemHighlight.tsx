@@ -1,7 +1,7 @@
 import React from "react";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 
-export default function SearchProfileModalItemHighlight({
+export default function HeaderSearchModalItemHighlight({
   text,
   highlight,
 }: {

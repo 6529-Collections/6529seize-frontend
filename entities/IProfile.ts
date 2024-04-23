@@ -465,7 +465,7 @@ export interface ProfileMinimal {
 }
 
 export interface ProfileAvailableDropRateResponse {
-  readonly available_tdh_for_rep: number;
+  readonly available_credit_for_rating: number;
 }
 
 export enum ProfileConnectedStatus {

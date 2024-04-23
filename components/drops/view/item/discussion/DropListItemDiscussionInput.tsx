@@ -5,7 +5,7 @@ import PrimaryButton, {
 import { AuthContext } from "../../../../auth/Auth";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import DropPfp from "../../../create/utils/DropPfp";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
@@ -23,7 +23,7 @@ export default function DropListItemDiscussionInput({
   drop,
 }: {
   readonly profile: IProfileAndConsolidations | null;
-  readonly drop: DropFull;
+  readonly drop: Drop;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);

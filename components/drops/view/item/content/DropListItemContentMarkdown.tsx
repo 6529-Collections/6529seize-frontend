@@ -3,12 +3,11 @@ import {
   ClassAttributes,
   memo,
   ReactNode,
-  RefObject,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import Markdown, { ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
@@ -27,7 +26,7 @@ const customRenderer = ({
   onImageLoaded,
 }: {
   readonly content: ReactNode | undefined;
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly onImageLoaded: () => void;
 }) => {
   if (typeof content !== "string") {
@@ -113,7 +112,7 @@ const DropListItemContentMarkdown = memo(
     drop,
     showFull = false,
   }: {
-    readonly drop: DropFull;
+    readonly drop: Drop;
     readonly showFull?: boolean;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -159,6 +158,8 @@ const DropListItemContentMarkdown = memo(
         }
       }
     };
+
+    const dropMedia = drop.media?.at(0);
 
     return (
       <>
@@ -278,11 +279,11 @@ const DropListItemContentMarkdown = memo(
             )}
           </div>
         </CommonAnimationHeight>
-        {!!drop.media_url && !!drop.media_mime_type && (
+        {!!dropMedia?.url && !!dropMedia?.mime_type && (
           <div>
             <DropListItemContentMedia
-              media_mime_type={drop.media_mime_type}
-              media_url={drop.media_url}
+              media_mime_type={dropMedia.mime_type}
+              media_url={dropMedia.url}
             />
           </div>
         )}

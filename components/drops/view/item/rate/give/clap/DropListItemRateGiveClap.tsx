@@ -9,7 +9,7 @@ import {
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../../entities/IProfile";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
-import { DropFull } from "../../../../../../../entities/IDrop";
+import { Drop } from "../../../../../../../entities/IDrop";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",
@@ -23,7 +23,7 @@ export default function DropListItemRateGiveClap({
   availableRates,
   onSubmit,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly rate: number;
   readonly availableRates: number;
   readonly onSubmit: () => void;
@@ -132,7 +132,8 @@ export default function DropListItemRateGiveClap({
     onSubmit();
   };
 
-  const getCountShort = () => `${rate > 0 ? "+" : ""}${formatLargeNumber(rate)}`;
+  const getCountShort = () =>
+    `${rate > 0 ? "+" : ""}${formatLargeNumber(rate)}`;
 
   const [countShort, setCountShort] = useState(getCountShort());
 
@@ -267,7 +268,7 @@ export default function DropListItemRateGiveClap({
   return (
     <LazyTippy
       placement="top"
-      interactive={true}
+      interactive={false}
       disabled={!tooltipContent}
       content={<div>{tooltipContent}</div>}
     >

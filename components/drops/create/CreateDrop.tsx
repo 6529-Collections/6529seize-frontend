@@ -16,9 +16,9 @@ export interface DropRequest {
   readonly title: string | null;
   readonly content: string | null;
   readonly stormId: string | null;
-  readonly quotedDropId: number | null;
+  readonly quotedDropId: string | null;
   readonly referencedNfts: ReferencedNft[];
-  readonly mentionedUsers: MentionedUser[];
+  readonly mentionedUsers: Omit<MentionedUser, "current_handle">[];
   readonly metadata: DropMetadata[];
   readonly file: File | null;
 }
@@ -36,7 +36,7 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly quotedDropId: number | null;
+  readonly quotedDropId: string | null;
   readonly isClient?: boolean;
   readonly type: CreateDropType;
   readonly onSuccessfulDrop?: () => void;
@@ -96,7 +96,7 @@ export default function CreateDrop({
       referenced_nfts: dropRequest.referencedNfts,
       mentioned_users: dropRequest.mentionedUsers,
       metadata: dropRequest.metadata,
-      drop_media: null,
+      media: [],
     };
 
     if (dropRequest.file) {
@@ -104,6 +104,7 @@ export default function CreateDrop({
         {
           content_type: string;
           file_name: string;
+          file_size: number;
         },
         {
           upload_url: string;
@@ -115,6 +116,7 @@ export default function CreateDrop({
         body: {
           content_type: dropRequest.file.type,
           file_name: dropRequest.file.name,
+          file_size: dropRequest.file.size,
         },
       });
       const myHeaders = new Headers({ "Content-Type": prep.content_type });
@@ -123,10 +125,10 @@ export default function CreateDrop({
         headers: myHeaders,
         body: dropRequest.file,
       });
-      requestBody.drop_media = {
+      requestBody.media.push({
         url: prep.media_url,
-        mimetype: prep.content_type,
-      };
+        mime_type: prep.content_type,
+      });
     }
 
     await addDropMutation.mutateAsync(requestBody);

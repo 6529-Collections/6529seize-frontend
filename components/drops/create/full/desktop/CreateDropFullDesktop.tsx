@@ -44,14 +44,16 @@ export default function CreateDropFullDesktop({
   readonly metadata: DropMetadata[];
   readonly file: File | null;
   readonly disabled: boolean;
-    readonly type: CreateDropType;
+  readonly type: CreateDropType;
   readonly loading: boolean;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (data_key: string) => void;
   readonly onTitle: (newV: string | null) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
-  readonly onMentionedUser: (newUser: MentionedUser) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;

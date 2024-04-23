@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,7 +10,7 @@ export default function DropListItemLogsWrapper({
   drop,
   discussionExpandableState,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly discussionExpandableState: DropDiscussionExpandableState;
 }) {
   const open = discussionExpandableState !== DropDiscussionExpandableState.IDLE;

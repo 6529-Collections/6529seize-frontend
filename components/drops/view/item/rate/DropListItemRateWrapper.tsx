@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { DropFull } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../entities/IDrop";
 import DropListItemRateGive from "./give/DropListItemRateGive";
 import { AuthContext } from "../../../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +10,7 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 export default function DropListItemRateWrapper({
   drop,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
 }) {
   const { connectedProfile } = useContext(AuthContext);
   const { data: availableRateResponse } =
@@ -21,7 +21,7 @@ export default function DropListItemRateWrapper({
       ],
       queryFn: async () =>
         await commonApiFetch<ProfileAvailableDropRateResponse>({
-          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-tdh-for-rep`,
+          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
         }),
       enabled: !!connectedProfile?.profile?.handle,
     });
@@ -29,7 +29,7 @@ export default function DropListItemRateWrapper({
   return (
     <DropListItemRateGive
       drop={drop}
-      availableRates={availableRateResponse?.available_tdh_for_rep ?? 0}
+      availableRates={availableRateResponse?.available_credit_for_rating ?? 0}
     />
   );
 }

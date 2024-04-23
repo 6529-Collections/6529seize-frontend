@@ -2,7 +2,7 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import Image from "next/image";
-import { useWeb3Modal } from "@web3modal/react";
+import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 
 import { SUPPORTED_COLLECTIONS } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,6 +24,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const accountResolution = useAccount();
   const web3Modal = useWeb3Modal();
+  const web3ModalState = useWeb3ModalState();
 
   const [openConnect, setOpenConnect] = useState(false);
 
@@ -39,7 +40,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   }, [redirect]);
 
   useEffect(() => {
-    if (!web3Modal.isOpen) {
+    if (!web3ModalState.open) {
       if (openConnect) {
         if (accountResolution.isConnected && redirect) {
           props.setSection(redirect);
@@ -47,7 +48,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       }
       setRedirect(undefined);
     }
-  }, [web3Modal.isOpen]);
+  }, [web3ModalState.open]);
 
   function printCollectionSelection() {
     return (

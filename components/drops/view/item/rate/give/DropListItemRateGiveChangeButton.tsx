@@ -2,7 +2,7 @@ import { RateChangeType } from "./DropListItemRateGive";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
-import { DropFull } from "../../../../../../entities/IDrop";
+import { Drop } from "../../../../../../entities/IDrop";
 
 export default function DropListItemRateGiveChangeButton({
   drop,
@@ -11,7 +11,7 @@ export default function DropListItemRateGiveChangeButton({
   handleMouseDown,
   handleMouseUp,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly type: RateChangeType;
   readonly availableRates: number;
   readonly handleMouseDown: (changeType: RateChangeType) => void;

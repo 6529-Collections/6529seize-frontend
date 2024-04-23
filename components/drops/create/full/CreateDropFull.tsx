@@ -47,7 +47,9 @@ export default function CreateDropFull({
   readonly onMetadataRemove: (key: string) => void;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
-  readonly onMentionedUser: (newUser: MentionedUser) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;

@@ -163,7 +163,7 @@ export class MentionTypeaheadOption extends MenuOption {
 export default function NewMentionsPlugin({
   onSelect,
 }: {
-  readonly onSelect: (user: MentionedUser) => void;
+  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);

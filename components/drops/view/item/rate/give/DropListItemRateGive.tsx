@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
-import { DropFull } from "../../../../../../entities/IDrop";
+import { Drop } from "../../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { AuthContext } from "../../../../../auth/Auth";
@@ -16,7 +16,7 @@ export default function DropListItemRateGive({
   drop,
   availableRates,
 }: {
-  readonly drop: DropFull;
+  readonly drop: Drop;
   readonly availableRates: number;
 }) {
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
@@ -209,7 +209,7 @@ export default function DropListItemRateGive({
 
   return (
     <div className="tw-w-[42px] tw-mt-1 tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-      {!canRate && (
+      {canRate && (
         <div className="tw-text-center tw-bg-iron-900 tw-rounded-lg">
           <span
             className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
