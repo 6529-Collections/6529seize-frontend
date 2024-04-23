@@ -183,164 +183,10 @@ export default function About(props: any) {
               <Container className="pt-4">
                 <Row>
                   <Col className={menuStyles.aboutMenuLeft}>
-                    <Container>
-                      <Row>
-                        <Col>
-                          <h3>About</h3>
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.MEMES}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="The Memes"
-                      />
-                      <AboutRow
-                        section={AboutSection.SUBSCRIPTIONS}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Subscriptions"
-                      />
-                      <AboutRow
-                        section={AboutSection.SUBSCRIPTIONS_UPCOMING}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Upcoming Drops"
-                      />
-                      <AboutRow
-                        section={AboutSection.MEMES_CALENDAR}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Memes Calendar"
-                      />
-                      <AboutRow
-                        section={AboutSection.MEME_LAB}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Meme Lab"
-                      />
-                      <AboutRow
-                        section={AboutSection.GRADIENTS}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Gradient"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.GDRC1}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="GDRC1"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.NFT_DELEGATION}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="NFT Delegation"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.FAQ}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="FAQ"
-                      />
-                      <AboutRow
-                        section={AboutSection.ENS}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="ENS"
-                      />
-                      <AboutRow
-                        section={AboutSection.MINTING}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Minting"
-                      />
-                      <AboutRow
-                        section={AboutSection.NAKAMOTO_THRESHOLD}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Nakamoto Threshold"
-                      />
-                      <AboutRow
-                        section={AboutSection.LICENSE}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="License"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.APPLY}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Apply"
-                      />
-                      <AboutRow
-                        section={AboutSection.CONTACT_US}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Contact Us"
-                      />
-                      <AboutRow
-                        section={AboutSection.RELEASE_NOTES}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Release Notes"
-                      />
-                      <AboutRow
-                        section={AboutSection.DATA_DECENTR}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Data Decentralization"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.TERMS_OF_SERVICE}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Terms of Service"
-                      />
-                      <AboutRow
-                        section={AboutSection.PRIVACY_POLICY}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Privacy Policy"
-                      />
-                      <AboutRow
-                        section={AboutSection.COPYRIGHT}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Copyright"
-                      />
-                      <AboutRow
-                        section={AboutSection.COOKIE_POLICY}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Cookie Policy"
-                      />
-                    </Container>
+                    <AboutMenu
+                      currentSection={section}
+                      setSection={setNewSection}
+                    />
                   </Col>
                   {section && (
                     <Col className={menuStyles.aboutMenuRight}>
@@ -350,164 +196,10 @@ export default function About(props: any) {
                 </Row>
                 <Row className="pt-4">
                   <Col className={menuStyles.aboutMenuLeftFull}>
-                    <Container>
-                      <Row>
-                        <Col>
-                          <h3 className="float-none">About</h3>
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.MEMES}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="The Memes"
-                      />
-                      <AboutRow
-                        section={AboutSection.SUBSCRIPTIONS}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Subscriptions"
-                      />
-                      <AboutRow
-                        section={AboutSection.SUBSCRIPTIONS_UPCOMING}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Upcoming Drops"
-                      />
-                      <AboutRow
-                        section={AboutSection.MEMES_CALENDAR}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Memes Calendar"
-                      />
-                      <AboutRow
-                        section={AboutSection.MEME_LAB}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Meme Lab"
-                      />
-                      <AboutRow
-                        section={AboutSection.GRADIENTS}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Gradient"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.GDRC1}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="GDRC1"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.NFT_DELEGATION}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="NFT Delegation"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.FAQ}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="FAQ"
-                      />
-                      <AboutRow
-                        section={AboutSection.ENS}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="ENS"
-                      />
-                      <AboutRow
-                        section={AboutSection.MINTING}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Minting"
-                      />
-                      <AboutRow
-                        section={AboutSection.NAKAMOTO_THRESHOLD}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Nakamoto Threshold"
-                      />
-                      <AboutRow
-                        section={AboutSection.LICENSE}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="License"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.APPLY}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Apply"
-                      />
-                      <AboutRow
-                        section={AboutSection.CONTACT_US}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Contact Us"
-                      />
-                      <AboutRow
-                        section={AboutSection.RELEASE_NOTES}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Release Notes"
-                      />
-                      <AboutRow
-                        section={AboutSection.DATA_DECENTR}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Data Decentralization"
-                      />
-                      <Row>
-                        <Col>
-                          <hr />
-                        </Col>
-                      </Row>
-                      <AboutRow
-                        section={AboutSection.TERMS_OF_SERVICE}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Terms of Service"
-                      />
-                      <AboutRow
-                        section={AboutSection.PRIVACY_POLICY}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Privacy Policy"
-                      />
-                      <AboutRow
-                        section={AboutSection.COPYRIGHT}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Copyright"
-                      />
-                      <AboutRow
-                        section={AboutSection.COOKIE_POLICY}
-                        currentSection={section}
-                        setSection={setNewSection}
-                        title="Cookie Policy"
-                      />
-                    </Container>
+                    <AboutMenu
+                      currentSection={section}
+                      setSection={setNewSection}
+                    />
                   </Col>
                 </Row>
               </Container>
@@ -581,6 +273,176 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       props: {},
     };
   }
+}
+
+function AboutMenu(
+  props: Readonly<{
+    currentSection: AboutSection | undefined;
+    setSection: (section: AboutSection) => void;
+  }>
+) {
+  const { currentSection, setSection } = props;
+
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <h3>About</h3>
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.MEMES}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="The Memes"
+      />
+      <AboutRow
+        section={AboutSection.SUBSCRIPTIONS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Subscriptions"
+      />
+      <AboutRow
+        section={AboutSection.SUBSCRIPTIONS_UPCOMING}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Upcoming Drops"
+      />
+      <AboutRow
+        section={AboutSection.MEMES_CALENDAR}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Memes Calendar"
+      />
+      <AboutRow
+        section={AboutSection.MEME_LAB}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Meme Lab"
+      />
+      <AboutRow
+        section={AboutSection.GRADIENTS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Gradient"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.GDRC1}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="GDRC1"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.NFT_DELEGATION}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="NFT Delegation"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.FAQ}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="FAQ"
+      />
+      <AboutRow
+        section={AboutSection.ENS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="ENS"
+      />
+      <AboutRow
+        section={AboutSection.MINTING}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Minting"
+      />
+      <AboutRow
+        section={AboutSection.NAKAMOTO_THRESHOLD}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Nakamoto Threshold"
+      />
+      <AboutRow
+        section={AboutSection.LICENSE}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="License"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.APPLY}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Apply"
+      />
+      <AboutRow
+        section={AboutSection.CONTACT_US}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Contact Us"
+      />
+      <AboutRow
+        section={AboutSection.RELEASE_NOTES}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Release Notes"
+      />
+      <AboutRow
+        section={AboutSection.DATA_DECENTR}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Data Decentralization"
+      />
+      <Row>
+        <Col>
+          <hr />
+        </Col>
+      </Row>
+      <AboutRow
+        section={AboutSection.TERMS_OF_SERVICE}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Terms of Service"
+      />
+      <AboutRow
+        section={AboutSection.PRIVACY_POLICY}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Privacy Policy"
+      />
+      <AboutRow
+        section={AboutSection.COPYRIGHT}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Copyright"
+      />
+      <AboutRow
+        section={AboutSection.COOKIE_POLICY}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Cookie Policy"
+      />
+    </Container>
+  );
 }
 
 function AboutRow(
