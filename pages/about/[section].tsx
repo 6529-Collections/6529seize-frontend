@@ -26,6 +26,8 @@ import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
 import AboutHTML from "../../components/about/AboutHTML";
 import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
+import AboutSubscriptionsUpcoming from "../../components/about/AboutSubscriptionsUpcoming";
+import AboutCopyright from "../../components/about/AboutCopyright";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -47,7 +49,9 @@ export enum AboutSection {
   NFT_DELEGATION = "nft-delegation",
   ENS = "ens",
   SUBSCRIPTIONS = "subscriptions",
+  SUBSCRIPTIONS_UPCOMING = "upcoming-drops",
   NAKAMOTO_THRESHOLD = "nakamoto-threshold",
+  COPYRIGHT = "copyright",
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -72,15 +76,18 @@ export default function About(props: any) {
     { display: "About" },
   ]);
 
-  const [section, setSection] = useState<AboutSection>(pageProps.section);
-  const [sectionTitle, setSectionTitle] = useState<string>(
-    pageProps.sectionTitle
-  );
+  const [section, setSection] = useState<AboutSection>();
+  const [sectionTitle, setSectionTitle] = useState<string>();
 
   function setNewSection(section: AboutSection) {
     setSection(section);
     setSectionTitle(section.toUpperCase().replaceAll("-", " "));
   }
+
+  useEffect(() => {
+    setSection(pageProps.section);
+    setSectionTitle(pageProps.sectionTitle);
+  }, [pageProps]);
 
   useEffect(() => {
     if (section && sectionTitle) {
@@ -138,8 +145,12 @@ export default function About(props: any) {
         return <AboutHTML title="ENS" html={pageProps.ensText} />;
       case AboutSection.SUBSCRIPTIONS:
         return <AboutSubscriptions />;
+      case AboutSection.SUBSCRIPTIONS_UPCOMING:
+        return <AboutSubscriptionsUpcoming />;
       case AboutSection.NAKAMOTO_THRESHOLD:
         return <AboutNakamotoThreshold />;
+      case AboutSection.COPYRIGHT:
+        return <AboutCopyright />;
     }
   }
 
@@ -200,6 +211,19 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           Subscriptions
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.SUBSCRIPTIONS_UPCOMING)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.SUBSCRIPTIONS_UPCOMING
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Upcoming Drops
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -311,7 +335,9 @@ export default function About(props: any) {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setNewSection(AboutSection.NAKAMOTO_THRESHOLD)}
+                          onClick={() =>
+                            setNewSection(AboutSection.NAKAMOTO_THRESHOLD)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section === AboutSection.NAKAMOTO_THRESHOLD
                               ? menuStyles.aboutMenuLeftItemActive
@@ -417,6 +443,17 @@ export default function About(props: any) {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
+                          onClick={() => setNewSection(AboutSection.COPYRIGHT)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.COPYRIGHT
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Copyright
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
                           onClick={() =>
                             setNewSection(AboutSection.COOKIE_POLICY)
                           }
@@ -466,6 +503,19 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           Subscriptions
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() =>
+                            setNewSection(AboutSection.SUBSCRIPTIONS_UPCOMING)
+                          }
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.SUBSCRIPTIONS_UPCOMING
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Upcoming Drops
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
@@ -577,7 +627,9 @@ export default function About(props: any) {
                       </Row>
                       <Row className="pt-1 pb-1">
                         <Col
-                          onClick={() => setNewSection(AboutSection.NAKAMOTO_THRESHOLD)}
+                          onClick={() =>
+                            setNewSection(AboutSection.NAKAMOTO_THRESHOLD)
+                          }
                           className={`${menuStyles.aboutMenuLeftItem} ${
                             section === AboutSection.NAKAMOTO_THRESHOLD
                               ? menuStyles.aboutMenuLeftItemActive
@@ -679,6 +731,17 @@ export default function About(props: any) {
                               : ""
                           }`}>
                           Privacy Policy
+                        </Col>
+                      </Row>
+                      <Row className="pt-1 pb-1">
+                        <Col
+                          onClick={() => setNewSection(AboutSection.COPYRIGHT)}
+                          className={`${menuStyles.aboutMenuLeftItem} ${
+                            section === AboutSection.COPYRIGHT
+                              ? menuStyles.aboutMenuLeftItemActive
+                              : ""
+                          }`}>
+                          Copyright
                         </Col>
                       </Row>
                       <Row className="pt-1 pb-1">
