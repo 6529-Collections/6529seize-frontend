@@ -222,7 +222,7 @@ function SubscriptionRow(
               </Tippy>
             ) : (
               <span className="font-color-silver">
-                {props.date.toIsoDateString()} - {props.date.toDayName()}
+                {props.date.toIsoDateString()} / {props.date.toDayName()}
               </span>
             )}
           </span>
