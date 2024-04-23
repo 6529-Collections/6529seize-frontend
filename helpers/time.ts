@@ -238,6 +238,19 @@ export class Time {
     });
   }
 
+  public toDayName() {
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return daysOfWeek[this.toDate().getDay()];
+  }
+
   public formatAsDuration() {
     let left = this.ms;
     const daydf = Math.floor(Time.millis(left).toDays());
