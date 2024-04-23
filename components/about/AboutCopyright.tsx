@@ -20,8 +20,8 @@ export default function AboutCopyright() {
           <p>
             Seize.io, a platform of 6529 Collection LLC, respects the
             intellectual property rights of others and expects its users to do
-            the same. It is Seize.io's policy to respond to clear notices of
-            alleged copyright infringement that comply with the Digital
+            the same. It is Seize.io&apos;s policy to respond to clear notices
+            of alleged copyright infringement that comply with the Digital
             Millennium Copyright Act (DMCA).
           </p>
         </Col>
@@ -34,8 +34,8 @@ export default function AboutCopyright() {
           <p>
             If you believe that your copyrighted work has been copied in a way
             that constitutes copyright infringement and is accessible through
-            the Seize.io service, you may notify 6529 Collection LLC's copyright
-            agent, providing the following information:
+            the Seize.io service, you may notify 6529 Collection LLC&apos;s
+            copyright agent, providing the following information:
           </p>
           <ol>
             <li>
@@ -132,8 +132,8 @@ export default function AboutCopyright() {
             the copyright owner files an action seeking a court order against
             the content provider, member, or user, the removed content may be
             replaced, or access to it restored, in 10 to 14 business days or
-            more after receipt of the counter-notice, at 6529 Collection LLC's
-            discretion.
+            more after receipt of the counter-notice, at 6529 Collection
+            LLC&apos;s discretion.
           </p>
         </Col>
       </Row>
@@ -143,11 +143,12 @@ export default function AboutCopyright() {
           <p>
             In accordance with the DMCA and other applicable law, 6529
             Collection LLC has adopted a policy of terminating, in appropriate
-            circumstances and at 6529 Collection LLC's sole discretion, users
-            who are deemed to be repeat infringers. 6529 Collection LLC may also
-            at its sole discretion limit access to the Seize.io and/or terminate
-            the accounts of any users who infringe any intellectual property
-            rights of others, whether or not there is any repeat infringement.
+            circumstances and at 6529 Collection LLC&apos;s sole discretion,
+            users who are deemed to be repeat infringers. 6529 Collection LLC
+            may also at its sole discretion limit access to the Seize.io and/or
+            terminate the accounts of any users who infringe any intellectual
+            property rights of others, whether or not there is any repeat
+            infringement.
           </p>
         </Col>
       </Row>
@@ -167,7 +168,7 @@ export default function AboutCopyright() {
           <p className="font-larger font-bolder">Contact Information</p>
           <p>
             For any questions regarding this DMCA Policy, please contact our
-            Copyright Agent's as follows:
+            Copyright Agent&apos;s as follows:
           </p>
           <p>All DMCA notices should be sent to:</p>
           <p>
