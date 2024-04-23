@@ -35,9 +35,8 @@ export default function DropAuthor({
   const textClasses = getTextClasses();
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
-      <UserCICAndLevel level={profile.level} cicType={cicType} />
       <DropAuthorHandle profile={profile} size={size} />
-
+      <UserCICAndLevel level={profile.level} cicType={cicType} />
       <span className="tw-text-iron-500">&bull;</span>
       <p
         className={`${textClasses} tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500`}

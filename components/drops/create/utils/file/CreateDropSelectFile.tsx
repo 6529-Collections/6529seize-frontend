@@ -32,7 +32,7 @@ export default function CreateDropSelectFile({
                 {file.name}
               </p>
             </div>
-            <div className="tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
               <button
                 onClick={() => onFileChange(null)}
                 aria-label="Remove file"
