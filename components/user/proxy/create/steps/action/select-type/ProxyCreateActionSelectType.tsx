@@ -26,7 +26,7 @@ export default function ProxyCreateActionSelectType({
   }));
 
   return (
-    <div className="tw-space-x-2">
+    <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden">
       {actionTypes.map((action) => (
         <ProxyCreateActionSelectTypeItem
           key={action.value}

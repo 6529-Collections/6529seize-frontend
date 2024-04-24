@@ -24,7 +24,9 @@ export default function ProxyCreateTarget() {
       />
       <CommonChangeAnimation>
         {!selectedTarget ? (
-          <ProxyCreateTargetSearch onTargetSelect={setSelectedTarget} />
+          <div className="tw-mt-5">
+            <ProxyCreateTargetSearch onTargetSelect={setSelectedTarget} />
+          </div>
         ) : (
           <div className="tw-inline-flex tw-space-x-4">
             <div>{selectedTarget.handle}</div>
