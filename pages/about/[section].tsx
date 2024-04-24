@@ -76,8 +76,10 @@ export default function About(props: any) {
     { display: "About" },
   ]);
 
-  const [section, setSection] = useState<AboutSection>();
-  const [sectionTitle, setSectionTitle] = useState<string>();
+  const [section, setSection] = useState<AboutSection>(pageProps.section);
+  const [sectionTitle, setSectionTitle] = useState<string>(
+    pageProps.sectionTitle
+  );
 
   function setNewSection(section: AboutSection) {
     setSection(section);
