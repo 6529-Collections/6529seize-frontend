@@ -20,7 +20,7 @@ export default function ProxyCreateTargetSelectType({
 
   return (
     <RadioGroup value={selectedTargetType} onChange={setSelectedTargetType}>
-      <RadioGroup.Label className="tw-text-base tw-font-semibold tw-leading-6 tw-text-gray-300">
+      <RadioGroup.Label className="tw-float-none tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
         Select a target
       </RadioGroup.Label>
 
@@ -29,12 +29,12 @@ export default function ProxyCreateTargetSelectType({
           <RadioGroup.Option
             key={target.value}
             value={target.value}
-            className={({ active }) =>
+            className={({ checked }) =>
               `${
-                active
-                  ? "tw-border-indigo-600 tw-ring-2 tw-ring-indigo-600"
-                  : "tw-border-gray-300"
-              } tw-relative tw-flex tw-cursor-pointer tw-rounded-lg tw-border tw-bg-white tw-p-4 tw-shadow-sm focus:tw-outline-none`
+                checked
+                  ? "tw-ring-primary-400"
+                  : "tw-ring-iron-700 hover:tw-ring-iron-600"
+              } tw-relative tw-flex tw-cursor-pointer tw-rounded-lg tw-border tw-bg-[#232329] tw-p-4 tw-shadow-sm focus:tw-outline-none tw-ring-1 tw-ring-inset tw-transition tw-duration300 tw-ease-out`
             }
           >
             {({ checked, active }) => (
@@ -43,13 +43,13 @@ export default function ProxyCreateTargetSelectType({
                   <span className="tw-flex tw-flex-col">
                     <RadioGroup.Label
                       as="span"
-                      className="tw-block tw-text-sm tw-font-medium tw-text-gray-900"
+                      className="tw-block tw-text-base tw-font-medium tw-text-iron-50"
                     >
                       {target.label}
                     </RadioGroup.Label>
                     <RadioGroup.Description
                       as="span"
-                      className="tw-mt-1 tw-flex tw-items-center tw-text-sm tw-text-gray-500"
+                      className="tw-mt-1 tw-flex tw-items-center tw-text-md tw-text-iron-500"
                     >
                       Description
                     </RadioGroup.Description>
@@ -58,11 +58,26 @@ export default function ProxyCreateTargetSelectType({
                 <div
                   className={`${
                     checked
-                      ? "tw-h-5 tw-w-5 tw-text-indigo-600"
+                      ? "tw-h-5 tw-w-5 tw-text-primary-400"
                       : "tw-invisible"
                   }`}
                 >
-                  icon
+                  <svg
+                    className="tw-h-5 tw-w-5"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 6L9 17L4 12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </div>
                 <span
                   className={`${active ? "tw-border" : "tw-border-2"} ${

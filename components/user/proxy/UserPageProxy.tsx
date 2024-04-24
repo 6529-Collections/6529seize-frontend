@@ -28,7 +28,7 @@ export default function UserPageProxy({
   };
 
   return (
-    <div>
+    <div className="tailwind-scope">
       <CommonChangeAnimation>{components[mode]}</CommonChangeAnimation>
     </div>
   );

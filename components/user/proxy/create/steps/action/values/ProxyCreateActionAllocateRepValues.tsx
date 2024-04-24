@@ -4,7 +4,7 @@ import CommonInput from "../../../../../../utils/input/CommonInput";
 export default function ProxyCreateActionAllocateRepValues() {
   const [amount, setAmount] = useState<number | null>(null); // [1]
   return (
-    <div>
+    <div className="tw-mt-5">
       <div className="tw-w-40">
         <CommonInput
           placeholder="Amount"
