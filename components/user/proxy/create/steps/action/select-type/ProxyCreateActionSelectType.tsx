@@ -26,7 +26,7 @@ export default function ProxyCreateActionSelectType({
   }));
 
   return (
-    <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden">
+  /*   <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden">
       {actionTypes.map((action) => (
         <ProxyCreateActionSelectTypeItem
           key={action.value}
@@ -35,6 +35,8 @@ export default function ProxyCreateActionSelectType({
           setSelectedActionType={setSelectedActionType}
         />
       ))}
+    </div> */
+    <div>
     </div>
   );
 }
