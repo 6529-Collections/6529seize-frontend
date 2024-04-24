@@ -19,7 +19,7 @@ export default function ProxyCreate({
 }: {
   readonly onModeChange: (mode: ProxyMode) => void;
 }) {
-  const [step, setStep] = useState<ProxyCreateStep>(ProxyCreateStep.ACTION);
+  const [step, setStep] = useState<ProxyCreateStep>(ProxyCreateStep.TARGET);
 
   const components: Record<ProxyCreateStep, JSX.Element> = {
     [ProxyCreateStep.TARGET]: <ProxyCreateTarget />,
@@ -30,11 +30,17 @@ export default function ProxyCreate({
 
   return (
     <div>
-      <button onClick={() => onModeChange(ProxyMode.LIST)}>CANCEL</button>
-      <div className="tw-my-4">
-        <CommonChangeAnimation>{components[step]}</CommonChangeAnimation>
+      <CommonChangeAnimation>{components[step]}</CommonChangeAnimation>
+      <div className="tw-mt-6 tw-flex tw-items-center tw-gap-x-3">
+        <button
+          onClick={() => onModeChange(ProxyMode.LIST)}
+          type="button"
+          className="tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-800 hover:tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out"
+        >
+          Cancel
+        </button>
+        <ProxyCreateActionButton activeStep={step} onStepChange={setStep} />
       </div>
-      <ProxyCreateActionButton activeStep={step} onStepChange={setStep} />
     </div>
   );
 }
