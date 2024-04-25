@@ -20,10 +20,10 @@ export default function UserPageProxy({
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const [mode, setMode] = useState<ProxyMode>(ProxyMode.CREATE);
+  const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
 
   const components: Record<ProxyMode, JSX.Element> = {
-    [ProxyMode.LIST]: <ProxyList onModeChange={setMode} />,
+    [ProxyMode.LIST]: <ProxyList profile={profile} onModeChange={setMode} />,
     [ProxyMode.CREATE]: <ProxyCreate onModeChange={setMode} />,
   };
 

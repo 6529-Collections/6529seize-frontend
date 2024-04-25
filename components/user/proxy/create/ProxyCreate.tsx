@@ -1,36 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProxyMode } from "../UserPageProxy";
-import ProxyCreateTarget from "./steps/target/ProxyCreateTarget";
-import ProxyCreateAction from "./steps/action/ProxyCreateAction";
-import ProxyCreateTime from "./steps/ProxyCreateTime";
-import ProxyCreatePreview from "./steps/ProxyCreatePreview";
-import ProxyCreateActionButton from "./ProxyCreateActionButton";
+import ProxyCreateSubmit from "./ProxyCreateSubmit";
+import ProxyCreateTarget from "./target/ProxyCreateTarget";
+import { CommunityMemberMinimal } from "../../../../entities/IProfile";
 import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
-
-export enum ProxyCreateStep {
-  TARGET = "TARGET",
-  ACTION = "ACTION",
-  TIME = "TIME",
-  PREVIEW = "PREVIEW",
-}
 
 export default function ProxyCreate({
   onModeChange,
 }: {
   readonly onModeChange: (mode: ProxyMode) => void;
 }) {
-  const [step, setStep] = useState<ProxyCreateStep>(ProxyCreateStep.TARGET);
-
-  const components: Record<ProxyCreateStep, JSX.Element> = {
-    [ProxyCreateStep.TARGET]: <ProxyCreateTarget />,
-    [ProxyCreateStep.ACTION]: <ProxyCreateAction />,
-    [ProxyCreateStep.TIME]: <ProxyCreateTime />,
-    [ProxyCreateStep.PREVIEW]: <ProxyCreatePreview />,
-  };
+  const [selectedTarget, setSelectedTarget] =
+    useState<CommunityMemberMinimal | null>(null);
 
   return (
     <div>
-      <CommonChangeAnimation>{components[step]}</CommonChangeAnimation>
+      <ProxyCreateTarget
+        selectedTarget={selectedTarget}
+        setSelectedTarget={setSelectedTarget}
+      />
       <div className="tw-mt-6 tw-flex tw-items-center tw-gap-x-3">
         <button
           onClick={() => onModeChange(ProxyMode.LIST)}
@@ -39,7 +27,11 @@ export default function ProxyCreate({
         >
           Cancel
         </button>
-        <ProxyCreateActionButton activeStep={step} onStepChange={setStep} />
+        <CommonChangeAnimation>
+          {!!selectedTarget?.profile_id && (
+            <ProxyCreateSubmit targetId={selectedTarget.profile_id} />
+          )}
+        </CommonChangeAnimation>
       </div>
     </div>
   );

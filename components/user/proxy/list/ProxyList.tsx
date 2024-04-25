@@ -1,10 +1,36 @@
+import { useQuery } from "@tanstack/react-query";
 import { ProxyMode } from "../UserPageProxy";
+import { Page } from "../../../../helpers/Types";
+import { ProfileProxyEntity } from "../../../../entities/IProxy";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { useEffect } from "react";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
 export default function ProxyList({
   onModeChange,
+  profile,
 }: {
   readonly onModeChange: (mode: ProxyMode) => void;
+  readonly profile: IProfileAndConsolidations;
 }) {
+  const { data: receivedProfileProxies } = useQuery<Page<ProfileProxyEntity>>({
+    queryKey: [
+      QueryKey.PROFILE_RECEIVED_PROFILE_PROXIES,
+      { handleOrWallet: profile.profile?.handle },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<Page<ProfileProxyEntity>>({
+        endpoint: `/profiles/${profile.profile?.handle}/proxies/received`,
+      }),
+    enabled: !!profile.profile?.handle,
+  });
+
+  useEffect(
+    () => console.log(receivedProfileProxies),
+    [receivedProfileProxies]
+  );
+
   return (
     <div>
       <button
