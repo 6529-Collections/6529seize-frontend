@@ -15,6 +15,7 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { ProfileProxyEntity } from "../../entities/IProxy";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -42,6 +43,8 @@ export enum QueryKey {
   CURATION_FILTERS = "CURATION_FILTERS",
   CURATION_FILTER = "CURATION_FILTER",
   NFTS_SEARCH = "NFTS_SEARCH",
+  PROFILE_PROXY = "PROFILE_PROXY",
+  PROFILE_RECEIVED_PROFILE_PROXIES = "PROFILE_RECEIVED_PROFILE_PROXIES",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -89,6 +92,7 @@ export interface InitProfileIdentityPageParams {
 
 type ReactQueryWrapperContextType = {
   setProfile: (profile: IProfileAndConsolidations) => void;
+  setProfileProxy: (profileProxy: ProfileProxyEntity) => void;
   onProfileCICModify: (params: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
@@ -141,6 +145,7 @@ type ReactQueryWrapperContextType = {
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
     setProfile: () => {},
+    setProfileProxy: () => {},
     onProfileCICModify: () => {},
     onProfileRepModify: () => {},
     onProfileEdit: () => {},
@@ -212,6 +217,13 @@ export default function ReactQueryWrapper({
         profile
       );
     }
+  };
+
+  const setProfileProxy = (profileProxy: ProfileProxyEntity) => {
+    queryClient.setQueryData<ProfileProxyEntity>(
+      [QueryKey.PROFILE_PROXY, { id: profileProxy.id }],
+      profileProxy
+    );
   };
 
   const invalidateProfileRaterCICState = ({
@@ -544,6 +556,7 @@ export default function ReactQueryWrapper({
     <ReactQueryWrapperContext.Provider
       value={{
         setProfile,
+        setProfileProxy,
         onProfileCICModify,
         onProfileRepModify,
         onProfileEdit,
@@ -555,7 +568,8 @@ export default function ReactQueryWrapper({
         initCommunityActivityPage,
         onCurationFilterRemoved,
         onCurationFilterChanged,
-      }}>
+      }}
+    >
       {children}
     </ReactQueryWrapperContext.Provider>
   );
