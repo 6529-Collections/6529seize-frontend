@@ -1,14 +1,14 @@
 import { ReactElement, useContext } from "react";
-import { NextPageWithLayout } from "../_app";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
-import UserPageLayout from "../../components/user/layout/UserPageLayout";
+import { NextPageWithLayout } from "../../_app";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import UserPageLayout from "../../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getUserProfile,
   userPageNeedsRedirect,
-} from "../../helpers/server.helpers";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
-import UserPageProxy from "../../components/user/proxy/UserPageProxy";
+} from "../../../helpers/server.helpers";
+import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
+import UserPageProxy from "../../../components/user/proxy/UserPageProxy";
 
 export interface UserPageProxyProps {
   readonly profile: IProfileAndConsolidations;

@@ -51,6 +51,7 @@ export const CLASSIFICATIONS: Record<
 };
 
 export interface IProfile {
+  readonly external_id: string;
   readonly normalised_handle: string;
   readonly handle: string;
   readonly primary_wallet: string;
@@ -302,6 +303,7 @@ export interface ProfilesMatterRating {
 }
 
 export interface CommunityMemberMinimal {
+  readonly profile_id: string | null;
   readonly handle: string | null;
   readonly normalised_handle: string | null;
   readonly primary_wallet: string | null;
