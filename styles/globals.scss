@@ -409,10 +409,14 @@ h5:not(.tailwind-scope h5) {
   &:hover,
   &:focus,
   &:active {
-    color: $font-color-h !important;
     background-color: inherit !important;
   }
+
+  &:hover {
+    color: $font-color-h !important;
+  }
 }
+
 .horizontal-menu-hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
