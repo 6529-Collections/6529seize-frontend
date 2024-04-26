@@ -1,27 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
-import {
-  CreateDropRequest,
-  DropMetadata,
-  MentionedUser,
-  ReferencedNft,
-} from "../../../entities/IDrop";
+import { CreateDropConfig, CreateDropRequest } from "../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiPost } from "../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-
-export interface DropRequest {
-  readonly title: string | null;
-  readonly content: string | null;
-  readonly stormId: string | null;
-  readonly quotedDropId: string | null;
-  readonly referencedNfts: ReferencedNft[];
-  readonly mentionedUsers: Omit<MentionedUser, "current_handle">[];
-  readonly metadata: DropMetadata[];
-  readonly file: File | null;
-}
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -78,7 +62,7 @@ export default function CreateDrop({
     return null;
   }
 
-  const submitDrop = async (dropRequest: DropRequest) => {
+  const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
     }
@@ -88,18 +72,25 @@ export default function CreateDrop({
       setSubmitting(false);
       return;
     }
+
+    // TODO make it multiple parts
+    const firstPart = dropRequest.parts[0];
+    if (!firstPart) {
+      setSubmitting(false);
+      return;
+    }
+
     const requestBody: CreateDropRequest = {
-      title: dropRequest.title,
-      content: dropRequest.content,
-      root_drop_id: dropRequest.stormId ? parseInt(dropRequest.stormId) : null,
-      quoted_drop_id: dropRequest.quotedDropId,
-      referenced_nfts: dropRequest.referencedNfts,
-      mentioned_users: dropRequest.mentionedUsers,
-      metadata: dropRequest.metadata,
-      media: [],
+      ...dropRequest,
+      parts: dropRequest.parts.map((part) => ({
+        ...part,
+        media: [],
+      })),
     };
 
-    if (dropRequest.file) {
+    if (!!firstPart.media.length) {
+      // TODO make it multiple media
+      const firstMedia = firstPart.media[0];
       const prep = await commonApiPost<
         {
           content_type: string;
@@ -114,18 +105,18 @@ export default function CreateDrop({
       >({
         endpoint: "drop-media/prep",
         body: {
-          content_type: dropRequest.file.type,
-          file_name: dropRequest.file.name,
-          file_size: dropRequest.file.size,
+          content_type: firstMedia.type,
+          file_name: firstMedia.name,
+          file_size: firstMedia.size,
         },
       });
       const myHeaders = new Headers({ "Content-Type": prep.content_type });
       await fetch(prep.upload_url, {
         method: "PUT",
         headers: myHeaders,
-        body: dropRequest.file,
+        body: firstMedia,
       });
-      requestBody.media.push({
+      requestBody.parts[0].media.push({
         url: prep.media_url,
         mime_type: prep.content_type,
       });
