@@ -5,11 +5,11 @@ import PrimaryButton, {
 import { AuthContext } from "../../../../auth/Auth";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import DropPfp from "../../../create/utils/DropPfp";
-import { Drop } from "../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { createBreakpoint } from "react-use";
+import { Drop } from "../../../../../generated/models/Drop";
 
 enum ScreenType {
   DESKTOP = "DESKTOP",

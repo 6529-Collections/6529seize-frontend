@@ -1,11 +1,11 @@
 import { useContext } from "react";
-import { Drop } from "../../../../../entities/IDrop";
 import DropListItemRateGive from "./give/DropListItemRateGive";
 import { AuthContext } from "../../../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { ProfileAvailableDropRateResponse } from "../../../../../entities/IProfile";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export default function DropListItemRateWrapper({
   drop,

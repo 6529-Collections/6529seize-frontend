@@ -10,31 +10,45 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
+import { DropComment } from '../models/DropComment';
 import { HttpFile } from '../http/http';
 
-export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
-    'rating': number;
+export class DropCommentsPage {
+    'count': number;
+    'page': number;
+    'next': boolean;
+    'data': Array<DropComment>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
+            "name": "count",
+            "baseName": "count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "rating",
-            "baseName": "rating",
-            "type": "number",
-            "format": "int64"
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<DropComment>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropContextProfileContext.attributeTypeMap;
+        return DropCommentsPage.attributeTypeMap;
     }
 
     public constructor() {

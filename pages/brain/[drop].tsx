@@ -1,5 +1,4 @@
 import { useRouter } from "next/router";
-import { Drop } from "../../entities/IDrop";
 
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
@@ -11,6 +10,7 @@ import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext } from "react";
 import { AuthContext } from "../../components/auth/Auth";
+import { Drop } from "../../generated/models/Drop";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,

@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Drop } from "../../../entities/IDrop";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "./DropListWrapper";
 import { AuthContext } from "../../auth/Auth";
+import { Drop } from "../../../generated/models/Drop";
 
 const REQUEST_SIZE = 10;
 

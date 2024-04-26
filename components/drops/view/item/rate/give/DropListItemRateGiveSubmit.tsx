@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import {
-  Drop,
   DropRateChangeRequest,
 } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
@@ -9,6 +8,7 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 import dynamic from "next/dynamic";
+import { Drop } from "../../../../../../generated/models/Drop";
 
 const DropListItemRateGiveClap = dynamic(
   () => import("./clap/DropListItemRateGiveClap"),

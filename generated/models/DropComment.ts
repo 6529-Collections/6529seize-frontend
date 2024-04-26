@@ -13,13 +13,10 @@
 import { ProfileMin } from '../models/ProfileMin';
 import { HttpFile } from '../http/http';
 
-export class DropActivityLog {
-    'id': string;
-    'profile_id': string;
+export class DropComment {
+    'id': number;
     'author': ProfileMin;
-    'target_id': string;
-    'contents': any;
-    'type': DropActivityLogTypeEnum;
+    'comment': string;
     'created_at': number;
 
     static readonly discriminator: string | undefined = undefined;
@@ -28,14 +25,8 @@ export class DropActivityLog {
         {
             "name": "id",
             "baseName": "id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "profile_id",
-            "baseName": "profile_id",
-            "type": "string",
-            "format": "uuid"
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "author",
@@ -44,21 +35,9 @@ export class DropActivityLog {
             "format": ""
         },
         {
-            "name": "target_id",
-            "baseName": "target_id",
+            "name": "comment",
+            "baseName": "comment",
             "type": "string",
-            "format": ""
-        },
-        {
-            "name": "contents",
-            "baseName": "contents",
-            "type": "any",
-            "format": ""
-        },
-        {
-            "name": "type",
-            "baseName": "type",
-            "type": "DropActivityLogTypeEnum",
             "format": ""
         },
         {
@@ -69,17 +48,10 @@ export class DropActivityLog {
         }    ];
 
     static getAttributeTypeMap() {
-        return DropActivityLog.attributeTypeMap;
+        return DropComment.attributeTypeMap;
     }
 
     public constructor() {
     }
-}
-
-
-export enum DropActivityLogTypeEnum {
-    Comment = 'DROP_COMMENT',
-    RatingEdit = 'DROP_RATING_EDIT',
-    Created = 'DROP_CREATED'
 }
 

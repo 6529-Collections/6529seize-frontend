@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
-import { Drop } from "../../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
+import { Drop } from "../../../../../../generated/models/Drop";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",
