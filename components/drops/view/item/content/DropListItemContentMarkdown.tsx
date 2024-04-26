@@ -115,6 +115,9 @@ const DropListItemContentMarkdown = memo(
     readonly drop: Drop;
     readonly showFull?: boolean;
   }) => {
+    // TODO make it multiple parts
+    const part = drop.parts[0];
+
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const checkOverflow = () => {
@@ -159,7 +162,7 @@ const DropListItemContentMarkdown = memo(
       }
     };
 
-    const dropMedia = drop.media?.at(0);
+    const dropMedia = part.media?.at(0);
 
     return (
       <>
@@ -261,7 +264,7 @@ const DropListItemContentMarkdown = memo(
                 a: (params) => aHrefRenderer(params),
               }}
             >
-              {drop.content}
+              {part.content}
             </Markdown>
 
             {isOverflowing && !showMore && (

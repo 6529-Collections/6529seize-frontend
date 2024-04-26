@@ -5,13 +5,15 @@ import CreateDropFull from "../full/CreateDropFull";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { EditorState } from "lexical";
 import {
+  CreateDropConfig,
+  CreateDropRequest,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
 import { createBreakpoint } from "react-use";
 import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
-import { CreateDropType, DropRequest } from "../CreateDrop";
+import { CreateDropType } from "../CreateDrop";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
@@ -40,7 +42,7 @@ export default function CreateDropWrapper({
   readonly quotedDropId: string | null;
   readonly type: CreateDropType;
   readonly loading: boolean;
-  readonly onSubmitDrop: (dropRequest: DropRequest) => void;
+  readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
 }) {
   const breakpoint = useBreakpoint();
   const [screenType, setScreenType] = useState<CreateDropScreenType>(
@@ -127,15 +129,23 @@ export default function CreateDropWrapper({
       markdown?.includes(`#[${nft.name}]`)
     );
 
-    const drop: DropRequest = {
+    const drop: CreateDropConfig = {
       title,
-      content: markdown,
-      stormId: null,
-      quotedDropId,
-      mentionedUsers: mentions,
-      referencedNfts: nfts,
+      parts: [
+        {
+          content: markdown,
+          quoted_drop: quotedDropId
+            ? { drop_id: quotedDropId, drop_part_id: 1 }
+            : null,
+          media: file ? [file] : [],
+        },
+      ],
+      mentioned_users: mentions.map((mention) => ({
+        ...mention,
+        current_handle: mention.handle_in_content,
+      })),
+      referenced_nfts: nfts,
       metadata,
-      file,
     };
     onSubmitDrop(drop);
   };

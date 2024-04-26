@@ -16,14 +16,17 @@ export default function DropListItemContent({
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
-}) {
+  }) {
+  // TODO make it multiple parts
+  const part = drop.parts[0];
+
   const { data: quotedDrop } = useQuery<Drop>({
-    queryKey: [QueryKey.DROP, drop.quoted_drop_id],
+    queryKey: [QueryKey.DROP, part.quoted_drop?.drop_id],
     queryFn: async () =>
       await commonApiFetch<Drop>({
-        endpoint: `/drops/${drop.quoted_drop_id}`,
+        endpoint: `/drops/${part.quoted_drop?.drop_id}`,
       }),
-    enabled: typeof drop.quoted_drop_id === "string",
+    enabled: typeof part.quoted_drop?.drop_id === "string",
   });
 
   return (
