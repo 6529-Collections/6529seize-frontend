@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
-import { Drop } from "../../entities/IDrop";
+
 import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "../drops/view/DropListWrapper";
 import { useSelector } from "react-redux";
@@ -12,6 +12,7 @@ import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
 import BrainCreateADrop from "./BrainCreateADrop";
+import { Drop } from "../../generated/models/Drop";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;

@@ -9,7 +9,8 @@ import {
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../../entities/IProfile";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
-import { Drop } from "../../../../../../../entities/IDrop";
+import { Drop } from "../../../../../../../generated/models/Drop";
+
 
 enum RateStatus {
   POSITIVE = "POSITIVE",

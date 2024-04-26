@@ -1,5 +1,4 @@
 import Tippy from "@tippyjs/react";
-import { Drop } from "../../../../../entities/IDrop";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 import DropListItemActionsRateTooltip from "./DropListItemActionsRateTooltip";
@@ -7,6 +6,7 @@ import RateClapOutlineIcon from "../../../../utils/icons/RateClapOutlineIcon";
 import RateClapSolidIcon from "./RateClapSolidIcon";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { DropDiscussionExpandableState } from "../DropsListItem";
+import { Drop } from "../../../../../generated/models/Drop";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",

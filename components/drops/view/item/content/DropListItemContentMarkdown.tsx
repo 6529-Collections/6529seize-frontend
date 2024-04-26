@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Drop } from "../../../../../entities/IDrop";
+
 import Markdown, { ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
@@ -19,6 +19,7 @@ import DropListItemContentMedia from "./media/DropListItemContentMedia";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
+import { Drop } from "../../../../../generated/models/Drop";
 
 const customRenderer = ({
   content,

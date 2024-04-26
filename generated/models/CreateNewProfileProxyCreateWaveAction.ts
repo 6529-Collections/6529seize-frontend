@@ -10,34 +10,43 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
+import { CreateNewProfileProxyActionType } from '../models/CreateNewProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
-export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
-    'rating': number;
+export class CreateNewProfileProxyCreateWaveAction {
+    'action_type': CreateNewProfileProxyActionType;
+    'start_time': number;
+    'end_time': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
+            "name": "action_type",
+            "baseName": "action_type",
+            "type": "CreateNewProfileProxyActionType",
             "format": ""
         },
         {
-            "name": "rating",
-            "baseName": "rating",
+            "name": "start_time",
+            "baseName": "start_time",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "end_time",
+            "baseName": "end_time",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return DropContextProfileContext.attributeTypeMap;
+        return CreateNewProfileProxyCreateWaveAction.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+
 

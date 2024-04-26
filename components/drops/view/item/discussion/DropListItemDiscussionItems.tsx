@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import DropListItemDiscussionItemsItem from "./item/DropListItemDiscussionItemsItem";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { DropActivityLog, Drop } from "../../../../../entities/IDrop";
+import { DropActivityLog } from "../../../../../entities/IDrop";
 import { Page } from "../../../../../helpers/Types";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { DropItemDiscussionFilterType } from "./DropListItemDiscussion";
@@ -11,6 +11,7 @@ import DropListWrapperBottomTrigger from "../../DropListWrapperBottomTrigger";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../../distribution-plan-tool/common/CircleLoader";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export default function DropListItemDiscussionItems({
   drop,

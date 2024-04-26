@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Drop } from "../../../../../entities/IDrop";
 import DropListItemDataTrigger from "./DropListItemDataTrigger";
 import DropListItemDataContent from "./DropListItemDataContent";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export default function DropListItemData({ drop }: { readonly drop: Drop }) {
   const [showMoreOpen, setShowMoreOpen] = useState<boolean>(false);

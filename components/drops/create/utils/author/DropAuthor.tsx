@@ -1,8 +1,8 @@
 import { cicToType, getTimeAgo } from "../../../../../helpers/Helpers";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
-import { ProfileMinimal } from "../../../../../entities/IProfile";
 import UserCICAndLevel from "../../../../user/utils/UserCICAndLevel";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 export enum DropAuthorSize {
   SMALL = "SMALL",
@@ -14,7 +14,7 @@ export default function DropAuthor({
   timestamp,
   size = DropAuthorSize.MEDIUM,
 }: {
-  readonly profile: ProfileMinimal;
+  readonly profile: ProfileMin;
   readonly timestamp: number;
   readonly size?: DropAuthorSize;
 }) {

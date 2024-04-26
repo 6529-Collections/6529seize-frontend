@@ -1,4 +1,4 @@
-import { Drop } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../generated/models/Drop";
 import DropListItemActionsItemWrapper from "./DropListItemActionsItemWrapper";
 
 export default function DropListItemActionsQuote({
@@ -9,8 +9,9 @@ export default function DropListItemActionsQuote({
   readonly drop: Drop;
   readonly isQuoteMode: boolean;
   readonly setIsQuoteMode: (newState: boolean) => void;
-}) {
-  const userHaveQuoted = !!drop.context_profile_context?.quotes_count;
+  }) {
+  const part = drop.parts[0];
+  const userHaveQuoted = !!part.context_profile_context?.quotes_count;
   return (
     <DropListItemActionsItemWrapper
       state={!isQuoteMode}
@@ -37,9 +38,9 @@ export default function DropListItemActionsQuote({
         <span className="tw-text-iron-400 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
           Redrop
         </span>
-        {!!drop.quotes_count && (
+        {!!part.quotes_count && (
           <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
-            {drop.quotes_count}
+            {part.quotes_count}
           </div>
         )}
       </>

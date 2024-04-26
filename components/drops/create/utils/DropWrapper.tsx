@@ -1,4 +1,4 @@
-import { Drop } from "../../../../entities/IDrop";
+import { Drop } from "../../../../generated/models/Drop";
 import DropAuthor from "./author/DropAuthor";
 import DropPfp from "./DropPfp";
 

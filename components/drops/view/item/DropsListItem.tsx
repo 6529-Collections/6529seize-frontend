@@ -1,4 +1,4 @@
-import { Drop } from "../../../../entities/IDrop";
+
 import { useEffect, useState } from "react";
 import DropListItemData from "./data/DropListItemData";
 import DropListItemActions from "./action/DropListItemActions";
@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import OutsideLinkIcon from "../../../utils/icons/OutsideLinkIcon";
 import DropListItemLogsWrapper from "./logs/DropListItemLogsWrapper";
 import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
+import { Drop } from "../../../../generated/models/Drop";
 
 export enum DropDiscussionExpandableState {
   IDLE = "IDLE",

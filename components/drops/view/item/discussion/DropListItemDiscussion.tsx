@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Drop } from "../../../../../entities/IDrop";
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import DropListItemDiscussionInputWrapper from "./DropListItemDiscussionInputWrapper";
 import DropListItemDiscussionItems from "./DropListItemDiscussionItems";
 import DropListItemDiscussionFilter from "./filter/DropListItemDiscussionFilter";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export type DropItemDiscussionFilterType =
   | ProfileActivityLogType.DROP_COMMENT

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { MentionedUser } from "../../../../../entities/IDrop";
+import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
 
 export default function DropListItemDataContentProfiles({
   profiles,
 }: {
-  readonly profiles: MentionedUser[];
+  readonly profiles: DropMentionedUser[];
 }) {
   return (
     <div>

@@ -1,9 +1,10 @@
-import { Drop } from "../../../entities/IDrop";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import DropsList from "./DropsList";
 import DropListWrapperBottomTrigger from "./DropListWrapperBottomTrigger";
+import { Drop } from "../../../generated/models/Drop";
 
 export default function DropListWrapper({
   drops,
