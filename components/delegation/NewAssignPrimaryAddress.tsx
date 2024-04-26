@@ -140,26 +140,16 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
   useEffect(() => {
     if (tdhAddress) {
       const addresses = tdhAddress.consolidation_key.split("-");
-      const filteredAddresses = addresses.filter(
-        (a) =>
-          !areEqualAddresses(
-            a,
-            props.subdelegation
-              ? props.subdelegation.originalDelegator
-              : props.address
-          )
-      );
-      setAddressOptions(filteredAddresses);
+      setAddressOptions(addresses);
       if (
         props.new_primary_address_query &&
-        filteredAddresses.some((f) =>
+        addresses.some((f) =>
           areEqualAddresses(f, props.new_primary_address_query)
         )
       ) {
         setSelectedToAddress(props.new_primary_address_query);
       } else {
-        const newTo =
-          filteredAddresses.length === 1 ? filteredAddresses[0] : "";
+        const newTo = addresses.length === 1 ? addresses[0] : "";
         setSelectedToAddress(newTo);
         props.setNewPrimaryAddressQuery?.(newTo);
       }
@@ -181,7 +171,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
                 title={props.subdelegation ? `Delegation Manager` : `Delegator`}
                 tooltip={`Address ${
                   props.subdelegation ? `executing` : `registering`
-                } the sub-consolidation`}
+                } the Primary Address assignment`}
               />
               <Col sm={9}>
                 <DelegationAddressDisabledInput
@@ -217,6 +207,24 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     return tdhAddress.consolidation_key.split("-").length > 1;
   }
 
+  function printContent() {
+    if (connectedProfile) {
+      if (isFetchingTdhAddress) {
+        return <DotLoader />;
+      } else if (!isValidConsolidation()) {
+        return (
+          <Row>
+            <Col className="font-larger font-bolder">
+              You must have a consolidation to assign a Primary Address
+            </Col>
+          </Row>
+        );
+      } else {
+        return printForm();
+      }
+    }
+  }
+
   return (
     <Container>
       <Row className="pb-3">
@@ -246,21 +254,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
           </Row>
         </>
       )}
-      {connectedProfile && (
-        <>
-          {isFetchingTdhAddress ? (
-            <DotLoader />
-          ) : !isValidConsolidation() ? (
-            <Row>
-              <Col className="font-larger font-bolder">
-                You must have a consolidation to assign a Primary Address
-              </Col>
-            </Row>
-          ) : (
-            printForm()
-          )}
-        </>
-      )}
+      {printContent()}
     </Container>
   );
 }
