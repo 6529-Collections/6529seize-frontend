@@ -1,4 +1,5 @@
-import { Drop } from "../../../entities/IDrop";
+
+import { Drop } from "../../../generated/models/Drop";
 import DropsListItem from "./item/DropsListItem";
 
 export default function DropsList({ drops }: { readonly drops: Drop[] }) {

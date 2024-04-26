@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropListItemQuote from "./DropListItemQuote";
-import { Drop } from "../../../../../entities/IDrop";
 import { useEffect, useState } from "react";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export default function DropListItemCreateQuote({
   drop,

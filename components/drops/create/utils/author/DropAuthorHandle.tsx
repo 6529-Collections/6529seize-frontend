@@ -2,13 +2,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { DropAuthorSize } from "./DropAuthor";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import { ProfileMinimal } from "../../../../../entities/IProfile";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 export default function DropAuthorHandle({
   profile: { handle },
   size,
 }: {
-  readonly profile: ProfileMinimal;
+  readonly profile: ProfileMin;
   readonly size: DropAuthorSize;
 }) {
   const router = useRouter();

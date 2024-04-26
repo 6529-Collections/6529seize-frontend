@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Drop } from "../../../../../entities/IDrop";
 import DropListItemDataContentProfiles from "./DropListItemDataContentProfiles";
 import DropListItemDataContentMetadata from "./DropListItemDataContentMetadata";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export default function DropListItemDataContent({
   open,

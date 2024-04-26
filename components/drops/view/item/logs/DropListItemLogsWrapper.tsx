@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Drop } from "../../../../../entities/IDrop";
 import DropListItemDiscussion from "../discussion/DropListItemDiscussion";
 import { ProfileActivityLogType } from "../../../../../entities/IProfile";
 import { AnimatePresence, motion } from "framer-motion";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import { DropDiscussionExpandableState } from "../DropsListItem";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export default function DropListItemLogsWrapper({
   drop,

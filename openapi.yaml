@@ -8,6 +8,46 @@ servers:
   - url: /api
 
 paths:
+  /profiles/{handleOrWallet}/proxies/received:
+    get:
+      tags:
+        - Proxies
+      summary: Get proxies received by a profile, if authenticated, it will return the not accepted proxies as well
+      operationId: getProxiesReceived
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 50
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 2000
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileProxy'
+        '404':
+          description: Profile not found
   /drops:
     get:
       tags:
@@ -37,12 +77,22 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: root_drop_id
+        - name: min_part_id
           in: query
-          description: If you want to find drops in a storm
+          description: Minimum ID of the parts wrapped in drops
           required: false
           schema:
-            type: string
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
         - name: context_profile
           in: query
           description: If supplied, each drop has some context related to given profile. It can be wallet, ENS, handle or profile ID.
@@ -97,6 +147,22 @@ paths:
           required: false
           schema:
             type: string
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
       responses:
         '200':
           description: successful operation
@@ -155,8 +221,8 @@ paths:
           description: Filter logs by type
           required: false
           schema:
-              type: string
-              enum:
+            type: string
+            enum:
               - DROP_COMMENT
               - DROP_RATING_EDIT
               - DROP_CREATED
@@ -205,11 +271,71 @@ paths:
                   $ref: '#/components/schemas/DropActivityLog'
         '404':
           description: Drop not found
-
+  /drops/{dropId}/parts/{dropPartId}/comments:
+    get:
+      tags:
+        - Drops
+      summary: Get drop part comments
+      operationId: getDropComments
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dropPartId
+          in: path
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 20
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DropCommentsPage'
+        '404':
+          description: Drop not found
     post:
       tags:
         - Drops
-      summary: Write a discussion comment to drop logs
+      summary: Write a discussion comment for drop part
       description: 'Requires the user to be authenticated'
       operationId: commentDrop
       parameters:
@@ -218,26 +344,25 @@ paths:
           required: true
           schema:
             type: string
+        - name: dropPartId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - content
-              properties:
-                content:
-                  type: string
-                  minLength: 1
-                  maxLength: 500
+              $ref: '#/components/schemas/NewDropComment'
       responses:
         '201':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DropActivityLog'
+                $ref: '#/components/schemas/DropComment'
         '404':
           description: Drop not found
         '400':
@@ -266,8 +391,8 @@ paths:
                 content_type:
                   type: string
                 file_size:
-                    type: number
-                    format: int64
+                  type: number
+                  format: int64
       responses:
         '201':
           description: successful operation
@@ -288,6 +413,84 @@ paths:
                     type: string
         '400':
           description: 'Invalid request'
+  /proxies:
+    post:
+      tags:
+        - Proxies
+      summary: Create a new proxy
+      description: Requires the user to be authenticated
+      operationId: createProxy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNewProfileProxy'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileProxy'
+        '400':
+          description: Invalid request
+  /proxies/{proxyId}:
+    get:
+      tags:
+        - Proxies
+      summary: Get proxy by ID
+      operationId: getProxyById
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileProxy'
+        '404':
+          description: Proxy not found
+  /proxies/{proxyId}/actions:
+    post:
+      tags:
+        - Proxies
+      summary: Add action to proxy
+      description: Requires the user to be authenticated
+      operationId: addActionToProxy
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/CreateNewProfileProxyAllocateRepAction'
+                - $ref: '#/components/schemas/CreateNewProfileProxyAllocateCicAction'
+                - $ref: '#/components/schemas/CreateNewProfileProxyCreateWaveAction'
+                - $ref: '#/components/schemas/CreateNewProfileProxyReadWaveAction'
+                - $ref: '#/components/schemas/CreateNewProfileProxyCreateWaveParticipationDropAction'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileProxyAction'
+        '404':
+          description: Proxy not found
+        '400':
+          description: Invalid request
 
 components:
   securitySchemes:
@@ -305,17 +508,14 @@ components:
           - referenced_nfts
           - mentioned_users
           - metadata
-          - media
-          - storm_sequence
-          - max_storm_sequence
+          - parts
+          - parts_count
           - rating
           - top_raters
           - raters_count
           - top_rating_categories
           - rating_categories_count
-          - discussion_comments_count
           - rating_logs_count
-          - quotes_count
       properties:
           id:
             type: string
@@ -333,17 +533,14 @@ components:
             type: string
             maxLength: 250
             nullable: true
-          content:
-            type: string
-            maxLength: 25000
-            nullable: true
-          quoted_drop_id:
-            type: string
-            nullable: true
-          root_drop_id:
-            description: 'Exists if the drop is part of a storm and is not the first drop in the storm'
-            type: string
-            nullable: true
+          parts:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropPart'
+          parts_count:
+            description: 'Number of drops in the storm'
+            type: number
+            format: int64
           referenced_nfts:
             type: array
             items:
@@ -356,18 +553,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/DropMetadata'
-          media:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropMedia'
-          storm_sequence:
-            description: 'Which drop in the storm is this drop'
-            type: number
-            format: int64
-          max_storm_sequence:
-            description: 'Number of drops in the storm'
-            type: number
-            format: int64
           rating:
             type: number
             format: int64
@@ -385,19 +570,60 @@ components:
           rating_categories_count:
             type: number
             format: int64
-          discussion_comments_count:
-            type: number
-            format: int64
           rating_logs_count:
-            type: number
-            format: int64
-          quotes_count:
             type: number
             format: int64
           context_profile_context:
             anyOf:
               - type: 'null'
               - $ref: '#/components/schemas/DropContextProfileContext'
+
+    QuotedDrop:
+      type: object
+      required:
+        - drop_id
+        - drop_part_id
+      properties:
+        drop_id:
+          type: string
+        drop_part_id:
+          type: number
+          format: int64
+
+    DropPart:
+      type: object
+      required:
+        - part_id
+        - media
+        - discussion_comments_count
+        - quotes_count
+      properties:
+        part_id:
+          description: 'Which drop in the storm is this drop'
+          type: number
+          format: int64
+        content:
+          type: string
+          maxLength: 25000
+          nullable: true
+        media:
+          type: array
+          items:
+              $ref: '#/components/schemas/DropMedia'
+        quoted_drop:
+          anyOf:
+            - $ref: '#/components/schemas/QuotedDrop'
+            - type: 'null'
+        discussion_comments_count:
+          type: number
+          format: int64
+        quotes_count:
+          type: number
+          format: int64
+        context_profile_context:
+          anyOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/DropPartContextProfileContext'
     ProfileMin:
       type: object
       required:
@@ -466,23 +692,23 @@ components:
           nullable: true
 
     DropMetadata:
-        type: object
-        required:
-          - data_key
-          - data_value
-        properties:
-          data_key:
-            type: string
-            maxLength: 500
-          data_value:
-            type: string
-            maxLength: 500
+      type: object
+      required:
+        - data_key
+        - data_value
+      properties:
+        data_key:
+          type: string
+          maxLength: 500
+        data_value:
+          type: string
+          maxLength: 500
 
     DropRater:
       type: object
       required:
-          - profile
-          - rating
+        - profile
+        - rating
       properties:
         profile:
           $ref: '#/components/schemas/ProfileMin'
@@ -507,8 +733,6 @@ components:
         required:
           - categories
           - rating
-          - discussion_comments_count
-          - quotes_count
         properties:
           categories:
             type: array
@@ -517,12 +741,37 @@ components:
           rating:
             type: number
             format: int64
-          discussion_comments_count:
-            type: number
-            format: int64
-          quotes_count:
-            type: number
-            format: int64
+
+    DropPartContextProfileContext:
+      type: object
+      required:
+        - discussion_comments_count
+        - quotes_count
+      properties:
+        discussion_comments_count:
+          type: number
+          format: int64
+        quotes_count:
+          type: number
+          format: int64
+
+    CreateDropPart:
+      type: object
+      required:
+        - media
+      properties:
+        content:
+          type: string
+          maxLength: 25000
+          nullable: true
+        quoted_drop:
+          anyOf:
+            - $ref: '#/components/schemas/QuotedDrop'
+            - type: 'null'
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropMedia'
 
     CreateDropRequest:
       type: object
@@ -530,25 +779,17 @@ components:
         - referenced_nfts
         - mentioned_users
         - metadata
-        - media
+        - parts
       properties:
         title:
           type: string
           maxLength: 250
           nullable: true
-        content:
-          type: string
-          maxLength: 25000
-          nullable: true
-        root_drop_id:
-          description: 'If the drop is part of a storm and is not the first drop in the storm'
-          type: string
-          format: uuid
-          nullable: true
-        quoted_drop_id:
-          type: string
-          format: uuid
-          nullable: true
+        parts:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CreateDropPart'
         referenced_nfts:
           type: array
           items:
@@ -561,23 +802,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DropMetadata'
-        media:
-          type: array
-          items:
-            $ref: '#/components/schemas/DropMedia'
 
     DropMedia:
-        type: object
-        required:
-            - url
-            - mime_type
-        properties:
-          url:
-            type: string
-            maxLength: 2000
-          mime_type:
-            type: string
-            maxLength: 100
+      type: object
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+          maxLength: 2000
+        mime_type:
+          type: string
+          maxLength: 100
 
     DropRatingRequest:
       type: object
@@ -621,8 +858,275 @@ components:
             - DROP_RATING_EDIT
             - DROP_CREATED
         created_at:
+          type: number
+          format: int64
+
+    DropComment:
+      type: object
+      required:
+        - id
+        - author
+        - comment
+        - created_at
+      properties:
+        id:
+          type: number
+          format: int64
+        author:
+          $ref: '#/components/schemas/ProfileMin'
+        comment:
           type: string
-          format: date-time
+          maxLength: 2000
+        created_at:
+          type: number
+          format: int64
+
+    NewDropComment:
+      type: object
+      required:
+        - comment
+      properties:
+        comment:
+          type: string
+          maxLength: 2000
+
+    DropCommentsPage:
+        type: object
+        required:
+          - count
+          - page
+          - next
+          - data
+        properties:
+          count:
+            type: number
+            format: int64
+          page:
+            type: number
+            format: int64
+          next:
+            type: boolean
+          data:
+            type: array
+            items:
+                $ref: '#/components/schemas/DropComment'
+
+    CreateNewProfileProxy:
+      type: object
+      required:
+        - target_id
+      properties:
+        target_id:
+          type: string
+
+    ProfileProxy:
+      type: object
+      required:
+        - id
+        - target_id
+        - created_at
+        - created_by
+      properties:
+        id:
+          type: string
+        target_id:
+          type: string
+        created_at:
+          type: number
+        created_by:
+          type: string
+
+    CreateNewProfileProxyAllocateRepAction:
+      type: object
+      required:
+        - action_type
+        - start_time
+        - end_time
+        - credit_amount
+        - credit_category
+      properties:
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        start_time:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+        credit_amount:
+          type: number
+          format: int64
+        group_id:
+          anyOf:
+            - type: 'null'
+            - type: string
+        credit_category:
+          anyOf:
+            - type: 'null'
+            - type: string
+
+    CreateNewProfileProxyAllocateCicAction:
+      type: object
+      required:
+        - action_type
+        - start_time
+        - end_time
+        - credit_amount
+        - group_id
+      properties:
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        start_time:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+        credit_amount:
+          type: number
+          format: int64
+        group_id:
+          anyOf:
+            - type: 'null'
+            - type: string
+
+    CreateNewProfileProxyCreateWaveAction:
+      type: object
+      required:
+        - action_type
+        - start_time
+        - end_time
+      properties:
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        start_time:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+
+    CreateNewProfileProxyReadWaveAction:
+      type: object
+      required:
+        - action_type
+        - start_time
+        - end_time
+      properties:
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        start_time:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+
+    CreateNewProfileProxyCreateWaveParticipationDropAction:
+      type: object
+      required:
+        - action_type
+        - start_time
+        - end_time
+      properties:
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        start_time:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+    CreateNewProfileProxyRateWaveDropAction:
+      type: object
+      required:
+        - action_type
+        - start_time
+        - end_time
+      properties:
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        start_time:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+
+    CreateNewProfileProxyActionType:
+      type: string
+      enum:
+        - ALLOCATE_REP
+        - ALLOCATE_CIC
+        - CREATE_WAVE
+        - READ_WAVE
+        - CREATE_DROP_TO_WAVE
+        - RATE_WAVE_DROP
+    ProfileProxyAction:
+      type: object
+      required:
+        - id
+        - proxy_id
+        - action_type
+        - action_data
+        - start_time
+        - end_time
+        - accepted_at
+        - rejected_at
+        - revoked_at
+        - created_at
+        - is_active
+      properties:
+        id:
+          type: string
+        proxy_id:
+          type: string
+        action_type:
+          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
+        action_data:
+          type: object
+        start_ime:
+          type: number
+          format: int64
+        end_time:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+        created_at:
+          type: number
+          format: int64
+        accepted_at:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+        rejected_at:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+        revoked_at:
+          anyOf:
+            - type: 'null'
+            - type: number
+              format: int64
+        is_active:
+          type: boolean
+        
+
 
 security:
   - bearerAuth: []

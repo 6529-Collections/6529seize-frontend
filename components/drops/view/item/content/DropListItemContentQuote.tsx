@@ -1,4 +1,4 @@
-import { Drop } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../generated/models/Drop";
 import DropWrapper from "../../../create/utils/DropWrapper";
 import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
 

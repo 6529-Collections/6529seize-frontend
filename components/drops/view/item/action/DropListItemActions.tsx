@@ -1,4 +1,5 @@
-import { Drop } from "../../../../../entities/IDrop";
+
+import { Drop } from "../../../../../generated/models/Drop";
 import { DropDiscussionExpandableState } from "../DropsListItem";
 
 import DropListItemActionsDiscussion from "./DropListItemActionsDiscussion";

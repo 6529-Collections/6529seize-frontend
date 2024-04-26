@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import DropListItemDiscussionInput from "./DropListItemDiscussionInput";
 import { AuthContext } from "../../../../auth/Auth";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
-import { Drop } from "../../../../../entities/IDrop";
+import { Drop } from "../../../../../generated/models/Drop";
 
 enum STATE {
   NOT_CONNECTED = "NOT_CONNECTED",

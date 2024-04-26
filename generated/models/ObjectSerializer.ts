@@ -1,34 +1,68 @@
-export * from '../models/CommentDropRequest';
+export * from '../models/AddActionToProxyRequest';
 export * from '../models/CreateDropMediaUrl201Response';
 export * from '../models/CreateDropMediaUrlRequest';
+export * from '../models/CreateDropPart';
 export * from '../models/CreateDropRequest';
+export * from '../models/CreateNewProfileProxy';
+export * from '../models/CreateNewProfileProxyActionType';
+export * from '../models/CreateNewProfileProxyAllocateCicAction';
+export * from '../models/CreateNewProfileProxyAllocateRepAction';
+export * from '../models/CreateNewProfileProxyCreateWaveAction';
+export * from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
+export * from '../models/CreateNewProfileProxyRateWaveDropAction';
+export * from '../models/CreateNewProfileProxyReadWaveAction';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
+export * from '../models/DropComment';
+export * from '../models/DropCommentsPage';
 export * from '../models/DropContextProfileContext';
 export * from '../models/DropMedia';
 export * from '../models/DropMentionedUser';
 export * from '../models/DropMetadata';
+export * from '../models/DropPart';
+export * from '../models/DropPartContextProfileContext';
 export * from '../models/DropRater';
 export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
+export * from '../models/NewDropComment';
 export * from '../models/ProfileMin';
+export * from '../models/ProfileProxy';
+export * from '../models/ProfileProxyAction';
+export * from '../models/QuotedDrop';
 
-import { CommentDropRequest } from '../models/CommentDropRequest';
+import { AddActionToProxyRequest       } from '../models/AddActionToProxyRequest';
 import { CreateDropMediaUrl201Response } from '../models/CreateDropMediaUrl201Response';
 import { CreateDropMediaUrlRequest } from '../models/CreateDropMediaUrlRequest';
+import { CreateDropPart } from '../models/CreateDropPart';
 import { CreateDropRequest } from '../models/CreateDropRequest';
+import { CreateNewProfileProxy } from '../models/CreateNewProfileProxy';
+import { CreateNewProfileProxyActionType } from '../models/CreateNewProfileProxyActionType';
+import { CreateNewProfileProxyAllocateCicAction      } from '../models/CreateNewProfileProxyAllocateCicAction';
+import { CreateNewProfileProxyAllocateRepAction       } from '../models/CreateNewProfileProxyAllocateRepAction';
+import { CreateNewProfileProxyCreateWaveAction    } from '../models/CreateNewProfileProxyCreateWaveAction';
+import { CreateNewProfileProxyCreateWaveParticipationDropAction    } from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
+import { CreateNewProfileProxyRateWaveDropAction    } from '../models/CreateNewProfileProxyRateWaveDropAction';
+import { CreateNewProfileProxyReadWaveAction    } from '../models/CreateNewProfileProxyReadWaveAction';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
+import { DropComment } from '../models/DropComment';
+import { DropCommentsPage } from '../models/DropCommentsPage';
 import { DropContextProfileContext } from '../models/DropContextProfileContext';
 import { DropMedia } from '../models/DropMedia';
 import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
+import { DropPart } from '../models/DropPart';
+import { DropPartContextProfileContext } from '../models/DropPartContextProfileContext';
 import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { NewDropComment } from '../models/NewDropComment';
 import { ProfileMin } from '../models/ProfileMin';
+import { ProfileProxy } from '../models/ProfileProxy';
+import { ProfileProxyAction            } from '../models/ProfileProxyAction';
+import { QuotedDrop } from '../models/QuotedDrop';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -43,25 +77,42 @@ let primitives = [
                  ];
 
 let enumsMap: Set<string> = new Set<string>([
+    "CreateNewProfileProxyActionType",
     "DropActivityLogTypeEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
-    "CommentDropRequest": CommentDropRequest,
+    "AddActionToProxyRequest": AddActionToProxyRequest,
     "CreateDropMediaUrl201Response": CreateDropMediaUrl201Response,
     "CreateDropMediaUrlRequest": CreateDropMediaUrlRequest,
+    "CreateDropPart": CreateDropPart,
     "CreateDropRequest": CreateDropRequest,
+    "CreateNewProfileProxy": CreateNewProfileProxy,
+    "CreateNewProfileProxyAllocateCicAction": CreateNewProfileProxyAllocateCicAction,
+    "CreateNewProfileProxyAllocateRepAction": CreateNewProfileProxyAllocateRepAction,
+    "CreateNewProfileProxyCreateWaveAction": CreateNewProfileProxyCreateWaveAction,
+    "CreateNewProfileProxyCreateWaveParticipationDropAction": CreateNewProfileProxyCreateWaveParticipationDropAction,
+    "CreateNewProfileProxyRateWaveDropAction": CreateNewProfileProxyRateWaveDropAction,
+    "CreateNewProfileProxyReadWaveAction": CreateNewProfileProxyReadWaveAction,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
+    "DropComment": DropComment,
+    "DropCommentsPage": DropCommentsPage,
     "DropContextProfileContext": DropContextProfileContext,
     "DropMedia": DropMedia,
     "DropMentionedUser": DropMentionedUser,
     "DropMetadata": DropMetadata,
+    "DropPart": DropPart,
+    "DropPartContextProfileContext": DropPartContextProfileContext,
     "DropRater": DropRater,
     "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
+    "NewDropComment": NewDropComment,
     "ProfileMin": ProfileMin,
+    "ProfileProxy": ProfileProxy,
+    "ProfileProxyAction": ProfileProxyAction,
+    "QuotedDrop": QuotedDrop,
 }
 
 type MimeTypeDescriptor = {

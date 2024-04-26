@@ -15,7 +15,7 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { Drop } from "../../entities/IDrop";
+import { Drop } from "../../generated/models/Drop";
 
 export enum QueryKey {
   PROFILE = "PROFILE",

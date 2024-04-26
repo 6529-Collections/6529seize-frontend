@@ -2,7 +2,8 @@ import { RateChangeType } from "./DropListItemRateGive";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
-import { Drop } from "../../../../../../entities/IDrop";
+import { Drop } from "../../../../../../generated/models/Drop";
+
 
 export default function DropListItemRateGiveChangeButton({
   drop,

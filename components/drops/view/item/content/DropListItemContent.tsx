@@ -1,9 +1,9 @@
-import { Drop } from "../../../../../entities/IDrop";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
 import DropListItemContentQuote from "./DropListItemContentQuote";
+import { Drop } from "../../../../../generated/models/Drop";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
