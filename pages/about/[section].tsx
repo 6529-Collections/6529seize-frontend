@@ -28,6 +28,7 @@ import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
 import AboutSubscriptionsUpcoming from "../../components/about/AboutSubscriptionsUpcoming";
 import AboutCopyright from "../../components/about/AboutCopyright";
+import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
 
 export enum AboutSection {
   MEMES = "the-memes",
@@ -47,6 +48,7 @@ export enum AboutSection {
   DATA_DECENTR = "data-decentralization",
   GDRC1 = "gdrc1",
   NFT_DELEGATION = "nft-delegation",
+  PRIMARY_ADDRESS = "primary-address",
   ENS = "ens",
   SUBSCRIPTIONS = "subscriptions",
   SUBSCRIPTIONS_UPCOMING = "upcoming-drops",
@@ -143,6 +145,8 @@ export default function About(props: any) {
         return <AboutGDRC1 html={pageProps.gdrc1Text} />;
       case AboutSection.NFT_DELEGATION:
         return <AboutNFTDelegation />;
+      case AboutSection.PRIMARY_ADDRESS:
+        return <AboutPrimaryAddress />;
       case AboutSection.ENS:
         return <AboutHTML title="ENS" html={pageProps.ensText} />;
       case AboutSection.SUBSCRIPTIONS:
@@ -349,6 +353,12 @@ function AboutMenu(
         currentSection={currentSection}
         setSection={setSection}
         title="NFT Delegation"
+      />
+      <AboutRow
+        section={AboutSection.PRIMARY_ADDRESS}
+        currentSection={currentSection}
+        setSection={setSection}
+        title="Primary Address"
       />
       <Row>
         <Col>
