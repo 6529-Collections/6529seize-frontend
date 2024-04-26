@@ -1,0 +1,628 @@
+openapi: 3.0.3
+
+info:
+  title: Seize API
+  description: Following is the API interface description for most common operations in Seize API. Some modifying endpoints may need authentication token.
+  version: 1.0.0
+servers:
+  - url: /api
+
+paths:
+  /drops:
+    get:
+      tags:
+        - Drops
+      summary: Get latest drops
+      operationId: getLatestDrops
+      parameters:
+        - name: limit
+          in: query
+          description: How many drops to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: curation_criteria_id
+          in: query
+          description: Drops by authors that match the supplied criteria
+          required: false
+          schema:
+            type: string
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: root_drop_id
+          in: query
+          description: If you want to find drops in a storm
+          required: false
+          schema:
+            type: string
+        - name: context_profile
+          in: query
+          description: If supplied, each drop has some context related to given profile. It can be wallet, ENS, handle or profile ID.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Drop'
+    post:
+      tags:
+        - Drops
+      summary: Create a drop
+      description: 'Requires the user to be authenticated'
+      operationId: createDrop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDropRequest'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drop'
+        '400':
+          description: 'Invalid request'
+  /drops/{dropId}:
+    get:
+      tags:
+        - Drops
+      summary: Get drop by ID
+      operationId: getDropById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: context_profile
+          in: query
+          description: If supplied drop has some context related to given profile. It can be wallet, ENS, handle or profile ID.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drop'
+        '404':
+          description: Drop not found
+
+  /drops/{dropId}/ratings:
+    post:
+      tags:
+        - Drops
+      summary: Rate a drop
+      description: 'Requires the user to be authenticated'
+      operationId: rateDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DropRatingRequest'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drop'
+        '404':
+          description: Drop not found
+        '400':
+          description: 'Invalid request'
+
+  /drops/{dropId}/log:
+    get:
+      tags:
+        - Drops
+      summary: Get drop logs
+      operationId: getDropLogs
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          description: Filter logs by type
+          required: false
+          schema:
+              type: string
+              enum:
+              - DROP_COMMENT
+              - DROP_RATING_EDIT
+              - DROP_CREATED
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 50
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 2000
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DropActivityLog'
+        '404':
+          description: Drop not found
+
+    post:
+      tags:
+        - Drops
+      summary: Write a discussion comment to drop logs
+      description: 'Requires the user to be authenticated'
+      operationId: commentDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DropActivityLog'
+        '404':
+          description: Drop not found
+        '400':
+          description: 'Invalid request'
+
+  /drop-media/prep:
+    post:
+      tags:
+        - Drops
+      summary: Create S3 URL for drop media upload
+      description: 'Requires the user to be authenticated'
+      operationId: createDropMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content_type
+                - file_name
+                - file_size
+              properties:
+                file_name:
+                  type: string
+                content_type:
+                  type: string
+                file_size:
+                    type: number
+                    format: int64
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - upload_url
+                  - content_type
+                  - media_url
+                properties:
+                  upload_url:
+                    type: string
+                  content_type:
+                    type: string
+                  media_url:
+                    type: string
+        '400':
+          description: 'Invalid request'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Drop:
+      type: object
+      required:
+          - id
+          - serial_no
+          - author
+          - created_at
+          - referenced_nfts
+          - mentioned_users
+          - metadata
+          - media
+          - storm_sequence
+          - max_storm_sequence
+          - rating
+          - top_raters
+          - raters_count
+          - top_rating_categories
+          - rating_categories_count
+          - discussion_comments_count
+          - rating_logs_count
+          - quotes_count
+      properties:
+          id:
+            type: string
+          serial_no:
+            description: Sequence number of the drop in Seize
+            type: number
+            format: int64
+          author:
+            $ref: '#/components/schemas/ProfileMin'
+          created_at:
+            description: Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
+            type: number
+            format: int64
+          title:
+            type: string
+            maxLength: 250
+            nullable: true
+          content:
+            type: string
+            maxLength: 25000
+            nullable: true
+          quoted_drop_id:
+            type: string
+            nullable: true
+          root_drop_id:
+            description: 'Exists if the drop is part of a storm and is not the first drop in the storm'
+            type: string
+            nullable: true
+          referenced_nfts:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropReferencedNFT'
+          mentioned_users:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropMentionedUser'
+          metadata:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropMetadata'
+          media:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropMedia'
+          storm_sequence:
+            description: 'Which drop in the storm is this drop'
+            type: number
+            format: int64
+          max_storm_sequence:
+            description: 'Number of drops in the storm'
+            type: number
+            format: int64
+          rating:
+            type: number
+            format: int64
+          top_raters:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropRater'
+          raters_count:
+            type: number
+            format: int64
+          top_rating_categories:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropRatingCategory'
+          rating_categories_count:
+            type: number
+            format: int64
+          discussion_comments_count:
+            type: number
+            format: int64
+          rating_logs_count:
+            type: number
+            format: int64
+          quotes_count:
+            type: number
+            format: int64
+          context_profile_context:
+            anyOf:
+              - type: 'null'
+              - $ref: '#/components/schemas/DropContextProfileContext'
+    ProfileMin:
+      type: object
+      required:
+        - id
+        - handle
+        - cic
+        - rep
+        - tdh
+        - level
+        - archived
+      properties:
+        id:
+          type: string
+          format: uuid
+        handle:
+          type: string
+        pfp:
+          type: string
+        cic:
+          type: number
+          format: int64
+        rep:
+          type: number
+          format: int64
+        tdh:
+          type: number
+          format: int64
+        level:
+          type: number
+          format: int64
+        archived:
+          type: boolean
+
+    DropReferencedNFT:
+      type: object
+      required:
+        - contract
+        - token
+        - name
+      properties:
+        contract:
+          type: string
+          maxLength: 100
+        token:
+          type: string
+          maxLength: 250
+        name:
+          type: string
+          maxLength: 500
+
+    DropMentionedUser:
+      type: object
+      required:
+        - mentioned_profile_id
+        - handle_in_content
+      properties:
+        mentioned_profile_id:
+          type: string
+          format: uuid
+        handle_in_content:
+          type: string
+          maxLength: 100
+        current_handle:
+          type: string
+          maxLength: 100
+          nullable: true
+
+    DropMetadata:
+        type: object
+        required:
+          - data_key
+          - data_value
+        properties:
+          data_key:
+            type: string
+            maxLength: 500
+          data_value:
+            type: string
+            maxLength: 500
+
+    DropRater:
+      type: object
+      required:
+          - profile
+          - rating
+      properties:
+        profile:
+          $ref: '#/components/schemas/ProfileMin'
+        rating:
+          type: number
+          format: int64
+
+    DropRatingCategory:
+      type: object
+      required:
+        - category
+        - rating
+      properties:
+        category:
+          type: string
+        rating:
+          type: number
+          format: int64
+
+    DropContextProfileContext:
+        type: object
+        required:
+          - categories
+          - rating
+          - discussion_comments_count
+          - quotes_count
+        properties:
+          categories:
+            type: array
+            items:
+              $ref: '#/components/schemas/DropRatingCategory'
+          rating:
+            type: number
+            format: int64
+          discussion_comments_count:
+            type: number
+            format: int64
+          quotes_count:
+            type: number
+            format: int64
+
+    CreateDropRequest:
+      type: object
+      required:
+        - referenced_nfts
+        - mentioned_users
+        - metadata
+        - media
+      properties:
+        title:
+          type: string
+          maxLength: 250
+          nullable: true
+        content:
+          type: string
+          maxLength: 25000
+          nullable: true
+        root_drop_id:
+          description: 'If the drop is part of a storm and is not the first drop in the storm'
+          type: string
+          format: uuid
+          nullable: true
+        quoted_drop_id:
+          type: string
+          format: uuid
+          nullable: true
+        referenced_nfts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropReferencedNFT'
+        mentioned_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropMentionedUser'
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropMetadata'
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropMedia'
+
+    DropMedia:
+        type: object
+        required:
+            - url
+            - mime_type
+        properties:
+          url:
+            type: string
+            maxLength: 2000
+          mime_type:
+            type: string
+            maxLength: 100
+
+    DropRatingRequest:
+      type: object
+      required:
+        - rating
+        - category
+      properties:
+        rating:
+          type: number
+          format: int64
+        category:
+          type: string
+          maxLength: 100
+
+    DropActivityLog:
+      type: object
+      required:
+        - id
+        - profile_id
+        - author
+        - contents
+        - target_id
+        - type
+        - created_at
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+          format: uuid
+        author:
+          $ref: '#/components/schemas/ProfileMin'
+        target_id:
+          type: string
+        contents:
+          type: object
+        type:
+          type: string
+          enum:
+            - DROP_COMMENT
+            - DROP_RATING_EDIT
+            - DROP_CREATED
+        created_at:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []

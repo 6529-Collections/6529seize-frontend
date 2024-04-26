@@ -299,6 +299,22 @@ export default function AboutTermsOfService() {
             <br />
             <br />
             <li>
+              <b>Copyright</b>
+              <br />
+              <br />
+              Our Copyright policy can be found here
+              <br />
+              <br />
+              <a
+                href={`/about/${AboutSection.COPYRIGHT}`}
+                target="_blank"
+                rel="noreferrer">
+                seize.io/about/{AboutSection.COPYRIGHT}
+              </a>
+            </li>
+            <br />
+            <br />
+            <li>
               <b>Not Our Platform</b>
               <br />
               <br />

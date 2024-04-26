@@ -367,6 +367,13 @@ export default function Header(props: Readonly<Props>) {
                     </Link>
                   </Col>
                 </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href="/about/upcoming-drops">
+                      <h3>Upcoming Drops</h3>
+                    </Link>
+                  </Col>
+                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -778,6 +785,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Subscriptions",
                                   path: "/about/subscriptions",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Upcoming Drops",
+                                  path: "/about/upcoming-drops",
                                 }}
                               />
                               <NavDropdown.Divider />
