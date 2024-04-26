@@ -12,6 +12,12 @@ interface PrimaryAddressData {
 export default function AboutPrimaryAddress() {
   const [data, setData] = useState<PrimaryAddressData[]>([]);
 
+  const tdStyle = {
+    border: "1px solid white",
+    padding: "15px",
+    verticalAlign: "middle",
+  };
+
   useEffect(() => {
     const filePath = "/primary_address.csv";
     fetch(filePath)
@@ -116,57 +122,25 @@ export default function AboutPrimaryAddress() {
           <table className="table">
             <thead>
               <tr>
-                <th
-                  style={{
-                    border: "1px solid white",
-                    padding: "15px",
-                  }}>
-                  Profile Handle
-                </th>
-                <th
-                  style={{
-                    border: "1px solid white",
-                    padding: "15px",
-                  }}>
-                  Current Selected Primary Address
-                </th>
-                <th
-                  style={{
-                    border: "1px solid white",
-                    padding: "15px",
-                  }}>
-                  Primary Address Changed to
-                </th>
+                <th style={tdStyle}>Profile Handle</th>
+                <th style={tdStyle}>Current Selected Primary Address</th>
+                <th style={tdStyle}>Primary Address Changed to</th>
               </tr>
             </thead>
             <tbody>
               {data.map((item) => (
                 <tr key={item.handle}>
-                  <td
-                    style={{
-                      border: "1px solid white",
-                      padding: "15px",
-                    }}>
+                  <td style={tdStyle}>
                     <a
                       href={`/${item.current_primary}`}
                       className="decoration-hover-underline">
                       {item.handle}
                     </a>
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid white",
-                      padding: "15px",
-                    }}
-                    className="font-smaller">
+                  <td style={tdStyle} className="font-smaller">
                     {item.current_primary}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid white",
-                      padding: "15px",
-                    }}
-                    className="font-smaller">
+                  <td style={tdStyle} className="font-smaller">
                     {item.new_primary}
                   </td>
                 </tr>
