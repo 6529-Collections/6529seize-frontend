@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { Readable } from "stream";
-import csv from "csv-parser";
+import csvParser from "csv-parser";
 
 interface PrimaryAddressData {
   profile_id: string;
@@ -16,33 +15,50 @@ export default function AboutPrimaryAddress() {
   useEffect(() => {
     const filePath = "/primary_address.csv";
     fetch(filePath)
-      .then((response) => response.body)
+      .then((response) => response.blob())
       .then((body) => {
-        const reader = body?.getReader();
-        const stream = new Readable({
-          read() {
-            reader?.read().then(({ done, value }) => {
-              if (done) {
-                this.push(null);
-              } else {
-                this.push(value);
-              }
-            });
-          },
-        });
-
-        const results: any[] = [];
-        stream
-          .pipe(csv())
-          .on("data", (data) => results.push(data))
-          .on("end", () => {
-            results.sort((a, b) => {
-              return a.handle.localeCompare(b.handle);
-            });
-            setData(results);
-          });
+        if (body) {
+          populateData(body);
+        }
       });
   }, []);
+
+  function populateData(body: Blob) {
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      const data = reader.result;
+      const results: PrimaryAddressData[] = [];
+
+      const parser = csvParser({ headers: false })
+        .on("data", (row: any) => {
+          const r = {
+            profile_id: row["0"],
+            handle: row["1"],
+            current_primary: row["2"],
+            new_primary: row["3"],
+          };
+          results.push(r);
+        })
+        .on("end", () => {
+          setResults(results);
+        })
+        .on("error", (err: any) => {
+          console.error(err);
+        });
+
+      parser.write(data);
+      parser.end();
+    };
+    reader.readAsText(body);
+  }
+
+  function setResults(results: PrimaryAddressData[]) {
+    results.sort((a, b) => {
+      return a.handle.localeCompare(b.handle);
+    });
+    setData(results);
+  }
 
   return (
     <Container>
@@ -124,8 +140,8 @@ export default function AboutPrimaryAddress() {
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
-                <tr key={index}>
+              {data.map((item) => (
+                <tr key={item.handle}>
                   <td
                     style={{
                       border: "1px solid white",
