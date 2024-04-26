@@ -89,6 +89,8 @@ import {
   faMinusSquare,
   faChevronDown,
   faEdit,
+  faAnglesDown,
+  faAnglesUp,
 } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
@@ -178,7 +180,9 @@ library.add(
   faPlusSquare,
   faMinusSquare,
   faChevronDown,
-  faEdit
+  faEdit,
+  faAnglesDown,
+  faAnglesUp
 );
 
 const CONTRACT_CHAINS: Chain[] = [mainnet];
