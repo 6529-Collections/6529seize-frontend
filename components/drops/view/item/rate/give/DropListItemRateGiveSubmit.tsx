@@ -1,7 +1,5 @@
 import { useContext, useState } from "react";
-import {
-  DropRateChangeRequest,
-} from "../../../../../../entities/IDrop";
+import { DropRateChangeRequest } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
@@ -36,9 +34,9 @@ export default function DropListItemRateGiveSubmit({
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
       await commonApiPost<DropRateChangeRequest, Drop>({
-        endpoint: `drops/${drop.id}/rep`,
+        endpoint: `drops/${drop.id}/ratings`,
         body: {
-          amount: param.rate,
+          rating: param.rate,
           category: param.category,
         },
       }),
