@@ -499,6 +499,13 @@ export default function Header(props: Readonly<Props>) {
                     </Link>
                   </Col>
                 </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href={`/about/${AboutSection.PRIMARY_ADDRESS}`}>
+                      <h3>Primary Address</h3>
+                    </Link>
+                  </Col>
+                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -864,6 +871,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "NFT Delegation",
                                   path: `/about/${AboutSection.NFT_DELEGATION}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Primary Address",
+                                  path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
                                 }}
                               />
                               <NavDropdown.Divider />
