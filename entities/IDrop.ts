@@ -44,7 +44,7 @@ export interface QuotedDrop {
 }
 
 export interface DropRateChangeRequest {
-  readonly amount: number;
+  readonly rating: number;
   readonly category: string;
 }
 
@@ -61,7 +61,8 @@ export interface DropActivityLogRepEdit extends ProfileActivityLogDropRepEdit {
   readonly author: ProfileMin | null;
 }
 
-export interface DropActivityLogDropCreated extends ProfileActivityLogDropCreated {
+export interface DropActivityLogDropCreated
+  extends ProfileActivityLogDropCreated {
   readonly author: ProfileMin | null;
 }
 export type DropActivityLog =

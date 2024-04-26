@@ -456,7 +456,7 @@ export default function Home({
               )}
             <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
               <div className="tw-px-2">
-                <ProfileActivityLogs
+                {/* <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}
                   disableActiveCurationFilter={true}
@@ -472,7 +472,7 @@ export default function Home({
                       <span>View All</span>
                     </Link>
                   </span>
-                </ProfileActivityLogs>
+                </ProfileActivityLogs> */}
               </div>
             </div>
             <Container className={styles.mainContainer}>
