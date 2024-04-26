@@ -167,20 +167,20 @@ function formatExpiry(myDate: any) {
 }
 
 function getDelegationsFromData(data: any) {
-  console.log("hi i am data", data);
   const myDelegations: ContractDelegation[] = [];
   data.map((d: any, index: number) => {
     const walletDelegations: ContractWalletDelegation[] = [];
-    const useCase =
-      DELEGATION_USE_CASES.length > index
-        ? DELEGATION_USE_CASES[index]
-        : index === PRIMARY_ADDRESS_USE_CASE.index
-        ? PRIMARY_ADDRESS_USE_CASE
-        : index === SUB_DELEGATION_USE_CASE.index
-        ? SUB_DELEGATION_USE_CASE
-        : index === CONSOLIDATION_USE_CASE.index
-        ? CONSOLIDATION_USE_CASE
-        : null;
+    let useCase = null;
+    if (DELEGATION_USE_CASES.length > index) {
+      useCase = DELEGATION_USE_CASES[index];
+    } else if (index === PRIMARY_ADDRESS_USE_CASE.index) {
+      useCase = PRIMARY_ADDRESS_USE_CASE;
+    } else if (index === SUB_DELEGATION_USE_CASE.index) {
+      useCase = SUB_DELEGATION_USE_CASE;
+    } else if (index === CONSOLIDATION_USE_CASE.index) {
+      useCase = CONSOLIDATION_USE_CASE;
+    }
+
     if (useCase) {
       const delegationsArray = d.result as any[];
       delegationsArray[0].map((wallet: string, i: number) => {
@@ -204,7 +204,6 @@ function getDelegationsFromData(data: any) {
       });
     }
   });
-  console.log("i am mydelegations", myDelegations);
   return myDelegations;
 }
 

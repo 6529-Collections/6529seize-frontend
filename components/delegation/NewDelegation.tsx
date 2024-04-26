@@ -1,9 +1,8 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
-  ANY_COLLECTION,
   DELEGATION_USE_CASES,
   DelegationCollection,
 } from "../../pages/delegation/[...section]";

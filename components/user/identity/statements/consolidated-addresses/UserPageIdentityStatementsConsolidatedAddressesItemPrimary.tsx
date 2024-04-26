@@ -1,10 +1,5 @@
 import { IProfileConsolidation } from "../../../../../entities/IProfile";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
-import { useAccount } from "wagmi";
-import { areEqualAddresses } from "../../../../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Tippy from "@tippyjs/react";
-import { useEffect, useState } from "react";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItemPrimary({
   isPrimary,
