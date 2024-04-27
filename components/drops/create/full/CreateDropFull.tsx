@@ -2,7 +2,6 @@ import { EditorState } from "lexical";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import {
   CreateDropScreenType,
-  CreateDropViewType,
 } from "../utils/CreateDropWrapper";
 import CreateDropFullDesktop from "./desktop/CreateDropFullDesktop";
 import CreateDropFullMobile from "./mobile/CreateDropFullMobile";
@@ -11,7 +10,7 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
-import { CreateDropType } from "../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 
 export default function CreateDropFull({
   screenType,
@@ -32,6 +31,7 @@ export default function CreateDropFull({
   onReferencedNft,
   onFileChange,
   onDrop,
+  onDropPart,
 }: {
   readonly screenType: CreateDropScreenType;
   readonly profile: IProfileAndConsolidations;
@@ -53,6 +53,7 @@ export default function CreateDropFull({
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
+  readonly onDropPart: () => void;
 }) {
   const components: Record<CreateDropScreenType, JSX.Element> = {
     [CreateDropScreenType.DESKTOP]: (
@@ -74,6 +75,7 @@ export default function CreateDropFull({
         onFileChange={onFileChange}
         onViewChange={onViewChange}
         onDrop={onDrop}
+        onDropPart={onDropPart}
       />
     ),
     [CreateDropScreenType.MOBILE]: (

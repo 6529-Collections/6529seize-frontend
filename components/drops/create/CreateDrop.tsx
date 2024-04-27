@@ -1,7 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
-import { CreateDropConfig, CreateDropRequest } from "../../../entities/IDrop";
+import {
+  CreateDropConfig,
+  CreateDropRequest,
+  DropMetadata,
+  MentionedUser,
+  ReferencedNft,
+} from "../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiPost } from "../../../services/api/common-api";
@@ -10,6 +16,11 @@ import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWr
 export enum CreateDropType {
   DROP = "DROP",
   QUOTE = "QUOTE",
+}
+
+export enum CreateDropViewType {
+  COMPACT = "COMPACT",
+  FULL = "FULL",
 }
 
 export default function CreateDrop({
@@ -30,6 +41,24 @@ export default function CreateDrop({
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
 
+  // TODO clear these after submit
+  const [title, setTitle] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState<DropMetadata[]>([]);
+  const [mentionedUsers, setMentionedUsers] = useState<
+    Omit<MentionedUser, "current_handle">[]
+  >([]);
+  const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
+  const [drop, setDrop] = useState<CreateDropConfig | null>(null);
+  // set it back to compact after submit
+  const [viewType, setViewType] = useState<CreateDropViewType>(
+    CreateDropViewType.COMPACT
+  );
+
+  const onDrop = (updatedDrop: CreateDropConfig) => {
+    setDrop(updatedDrop);
+    setDropEditorRefreshKey((prev) => prev + 1);
+  };
+
   const [submitting, setSubmitting] = useState(false);
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
@@ -42,6 +71,8 @@ export default function CreateDrop({
       }),
     onSuccess: (response) => {
       setDropEditorRefreshKey((prev) => prev + 1);
+      setTitle(null);
+      setMetadata([]);
       onDropCreate({ profile });
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
@@ -131,6 +162,18 @@ export default function CreateDrop({
       quotedDropId={quotedDropId}
       type={type}
       loading={submitting}
+      title={title}
+      metadata={metadata}
+      mentionedUsers={mentionedUsers}
+      referencedNfts={referencedNfts}
+      drop={drop}
+      viewType={viewType}
+      setViewType={setViewType}
+      setDrop={onDrop}
+      setMentionedUsers={setMentionedUsers}
+      setReferencedNfts={setReferencedNfts}
+      setTitle={setTitle}
+      setMetadata={setMetadata}
       onSubmitDrop={submitDrop}
       key={dropEditorRefreshKey}
     />

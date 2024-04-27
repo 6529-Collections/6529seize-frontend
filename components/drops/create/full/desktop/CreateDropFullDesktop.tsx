@@ -1,6 +1,6 @@
 import { EditorState } from "lexical";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { CreateDropViewType } from "../../utils/CreateDropWrapper";
+
 import CreateDropContent from "../../utils/CreateDropContent";
 import DropPfp from "../../utils/DropPfp";
 import {
@@ -11,7 +11,7 @@ import {
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { useState } from "react";
-import { CreateDropType } from "../../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 
 enum TITLE_STATE {
@@ -37,6 +37,7 @@ export default function CreateDropFullDesktop({
   onReferencedNft,
   onFileChange,
   onDrop,
+  onDropPart,
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly title: string | null;
@@ -57,6 +58,7 @@ export default function CreateDropFullDesktop({
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
+  readonly onDropPart: () => void;
 }) {
   const [titleState, setTitleState] = useState<TITLE_STATE>(
     title?.length ? TITLE_STATE.INPUT : TITLE_STATE.BUTTON
@@ -154,6 +156,9 @@ export default function CreateDropFullDesktop({
             onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
             onFileChange={onFileChange}
           />
+          <button onClick={onDropPart} disabled={disabled}>
+            Add storm
+          </button>
           <CreateDropFullDesktopMetadata
             metadata={metadata}
             onMetadataEdit={onMetadataEdit}
