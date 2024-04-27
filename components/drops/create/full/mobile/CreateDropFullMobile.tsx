@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
-import { CreateDropViewType } from "../../utils/CreateDropWrapper";
+
 import { EditorState } from "lexical";
 import {
   DropMetadata,
@@ -11,7 +11,7 @@ import CreateDropContent from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropSelectFile from "../../utils/file/CreateDropSelectFile";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { CreateDropType } from "../../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
