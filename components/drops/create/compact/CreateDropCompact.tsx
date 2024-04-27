@@ -1,6 +1,5 @@
 import {
   CreateDropScreenType,
-  CreateDropViewType,
 } from "../utils/CreateDropWrapper";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import DropPfp from "../utils/DropPfp";
@@ -15,7 +14,7 @@ import PrimaryButton, {
   PrimaryButtonSize,
 } from "../../../utils/buttons/PrimaryButton";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
-import { CreateDropType } from "../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 import dynamic from "next/dynamic";
