@@ -192,7 +192,6 @@ function SubscriptionRow(
       });
       props.refresh();
     } catch (e: any) {
-      console.log(e);
       setIsSubmitting(false);
       setToast({
         message: e ?? "Failed to change token subscription.",
