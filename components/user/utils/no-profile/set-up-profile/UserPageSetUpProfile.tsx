@@ -106,7 +106,6 @@ export default function UserPageSetUpProfile({
     }
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: userName,
-      primary_wallet: primaryWallet,
       classification,
     };
 
