@@ -3,7 +3,9 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
 import {
   CreateDropConfig,
+  CreateDropPart,
   CreateDropRequest,
+  CreateDropRequestPart,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -12,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiPost } from "../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { DropMedia } from "../../../generated/models/DropMedia";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -41,7 +44,6 @@ export default function CreateDrop({
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
 
-  // TODO clear these after submit
   const [title, setTitle] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<DropMetadata[]>([]);
   const [mentionedUsers, setMentionedUsers] = useState<
@@ -49,14 +51,13 @@ export default function CreateDrop({
   >([]);
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-  // set it back to compact after submit
   const [viewType, setViewType] = useState<CreateDropViewType>(
-    CreateDropViewType.COMPACT
+    CreateDropViewType.FULL
   );
 
   const onDrop = (updatedDrop: CreateDropConfig) => {
     setDrop(updatedDrop);
-    setDropEditorRefreshKey((prev) => prev + 1);
+    // setDropEditorRefreshKey((prev) => prev + 1);
   };
 
   const [submitting, setSubmitting] = useState(false);
@@ -73,6 +74,10 @@ export default function CreateDrop({
       setDropEditorRefreshKey((prev) => prev + 1);
       setTitle(null);
       setMetadata([]);
+      setMentionedUsers([]);
+      setReferencedNfts([]);
+      setDrop(null);
+      setViewType(CreateDropViewType.COMPACT);
       onDropCreate({ profile });
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
@@ -93,6 +98,56 @@ export default function CreateDrop({
     return null;
   }
 
+  const generateMediaForPart = async (
+    part: CreateDropPart
+  ): Promise<Array<DropMedia>> => {
+    if (!part.media.length) {
+      return [];
+    }
+
+    const media = part.media[0];
+    const prep = await commonApiPost<
+      {
+        content_type: string;
+        file_name: string;
+        file_size: number;
+      },
+      {
+        upload_url: string;
+        content_type: string;
+        media_url: string;
+      }
+    >({
+      endpoint: "drop-media/prep",
+      body: {
+        content_type: media.type,
+        file_name: media.name,
+        file_size: media.size,
+      },
+    });
+    const myHeaders = new Headers({ "Content-Type": prep.content_type });
+    await fetch(prep.upload_url, {
+      method: "PUT",
+      headers: myHeaders,
+      body: media,
+    });
+    return [
+      {
+        url: prep.media_url,
+        mime_type: prep.content_type,
+      },
+    ];
+  };
+
+  const generatePart = async (
+    part: CreateDropPart
+  ): Promise<CreateDropRequestPart> => {
+    return {
+      ...part,
+      media: await generateMediaForPart(part),
+    };
+  };
+
   const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
@@ -104,55 +159,19 @@ export default function CreateDrop({
       return;
     }
 
-    // TODO make it multiple parts
-    const firstPart = dropRequest.parts[0];
-    if (!firstPart) {
+    if (!dropRequest.parts.length) {
       setSubmitting(false);
       return;
     }
 
+    const parts = await Promise.all(
+      dropRequest.parts.map((part) => generatePart(part))
+    );
+
     const requestBody: CreateDropRequest = {
       ...dropRequest,
-      parts: dropRequest.parts.map((part) => ({
-        ...part,
-        media: [],
-      })),
+      parts,
     };
-
-    if (!!firstPart.media.length) {
-      // TODO make it multiple media
-      const firstMedia = firstPart.media[0];
-      const prep = await commonApiPost<
-        {
-          content_type: string;
-          file_name: string;
-          file_size: number;
-        },
-        {
-          upload_url: string;
-          content_type: string;
-          media_url: string;
-        }
-      >({
-        endpoint: "drop-media/prep",
-        body: {
-          content_type: firstMedia.type,
-          file_name: firstMedia.name,
-          file_size: firstMedia.size,
-        },
-      });
-      const myHeaders = new Headers({ "Content-Type": prep.content_type });
-      await fetch(prep.upload_url, {
-        method: "PUT",
-        headers: myHeaders,
-        body: firstMedia,
-      });
-      requestBody.parts[0].media.push({
-        url: prep.media_url,
-        mime_type: prep.content_type,
-      });
-    }
-
     await addDropMutation.mutateAsync(requestBody);
   };
 

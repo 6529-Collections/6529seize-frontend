@@ -4,6 +4,7 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
 import DropListItemContentQuote from "./DropListItemContentQuote";
 import { Drop } from "../../../../../generated/models/Drop";
+import DropPart from "../../part/DropPart";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -16,7 +17,7 @@ export default function DropListItemContent({
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
-  }) {
+}) {
   // TODO make it multiple parts
   const part = drop.parts[0];
 
@@ -30,11 +31,31 @@ export default function DropListItemContent({
   });
 
   return (
-    <div>
-      <DropListItemContentMarkdown drop={drop} showFull={showFull} />
-      {quotedDrop && (
-        <DropListItemContentQuote drop={quotedDrop} showFull={showFull} />
-      )}
+    <div className="tw-space-y-2 ">
+      {drop.parts.map((part) => (
+        <div
+          key={part.part_id}
+          className="tw-border-2 tw-border-solid tw-border-blue-600"
+        >
+          <DropPart
+            mentionedUsers={drop.mentioned_users}
+            referencedNfts={drop.referenced_nfts}
+            partContent={part.content ?? null}
+            partMedia={
+              part.media.length
+                ? {
+                    mimeType: part.media[0].mime_type,
+                    mediaSrc: part.media[0].url,
+                  }
+                : null
+            }
+            showFull={showFull}
+          />
+          {quotedDrop && (
+            <DropListItemContentQuote drop={quotedDrop} showFull={showFull} />
+          )}
+        </div>
+      ))}
     </div>
   );
 }

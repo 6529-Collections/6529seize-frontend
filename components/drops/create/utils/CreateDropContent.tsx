@@ -33,6 +33,8 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import ClearEditorPlugin from "../lexical/plugins/ClearEditorPlugin";
+import { useRef } from "react";
 
 export default function CreateDropContent({
   viewType,
@@ -49,7 +51,9 @@ export default function CreateDropContent({
   readonly type: CreateDropType;
   readonly onEditorState: (editorState: EditorState) => void;
   readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
-  readonly onMentionedUser: (mentionedUser: Omit<MentionedUser, 'current_handle'>) => void;
+  readonly onMentionedUser: (
+    mentionedUser: Omit<MentionedUser, "current_handle">
+  ) => void;
   readonly onFileChange: (file: File) => void;
   readonly onViewClick: () => void;
 }) {
@@ -83,7 +87,8 @@ export default function CreateDropContent({
   const onEditorStateChange = (editorState: EditorState) =>
     onEditorState(editorState);
 
-  const onMentionedUserAdded = (user: Omit<MentionedUser, 'current_handle'>) => onMentionedUser(user);
+  const onMentionedUserAdded = (user: Omit<MentionedUser, "current_handle">) =>
+    onMentionedUser(user);
   const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
   const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
@@ -106,6 +111,10 @@ export default function CreateDropContent({
   function validateUrl(url: string): boolean {
     return url === "https://" || urlRegExp.test(url);
   }
+
+  const clearEditorRef = useRef();
+
+  const onClear = () => clearEditorRef.current?.clear();
 
   return (
     <div className="tailwind-scope">
@@ -148,9 +157,11 @@ export default function CreateDropContent({
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
             <TabIndentationPlugin />
             <LinkPlugin validateUrl={validateUrl} />
+            <ClearEditorPlugin ref={clearEditorRef} />
           </div>
         </div>
       </LexicalComposer>
+      <button>clear</button>
     </div>
   );
 }
