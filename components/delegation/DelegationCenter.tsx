@@ -146,7 +146,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
               <Col
                 sm={12}
                 md={3}
-                className="pt-2 pb-2 d-flex align-items-center justify-content-center">
+                className="pt-2 pb-2 d-flex flex-column gap-2 align-items-center justify-content-center">
                 <button
                   className={`${styles.addNewDelegationBtn}`}
                   onClick={() =>
