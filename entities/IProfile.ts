@@ -342,7 +342,6 @@ export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
 
 export interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
-  readonly primary_wallet: string;
   readonly classification: PROFILE_CLASSIFICATION;
   pfp_url?: string;
   banner_1?: string;
