@@ -4,6 +4,7 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import CreateDropContent from "../../utils/CreateDropContent";
 import DropPfp from "../../utils/DropPfp";
 import {
+  CreateDropConfig,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -12,7 +13,12 @@ import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { useState } from "react";
 import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import {
+  assertUnreachable,
+  getRandomObjectId,
+} from "../../../../../helpers/AllowlistToolHelpers";
+import DropPart from "../../../view/part/DropPart";
+import CreateDropStormView from "../../utils/storm/CreateDropStormView";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -25,9 +31,11 @@ export default function CreateDropFullDesktop({
   editorState,
   metadata,
   file,
-  disabled,
+  canSubmit,
+  canAddPart,
   type,
   loading,
+  drop,
   onViewChange,
   onMetadataEdit,
   onMetadataRemove,
@@ -44,9 +52,11 @@ export default function CreateDropFullDesktop({
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
   readonly file: File | null;
-  readonly disabled: boolean;
+  readonly canSubmit: boolean;
+  readonly canAddPart: boolean;
   readonly type: CreateDropType;
   readonly loading: boolean;
+  readonly drop: CreateDropConfig | null;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (data_key: string) => void;
@@ -99,6 +109,7 @@ export default function CreateDropFullDesktop({
           />
         </svg>
       </button>
+      {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
       <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-4">
         {titleState === TITLE_STATE.BUTTON && (
           <button
@@ -156,7 +167,7 @@ export default function CreateDropFullDesktop({
             onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
             onFileChange={onFileChange}
           />
-          <button onClick={onDropPart} disabled={disabled}>
+          <button onClick={onDropPart} disabled={!canAddPart}>
             Add storm
           </button>
           <CreateDropFullDesktopMetadata
@@ -166,7 +177,7 @@ export default function CreateDropFullDesktop({
           />
           <CreateDropDesktopFooter
             file={file}
-            disabled={disabled}
+            disabled={!canSubmit}
             type={type}
             loading={loading}
             onFileChange={onFileChange}

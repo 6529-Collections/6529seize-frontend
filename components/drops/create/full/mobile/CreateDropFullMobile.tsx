@@ -26,7 +26,7 @@ export default function CreateDropFullMobile({
   editorState,
   metadata,
   file,
-  disabled,
+  canSubmit,
   type,
   loading,
   onEditorState,
@@ -44,7 +44,7 @@ export default function CreateDropFullMobile({
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
   readonly file: File | null;
-  readonly disabled: boolean;
+  readonly canSubmit: boolean;
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly onEditorState: (editorState: EditorState | null) => void;
@@ -148,10 +148,10 @@ export default function CreateDropFullMobile({
           <div className="tw-flex tw-gap-x-3">
             <button
               type="button"
-              disabled={disabled || loading}
+              disabled={!canSubmit || loading}
               onClick={onDrop}
               className={`${
-                disabled
+                !canSubmit
                   ? "tw-opacity-50 tw-text-iron-200"
                   : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
               } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
