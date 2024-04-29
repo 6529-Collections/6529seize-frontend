@@ -87,14 +87,20 @@ export const AIRDROPS_USE_CASE = {
   display: "Airdrops",
 };
 
-export const SUB_DELEGATION_USE_CASE = {
+export const PRIMARY_ADDRESS_USE_CASE = {
   index: 17,
+  use_case: 997,
+  display: "Primary Address",
+};
+
+export const SUB_DELEGATION_USE_CASE = {
+  index: 18,
   use_case: 998,
   display: "Delegation Management (Sub-Delegation)",
 };
 
 export const CONSOLIDATION_USE_CASE = {
-  index: 18,
+  index: 19,
   use_case: 999,
   display: "Consolidation",
 };
@@ -163,6 +169,7 @@ export const DELEGATION_USE_CASES = [
 
 export const ALL_USE_CASES = [
   ...DELEGATION_USE_CASES,
+  PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
   CONSOLIDATION_USE_CASE,
 ];
@@ -190,7 +197,13 @@ export default function DelegationsDocumentation(props: any) {
 
   function getQueryParams() {
     let queryParams;
-    if (addressQuery && activeSection === DelegationCenterSection.CHECKER) {
+    if (
+      addressQuery &&
+      [
+        DelegationCenterSection.CHECKER,
+        DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+      ].includes(activeSection)
+    ) {
       queryParams = { address: addressQuery };
     } else {
       setAddressQuery("");
