@@ -201,7 +201,7 @@ export default function DelegationsDocumentation(props: any) {
       addressQuery &&
       [
         DelegationCenterSection.CHECKER,
-        DelegationCenterSection.ASSING_PRIMARY_ADDRESS,
+        DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
       ].includes(activeSection)
     ) {
       queryParams = { address: addressQuery };

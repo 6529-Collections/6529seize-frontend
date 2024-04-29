@@ -26,7 +26,7 @@ export enum DelegationCenterSection {
   REGISTER_DELEGATION = "register-delegation",
   REGISTER_SUB_DELEGATION = "register-sub-delegation",
   REGISTER_CONSOLIDATION = "register-consolidation",
-  ASSING_PRIMARY_ADDRESS = "assign-primary-address",
+  ASSIGN_PRIMARY_ADDRESS = "assign-primary-address",
   ANY_COLLECTION = "any-collection",
   MEMES_COLLECTION = "the-memes",
   MEME_LAB_COLLECTION = "meme-lab",
@@ -136,7 +136,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             }}
           />
         );
-      case DelegationCenterSection.ASSING_PRIMARY_ADDRESS:
+      case DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS:
         return (
           <NewAssignPrimaryAddress
             address={accountResolution.address as string}
