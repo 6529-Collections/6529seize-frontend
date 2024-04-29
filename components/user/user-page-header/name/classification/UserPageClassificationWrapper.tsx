@@ -22,11 +22,8 @@ export default function UserPageClassificationWrapper({
         onClick={() => setIsEditOpen(true)}
         disabled={!canEdit}
         className={`${
-          canEdit
-            ? "hover:tw-text-neutral-400"
-            : ""
-        } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}
-      >
+          canEdit ? "hover:tw-text-neutral-400" : ""
+        } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}>
         {children}
         {canEdit && (
           <div className="group-hover:tw-block tw-hidden tw-absolute tw-text-neutral-400">
@@ -42,8 +39,7 @@ export default function UserPageClassificationWrapper({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageHeaderEditClassification
               profile={profile}
               onClose={() => setIsEditOpen(false)}
