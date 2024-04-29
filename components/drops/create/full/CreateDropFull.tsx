@@ -1,11 +1,10 @@
 import { EditorState } from "lexical";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import {
-  CreateDropScreenType,
-} from "../utils/CreateDropWrapper";
+import { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import CreateDropFullDesktop from "./desktop/CreateDropFullDesktop";
 import CreateDropFullMobile from "./mobile/CreateDropFullMobile";
 import {
+  CreateDropConfig,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -19,9 +18,11 @@ export default function CreateDropFull({
   editorState,
   metadata,
   file,
-  disabled,
+  canSubmit,
+  canAddPart,
   loading,
   type,
+  drop,
   onTitle,
   onMetadataEdit,
   onMetadataRemove,
@@ -39,9 +40,11 @@ export default function CreateDropFull({
   readonly metadata: DropMetadata[];
   readonly editorState: EditorState | null;
   readonly file: File | null;
-  readonly disabled: boolean;
+  readonly canSubmit: boolean;
+  readonly canAddPart: boolean;
   readonly loading: boolean;
   readonly type: CreateDropType;
+  readonly drop: CreateDropConfig | null;
   readonly onTitle: (newV: string | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -63,9 +66,11 @@ export default function CreateDropFull({
         editorState={editorState}
         metadata={metadata}
         file={file}
-        disabled={disabled}
+        canSubmit={canSubmit}
+        canAddPart={canAddPart}
         type={type}
         loading={loading}
+        drop={drop}
         onTitle={onTitle}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}
@@ -85,7 +90,7 @@ export default function CreateDropFull({
         editorState={editorState}
         metadata={metadata}
         file={file}
-        disabled={disabled}
+        canSubmit={canSubmit}
         type={type}
         loading={loading}
         onEditorState={onEditorState}

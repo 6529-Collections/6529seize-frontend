@@ -1,6 +1,4 @@
-import {
-  CreateDropScreenType,
-} from "../utils/CreateDropWrapper";
+import { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import DropPfp from "../utils/DropPfp";
 import CreateDropContent from "../utils/CreateDropContent";
@@ -32,7 +30,7 @@ export default function CreateDropCompact({
   file,
   title,
   metadata,
-  disabled,
+  canSubmit,
   loading,
   type,
   onViewChange,
@@ -49,13 +47,15 @@ export default function CreateDropCompact({
   readonly title: string | null;
   readonly file: File | null;
   readonly metadata: DropMetadata[];
-  readonly disabled: boolean;
+  readonly canSubmit: boolean;
   readonly loading: boolean;
   readonly type: CreateDropType;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataRemove: (key: string) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
-  readonly onMentionedUser: (newUser: Omit<MentionedUser, 'current_handle'>) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
@@ -107,7 +107,7 @@ export default function CreateDropCompact({
           <div className="tw-self-end">
             <PrimaryButton
               onClick={onDrop}
-              disabled={disabled}
+              disabled={!canSubmit}
               loading={loading}
               size={
                 screenType === CreateDropScreenType.MOBILE

@@ -121,20 +121,39 @@ export default function CreateDropWrapper({
       ])
     ) ?? null;
 
-  const getCanSubmit = () => !!getMarkdown() || !!file;
+  const getCanSubmit = () => !!getMarkdown() || !!file || !!drop?.parts.length;
   const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
-  useEffect(() => setCanSubmit(getCanSubmit()), [editorState, file]);
+  const getCanAddPart = () => !!getMarkdown() || !!file;
+  const [canAddPart, setCanAddPart] = useState(getCanAddPart());
 
-  const onDropPart = () => {
+  useEffect(() => {
+    setCanSubmit(getCanSubmit());
+    setCanAddPart(getCanAddPart());
+  }, [editorState, file, drop]);
+
+  const onDropPart = (): CreateDropConfig => {
     const markdown = getMarkdown();
+
+    if (!markdown?.length && !file) {
+      const currentDrop: CreateDropConfig = {
+        title,
+        parts: drop?.parts.length ? drop.parts : [],
+        mentioned_users: drop?.mentioned_users ?? [],
+        referenced_nfts: drop?.referenced_nfts ?? [],
+        metadata,
+      };
+      setDrop(currentDrop);
+      
+      return currentDrop;
+    }
+
     const mentions = mentionedUsers.filter((user) =>
       markdown?.includes(`@[${user.handle_in_content}]`)
     );
 
     const partMentions = mentions.map((mention) => ({
       ...mention,
-      current_handle: mention.handle_in_content,
     }));
     const notAddedMentions = partMentions.filter(
       (mention) =>
@@ -158,7 +177,6 @@ export default function CreateDropWrapper({
     );
 
     const allNfts = [...(drop?.referenced_nfts ?? []), ...notAddedNfts];
-
     const currentDrop: CreateDropConfig = {
       title,
       parts: drop?.parts.length ? drop.parts : [],
@@ -175,13 +193,13 @@ export default function CreateDropWrapper({
       media: file ? [file] : [],
     });
 
-    console.log(currentDrop);
     setDrop(currentDrop);
+    return currentDrop;
   };
 
   const onDrop = () => {
-    console.log(drop);
-    // onSubmitDrop(drop);
+    const currentDrop = onDropPart();
+    onSubmitDrop(currentDrop);
   };
 
   const components: Record<CreateDropViewType, JSX.Element> = {
@@ -193,7 +211,7 @@ export default function CreateDropWrapper({
         file={file}
         title={title}
         metadata={metadata}
-        disabled={!canSubmit}
+        canSubmit={canSubmit}
         loading={loading}
         type={type}
         onViewChange={setViewType}
@@ -213,9 +231,11 @@ export default function CreateDropWrapper({
         metadata={metadata}
         editorState={editorState}
         file={file}
-        disabled={!canSubmit}
+        canSubmit={canSubmit}
+        canAddPart={canAddPart}
         loading={loading}
         type={type}
+        drop={drop}
         onTitle={setTitle}
         onMetadataEdit={onMetadataEdit}
         onMetadataRemove={onMetadataRemove}
