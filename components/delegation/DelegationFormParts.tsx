@@ -135,6 +135,51 @@ export function DelegationAddressDisabledInput(
   );
 }
 
+export function DelegationAddressDisplay(props: Readonly<{ address: string }>) {
+  const ens = useEnsName({
+    address: props.address as `0x${string}`,
+    chainId: 1,
+  });
+
+  return (
+    <>
+      {props.address}
+      {ens.data && ` - ${ens.data}`}
+    </>
+  );
+}
+
+export function DelegationFormOptionsFormGroup(
+  props: Readonly<{
+    title: string;
+    tooltip: string;
+    options: string[];
+    selected: string;
+    setSelected: (s: string) => void;
+  }>
+) {
+  return (
+    <Form.Group as={Row} className="pb-4">
+      <DelegationFormLabel title={props.title} tooltip={props.tooltip} />
+      <Col sm={9}>
+        <Form.Select
+          className={`${styles.formInput}`}
+          value={props.selected}
+          onChange={(e) => props.setSelected(e.target.value)}>
+          <option value="" disabled>
+            Select
+          </option>
+          {props.options.map((o) => (
+            <option key={o} value={o}>
+              <DelegationAddressDisplay address={o} />
+            </option>
+          ))}
+        </Form.Select>
+      </Col>
+    </Form.Group>
+  );
+}
+
 export function DelegationFormCollectionFormGroup(
   props: Readonly<{
     collection: string;
@@ -145,6 +190,17 @@ export function DelegationFormCollectionFormGroup(
     };
   }>
 ) {
+  const collections =
+    !props.subdelegation ||
+    areEqualAddresses(
+      props.subdelegation.collection.contract,
+      DELEGATION_ALL_ADDRESS
+    )
+      ? SUPPORTED_COLLECTIONS
+      : [props.subdelegation.collection];
+
+  props.setCollection(collections[0].contract);
+
   return (
     <Form.Group as={Row} className="pb-4">
       <DelegationFormLabel
@@ -159,25 +215,13 @@ export function DelegationFormCollectionFormGroup(
           <option value="0" disabled>
             Select Collection
           </option>
-          {!props.subdelegation ||
-          areEqualAddresses(
-            props.subdelegation.collection.contract,
-            DELEGATION_ALL_ADDRESS
-          ) ? (
-            SUPPORTED_COLLECTIONS.map((sc) => (
-              <option
-                key={`add-delegation-select-collection-${sc.contract}`}
-                value={sc.contract}>
-                {`${sc.display}`}
-              </option>
-            ))
-          ) : (
+          {collections.map((sc) => (
             <option
-              key={`add-delegation-select-collection`}
-              value={props.subdelegation.collection.contract}>
-              {`${props.subdelegation.collection.display}`}
+              key={`add-delegation-select-collection-${sc.contract}`}
+              value={sc.contract}>
+              {`${sc.display}`}
             </option>
-          )}
+          ))}
         </Form.Select>
       </Col>
     </Form.Group>
@@ -359,7 +403,7 @@ export function DelegationSubmitGroups(
           <Form.Label column sm={4} className="d-flex align-items-center">
             Errors
           </Form.Label>
-          <Col sm={8}>
+          <Col sm={8} className="d-flex align-items-center">
             <ul className="mb-0">
               {errors.map((e, index) => (
                 <li key={getRandomObjectId()}>{e}</li>
