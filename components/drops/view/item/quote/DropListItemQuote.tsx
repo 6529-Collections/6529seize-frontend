@@ -6,10 +6,12 @@ import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox
 
 export default function DropListItemQuote({
   quotedDropId,
+  quotedPartId,
   init,
   onSuccessfulDrop,
 }: {
   readonly quotedDropId: string;
+  readonly quotedPartId: number;
   readonly init: boolean;
   readonly onSuccessfulDrop: () => void;
 }) {
@@ -27,7 +29,10 @@ export default function DropListItemQuote({
         {connectedProfile && (
           <CreateDrop
             profile={connectedProfile}
-            quotedDropId={quotedDropId}
+            quotedDrop={{
+              dropId: quotedDropId,
+              partId: quotedPartId,
+            }}
             isClient={init}
             type={CreateDropType.QUOTE}
             onSuccessfulDrop={onSuccessfulDrop}

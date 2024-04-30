@@ -28,13 +28,16 @@ export enum CreateDropViewType {
 
 export default function CreateDrop({
   profile,
-  quotedDropId,
+  quotedDrop,
   isClient = false,
   type,
   onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly quotedDropId: string | null;
+  readonly quotedDrop: {
+    dropId: string;
+    partId: number;
+  } | null;
   readonly isClient?: boolean;
   readonly type: CreateDropType;
   readonly onSuccessfulDrop?: () => void;
@@ -52,7 +55,7 @@ export default function CreateDrop({
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
   const [viewType, setViewType] = useState<CreateDropViewType>(
-    CreateDropViewType.FULL
+    CreateDropViewType.COMPACT
   );
 
   const onDrop = (updatedDrop: CreateDropConfig) => {
@@ -178,7 +181,7 @@ export default function CreateDrop({
   return (
     <CreateDropWrapper
       profile={profile}
-      quotedDropId={quotedDropId}
+      quotedDrop={quotedDrop}
       type={type}
       loading={submitting}
       title={title}

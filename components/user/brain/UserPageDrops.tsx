@@ -28,7 +28,7 @@ export default function UserPageDrops({
             {canCreateDrop && (
               <CreateDrop
                 profile={profile}
-                quotedDropId={null}
+                quotedDrop={null}
                 type={CreateDropType.DROP}
               />
             )}

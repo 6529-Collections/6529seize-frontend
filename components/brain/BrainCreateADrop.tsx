@@ -35,7 +35,7 @@ export default function BrainCreateADrop() {
     return (
       <CreateDrop
         profile={connectedProfile}
-        quotedDropId={null}
+        quotedDrop={null}
         type={CreateDropType.DROP}
       />
     );

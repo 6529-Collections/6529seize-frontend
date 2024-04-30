@@ -1,4 +1,5 @@
 import { ProfileMin } from "../generated/models/ProfileMin";
+import { FullPageRequest } from "../helpers/Types";
 import {
   ProfileActivityLogDropCreated,
   ProfileActivityLogDropComment,
@@ -91,3 +92,5 @@ export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
 export interface CreateDropConfig extends Omit<CreateDropRequest, "parts"> {
   readonly parts: Array<CreateDropPart>;
 }
+
+export type DropPartDiscussionRequest = FullPageRequest<"created_at">;

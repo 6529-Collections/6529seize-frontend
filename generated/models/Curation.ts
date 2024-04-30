@@ -10,45 +10,45 @@
  * Do not edit the class manually.
  */
 
-import { DropComment } from '../models/DropComment';
+import { ProfileMin } from '../models/ProfileMin';
 import { HttpFile } from '../http/http';
 
-export class DropCommentsPage {
-    'data': Array<DropComment>;
-    'count': number;
-    'page': number;
-    'next': boolean;
+export class Curation {
+    'id': string;
+    'name': string;
+    'author': ProfileMin;
+    'created_at': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<DropComment>",
+            "name": "id",
+            "baseName": "id",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "boolean",
+            "name": "name",
+            "baseName": "name",
+            "type": "string",
             "format": ""
+        },
+        {
+            "name": "author",
+            "baseName": "author",
+            "type": "ProfileMin",
+            "format": ""
+        },
+        {
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return DropCommentsPage.attributeTypeMap;
+        return Curation.attributeTypeMap;
     }
 
     public constructor() {

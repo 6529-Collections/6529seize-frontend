@@ -1,10 +1,9 @@
-
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import DropsList from "./DropsList";
-import DropListWrapperBottomTrigger from "./DropListWrapperBottomTrigger";
 import { Drop } from "../../../generated/models/Drop";
+import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 
 export default function DropListWrapper({
   drops,
@@ -23,9 +22,7 @@ export default function DropListWrapper({
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
         </div>
       )}
-      <DropListWrapperBottomTrigger
-        onBottomIntersection={onBottomIntersection}
-      />
+      <CommonIntersectionElement onIntersection={onBottomIntersection} />
     </div>
   );
 }

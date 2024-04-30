@@ -1,22 +1,17 @@
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import PrimaryButton from "../../../utils/buttons/PrimaryButton";
 import { CreateDropType } from "../CreateDrop";
-import CreateDropSelectFile from "./file/CreateDropSelectFile";
-import CreateDropChallengeAcceptButton from "./challenge/CreateDropChallengeAcceptButton";
+
 
 export default function CreateDropDesktopFooter({
-  file,
   disabled,
   type,
   loading,
-  onFileChange,
   onDrop,
 }: {
-  readonly file: File | null;
   readonly disabled: boolean;
   readonly type: CreateDropType;
   readonly loading: boolean;
-  readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
 }) {
   const getText = () => {
@@ -32,9 +27,7 @@ export default function CreateDropDesktopFooter({
   };
   return (
     <div>
-      <CreateDropSelectFile onFileChange={onFileChange} file={file} />
       <div className="tw-mt-4 tw-gap-x-3 tw-flex tw-justify-end">
-        {/* <CreateDropChallengeAcceptButton /> */}
         <PrimaryButton onClick={onDrop} disabled={disabled} loading={loading}>
           {getText()}
         </PrimaryButton>
