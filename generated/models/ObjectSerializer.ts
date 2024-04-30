@@ -11,6 +11,12 @@ export * from '../models/CreateNewProfileProxyCreateWaveAction';
 export * from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
 export * from '../models/CreateNewProfileProxyRateWaveDropAction';
 export * from '../models/CreateNewProfileProxyReadWaveAction';
+export * from '../models/CreateNewWave';
+export * from '../models/CreateNewWaveParticipationConfig';
+export * from '../models/CreateNewWaveScope';
+export * from '../models/CreateNewWaveVisibilityConfig';
+export * from '../models/CreateNewWaveVotingConfig';
+export * from '../models/Curation';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
 export * from '../models/DropComment';
@@ -25,11 +31,25 @@ export * from '../models/DropRater';
 export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
+export * from '../models/IntRange';
 export * from '../models/NewDropComment';
+export * from '../models/PageBase';
 export * from '../models/ProfileMin';
 export * from '../models/ProfileProxy';
 export * from '../models/ProfileProxyAction';
 export * from '../models/QuotedDrop';
+export * from '../models/Wave';
+export * from '../models/WaveConfig';
+export * from '../models/WaveCreditScope';
+export * from '../models/WaveCreditType';
+export * from '../models/WaveOutcome';
+export * from '../models/WaveParticipationConfig';
+export * from '../models/WaveRequiredMetadata';
+export * from '../models/WaveScope';
+export * from '../models/WaveScopeType';
+export * from '../models/WaveType';
+export * from '../models/WaveVisibilityConfig';
+export * from '../models/WaveVotingConfig';
 
 import { AddActionToProxyRequest       } from '../models/AddActionToProxyRequest';
 import { CreateDropMediaUrl201Response } from '../models/CreateDropMediaUrl201Response';
@@ -44,6 +64,12 @@ import { CreateNewProfileProxyCreateWaveAction    } from '../models/CreateNewPro
 import { CreateNewProfileProxyCreateWaveParticipationDropAction    } from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
 import { CreateNewProfileProxyRateWaveDropAction    } from '../models/CreateNewProfileProxyRateWaveDropAction';
 import { CreateNewProfileProxyReadWaveAction    } from '../models/CreateNewProfileProxyReadWaveAction';
+import { CreateNewWave } from '../models/CreateNewWave';
+import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
+import { CreateNewWaveScope   } from '../models/CreateNewWaveScope';
+import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
+import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
+import { Curation } from '../models/Curation';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
 import { DropComment } from '../models/DropComment';
@@ -58,11 +84,25 @@ import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { IntRange } from '../models/IntRange';
 import { NewDropComment } from '../models/NewDropComment';
+import { PageBase } from '../models/PageBase';
 import { ProfileMin } from '../models/ProfileMin';
 import { ProfileProxy } from '../models/ProfileProxy';
 import { ProfileProxyAction            } from '../models/ProfileProxyAction';
 import { QuotedDrop } from '../models/QuotedDrop';
+import { Wave } from '../models/Wave';
+import { WaveConfig      } from '../models/WaveConfig';
+import { WaveCreditScope } from '../models/WaveCreditScope';
+import { WaveCreditType } from '../models/WaveCreditType';
+import { WaveOutcome } from '../models/WaveOutcome';
+import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
+import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
+import { WaveScope   } from '../models/WaveScope';
+import { WaveScopeType } from '../models/WaveScopeType';
+import { WaveType } from '../models/WaveType';
+import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
+import { WaveVotingConfig        } from '../models/WaveVotingConfig';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -79,6 +119,10 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "CreateNewProfileProxyActionType",
     "DropActivityLogTypeEnum",
+    "WaveCreditScope",
+    "WaveCreditType",
+    "WaveScopeType",
+    "WaveType",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -94,6 +138,12 @@ let typeMap: {[index: string]: any} = {
     "CreateNewProfileProxyCreateWaveParticipationDropAction": CreateNewProfileProxyCreateWaveParticipationDropAction,
     "CreateNewProfileProxyRateWaveDropAction": CreateNewProfileProxyRateWaveDropAction,
     "CreateNewProfileProxyReadWaveAction": CreateNewProfileProxyReadWaveAction,
+    "CreateNewWave": CreateNewWave,
+    "CreateNewWaveParticipationConfig": CreateNewWaveParticipationConfig,
+    "CreateNewWaveScope": CreateNewWaveScope,
+    "CreateNewWaveVisibilityConfig": CreateNewWaveVisibilityConfig,
+    "CreateNewWaveVotingConfig": CreateNewWaveVotingConfig,
+    "Curation": Curation,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
     "DropComment": DropComment,
@@ -108,11 +158,21 @@ let typeMap: {[index: string]: any} = {
     "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
+    "IntRange": IntRange,
     "NewDropComment": NewDropComment,
+    "PageBase": PageBase,
     "ProfileMin": ProfileMin,
     "ProfileProxy": ProfileProxy,
     "ProfileProxyAction": ProfileProxyAction,
     "QuotedDrop": QuotedDrop,
+    "Wave": Wave,
+    "WaveConfig": WaveConfig,
+    "WaveOutcome": WaveOutcome,
+    "WaveParticipationConfig": WaveParticipationConfig,
+    "WaveRequiredMetadata": WaveRequiredMetadata,
+    "WaveScope": WaveScope,
+    "WaveVisibilityConfig": WaveVisibilityConfig,
+    "WaveVotingConfig": WaveVotingConfig,
 }
 
 type MimeTypeDescriptor = {

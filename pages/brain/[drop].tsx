@@ -69,7 +69,7 @@ export default function BrainDropPage() {
             {drop && (
               <DropsListItem
                 drop={drop}
-                showFull={false}
+                showFull={true}
                 showExternalLink={false}
               />
             )}

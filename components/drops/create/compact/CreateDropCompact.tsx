@@ -1,9 +1,12 @@
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import DropPfp from "../utils/DropPfp";
-import CreateDropContent from "../utils/CreateDropContent";
+import CreateDropContent, {
+  CreateDropContentHandles,
+} from "../utils/CreateDropContent";
 import { EditorState } from "lexical";
 import {
+  CreateDropConfig,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -14,148 +17,176 @@ import PrimaryButton, {
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-
-import dynamic from "next/dynamic";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import CreateDropStormView from "../utils/storm/CreateDropStormView";
 
-const CreateDropChallengeAcceptButton = dynamic(
-  () => import("../utils/challenge/CreateDropChallengeAcceptButton"),
-  { ssr: false }
+export interface CreateDropCompactHandles {
+  clearEditorState: () => void;
+}
+
+const CreateDropCompact = forwardRef<
+  CreateDropCompactHandles,
+  {
+    readonly profile: IProfileAndConsolidations;
+    readonly screenType: CreateDropScreenType;
+    readonly editorState: EditorState | null;
+    readonly title: string | null;
+    readonly file: File | null;
+    readonly metadata: DropMetadata[];
+    readonly canSubmit: boolean;
+    readonly canAddPart: boolean;
+    readonly loading: boolean;
+    readonly type: CreateDropType;
+    readonly drop: CreateDropConfig | null;
+    readonly onViewChange: (newV: CreateDropViewType) => void;
+    readonly onMetadataRemove: (key: string) => void;
+    readonly onEditorState: (editorState: EditorState | null) => void;
+    readonly onMentionedUser: (
+      newUser: Omit<MentionedUser, "current_handle">
+    ) => void;
+    readonly onReferencedNft: (newNft: ReferencedNft) => void;
+    readonly onFileChange: (file: File | null) => void;
+    readonly onDrop: () => void;
+    readonly onDropPart: () => void;
+  }
+>(
+  (
+    {
+      profile,
+      editorState,
+      screenType,
+      file,
+      title,
+      metadata,
+      canSubmit,
+      canAddPart,
+      loading,
+      type,
+      drop,
+      onViewChange,
+      onMetadataRemove,
+      onEditorState,
+      onMentionedUser,
+      onReferencedNft,
+      onFileChange,
+      onDrop,
+      onDropPart,
+    },
+    ref
+  ) => {
+    const getWrapperClasses = () => {
+      switch (type) {
+        case CreateDropType.DROP:
+          return "tw-p-4 sm:tw-p-5 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl";
+        case CreateDropType.QUOTE:
+          return "";
+        default:
+          assertUnreachable(type);
+          return "";
+      }
+    };
+
+    const getSubmitText = () => {
+      switch (type) {
+        case CreateDropType.DROP:
+          return "Drop";
+        case CreateDropType.QUOTE:
+          return "Quote";
+        default:
+          assertUnreachable(type);
+          return "";
+      }
+    };
+
+    const editorRef = useRef<CreateDropContentHandles | null>(null);
+    const clearEditorState = () => editorRef.current?.clearEditorState();
+    useImperativeHandle(ref, () => ({
+      clearEditorState,
+    }));
+
+
+    return (
+      <div className={`${getWrapperClasses()}  tw-bg-iron-900 `}>
+        {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
+        <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
+          <div className="tw-hidden sm:tw-block">
+            <DropPfp pfpUrl={profile.profile?.pfp_url} />
+          </div>
+          <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
+            <div className="tw-w-full">
+              <CreateDropContent
+                ref={editorRef}
+                viewType={CreateDropViewType.COMPACT}
+                editorState={editorState}
+                type={type}
+                drop={drop}
+                onEditorState={onEditorState}
+                onMentionedUser={onMentionedUser}
+                onReferencedNft={onReferencedNft}
+                onViewClick={() => onViewChange(CreateDropViewType.FULL)}
+                onFileChange={onFileChange}
+              />
+            </div>
+            <button onClick={onDropPart} disabled={!canAddPart}>
+              Add storm
+            </button>
+            <div className="tw-self-end">
+              <PrimaryButton
+                onClick={onDrop}
+                disabled={!canSubmit}
+                loading={loading}
+                size={
+                  screenType === CreateDropScreenType.MOBILE
+                    ? PrimaryButtonSize.SMALL
+                    : PrimaryButtonSize.MEDIUM
+                }
+              >
+                {getSubmitText()}
+              </PrimaryButton>
+            </div>
+          </div>
+        </div>
+
+        {file && (
+          <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
+            <div className="tw-w-full">
+              <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
+                <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
+                  <CreateDropSelectedFileIcon file={file} />
+                  <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+                    {file.name}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onFileChange(null)}
+                  type="button"
+                  className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                >
+                  <svg
+                    className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18 6L6 18M6 6L18 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <CreateDropSelectedFilePreview file={file} />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 );
 
-export default function CreateDropCompact({
-  profile,
-  editorState,
-  screenType,
-  file,
-  title,
-  metadata,
-  canSubmit,
-  loading,
-  type,
-  onViewChange,
-  onMetadataRemove,
-  onEditorState,
-  onMentionedUser,
-  onReferencedNft,
-  onFileChange,
-  onDrop,
-}: {
-  readonly profile: IProfileAndConsolidations;
-  readonly screenType: CreateDropScreenType;
-  readonly editorState: EditorState | null;
-  readonly title: string | null;
-  readonly file: File | null;
-  readonly metadata: DropMetadata[];
-  readonly canSubmit: boolean;
-  readonly loading: boolean;
-  readonly type: CreateDropType;
-  readonly onViewChange: (newV: CreateDropViewType) => void;
-  readonly onMetadataRemove: (key: string) => void;
-  readonly onEditorState: (editorState: EditorState | null) => void;
-  readonly onMentionedUser: (
-    newUser: Omit<MentionedUser, "current_handle">
-  ) => void;
-  readonly onReferencedNft: (newNft: ReferencedNft) => void;
-  readonly onFileChange: (file: File | null) => void;
-  readonly onDrop: () => void;
-}) {
-  const getWrapperClasses = () => {
-    switch (type) {
-      case CreateDropType.DROP:
-        return "tw-p-4 sm:tw-p-5 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl";
-      case CreateDropType.QUOTE:
-        return "";
-      default:
-        assertUnreachable(type);
-        return "";
-    }
-  };
-
-  const getSubmitText = () => {
-    switch (type) {
-      case CreateDropType.DROP:
-        return "Drop";
-      case CreateDropType.QUOTE:
-        return "Quote";
-      default:
-        assertUnreachable(type);
-        return "";
-    }
-  };
-
-  return (
-    <div className={`${getWrapperClasses()}  tw-bg-iron-900 `}>
-      <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-        <div className="tw-hidden sm:tw-block">
-          <DropPfp pfpUrl={profile.profile?.pfp_url} />
-        </div>
-        <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
-          <div className="tw-w-full">
-            <CreateDropContent
-              viewType={CreateDropViewType.COMPACT}
-              editorState={editorState}
-              type={type}
-              onEditorState={onEditorState}
-              onMentionedUser={onMentionedUser}
-              onReferencedNft={onReferencedNft}
-              onViewClick={() => onViewChange(CreateDropViewType.FULL)}
-              onFileChange={onFileChange}
-            />
-          </div>
-          {/* <CreateDropChallengeAcceptButton /> */}
-          <div className="tw-self-end">
-            <PrimaryButton
-              onClick={onDrop}
-              disabled={!canSubmit}
-              loading={loading}
-              size={
-                screenType === CreateDropScreenType.MOBILE
-                  ? PrimaryButtonSize.SMALL
-                  : PrimaryButtonSize.MEDIUM
-              }
-            >
-              {getSubmitText()}
-            </PrimaryButton>
-          </div>
-        </div>
-      </div>
-
-      {file && (
-        <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
-          <div className="tw-w-full">
-            <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between">
-              <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
-                <CreateDropSelectedFileIcon file={file} />
-                <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
-                  {file.name}
-                </p>
-              </div>
-              <button
-                onClick={() => onFileChange(null)}
-                type="button"
-                className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
-              >
-                <svg
-                  className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M18 6L6 18M6 6L18 18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <CreateDropSelectedFilePreview file={file} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+CreateDropCompact.displayName = "CreateDropCompact";
+export default CreateDropCompact;

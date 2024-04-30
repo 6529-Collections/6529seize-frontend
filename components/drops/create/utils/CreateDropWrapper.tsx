@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import CreateDropCompact from "../compact/CreateDropCompact";
+import { useEffect, useRef, useState } from "react";
+import CreateDropCompact, {
+  CreateDropCompactHandles,
+} from "../compact/CreateDropCompact";
 
-import CreateDropFull from "../full/CreateDropFull";
+import CreateDropFull, { CreateDropFullHandles } from "../full/CreateDropFull";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { EditorState } from "lexical";
 import {
@@ -27,7 +29,7 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function CreateDropWrapper({
   profile,
-  quotedDropId,
+  quotedDrop,
   type,
   loading,
   title,
@@ -45,7 +47,10 @@ export default function CreateDropWrapper({
   onSubmitDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly quotedDropId: string | null;
+  readonly quotedDrop: {
+    dropId: string;
+    partId: number;
+  } | null;
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly title: string | null;
@@ -132,6 +137,17 @@ export default function CreateDropWrapper({
     setCanAddPart(getCanAddPart());
   }, [editorState, file, drop]);
 
+  const createDropContentFullRef = useRef<CreateDropFullHandles | null>(null);
+  const createDropContendCompactRef = useRef<CreateDropCompactHandles | null>(
+    null
+  );
+
+  const clearInputState = () => {
+    createDropContentFullRef.current?.clearEditorState();
+    createDropContendCompactRef.current?.clearEditorState();
+    setFile(null);
+  };
+
   const onDropPart = (): CreateDropConfig => {
     const markdown = getMarkdown();
 
@@ -144,7 +160,7 @@ export default function CreateDropWrapper({
         metadata,
       };
       setDrop(currentDrop);
-      
+      clearInputState();
       return currentDrop;
     }
 
@@ -185,15 +201,22 @@ export default function CreateDropWrapper({
       metadata,
     };
 
+    console.log(quotedDrop);
+
     currentDrop.parts.push({
       content: markdown,
-      quoted_drop: quotedDropId
-        ? { drop_id: quotedDropId, drop_part_id: 1 }
-        : null,
+      quoted_drop:
+        quotedDrop && !currentDrop.parts.length
+          ? {
+              drop_id: quotedDrop.dropId,
+              drop_part_id: quotedDrop.partId,
+            }
+          : null,
       media: file ? [file] : [],
     });
 
     setDrop(currentDrop);
+    clearInputState();
     return currentDrop;
   };
 
@@ -205,6 +228,7 @@ export default function CreateDropWrapper({
   const components: Record<CreateDropViewType, JSX.Element> = {
     [CreateDropViewType.COMPACT]: (
       <CreateDropCompact
+        ref={createDropContendCompactRef}
         profile={profile}
         screenType={screenType}
         editorState={editorState}
@@ -212,6 +236,8 @@ export default function CreateDropWrapper({
         title={title}
         metadata={metadata}
         canSubmit={canSubmit}
+        canAddPart={canAddPart}
+        drop={drop}
         loading={loading}
         type={type}
         onViewChange={setViewType}
@@ -221,10 +247,12 @@ export default function CreateDropWrapper({
         onReferencedNft={onReferencedNft}
         onFileChange={setFile}
         onDrop={onDrop}
+        onDropPart={onDropPart}
       />
     ),
     [CreateDropViewType.FULL]: (
       <CreateDropFull
+        ref={createDropContentFullRef}
         screenType={screenType}
         profile={profile}
         title={title}

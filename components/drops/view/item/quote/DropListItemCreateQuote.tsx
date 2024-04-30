@@ -1,20 +1,38 @@
 import { AnimatePresence, motion } from "framer-motion";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropListItemQuote from "./DropListItemQuote";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Drop } from "../../../../../generated/models/Drop";
+import { useRouter } from "next/router";
 
 export default function DropListItemCreateQuote({
   drop,
-  isOpen,
-  setIsOpen,
+  quotedPartId,
+  onSuccessfulQuote,
 }: {
   readonly drop: Drop;
-  readonly isOpen: boolean;
-  readonly setIsOpen: (newState: boolean) => void;
+  readonly quotedPartId: number | null;
+  readonly onSuccessfulQuote: () => void;
 }) {
+  const router = useRouter();
   const [init, setInit] = useState(false);
   useEffect(() => setInit(true), []);
+  const isOpen = quotedPartId !== null;
+  const elemRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!quotedPartId) {
+      return;
+    }
+    if (!elemRef.current) {
+      return;
+    }
+    elemRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [quotedPartId]);
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       {isOpen && (
@@ -56,11 +74,14 @@ export default function DropListItemCreateQuote({
                 },
               }}
             >
-              <DropListItemQuote
-                quotedDropId={drop.id}
-                init={init}
-                onSuccessfulDrop={() => setIsOpen(false)}
-              />
+              <div ref={elemRef}>
+                <DropListItemQuote
+                  quotedDropId={drop.id}
+                  quotedPartId={quotedPartId}
+                  init={init}
+                  onSuccessfulDrop={onSuccessfulQuote}
+                />
+              </div>
             </motion.div>
           </CommonAnimationHeight>
         </motion.div>

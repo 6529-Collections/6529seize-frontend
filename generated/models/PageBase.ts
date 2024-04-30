@@ -10,11 +10,9 @@
  * Do not edit the class manually.
  */
 
-import { DropComment } from '../models/DropComment';
 import { HttpFile } from '../http/http';
 
-export class DropCommentsPage {
-    'data': Array<DropComment>;
+export class PageBase {
     'count': number;
     'page': number;
     'next': boolean;
@@ -22,12 +20,6 @@ export class DropCommentsPage {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<DropComment>",
-            "format": ""
-        },
         {
             "name": "count",
             "baseName": "count",
@@ -48,7 +40,7 @@ export class DropCommentsPage {
         }    ];
 
     static getAttributeTypeMap() {
-        return DropCommentsPage.attributeTypeMap;
+        return PageBase.attributeTypeMap;
     }
 
     public constructor() {

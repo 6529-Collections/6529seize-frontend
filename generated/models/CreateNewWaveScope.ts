@@ -10,48 +10,39 @@
  * Do not edit the class manually.
  */
 
-import { DropComment } from '../models/DropComment';
+import { WaveScopeType } from '../models/WaveScopeType';
 import { HttpFile } from '../http/http';
 
-export class DropCommentsPage {
-    'data': Array<DropComment>;
-    'count': number;
-    'page': number;
-    'next': boolean;
+export class CreateNewWaveScope {
+    'type': WaveScopeType;
+    /**
+    * Only relevant when type=CURATED.
+    */
+    'curation_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<DropComment>",
+            "name": "type",
+            "baseName": "type",
+            "type": "WaveScopeType",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "boolean",
+            "name": "curation_id",
+            "baseName": "curation_id",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropCommentsPage.attributeTypeMap;
+        return CreateNewWaveScope.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+
 

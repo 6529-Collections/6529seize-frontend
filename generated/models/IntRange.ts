@@ -10,45 +10,36 @@
  * Do not edit the class manually.
  */
 
-import { DropComment } from '../models/DropComment';
 import { HttpFile } from '../http/http';
 
-export class DropCommentsPage {
-    'data': Array<DropComment>;
-    'count': number;
-    'page': number;
-    'next': boolean;
+export class IntRange {
+    /**
+    * Included
+    */
+    'min': number | null;
+    /**
+    * Included
+    */
+    'max': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<DropComment>",
-            "format": ""
-        },
-        {
-            "name": "count",
-            "baseName": "count",
+            "name": "min",
+            "baseName": "min",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "page",
-            "baseName": "page",
+            "name": "max",
+            "baseName": "max",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "boolean",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropCommentsPage.attributeTypeMap;
+        return IntRange.attributeTypeMap;
     }
 
     public constructor() {

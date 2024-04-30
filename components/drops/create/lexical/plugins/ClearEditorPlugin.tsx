@@ -2,7 +2,11 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { $getRoot } from "lexical";
 import { forwardRef, useImperativeHandle } from "react";
 
-const ClearEditorPlugin = forwardRef((_, ref) => {
+export interface ClearEditorPluginHandles {
+  clearEditorState: () => void;
+}
+
+const ClearEditorPlugin = forwardRef<ClearEditorPluginHandles, {}>((_, ref) => {
   const [editor] = useLexicalComposerContext();
   const clearEditorState = () => {
     editor.update(() => $getRoot().clear());
