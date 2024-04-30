@@ -10,45 +10,33 @@
  * Do not edit the class manually.
  */
 
-import { DropComment } from '../models/DropComment';
 import { HttpFile } from '../http/http';
 
-export class DropCommentsPage {
-    'data': Array<DropComment>;
-    'count': number;
-    'page': number;
-    'next': boolean;
+export class WaveOutcome {
+    /**
+    * Type of the outcome. (Promise, EVM Mint, Crypto Prize etc.) 
+    */
+    'type': string;
+    'properties': { [key: string]: string; };
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<DropComment>",
+            "name": "type",
+            "baseName": "type",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "boolean",
+            "name": "properties",
+            "baseName": "properties",
+            "type": "{ [key: string]: string; }",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropCommentsPage.attributeTypeMap;
+        return WaveOutcome.attributeTypeMap;
     }
 
     public constructor() {

@@ -1,10 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import DropListItemContentMarkdown from "./DropListItemContentMarkdown";
-import DropListItemContentQuote from "./DropListItemContentQuote";
 import { Drop } from "../../../../../generated/models/Drop";
 import DropPart from "../../part/DropPart";
+import { useEffect, useState } from "react";
+import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
+import DropPartWrapper from "../../part/DropPartWrapper";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -14,48 +12,77 @@ export enum DropContentPartType {
 export default function DropListItemContent({
   drop,
   showFull = false,
+  onQuote,
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
+  readonly onQuote: (dropPartId: number) => void;
 }) {
-  // TODO make it multiple parts
-  const part = drop.parts[0];
+  const [isFullMode, setIsFullMode] = useState(showFull);
+  const getParts = () => {
+    if (!drop.parts.length) {
+      return [];
+    }
+    if (!isFullMode) {
+      return [drop.parts[0]];
+    }
+    return drop.parts;
+  };
+  const [parts, setParts] = useState(getParts());
+  useEffect(() => setParts(getParts()), [drop.parts, isFullMode]);
 
-  const { data: quotedDrop } = useQuery<Drop>({
-    queryKey: [QueryKey.DROP, part.quoted_drop?.drop_id],
-    queryFn: async () =>
-      await commonApiFetch<Drop>({
-        endpoint: `/drops/${part.quoted_drop?.drop_id}`,
-      }),
-    enabled: typeof part.quoted_drop?.drop_id === "string",
-  });
+  const partsCount = drop.parts.length;
+  const isStorm = partsCount > 1;
+
+  const getShowStormExpandButton = () => {
+    if (!isStorm) {
+      return false;
+    }
+    if (isFullMode) {
+      return false;
+    }
+    return true;
+  };
+  const [showStormExpandButton, setShowStormExpandButton] = useState(
+    getShowStormExpandButton()
+  );
+  useEffect(
+    () => setShowStormExpandButton(getShowStormExpandButton()),
+    [isStorm, isFullMode]
+  );
 
   return (
-    <div className="tw-space-y-2 ">
-      {drop.parts.map((part) => (
-        <div
-          key={part.part_id}
-          className="tw-border-2 tw-border-solid tw-border-blue-600"
-        >
-          <DropPart
-            mentionedUsers={drop.mentioned_users}
-            referencedNfts={drop.referenced_nfts}
-            partContent={part.content ?? null}
-            partMedia={
-              part.media.length
-                ? {
-                    mimeType: part.media[0].mime_type,
-                    mediaSrc: part.media[0].url,
-                  }
-                : null
-            }
-            showFull={showFull}
-          />
-          {quotedDrop && (
-            <DropListItemContentQuote drop={quotedDrop} showFull={showFull} />
-          )}
-        </div>
-      ))}
-    </div>
+    <CommonAnimationHeight>
+      <div className="tw-space-y-2 ">
+        {parts.map((part, index) => (
+          <DropPartWrapper
+            key={`drop-${drop.id}-part-${index}`}
+            dropPart={part}
+            drop={drop}
+            onQuote={onQuote}
+          >
+            <DropPart
+              mentionedUsers={drop.mentioned_users}
+              referencedNfts={drop.referenced_nfts}
+              partContent={part.content ?? null}
+              partMedia={
+                part.media.length
+                  ? {
+                      mimeType: part.media[0].mime_type,
+                      mediaSrc: part.media[0].url,
+                    }
+                  : null
+              }
+              showFull={isFullMode}
+            />
+            {showStormExpandButton && index === 0 && (
+              <button onClick={() => setIsFullMode(true)}>
+                Show storm ({partsCount})
+              </button>
+            )}
+          </DropPartWrapper>
+        ))}
+      </div>
+    </CommonAnimationHeight>
   );
 }

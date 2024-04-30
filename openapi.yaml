@@ -492,12 +492,146 @@ paths:
         '400':
           description: Invalid request
 
+  /waves:
+    get:
+      tags:
+        - Waves
+      summary: Get waves
+      operationId: getWaves
+      parameters:
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: curation_criteria_id
+          in: query
+          description: Waves by authors that match the supplied criteria
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wave'
+    post:
+      tags:
+        - Waves
+      summary: Create new wave
+      description: Requires the user to be authenticated
+      operationId: createWave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNewWave'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '400':
+          description: Invalid request
+
+  /waves/{id}:
+    get:
+      tags:
+        - Waves
+      summary: Get wave by ID
+      operationId: getWaveById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '404':
+          description: Wave not found
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
   schemas:
+
+    IntRange:
+      type: object
+      required:
+        - min
+        - max
+      properties:
+        min:
+          description: Included
+          type: number
+          format: int64
+          nullable: true
+        max:
+          description: Included
+          type: number
+          format: int64
+          nullable: true
+
+    Curation:
+        type: object
+        required:
+            - id
+            - name
+            - author
+            - created_at
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          author:
+            $ref: '#/components/schemas/ProfileMin'
+          created_at:
+            type: number
+            format: int64
+
+    PageBase:
+      type: object
+      required:
+        - count
+        - page
+        - next
+      properties:
+        count:
+          type: number
+          format: int64
+        page:
+          type: number
+          format: int64
+        next:
+          type: boolean
+
     Drop:
       type: object
       required:
@@ -629,6 +763,7 @@ components:
       required:
         - id
         - handle
+        - pfp
         - cic
         - rep
         - tdh
@@ -642,6 +777,7 @@ components:
           type: string
         pfp:
           type: string
+          nullable: true
         cic:
           type: number
           format: int64
@@ -893,23 +1029,350 @@ components:
     DropCommentsPage:
         type: object
         required:
-          - count
-          - page
-          - next
           - data
+        allOf:
+          - $ref: '#/components/schemas/PageBase'
         properties:
-          count:
-            type: number
-            format: int64
-          page:
-            type: number
-            format: int64
-          next:
-            type: boolean
           data:
             type: array
             items:
                 $ref: '#/components/schemas/DropComment'
+
+    WaveScopeType:
+      type: string
+      enum:
+        - ALL
+        - CURATED
+
+    CreateNewWaveScope:
+      type: object
+      required:
+        - type
+        - curation_id
+      properties:
+        type:
+          $ref: '#/components/schemas/WaveScopeType'
+        curation_id:
+          description: 'Only relevant when type=CURATED.'
+          type: string
+          nullable: true
+
+    WaveScope:
+      title: Scope
+      description: A scope of audience
+      type: object
+      required:
+        - type
+        - curation
+      properties:
+        type:
+          $ref: '#/components/schemas/WaveScopeType'
+        curation:
+          description: 'Only relevant when type=CURATED.'
+          anyOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Curation'
+
+    WaveCreditType:
+      type: string
+      description: |
+        What will be counted as a credit. UNIQUE means each voter gets one vote.
+      enum:
+        - TDH
+        - REP
+        - UNIQUE
+
+    WaveType:
+      type: string
+      description: |
+        Type of the wave:
+        * VOTE_TALLY_IN_RANGE - Everybody who will end up in specified range will win.
+        * TOP_VOTED - Top voted participant(s) will win.
+        * NONE - No winners.
+      enum:
+        - VOTE_TALLY_IN_RANGE
+        - TOP_VOTED
+        - NONE
+
+    WaveCreditScope:
+      description: |
+        The scope of the credit. 
+        * WAVE - Credit is spendable across all drops in wave. 
+        * DROP - The amount of votes, voter can give to a drop is not affected by votes spent on other drops. 
+        * PARTICIPANT: The amount of votes, voter can give to a drop by concrete participant is only affected by voted given by same user to other drops by the same participant.
+      enum:
+        - WAVE
+        - DROP
+        - PARTICIPANT
+
+    WaveRequiredMetadata:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          description: Metadata key
+          type: string
+
+    CreateNewWaveVotingConfig:
+      type: object
+      required:
+        - scope
+        - credit_type
+        - credit_scope
+        - credit_category
+        - signature_required
+        - creditor_id
+      properties:
+        scope:
+          $ref: '#/components/schemas/CreateNewWaveScope'
+        credit_type:
+          $ref: '#/components/schemas/WaveCreditType'
+        credit_scope:
+          $ref: '#/components/schemas/WaveCreditScope'
+        credit_category:
+          description: "Only relevant when credit_type=REP. 
+            The REP category which is usable as credit. 
+            If not set then all categories will be usable as voting credits."
+          type: string
+          nullable: true
+        creditor_id:
+          description: 'Only relevant when credit_type=REP'
+          type: string
+          nullable: true
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: '#/components/schemas/IntRange'
+
+    WaveVotingConfig:
+      type: object
+      required:
+        - scope
+        - credit_type
+        - credit_scope
+        - credit_category
+        - signature_required
+        - creditor
+      properties:
+        scope:
+          $ref: '#/components/schemas/WaveScope'
+        credit_type:
+          $ref: '#/components/schemas/WaveCreditType'
+        credit_scope:
+          $ref: '#/components/schemas/WaveCreditScope'
+        credit_category:
+          description: "Only relevant when credit_type=REP. 
+            The REP category which is usable as credit. 
+            If not set then all categories will be usable as voting credits."
+          type: string
+          nullable: true
+        creditor:
+          description: 'Only relevant when credit_type=REP'
+          anyOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/ProfileMin'
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: '#/components/schemas/IntRange'
+
+    WaveVisibilityConfig:
+      type: object
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: '#/components/schemas/WaveScope'
+
+    CreateNewWaveVisibilityConfig:
+      type: object
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: '#/components/schemas/CreateNewWaveScope'
+
+    WaveParticipationConfig:
+      type: object
+      required:
+        - scope
+        - required_metadata
+        - signature_required
+        - no_of_applications_allowed_per_participant
+      properties:
+        scope:
+          $ref: '#/components/schemas/WaveScope'
+        no_of_applications_allowed_per_participant:
+          description: 'The number of applications allowed per participant. Infinite if omitted.'
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        required_metadata:
+          description: |
+            The metadata that must be provided by the participant. 
+            Empty array if nothing is required.
+          type: array
+          items:
+            $ref: '#/components/schemas/WaveRequiredMetadata'
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: '#/components/schemas/IntRange'
+
+    CreateNewWaveParticipationConfig:
+      type: object
+      required:
+        - scope
+        - required_metadata
+        - signature_required
+        - no_of_applications_allowed_per_participant
+      properties:
+        scope:
+          $ref: '#/components/schemas/CreateNewWaveScope'
+        no_of_applications_allowed_per_participant:
+          description: 'The number of applications allowed per participant. Infinite if omitted.'
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 1
+        required_metadata:
+          description: |
+            The metadata that must be provided by the participant. 
+            Empty array if nothing is required.
+          type: array
+          items:
+            $ref: '#/components/schemas/WaveRequiredMetadata'
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: '#/components/schemas/IntRange'
+
+    WaveConfig:
+      type: object
+      required:
+        - type
+        - time_lock_ms
+        - winning_thresholds
+        - period
+        - max_winners
+      properties:
+        type:
+          $ref: '#/components/schemas/WaveType'
+        winning_thresholds:
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is VOTE_TALLY_IN_RANGE
+          anyOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/IntRange'
+        max_winners:
+          description: This amount of top rated drops will win. Must be set if and only if type is TOP_VOTED
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        time_lock_ms:
+          nullable: true
+          description: Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
+          type: integer
+          format: int64
+          minimum: 1
+        period:
+          anyOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/IntRange'
+
+    WaveOutcome:
+      type: object
+      required:
+        - type
+        - properties
+      properties:
+        type:
+          type: string
+          description: |
+            Type of the outcome. (Promise, EVM Mint, Crypto Prize etc.)
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+
+    Wave:
+      type: object
+      required:
+        - id
+        - serial_no
+        - author
+        - name
+        - description
+        - voting
+        - visibility
+        - participation
+        - wave
+        - outcomes
+      properties:
+        id:
+          description: The ID of the wave
+          type: string
+        serial_no:
+          description: Sequence number of the wave in Seize
+          type: number
+          format: int64
+        author:
+          $ref: '#/components/schemas/ProfileMin'
+        name:
+          description: The name of the wave
+          type: string
+        description:
+          description: The description of the wave
+          type: string
+        voting:
+          $ref: '#/components/schemas/WaveVotingConfig'
+        visibility:
+          $ref: '#/components/schemas/WaveVisibilityConfig'
+        participation:
+          $ref: '#/components/schemas/WaveParticipationConfig'
+        wave:
+          $ref: '#/components/schemas/WaveConfig'
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaveOutcome'
+
+    CreateNewWave:
+      type: object
+      required:
+        - name
+        - description
+        - voting
+        - visibility
+        - participation
+        - wave
+        - outcomes
+      properties:
+        name:
+          description: The name of the wave
+          type: string
+          maxLength: 250
+        description:
+          description: The description of the wave
+          type: string
+        voting:
+          $ref: '#/components/schemas/CreateNewWaveVotingConfig'
+        visibility:
+          $ref: '#/components/schemas/CreateNewWaveVisibilityConfig'
+        participation:
+          $ref: '#/components/schemas/CreateNewWaveParticipationConfig'
+        wave:
+          $ref: '#/components/schemas/WaveConfig'
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaveOutcome'
 
     CreateNewProfileProxy:
       type: object
@@ -1125,7 +1588,7 @@ components:
               format: int64
         is_active:
           type: boolean
-        
+
 
 
 security:
