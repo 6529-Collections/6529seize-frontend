@@ -14,7 +14,6 @@ export default function DropListItemDataContent({
     <AnimatePresence mode="wait" initial={false}>
       {open && (
         <motion.div
-          key={drop.id}
           initial={{ height: "0", opacity: 0 }}
           animate={{
             height: "auto",

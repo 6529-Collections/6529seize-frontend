@@ -20,9 +20,9 @@ export class DropPart {
     * Which drop in the storm is this drop
     */
     'part_id': number;
-    'content'?: string | null;
+    'content': string | null;
     'media': Array<DropMedia>;
-    'quoted_drop'?: QuotedDrop | null;
+    'quoted_drop': QuotedDrop | null;
     'discussion_comments_count': number;
     'quotes_count': number;
     'context_profile_context'?: DropPartContextProfileContext | null;
