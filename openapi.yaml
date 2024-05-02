@@ -650,6 +650,8 @@ components:
           - top_rating_categories
           - rating_categories_count
           - rating_logs_count
+          - title
+          - context_profile_context
       properties:
           id:
             type: string
@@ -731,6 +733,8 @@ components:
         - media
         - discussion_comments_count
         - quotes_count
+        - quoted_drop
+        - content
       properties:
         part_id:
           description: 'Which drop in the storm is this drop'

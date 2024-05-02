@@ -52,23 +52,25 @@ export default function DropPartQuote({
   }
 
   return (
-    <DropWrapper drop={drop}>
-      <div className="tw-w-full">
-        <DropPart
-          mentionedUsers={drop.mentioned_users}
-          referencedNfts={drop.referenced_nfts}
-          partContent={quotedPart.content ?? null}
-          partMedia={
-            quotedPart.media.length
-              ? {
-                  mimeType: quotedPart.media[0].mime_type,
-                  mediaSrc: quotedPart.media[0].url,
-                }
-              : null
-          }
-          showFull={false}
-        />
-      </div>
-    </DropWrapper>
+    <div className="tw-border-red tw-border tw-border-solid">
+      <DropWrapper drop={drop}>
+        <div className="tw-w-full">
+          <DropPart
+            mentionedUsers={drop.mentioned_users}
+            referencedNfts={drop.referenced_nfts}
+            partContent={quotedPart.content ?? null}
+            partMedia={
+              quotedPart.media.length
+                ? {
+                    mimeType: quotedPart.media[0].mime_type,
+                    mediaSrc: quotedPart.media[0].url,
+                  }
+                : null
+            }
+            showFull={false}
+          />
+        </div>
+      </DropWrapper>
+    </div>
   );
 }

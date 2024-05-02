@@ -20,12 +20,7 @@ export default function DropPartWrapper({
   readonly children: React.ReactNode;
 }) {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
-  const quotedDrop: QuotedDrop | null = (dropPart as any)?.quoted_drop_id
-    ? {
-        drop_id: (dropPart as any).quoted_drop_id,
-        drop_part_id: (dropPart as any).quoted_drop_part_id,
-      }
-    : null;
+  const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
   return (
     <div>
       <div className="tw-border-2 tw-border-solid tw-border-blue-600">
