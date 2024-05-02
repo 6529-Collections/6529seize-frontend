@@ -362,6 +362,13 @@ export default function Header(props: Readonly<Props>) {
                     </Link>
                   </Col>
                 </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href="/about/upcoming-drops">
+                      <h3>Upcoming Drops</h3>
+                    </Link>
+                  </Col>
+                </Row>
                 <Row>
                   <Col xs={{ span: 6, offset: 3 }}>
                     <hr />
@@ -489,6 +496,13 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <Link href={`/about/${AboutSection.NFT_DELEGATION}`}>
                       <h3>NFT Delegation</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href={`/about/${AboutSection.PRIMARY_ADDRESS}`}>
+                      <h3>Primary Address</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -765,6 +779,12 @@ export default function Header(props: Readonly<Props>) {
                                   path: "/about/subscriptions",
                                 }}
                               />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Upcoming Drops",
+                                  path: "/about/upcoming-drops",
+                                }}
+                              />
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
@@ -851,6 +871,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "NFT Delegation",
                                   path: `/about/${AboutSection.NFT_DELEGATION}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Primary Address",
+                                  path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
                                 }}
                               />
                               <NavDropdown.Divider />
