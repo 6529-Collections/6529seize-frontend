@@ -20,7 +20,7 @@ export default function DropListItemCreateQuote({
   const isOpen = quotedPartId !== null;
   const elemRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
+  const scrollIntoView = () => {
     if (!quotedPartId) {
       return;
     }
@@ -31,61 +31,63 @@ export default function DropListItemCreateQuote({
       behavior: "smooth",
       block: "center",
     });
-  }, [quotedPartId]);
+  };
+
+  // useEffect(() => scrollIntoView(), [quotedPartId]);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      {isOpen && (
-        <motion.div
-          key={drop.id}
-          initial={{ height: "0", opacity: 0 }}
-          animate={{
-            height: "auto",
-            opacity: 1,
-            transition: {
-              height: { duration: 0.3 },
-              opacity: { duration: 0.3, delay: 0.3 },
-            },
-          }}
-          exit={{
-            height: "0",
-            opacity: 0,
-            transition: {
-              opacity: { duration: 0 },
-              height: { duration: 0.3 },
-            },
-          }}
-        >
-          <CommonAnimationHeight>
-            <motion.div
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-                transition: {
-                  duration: 0.3,
-                },
-              }}
-              exit={{
-                opacity: 0,
-                transition: {
-                  duration: 0.3,
-                },
-              }}
-            >
-              <div ref={elemRef}>
+    <div ref={elemRef}>
+      <AnimatePresence mode="wait" initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: "0", opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: {
+                height: { duration: 0.3 },
+                opacity: { duration: 0.3, delay: 0.3 },
+              },
+            }}
+            exit={{
+              height: "0",
+              opacity: 0,
+              transition: {
+                opacity: { duration: 0 },
+                height: { duration: 0.3 },
+              },
+            }}
+            onAnimationComplete={scrollIntoView}
+          >
+            <CommonAnimationHeight>
+              <motion.div
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  transition: {
+                    duration: 0.3,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: {
+                    duration: 0.3,
+                  },
+                }}
+              >
                 <DropListItemQuote
                   quotedDropId={drop.id}
                   quotedPartId={quotedPartId}
                   init={init}
                   onSuccessfulDrop={onSuccessfulQuote}
                 />
-              </div>
-            </motion.div>
-          </CommonAnimationHeight>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              </motion.div>
+            </CommonAnimationHeight>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

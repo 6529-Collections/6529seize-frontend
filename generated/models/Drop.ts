@@ -31,7 +31,7 @@ export class Drop {
     * Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
     */
     'created_at': number;
-    'title'?: string | null;
+    'title': string | null;
     'parts': Array<DropPart>;
     /**
     * Number of drops in the storm
@@ -46,7 +46,7 @@ export class Drop {
     'top_rating_categories': Array<DropRatingCategory>;
     'rating_categories_count': number;
     'rating_logs_count': number;
-    'context_profile_context'?: DropContextProfileContext | null;
+    'context_profile_context': DropContextProfileContext | null;
 
     static readonly discriminator: string | undefined = undefined;
 
