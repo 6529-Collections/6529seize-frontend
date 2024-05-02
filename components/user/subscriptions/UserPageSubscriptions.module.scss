@@ -32,6 +32,11 @@
     padding: 10px 20px;
     white-space: nowrap;
   }
+
+  tr:last-child td {
+    border-bottom: none !important;
+    padding: 5px 20px;
+  }
 }
 
 .tagContainer {

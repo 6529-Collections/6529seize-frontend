@@ -28,6 +28,8 @@ import {
   MAX_BULK_ACTIONS,
   SUB_DELEGATION_USE_CASE,
   ALL_USE_CASES,
+  MEMES_COLLECTION,
+  PRIMARY_ADDRESS_USE_CASE,
 } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
@@ -49,6 +51,7 @@ import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import UpdateDelegationComponent from "./UpdateDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
+import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -88,6 +91,13 @@ function getParams(
       functionName: functionName,
       args: [address, collection, uc.use_case],
     });
+  });
+  params.push({
+    address: DELEGATION_CONTRACT.contract,
+    abi: DELEGATION_ABI,
+    chainId: DELEGATION_CONTRACT.chain_id,
+    functionName: functionName,
+    args: [address, collection, PRIMARY_ADDRESS_USE_CASE.use_case],
   });
   params.push({
     address: DELEGATION_CONTRACT.contract,
@@ -160,14 +170,17 @@ function getDelegationsFromData(data: any) {
   const myDelegations: ContractDelegation[] = [];
   data.map((d: any, index: number) => {
     const walletDelegations: ContractWalletDelegation[] = [];
-    const useCase =
-      DELEGATION_USE_CASES.length > index
-        ? DELEGATION_USE_CASES[index]
-        : index === SUB_DELEGATION_USE_CASE.index
-        ? SUB_DELEGATION_USE_CASE
-        : index === CONSOLIDATION_USE_CASE.index
-        ? CONSOLIDATION_USE_CASE
-        : null;
+    let useCase = null;
+    if (DELEGATION_USE_CASES.length > index) {
+      useCase = DELEGATION_USE_CASES[index];
+    } else if (index === PRIMARY_ADDRESS_USE_CASE.index) {
+      useCase = PRIMARY_ADDRESS_USE_CASE;
+    } else if (index === SUB_DELEGATION_USE_CASE.index) {
+      useCase = SUB_DELEGATION_USE_CASE;
+    } else if (index === CONSOLIDATION_USE_CASE.index) {
+      useCase = CONSOLIDATION_USE_CASE;
+    }
+
     if (useCase) {
       const delegationsArray = d.result as any[];
       delegationsArray[0].map((wallet: string, i: number) => {
@@ -241,6 +254,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     showCreateNewConsolidationWithSub,
     setShowCreateNewConsolidationWithSub,
   ] = useState(false);
+  const [showAssignPrimaryAddressWithSub, setShowAssignPrimaryAddressWithSub] =
+    useState(false);
   const [showRevokeDelegationWithSub, setShowRevokeDelegationWithSub] =
     useState(false);
 
@@ -1484,6 +1499,27 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             />
                             Register Consolidation
                           </button>
+                          {(props.collection.contract ===
+                            DELEGATION_ALL_ADDRESS ||
+                            props.collection.contract ===
+                              MEMES_COLLECTION.contract) && (
+                            <button
+                              className={`${styles.useCaseWalletUpdate} ${
+                                subDelegationOriginalDelegator === undefined
+                                  ? styles.useCaseWalletUpdateDisabled
+                                  : ""
+                              }`}
+                              onClick={() => {
+                                setShowAssignPrimaryAddressWithSub(true);
+                                window.scrollTo(0, 0);
+                              }}>
+                              <FontAwesomeIcon
+                                icon="plus"
+                                className={styles.buttonIcon}
+                              />
+                              Assign Primary Address
+                            </button>
+                          )}
                           <button
                             className={`${styles.useCaseWalletRevoke} ${
                               subDelegationOriginalDelegator === undefined
@@ -1597,6 +1633,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   const value = parseInt(e.target.value);
                   setLockUseCaseValue(value);
                   if (value === CONSOLIDATION_USE_CASE.use_case) {
+                    setLockUseCaseIndex(18);
+                  } else if (value === SUB_DELEGATION_USE_CASE.use_case) {
+                    setLockUseCaseIndex(17);
+                  } else if (value === PRIMARY_ADDRESS_USE_CASE.use_case) {
                     setLockUseCaseIndex(16);
                   } else {
                     setLockUseCaseIndex(value - 1);
@@ -1648,7 +1688,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 md={8}
                 lg={8}
                 className="pt-2 pb-2 d-flex align-items-center">
-                {!useCaseLockStatusesGlobal ||
+                {!useCaseLockStatusesGlobal.data ||
                 (useCaseLockStatusesGlobal?.data &&
                   (useCaseLockStatusesGlobal?.data[
                     lockUseCaseIndex
@@ -1764,6 +1804,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 !showCreateNewDelegationWithSub &&
                 !showCreateNewSubDelegationWithSub &&
                 !showCreateNewConsolidationWithSub &&
+                !showAssignPrimaryAddressWithSub &&
                 !showRevokeDelegationWithSub && (
                   <>
                     {printDelegations()}
@@ -1860,6 +1901,28 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     ens={ensResolution.data}
                     onHide={() => {
                       setShowCreateNewConsolidationWithSub(false);
+                      setSubDelegationOriginalDelegator(undefined);
+                    }}
+                    onSetToast={(toast: any) => {
+                      setToast({
+                        title: toast.title,
+                        message: toast.message,
+                      });
+                    }}
+                  />
+                )}
+
+              {showAssignPrimaryAddressWithSub &&
+                subDelegationOriginalDelegator && (
+                  <NewAssignPrimaryAddress
+                    subdelegation={{
+                      originalDelegator: subDelegationOriginalDelegator,
+                      collection: props.collection,
+                    }}
+                    address={accountResolution.address as string}
+                    ens={ensResolution.data}
+                    onHide={() => {
+                      setShowAssignPrimaryAddressWithSub(false);
                       setSubDelegationOriginalDelegator(undefined);
                     }}
                     onSetToast={(toast: any) => {

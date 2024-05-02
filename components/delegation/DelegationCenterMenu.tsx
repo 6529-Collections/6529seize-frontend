@@ -19,12 +19,14 @@ import NewSubDelegationComponent from "./NewSubDelegation";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 import { useRouter } from "next/router";
+import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
   REGISTER_DELEGATION = "register-delegation",
   REGISTER_SUB_DELEGATION = "register-sub-delegation",
   REGISTER_CONSOLIDATION = "register-consolidation",
+  ASSIGN_PRIMARY_ADDRESS = "assign-primary-address",
   ANY_COLLECTION = "any-collection",
   MEMES_COLLECTION = "the-memes",
   MEME_LAB_COLLECTION = "meme-lab",
@@ -132,6 +134,24 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 message: toast.message,
               });
             }}
+          />
+        );
+      case DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS:
+        return (
+          <NewAssignPrimaryAddress
+            address={accountResolution.address as string}
+            ens={ensResolution.data}
+            onHide={() => {
+              props.setActiveSection(DelegationCenterSection.CENTER);
+            }}
+            onSetToast={(toast: any) => {
+              setToast({
+                title: toast.title,
+                message: toast.message,
+              });
+            }}
+            new_primary_address_query={props.address_query}
+            setNewPrimaryAddressQuery={props.setAddressQuery}
           />
         );
       case DelegationCenterSection.ANY_COLLECTION:

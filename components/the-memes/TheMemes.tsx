@@ -206,7 +206,6 @@ export default function TheMemesComponent(props: Readonly<Props>) {
     } else {
       myMemes.sort((a, d) => a.meme - d.meme);
     }
-    console.log("myMemes", myMemes);
     setNftMemes(myMemes);
   }, [nfts]);
 
