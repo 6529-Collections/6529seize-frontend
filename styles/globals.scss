@@ -49,6 +49,10 @@ svg:not(.tailwind-scope svg) {
   box-shadow: none !important;
 }
 
+code {
+  color: #25e4eb;
+}
+
 a {
   outline: 0 !important;
   text-decoration: underline;
@@ -409,10 +413,14 @@ h5 {
   &:hover,
   &:focus,
   &:active {
-    color: $font-color-h !important;
     background-color: inherit !important;
   }
+
+  &:hover {
+    color: $font-color-h !important;
+  }
 }
+
 .horizontal-menu-hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */

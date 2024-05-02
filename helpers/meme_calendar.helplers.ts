@@ -147,7 +147,11 @@ export const MEMES_MINTING_DAYS = [
 
 export function isMintingToday() {
   const now = Time.now();
-  const dayOfWeek = now.toDate().getUTCDay();
+  return isMintingDay(now);
+}
+
+function isMintingDay(t: Time) {
+  const dayOfWeek = t.toDate().getUTCDay();
 
   if (!MEMES_MINTING_DAYS.includes(dayOfWeek)) {
     return false;
@@ -155,22 +159,42 @@ export function isMintingToday() {
 
   return MEMES_CALENDARS.some((calendar) => {
     return calendar.blocks.some((block) => {
-      return block.szn && block.start.lt(now) && block.end.gt(now);
+      return block.szn && block.start.lt(t) && block.end.plusDays(1).gt(t);
     });
   });
+}
+
+export function getMintingDates(cardCount: number) {
+  let now = Time.now();
+  const dates = [];
+
+  for (let i = 0; i < cardCount; i++) {
+    if (isMintingDay(now)) {
+      dates.push(now);
+    } else {
+      now = now.plusDays(1);
+      while (!isMintingDay(now)) {
+        now = now.plusDays(1);
+      }
+      dates.push(now);
+    }
+    now = now.plusDays(1);
+  }
+  return dates;
 }
 
 function getRemainingMintsInBlock(block: CalendarBlock, now: Time) {
   let mintsInBlock = 0;
   const start = block.start.gt(now) ? block.start : now.plusDays(1);
 
-  for (let i = start; i.lt(block.end); i = i.plusDays(1)) {
+  for (let i = start; i.lt(block.end.plusDays(1)); i = i.plusDays(1)) {
     if (MEMES_MINTING_DAYS.includes(i.toDate().getUTCDay())) {
       mintsInBlock++;
     }
   }
   return mintsInBlock;
 }
+
 export function numberOfCardsForSeasonEnd() {
   const now = Time.now();
   const upcomingBlock: CalendarBlock | undefined = MEMES_CALENDARS.flatMap(
