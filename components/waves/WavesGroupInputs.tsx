@@ -4,7 +4,7 @@ export default function WavesGroupInputs() {
       <div className="tw-grid tw-grid-cols-2 tw-gap-4">
         <div className="tw-relative">
           <svg
-            className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300"
+            className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -18,12 +18,12 @@ export default function WavesGroupInputs() {
           <input
             type="text"
             placeholder="Search by user"
-            className="tw-pl-11 tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-[#1C1D20] tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-pl-11 tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pr-3 tw-bg-[#1C1D20] tw-text-iron-50 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
         </div>
         <div className="tw-relative">
           <svg
-            className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300"
+            className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -37,7 +37,7 @@ export default function WavesGroupInputs() {
           <input
             type="text"
             placeholder="Search by curation name"
-            className="tw-pl-11 tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-[#1C1D20] tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-pl-11 tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pr-3 tw-bg-[#1C1D20] tw-text-iron-50 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-2 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-600 focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
           />
         </div>
       </div>

@@ -104,11 +104,10 @@ export default function WavesRating() {
           </button>
         </div>
       </nav>
-
       <div className="tw-mt-16 tw-max-w-xl tw-mx-auto tw-w-full">
         <WavesRatingScope />
         {/*  <WavesCreditType /> */}
-        {/*  <WavesRatingType /> */}
+        {/* <WavesRatingType /> */}
         {/*  <WavesFinalizationPeriod /> */}
       </div>
     </div>
