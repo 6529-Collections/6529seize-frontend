@@ -20,7 +20,7 @@ export default function DropPartActionTriggers({
 
   const userHaveQuoted = !!dropPart.context_profile_context?.quotes_count;
   return (
-    <div>
+    <div className="tw-pt-4 tw-gap-x-6 tw-flex tw-items-center">
       <button
         onClick={() => setIsDiscussionOpen(!isDiscussionOpen)}
         type="button"
@@ -32,7 +32,7 @@ export default function DropPartActionTriggers({
             Discuss
           </span>
           {!!discussionCount && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
               {discussionCount}
             </div>
           )}
@@ -65,7 +65,7 @@ export default function DropPartActionTriggers({
             Redrop
           </span>
           {!!quotesCount && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
+            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-300 tw-text-xs tw-font-medium">
               {quotesCount}
             </div>
           )}

@@ -132,10 +132,10 @@ const CreateDropFullDesktop = forwardRef<
               onClick={() => setTitleState(TITLE_STATE.INPUT)}
               type="button"
               className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 
-            tw-px-2.5 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+            tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-w-4 tw-h-4 tw-mr-2 -tw-ml-1"
+                className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -157,7 +157,7 @@ const CreateDropFullDesktop = forwardRef<
           <div className="tw-mt-0.5">
             <DropPfp pfpUrl={profile.profile?.pfp_url} />
           </div>
-          <div className="tw-flex tw-flex-col tw-space-y-5 tw-w-full">
+          <div className="tw-space-y-5 tw-w-full">
             {titleState === TITLE_STATE.INPUT && (
               <div>
                 <div className="tw-mt-1 5">
@@ -185,10 +185,35 @@ const CreateDropFullDesktop = forwardRef<
               onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
               onFileChange={onFileChange}
             />
-
-            <button onClick={onDropPart} disabled={!canAddPart}>
-              Add storm
-            </button>
+            <div className="tw-flex tw-justify-end">
+              <button
+                type="button"
+                onClick={onDropPart}
+                disabled={!canAddPart}
+                className={`${
+                  canAddPart
+                    ? "tw-text-primary-400 hover:tw-bg-primary-400/10 tw-border-primary-400"
+                    : "tw-opacity-80 tw-text-iron-400"
+                } tw-bg-iron-900 tw-shadow tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-rounded-lg tw-inline-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300`}
+              >
+                <svg
+                  className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Add storm</span>
+              </button>
+            </div>
             <CreateDropSelectFile onFileChange={onFileChange} file={file} />
             <CreateDropFullDesktopMetadata
               metadata={metadata}
