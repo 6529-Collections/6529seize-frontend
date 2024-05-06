@@ -11,7 +11,7 @@ export default function DropPartDiscussion({
   readonly dropPart: DropPart;
 }) {
   return (
-    <div>
+    <div className="tw-mt-4">
       <DropPartDiscussionInputWrapper drop={drop} dropPart={dropPart} />
       <DropPartDiscussionItems drop={drop} dropPart={dropPart} />
     </div>

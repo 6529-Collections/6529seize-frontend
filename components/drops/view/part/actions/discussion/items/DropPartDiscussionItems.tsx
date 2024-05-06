@@ -81,7 +81,7 @@ export default function DropPartDiscussionItems({
     fetchNextPage();
   };
   return (
-    <div className="tw-space-y-4">
+    <div className="tw-mt-2 tw-space-y-4">
       <div className="tw-max-h-72 tw-overflow-y-auto">
         <div className="tw-space-y-4">
           {comments.map((item) => (

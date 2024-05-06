@@ -52,7 +52,7 @@ export default function DropPartQuote({
   }
 
   return (
-    <div className="tw-border-red tw-border tw-border-solid">
+    <div className="tw-mt-4 tw-p-4 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid">
       <DropWrapper drop={drop}>
         <div className="tw-w-full">
           <DropPart

@@ -251,7 +251,7 @@ const DropPart = memo(
                   </h1>
                 ),
                 p: (params) => (
-                  <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+                  <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-text-balance">
                     {customRenderer({
                       content: params.children,
                       mentionedUsers,
