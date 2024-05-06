@@ -1,13 +1,21 @@
 import Head from "next/head";
-import { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
 import Waves from "../../components/waves/Waves";
+import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+
+const Header = dynamic(() => import("../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 export default function WavesPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Waves" },
   ];
+
   return (
     <>
       <Head>
@@ -25,11 +33,12 @@ export default function WavesPage() {
         />
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
-
-      <div className="tailwind-scope">
-        <SidebarLayout breadcrumbs={breadcrumbs}>
-          <Waves />
-        </SidebarLayout>
+      <div className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+        <div>
+          <Header />
+          <Breadcrumb breadcrumbs={breadcrumbs} />
+        </div>
+        <Waves />
       </div>
     </>
   );

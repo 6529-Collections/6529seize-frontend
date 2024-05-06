@@ -12,13 +12,13 @@ export default function WavesOutcome() {
       <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
         Actions
       </p>
-      <div className="tw-mt-6">
+      <div className="tw-mt-5">
         <WavesOutcomeTabs />
       </div>
       <div className="tw-mt-6">
-        <WavesOutcomeManualOptions />
-        {/*   <WavesOutcome6529ActionsOptions /> */}
-        {/*  <WavesOutcomeSocialMediaOptions /> */}
+        {/*  <WavesOutcomeManualOptions /> */}
+        {/* <WavesOutcome6529ActionsOptions /> */}
+        <WavesOutcomeSocialMediaOptions />
         {/* <WavesOutcomeOnChainOptions /> */}
         {/* <WavesOutcomeGeneralDataOptions /> */}
         {/*  <WavesOutcomeAppsOptions /> */}
