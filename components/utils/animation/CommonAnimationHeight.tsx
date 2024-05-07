@@ -32,7 +32,7 @@ export default function CommonAnimationHeight({
 
   return (
     <motion.div
-      className={`${className} `}
+      className={`${className} tw-overflow-hidden `}
       style={{ height }}
       animate={{ height }}
       transition={{ duration: 0.3 }}
