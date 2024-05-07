@@ -18,10 +18,10 @@ export default function WavesOutcome() {
       <div className="tw-mt-6">
         {/*  <WavesOutcomeManualOptions /> */}
         {/* <WavesOutcome6529ActionsOptions /> */}
-        <WavesOutcomeSocialMediaOptions />
-        {/* <WavesOutcomeOnChainOptions /> */}
-        {/* <WavesOutcomeGeneralDataOptions /> */}
-        {/*  <WavesOutcomeAppsOptions /> */}
+        {/*  <WavesOutcomeSocialMediaOptions />  */}
+       {/*  <WavesOutcomeOnChainOptions /> */}
+       {/*  <WavesOutcomeGeneralDataOptions /> */}
+        <WavesOutcomeAppsOptions /> 
       </div>
     </div>
   );

@@ -9,8 +9,8 @@ export default function WavesDrops() {
       <WavesDropsSteps />
       <div className="tw-max-w-xl tw-mx-auto tw-w-full">
         <WavesDropsScope />
-        {/*  <WavesDropsApplicationsPerParticipant /> */}
-        {/*   <WavesDropsMetadata />  */}
+        {/* <WavesDropsApplicationsPerParticipant /> */}
+        {/* <WavesDropsMetadata />  */}
       </div>
     </div>
   );

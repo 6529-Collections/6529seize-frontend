@@ -43,7 +43,7 @@ export default function WavesCreditType() {
         </div>
         {/* <div className="tw-col-span-full">
           <WavesCreditTypeRep />
-        </div> */}
+        </div>  */}
       </div>
       <div className="tw-mt-6 tw-text-right">
         <button
