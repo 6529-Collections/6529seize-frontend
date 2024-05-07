@@ -165,7 +165,7 @@ const CreateDropFullMobile = forwardRef<
               onReferencedNft={onReferencedNft}
               onViewClick={onViewClick}
               onFileChange={onFileChange}
-            />
+            />{/* 
             <button type="button" onClick={onDropPart} disabled={!canAddPart} className={`${canAddPart? "tw-bg-iron-800" : ""} tw-font-medium tw-text-sm tw-rounded-lg tw-inline-flex tw-items-center tw-justify-center tw-gap-x-2 tailwind-scope`}>
               <svg
                 enable-background="new 0 0 57.691 55.692"
@@ -199,7 +199,7 @@ const CreateDropFullMobile = forwardRef<
                 ></path>
               </svg>
               <span>Add storm</span>
-            </button>
+            </button> */}
             <CreateDropSelectFile onFileChange={onFileChange} file={file} />
             <CreateDropFullMobileMetadata
               metadata={metadata}

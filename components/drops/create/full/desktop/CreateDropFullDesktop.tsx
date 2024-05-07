@@ -188,11 +188,11 @@ const CreateDropFullDesktop = forwardRef<
                 type="button"
                 onClick={onDropPart}
                 disabled={!canAddPart}
-                className={`${
+                className={`${ 
                   canAddPart
-                    ? "tw-text-iron-300 hover:tw-text-primary-400 hover:tw-border-primary-400 hover:tw-bg-iron-900"
-                    : "tw-opacity-80 tw-text-iron-400"
-                } tw-bg-iron-800 tw-border-iron-600 tw-shadow tw-border tw-border-solid tw-px-2.5 tw-py-2 tw-text-xxs tw-font-semibold tw-rounded-lg tw-inline-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300`}
+                    ? "tw-text-iron-400 hover:tw-text-primary-400"
+                    : "tw-text-iron-600"
+                } `}
               >
                 <svg
                   className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-mr-2"
