@@ -44,7 +44,7 @@ export default function DropsListItem({
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropWrapper drop={drop}>
-              <div className="tw-w-full">
+              <div className="tw-w-full tw-h-full">
                 <DropListItemContent
                   drop={drop}
                   showFull={showFull}

@@ -10,7 +10,7 @@ export default function DropWrapper({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="tw-flex tw-gap-x-3">
+    <div className="tw-flex tw-gap-x-3 tw-h-full">
       <div className="tw-hidden sm:tw-block">
         <DropPfp pfpUrl={drop.author.pfp} />
       </div>
