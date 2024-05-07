@@ -15,7 +15,7 @@ export default function DropListItemContentNftDetails({
         <img
           alt="Seize"
           src={image}
-          className="tw-flex-shrink-0 tw-h-3 tw-w-3"
+          className="tw-flex-shrink-0 tw-h-4 tw-w-4"
         />
       )}
       <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-50">

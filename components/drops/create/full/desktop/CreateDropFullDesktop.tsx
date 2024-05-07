@@ -135,7 +135,7 @@ const CreateDropFullDesktop = forwardRef<
             tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -160,17 +160,15 @@ const CreateDropFullDesktop = forwardRef<
           <div className="tw-space-y-5 tw-w-full">
             {titleState === TITLE_STATE.INPUT && (
               <div>
-                <div className="tw-mt-1 5">
-                  <input
-                    id="title"
-                    type="text"
-                    placeholder="Drop title"
-                    value={title ?? ""}
-                    onChange={(e) => onTitle(e.target.value)}
-                    maxLength={250}
-                    className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-text-md tw-leading-6 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                  />
-                </div>
+                <input
+                  id="title"
+                  type="text"
+                  placeholder="Drop title"
+                  value={title ?? ""}
+                  onChange={(e) => onTitle(e.target.value)}
+                  maxLength={250}
+                  className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-text-md tw-leading-6 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                />
               </div>
             )}
             <CreateDropContent
@@ -185,26 +183,27 @@ const CreateDropFullDesktop = forwardRef<
               onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
               onFileChange={onFileChange}
             />
-            <div className="tw-flex tw-justify-end">
+         {/*  <div className="tw-flex tw-justify-end">
               <button
                 type="button"
                 onClick={onDropPart}
                 disabled={!canAddPart}
                 className={`${
                   canAddPart
-                    ? "tw-text-primary-400 hover:tw-bg-primary-400/10 tw-border-primary-400"
+                    ? "tw-text-iron-300 hover:tw-text-primary-400 hover:tw-border-primary-400 hover:tw-bg-iron-900"
                     : "tw-opacity-80 tw-text-iron-400"
-                } tw-bg-iron-900 tw-shadow tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-rounded-lg tw-inline-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300`}
+                } tw-bg-iron-800 tw-border-iron-600 tw-shadow tw-border tw-border-solid tw-px-2.5 tw-py-2 tw-text-xxs tw-font-semibold tw-rounded-lg tw-inline-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300`}
               >
                 <svg
-                  className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                  className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-mr-2"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
-                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M12 5V19M5 12H19"
+                    d="M14.2495 2H8.49395C8.31447 2 8.22473 2 8.14551 2.02733C8.07544 2.05149 8.01163 2.09093 7.95868 2.14279C7.89881 2.20143 7.85868 2.2817 7.77841 2.44223L3.57841 10.8422C3.38673 11.2256 3.29089 11.4173 3.31391 11.5731C3.33401 11.7091 3.40927 11.8309 3.52197 11.9097C3.65104 12 3.86534 12 4.29395 12H10.4995L7.49953 22L19.6926 9.35531C20.104 8.9287 20.3097 8.7154 20.3217 8.53288C20.3321 8.37446 20.2667 8.22049 20.1454 8.11803C20.0057 8 19.7094 8 19.1167 8H11.9995L14.2495 2Z"
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -213,7 +212,7 @@ const CreateDropFullDesktop = forwardRef<
                 </svg>
                 <span>Add storm</span>
               </button>
-            </div>
+            </div>  */}
             <CreateDropSelectFile onFileChange={onFileChange} file={file} />
             <CreateDropFullDesktopMetadata
               metadata={metadata}

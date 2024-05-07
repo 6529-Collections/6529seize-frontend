@@ -39,7 +39,7 @@ export default function PrimaryButton({
       type={type}
       disabled={disabled || loading}
       onClick={onClick}
-      className={`${classes} tw-relative tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
+      className={`${classes} tw-relative tw-inline-flex tw-items-center tw-justify-center  tw-bg-primary-500 tw-py-2.5 tw-text-md tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-rounded-lg tw-shadow-sm tw-transition tw-duration-300 tw-ease-out`}
     >
       <div className={loading ? "tw-opacity-0" : ""}>{children}</div>
       {loading && (

@@ -9,10 +9,10 @@ export default function CreateDropSelectFileVideo({
   const inputRef = useRef<HTMLInputElement>(null);
     const randomId = getRandomObjectId();
   return (
-    <div className="tw-cursor-pointer tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out" role="button" aria-label="Select video file">
+    <div className="tw-cursor-pointer tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out" role="button" aria-label="Select video file">
       <label htmlFor={randomId}>
         <svg
-          className="tw-cursor-pointer tw-h-6 tw-w-6 lg:tw-h-5 lg:tw-w-5 tw-text-iron-400 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+          className="tw-cursor-pointer -tw-mt-0.5 -tw-ml-0.5 tw-h-6 tw-w-6 lg:tw-h-5 lg:tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
