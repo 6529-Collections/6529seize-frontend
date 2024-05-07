@@ -25,7 +25,7 @@ export default function CreateDropSelectFile({
 
       {file && (
         <div className="tw-mt-2 tw-w-full">
-          <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700  tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-1 tw-truncate">
+          <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-1 tw-truncate hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out">
             <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
               <CreateDropSelectedFileIcon file={file} />
               <p className="tw-mb-0 tw-max-w-xl tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
@@ -36,7 +36,7 @@ export default function CreateDropSelectFile({
               <button
                 onClick={() => onFileChange(null)}
                 aria-label="Remove file"
-                className="tw-group tw-bg-transparent tw-border-none"
+                className="tw-group tw-bg-transparent tw-border-none tw-flex tw-items-center tw-justify-center"
               >
                 <svg
                   className="tw-w-5 tw-h-5 tw-text-red group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"

@@ -17,7 +17,7 @@ export default function CreateDropMetadataItem({
           <button
             onClick={() => onMetadataRemove(data_key)}
             aria-label="Remove file"
-            className="tw-group tw-p-1 tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-group tw-p-1.5 tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
           >
             <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"

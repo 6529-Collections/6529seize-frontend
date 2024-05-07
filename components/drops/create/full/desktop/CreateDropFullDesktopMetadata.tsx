@@ -37,7 +37,7 @@ export default function CreateDropFullDesktopMetadata({
       <form
         id="metadata-form"
         onSubmit={onSubmit}
-        className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-4 tw-w-full"
+        className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-3 tw-w-full"
       >
         <div className="tw-w-full">
           <input
@@ -62,10 +62,12 @@ export default function CreateDropFullDesktopMetadata({
         </div>
         <button
           type="submit"
-          className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+          aria-label="Add metadata"
+          title="Add metadata"
+          className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2.5 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
         >
           <svg
-            className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+            className="tw-w-5 tw-h-5"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -79,7 +81,6 @@ export default function CreateDropFullDesktopMetadata({
               strokeLinejoin="round"
             />
           </svg>
-          <span>Add</span>
         </button>
       </form>
       <CreateDropMetadataItems
