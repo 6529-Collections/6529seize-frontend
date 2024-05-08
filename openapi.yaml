@@ -8,6 +8,55 @@ servers:
   - url: /api
 
 paths:
+  /auth/nonce:
+    get:
+      tags:
+        - Authentication
+      summary: Get a message to sign by your web3 wallet
+      operationId: getNonce
+      parameters:
+        - name: signer_address
+          in: query
+          description: Your wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NonceResponse'
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Get a message to sign by your web3 wallet
+      operationId: getAuthToken
+      parameters:
+        - name: signer_address
+          in: query
+          description: Your wallet address
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 'Invalid request'
+
   /nfts:
     get:
       tags:
@@ -1901,6 +1950,38 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Nft"
+
+    NonceResponse:
+      type: object
+      required:
+        - nonce
+        - server_signature
+      properties:
+        nonce:
+          type: string
+        server_signature:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - client_signature
+        - server_signature
+      properties:
+        client_signature:
+          type: string
+        server_signature:
+          type: string
+        role:
+          type: string
+
+    LoginResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
 
 security:
   - bearerAuth: []

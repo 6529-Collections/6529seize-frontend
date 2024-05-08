@@ -32,9 +32,12 @@ export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
 export * from '../models/IntRange';
+export * from '../models/LoginRequest';
+export * from '../models/LoginResponse';
 export * from '../models/NewDropComment';
 export * from '../models/Nft';
 export * from '../models/NftsPage';
+export * from '../models/NonceResponse';
 export * from '../models/PageBase';
 export * from '../models/PageWithNextUriBase';
 export * from '../models/ProfileMin';
@@ -90,9 +93,12 @@ import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { IntRange } from '../models/IntRange';
+import { LoginRequest } from '../models/LoginRequest';
+import { LoginResponse } from '../models/LoginResponse';
 import { NewDropComment } from '../models/NewDropComment';
 import { Nft      , NftTokenTypeEnum                            } from '../models/Nft';
 import { NftsPage } from '../models/NftsPage';
+import { NonceResponse } from '../models/NonceResponse';
 import { PageBase } from '../models/PageBase';
 import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
 import { ProfileMin } from '../models/ProfileMin';
@@ -172,9 +178,12 @@ let typeMap: {[index: string]: any} = {
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
     "IntRange": IntRange,
+    "LoginRequest": LoginRequest,
+    "LoginResponse": LoginResponse,
     "NewDropComment": NewDropComment,
     "Nft": Nft,
     "NftsPage": NftsPage,
+    "NonceResponse": NonceResponse,
     "PageBase": PageBase,
     "PageWithNextUriBase": PageWithNextUriBase,
     "ProfileMin": ProfileMin,
