@@ -13,6 +13,9 @@ import { UserRejectedRequestError } from "viem";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { NonceResponse } from "../../generated/models/NonceResponse";
+import { LoginRequest } from "../../generated/models/LoginRequest";
+import { LoginResponse } from "../../generated/models/LoginResponse";
 
 type AuthContextType = {
   connectedProfile: IProfileAndConsolidations | null;
@@ -25,11 +28,6 @@ type AuthContextType = {
     type: TypeOptions;
   }) => void;
 };
-
-interface NonceResponse {
-  readonly nonce: string;
-  readonly serverSignature: string;
-}
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
@@ -71,7 +69,7 @@ export default function Auth({
       return await commonApiFetch<NonceResponse>({
         endpoint: "auth/nonce",
         params: {
-          signerAddress,
+          signer_address: signerAddress,
         },
       });
     } catch {
@@ -159,8 +157,8 @@ export default function Auth({
       });
       return;
     }
-    const { nonce, serverSignature } = nonceResponse;
-    if (!nonce || !serverSignature) {
+    const { nonce, server_signature } = nonceResponse;
+    if (!nonce || !server_signature) {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
@@ -184,17 +182,11 @@ export default function Auth({
       return;
     }
     try {
-      const tokenResponse = await commonApiPost<
-        {
-          serverSignature: string;
-          clientSignature: string;
-        },
-        { token: string }
-      >({
+      const tokenResponse = await commonApiPost<LoginRequest, LoginResponse>({
         endpoint: "auth/login",
         body: {
-          serverSignature,
-          clientSignature: clientSignature.signature,
+          server_signature,
+          client_signature: clientSignature.signature,
         },
       });
       setAuthJwt(tokenResponse.token);
@@ -249,7 +241,8 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
-      }}>
+      }}
+    >
       {children}
       <ToastContainer />
     </AuthContext.Provider>
