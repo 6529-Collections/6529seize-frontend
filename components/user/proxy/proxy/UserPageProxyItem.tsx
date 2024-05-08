@@ -1,30 +1,35 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import {
-  CreateProxyAction,
-  ProfileProxyEntity,
-  ProxyActionType,
-} from "../../../../entities/IProxy";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { useRouter } from "next/router";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../../services/api/common-api";
-import { useContext, useState } from "react";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
+import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import ProxyHeader from "./ProxyHeader";
+import ProxyActions from "./list/ProxyActions";
+import ProxyCreateAction from "./create-action/ProxyCreateAction";
+import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
+import { Time } from "../../../../helpers/time";
+import Link from "next/link";
+
+enum VIEW_TYPE {
+  LIST = "LIST",
+  CREATE_NEW = "CREATE_NEW",
+}
 
 export default function UserPageProxyItem({
   profile: initialProfile,
   profileProxy: initialProfileProxy,
 }: {
   readonly profile: IProfileAndConsolidations;
-  readonly profileProxy: ProfileProxyEntity;
+  readonly profileProxy: ProfileProxy;
 }) {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string).toLowerCase();
   const profileProxyId = router.query.proxy as string;
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+
   const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, handleOrWallet],
     queryFn: async () =>
@@ -34,65 +39,79 @@ export default function UserPageProxyItem({
     enabled: !!handleOrWallet,
     initialData: initialProfile,
   });
-  const { data: profileProxy } = useQuery<ProfileProxyEntity>({
+
+  const { data } = useQuery<ProfileProxy>({
     queryKey: [QueryKey.PROFILE_PROXY, { id: profileProxyId }],
     queryFn: async () =>
-      await commonApiFetch<ProfileProxyEntity>({
+      await commonApiFetch<ProfileProxy>({
         endpoint: `proxies/${profileProxyId}`,
       }),
     enabled: !!profileProxyId,
     initialData: initialProfileProxy,
   });
+  const getIsSelf = () =>
+    connectedProfile?.profile?.external_id === profile.profile?.external_id;
 
-  const [submitting, setSubmitting] = useState(false);
+  const [isSelf, setIsSelf] = useState(getIsSelf());
 
-  const action: CreateProxyAction = {
-    action_type: ProxyActionType.ALLOCATE_REP,
-    start_time: 0,
-    end_time: null,
-    credit: 0,
-    group_id: null,
-    category: null,
-  };
-
-  const createProxyActionMutation = useMutation({
-    mutationFn: async (action: CreateProxyAction) => {
-      return await commonApiPost<CreateProxyAction, ProfileProxyEntity>({
-        endpoint: `proxies/${profileProxyId}/actions`,
-        body: action,
-      });
-    },
-    onSuccess: (result) => {
-      console.log(result);
-      setToast({
-        message: "Action created",
-        type: "success",
-      });
-    },
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      setSubmitting(false);
-    },
-  });
-
-  const onSubmit = async () => {
-    setSubmitting(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setSubmitting(false);
-      return;
+  const getProfileProxy = () => {
+    if (isSelf) {
+      return data;
     }
-    await createProxyActionMutation.mutateAsync(action);
+    const now = Time.currentMillis();
+    return {
+      ...data,
+      actions: data.actions.filter((a) => {
+        if (a.start_time && a.start_time > now) {
+          return false;
+        }
+        if (a.end_time && a.end_time < now) {
+          return false;
+        }
+        return a.is_active;
+      }),
+    };
   };
+  const [profileProxy, setProfileProxy] = useState(getProfileProxy());
+  useEffect(() => setProfileProxy(getProfileProxy()), [data, isSelf]);
+
+  const [viewType, setViewType] = useState(VIEW_TYPE.LIST);
+
+  const getIsGrantor = () =>
+    connectedProfile?.profile?.external_id === profileProxy?.created_by?.id;
+
+  const [isGrantor, setIsGrantor] = useState(getIsGrantor());
+  useEffect(() => setIsSelf(getIsSelf()), [connectedProfile, profile]);
+  useEffect(
+    () => setIsGrantor(getIsGrantor()),
+    [connectedProfile, profileProxy]
+  );
+
+  const getCanAddNewAction = () =>
+    isGrantor && isSelf && viewType === VIEW_TYPE.LIST;
+  const [canAddNewAction, setCanAddNewAction] = useState(getCanAddNewAction());
+  useEffect(
+    () => setCanAddNewAction(getCanAddNewAction()),
+    [isGrantor, isSelf, viewType]
+  );
+
+  const components: Record<VIEW_TYPE, JSX.Element> = {
+    [VIEW_TYPE.LIST]: <ProxyActions profileProxy={profileProxy} />,
+    [VIEW_TYPE.CREATE_NEW]: <ProxyCreateAction profileProxy={profileProxy} />,
+  };
+
+  const backHref = `/${handleOrWallet}/proxy`;
 
   return (
     <div>
-      <button onClick={onSubmit}>submit</button>
+      <Link href={backHref}>Back</Link>
+      <ProxyHeader profileProxy={profileProxy} />
+      {canAddNewAction && (
+        <button onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}>
+          Create new action
+        </button>
+      )}
+      <CommonChangeAnimation>{components[viewType]}</CommonChangeAnimation>
     </div>
   );
 }

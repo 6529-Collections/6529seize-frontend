@@ -11,9 +11,9 @@
  */
 
 import { DropContextProfileContext } from '../models/DropContextProfileContext';
-import { DropMedia } from '../models/DropMedia';
 import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
+import { DropPart } from '../models/DropPart';
 import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
@@ -31,34 +31,22 @@ export class Drop {
     * Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
     */
     'created_at': number;
-    'title'?: string | null;
-    'content'?: string | null;
-    'quoted_drop_id'?: string | null;
-    /**
-    * Exists if the drop is part of a storm and is not the first drop in the storm
-    */
-    'root_drop_id'?: string | null;
-    'referenced_nfts': Array<DropReferencedNFT>;
-    'mentioned_users': Array<DropMentionedUser>;
-    'metadata': Array<DropMetadata>;
-    'media': Array<DropMedia>;
-    /**
-    * Which drop in the storm is this drop
-    */
-    'storm_sequence': number;
+    'title': string | null;
+    'parts': Array<DropPart>;
     /**
     * Number of drops in the storm
     */
-    'max_storm_sequence': number;
+    'parts_count': number;
+    'referenced_nfts': Array<DropReferencedNFT>;
+    'mentioned_users': Array<DropMentionedUser>;
+    'metadata': Array<DropMetadata>;
     'rating': number;
     'top_raters': Array<DropRater>;
     'raters_count': number;
     'top_rating_categories': Array<DropRatingCategory>;
     'rating_categories_count': number;
-    'discussion_comments_count': number;
     'rating_logs_count': number;
-    'quotes_count': number;
-    'context_profile_context'?: DropContextProfileContext | null;
+    'context_profile_context': DropContextProfileContext | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -94,22 +82,16 @@ export class Drop {
             "format": ""
         },
         {
-            "name": "content",
-            "baseName": "content",
-            "type": "string",
+            "name": "parts",
+            "baseName": "parts",
+            "type": "Array<DropPart>",
             "format": ""
         },
         {
-            "name": "quoted_drop_id",
-            "baseName": "quoted_drop_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "root_drop_id",
-            "baseName": "root_drop_id",
-            "type": "string",
-            "format": ""
+            "name": "parts_count",
+            "baseName": "parts_count",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "referenced_nfts",
@@ -128,24 +110,6 @@ export class Drop {
             "baseName": "metadata",
             "type": "Array<DropMetadata>",
             "format": ""
-        },
-        {
-            "name": "media",
-            "baseName": "media",
-            "type": "Array<DropMedia>",
-            "format": ""
-        },
-        {
-            "name": "storm_sequence",
-            "baseName": "storm_sequence",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "max_storm_sequence",
-            "baseName": "max_storm_sequence",
-            "type": "number",
-            "format": "int64"
         },
         {
             "name": "rating",
@@ -178,20 +142,8 @@ export class Drop {
             "format": "int64"
         },
         {
-            "name": "discussion_comments_count",
-            "baseName": "discussion_comments_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
             "name": "rating_logs_count",
             "baseName": "rating_logs_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "quotes_count",
-            "baseName": "quotes_count",
             "type": "number",
             "format": "int64"
         },

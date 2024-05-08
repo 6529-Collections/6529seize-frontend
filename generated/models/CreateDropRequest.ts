@@ -10,7 +10,7 @@
  * Do not edit the class manually.
  */
 
-import { DropMedia } from '../models/DropMedia';
+import { CreateDropPart } from '../models/CreateDropPart';
 import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
@@ -18,16 +18,10 @@ import { HttpFile } from '../http/http';
 
 export class CreateDropRequest {
     'title'?: string | null;
-    'content'?: string | null;
-    /**
-    * If the drop is part of a storm and is not the first drop in the storm
-    */
-    'root_drop_id'?: string | null;
-    'quoted_drop_id'?: string | null;
+    'parts': Array<CreateDropPart>;
     'referenced_nfts': Array<DropReferencedNFT>;
     'mentioned_users': Array<DropMentionedUser>;
     'metadata': Array<DropMetadata>;
-    'media': Array<DropMedia>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -39,22 +33,10 @@ export class CreateDropRequest {
             "format": ""
         },
         {
-            "name": "content",
-            "baseName": "content",
-            "type": "string",
+            "name": "parts",
+            "baseName": "parts",
+            "type": "Array<CreateDropPart>",
             "format": ""
-        },
-        {
-            "name": "root_drop_id",
-            "baseName": "root_drop_id",
-            "type": "string",
-            "format": "uuid"
-        },
-        {
-            "name": "quoted_drop_id",
-            "baseName": "quoted_drop_id",
-            "type": "string",
-            "format": "uuid"
         },
         {
             "name": "referenced_nfts",
@@ -72,12 +54,6 @@ export class CreateDropRequest {
             "name": "metadata",
             "baseName": "metadata",
             "type": "Array<DropMetadata>",
-            "format": ""
-        },
-        {
-            "name": "media",
-            "baseName": "media",
-            "type": "Array<DropMedia>",
             "format": ""
         }    ];
 

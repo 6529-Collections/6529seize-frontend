@@ -15,7 +15,7 @@ import {
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { ProfileProxyEntity } from "../../entities/IProxy";
+import { ProfileProxy } from "../../generated/models/ProfileProxy";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -44,7 +44,7 @@ export enum QueryKey {
   CURATION_FILTER = "CURATION_FILTER",
   NFTS_SEARCH = "NFTS_SEARCH",
   PROFILE_PROXY = "PROFILE_PROXY",
-  PROFILE_RECEIVED_PROFILE_PROXIES = "PROFILE_RECEIVED_PROFILE_PROXIES",
+  PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -91,8 +91,17 @@ export interface InitProfileIdentityPageParams {
 }
 
 type ReactQueryWrapperContextType = {
-  setProfile: (profile: IProfileAndConsolidations) => void;
-  setProfileProxy: (profileProxy: ProfileProxyEntity) => void;
+  readonly setProfile: (profile: IProfileAndConsolidations) => void;
+  readonly setProfileProxy: (profileProxy: ProfileProxy) => void;
+  readonly onProfileProxyModify: ({
+    profileProxyId,
+    createdByHandle,
+    grantedToHandle,
+  }: {
+    readonly profileProxyId: string;
+    readonly createdByHandle: string;
+    readonly grantedToHandle: string;
+  }) => void;
   onProfileCICModify: (params: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
@@ -142,22 +151,22 @@ type ReactQueryWrapperContextType = {
   }) => void;
 };
 
-export const ReactQueryWrapperContext =
-  createContext<ReactQueryWrapperContextType>({
-    setProfile: () => {},
-    setProfileProxy: () => {},
-    onProfileCICModify: () => {},
-    onProfileRepModify: () => {},
-    onProfileEdit: () => {},
-    onProfileStatementAdd: () => {},
-    onProfileStatementRemove: () => {},
-    initProfileRepPage: () => {},
-    initProfileIdentityPage: () => {},
-    initLandingPage: () => {},
-    initCommunityActivityPage: () => {},
-    onCurationFilterRemoved: () => {},
-    onCurationFilterChanged: () => {},
-  });
+export const ReactQueryWrapperContext = createContext<ReactQueryWrapperContextType>({
+  setProfile: () => {},
+  setProfileProxy: () => {},
+  onProfileProxyModify: () => {},
+  onProfileCICModify: () => {},
+  onProfileRepModify: () => {},
+  onProfileEdit: () => {},
+  onProfileStatementAdd: () => {},
+  onProfileStatementRemove: () => {},
+  initProfileRepPage: () => {},
+  initProfileIdentityPage: () => {},
+  initLandingPage: () => {},
+  initCommunityActivityPage: () => {},
+  onCurationFilterRemoved: () => {},
+  onCurationFilterChanged: () => {},
+});
 
 export default function ReactQueryWrapper({
   children,
@@ -219,11 +228,31 @@ export default function ReactQueryWrapper({
     }
   };
 
-  const setProfileProxy = (profileProxy: ProfileProxyEntity) => {
-    queryClient.setQueryData<ProfileProxyEntity>(
+  const setProfileProxy = (profileProxy: ProfileProxy) => {
+    queryClient.setQueryData<ProfileProxy>(
       [QueryKey.PROFILE_PROXY, { id: profileProxy.id }],
       profileProxy
     );
+  };
+
+  const onProfileProxyModify = ({
+    profileProxyId,
+    createdByHandle,
+    grantedToHandle,
+  }: {
+    readonly profileProxyId: string;
+    readonly createdByHandle: string;
+    readonly grantedToHandle: string;
+  }): void => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROXY, { id: profileProxyId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
+    });
   };
 
   const invalidateProfileRaterCICState = ({
@@ -557,6 +586,7 @@ export default function ReactQueryWrapper({
       value={{
         setProfile,
         setProfileProxy,
+        onProfileProxyModify,
         onProfileCICModify,
         onProfileRepModify,
         onProfileEdit,

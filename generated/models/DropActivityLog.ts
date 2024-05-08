@@ -20,7 +20,7 @@ export class DropActivityLog {
     'target_id': string;
     'contents': any;
     'type': DropActivityLogTypeEnum;
-    'created_at': Date;
+    'created_at': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -64,8 +64,8 @@ export class DropActivityLog {
         {
             "name": "created_at",
             "baseName": "created_at",
-            "type": "Date",
-            "format": "date-time"
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
