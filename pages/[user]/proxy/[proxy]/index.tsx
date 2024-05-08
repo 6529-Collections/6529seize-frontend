@@ -1,20 +1,20 @@
 import { ReactElement, useContext } from "react";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { NextPageWithLayout } from "../../_app";
-import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
-import UserPageLayout from "../../../components/user/layout/UserPageLayout";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { NextPageWithLayout } from "../../../_app";
+import { ReactQueryWrapperContext } from "../../../../components/react-query-wrapper/ReactQueryWrapper";
+import UserPageLayout from "../../../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getProxyById,
   getUserProfile,
   userPageNeedsRedirect,
-} from "../../../helpers/server.helpers";
-import UserPageProxyItem from "../../../components/user/proxy/proxy/UserPageProxyItem";
-import { ProfileProxyEntity } from "../../../entities/IProxy";
+} from "../../../../helpers/server.helpers";
+import UserPageProxyItem from "../../../../components/user/proxy/proxy/UserPageProxyItem";
+import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 
 export interface UserPageProxyProps {
   readonly profile: IProfileAndConsolidations;
-  readonly profileProxy: ProfileProxyEntity;
+  readonly profileProxy: ProfileProxy;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProxyProps }> = ({
@@ -59,8 +59,12 @@ export async function getServerSideProps(
       getProxyById({ proxyId, headers }),
     ]);
 
-    // TODO confirm it works (try to access some other user's proxy page)
-    if (profile.profile?.external_id !== profileProxy.created_by_id) {
+    if (
+      !profile.profile?.external_id ||
+      ![profileProxy.created_by.id, profileProxy.granted_to.id].includes(
+        profile.profile?.external_id
+      )
+    ) {
       return {
         redirect: {
           permanent: false,

@@ -1,13 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import {
-  CreateNewProfileProxy,
-  ProfileProxyEntity,
-} from "../../../../entities/IProxy";
+import { CreateNewProfileProxy } from "../../../../entities/IProxy";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
+import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 
 export default function ProxyCreateSubmit({
   targetId,
@@ -25,7 +23,7 @@ export default function ProxyCreateSubmit({
 
   const createProxyMutation = useMutation({
     mutationFn: async (body: CreateNewProfileProxy) => {
-      return await commonApiPost<CreateNewProfileProxy, ProfileProxyEntity>({
+      return await commonApiPost<CreateNewProfileProxy, ProfileProxy>({
         endpoint: `proxies`,
         body,
       });

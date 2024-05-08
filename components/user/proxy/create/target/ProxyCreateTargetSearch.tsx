@@ -12,10 +12,8 @@ function classNames(...classes: any) {
 }
 
 export default function ProxyCreateTargetSearch({
-  selectedTarget,
   onTargetSelect,
 }: {
-  readonly selectedTarget: CommunityMemberMinimal | null;
   readonly onTargetSelect: (target: CommunityMemberMinimal | null) => void;
 }) {
   // TODO make sure that user can't select themselves (disable the option)
@@ -49,7 +47,7 @@ export default function ProxyCreateTargetSearch({
   });
 
   return (
-    <Combobox as="div" value={selectedTarget} onChange={onTargetSelect}>
+    <Combobox as="div" value={null} onChange={onTargetSelect}>
       <Combobox.Label className="tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-gray-900">
         Assigned to
       </Combobox.Label>

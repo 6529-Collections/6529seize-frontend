@@ -12,21 +12,28 @@
 
 import { HttpFile } from '../http/http';
 
-export class CommentDropRequest {
-    'content': string;
+export class QuotedDrop {
+    'drop_id': string;
+    'drop_part_id': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "content",
-            "baseName": "content",
+            "name": "drop_id",
+            "baseName": "drop_id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "drop_part_id",
+            "baseName": "drop_part_id",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return CommentDropRequest.attributeTypeMap;
+        return QuotedDrop.attributeTypeMap;
     }
 
     public constructor() {

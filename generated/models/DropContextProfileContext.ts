@@ -16,8 +16,6 @@ import { HttpFile } from '../http/http';
 export class DropContextProfileContext {
     'categories': Array<DropRatingCategory>;
     'rating': number;
-    'discussion_comments_count': number;
-    'quotes_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,18 +29,6 @@ export class DropContextProfileContext {
         {
             "name": "rating",
             "baseName": "rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "discussion_comments_count",
-            "baseName": "discussion_comments_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "quotes_count",
-            "baseName": "quotes_count",
             "type": "number",
             "format": "int64"
         }    ];
