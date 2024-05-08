@@ -103,7 +103,7 @@ export default function UserPageProxyItem({
   const backHref = `/${handleOrWallet}/proxy`;
 
   return (
-    <div>
+    <div className="tailwind-scope">
       <div className="tw-flex tw-items-center tw-justify-between">
         <Link
           className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-no-underline tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
@@ -152,9 +152,21 @@ export default function UserPageProxyItem({
           )}
         </div>
       </div>
-      <ProxyHeader profileProxy={profileProxy} />
-
-      <CommonChangeAnimation>{components[viewType]}</CommonChangeAnimation>
+      <div className="tw-mt-2 sm:tw-mt-4">
+        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+          Actions
+        </p>
+        <div className="tw-mt-2 sm:tw-mt-4 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
+          <div className="tw-relative tw-gap-x-4 tw-py-4">
+            <ProxyHeader profileProxy={profileProxy} />
+            <div className="tw-pt-3 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
+              <CommonChangeAnimation>
+                {components[viewType]}
+              </CommonChangeAnimation>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function ProxyCreateActionSelectTypeItem({
   readonly setSelectedActionType: (actionType: ProfileProxyActionType) => void;
 }) {
   return (
-    <li className="tw-ring-1 tw-ring-iron-700 tw-rounded-lg">
+    <li className="tw-ring-1 tw-ring-iron-600 tw-rounded-lg">
       <button
         type="button"
         onClick={() => setSelectedActionType(actionType)}
