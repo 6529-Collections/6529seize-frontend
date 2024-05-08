@@ -1,57 +1,66 @@
+import { ProfileProxyActionType } from "../generated/models/ProfileProxyActionType";
 
-export enum ProxyActionType {
-  ALLOCATE_REP = "ALLOCATE_REP",
-  ALLOCATE_CIC = "ALLOCATE_CIC",
-  CREATE_WAVE = "CREATE_WAVE",
-  READ_WAVE = "READ_WAVE",
-  CREATE_DROP_TO_WAVE = "CREATE_DROP_TO_WAVE",
-  RATE_WAVE_DROP = "RATE_WAVE_DROP",
-}
-
-export interface CreateProxyActionBase<T extends ProxyActionType> {
+export interface CreateProxyActionBase<T extends ProfileProxyActionType> {
   readonly action_type: T;
-  readonly start_time: number;
   readonly end_time: number | null;
 }
 
 export interface CreateProxyAllocateCreditBase {
-  readonly credit: number;
+  readonly credit_amount: number;
   readonly group_id: string | null;
 }
 
 export interface CreateProxyAllocateRepAction
   extends CreateProxyAllocateCreditBase,
-    CreateProxyActionBase<ProxyActionType.ALLOCATE_REP> {
-  readonly category: string | null;
+    CreateProxyActionBase<ProfileProxyActionType.AllocateRep> {
+  readonly credit_category: string | null;
 }
 
 export interface CreateProxyAllocateCicAction
   extends CreateProxyAllocateCreditBase,
-    CreateProxyActionBase<ProxyActionType.ALLOCATE_CIC> {}
+    CreateProxyActionBase<ProfileProxyActionType.AllocateCic> {}
 
 export interface CreateProxyCreateWaveAction
-  extends CreateProxyActionBase<ProxyActionType.CREATE_WAVE> {}
+  extends CreateProxyActionBase<ProfileProxyActionType.CreateWave> {}
 
 export interface CreateProxyReadWaveAction
-  extends CreateProxyActionBase<ProxyActionType.READ_WAVE> {}
+  extends CreateProxyActionBase<ProfileProxyActionType.ReadWave> {}
 
 export interface CreateProxyCreateDropToWaveAction
-  extends CreateProxyActionBase<ProxyActionType.CREATE_DROP_TO_WAVE> {}
+  extends CreateProxyActionBase<ProfileProxyActionType.CreateDropToWave> {}
+
+export interface CreateProxyRateWaveDropAction
+  extends CreateProxyActionBase<ProfileProxyActionType.RateWaveDrop> {}
 
 export type CreateProxyAction =
   | CreateProxyAllocateRepAction
   | CreateProxyAllocateCicAction
   | CreateProxyCreateWaveAction
   | CreateProxyReadWaveAction
-  | CreateProxyCreateDropToWaveAction;
+  | CreateProxyCreateDropToWaveAction
+  | CreateProxyRateWaveDropAction;
 
 export interface CreateNewProfileProxy {
   readonly target_id: string;
 }
 
-export interface ProfileProxyEntity {
-  readonly id: string;
-  readonly target_id: string;
-  readonly created_at: number;
-  readonly created_by_id: string;
+export const PROFILE_PROXY_ACTION_LABELS: Record<
+  ProfileProxyActionType,
+  string
+> = {
+  [ProfileProxyActionType.AllocateRep]: "Allocate Rep",
+  [ProfileProxyActionType.AllocateCic]: "Allocate Cic",
+  [ProfileProxyActionType.CreateWave]: "Create Wave",
+  [ProfileProxyActionType.ReadWave]: "Read Wave",
+  [ProfileProxyActionType.CreateDropToWave]: "Create Drop To Wave",
+  [ProfileProxyActionType.RateWaveDrop]: "Rate Wave Drop",
+};
+
+export enum ProfileProxyActionStatus {
+  REJECTED = "REJECTED",
+  REVOKED = "REVOKED",
+  EXPIRED = "EXPIRED",
+  NOT_STARTED = "NOT_STARTED",
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
 }

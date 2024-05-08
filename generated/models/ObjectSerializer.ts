@@ -1,34 +1,120 @@
-export * from '../models/CommentDropRequest';
+export * from '../models/AcceptActionRequest';
+export * from '../models/AddActionToProxyRequest';
 export * from '../models/CreateDropMediaUrl201Response';
 export * from '../models/CreateDropMediaUrlRequest';
+export * from '../models/CreateDropPart';
 export * from '../models/CreateDropRequest';
+export * from '../models/CreateNewProfileProxy';
+export * from '../models/CreateNewProfileProxyAllocateCicAction';
+export * from '../models/CreateNewProfileProxyAllocateRepAction';
+export * from '../models/CreateNewProfileProxyCreateWaveAction';
+export * from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
+export * from '../models/CreateNewProfileProxyRateWaveDropAction';
+export * from '../models/CreateNewProfileProxyReadWaveAction';
+export * from '../models/CreateNewWave';
+export * from '../models/CreateNewWaveParticipationConfig';
+export * from '../models/CreateNewWaveScope';
+export * from '../models/CreateNewWaveVisibilityConfig';
+export * from '../models/CreateNewWaveVotingConfig';
+export * from '../models/Curation';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
+export * from '../models/DropComment';
+export * from '../models/DropCommentsPage';
 export * from '../models/DropContextProfileContext';
 export * from '../models/DropMedia';
 export * from '../models/DropMentionedUser';
 export * from '../models/DropMetadata';
+export * from '../models/DropPart';
+export * from '../models/DropPartContextProfileContext';
 export * from '../models/DropRater';
 export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
+export * from '../models/IntRange';
+export * from '../models/NewDropComment';
+export * from '../models/Nft';
+export * from '../models/NftsPage';
+export * from '../models/PageBase';
+export * from '../models/PageWithNextUriBase';
 export * from '../models/ProfileMin';
+export * from '../models/ProfileProxy';
+export * from '../models/ProfileProxyAction';
+export * from '../models/ProfileProxyActionType';
+export * from '../models/QuotedDrop';
+export * from '../models/UpdateCreditForActionRequest';
+export * from '../models/UpdateEndTimeForActionRequest';
+export * from '../models/Wave';
+export * from '../models/WaveConfig';
+export * from '../models/WaveCreditScope';
+export * from '../models/WaveCreditType';
+export * from '../models/WaveOutcome';
+export * from '../models/WaveParticipationConfig';
+export * from '../models/WaveRequiredMetadata';
+export * from '../models/WaveScope';
+export * from '../models/WaveScopeType';
+export * from '../models/WaveType';
+export * from '../models/WaveVisibilityConfig';
+export * from '../models/WaveVotingConfig';
 
-import { CommentDropRequest } from '../models/CommentDropRequest';
+import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
+import { AddActionToProxyRequest      } from '../models/AddActionToProxyRequest';
 import { CreateDropMediaUrl201Response } from '../models/CreateDropMediaUrl201Response';
 import { CreateDropMediaUrlRequest } from '../models/CreateDropMediaUrlRequest';
+import { CreateDropPart } from '../models/CreateDropPart';
 import { CreateDropRequest } from '../models/CreateDropRequest';
+import { CreateNewProfileProxy } from '../models/CreateNewProfileProxy';
+import { CreateNewProfileProxyAllocateCicAction     } from '../models/CreateNewProfileProxyAllocateCicAction';
+import { CreateNewProfileProxyAllocateRepAction      } from '../models/CreateNewProfileProxyAllocateRepAction';
+import { CreateNewProfileProxyCreateWaveAction   } from '../models/CreateNewProfileProxyCreateWaveAction';
+import { CreateNewProfileProxyCreateWaveParticipationDropAction   } from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
+import { CreateNewProfileProxyRateWaveDropAction   } from '../models/CreateNewProfileProxyRateWaveDropAction';
+import { CreateNewProfileProxyReadWaveAction   } from '../models/CreateNewProfileProxyReadWaveAction';
+import { CreateNewWave } from '../models/CreateNewWave';
+import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
+import { CreateNewWaveScope   } from '../models/CreateNewWaveScope';
+import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
+import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
+import { Curation } from '../models/Curation';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
+import { DropComment } from '../models/DropComment';
+import { DropCommentsPage } from '../models/DropCommentsPage';
 import { DropContextProfileContext } from '../models/DropContextProfileContext';
 import { DropMedia } from '../models/DropMedia';
 import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
+import { DropPart } from '../models/DropPart';
+import { DropPartContextProfileContext } from '../models/DropPartContextProfileContext';
 import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { IntRange } from '../models/IntRange';
+import { NewDropComment } from '../models/NewDropComment';
+import { Nft      , NftTokenTypeEnum                            } from '../models/Nft';
+import { NftsPage } from '../models/NftsPage';
+import { PageBase } from '../models/PageBase';
+import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
 import { ProfileMin } from '../models/ProfileMin';
+import { ProfileProxy } from '../models/ProfileProxy';
+import { ProfileProxyAction            } from '../models/ProfileProxyAction';
+import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
+import { QuotedDrop } from '../models/QuotedDrop';
+import { UpdateCreditForActionRequest } from '../models/UpdateCreditForActionRequest';
+import { UpdateEndTimeForActionRequest } from '../models/UpdateEndTimeForActionRequest';
+import { Wave } from '../models/Wave';
+import { WaveConfig      } from '../models/WaveConfig';
+import { WaveCreditScope } from '../models/WaveCreditScope';
+import { WaveCreditType } from '../models/WaveCreditType';
+import { WaveOutcome } from '../models/WaveOutcome';
+import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
+import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
+import { WaveScope   } from '../models/WaveScope';
+import { WaveScopeType } from '../models/WaveScopeType';
+import { WaveType } from '../models/WaveType';
+import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
+import { WaveVotingConfig        } from '../models/WaveVotingConfig';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -43,25 +129,70 @@ let primitives = [
                  ];
 
 let enumsMap: Set<string> = new Set<string>([
+    "AcceptActionRequestActionEnum",
     "DropActivityLogTypeEnum",
+    "NftTokenTypeEnum",
+    "ProfileProxyActionType",
+    "WaveCreditScope",
+    "WaveCreditType",
+    "WaveScopeType",
+    "WaveType",
 ]);
 
 let typeMap: {[index: string]: any} = {
-    "CommentDropRequest": CommentDropRequest,
+    "AcceptActionRequest": AcceptActionRequest,
+    "AddActionToProxyRequest": AddActionToProxyRequest,
     "CreateDropMediaUrl201Response": CreateDropMediaUrl201Response,
     "CreateDropMediaUrlRequest": CreateDropMediaUrlRequest,
+    "CreateDropPart": CreateDropPart,
     "CreateDropRequest": CreateDropRequest,
+    "CreateNewProfileProxy": CreateNewProfileProxy,
+    "CreateNewProfileProxyAllocateCicAction": CreateNewProfileProxyAllocateCicAction,
+    "CreateNewProfileProxyAllocateRepAction": CreateNewProfileProxyAllocateRepAction,
+    "CreateNewProfileProxyCreateWaveAction": CreateNewProfileProxyCreateWaveAction,
+    "CreateNewProfileProxyCreateWaveParticipationDropAction": CreateNewProfileProxyCreateWaveParticipationDropAction,
+    "CreateNewProfileProxyRateWaveDropAction": CreateNewProfileProxyRateWaveDropAction,
+    "CreateNewProfileProxyReadWaveAction": CreateNewProfileProxyReadWaveAction,
+    "CreateNewWave": CreateNewWave,
+    "CreateNewWaveParticipationConfig": CreateNewWaveParticipationConfig,
+    "CreateNewWaveScope": CreateNewWaveScope,
+    "CreateNewWaveVisibilityConfig": CreateNewWaveVisibilityConfig,
+    "CreateNewWaveVotingConfig": CreateNewWaveVotingConfig,
+    "Curation": Curation,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
+    "DropComment": DropComment,
+    "DropCommentsPage": DropCommentsPage,
     "DropContextProfileContext": DropContextProfileContext,
     "DropMedia": DropMedia,
     "DropMentionedUser": DropMentionedUser,
     "DropMetadata": DropMetadata,
+    "DropPart": DropPart,
+    "DropPartContextProfileContext": DropPartContextProfileContext,
     "DropRater": DropRater,
     "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
+    "IntRange": IntRange,
+    "NewDropComment": NewDropComment,
+    "Nft": Nft,
+    "NftsPage": NftsPage,
+    "PageBase": PageBase,
+    "PageWithNextUriBase": PageWithNextUriBase,
     "ProfileMin": ProfileMin,
+    "ProfileProxy": ProfileProxy,
+    "ProfileProxyAction": ProfileProxyAction,
+    "QuotedDrop": QuotedDrop,
+    "UpdateCreditForActionRequest": UpdateCreditForActionRequest,
+    "UpdateEndTimeForActionRequest": UpdateEndTimeForActionRequest,
+    "Wave": Wave,
+    "WaveConfig": WaveConfig,
+    "WaveOutcome": WaveOutcome,
+    "WaveParticipationConfig": WaveParticipationConfig,
+    "WaveRequiredMetadata": WaveRequiredMetadata,
+    "WaveScope": WaveScope,
+    "WaveVisibilityConfig": WaveVisibilityConfig,
+    "WaveVotingConfig": WaveVotingConfig,
 }
 
 type MimeTypeDescriptor = {
