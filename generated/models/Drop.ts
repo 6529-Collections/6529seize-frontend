@@ -26,6 +26,7 @@ export class Drop {
     * Sequence number of the drop in Seize
     */
     'serial_no': number;
+    'wave_id': string;
     'author': ProfileMin;
     /**
     * Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
@@ -62,6 +63,12 @@ export class Drop {
             "baseName": "serial_no",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "wave_id",
+            "baseName": "wave_id",
+            "type": "string",
+            "format": ""
         },
         {
             "name": "author",

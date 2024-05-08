@@ -42,8 +42,7 @@ export * from '../models/ProfileProxy';
 export * from '../models/ProfileProxyAction';
 export * from '../models/ProfileProxyActionType';
 export * from '../models/QuotedDrop';
-export * from '../models/UpdateCreditForActionRequest';
-export * from '../models/UpdateEndTimeForActionRequest';
+export * from '../models/UpdateActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
 export * from '../models/WaveCreditScope';
@@ -101,8 +100,7 @@ import { ProfileProxy } from '../models/ProfileProxy';
 import { ProfileProxyAction            } from '../models/ProfileProxyAction';
 import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { QuotedDrop } from '../models/QuotedDrop';
-import { UpdateCreditForActionRequest } from '../models/UpdateCreditForActionRequest';
-import { UpdateEndTimeForActionRequest } from '../models/UpdateEndTimeForActionRequest';
+import { UpdateActionRequest } from '../models/UpdateActionRequest';
 import { Wave } from '../models/Wave';
 import { WaveConfig      } from '../models/WaveConfig';
 import { WaveCreditScope } from '../models/WaveCreditScope';
@@ -183,8 +181,7 @@ let typeMap: {[index: string]: any} = {
     "ProfileProxy": ProfileProxy,
     "ProfileProxyAction": ProfileProxyAction,
     "QuotedDrop": QuotedDrop,
-    "UpdateCreditForActionRequest": UpdateCreditForActionRequest,
-    "UpdateEndTimeForActionRequest": UpdateEndTimeForActionRequest,
+    "UpdateActionRequest": UpdateActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
     "WaveOutcome": WaveOutcome,

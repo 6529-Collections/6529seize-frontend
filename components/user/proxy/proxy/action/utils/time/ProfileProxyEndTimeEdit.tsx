@@ -5,8 +5,11 @@ import CommonTimeSelect from "../../../../../../utils/time/CommonTimeSelect";
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import { UpdateEndTimeForActionRequest } from "../../../../../../../generated/models/UpdateEndTimeForActionRequest";
-import { commonApiPost } from "../../../../../../../services/api/common-api";
+import {
+  commonApiPost,
+  commonApiPut,
+} from "../../../../../../../services/api/common-api";
+import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
 
 export default function ProfileProxyEndTimeEdit({
   profileProxy,
@@ -24,12 +27,10 @@ export default function ProfileProxyEndTimeEdit({
   );
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
-    mutationFn: async (body: UpdateEndTimeForActionRequest) => {
-      return await commonApiPost<
-        UpdateEndTimeForActionRequest,
-        ProfileProxyAction
-      >({
-        endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}/end-time`,
+    mutationFn: async (body: UpdateActionRequest) => {
+      console.log(body);
+      return await commonApiPut<UpdateActionRequest, ProfileProxyAction>({
+        endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}`,
         body,
       });
     },

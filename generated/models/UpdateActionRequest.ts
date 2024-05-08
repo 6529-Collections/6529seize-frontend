@@ -12,8 +12,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class UpdateCreditForActionRequest {
-    'credit_amount': number;
+export class UpdateActionRequest {
+    'credit_amount'?: number;
+    'end_time'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,10 +24,16 @@ export class UpdateCreditForActionRequest {
             "baseName": "credit_amount",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "end_time",
+            "baseName": "end_time",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return UpdateCreditForActionRequest.attributeTypeMap;
+        return UpdateActionRequest.attributeTypeMap;
     }
 
     public constructor() {
