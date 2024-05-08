@@ -5,8 +5,11 @@ import { ProfileProxyAction } from "../../../../../../../generated/models/Profil
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import { UpdateCreditForActionRequest } from "../../../../../../../generated/models/UpdateCreditForActionRequest";
-import { commonApiPost } from "../../../../../../../services/api/common-api";
+import {
+  commonApiPost,
+  commonApiPut,
+} from "../../../../../../../services/api/common-api";
+import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
 
 export default function ProfileProxyCreditEdit({
   profileProxy,
@@ -24,12 +27,9 @@ export default function ProfileProxyCreditEdit({
   );
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
-    mutationFn: async (body: UpdateCreditForActionRequest) => {
-      return await commonApiPost<
-        UpdateCreditForActionRequest,
-        ProfileProxyAction
-      >({
-        endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}/credit`,
+    mutationFn: async (body: UpdateActionRequest) => {
+      return await commonApiPut<UpdateActionRequest, ProfileProxyAction>({
+        endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}`,
         body,
       });
     },
