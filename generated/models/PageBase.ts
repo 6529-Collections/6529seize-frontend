@@ -10,31 +10,37 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
 import { HttpFile } from '../http/http';
 
-export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
-    'rating': number;
+export class PageBase {
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
-            "format": ""
-        },
-        {
-            "name": "rating",
-            "baseName": "rating",
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropContextProfileContext.attributeTypeMap;
+        return PageBase.attributeTypeMap;
     }
 
     public constructor() {

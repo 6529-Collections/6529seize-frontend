@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 export class ProfileMin {
     'id': string;
     'handle': string;
-    'pfp'?: string;
+    'pfp': string | null;
     'cic': number;
     'rep': number;
     'tdh': number;

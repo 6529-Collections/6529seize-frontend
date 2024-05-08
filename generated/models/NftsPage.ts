@@ -10,31 +10,45 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
+import { Nft } from '../models/Nft';
 import { HttpFile } from '../http/http';
 
-export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
-    'rating': number;
+export class NftsPage {
+    'data': Array<Nft>;
+    'count': number;
+    'page': number;
+    'next': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<Nft>",
             "format": ""
         },
         {
-            "name": "rating",
-            "baseName": "rating",
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropContextProfileContext.attributeTypeMap;
+        return NftsPage.attributeTypeMap;
     }
 
     public constructor() {

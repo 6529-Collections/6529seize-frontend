@@ -13,13 +13,10 @@
 import { ProfileMin } from '../models/ProfileMin';
 import { HttpFile } from '../http/http';
 
-export class DropActivityLog {
+export class Curation {
     'id': string;
-    'profile_id': string;
+    'name': string;
     'author': ProfileMin;
-    'target_id': string;
-    'contents': any;
-    'type': DropActivityLogTypeEnum;
     'created_at': number;
 
     static readonly discriminator: string | undefined = undefined;
@@ -32,33 +29,15 @@ export class DropActivityLog {
             "format": ""
         },
         {
-            "name": "profile_id",
-            "baseName": "profile_id",
+            "name": "name",
+            "baseName": "name",
             "type": "string",
-            "format": "uuid"
+            "format": ""
         },
         {
             "name": "author",
             "baseName": "author",
             "type": "ProfileMin",
-            "format": ""
-        },
-        {
-            "name": "target_id",
-            "baseName": "target_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "contents",
-            "baseName": "contents",
-            "type": "any",
-            "format": ""
-        },
-        {
-            "name": "type",
-            "baseName": "type",
-            "type": "DropActivityLogTypeEnum",
             "format": ""
         },
         {
@@ -69,17 +48,10 @@ export class DropActivityLog {
         }    ];
 
     static getAttributeTypeMap() {
-        return DropActivityLog.attributeTypeMap;
+        return Curation.attributeTypeMap;
     }
 
     public constructor() {
     }
-}
-
-
-export enum DropActivityLogTypeEnum {
-    Comment = 'DROP_COMMENT',
-    RatingEdit = 'DROP_RATING_EDIT',
-    Created = 'DROP_CREATED'
 }
 
