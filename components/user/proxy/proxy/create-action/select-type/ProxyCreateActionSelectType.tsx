@@ -48,8 +48,8 @@ export default function ProxyCreateActionSelectType({
 
   return (
     <div>
-      <div>Select action type</div>
-      <ul>
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">Select action type</p>
+      <ul className="tw-mt-2 sm:tw-mt-4 tw-list-none tw-pl-0 tw-flex tw-items-center tw-gap-x-3">
         {availableActions.map((actionType) => (
           <ProxyCreateActionSelectTypeItem
             key={actionType}
