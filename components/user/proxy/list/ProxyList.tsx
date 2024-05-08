@@ -73,7 +73,9 @@ export default function ProxyList({
           )}
         </div>
       </div>
-      <CommonChangeAnimation>{components[proxyType]}</CommonChangeAnimation>
+      <div className="tw-mt-2 sm:tw-mt-4">
+        <CommonChangeAnimation>{components[proxyType]}</CommonChangeAnimation>
+      </div>
     </div>
   );
 }
