@@ -11,16 +11,15 @@
  */
 
 import { ProfileMin } from '../models/ProfileMin';
+import { ProfileProxyAction } from '../models/ProfileProxyAction';
 import { HttpFile } from '../http/http';
 
-export class DropActivityLog {
+export class ProfileProxy {
     'id': string;
-    'profile_id': string;
-    'author': ProfileMin;
-    'target_id': string;
-    'contents': any;
-    'type': DropActivityLogTypeEnum;
+    'granted_to': ProfileMin;
     'created_at': number;
+    'created_by': ProfileMin;
+    'actions': Array<ProfileProxyAction>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,54 +31,35 @@ export class DropActivityLog {
             "format": ""
         },
         {
-            "name": "profile_id",
-            "baseName": "profile_id",
-            "type": "string",
-            "format": "uuid"
-        },
-        {
-            "name": "author",
-            "baseName": "author",
+            "name": "granted_to",
+            "baseName": "granted_to",
             "type": "ProfileMin",
-            "format": ""
-        },
-        {
-            "name": "target_id",
-            "baseName": "target_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "contents",
-            "baseName": "contents",
-            "type": "any",
-            "format": ""
-        },
-        {
-            "name": "type",
-            "baseName": "type",
-            "type": "DropActivityLogTypeEnum",
             "format": ""
         },
         {
             "name": "created_at",
             "baseName": "created_at",
             "type": "number",
-            "format": "int64"
+            "format": ""
+        },
+        {
+            "name": "created_by",
+            "baseName": "created_by",
+            "type": "ProfileMin",
+            "format": ""
+        },
+        {
+            "name": "actions",
+            "baseName": "actions",
+            "type": "Array<ProfileProxyAction>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropActivityLog.attributeTypeMap;
+        return ProfileProxy.attributeTypeMap;
     }
 
     public constructor() {
     }
-}
-
-
-export enum DropActivityLogTypeEnum {
-    Comment = 'DROP_COMMENT',
-    RatingEdit = 'DROP_RATING_EDIT',
-    Created = 'DROP_CREATED'
 }
 
