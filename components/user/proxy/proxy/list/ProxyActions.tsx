@@ -22,7 +22,7 @@ export default function ProxyActions({
     return d.start_time - a.start_time;
   });
   return (
-    <ul>
+    <div className="tw-px-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-b-0 tw-divide-iron-700">
       {actions.map((action) => (
         <ProxyActionRow
           key={action.id}
@@ -30,6 +30,6 @@ export default function ProxyActions({
           profileProxyId={profileProxy.id}
         />
       ))}
-    </ul>
+    </div>
   );
 }
