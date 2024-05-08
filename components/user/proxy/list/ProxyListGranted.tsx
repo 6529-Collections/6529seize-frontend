@@ -45,10 +45,10 @@ export default function ProxyListGranted({
                 <circle cx="1" cy="1" r="1" />
               </svg>
               <p className="tw-mb-0">Allocate CIC</p>
+              <div className="tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20">
+                Pending
+              </div>
             </div>
-          </div>
-          <div className="tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20">
-            Pending
           </div>
           <svg
             className="tw-h-5 tw-w-5 tw-flex-none tw-text-iron-400"
