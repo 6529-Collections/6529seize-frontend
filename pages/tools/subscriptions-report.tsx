@@ -47,7 +47,7 @@ export default function SubscriptionsReport({
         <meta name="description" content="Subscriptions Report | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/subscriptions-report`}
+          content={`${process.env.BASE_ENDPOINT}/tools/subscriptions-report`}
         />
         <meta property="og:title" content="Subscriptions Report" />
         <meta property="og:description" content="6529 SEIZE" />
