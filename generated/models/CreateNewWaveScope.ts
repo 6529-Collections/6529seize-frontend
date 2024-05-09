@@ -10,34 +10,39 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
+import { WaveScopeType } from '../models/WaveScopeType';
 import { HttpFile } from '../http/http';
 
-export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
-    'rating': number;
+export class CreateNewWaveScope {
+    'type': WaveScopeType;
+    /**
+    * Only relevant when type=CURATED.
+    */
+    'curation_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
+            "name": "type",
+            "baseName": "type",
+            "type": "WaveScopeType",
             "format": ""
         },
         {
-            "name": "rating",
-            "baseName": "rating",
-            "type": "number",
-            "format": "int64"
+            "name": "curation_id",
+            "baseName": "curation_id",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropContextProfileContext.attributeTypeMap;
+        return CreateNewWaveScope.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+
 

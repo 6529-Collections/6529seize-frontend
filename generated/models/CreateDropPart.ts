@@ -10,31 +10,39 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
+import { DropMedia } from '../models/DropMedia';
+import { QuotedDrop } from '../models/QuotedDrop';
 import { HttpFile } from '../http/http';
 
-export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
-    'rating': number;
+export class CreateDropPart {
+    'content'?: string | null;
+    'quoted_drop'?: QuotedDrop | null;
+    'media': Array<DropMedia>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
+            "name": "content",
+            "baseName": "content",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "rating",
-            "baseName": "rating",
-            "type": "number",
-            "format": "int64"
+            "name": "quoted_drop",
+            "baseName": "quoted_drop",
+            "type": "QuotedDrop",
+            "format": ""
+        },
+        {
+            "name": "media",
+            "baseName": "media",
+            "type": "Array<DropMedia>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropContextProfileContext.attributeTypeMap;
+        return CreateDropPart.attributeTypeMap;
     }
 
     public constructor() {
