@@ -15,7 +15,8 @@ export default function UserPageRepNewRep({
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly repRates: ApiProfileRepRatesState | null;
-}) {
+  }) {
+  
   const [isAddNewRepModalOpen, setIsAddNewRepModalOpen] =
     useState<boolean>(false);
 

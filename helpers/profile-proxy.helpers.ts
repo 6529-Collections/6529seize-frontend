@@ -1,33 +1,34 @@
-import { ProfileProxyActionStatus } from "../entities/IProxy";
+import { ProfileProxyActionStatus, ProfileProxySide } from "../entities/IProxy";
 import { ProfileProxy } from "../generated/models/ProfileProxy";
 import { ProfileProxyAction } from "../generated/models/ProfileProxyAction";
+import { assertUnreachable } from "./AllowlistToolHelpers";
 import { Time } from "./time";
 
-export const getProfileProxyActionStatus = (
-  action: ProfileProxyAction
-): ProfileProxyActionStatus => {
-  const now = Time.currentMillis();
-  if (action.rejected_at) {
-    return ProfileProxyActionStatus.REJECTED;
+export const getProfileProxyActionStatus = ({
+  action,
+  side,
+}: {
+  action: ProfileProxyAction;
+  side: ProfileProxySide;
+}): ProfileProxyActionStatus => {
+  switch (side) {
+    case ProfileProxySide.GRANTED:
+      if (action.revoked_at) {
+        return ProfileProxyActionStatus.REVOKED;
+      }
+      return ProfileProxyActionStatus.ACTIVE;
+    case ProfileProxySide.RECEIVED:
+      if (action.rejected_at) {
+        return ProfileProxyActionStatus.REJECTED;
+      }
+      if (action.accepted_at) {
+        return ProfileProxyActionStatus.ACTIVE;
+      }
+      return ProfileProxyActionStatus.PENDING;
+    default:
+      assertUnreachable(side);
+      return ProfileProxyActionStatus.PENDING;
   }
-
-  if (action.revoked_at) {
-    return ProfileProxyActionStatus.REVOKED;
-  }
-
-  if (action.end_time && action.end_time < now) {
-    return ProfileProxyActionStatus.EXPIRED;
-  }
-
-  if (!action.accepted_at) {
-    return ProfileProxyActionStatus.PENDING;
-  }
-
-  if (action.start_time > now) {
-    return ProfileProxyActionStatus.NOT_STARTED;
-  }
-
-  return ProfileProxyActionStatus.ACTIVE;
 };
 
 const getProxiesFiltered = ({
@@ -68,8 +69,7 @@ export const groupProfileProxies = ({
 }): {
   readonly granted: ProfileProxy[];
   readonly received: ProfileProxy[];
-  } => {
-  
+} => {
   if (!profileProxies.length || !profileId)
     return { granted: [], received: [] };
   const profileProxiesFiltered = getProxiesFiltered({
