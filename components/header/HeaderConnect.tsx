@@ -1,6 +1,6 @@
 import styles from "./Header.module.scss";
 import { useAccount } from "wagmi";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import WalletModal from "./walletModal/WalletModal";
 import { useQuery } from "@tanstack/react-query";
@@ -8,11 +8,13 @@ import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
+import HeaderProxy from "./proxy/HeaderProxy";
+import { AuthContext } from "../auth/Auth";
 
 export default function HeaderConnect() {
   const account = useAccount();
   const { open } = useWeb3Modal();
-
+  const { activeProfileProxy } = useContext(AuthContext);
   const { isLoading, data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, account.address?.toLowerCase()],
     queryFn: async () =>
@@ -26,6 +28,10 @@ export default function HeaderConnect() {
   const [display, setDisplay] = useState("");
 
   useEffect(() => {
+    if (activeProfileProxy) {
+      setDisplay(`${activeProfileProxy.created_by.handle} (Proxy)`);
+      return;
+    }
     if (profile?.profile?.handle) {
       setDisplay(profile?.profile?.handle);
       return;
@@ -43,7 +49,7 @@ export default function HeaderConnect() {
       return;
     }
     setDisplay("Connect");
-  }, [profile, account.address]);
+  }, [profile, account.address, activeProfileProxy]);
 
   return (
     <>
@@ -53,20 +59,24 @@ export default function HeaderConnect() {
         <>
           <button
             className={`${styles.userProfileBtn}`}
-            onClick={() => setShowWalletModal(true)}>
+            onClick={() => setShowWalletModal(true)}
+          >
             <b>
               &nbsp;
               {display}
               &nbsp;
             </b>
           </button>
+
+          <HeaderProxy />
           <button
             className={`${styles.userProfileBtn}`}
             onClick={() =>
               (window.location.href = `/${
                 profile?.profile?.handle ?? account.address
               }`)
-            }>
+            }
+          >
             <FontAwesomeIcon icon="user"></FontAwesomeIcon>
           </button>
         </>

@@ -1,4 +1,4 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -16,23 +16,31 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { NonceResponse } from "../../generated/models/NonceResponse";
 import { LoginRequest } from "../../generated/models/LoginRequest";
 import { LoginResponse } from "../../generated/models/LoginResponse";
+import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 
 type AuthContextType = {
-  connectedProfile: IProfileAndConsolidations | null;
-  requestAuth: () => Promise<{ success: boolean }>;
-  setToast: ({
+  readonly connectedProfile: IProfileAndConsolidations | null;
+  readonly receivedProfileProxies: ProfileProxy[];
+  readonly activeProfileProxy: ProfileProxy | null;
+  readonly requestAuth: () => Promise<{ success: boolean }>;
+  readonly setToast: ({
     message,
     type,
   }: {
     message: string | React.ReactNode;
     type: TypeOptions;
   }) => void;
+  readonly setActiveProfileProxy: (profileProxy: ProfileProxy | null) => void;
 };
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  receivedProfileProxies: [],
+  activeProfileProxy: null,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
+  setActiveProfileProxy: () => {},
 });
 
 export default function Auth({
@@ -50,6 +58,42 @@ export default function Auth({
       }),
     enabled: !!address,
   });
+
+  const { data: profileProxies } = useQuery<ProfileProxy[]>({
+    queryKey: [
+      QueryKey.PROFILE_PROFILE_PROXIES,
+      { handleOrWallet: connectedProfile?.profile?.external_id },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ProfileProxy[]>({
+        endpoint: `profiles/${connectedProfile?.profile?.external_id}/proxies/`,
+      }),
+    enabled: !!connectedProfile?.profile?.external_id,
+  });
+
+  const [receivedProfileProxies, setReceivedProfileProxies] = useState<
+    ProfileProxy[]
+  >(
+    groupProfileProxies({
+      profileProxies: profileProxies ?? [],
+      onlyActive: true,
+      profileId: connectedProfile?.profile?.external_id ?? null,
+    }).received
+  );
+
+  const [activeProfileProxy, setActiveProfileProxy] =
+    useState<ProfileProxy | null>(null);
+
+  useEffect(() => {
+    setReceivedProfileProxies(
+      groupProfileProxies({
+        profileProxies: profileProxies ?? [],
+        onlyActive: true,
+        profileId: connectedProfile?.profile?.external_id ?? null,
+      }).received
+    );
+    setActiveProfileProxy(null);
+  }, [profileProxies, connectedProfile]);
 
   useEffect(() => {
     if (!address) {
@@ -241,6 +285,9 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
+        receivedProfileProxies,
+        activeProfileProxy,
+        setActiveProfileProxy,
       }}
     >
       {children}

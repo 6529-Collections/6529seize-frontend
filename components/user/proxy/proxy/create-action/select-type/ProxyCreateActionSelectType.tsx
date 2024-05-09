@@ -14,7 +14,9 @@ export default function ProxyCreateActionSelectType({
   const isActionAvailable = (actionType: ProfileProxyActionType): boolean => {
     switch (actionType) {
       case ProfileProxyActionType.AllocateRep:
-        return true;
+        return !currentActions.some(
+          (action) => action.action_type === ProfileProxyActionType.AllocateRep
+        );
       case ProfileProxyActionType.AllocateCic:
         return !currentActions.some(
           (action) => action.action_type === ProfileProxyActionType.AllocateCic
@@ -48,7 +50,9 @@ export default function ProxyCreateActionSelectType({
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">Select action type</p>
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+        Select action type
+      </p>
       <ul className="tw-mt-2 sm:tw-mt-4 tw-list-none tw-pl-0 tw-flex tw-items-center tw-gap-x-3">
         {availableActions.map((actionType) => (
           <ProxyCreateActionSelectTypeItem

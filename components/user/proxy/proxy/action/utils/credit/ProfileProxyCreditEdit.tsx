@@ -23,7 +23,7 @@ export default function ProfileProxyCreditEdit({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);
   const [creditAmount, setCreditAmount] = useState<number>(
-    profileProxyAction.action_data.credit_amount
+    profileProxyAction.credit_amount ?? 0
   );
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
