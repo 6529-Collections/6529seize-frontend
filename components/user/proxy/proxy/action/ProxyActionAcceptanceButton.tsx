@@ -12,6 +12,20 @@ import {
 } from "../../../../../generated/models/AcceptActionRequest";
 import { commonApiPost } from "../../../../../services/api/common-api";
 
+const ACTION_LABEL: Record<AcceptActionRequestActionEnum, string> = {
+  [AcceptActionRequestActionEnum.Accept]: "Accept",
+  [AcceptActionRequestActionEnum.Reject]: "Reject",
+  [AcceptActionRequestActionEnum.Revoke]: "Revoke",
+  [AcceptActionRequestActionEnum.Restore]: "Restore",
+};
+
+const ACTION_CLASSES: Record<AcceptActionRequestActionEnum, string> = {
+  [AcceptActionRequestActionEnum.Accept]: "tw-text-green",
+  [AcceptActionRequestActionEnum.Reject]: "tw-text-red",
+  [AcceptActionRequestActionEnum.Revoke]: "tw-text-red",
+  [AcceptActionRequestActionEnum.Restore]: "tw-text-green",
+};
+
 export default function ProxyActionAcceptanceButton({
   action,
   profile,
@@ -99,34 +113,18 @@ export default function ProxyActionAcceptanceButton({
     await profileProxyAcceptanceMutation.mutateAsync({ action: actionType });
   };
 
-  if (!possibleActions.length) {
-    return <></>;
-  }
-
   return (
     <div className="tw-flex tw-justify-end">
-      {/*   {possibleActions.map((possibleAction) => (
+      {possibleActions.map((action) => (
         <button
+          key={action}
+          onClick={() => onSubmit(action)}
           type="button"
-          className="tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-          key={possibleAction}
-          onClick={() => onSubmit(possibleAction)}
+          className={`${ACTION_CLASSES[action]} tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out`}
         >
-          {possibleAction}
+          {ACTION_LABEL[action]}
         </button>
-      ))} */}
-      <button
-        type="button"
-        className="tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-green tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-      >
-        Accept
-      </button>
-      <button
-        type="button"
-        className="tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-red tw-border-0 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-      >
-        Reject
-      </button>
+      ))}
     </div>
   );
 }

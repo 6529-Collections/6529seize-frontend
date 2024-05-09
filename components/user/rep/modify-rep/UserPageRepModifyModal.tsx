@@ -1,18 +1,26 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import {
+  ApiProfileRepRatesState,
   IProfileAndConsolidations,
   RatingStats,
 } from "../../../../entities/IProfile";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../../auth/Auth";
-import { commonApiPost } from "../../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../../services/api/common-api";
 import { getStringAsNumberOrZero } from "../../../../helpers/Helpers";
 import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
 import UserRateAdjustmentHelper from "../../utils/rate/UserRateAdjustmentHelper";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -22,16 +30,128 @@ interface ApiAddRepRatingToProfileRequest {
 export default function UserPageRepModifyModal({
   onClose,
   profile,
-  repState,
-  giverAvailableRep,
+  category,
 }: {
   readonly onClose: () => void;
   readonly profile: IProfileAndConsolidations;
-  readonly repState: RatingStats;
-  readonly giverAvailableRep: number;
+  readonly category: string;
 }) {
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
+
+  const { data: proxyGrantorRepRates } = useQuery<ApiProfileRepRatesState>({
+    queryKey: [
+      QueryKey.PROFILE_REP_RATINGS,
+      {
+        rater: activeProfileProxy?.created_by.handle,
+        handleOrWallet: profile.profile?.handle,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${profile.profile?.handle}/rep/ratings/received`,
+        params: activeProfileProxy?.created_by.handle
+          ? { rater: activeProfileProxy.created_by.handle }
+          : {},
+      }),
+    enabled:
+      !!activeProfileProxy?.created_by.handle && !!profile.profile?.handle,
+  });
+
+  const { data: connectedProfileRepRates } = useQuery<ApiProfileRepRatesState>({
+    queryKey: [
+      QueryKey.PROFILE_REP_RATINGS,
+      {
+        rater: connectedProfile?.profile?.handle,
+        handleOrWallet: profile.profile?.handle,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${profile.profile?.handle}/rep/ratings/received`,
+        params: connectedProfile?.profile?.handle
+          ? { rater: connectedProfile?.profile?.handle }
+          : {},
+      }),
+    enabled: !!connectedProfile?.profile?.handle && !!profile.profile?.handle,
+  });
+
+  const getRepState = (): RatingStats | null => {
+    if (proxyGrantorRepRates) {
+      const target = proxyGrantorRepRates.rating_stats.find(
+        (s) => s.category === category
+      );
+      return (
+        target ?? {
+          category,
+          rating: 0,
+          contributor_count: 0,
+          rater_contribution: 0,
+        }
+      );
+    }
+
+    if (activeProfileProxy) {
+      return null;
+    }
+
+    if (connectedProfileRepRates) {
+      const target = connectedProfileRepRates.rating_stats.find(
+        (s) => s.category === category
+      );
+      return (
+        target ?? {
+          category,
+          rating: 0,
+          contributor_count: 0,
+          rater_contribution: 0,
+        }
+      );
+    }
+
+    return null;
+  };
+
+  const getAvailableRep = (): number | null => {
+    if (proxyGrantorRepRates) {
+      const repProxy = activeProfileProxy?.actions.find(
+        (a) => a.action_type === ProfileProxyActionType.AllocateRep
+      );
+      if (!repProxy) {
+        return null;
+      }
+      const proxyGrantorAvailableRep =
+        proxyGrantorRepRates.rep_rates_left_for_rater ?? 0;
+      const repProxyAvailableRep =
+        (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0);
+      if (repProxyAvailableRep <= 0) {
+        return 0;
+      }
+      return Math.min(repProxyAvailableRep, proxyGrantorAvailableRep);
+    }
+    if (activeProfileProxy) {
+      return null;
+    }
+    return connectedProfileRepRates?.rep_rates_left_for_rater ?? null;
+  };
+
+  const [repState, setRepState] = useState<RatingStats | null>(getRepState());
+  const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
+    `${getRepState()?.rater_contribution}`
+  );
+
+  const [availableRep, setAvailableRep] = useState<number | null>(
+    getAvailableRep()
+  );
+
+  useEffect(() => {
+    const newState = getRepState();
+    setRepState(newState);
+    setAdjustedRatingStr(`${newState?.rater_contribution}`);
+    setAvailableRep(getAvailableRep());
+  }, [proxyGrantorRepRates, activeProfileProxy, connectedProfileRepRates]);
+
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (inputRef.current) {
@@ -43,15 +163,15 @@ export default function UserPageRepModifyModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const originalRating = repState.rater_contribution;
-
-  const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
-    `${originalRating}`
-  );
-
-  const maxPositiveValue = giverAvailableRep + Math.abs(originalRating);
+  const getMaxPositiveValue = (): number => {
+    if (typeof availableRep === "number" && repState) {
+      return availableRep + Math.abs(repState.rater_contribution);
+    }
+    return 0;
+  };
 
   const getValueStrOrMax = (value: string): string => {
+    const maxPositiveValue = getMaxPositiveValue();
     const valueAsNumber = getStringAsNumberOrZero(value);
     if (valueAsNumber > maxPositiveValue) {
       return `${maxPositiveValue}`;
@@ -122,12 +242,12 @@ export default function UserPageRepModifyModal({
   }, [adjustedRatingStr]);
 
   const [haveChanged, setHaveChanged] = useState<boolean>(
-    newRating !== originalRating
+    newRating !== repState?.rater_contribution
   );
 
   useEffect(() => {
-    setHaveChanged(newRating !== originalRating);
-  }, [newRating, originalRating]);
+    setHaveChanged(newRating !== repState?.rater_contribution);
+  }, [newRating, repState]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -151,7 +271,7 @@ export default function UserPageRepModifyModal({
 
     await addRepMutation.mutateAsync({
       amount: newRating,
-      category: repState.category,
+      category,
     });
   };
 
@@ -165,14 +285,16 @@ export default function UserPageRepModifyModal({
             className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
           >
             <UserPageRepModifyModalHeader profile={profile} onClose={onClose} />
-            <UserPageRepModifyModalRaterStats
-              repState={repState}
-              giverAvailableRep={giverAvailableRep}
-            />
+            {repState && (
+              <UserPageRepModifyModalRaterStats
+                repState={repState}
+                giverAvailableRep={availableRep ?? 0}
+              />
+            )}
             <form onSubmit={onSubmit} className="tw-mt-4">
               <div>
                 <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
-                  Your total Rep for {repState.category}:
+                  Your total Rep for {category}:
                 </label>
                 <div className="tw-relative tw-flex tw-mt-1.5">
                   <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
@@ -217,7 +339,7 @@ export default function UserPageRepModifyModal({
                 </div>
                 <UserRateAdjustmentHelper
                   inLineValues={true}
-                  originalValue={originalRating}
+                  originalValue={repState?.rater_contribution ?? 0}
                   adjustedValue={getStringAsNumberOrZero(adjustedRatingStr)}
                   adjustmentType="Rep"
                 />

@@ -20,7 +20,7 @@ export default function ProxyListItem({
   readonly profileProxy: ProfileProxy;
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const getIsGrantor = () =>
     connectedProfile?.profile?.external_id === profileProxy?.created_by?.id;
 
@@ -41,7 +41,11 @@ export default function ProxyListItem({
 
   const components: Record<VIEW_TYPE, JSX.Element> = {
     [VIEW_TYPE.LIST]: (
-      <ProxyActions profileProxy={profileProxy} profile={profile} />
+      <ProxyActions
+        profileProxy={profileProxy}
+        profile={profile}
+        isSelf={isSelf}
+      />
     ),
     [VIEW_TYPE.CREATE_NEW]: <ProxyCreateAction profileProxy={profileProxy} />,
   };
@@ -50,7 +54,7 @@ export default function ProxyListItem({
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-py-1">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <img
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+            src={profileProxy.created_by.pfp ?? ""}
             alt=""
             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
           />
@@ -78,7 +82,7 @@ export default function ProxyListItem({
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <img
-              src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+              src={profileProxy.granted_to.pfp ?? ""}
               alt=""
               className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
             />
@@ -86,32 +90,32 @@ export default function ProxyListItem({
               {profileProxy.granted_to.handle}
             </p>
           </div>
-          <div>
-            {canAddNewAction && (
-              <button
-                type="button"
-                onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
-                className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+        </div>
+        <div>
+          {canAddNewAction && (
+            <button
+              type="button"
+              onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
+              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+            >
+              <svg
+                className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 5V19M5 12H19"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>New action</span>
-              </button>
-            )}
-          </div>
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span> action</span>
+            </button>
+          )}
         </div>
       </div>
       <div>
