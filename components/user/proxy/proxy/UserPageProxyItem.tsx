@@ -152,18 +152,13 @@ export default function UserPageProxyItem({
           )}
         </div>
       </div>
-      <div className="tw-mt-2 sm:tw-mt-4">
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
-          Actions
-        </p>
-        <div className="tw-mt-2 sm:tw-mt-4 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
-          <div className="tw-relative tw-gap-x-4 tw-py-4">
-            <ProxyHeader profileProxy={profileProxy} />
-            <div className="tw-pt-3 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
-              <CommonChangeAnimation>
-                {components[viewType]}
-              </CommonChangeAnimation>
-            </div>
+      <div className="tw-mt-4 sm:tw-mt-6">
+        <div className="tw-relative tw-gap-x-4">
+          <ProxyHeader profileProxy={profileProxy} />
+          <div className="tw-mt-2 sm:tw-mt-4">
+            <CommonChangeAnimation>
+              {components[viewType]}
+            </CommonChangeAnimation>
           </div>
         </div>
       </div>
