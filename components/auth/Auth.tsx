@@ -85,14 +85,19 @@ export default function Auth({
     useState<ProfileProxy | null>(null);
 
   useEffect(() => {
-    setReceivedProfileProxies(
-      groupProfileProxies({
-        profileProxies: profileProxies ?? [],
-        onlyActive: true,
-        profileId: connectedProfile?.profile?.external_id ?? null,
-      }).received
-    );
-    setActiveProfileProxy(null);
+    const receivedProxies = groupProfileProxies({
+      profileProxies: profileProxies ?? [],
+      onlyActive: true,
+      profileId: connectedProfile?.profile?.external_id ?? null,
+    }).received;
+    setReceivedProfileProxies(receivedProxies);
+    const role = getRole({ jwt: getAuthJwt() });
+    if (role) {
+      const activeProxy = receivedProxies?.find(
+        (proxy) => proxy.created_by.id === role
+      );
+      setActiveProfileProxy(activeProxy ?? null);
+    }
   }, [profileProxies, connectedProfile]);
 
   useEffect(() => {
@@ -190,16 +195,18 @@ export default function Auth({
 
   const requestSignIn = async ({
     signerAddress,
+    role,
   }: {
-    signerAddress: string;
-  }) => {
+    readonly signerAddress: string;
+    readonly role: string | null;
+  }): Promise<{ success: boolean }> => {
     const nonceResponse = await getNonce({ signerAddress });
     if (!nonceResponse) {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
     const { nonce, server_signature } = nonceResponse;
     if (!nonce || !server_signature) {
@@ -207,7 +214,7 @@ export default function Auth({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
     const clientSignature = await getSignatureWithRetry({ message: nonce });
     if (clientSignature.userRejected) {
@@ -215,7 +222,7 @@ export default function Auth({
         message: "Authentication rejected",
         type: "error",
       });
-      return;
+      return { success: false };
     }
 
     if (!clientSignature.signature) {
@@ -223,7 +230,7 @@ export default function Auth({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
     try {
       const tokenResponse = await commonApiPost<LoginRequest, LoginResponse>({
@@ -231,16 +238,30 @@ export default function Auth({
         body: {
           server_signature,
           client_signature: clientSignature.signature,
+          role: role ?? undefined,
         },
       });
       setAuthJwt(tokenResponse.token);
+      return { success: true };
     } catch {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
+  };
+
+  const getRole = ({ jwt }: { jwt: string | null }): string | null => {
+    if (!jwt) return null;
+    const decodedJwt = jwtDecode<{
+      id: string;
+      sub: string;
+      iat: number;
+      exp: number;
+      role: string;
+    }>(jwt);
+    return decodedJwt.role;
   };
 
   const validateJwt = ({
@@ -256,6 +277,7 @@ export default function Auth({
       sub: string;
       iat: number;
       exp: number;
+      role: string;
     }>(jwt);
     return (
       decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
@@ -274,9 +296,28 @@ export default function Auth({
     const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
     if (!isAuth) {
       removeAuthJwt();
-      await requestSignIn({ signerAddress: address });
+      await requestSignIn({
+        signerAddress: address,
+        role: activeProfileProxy?.created_by.id ?? null,
+      });
     }
     return { success: !!getAuthJwt() };
+  };
+
+  const onActiveProfileProxy = async (profileProxy: ProfileProxy | null) => {
+    removeAuthJwt();
+    if (!address) {
+      setActiveProfileProxy(null);
+      return;
+    }
+
+    const { success } = await requestSignIn({
+      signerAddress: address,
+      role: profileProxy?.created_by.id ?? null,
+    });
+    if (success) {
+      setActiveProfileProxy(profileProxy);
+    }
   };
 
   return (
@@ -287,7 +328,7 @@ export default function Auth({
         connectedProfile: connectedProfile ?? null,
         receivedProfileProxies,
         activeProfileProxy,
-        setActiveProfileProxy,
+        setActiveProfileProxy: onActiveProfileProxy,
       }}
     >
       {children}
