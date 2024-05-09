@@ -18,17 +18,15 @@ import { useQuery } from "@tanstack/react-query";
 export default function AboutSubscriptionsUpcoming() {
   const remainingMintsForSeason = numberOfCardsForSeasonEnd();
   const dates = getMintingDates(remainingMintsForSeason.count);
-  const [upcomingCounts, setUpcomingCounts] = useState<SubscriptionCounts[]>(
-    []
-  );
 
-  useEffect(() => {
-    commonApiFetch<SubscriptionCounts[]>({
-      endpoint: `subscriptions/upcoming-memes-counts?card_count=${remainingMintsForSeason.count}`,
-    }).then((data) => {
-      setUpcomingCounts(data);
-    });
-  }, [remainingMintsForSeason.count]);
+  const { data: upcomingCounts } = useQuery<SubscriptionCounts[]>({
+    queryKey: ["upcoming-memes-counts", remainingMintsForSeason.count],
+    queryFn: async () =>
+      await commonApiFetch<SubscriptionCounts[]>({
+        endpoint: `subscriptions/upcoming-memes-counts?card_count=${remainingMintsForSeason.count}`,
+      }),
+    enabled: remainingMintsForSeason.count > 0,
+  });
 
   const { data: redeemedCounts } = useQuery<RedeemedSubscriptionCounts[]>({
     queryKey: ["redeeemed-memes-counts"],
@@ -56,7 +54,7 @@ export default function AboutSubscriptionsUpcoming() {
       </Row>
       <Row className="pt-3">
         <Col>
-          {upcomingCounts.length > 0 ? (
+          {upcomingCounts ? (
             <table
               className="table table-bordered"
               style={{
@@ -165,9 +163,11 @@ function SubscriptionDayDetails(
           padding: "15px",
           verticalAlign: "middle",
         }}>
-        The Memes #{props.count.token_id}{" "}
-        <span className="font-color-silver">
-          {props.date.toIsoDateString()} / {props.date.toDayName()}
+        <span className="d-flex flex-column">
+          <span>The Memes #{props.count.token_id}</span>
+          <span className="font-color-silver font-smaller">
+            {props.date.toIsoDateString()} / {props.date.toDayName()}
+          </span>
         </span>
       </td>
       <td
