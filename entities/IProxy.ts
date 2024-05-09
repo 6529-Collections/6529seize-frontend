@@ -62,3 +62,11 @@ export enum ProfileProxyActionStatus {
   ACTIVE = "ACTIVE",
 }
 
+export const PROFILE_PROXY_ACTION_HAVE_CREDIT: Record<ProfileProxyActionType, boolean> = {
+  [ProfileProxyActionType.AllocateRep]: true,
+  [ProfileProxyActionType.AllocateCic]: true,
+  [ProfileProxyActionType.CreateWave]: false,
+  [ProfileProxyActionType.ReadWave]: false,
+  [ProfileProxyActionType.CreateDropToWave]: false,
+  [ProfileProxyActionType.RateWaveDrop]: false,
+};
