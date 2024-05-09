@@ -6,7 +6,7 @@ import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useAccount } from "wagmi";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   amIUser,
   formatTimestampToMonthYear,
@@ -21,6 +21,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
+import { AuthContext } from "../../auth/Auth";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -35,19 +36,22 @@ export default function UserPageHeader({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
   const { address } = useAccount();
+  const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
     [profile, address]
   );
 
-  const [canEdit, setCanEdit] = useState<boolean>(
-    !!(profile.profile?.handle && isMyProfile)
-  );
+  const getCanEdit = (): boolean => {
+    return !!(profile.profile?.handle && isMyProfile && !activeProfileProxy);
+  };
+
+  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
 
   useEffect(() => {
-    setCanEdit(!!(profile.profile?.handle && isMyProfile));
-  }, [profile, isMyProfile]);
+    setCanEdit(getCanEdit());
+  }, [profile, isMyProfile, activeProfileProxy]);
 
   const { isFetched, data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
