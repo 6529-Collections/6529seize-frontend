@@ -7,7 +7,7 @@ export default function ProxyHeader({
   readonly profileProxy: ProfileProxy;
 }) {
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-3 tw-px-4">
+    <div className="tw-flex tw-items-center tw-gap-x-3">
       <div className="tw-flex tw-items-center tw-gap-x-3">
         <img
           src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
