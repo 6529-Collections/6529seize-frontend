@@ -16,13 +16,14 @@ export default function ProfileProxyEndTimeView({
     }
   };
   return (
-    <div className="tw-inline-flex">
+    <div className="tw-flex">
       <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-2 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
         {profileProxyAction.end_time}
       </p>
       {isOwner && (
         <button
-          className="tw-bg-transparent tw-border-none"
+          type="button"
+          className="tw-bg-transparent tw-border-0 tw-p-0 tw-rounded-full tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
           onClick={onEditMode}
         >
           <PencilIcon />

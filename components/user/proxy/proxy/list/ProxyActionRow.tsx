@@ -22,7 +22,7 @@ export default function ProxyActionRow({
   const status = getProfileProxyActionStatus(action);
 
   return (
-    <div className="tw-grid tw-grid-cols-12 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-p-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
+    <div className="tw-grid tw-grid-cols-12 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-py-3 tw-px-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
       <div className="tw-col-span-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
@@ -56,15 +56,21 @@ export default function ProxyActionRow({
         )}
       </div>
       <div className="tw-col-span-2">
-        <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-2 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
-          3 days
+        <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
+          <span>Start time:</span>
+          <span>3 days</span>
         </p>
       </div>
       <div className="tw-col-span-2">
-        <ProfileProxyEndTime
-          profileProxy={profileProxy}
-          profileProxyAction={action}
-        />
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <span className="tw-text-base tw-font-normal tw-text-iron-500">
+            End time:
+          </span>
+          <ProfileProxyEndTime
+            profileProxy={profileProxy}
+            profileProxyAction={action}
+          />
+        </div>
       </div>
       <div className="tw-col-span-2">
         <ProxyActionAcceptanceButton

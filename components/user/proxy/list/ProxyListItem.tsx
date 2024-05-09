@@ -46,20 +46,20 @@ export default function ProxyListItem({
     [VIEW_TYPE.CREATE_NEW]: <ProxyCreateAction profileProxy={profileProxy} />,
   };
   return (
-    <div className="tw-py-2 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
-      <div className="tw-flex tw-items-center tw-gap-x-3 tw-px-4 tw-py-2">
+    <div>
+      <div className="tw-flex tw-items-center tw-gap-x-3 tw-py-1">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <img
             src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
             alt=""
             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
           />
-          <p className="tw-mb-0 tw-flex-auto tw-font-medium tw-text-base">
+          <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
             {profileProxy.created_by.handle}
           </p>
         </div>
         <svg
-          className="tw-h-5 tw-w-5 tw-text-iron-400"
+          className="tw-h-5 tw-w-5 tw-text-iron-300"
           width="24"
           height="24"
           viewBox="0 0 24 24"
@@ -75,44 +75,46 @@ export default function ProxyListItem({
             strokeLinejoin="round"
           />
         </svg>
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          <img
-            src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            alt=""
-            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-          />
-          <p className="tw-mb-0 tw-flex-auto tw-font-medium tw-text-base">
-            {profileProxy.granted_to.handle}
-          </p>
-        </div>
-        <div>
-          {canAddNewAction && (
-            <button
-              type="button"
-              onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
-              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <svg
-                className="tw-w-5 tw-h-5 tw-mr-1 -tw-ml-1"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
+        <div className="tw-flex tw-w-full tw-gap-x-4">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
+            <img
+              src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+              alt=""
+              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+            />
+            <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
+              {profileProxy.granted_to.handle}
+            </p>
+          </div>
+          <div>
+            {canAddNewAction && (
+              <button
+                type="button"
+                onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
+                className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
               >
-                <path
-                  d="M12 5V19M5 12H19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>Create new action</span>
-            </button>
-          )}
+                <svg
+                  className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>New action</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-      <div className="tw-mt-2 tw-px-4 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
+      <div>
         <CommonChangeAnimation>{components[viewType]}</CommonChangeAnimation>
       </div>
     </div>
