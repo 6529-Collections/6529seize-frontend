@@ -14,6 +14,8 @@ export default function ProxyActionRow({
   const router = useRouter();
   const user = router.query.user as string;
   const status = getProfileProxyActionStatus(action);
+  const goToAction = () =>
+    router.push(`/${user}/proxy/${profileProxyId}/actions/${action.id}`);
   return (
     /*   <li>
       <Link href={`/${user}/proxy/${profileProxyId}/actions/${action.id}`}>
@@ -26,7 +28,10 @@ export default function ProxyActionRow({
       </Link>
     </li> */
 
-    <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-p-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
+    <div
+      onClick={goToAction}
+      className="tw-cursor-pointer tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-p-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600"
+    >
       <div className="tw-col-span-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
