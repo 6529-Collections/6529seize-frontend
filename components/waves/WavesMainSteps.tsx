@@ -1,6 +1,6 @@
 export default function WavesMainSteps() {
   return (
-    <div className="tw-col-span-3 tw-pl-24 tw-pt-12">
+    <div className="tw-hidden lg:tw-block lg:tw-col-span-3 tw-pl-24 tw-pt-12">
       <nav aria-label="Progress">
         <div className="tw-flex tw-flex-col">
           <div className="tw-relative tw-mb-11">
