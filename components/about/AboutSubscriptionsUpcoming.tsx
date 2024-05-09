@@ -8,7 +8,6 @@ import {
   SubscriptionCounts,
 } from "../../entities/ISubscription";
 import { commonApiFetch } from "../../services/api/common-api";
-import { useEffect, useState } from "react";
 import { Time } from "../../helpers/time";
 import DotLoader from "../dotLoader/DotLoader";
 import Link from "next/link";
