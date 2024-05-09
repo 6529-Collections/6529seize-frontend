@@ -53,16 +53,22 @@ export const PROFILE_PROXY_ACTION_LABELS: Record<
   [ProfileProxyActionType.RateWaveDrop]: "Rate Wave Drop",
 };
 
+export enum ProfileProxySide {
+  GRANTED = "GRANTED",
+  RECEIVED = "RECEIVED",
+}
+
 export enum ProfileProxyActionStatus {
   REJECTED = "REJECTED",
   REVOKED = "REVOKED",
-  EXPIRED = "EXPIRED",
-  NOT_STARTED = "NOT_STARTED",
   PENDING = "PENDING",
   ACTIVE = "ACTIVE",
 }
 
-export const PROFILE_PROXY_ACTION_HAVE_CREDIT: Record<ProfileProxyActionType, boolean> = {
+export const PROFILE_PROXY_ACTION_HAVE_CREDIT: Record<
+  ProfileProxyActionType,
+  boolean
+> = {
   [ProfileProxyActionType.AllocateRep]: true,
   [ProfileProxyActionType.AllocateCic]: true,
   [ProfileProxyActionType.CreateWave]: false,

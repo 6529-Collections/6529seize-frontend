@@ -30,7 +30,7 @@ export default function UserPageProxy({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const { data: profile } = useQuery({
     queryKey: [QueryKey.PROFILE, user],
@@ -43,10 +43,14 @@ export default function UserPageProxy({
   });
 
   const getIsSelf = () =>
-    connectedProfile?.profile?.external_id === profile.profile?.external_id;
+    connectedProfile?.profile?.external_id === profile.profile?.external_id &&
+    !activeProfileProxy;
 
   const [isSelf, setIsSelf] = useState(getIsSelf());
-  useEffect(() => setIsSelf(getIsSelf()), [connectedProfile, profile]);
+  useEffect(
+    () => setIsSelf(getIsSelf()),
+    [connectedProfile, profile, activeProfileProxy]
+  );
 
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
     queryKey: [
