@@ -1,16 +1,16 @@
 import { useContext, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
-import { ProfileProxy } from "../../../../../../generated/models/ProfileProxy";
-import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
-import { AuthContext } from "../../../../../auth/Auth";
-import { Time } from "../../../../../../helpers/time";
-import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
+import { ProfileProxyAction } from "../../../../../generated/models/ProfileProxyAction";
+import { AuthContext } from "../../../../auth/Auth";
+import { Time } from "../../../../../helpers/time";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import {
   AcceptActionRequest,
   AcceptActionRequestActionEnum,
-} from "../../../../../../generated/models/AcceptActionRequest";
-import { commonApiPost } from "../../../../../../services/api/common-api";
+} from "../../../../../generated/models/AcceptActionRequest";
+import { commonApiPost } from "../../../../../services/api/common-api";
 
 export default function ProxyActionAcceptanceButton({
   action,

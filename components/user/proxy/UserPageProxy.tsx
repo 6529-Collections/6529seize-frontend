@@ -3,12 +3,13 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import ProxyList from "./list/ProxyList";
 import ProxyCreate from "./create/ProxyCreate";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ProfileProxy } from "../../../generated/models/ProfileProxy";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
 import { groupProfileProxies } from "../../../helpers/profile-proxy.helpers";
+import { useRouter } from "next/router";
 
 export enum ProxyMode {
   LIST = "LIST",
@@ -22,12 +23,24 @@ export enum ProxyAction {
 }
 
 export default function UserPageProxy({
-  profile,
+  profile: initialProfile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
+  const router = useRouter();
+  const user = (router.query.user as string).toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
   const { connectedProfile } = useContext(AuthContext);
+
+  const { data: profile } = useQuery({
+    queryKey: [QueryKey.PROFILE, user],
+    queryFn: async () =>
+      await commonApiFetch<IProfileAndConsolidations>({
+        endpoint: `profiles/${user}`,
+      }),
+    enabled: !!user,
+    initialData: initialProfile,
+  });
 
   const getIsSelf = () =>
     connectedProfile?.profile?.external_id === profile.profile?.external_id;
@@ -45,6 +58,7 @@ export default function UserPageProxy({
         endpoint: `profiles/${profile.profile?.handle}/proxies/`,
       }),
     enabled: !!profile.profile?.handle,
+    placeholderData: keepPreviousData,
   });
 
   const [profileProxiesFiltered, setProfileProxiesFiltered] = useState<{
@@ -74,6 +88,7 @@ export default function UserPageProxy({
         isSelf={isSelf}
         receivedProfileProxies={profileProxiesFiltered.received}
         grantedProfileProxies={profileProxiesFiltered.granted}
+        profile={profile}
         onModeChange={setMode}
       />
     ),

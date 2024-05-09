@@ -16,8 +16,10 @@ export default function ProfileProxyEndTimeView({
     }
   };
   return (
-    <div>
-      end time: {profileProxyAction.end_time}
+    <div className="tw-inline-flex">
+      <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-2 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
+        {profileProxyAction.end_time}
+      </p>
       {isOwner && (
         <button
           className="tw-bg-transparent tw-border-none"

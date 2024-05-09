@@ -1,19 +1,52 @@
-import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import ProxyActions from "../proxy/list/ProxyActions";
+import { AuthContext } from "../../../auth/Auth";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
+import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
+
+enum VIEW_TYPE {
+  LIST = "LIST",
+  CREATE_NEW = "CREATE_NEW",
+}
 
 export default function ProxyListItem({
+  isSelf,
   profileProxy,
+  profile,
 }: {
+  readonly isSelf: boolean;
   readonly profileProxy: ProfileProxy;
+  readonly profile: IProfileAndConsolidations;
 }) {
-  const router = useRouter();
-  const user = router.query.user as string;
-  const goToProxy = () => router.push(`/${user}/proxy/${profileProxy.id}`);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const getIsGrantor = () =>
+    connectedProfile?.profile?.external_id === profileProxy?.created_by?.id;
+
+  const [isGrantor, setIsGrantor] = useState(getIsGrantor());
+
+  const [viewType, setViewType] = useState(VIEW_TYPE.LIST);
+  const getCanAddNewAction = () =>
+    isGrantor && isSelf && viewType === VIEW_TYPE.LIST;
+  const [canAddNewAction, setCanAddNewAction] = useState(getCanAddNewAction());
+
+  useEffect(() => {
+    setIsGrantor(getIsGrantor());
+  }, [profileProxy, connectedProfile]);
+
+  useEffect(() => {
+    setCanAddNewAction(getCanAddNewAction());
+  }, [isGrantor, isSelf, viewType]);
+
+  const components: Record<VIEW_TYPE, JSX.Element> = {
+    [VIEW_TYPE.LIST]: (
+      <ProxyActions profileProxy={profileProxy} profile={profile} />
+    ),
+    [VIEW_TYPE.CREATE_NEW]: <ProxyCreateAction profileProxy={profileProxy} />,
+  };
   return (
-    <div
-      onClick={goToProxy}
-      className="tw-cursor-pointer tw-py-2 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0 tw-rounded-lg tw-ring-1 tw-ring-iron-600"
-    >
+    <div className="tw-py-2 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-px-4 tw-py-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <img
@@ -52,34 +85,35 @@ export default function ProxyListItem({
             {profileProxy.granted_to.handle}
           </p>
         </div>
+        <div>
+          {canAddNewAction && (
+            <button
+              type="button"
+              onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
+              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            >
+              <svg
+                className="tw-w-5 tw-h-5 tw-mr-1 -tw-ml-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>Create new action</span>
+            </button>
+          )}
+        </div>
       </div>
       <div className="tw-mt-2 tw-px-4 tw-divide-y tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
-        <div className="tw-grid tw-grid-cols-12 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-py-2">
-          <div className="tw-col-span-2">
-            <div className="tw-flex tw-items-center tw-gap-x-3">
-              <p className="tw-mb-0 tw-text-md tw-font-medium tw-text-iron-50">
-                action type
-              </p>
-            </div>
-          </div>
-          <div className="tw-inline-flex tw-col-span-1">
-            <div className="tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-[#FEC84B] tw-bg-[#FEC84B]/10 tw-ring-[#FEC84B]/20">
-              Pending
-            </div>
-            <div className="tw-hidden tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-green tw-bg-green/10 tw-ring-green/20">
-              Accepted
-            </div>
-            <div className="tw-hidden tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-red tw-bg-red/10 tw-ring-red/20">
-              Rejected
-            </div>
-            <div className="tw-hidden tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-red tw-bg-red/10 tw-ring-red/20">
-              Revoked
-            </div>
-            <div className="tw-hidden tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-text-iron-300 tw-bg-iron-400/10 tw-ring-iron-400/20">
-              Expired
-            </div>
-          </div>
-        </div>
+        <CommonChangeAnimation>{components[viewType]}</CommonChangeAnimation>
       </div>
     </div>
   );
