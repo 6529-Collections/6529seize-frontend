@@ -27,7 +27,7 @@ export default function UserPageSubscriptions(
     profile: IProfileAndConsolidations;
   }>
 ) {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const [isFetching, setIsFetching] = useState<boolean>(true);
 
@@ -64,7 +64,7 @@ export default function UserPageSubscriptions(
   const [isConnectedAccount, setIsConnectedAccount] = useState<boolean>(false);
 
   useEffect(() => {
-    if (connectedProfile && props.profile) {
+    if (connectedProfile && props.profile && !activeProfileProxy) {
       setIsConnectedAccount(
         connectedProfile.consolidation.consolidation_key ===
           props.profile.consolidation.consolidation_key
@@ -72,7 +72,7 @@ export default function UserPageSubscriptions(
     } else {
       setIsConnectedAccount(false);
     }
-  }, [connectedProfile, props.profile]);
+  }, [connectedProfile, props.profile, activeProfileProxy]);
 
   useEffect(() => {
     setIsFetching(
@@ -210,7 +210,8 @@ export default function UserPageSubscriptions(
             <span>
               <a
                 href="/about/subscriptions"
-                className="font-smaller font-color-silver decoration-hover-underline">
+                className="font-smaller font-color-silver decoration-hover-underline"
+              >
                 Learn More
               </a>
             </span>
@@ -236,7 +237,8 @@ export default function UserPageSubscriptions(
                 <span>
                   <a
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline">
+                    className="font-smaller font-color-silver decoration-hover-underline"
+                  >
                     Learn More
                   </a>
                 </span>

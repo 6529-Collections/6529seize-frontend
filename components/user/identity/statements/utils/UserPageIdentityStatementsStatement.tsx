@@ -16,11 +16,11 @@ import { STATEMENT_META } from "../../../../../helpers/Types";
 export default function UserPageIdentityStatementsStatement({
   statement,
   profile,
-  isMyProfile,
+  canEdit,
 }: {
   readonly statement: CicStatement;
   readonly profile: IProfileAndConsolidations;
-  readonly isMyProfile: boolean;
+  readonly canEdit: boolean;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(statement.statement_value);
@@ -83,7 +83,7 @@ export default function UserPageIdentityStatementsStatement({
           <CopyIcon />
         </button>
       </Tippy>
-      {isMyProfile && (
+      {canEdit && (
         <UserPageIdentityDeleteStatementButton
           statement={statement}
           profile={profile}
