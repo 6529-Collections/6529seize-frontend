@@ -190,8 +190,10 @@ export default function Auth({
 
   const requestSignIn = async ({
     signerAddress,
+    role,
   }: {
-    signerAddress: string;
+    readonly signerAddress: string;
+    readonly role: string | null;
   }) => {
     const nonceResponse = await getNonce({ signerAddress });
     if (!nonceResponse) {
@@ -274,9 +276,25 @@ export default function Auth({
     const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
     if (!isAuth) {
       removeAuthJwt();
-      await requestSignIn({ signerAddress: address });
+      await requestSignIn({
+        signerAddress: address,
+        role: activeProfileProxy?.created_by.id ?? null,
+      });
     }
     return { success: !!getAuthJwt() };
+  };
+
+  const onActiveProfileProxy = async (profileProxy: ProfileProxy | null) => {
+    if (!address) {
+      setActiveProfileProxy(null);
+      return;
+    }
+    setActiveProfileProxy(profileProxy);
+    removeAuthJwt();
+    await requestSignIn({
+      signerAddress: address,
+      role: profileProxy?.created_by.id ?? null,
+    });
   };
 
   return (
@@ -287,7 +305,7 @@ export default function Auth({
         connectedProfile: connectedProfile ?? null,
         receivedProfileProxies,
         activeProfileProxy,
-        setActiveProfileProxy,
+        setActiveProfileProxy: onActiveProfileProxy,
       }}
     >
       {children}
