@@ -17,7 +17,7 @@ export default function ProfileProxyCreditView({
   };
   return (
     <div>
-      Credit: {profileProxyAction.action_data.credit_amount}{" "}
+      Credit: {profileProxyAction.credit_amount}{" "}
       {isOwner && (
         <button
           className="tw-bg-transparent tw-border-none"

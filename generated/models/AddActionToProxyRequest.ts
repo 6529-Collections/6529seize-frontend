@@ -22,8 +22,6 @@ export class AddActionToProxyRequest {
     'action_type': ProfileProxyActionType;
     'end_time': number | null;
     'credit_amount': number;
-    'group_id': string | null;
-    'credit_category': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -45,18 +43,6 @@ export class AddActionToProxyRequest {
             "baseName": "credit_amount",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "group_id",
-            "baseName": "group_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "credit_category",
-            "baseName": "credit_category",
-            "type": "string",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
