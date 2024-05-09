@@ -10,10 +10,10 @@ tw-py-3 tw-pl-4 tw-pr-4 tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-sh
       />
       <label
         htmlFor="floating_participant_limited"
-        className="tw-absolute tw-text-base tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0]  tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2  peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
+        className="tw-absolute tw-text-base tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2  peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
       >
-       Placeholder text
+        Placeholder text
       </label>
     </div>
   );

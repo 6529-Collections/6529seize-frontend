@@ -1,6 +1,6 @@
 export default function WavesCreditTypeRep() {
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-4">
+    <div className="tw-grid md:tw-grid-cols-2 tw-gap-4">
       <div className="tw-relative">
         <svg
           className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300"
