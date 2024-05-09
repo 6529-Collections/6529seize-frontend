@@ -8,7 +8,7 @@ import { ProfileProxy } from "../../../generated/models/ProfileProxy";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
-import { Time } from "../../../helpers/time";
+import { groupProfileProxies } from "../../../helpers/profile-proxy.helpers";
 
 export enum ProxyMode {
   LIST = "LIST",
@@ -47,67 +47,33 @@ export default function UserPageProxy({
     enabled: !!profile.profile?.handle,
   });
 
-  const getProxies = (): ProfileProxy[] => {
-    if (!profileProxies) {
-      return [];
-    }
-    if (isSelf) {
-      return profileProxies.filter((p) => !!p.actions.length);
-    }
-    const now = Time.currentMillis();
-    return profileProxies
-      .map((p) => ({
-        ...p,
-        actions: p.actions.filter((a) => {
-          if (a.start_time && a.start_time > now) {
-            return false;
-          }
-          if (a.end_time && a.end_time < now) {
-            return false;
-          }
-          return a.is_active;
-        }),
-      }))
-      .filter((p) => !!p.actions.length);
-  };
-
-  const [profileProxiesFiltered, setProfileProxiesFiltered] = useState<
-    ProfileProxy[]
-  >(getProxies());
-  useEffect(
-    () => setProfileProxiesFiltered(getProxies()),
-    [profileProxies, isSelf]
+  const [profileProxiesFiltered, setProfileProxiesFiltered] = useState<{
+    readonly granted: ProfileProxy[];
+    readonly received: ProfileProxy[];
+  }>(
+    groupProfileProxies({
+      profileProxies: profileProxies ?? [],
+      onlyActive: !isSelf,
+      profileId: profile.profile?.external_id ?? null,
+    })
   );
 
-  const getGrantedProxies = (): ProfileProxy[] =>
-    profileProxiesFiltered.filter(
-      (p) => p.created_by.id === profile.profile?.external_id
-    );
-
-  const getReceivedProxies = (): ProfileProxy[] =>
-    profileProxiesFiltered.filter(
-      (p) => p.granted_to.id === profile.profile?.external_id
-    );
-
-  const [grantedProfileProxies, setGrantedProfileProxies] = useState<
-    ProfileProxy[]
-  >(getGrantedProxies());
-
-  const [receivedProfileProxies, setReceivedProfileProxies] = useState<
-    ProfileProxy[]
-  >(getReceivedProxies());
-
   useEffect(() => {
-    setGrantedProfileProxies(getGrantedProxies());
-    setReceivedProfileProxies(getReceivedProxies());
-  }, [profileProxiesFiltered]);
+    setProfileProxiesFiltered(
+      groupProfileProxies({
+        profileProxies: profileProxies ?? [],
+        onlyActive: !isSelf,
+        profileId: profile.profile?.external_id ?? null,
+      })
+    );
+  }, [profileProxies, isSelf, profile]);
 
   const components: Record<ProxyMode, JSX.Element> = {
     [ProxyMode.LIST]: (
       <ProxyList
         isSelf={isSelf}
-        receivedProfileProxies={receivedProfileProxies}
-        grantedProfileProxies={grantedProfileProxies}
+        receivedProfileProxies={profileProxiesFiltered.received}
+        grantedProfileProxies={profileProxiesFiltered.granted}
         onModeChange={setMode}
       />
     ),

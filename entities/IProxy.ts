@@ -7,14 +7,11 @@ export interface CreateProxyActionBase<T extends ProfileProxyActionType> {
 
 export interface CreateProxyAllocateCreditBase {
   readonly credit_amount: number;
-  readonly group_id: string | null;
 }
 
 export interface CreateProxyAllocateRepAction
   extends CreateProxyAllocateCreditBase,
-    CreateProxyActionBase<ProfileProxyActionType.AllocateRep> {
-  readonly credit_category: string | null;
-}
+    CreateProxyActionBase<ProfileProxyActionType.AllocateRep> {}
 
 export interface CreateProxyAllocateCicAction
   extends CreateProxyAllocateCreditBase,
@@ -64,3 +61,4 @@ export enum ProfileProxyActionStatus {
   PENDING = "PENDING",
   ACTIVE = "ACTIVE",
 }
+
