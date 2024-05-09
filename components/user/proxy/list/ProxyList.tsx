@@ -35,7 +35,7 @@ export default function ProxyList({
 
   const components: Record<ProfileProxyListType, JSX.Element> = {
     [ProfileProxyListType.RECEIVED]: (
-      <div className="tw-space-y-4">
+      <div className="tw-space-y-8">
         {receivedProfileProxies.map((profileProxy) => (
           <ProxyListItem
             key={profileProxy.id}
@@ -47,7 +47,7 @@ export default function ProxyList({
       </div>
     ),
     [ProfileProxyListType.GRANTED]: (
-      <div className="tw-space-y-4">
+      <div className="tw-space-y-8">
         {grantedProfileProxies.map((profileProxy) => (
           <ProxyListItem
             key={profileProxy.id}
