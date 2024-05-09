@@ -5,10 +5,10 @@ import { useMutation } from "@tanstack/react-query";
 import { CreateNewProfileProxy } from "../../../../generated/models/CreateNewProfileProxy";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
-import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
+import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 
 export default function ProxyCreate({
   profileProxies,
@@ -17,13 +17,14 @@ export default function ProxyCreate({
   readonly profileProxies: ProfileProxy[];
   readonly onModeChange: (mode: ProxyMode) => void;
 }) {
-  const router = useRouter();
-  const user = router.query.user as string;
   const { requestAuth, setToast } = useContext(AuthContext);
   const { setProfileProxy, onProfileProxyModify } = useContext(
     ReactQueryWrapperContext
   );
   const [submitting, setSubmitting] = useState(false);
+  const [newProfileProxy, setNewProfileProxy] = useState<ProfileProxy | null>(
+    null
+  );
 
   const createProxyMutation = useMutation({
     mutationFn: async (body: CreateNewProfileProxy) => {
@@ -33,13 +34,7 @@ export default function ProxyCreate({
       });
     },
     onSuccess: (result) => {
-      setProfileProxy(result);
-      onProfileProxyModify({
-        profileProxyId: result.id,
-        grantedToHandle: result.granted_to.handle,
-        createdByHandle: result.created_by.handle,
-      });
-      router.push(`/${user}/proxy/${result.id}`);
+      setNewProfileProxy(result);
     },
     onError: (error) => {
       setToast({
@@ -66,7 +61,7 @@ export default function ProxyCreate({
     }
     const existingProxy = alreadyProxied(target);
     if (existingProxy) {
-      router.push(`/${user}/proxy/${existingProxy.id}`);
+      setNewProfileProxy(existingProxy);
       return;
     }
     setSubmitting(true);
@@ -78,9 +73,29 @@ export default function ProxyCreate({
     await createProxyMutation.mutateAsync({ target_id: target.profile_id });
   };
 
+  const onActionCreated = () => {
+    if (!newProfileProxy) {
+      return;
+    }
+    setProfileProxy(newProfileProxy);
+    onProfileProxyModify({
+      profileProxyId: newProfileProxy.id,
+      grantedToHandle: newProfileProxy.granted_to.handle,
+      createdByHandle: newProfileProxy.created_by.handle,
+    });
+    onModeChange(ProxyMode.LIST);
+  };
+
   return (
     <div>
-      <ProxyCreateTargetSearch onTargetSelect={onTargetSelect} />
+      {newProfileProxy ? (
+        <ProxyCreateAction
+          profileProxy={newProfileProxy}
+          onActionCreated={onActionCreated}
+        />
+      ) : (
+        <ProxyCreateTargetSearch onTargetSelect={onTargetSelect} />
+      )}
       <div className="tw-mt-6 tw-flex tw-items-center tw-gap-x-3">
         <button
           onClick={() => onModeChange(ProxyMode.LIST)}

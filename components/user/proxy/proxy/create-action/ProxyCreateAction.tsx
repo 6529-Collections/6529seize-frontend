@@ -14,8 +14,10 @@ import { useRouter } from "next/router";
 
 export default function ProxyCreateAction({
   profileProxy,
+  onActionCreated,
 }: {
   readonly profileProxy: ProfileProxy;
+  readonly onActionCreated: () => void;
 }) {
   const router = useRouter();
   const user = router.query.user as string;
@@ -67,10 +69,7 @@ export default function ProxyCreateAction({
         grantedToHandle: profileProxy.granted_to.handle,
         createdByHandle: profileProxy.created_by.handle,
       });
-      setToast({
-        message: "Action created",
-        type: "success",
-      });
+      onActionCreated()
     },
     onError: (error) => {
       setToast({
