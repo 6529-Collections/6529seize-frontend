@@ -30,9 +30,7 @@ export default function AboutSubscriptionsUpcoming() {
     });
   }, [remainingMintsForSeason.count]);
 
-  const { isFetching, data: redeemedCounts } = useQuery<
-    RedeemedSubscriptionCounts[]
-  >({
+  const { data: redeemedCounts } = useQuery<RedeemedSubscriptionCounts[]>({
     queryKey: ["redeeemed-memes-counts"],
     queryFn: async () =>
       await commonApiFetch<RedeemedSubscriptionCounts[]>({
