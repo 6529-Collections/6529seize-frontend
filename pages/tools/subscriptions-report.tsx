@@ -1,59 +1,116 @@
-import { Col, Container, Row } from "react-bootstrap";
-import {
-  numberOfCardsForSeasonEnd,
-  getMintingDates,
-} from "../../helpers/meme_calendar.helplers";
+import Head from "next/head";
+import styles from "../../styles/Home.module.scss";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { Container, Row, Col } from "react-bootstrap";
 import {
   RedeemedSubscriptionCounts,
   SubscriptionCounts,
 } from "../../entities/ISubscription";
+import {
+  getMintingDates,
+  numberOfCardsForSeasonEnd,
+} from "../../helpers/meme_calendar.helplers";
 import { commonApiFetch } from "../../services/api/common-api";
+import { getCommonHeaders } from "../../helpers/server.helpers";
 import { Time } from "../../helpers/time";
-import DotLoader from "../dotLoader/DotLoader";
-import Link from "next/link";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
-export default function AboutSubscriptionsUpcoming() {
-  const remainingMintsForSeason = numberOfCardsForSeasonEnd();
-  const dates = getMintingDates(remainingMintsForSeason.count);
+const Header = dynamic(() => import("../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
-  const { data: upcomingCounts } = useQuery<SubscriptionCounts[]>({
-    queryKey: ["upcoming-memes-counts", remainingMintsForSeason.count],
-    queryFn: async () =>
-      await commonApiFetch<SubscriptionCounts[]>({
-        endpoint: `subscriptions/upcoming-memes-counts?card_count=${remainingMintsForSeason.count}`,
-      }),
-    enabled: remainingMintsForSeason.count > 0,
-  });
+interface SubscriptionsProps {
+  readonly szn: number;
+  readonly upcoming: SubscriptionCounts[];
+  readonly redeemed: RedeemedSubscriptionCounts[];
+}
 
-  const { data: redeemedCounts } = useQuery<RedeemedSubscriptionCounts[]>({
-    queryKey: ["redeeemed-memes-counts"],
-    queryFn: async () =>
-      await commonApiFetch<RedeemedSubscriptionCounts[]>({
-        endpoint: `subscriptions/redeemed-memes-counts`,
-      }),
-  });
+export default function SubscriptionsReport({
+  pageProps,
+}: {
+  readonly pageProps: SubscriptionsProps;
+}) {
+  const breadcrumbs: Crumb[] = [
+    { display: "Home", href: "/" },
+    { display: "Subscriptions Report" },
+  ];
+
+  return (
+    <>
+      <Head>
+        <title>Subscriptions Report | 6529 SEIZE</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content="Subscriptions Report | 6529 SEIZE" />
+        <meta
+          property="og:url"
+          content={`${process.env.BASE_ENDPOINT}/subscriptions-report`}
+        />
+        <meta property="og:title" content="Subscriptions Report" />
+        <meta property="og:description" content="6529 SEIZE" />
+        <meta
+          property="og:image"
+          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+        />
+      </Head>
+
+      <main className={styles.main}>
+        <Header />
+        <Breadcrumb breadcrumbs={breadcrumbs} />
+        <Container className="no-padding pt-4">
+          <Row>
+            <Col>
+              <SubscriptionsReportComponent
+                szn={pageProps.szn}
+                upcomingCounts={pageProps.upcoming}
+                redeemedCounts={pageProps.redeemed}
+              />
+            </Col>
+          </Row>
+        </Container>
+      </main>
+    </>
+  );
+}
+
+function SubscriptionsReportComponent({
+  szn,
+  upcomingCounts,
+  redeemedCounts,
+}: {
+  readonly szn: number;
+  readonly upcomingCounts: SubscriptionCounts[];
+  readonly redeemedCounts: RedeemedSubscriptionCounts[];
+}) {
+  const dates = getMintingDates(upcomingCounts.length);
 
   return (
     <Container>
       <Row>
-        <Col>
+        <Col className="d-flex align-items-center justify-content-between">
           <h1>
-            <span className="font-lightest">Upcoming</span> Drops
+            <span className="font-lightest">Subscriptions</span> Report
           </h1>
+          <Link
+            href="/about/subscriptions"
+            className="decoration-hover-underline">
+            Learn More
+          </Link>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
           <p className="font-larger font-bolder decoration-none">
-            Upcoming Drops for SZN{remainingMintsForSeason.szn}
+            Upcoming Drops for SZN{szn}
           </p>
         </Col>
       </Row>
       <Row className="pt-3">
         <Col>
-          {upcomingCounts ? (
+          {upcomingCounts?.length > 0 ? (
             <table
               className="table table-bordered"
               style={{
@@ -91,7 +148,7 @@ export default function AboutSubscriptionsUpcoming() {
               </tbody>
             </table>
           ) : (
-            <DotLoader />
+            <>No Subscriptions Found</>
           )}
         </Col>
       </Row>
@@ -102,7 +159,7 @@ export default function AboutSubscriptionsUpcoming() {
       </Row>
       <Row className="pt-3">
         <Col>
-          {redeemedCounts ? (
+          {redeemedCounts?.length > 0 ? (
             <table
               className="table table-bordered"
               style={{
@@ -139,7 +196,7 @@ export default function AboutSubscriptionsUpcoming() {
               </tbody>
             </table>
           ) : (
-            <DotLoader />
+            <>No Subscriptions Found</>
           )}
         </Col>
       </Row>
@@ -234,4 +291,32 @@ function RedeemedSubscriptionDetails(
       </td>
     </tr>
   );
+}
+
+export async function getServerSideProps(
+  req: any,
+  res: any,
+  resolvedUrl: any
+): Promise<{
+  props: SubscriptionsProps;
+}> {
+  const remainingMintsForSeason = numberOfCardsForSeasonEnd();
+
+  const headers = getCommonHeaders(req);
+  const upcoming = await commonApiFetch<SubscriptionCounts[]>({
+    endpoint: `subscriptions/upcoming-memes-counts?card_count=${remainingMintsForSeason.count}`,
+    headers: headers,
+  });
+  const redeemed = await commonApiFetch<RedeemedSubscriptionCounts[]>({
+    endpoint: `subscriptions/redeemed-memes-counts`,
+    headers: headers,
+  });
+
+  return {
+    props: {
+      szn: remainingMintsForSeason.szn,
+      upcoming: upcoming ?? [],
+      redeemed: redeemed ?? [],
+    },
+  };
 }
