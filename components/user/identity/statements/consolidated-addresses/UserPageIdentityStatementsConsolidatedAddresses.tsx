@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   IProfileAndConsolidations,
   IProfileConsolidation,
@@ -14,6 +14,7 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { Page } from "../../../../../helpers/Types";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
+import { AuthContext } from "../../../../auth/Auth";
 
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
@@ -21,12 +22,17 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   readonly profile: IProfileAndConsolidations;
 }) {
   const { address } = useAccount();
-
+  const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
+
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
     [profile, address]
   );
+
+  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
+  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
+  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
 
   const getPrimaryAddress = (p: IProfileAndConsolidations) => {
     if (p.profile?.primary_wallet) {
@@ -133,21 +139,23 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             address={wallet}
             profile={profile}
             primaryAddress={primaryAddress}
-            canEdit={isMyProfile}
+            canEdit={canEdit}
           />
         ))}
       </ul>
       <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
         <Link
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+        >
           Wallet Checker
         </Link>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
             <Link
               href="/delegation/delegation-center"
-              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+            >
               Delegation Center
             </Link>
           )}
