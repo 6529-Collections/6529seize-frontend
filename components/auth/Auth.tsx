@@ -100,6 +100,7 @@ export default function Auth({
       return;
     } else {
       const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
+      console.log(isAuth);
       if (!isAuth) removeAuthJwt();
     }
   }, [address]);
@@ -233,6 +234,7 @@ export default function Auth({
         body: {
           server_signature,
           client_signature: clientSignature.signature,
+          role: role ?? undefined,
         },
       });
       setAuthJwt(tokenResponse.token);
@@ -259,6 +261,7 @@ export default function Auth({
       iat: number;
       exp: number;
     }>(jwt);
+    console.log(decodedJwt);
     return (
       decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
       decodedJwt.exp > Date.now() / 1000
@@ -285,16 +288,17 @@ export default function Auth({
   };
 
   const onActiveProfileProxy = async (profileProxy: ProfileProxy | null) => {
+    removeAuthJwt();
     if (!address) {
       setActiveProfileProxy(null);
       return;
     }
-    setActiveProfileProxy(profileProxy);
-    removeAuthJwt();
+
     await requestSignIn({
       signerAddress: address,
       role: profileProxy?.created_by.id ?? null,
     });
+    setActiveProfileProxy(profileProxy);
   };
 
   return (
