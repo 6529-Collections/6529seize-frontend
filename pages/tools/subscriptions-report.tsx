@@ -60,17 +60,11 @@ export default function SubscriptionsReport({
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container className="no-padding pt-4">
-          <Row>
-            <Col>
-              <SubscriptionsReportComponent
-                szn={pageProps.szn}
-                upcomingCounts={pageProps.upcoming}
-                redeemedCounts={pageProps.redeemed}
-              />
-            </Col>
-          </Row>
-        </Container>
+        <SubscriptionsReportComponent
+          szn={pageProps.szn}
+          upcomingCounts={pageProps.upcoming}
+          redeemedCounts={pageProps.redeemed}
+        />
       </main>
     </>
   );
@@ -88,7 +82,7 @@ function SubscriptionsReportComponent({
   const dates = getMintingDates(upcomingCounts.length);
 
   return (
-    <Container>
+    <Container className="pt-4">
       <Row>
         <Col className="d-flex align-items-center justify-content-between">
           <h1>
