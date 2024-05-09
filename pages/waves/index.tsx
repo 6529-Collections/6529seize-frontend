@@ -33,7 +33,7 @@ export default function WavesPage() {
         />
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
-      <div className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
         <div>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />

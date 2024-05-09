@@ -4,7 +4,7 @@ export default function WavesGroupInputs() {
       <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
         Select period
       </p>
-      <div className="tw-mt-5 tw-relative tw-grid tw-grid-cols-1 tw-gap-x-12 md:tw-grid-cols-2">
+      <div className="tw-mt-5 tw-relative tw-grid tw-grid-cols-1 tw-gap-y-10 tw-gap-x-12 md:tw-grid-cols-2">
         <div className="tw-relative">
           <button
             type="button"
@@ -240,6 +240,14 @@ export default function WavesGroupInputs() {
             </p>
           </section>
         </div>
+      </div>
+      <div className="tw-mt-6 tw-text-right">
+        <button
+          type="button"
+          className="tw-w-full sm:tw-w-auto tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+        >
+          <span>Next step</span>
+        </button>
       </div>
     </div>
   );
