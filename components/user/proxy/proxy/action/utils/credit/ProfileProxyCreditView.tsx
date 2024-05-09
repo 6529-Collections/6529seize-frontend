@@ -16,8 +16,14 @@ export default function ProfileProxyCreditView({
     }
   };
   return (
-    <div>
-      Credit: {profileProxyAction.credit_amount}{" "}
+    <div className="tw-inline-flex">
+      <div className="tw-text-base tw-font-normal tw-text-iron-400">
+        <p className="tw-mb-0 tw-space-x-1 tw-whitespace-nowrap">
+          <span className="tw-text-iron-300 tw-font-medium">
+            {profileProxyAction.credit_amount}
+          </span>
+        </p>
+      </div>
       {isOwner && (
         <button
           className="tw-bg-transparent tw-border-none"

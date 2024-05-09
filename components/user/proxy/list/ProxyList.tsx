@@ -1,11 +1,11 @@
 import { ProxyMode } from "../UserPageProxy";
 import { useState } from "react";
-import ProxyListReceived from "./ProxyListReceived";
-import ProxyListGranted from "./ProxyListGranted";
 import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
 import dynamic from "next/dynamic";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import ProxyListItem from "./ProxyListItem";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
 export enum ProfileProxyListType {
   RECEIVED = "RECEIVED",
@@ -21,11 +21,13 @@ export default function ProxyList({
   receivedProfileProxies,
   grantedProfileProxies,
   isSelf,
+  profile,
 }: {
   readonly onModeChange: (mode: ProxyMode) => void;
   readonly receivedProfileProxies: ProfileProxy[];
   readonly grantedProfileProxies: ProfileProxy[];
   readonly isSelf: boolean;
+  readonly profile: IProfileAndConsolidations;
 }) {
   const [proxyType, setProxyType] = useState<ProfileProxyListType>(
     ProfileProxyListType.RECEIVED
@@ -33,10 +35,28 @@ export default function ProxyList({
 
   const components: Record<ProfileProxyListType, JSX.Element> = {
     [ProfileProxyListType.RECEIVED]: (
-      <ProxyListReceived profileProxies={receivedProfileProxies} />
+      <div className="tw-space-y-4">
+        {receivedProfileProxies.map((profileProxy) => (
+          <ProxyListItem
+            key={profileProxy.id}
+            profileProxy={profileProxy}
+            isSelf={isSelf}
+            profile={profile}
+          />
+        ))}
+      </div>
     ),
     [ProfileProxyListType.GRANTED]: (
-      <ProxyListGranted profileProxies={grantedProfileProxies} />
+      <div className="tw-space-y-4">
+        {grantedProfileProxies.map((profileProxy) => (
+          <ProxyListItem
+            key={profileProxy.id}
+            profileProxy={profileProxy}
+            isSelf={isSelf}
+            profile={profile}
+          />
+        ))}
+      </div>
     ),
   };
 

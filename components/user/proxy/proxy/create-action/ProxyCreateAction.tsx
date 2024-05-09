@@ -56,7 +56,6 @@ export default function ProxyCreateAction({
 
   const createProxyActionMutation = useMutation({
     mutationFn: async (action: CreateProxyAction) => {
-      console.log(action);
       return await commonApiPost<CreateProxyAction, ProfileProxy>({
         endpoint: `proxies/${profileProxy.id}/actions`,
         body: action,
