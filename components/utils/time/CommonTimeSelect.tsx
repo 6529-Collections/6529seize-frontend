@@ -12,6 +12,14 @@ enum TimeMode {
   MONTHS = "MONTHS",
 }
 
+const TIME_MODE_LABEL: Record<TimeMode, string> = {
+  [TimeMode.MINUTES]: "Minutes",
+  [TimeMode.HOURS]: "Hours",
+  [TimeMode.DAYS]: "Days",
+  [TimeMode.WEEKS]: "Weeks",
+  [TimeMode.MONTHS]: "Months",
+};
+
 export default function CommonTimeSelect({
   currentTime,
   onMillis,
@@ -28,7 +36,7 @@ export default function CommonTimeSelect({
   const timeModeItems: CommonSelectItem<TimeMode>[] = Object.values(
     TimeMode
   ).map((mode) => ({
-    label: mode,
+    label: TIME_MODE_LABEL[mode],
     value: mode,
     key: mode,
   }));

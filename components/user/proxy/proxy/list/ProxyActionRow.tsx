@@ -11,6 +11,7 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import ProxyActionAcceptanceButton from "../action/ProxyActionAcceptanceButton";
 import ProfileProxyEndTime from "../action/utils/time/ProfileProxyEndTime";
 import ProfileProxyCredit from "../action/utils/credit/ProfileProxyCredit";
+import { getTimeAgo } from "../../../../../helpers/Helpers";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
   [ProfileProxyActionStatus.ACTIVE]:
@@ -97,7 +98,7 @@ export default function ProxyActionRow({
       <div className="tw-col-span-1">
         <p className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
           <span>Start:</span>
-          <span>23 days</span>
+          <span>{getTimeAgo(profileProxy.created_at)}</span>
         </p>
       </div>
       <div className="tw-col-span-1">

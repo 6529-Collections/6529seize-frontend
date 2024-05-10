@@ -1,4 +1,5 @@
 import { ProfileProxyAction } from "../../../../../../../generated/models/ProfileProxyAction";
+import { getTimeAgo, getTimeUntil } from "../../../../../../../helpers/Helpers";
 import PencilIcon, {
   PencilIconSize,
 } from "../../../../../../utils/icons/PencilIcon";
@@ -20,7 +21,9 @@ export default function ProfileProxyEndTimeView({
   return (
     <div className="tw-flex">
       <p className="tw-whitespace-nowrap tw-mb-0 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
-        {profileProxyAction.end_time}
+        {profileProxyAction.end_time
+          ? getTimeUntil(profileProxyAction.end_time)
+          : "Not set"}
       </p>
       {isOwner && (
         <button

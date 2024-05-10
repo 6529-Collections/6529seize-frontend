@@ -10,17 +10,19 @@ import ProxyCreateActionConfigCreateDropToWave from "./ProxyCreateActionConfigCr
 import ProxyCreateActionConfigCreateWave from "./ProxyCreateActionConfigCreateWave";
 import ProxyCreateActionConfigRateWaveDrop from "./ProxyCreateActionConfigRateWaveDrop";
 import ProxyCreateActionConfigReadWave from "./ProxyCreateActionConfigReadWave";
-import { Time } from "../../../../../../helpers/time";
+
 import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
 
 export default function ProxyCreateActionConfig({
   selectedActionType,
   currentActions,
   onSubmit,
+  onCancel,
 }: {
   readonly selectedActionType: ProfileProxyActionType;
   readonly currentActions: ProfileProxyAction[];
   readonly onSubmit: (action: CreateProxyAction) => void;
+  readonly onCancel: () => void;
 }) {
   const [endTime, setEndTime] = useState<number | null>(null);
 
@@ -37,33 +39,42 @@ export default function ProxyCreateActionConfig({
         endTime={endTime}
         repActions={repActions}
         onSubmit={onSubmit}
+        onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.AllocateCic]: (
       <ProxyCreateActionConfigAllocateCic
         endTime={endTime}
         onSubmit={onSubmit}
+        onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.CreateWave]: (
       <ProxyCreateActionConfigCreateWave
         endTime={endTime}
         onSubmit={onSubmit}
+        onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.ReadWave]: (
-      <ProxyCreateActionConfigReadWave endTime={endTime} onSubmit={onSubmit} />
+      <ProxyCreateActionConfigReadWave
+        endTime={endTime}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+      />
     ),
     [ProfileProxyActionType.CreateDropToWave]: (
       <ProxyCreateActionConfigCreateDropToWave
         endTime={endTime}
         onSubmit={onSubmit}
+        onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.RateWaveDrop]: (
       <ProxyCreateActionConfigRateWaveDrop
         endTime={endTime}
         onSubmit={onSubmit}
+        onCancel={onCancel}
       />
     ),
   };
