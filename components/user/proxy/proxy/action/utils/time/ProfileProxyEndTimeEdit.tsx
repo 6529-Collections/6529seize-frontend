@@ -28,7 +28,6 @@ export default function ProfileProxyEndTimeEdit({
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
     mutationFn: async (body: UpdateActionRequest) => {
-      console.log(body);
       return await commonApiPut<UpdateActionRequest, ProfileProxyAction>({
         endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}`,
         body,
