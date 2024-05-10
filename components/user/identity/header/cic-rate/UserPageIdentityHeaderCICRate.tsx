@@ -77,6 +77,7 @@ export default function UserPageIdentityHeaderCICRate({
         targetProfile: profile,
         connectedProfile: connectedProfile ?? null,
         rater: address?.toLowerCase() ?? null,
+        profileProxy: activeProfileProxy ?? null,
       });
     },
     onSettled: () => {
@@ -95,7 +96,6 @@ export default function UserPageIdentityHeaderCICRate({
       0,
       (cicProxyAction?.credit_amount ?? 0) - (cicProxyAction?.credit_spent ?? 0)
     );
-    console.log(proxyAvailableCredit);
     return Math.min(
       proxyAvailableCredit,
       myCICState?.cic_ratings_left_to_give_by_rater ?? 0
