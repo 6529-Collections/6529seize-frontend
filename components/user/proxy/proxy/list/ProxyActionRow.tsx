@@ -58,33 +58,35 @@ export default function ProxyActionRow({
           </p>
         </div>
       </div>
-      <div className="tw-inline-flex tw-col-span-3 tw-space-x-4">
-        <div className="tw-inline-flex tw-space-x-2">
-          <img
-            src={profileProxy.created_by.pfp ?? ""}
-            alt=""
-            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-          />
-          <div
-            className={`${STATUS_CLASSES[grantorStatus]} tw-w-20 tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
-          >
-            {STATUS_LABELS[grantorStatus]}
+      <div className="tw-col-span-3">
+        <div className="tw-flex tw-space-x-3">
+          <div className="tw-inline-flex tw-space-x-2 tw-min-w-[6.6rem]">
+            <img
+              src={profileProxy.created_by.pfp ?? ""}
+              alt="Profile picture"
+              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+            />
+            <div
+              className={`${STATUS_CLASSES[grantorStatus]} tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
+            >
+              {STATUS_LABELS[grantorStatus]}
+            </div>
           </div>
-        </div>
-        <div className="tw-inline-flex tw-space-x-2">
-          <img
-            src={profileProxy.granted_to.pfp ?? ""}
-            alt=""
-            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-          />
-          <div
-            className={`${STATUS_CLASSES[receiverStatus]} tw-w-20 tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
-          >
-            {STATUS_LABELS[receiverStatus]}
+          <div className="tw-inline-flex tw-space-x-2 tw-min-w-[6.6rem]">
+            <img
+              src={profileProxy.granted_to.pfp ?? ""}
+              alt="Profile picture"
+              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+            />
+            <div
+              className={`${STATUS_CLASSES[receiverStatus]} tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
+            >
+              {STATUS_LABELS[receiverStatus]}
+            </div>
           </div>
         </div>
       </div>
-      <div className="tw-col-span-2">
+      <div className="tw-col-span-1">
         {PROFILE_PROXY_ACTION_HAVE_CREDIT[action.action_type] && (
           <ProfileProxyCredit
             profileProxy={profileProxy}
@@ -93,13 +95,13 @@ export default function ProxyActionRow({
         )}
       </div>
       <div className="tw-col-span-2">
-        <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
+        <p className="tw-flex tw-items-center tw-justify-center tw-mb-0 tw-gap-x-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
           <span>Start time:</span>
           <span>3 days</span>
         </p>
       </div>
       <div className="tw-col-span-2">
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+        <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-1.5">
           <span className="tw-text-base tw-font-normal tw-text-iron-500">
             End time:
           </span>
@@ -109,7 +111,7 @@ export default function ProxyActionRow({
           />
         </div>
       </div>
-      <div className="tw-col-span-1">
+      <div className="tw-col-span-2">
         {isSelf && (
           <ProxyActionAcceptanceButton
             action={action}

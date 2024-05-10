@@ -115,16 +115,30 @@ export default function ProxyActionAcceptanceButton({
 
   return (
     <div className="tw-flex tw-justify-end">
-      {possibleActions.map((action) => (
-        <button
-          key={action}
-          onClick={() => onSubmit(action)}
-          type="button"
-          className={`${ACTION_CLASSES[action]} tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out`}
-        >
-          {ACTION_LABEL[action]}
-        </button>
-      ))}
+      <div className="tw-grid tw-grid-cols-2">
+        <div className="tw-col-span-1">
+          {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
+            <button
+              onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
+              type="button"
+              className="tw-text-green tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Accept
+            </button>
+          )}
+        </div>
+        <div className="tw-col-span-1">
+          {possibleActions.includes(AcceptActionRequestActionEnum.Reject) && (
+            <button
+              onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}
+              type="button"
+              className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Reject
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

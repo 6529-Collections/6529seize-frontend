@@ -67,21 +67,28 @@ export default function CommonTimeSelect({
   }, [value, timeMode]);
 
   return (
-    <div>
-      <CommonInput
-        value={value.toString()}
-        inputType="number"
-        onChange={(newV) => setValue(parseInt(newV ?? "0"))}
-        placeholder="Time"
-      />
-      <CommonDropdown
-        items={timeModeItems}
-        activeItem={timeMode}
-        filterLabel="Time Mode"
-        setSelected={setTimeMode}
-      />
-      <div>
-        <span>Expires At: {expiresAt}</span>
+    <div className="tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-text-sm">
+        <span className="tw-text-iron-300 tw-font-normal tw-space-x-1">
+          <span> Expires At:</span>
+          <span className="tw-text-iron-50 tw-font-medium">{expiresAt}</span>
+        </span>
+      </div>
+      <div className="tw-w-40">
+        <CommonInput
+          value={value.toString()}
+          inputType="number"
+          onChange={(newV) => setValue(parseInt(newV ?? "0"))}
+          placeholder="Time"
+        />
+      </div>
+      <div className="tw-w-40">
+        <CommonDropdown
+          items={timeModeItems}
+          activeItem={timeMode}
+          filterLabel="Time Mode"
+          setSelected={setTimeMode}
+        />
       </div>
     </div>
   );
