@@ -60,7 +60,6 @@ export default function ProxyCreate({
       return;
     }
     const existingProxy = alreadyProxied(target);
-    console.log(existingProxy);
     if (existingProxy) {
       setNewProfileProxy(existingProxy);
       return;
