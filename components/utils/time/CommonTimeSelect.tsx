@@ -78,7 +78,7 @@ export default function CommonTimeSelect({
     <div className="tw-flex tw-items-center tw-gap-x-2">
       <div className="tw-text-sm">
         <span className="tw-text-iron-300 tw-font-normal tw-space-x-1">
-          <span> Expires At:</span>
+          <span>Expires At:</span>
           <span className="tw-text-iron-50 tw-font-medium">{expiresAt}</span>
         </span>
       </div>
