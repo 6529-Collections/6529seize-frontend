@@ -219,7 +219,11 @@ export default function UserPageRepModifyModal({
         message: "Rep updated.",
         type: "success",
       });
-      onProfileRepModify({ targetProfile: profile, connectedProfile });
+      onProfileRepModify({
+        targetProfile: profile,
+        connectedProfile,
+        profileProxy: activeProfileProxy ?? null,
+      });
       onClose();
     },
     onError: (error) => {

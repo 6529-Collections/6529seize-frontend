@@ -16,6 +16,7 @@ import {
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { ProfileMin } from "../../generated/models/ProfileMin";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -110,9 +111,11 @@ type ReactQueryWrapperContextType = {
   onProfileRepModify: ({
     targetProfile,
     connectedProfile,
+    profileProxy,
   }: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => void;
   onProfileEdit: ({
     profile,
@@ -151,22 +154,23 @@ type ReactQueryWrapperContextType = {
   }) => void;
 };
 
-export const ReactQueryWrapperContext = createContext<ReactQueryWrapperContextType>({
-  setProfile: () => {},
-  setProfileProxy: () => {},
-  onProfileProxyModify: () => {},
-  onProfileCICModify: () => {},
-  onProfileRepModify: () => {},
-  onProfileEdit: () => {},
-  onProfileStatementAdd: () => {},
-  onProfileStatementRemove: () => {},
-  initProfileRepPage: () => {},
-  initProfileIdentityPage: () => {},
-  initLandingPage: () => {},
-  initCommunityActivityPage: () => {},
-  onCurationFilterRemoved: () => {},
-  onCurationFilterChanged: () => {},
-});
+export const ReactQueryWrapperContext =
+  createContext<ReactQueryWrapperContextType>({
+    setProfile: () => {},
+    setProfileProxy: () => {},
+    onProfileProxyModify: () => {},
+    onProfileCICModify: () => {},
+    onProfileRepModify: () => {},
+    onProfileEdit: () => {},
+    onProfileStatementAdd: () => {},
+    onProfileStatementRemove: () => {},
+    initProfileRepPage: () => {},
+    initProfileIdentityPage: () => {},
+    initLandingPage: () => {},
+    initCommunityActivityPage: () => {},
+    onCurationFilterRemoved: () => {},
+    onCurationFilterChanged: () => {},
+  });
 
 export default function ReactQueryWrapper({
   children,
@@ -449,9 +453,11 @@ export default function ReactQueryWrapper({
   const onProfileRepModify = ({
     targetProfile,
     connectedProfile,
+    profileProxy,
   }: {
-    targetProfile: IProfileAndConsolidations;
-    connectedProfile: IProfileAndConsolidations | null;
+    readonly targetProfile: IProfileAndConsolidations;
+    readonly connectedProfile: IProfileAndConsolidations | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => {
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
@@ -467,6 +473,64 @@ export default function ReactQueryWrapper({
         profile: connectedProfile,
         matter: RateMatter.REP,
         given: true,
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_REP_RATINGS,
+        values: [
+          {
+            rater: connectedProfile.profile?.handle,
+            handleOrWallet: targetProfile.profile?.handle,
+          },
+        ],
+      });
+    }
+
+    if (profileProxy) {
+      invalidateQueries({
+        key: QueryKey.PROFILE,
+        values: [
+          profileProxy.created_by.handle,
+          profileProxy.granted_to.handle,
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_RATERS,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+            matter: RateMatter.REP,
+            given: false,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+            matter: RateMatter.REP,
+            given: false,
+          },
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_REP_RATINGS,
+        values: [
+          {
+            rater: profileProxy.created_by.handle,
+            handleOrWallet: targetProfile.profile?.handle,
+          },
+          {
+            rater: profileProxy.granted_to.handle,
+            handleOrWallet: targetProfile.profile?.handle,
+          },
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_PROFILE_PROXIES,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+          },
+        ],
       });
     }
   };

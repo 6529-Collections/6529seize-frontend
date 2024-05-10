@@ -73,8 +73,7 @@ export default function UserPageRepRepsTableItem({
               >
                 <UserPageRepModifyModal
                   profile={profile}
-                  repState={rep}
-                  giverAvailableRep={giverAvailableRep}
+                  category={rep.category}
                   onClose={() => setIsEditRepModalOpen(false)}
                 />
               </CommonAnimationOpacity>
