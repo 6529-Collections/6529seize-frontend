@@ -28,7 +28,7 @@ export default function ProxyCreateActionConfig({
     currentActions.filter(
       (a) => a.action_type === ProfileProxyActionType.AllocateRep
     );
-  
+
   const repActions = getRepActions();
 
   const components: Record<ProfileProxyActionType, JSX.Element> = {
@@ -52,10 +52,7 @@ export default function ProxyCreateActionConfig({
       />
     ),
     [ProfileProxyActionType.ReadWave]: (
-      <ProxyCreateActionConfigReadWave
-        endTime={endTime}
-        onSubmit={onSubmit}
-      />
+      <ProxyCreateActionConfigReadWave endTime={endTime} onSubmit={onSubmit} />
     ),
     [ProfileProxyActionType.CreateDropToWave]: (
       <ProxyCreateActionConfigCreateDropToWave
@@ -71,10 +68,19 @@ export default function ProxyCreateActionConfig({
     ),
   };
   return (
-    <div>
-      <div>{PROFILE_PROXY_ACTION_LABELS[selectedActionType]}</div>
-      <div>End time: {endTime}</div>
-      <div>{components[selectedActionType]}</div>
+    <div className="tw-flex tw-flex-col">
+      <p className="tw-mb-0 tw-text-base tw-text-iron-50 tw-font-semibold">
+        {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
+      </p>
+      <p className="tw-mb-0 tw-space-x-1.5">
+        <span className="tw-text-iron-400 tw-font-normal tw-text-base">
+          End time:
+        </span>
+        <span className="tw-text-iron-50 tw-text-base tw-font-medium">
+          {endTime}
+        </span>
+      </p>
+      <div className="tw-mt-2">{components[selectedActionType]}</div>
     </div>
   );
 }

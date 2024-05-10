@@ -74,12 +74,28 @@ export default function ProfileProxyEndTimeEdit({
   };
   return (
     <div>
-      <button onClick={setViewMode}>Cancel</button>
-      <CommonTimeSelect
-        currentTime={profileProxyAction.end_time}
-        onMillis={setEndTime}
-      />
-      <button onClick={onSubmit}>Update</button>
+      <div className="tw-absolute tw-top-0 tw-inset-x-0 tw-bg-iron-950 tw-bg-opacity-50 tw-backdrop-filter tw-backdrop-blur tw-p-1.5 tw-rounded-lg">
+        <div className="tw-flex tw-items-center tw-justify-end tw-ml-auto tw-gap-x-2">
+          <CommonTimeSelect
+            currentTime={profileProxyAction.end_time}
+            onMillis={setEndTime}
+          />
+          <button
+            onClick={setViewMode}
+            type="button"
+            className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            type="button"
+            className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          >
+            Update
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export default function ProxyListItem({
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <img
             src={profileProxy.created_by.pfp ?? ""}
-            alt=""
+            alt="Profile picture"
             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
           />
           <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
@@ -83,7 +83,7 @@ export default function ProxyListItem({
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <img
               src={profileProxy.granted_to.pfp ?? ""}
-              alt=""
+              alt="Profile picture"
               className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
             />
             <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
@@ -113,12 +113,12 @@ export default function ProxyListItem({
                   strokeLinejoin="round"
                 />
               </svg>
-              <span> action</span>
+              <span>action</span>
             </button>
           )}
         </div>
       </div>
-      <div>
+      <div className="tw-relative">
         <CommonChangeAnimation>{components[viewType]}</CommonChangeAnimation>
       </div>
     </div>
