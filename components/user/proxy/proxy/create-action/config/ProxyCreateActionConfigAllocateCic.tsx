@@ -9,7 +9,7 @@ export default function ProxyCreateActionConfigAllocateCic({
   readonly endTime: number | null;
   readonly onSubmit: (action: CreateProxyAllocateCicAction) => void;
 }) {
-  const [creditAmount, setCreditAmount] = useState<number>(0);
+  const [creditAmount, setCreditAmount] = useState<number>(25);
 
   const handleSubmit = () =>
     onSubmit({
