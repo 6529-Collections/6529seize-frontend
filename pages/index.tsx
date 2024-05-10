@@ -135,16 +135,24 @@ export default function Home({
 
   const renderManifoldClaimEditionSize = () => {
     if (manifoldClaim) {
-      if (disableClaim) {
-        return <>{numberWithCommas(manifoldClaim.total)}</>;
-      } else {
-        return (
-          <>
-            {numberWithCommas(manifoldClaim.total)} /{" "}
-            {numberWithCommas(manifoldClaim.totalMax)}
-          </>
-        );
-      }
+      // TODO: REMOVE BELOW line and uncomment
+      return (
+        <>
+          {numberWithCommas(manifoldClaim.total)} /{" "}
+          {numberWithCommas(manifoldClaim.totalMax)}
+        </>
+      );
+
+      // if (disableClaim) {
+      //   return <>{numberWithCommas(manifoldClaim.total)}</>;
+      // } else {
+      //   return (
+      //     <>
+      //       {numberWithCommas(manifoldClaim.total)} /{" "}
+      //       {numberWithCommas(manifoldClaim.totalMax)}
+      //     </>
+      //   );
+      // }
     } else {
       return <DotLoader />;
     }
