@@ -114,9 +114,9 @@ export default function ProxyActionAcceptanceButton({
   };
 
   return (
-    <div className="tw-flex lg:tw-justify-end">
-      <div className="tw-flex lg:tw-grid lg:tw-grid-cols-2">
-        <div className="lg:tw-col-span-1">
+    <div className="tw-flex tw-justify-end">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+        <div className="tw-col-span-1">
           {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
@@ -127,7 +127,7 @@ export default function ProxyActionAcceptanceButton({
             </button>
           )}
         </div>
-        <div className="lg:tw-col-span-1">
+        <div className="tw-col-span-1">
           {possibleActions.includes(AcceptActionRequestActionEnum.Reject) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}

@@ -51,17 +51,17 @@ export default function ProxyActionRow({
   });
 
   return (
-    <div className="tw-relative tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-14 tw-px-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
-      <div className="tw-col-span-2">
+    <div className="tw-relative tw-grid tw-grid-cols-[repeat(13,minmax(0,1fr))] tw-gap-y-3 tw-gap-x-4 tw-justify-between lg:tw-items-center tw-w-full tw-py-4 xl:tw-py-0 xl:tw-h-14 tw-px-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
+      <div className="tw-col-span-full lg:tw-col-span-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <p className="tw-mb-0 tw-text-md tw-font-medium tw-text-iron-50">
             {PROFILE_PROXY_ACTION_LABELS[action.action_type]}
           </p>
         </div>
       </div>
-      <div className="tw-col-span-2">
-        <div className="tw-flex tw-space-x-3">
-          <div className="tw-inline-flex tw-space-x-2 tw-min-w-[6.6rem]">
+      <div className="tw-col-span-4 lg:tw-col-span-3">
+        <div className="tw-flex tw-gap-x-3">
+          <div className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]">
             <img
               src={profileProxy.created_by.pfp ?? ""}
               alt="Profile picture"
@@ -73,7 +73,7 @@ export default function ProxyActionRow({
               {STATUS_LABELS[grantorStatus]}
             </div>
           </div>
-          <div className="tw-inline-flex tw-space-x-2 tw-min-w-[6.6rem]">
+          <div className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]">
             <img
               src={profileProxy.granted_to.pfp ?? ""}
               alt="Profile picture"
@@ -87,7 +87,7 @@ export default function ProxyActionRow({
           </div>
         </div>
       </div>
-      <div className="tw-col-span-2">
+      <div className="tw-col-span-full md:tw-col-span-2">
         {PROFILE_PROXY_ACTION_HAVE_CREDIT[action.action_type] && (
           <ProfileProxyCredit
             profileProxy={profileProxy}
@@ -95,24 +95,26 @@ export default function ProxyActionRow({
           />
         )}
       </div>
-      <div className="tw-col-span-1">
-        <p className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
-          <span>Start:</span>
-          <span>{getTimeAgo(profileProxy.created_at)}</span>
-        </p>
-      </div>
-      <div className="tw-col-span-1">
-        <div className="tw-flex tw-items-center tw-justify-center">
-          <span className="tw-text-md tw-font-normal tw-text-iron-500">
-            End:
-          </span>
-          <ProfileProxyEndTime
-            profileProxy={profileProxy}
-            profileProxyAction={action}
-          />
+      <div className="tw-col-span-full md:tw-col-span-4">
+        <div className="tw-flex tw-gap-x-6">
+          <p className="tw-flex tw-items-center tw-whitespace-nowrap tw-mb-0 tw-space-x-1 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
+            <span>Start:</span>
+            <span className="tw-text-iron-300 tw-font-normal">
+              {getTimeAgo(profileProxy.created_at)}
+            </span>
+          </p>
+          <div className="tw-flex tw-items-center tw-space-x-1">
+            <span className="tw-text-md tw-font-normal tw-text-iron-500">
+              End:
+            </span>
+            <ProfileProxyEndTime
+              profileProxy={profileProxy}
+              profileProxyAction={action}
+            />
+          </div>
         </div>
       </div>
-      <div className="tw-col-span-2">
+      <div className="tw-col-span-full md:tw-col-span-2">
         {isSelf && (
           <ProxyActionAcceptanceButton
             action={action}
