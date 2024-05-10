@@ -13,5 +13,13 @@ export default function ProxyCreateActionConfigRateWaveDrop({
       action_type: ProfileProxyActionType.RateWaveDrop,
       end_time: endTime,
     });
-  return <button onClick={handleSubmit}>SAVE</button>;
+  return (
+    <button
+      type="button"
+      onClick={handleSubmit}
+      className="tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+    >
+      Save
+    </button>
+  );
 }

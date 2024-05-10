@@ -69,8 +69,8 @@ export default function ProfileProxyCreditEdit({
   };
 
   return (
-    <div className="tw-absolute tw-top-0 tw-inset-x-0 tw-bg-iron-950 tw-bg-opacity-50 tw-backdrop-filter tw-backdrop-blur tw-p-1.5 tw-rounded-lg">
-      <div className="tw-max-w-xs tw-flex tw-items-center tw-justify-center tw-mx-auto tw-gap-x-2">
+    <div className="tw-absolute tw-top-0 tw-inset-x-0 tw-bg-iron-950 tw-bg-opacity-50 tw-backdrop-filter tw-backdrop-blur tw-h-full lg:tw-h-14 tw-rounded-lg">
+      <div className="tw-max-w-xs tw-h-full lg:tw-flex tw-items-center tw-justify-center tw-mx-auto tw-gap-x-2">
         <CommonInput
           value={creditAmount.toString()}
           inputType="number"
