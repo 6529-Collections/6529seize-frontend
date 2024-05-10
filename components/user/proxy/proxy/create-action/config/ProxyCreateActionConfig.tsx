@@ -91,7 +91,7 @@ export default function ProxyCreateActionConfig({
           {endTime}
         </span>
       </p>
-      <div className="tw-mt-2">{components[selectedActionType]}</div>
+      <div className="tw-mt-4">{components[selectedActionType]}</div>
     </div>
   );
 }

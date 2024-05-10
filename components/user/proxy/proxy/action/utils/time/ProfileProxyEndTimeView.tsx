@@ -19,12 +19,12 @@ export default function ProfileProxyEndTimeView({
     }
   };
   return (
-    <div className="tw-flex">
-      <p className="tw-whitespace-nowrap tw-mb-0 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-500">
+    <div className="tw-flex tw-items-center">
+      <span className="tw-whitespace-nowrap tw-text-iron-300 tw-text-md tw-font-normal">
         {profileProxyAction.end_time
           ? getTimeUntil(profileProxyAction.end_time)
           : "Not set"}
-      </p>
+      </span>
       {isOwner && (
         <button
           type="button"
