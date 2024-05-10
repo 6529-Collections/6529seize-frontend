@@ -107,6 +107,7 @@ type ReactQueryWrapperContextType = {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
     readonly rater: string | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => void;
   onProfileRepModify: ({
     targetProfile,
@@ -422,10 +423,12 @@ export default function ReactQueryWrapper({
     targetProfile,
     connectedProfile,
     rater,
+    profileProxy,
   }: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
     readonly rater: string | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
@@ -446,6 +449,41 @@ export default function ReactQueryWrapper({
       invalidateProfileRaterCICState({
         profile: targetProfile,
         rater: rater.toLowerCase(),
+      });
+    }
+    if (profileProxy) {
+      invalidateQueries({
+        key: QueryKey.PROFILE,
+        values: [
+          profileProxy.created_by.handle,
+          profileProxy.granted_to.handle,
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_RATERS,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+            matter: RateMatter.CIC,
+            given: false,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+            matter: RateMatter.CIC,
+            given: false,
+          },
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_PROFILE_PROXIES,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+          },
+        ],
       });
     }
   };
