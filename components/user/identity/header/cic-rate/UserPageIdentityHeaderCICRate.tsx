@@ -21,6 +21,7 @@ import {
 import { createBreakpoint } from "react-use";
 import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelper";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
+import { ProfileProxyActionType } from "../../../../../generated/models/ProfileProxyActionType";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -32,29 +33,24 @@ export default function UserPageIdentityHeaderCICRate({
   readonly isTooltip: boolean;
 }) {
   const { address } = useAccount();
-  const { requestAuth, setToast } = useContext(AuthContext);
-  const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
 
-  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${address}`,
-      }),
-    enabled: !!address,
-  });
+  const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
   const { data: myCICState } = useQuery<ApiProfileRaterCicState>({
     queryKey: [
       QueryKey.PROFILE_RATER_CIC_STATE,
       {
         handle: profile.profile?.handle.toLowerCase(),
-        rater: address?.toLowerCase(),
+        rater: activeProfileProxy?.created_by.handle ?? address?.toLowerCase(),
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRaterCicState>({
-        endpoint: `profiles/${profile.profile?.handle}/cic/rating/${address}`,
+        endpoint: `profiles/${profile.profile?.handle}/cic/rating/${
+          activeProfileProxy?.created_by.handle ?? address?.toLowerCase()
+        }`,
       }),
     enabled: !!profile.profile?.handle && !!address,
     staleTime: 0,
@@ -88,6 +84,32 @@ export default function UserPageIdentityHeaderCICRate({
     },
   });
 
+  const getCicLeftToGive = (): number => {
+    const cicProxyAction = activeProfileProxy?.actions.find(
+      (a) => a.action_type === ProfileProxyActionType.AllocateCic
+    );
+    if (!cicProxyAction) {
+      return myCICState?.cic_ratings_left_to_give_by_rater ?? 0;
+    }
+    const proxyAvailableCredit = Math.max(
+      0,
+      (cicProxyAction?.credit_amount ?? 0) - (cicProxyAction?.credit_spent ?? 0)
+    );
+    console.log(proxyAvailableCredit);
+    return Math.min(
+      proxyAvailableCredit,
+      myCICState?.cic_ratings_left_to_give_by_rater ?? 0
+    );
+  };
+
+  const [cicLeftToGive, setCicLeftToGive] = useState<number>(
+    getCicLeftToGive()
+  );
+  useEffect(
+    () => setCicLeftToGive(getCicLeftToGive()),
+    [myCICState, activeProfileProxy]
+  );
+
   const [originalRating, setOriginalRating] = useState<number>(
     myCICState?.cic_rating_by_rater ?? 0
   );
@@ -97,13 +119,10 @@ export default function UserPageIdentityHeaderCICRate({
   );
 
   const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
-    (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
-      Math.abs(originalRating)
+    cicLeftToGive + Math.abs(originalRating)
   );
 
-  const [myAvailableCIC, setMyAvailableCIC] = useState<number>(
-    myCICState?.cic_ratings_left_to_give_by_rater ?? 0
-  );
+  const [myAvailableCIC, setMyAvailableCIC] = useState<number>(cicLeftToGive);
 
   const getCICStrOrMaxStr = (strCIC: string): string => {
     const cicAsNumber = getStringAsNumberOrZero(strCIC);
@@ -125,11 +144,10 @@ export default function UserPageIdentityHeaderCICRate({
     setOriginalRating(myCICState?.cic_rating_by_rater ?? 0);
     setAdjustedRatingStr(`${myCICState?.cic_rating_by_rater ?? 0}`);
     setMyMaxCICRatings(
-      (myCICState?.cic_ratings_left_to_give_by_rater ?? 0) +
-        Math.abs(myCICState?.cic_rating_by_rater ?? 0)
+      cicLeftToGive + Math.abs(myCICState?.cic_rating_by_rater ?? 0)
     );
-    setMyAvailableCIC(myCICState?.cic_ratings_left_to_give_by_rater ?? 0);
-  }, [myCICState]);
+    setMyAvailableCIC(cicLeftToGive);
+  }, [myCICState, cicLeftToGive]);
 
   const handleChange = (e: FormEvent<HTMLInputElement>) => {
     const inputValue = e.currentTarget.value;
