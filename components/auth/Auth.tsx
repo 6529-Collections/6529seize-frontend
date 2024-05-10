@@ -31,7 +31,9 @@ type AuthContextType = {
     message: string | React.ReactNode;
     type: TypeOptions;
   }) => void;
-  readonly setActiveProfileProxy: (profileProxy: ProfileProxy | null) => void;
+  readonly setActiveProfileProxy: (
+    profileProxy: ProfileProxy | null
+  ) => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -40,7 +42,7 @@ export const AuthContext = createContext<AuthContextType>({
   activeProfileProxy: null,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
-  setActiveProfileProxy: () => {},
+  setActiveProfileProxy: async () => {},
 });
 
 export default function Auth({
@@ -305,7 +307,9 @@ export default function Auth({
     return { success: !!getAuthJwt() };
   };
 
-  const onActiveProfileProxy = async (profileProxy: ProfileProxy | null) => {
+  const onActiveProfileProxy = async (
+    profileProxy: ProfileProxy | null
+  ): Promise<void> => {
     removeAuthJwt();
     if (!address) {
       setActiveProfileProxy(null);
