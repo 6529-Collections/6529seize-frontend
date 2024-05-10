@@ -8,10 +8,12 @@ export default function ProxyCreateActionConfigAllocateRep({
   endTime,
   repActions,
   onSubmit,
+  onCancel,
 }: {
   readonly endTime: number | null;
   readonly repActions: ProfileProxyAction[];
   readonly onSubmit: (action: CreateProxyAllocateRepAction) => void;
+  readonly onCancel: () => void;
 }) {
   const [creditAmount, setCreditAmount] = useState<number>(0);
 
@@ -44,6 +46,13 @@ export default function ProxyCreateActionConfigAllocateRep({
         className="tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
       >
         Save
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+      >
+        Cancel
       </button>
     </div>
   );
