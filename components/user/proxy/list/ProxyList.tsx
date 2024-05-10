@@ -62,7 +62,7 @@ export default function ProxyList({
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-flex tw-items-center tw-justify-between">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <ProxyListFilters selected={proxyType} setSelected={setProxyType} />
         <div>
           {isSelf && (
@@ -70,7 +70,7 @@ export default function ProxyList({
               <button
                 type="button"
                 onClick={() => onModeChange(ProxyMode.CREATE)}
-                className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-whitespace-nowrap w-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
               >
                 <svg
                   className="tw-w-5 tw-h-5 tw-mr-1 -tw-ml-1"

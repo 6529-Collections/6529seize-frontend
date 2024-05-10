@@ -114,9 +114,9 @@ export default function ProxyActionAcceptanceButton({
   };
 
   return (
-    <div className="tw-flex tw-justify-end">
-      <div className="tw-grid tw-grid-cols-2">
-        <div className="tw-col-span-1">
+    <div className="tw-flex lg:tw-justify-end">
+      <div className="tw-flex lg:tw-grid lg:tw-grid-cols-2">
+        <div className="lg:tw-col-span-1">
           {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
@@ -127,7 +127,7 @@ export default function ProxyActionAcceptanceButton({
             </button>
           )}
         </div>
-        <div className="tw-col-span-1">
+        <div className="lg:tw-col-span-1">
           {possibleActions.includes(AcceptActionRequestActionEnum.Reject) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}
@@ -150,7 +150,7 @@ export default function ProxyActionAcceptanceButton({
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
               type="button"
-              className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >
               Restore
             </button>
