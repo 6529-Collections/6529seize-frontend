@@ -108,14 +108,16 @@ export default function Home({
   );
 
   useEffect(() => {
-    if (
-      manifoldClaim &&
-      (manifoldClaim.total === manifoldClaim.totalMax ||
-        (manifoldClaim.phase == ManifoldPhase.PUBLIC &&
-          manifoldClaim.status === ManifoldClaimStatus.EXPIRED))
-    ) {
-      setDisableClaim(true);
-    }
+    // if (
+    //   manifoldClaim &&
+    //   (manifoldClaim.total === manifoldClaim.totalMax ||
+    //     (manifoldClaim.phase == ManifoldPhase.PUBLIC &&
+    //       manifoldClaim.status === ManifoldClaimStatus.EXPIRED))
+    // ) {
+    //   setDisableClaim(true);
+    // }
+    // TODO: REMOVE BELOW and uncomment above
+    setDisableClaim(true);
   }, [manifoldClaim]);
 
   useEffect(() => {
@@ -343,6 +345,34 @@ export default function Home({
                           </Col>
                         </Row>
                       )}
+                    {/* TODO: REMOVE BELOW */}
+                    <Row className="pb-3">
+                      <Col>
+                        <Container
+                          style={{
+                            backgroundColor: "#222",
+                            padding: "15px 20px",
+                            width: "100%",
+                            color: "#fff",
+                            boxShadow:
+                              ".5px .5px 3px 0 hsla(0, 0%, 100%, .02), 1px 3px 6px 0 rgba(0, 0, 0, .15), -.5px -1px 3px 0 hsla(0, 0%, 100%, .02), inset -3px -3px 5px 0 hsla(0, 0%, 100%, .02), inset 6px 3px 6px 0 rgba(0, 0, 0, .4)",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: ".5rem",
+                            borderRadius: ".5rem",
+                          }}>
+                          <Row>
+                            <Col xs={12} className="pb-2">
+                              <b>Currently facing technical issues</b>
+                            </Col>
+                            <Col xs={12}>
+                              We will provide an update as soon as we reschedule
+                              the drop
+                            </Col>
+                          </Row>
+                        </Container>
+                      </Col>
+                    </Row>
                     <Row>
                       <Col>
                         <h3>Minting Approach</h3>
