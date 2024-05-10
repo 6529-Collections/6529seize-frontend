@@ -62,13 +62,13 @@ export default function Auth({
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
-      { handleOrWallet: connectedProfile?.profile?.external_id },
+      { handleOrWallet: connectedProfile?.profile?.handle },
     ],
     queryFn: async () =>
       await commonApiFetch<ProfileProxy[]>({
-        endpoint: `profiles/${connectedProfile?.profile?.external_id}/proxies/`,
+        endpoint: `profiles/${connectedProfile?.profile?.handle}/proxies/`,
       }),
-    enabled: !!connectedProfile?.profile?.external_id,
+    enabled: !!connectedProfile?.profile?.handle,
   });
 
   const [receivedProfileProxies, setReceivedProfileProxies] = useState<
@@ -96,6 +96,7 @@ export default function Auth({
       const activeProxy = receivedProxies?.find(
         (proxy) => proxy.created_by.id === role
       );
+
       setActiveProfileProxy(activeProxy ?? null);
     }
   }, [profileProxies, connectedProfile]);

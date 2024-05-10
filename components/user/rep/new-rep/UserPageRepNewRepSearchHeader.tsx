@@ -76,6 +76,7 @@ export default function UserPageRepNewRepSearchHeader({
     available: number;
     rated: number;
   }>(getActiveRepRates());
+
   useEffect(
     () => setActiveRepRates(getActiveRepRates()),
     [activeProfileProxy, proxyGrantorRepRates, repRates]
