@@ -118,7 +118,7 @@ export default function ProxyListItem({
           )}
         </div>
       </div>
-      <div className="tw-relative">
+      <div>
         <CommonChangeAnimation>{components[viewType]}</CommonChangeAnimation>
       </div>
     </div>
