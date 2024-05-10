@@ -50,15 +50,15 @@ export default function ProxyActionRow({
   });
 
   return (
-    <div className="tw-relative tw-grid lg:tw-grid-cols-10 tw-gap-4 tw-justify-between tw-items-center tw-w-full tw-py-4 lg:tw-py-0 lg:tw-h-14 tw-px-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
-      <div className="tw-col-span-full lg:tw-col-span-2">
+    <div className="tw-relative tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-14 tw-px-4 tw-rounded-lg tw-ring-1 tw-ring-iron-600">
+      <div className="tw-col-span-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <p className="tw-mb-0 tw-text-md tw-font-medium tw-text-iron-50">
             {PROFILE_PROXY_ACTION_LABELS[action.action_type]}
           </p>
         </div>
       </div>
-      <div className="tw-col-span-full lg:tw-col-span-2">
+      <div className="tw-col-span-2">
         <div className="tw-flex tw-space-x-3">
           <div className="tw-inline-flex tw-space-x-2 tw-min-w-[6.6rem]">
             <img
@@ -86,7 +86,7 @@ export default function ProxyActionRow({
           </div>
         </div>
       </div>
-      <div className="tw-col-span-full lg:tw-col-span-2">
+      <div className="tw-col-span-2">
         {PROFILE_PROXY_ACTION_HAVE_CREDIT[action.action_type] && (
           <ProfileProxyCredit
             profileProxy={profileProxy}
@@ -94,14 +94,14 @@ export default function ProxyActionRow({
           />
         )}
       </div>
-      <div className="tw-col-span-full lg:tw-col-span-1">
-        <p className="tw-flex tw-items-center lg:tw-justify-center tw-whitespace-nowrap tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
+      <div className="tw-col-span-1">
+        <p className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
           <span>Start:</span>
           <span>23 days</span>
         </p>
       </div>
-      <div className="tw-col-span-full lg:tw-col-span-1">
-        <div className="tw-flex tw-items-center lg:tw-justify-center">
+      <div className="tw-col-span-1">
+        <div className="tw-flex tw-items-center tw-justify-center">
           <span className="tw-text-md tw-font-normal tw-text-iron-500">
             End:
           </span>
@@ -111,7 +111,7 @@ export default function ProxyActionRow({
           />
         </div>
       </div>
-      <div className="tw-col-span-full lg:tw-col-span-2">
+      <div className="tw-col-span-2">
         {isSelf && (
           <ProxyActionAcceptanceButton
             action={action}

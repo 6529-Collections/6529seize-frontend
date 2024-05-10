@@ -1,4 +1,4 @@
-import PencilIcon from "../../../../../../utils/icons/PencilIcon";
+import PencilIcon, { PencilIconSize } from "../../../../../../utils/icons/PencilIcon";
 import { ProfileProxyAction } from "../../../../../../../generated/models/ProfileProxyAction";
 
 export default function ProfileProxyCreditView({
@@ -26,10 +26,10 @@ export default function ProfileProxyCreditView({
       {isOwner && (
         <button
           type="button"
-          className="tw-group tw-bg-transparent tw-border-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-group tw-bg-transparent tw-border-0 tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
           onClick={onEditMode}
         >
-          <PencilIcon />
+          <PencilIcon size={PencilIconSize.SMALL} />
         </button>
       )}
     </div>
