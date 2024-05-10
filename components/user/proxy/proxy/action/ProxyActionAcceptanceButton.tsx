@@ -137,6 +137,24 @@ export default function ProxyActionAcceptanceButton({
               Reject
             </button>
           )}
+          {possibleActions.includes(AcceptActionRequestActionEnum.Revoke) && (
+            <button
+              onClick={() => onSubmit(AcceptActionRequestActionEnum.Revoke)}
+              type="button"
+              className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Revoke
+            </button>
+          )}
+          {possibleActions.includes(AcceptActionRequestActionEnum.Restore) && (
+            <button
+              onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
+              type="button"
+              className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Restore
+            </button>
+          )}
         </div>
       </div>
     </div>
