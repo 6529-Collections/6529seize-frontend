@@ -28,11 +28,11 @@ export default function ProxyCreateActionConfigAllocateCic({
     <div className="tw-max-w-xs tw-flex tw-items-end tw-gap-x-3">
       <div className="tw-w-full">
         <p className="tw-mb-0">
-          <span className="tw-text-iron-300 tw-text-sm tw-font-medium">
+          <span className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
             Credit Amount
           </span>
         </p>
-        <div className="tw-mt-1">
+        <div className="tw-mt-1.5">
           <CommonInput
             value={creditAmount.toString()}
             inputType="number"

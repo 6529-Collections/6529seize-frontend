@@ -99,6 +99,7 @@ export default function ProxyCreate({
             className="tw-flex-shrink-0 tw-w-5 tw-h-5"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -116,12 +117,14 @@ export default function ProxyCreate({
         profileProxy={newProfileProxy}
         onTargetSelect={onTargetSelect}
       />
+      <div className="tw-mt-6">
       {newProfileProxy && (
         <ProxyCreateAction
           profileProxy={newProfileProxy}
           onActionCreated={onActionCreated}
         />
       )}
+      </div>
     </div>
   );
 }

@@ -80,16 +80,36 @@ export default function ProxyCreateActionConfig({
     ),
   };
   return (
-    <div className="tw-flex tw-flex-col">
+    <div className="tw-flex tw-flex-col tw-bg-iron-900 tw-p-5 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-iron-700">
       <p className="tw-mb-0 tw-text-base tw-text-iron-50 tw-font-semibold">
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
-      <p className="tw-mb-0">
-        <span className="tw-text-iron-300 tw-text-sm tw-font-medium">
-          End time
-        </span>
-      </p>
-      <CommonTimeSelect currentTime={endTime} onMillis={setEndTime} />
+      <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
+        <div>
+          <span className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+            End time
+          </span>
+          <div className="tw-mt-1.5">
+            <CommonTimeSelect currentTime={endTime} onMillis={setEndTime} />
+          </div>
+        </div>
+        <div className="tw-mt-7 tw-flex tw-items-center">
+          <button
+            type="button"
+            className="tw-bg-iron-800 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2"
+            role="switch"
+            aria-checked="false"
+          >
+            <span
+              aria-hidden="true"
+              className="tw-translate-x-0 tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out"
+            ></span>
+          </button>
+          <span className="tw-ml-3 tw-text-sm">
+            <span className="tw-font-medium tw-text-iron-50">No end time</span>
+          </span>
+        </div>
+      </div>
       <div className="tw-mt-4">{components[selectedActionType]}</div>
     </div>
   );
