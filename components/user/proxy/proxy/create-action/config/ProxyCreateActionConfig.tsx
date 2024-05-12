@@ -12,6 +12,7 @@ import ProxyCreateActionConfigRateWaveDrop from "./ProxyCreateActionConfigRateWa
 import ProxyCreateActionConfigReadWave from "./ProxyCreateActionConfigReadWave";
 
 import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
+import CommonTimeSelect from "../../../../../utils/time/CommonTimeSelect";
 
 export default function ProxyCreateActionConfig({
   selectedActionType,
@@ -83,14 +84,12 @@ export default function ProxyCreateActionConfig({
       <p className="tw-mb-0 tw-text-base tw-text-iron-50 tw-font-semibold">
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
-      <p className="tw-mb-0 tw-space-x-1.5">
-        <span className="tw-text-iron-400 tw-font-normal tw-text-base">
-          End time:
-        </span>
-        <span className="tw-text-iron-50 tw-text-base tw-font-medium">
-          {endTime}
+      <p className="tw-mb-0">
+        <span className="tw-text-iron-300 tw-text-sm tw-font-medium">
+          End time
         </span>
       </p>
+      <CommonTimeSelect currentTime={endTime} onMillis={setEndTime} />
       <div className="tw-mt-4">{components[selectedActionType]}</div>
     </div>
   );

@@ -5,10 +5,7 @@ import CommonTimeSelect from "../../../../../../utils/time/CommonTimeSelect";
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import {
-  commonApiPost,
-  commonApiPut,
-} from "../../../../../../../services/api/common-api";
+import { commonApiPut } from "../../../../../../../services/api/common-api";
 import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
 
 export default function ProfileProxyEndTimeEdit({
@@ -71,9 +68,10 @@ export default function ProfileProxyEndTimeEdit({
       end_time: endTime,
     });
   };
+
   return (
     <div>
-      <div className="tw-absolute tw-z-[1] tw-top-0 tw-inset-x-0 tw-bg-iron-950 tw-bg-opacity-90 tw-backdrop-blur-sm tw-inset-y-0 xl:tw-h-14 tw-rounded-lg">
+      <div className="xl:tw-h-14 tw-rounded-lg">
         <div className="tw-h-full tw-flex tw-items-center tw-justify-end tw-ml-auto tw-px-2 tw-gap-x-2">
           <CommonTimeSelect
             currentTime={profileProxyAction.end_time}
