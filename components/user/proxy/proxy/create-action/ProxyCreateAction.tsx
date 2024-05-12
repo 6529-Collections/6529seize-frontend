@@ -95,7 +95,7 @@ export default function ProxyCreateAction({
   };
 
   return (
-    <div className="tw-mt-4">
+    <div>
       <CommonChangeAnimation>
         {!selectedActionType ? (
           <ProxyCreateActionSelectType

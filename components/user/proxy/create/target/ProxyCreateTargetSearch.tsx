@@ -55,8 +55,8 @@ export default function ProxyCreateTargetSearch({
         Assigned to
       </Combobox.Label>
       {profileProxy ? (
-        <div>
-          <div className="tw-inline-flex">
+        <div className="tw-mt-3">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
             {profileProxy.granted_to.pfp ? (
               <img
                 src={profileProxy.granted_to.pfp}
@@ -66,8 +66,24 @@ export default function ProxyCreateTargetSearch({
             ) : (
               <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
             )}
-            <div>{profileProxy.granted_to.handle}</div>
-            <button onClick={() => onTargetSelect(null)}>X</button>
+            <span className="tw-font-semibold tw-text-iron-50">{profileProxy.granted_to.handle}</span>
+            <button type="button" onClick={() => onTargetSelect(null)} className="tw-bg-transparent tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 focus:tw-outline-none hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+              <svg
+                className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-red"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       ) : (
@@ -110,7 +126,7 @@ export default function ProxyCreateTargetSearch({
                       <div className="tw-flex tw-items-center">
                         <img
                           src={profile.pfp ?? ""}
-                          alt=""
+                          alt="Profile picture"
                           className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full"
                         />
                         <span
