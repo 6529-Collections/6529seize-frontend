@@ -66,27 +66,46 @@ export default function ProfileProxyCreditEdit({
   };
 
   return (
-    <div className="tw-h-full lg:tw-h-14 tw-rounded-lg">
-      <div className="tw-max-w-xs tw-h-full lg:tw-flex tw-items-center tw-justify-center tw-mx-auto tw-gap-x-2">
-        <CommonInput
-          value={creditAmount.toString()}
-          inputType="number"
-          onChange={(newV) => setCreditAmount(parseInt(newV ?? "0"))}
-          placeholder="Credit Amount"
-        />
+    <div className="tw-h-full xl:tw-h-14 tw-rounded-lg tw-bg-iron-900">
+      <div className="tw-h-full lg:tw-flex tw-items-center tw-justify-between tw-px-3 tw-gap-x-3">
+        <div className="tw-flex tw-items-center tw-gap-x-3">
+          <div className="tw-w-40">
+            <CommonInput
+              value={creditAmount.toString()}
+              inputType="number"
+              onChange={(newV) => setCreditAmount(parseInt(newV ?? "0"))}
+              placeholder="Credit Amount"
+            />
+          </div>
+          <button
+            onClick={onSubmit}
+            type="button"
+            className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          >
+            Update
+          </button>
+        </div>
         <button
           onClick={setViewMode}
           type="button"
-          className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+          aria-label="Cancel"
+          title="Cancel"
+          className="tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
         >
-          Cancel
-        </button>
-        <button
-          onClick={onSubmit}
-          type="button"
-          className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-        >
-          Update
+          <svg
+            className="tw-h-5 tw-w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
     </div>
