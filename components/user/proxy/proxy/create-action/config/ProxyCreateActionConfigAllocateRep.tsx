@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateProxyAllocateRepAction } from "../../../../../../entities/IProxy";
 import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
 import CommonInput from "../../../../../utils/input/CommonInput";
@@ -23,6 +23,9 @@ export default function ProxyCreateActionConfigAllocateRep({
       end_time: endTime,
       credit_amount: creditAmount,
     });
+
+  const [disabled, setDisabled] = useState(true);
+  useEffect(() => setDisabled(creditAmount <= 0), [creditAmount]);
   return (
     <div className="tw-max-w-xs tw-flex tw-items-end tw-gap-x-3">
       <div className="tw-w-full">
@@ -43,8 +46,11 @@ export default function ProxyCreateActionConfigAllocateRep({
       <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-3">
         <button
           type="button"
+          disabled={disabled}
           onClick={handleSubmit}
-          className="tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          className={`${
+            disabled ? "" : ""
+          } tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out`}
         >
           Save
         </button>

@@ -5,10 +5,7 @@ import { ProfileProxyAction } from "../../../../../../../generated/models/Profil
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import {
-  commonApiPost,
-  commonApiPut,
-} from "../../../../../../../services/api/common-api";
+import { commonApiPut } from "../../../../../../../services/api/common-api";
 import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
 
 export default function ProfileProxyCreditEdit({
@@ -69,7 +66,7 @@ export default function ProfileProxyCreditEdit({
   };
 
   return (
-    <div className="tw-absolute tw-top-0 tw-inset-x-0 tw-bg-iron-950 tw-bg-opacity-90 tw-backdrop-blur-sm tw-h-full lg:tw-h-14 tw-rounded-lg">
+    <div className="tw-h-full lg:tw-h-14 tw-rounded-lg">
       <div className="tw-max-w-xs tw-h-full lg:tw-flex tw-items-center tw-justify-center tw-mx-auto tw-gap-x-2">
         <CommonInput
           value={creditAmount.toString()}
