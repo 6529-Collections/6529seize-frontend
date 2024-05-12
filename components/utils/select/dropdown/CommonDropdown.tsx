@@ -16,6 +16,7 @@ export default function CommonDropdown<T, U = unknown>(
     filterLabel,
     setSelected,
     containerRef,
+    dynamicPosition = true,
     renderItemChildren,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
@@ -141,6 +142,7 @@ export default function CommonDropdown<T, U = unknown>(
         buttonRef={buttonRef}
         buttonPosition={buttonPosition}
         filterLabel={filterLabel}
+        dynamicPosition={dynamicPosition}
         onIsMobile={setIsMobile}
       >
         {Object.values(items).map((item, i) => (

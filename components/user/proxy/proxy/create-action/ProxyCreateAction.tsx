@@ -19,7 +19,7 @@ export default function ProxyCreateAction({
 }: {
   readonly profileProxy: ProfileProxy;
   readonly onActionCreated: () => void;
-  readonly onCancel: () => void;
+  readonly onCancel?: () => void;
 }) {
   const router = useRouter();
   const user = router.query.user as string;
@@ -109,7 +109,7 @@ export default function ProxyCreateAction({
               selectedActionType={selectedActionType}
               currentActions={profileProxy.actions}
               onSubmit={onSubmit}
-              onCancel={onCancel}
+              onCancel={() => setSelectedActionType(null)}
             />
           </div>
         )}

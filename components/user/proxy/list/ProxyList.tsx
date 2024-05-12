@@ -36,26 +36,38 @@ export default function ProxyList({
   const components: Record<ProfileProxyListType, JSX.Element> = {
     [ProfileProxyListType.RECEIVED]: (
       <div className="tw-space-y-8">
-        {receivedProfileProxies.map((profileProxy) => (
-          <ProxyListItem
-            key={profileProxy.id}
-            profileProxy={profileProxy}
-            isSelf={isSelf}
-            profile={profile}
-          />
-        ))}
+        {receivedProfileProxies.length ? (
+          receivedProfileProxies.map((profileProxy) => (
+            <ProxyListItem
+              key={profileProxy.id}
+              profileProxy={profileProxy}
+              isSelf={isSelf}
+              profile={profile}
+            />
+          ))
+        ) : (
+          <div className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
+            No received proxies
+          </div>
+        )}
       </div>
     ),
     [ProfileProxyListType.GRANTED]: (
       <div className="tw-space-y-8">
-        {grantedProfileProxies.map((profileProxy) => (
-          <ProxyListItem
-            key={profileProxy.id}
-            profileProxy={profileProxy}
-            isSelf={isSelf}
-            profile={profile}
-          />
-        ))}
+        {grantedProfileProxies.length ? (
+          grantedProfileProxies.map((profileProxy) => (
+            <ProxyListItem
+              key={profileProxy.id}
+              profileProxy={profileProxy}
+              isSelf={isSelf}
+              profile={profile}
+            />
+          ))
+        ) : (
+          <div className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
+            No granted proxies
+          </div>
+        )}
       </div>
     ),
   };
