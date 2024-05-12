@@ -14,11 +14,11 @@ export default function HeaderProxyDropdown({
   readonly setActiveProfileProxy: (profileProxy: ProfileProxy | null) => void;
 }) {
   return (
-    <div className="tw-absolute">
+    <div>
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-z-10 tw-mt-1 tw-min-w-[18rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-absolute tw-right-0 tw-z-10 tw-mt-1 tw-w-56 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

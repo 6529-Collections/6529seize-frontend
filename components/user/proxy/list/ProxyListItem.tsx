@@ -48,11 +48,13 @@ export default function ProxyListItem({
       />
     ),
     [VIEW_TYPE.CREATE_NEW]: (
-      <ProxyCreateAction
-        profileProxy={profileProxy}
-        onActionCreated={() => {}}
-        onCancel={() => setViewType(VIEW_TYPE.LIST)}
-      />
+      <div className="tw-mt-4">
+        <ProxyCreateAction
+          profileProxy={profileProxy}
+          onActionCreated={() => {}}
+          onCancel={() => setViewType(VIEW_TYPE.LIST)}
+        />
+      </div>
     ),
   };
   return (
