@@ -47,7 +47,7 @@ export default function ProxyCreateActionConfigAllocateCic({
           disabled={disabled}
           onClick={handleSubmit}
           className={`${
-            disabled ? "" : ""
+            disabled ? "tw-opacity-50" : ""
           } tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out`}
         >
           Save
