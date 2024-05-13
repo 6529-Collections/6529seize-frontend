@@ -75,6 +75,7 @@ export default function ProfileProxyCreditEdit({
               inputType="number"
               onChange={(newV) => setCreditAmount(parseInt(newV ?? "0"))}
               placeholder="Credit Amount"
+              theme="light"
             />
           </div>
           <button
