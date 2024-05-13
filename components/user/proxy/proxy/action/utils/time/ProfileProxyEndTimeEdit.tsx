@@ -7,6 +7,7 @@ import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "../../../../../../../services/api/common-api";
 import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
+import ProxyCreateActionConfigEndTimeSwitch from "../../../create-action/config/ProxyCreateActionConfigEndTimeSwitch";
 
 export default function ProfileProxyEndTimeEdit({
   profileProxy,
@@ -19,6 +20,9 @@ export default function ProfileProxyEndTimeEdit({
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);
+  const [isEndTimeDisabled, setIsEndTimeDisabled] = useState<boolean>(
+    !profileProxyAction.end_time
+  );
   const [endTime, setEndTime] = useState<number | null>(
     profileProxyAction.end_time
   );
@@ -73,9 +77,17 @@ export default function ProfileProxyEndTimeEdit({
     <div>
       <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600">
         <div className="tw-px-3 tw-w-full tw-h-full tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center lg:tw-justify-center tw-gap-x-3">
+          <div className="tw-mb-3">
+            <ProxyCreateActionConfigEndTimeSwitch
+              isActive={isEndTimeDisabled}
+              setIsActive={setIsEndTimeDisabled}
+            />
+          </div>
           <CommonTimeSelect
             currentTime={profileProxyAction.end_time}
             onMillis={setEndTime}
+            disabled={isEndTimeDisabled}
+            inline={true}
           />
           <div className="tw-mt-5 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
             <button
