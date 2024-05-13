@@ -29,7 +29,7 @@ export default function ProxyCreateActionConfigAllocateRep({
   return (
     <div className="md:tw-flex md:tw-items-end tw-gap-x-3">
       <div>
-        <span className="tw-text-iron-300 tw-text-sm tw-font-medium">
+        <span className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
           Credit Amount
         </span>
         <div className="tw-mt-1.5 tw-w-full md:tw-w-40">

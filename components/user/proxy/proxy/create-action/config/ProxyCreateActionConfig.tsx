@@ -93,7 +93,7 @@ export default function ProxyCreateActionConfig({
     ),
   };
   return (
-    <div className="tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-lg tw-p-6 tw-ring-1 tw-ring-inset tw-ring-iron-700">
+    <div className="tw-p-5 tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-lg">
       <p className="tw-mb-0 tw-text-lg tw-text-iron-50 tw-font-semibold">
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
@@ -101,8 +101,8 @@ export default function ProxyCreateActionConfig({
         isActive={isEndTimeActive}
         setIsActive={setIsEndTimeActive}
       />
-      <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
-        <div className="tw-w-full">
+      <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-gap-x-6 tw-gap-y-5">
+        <div className="tw-w-full lg:tw-w-auto">
           <span
             className={`${
               isEndTimeActive ? "tw-opacity-50" : ""
@@ -118,8 +118,8 @@ export default function ProxyCreateActionConfig({
             />
           </div>
         </div>
+        <div className="tw-w-full md:tw-w-auto">{components[selectedActionType]}</div>
       </div>
-      <div className="tw-mt-5 md:tw-mt-4">{components[selectedActionType]}</div>
     </div>
   );
 }
