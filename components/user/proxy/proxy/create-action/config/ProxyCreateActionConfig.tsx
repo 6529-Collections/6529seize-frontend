@@ -80,7 +80,7 @@ export default function ProxyCreateActionConfig({
     ),
   };
   return (
-    <div className="tw-flex tw-flex-col tw-bg-iron-900 tw-p-5 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-iron-700">
+    <div className="tw-flex tw-flex-col">
       <p className="tw-mb-0 tw-text-base tw-text-iron-50 tw-font-semibold">
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
