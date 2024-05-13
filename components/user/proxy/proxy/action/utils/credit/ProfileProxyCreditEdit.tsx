@@ -66,10 +66,10 @@ export default function ProfileProxyCreditEdit({
   };
 
   return (
-    <div className="tw-h-full xl:tw-h-14 tw-rounded-lg tw-bg-iron-900">
+    <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600">
       <div className="tw-h-full lg:tw-flex tw-items-center tw-justify-center tw-px-3 tw-gap-x-3">
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          <div className="tw-w-40">
+        <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-gap-x-3">
+          <div className="tw-w-full sm:tw-w-40">
             <CommonInput
               value={creditAmount.toString()}
               inputType="number"
@@ -78,37 +78,25 @@ export default function ProfileProxyCreditEdit({
               theme="light"
             />
           </div>
-          <button
-            onClick={onSubmit}
-            type="button"
-            className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-          >
-            Update
-          </button>
+          <div className="tw-mt-4 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end sm:tw-justify-start tw-gap-x-3">
+            <button
+              onClick={setViewMode}
+              type="button"
+              aria-label="Cancel"
+              title="Cancel"
+              className="tw-w-full sm:tw-w-auto tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onSubmit}
+              type="button"
+              className="tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            >
+              Update
+            </button>
+          </div>
         </div>
-        <button
-          onClick={setViewMode}
-          type="button"
-          aria-label="Cancel"
-          title="Cancel"
-          className="tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-        >
-          <svg
-            className="tw-h-5 tw-w-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M18 6L6 18M6 6L18 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
       </div>
     </div>
   );
