@@ -71,18 +71,17 @@ export default function ProfileProxyEndTimeEdit({
 
   return (
     <div>
-      <div className="xl:tw-h-14 tw-rounded-lg tw-flex tw-bg-iron-900">
-        <div className="tw-h-full tw-w-full tw-flex tw-items-center tw-justify-center tw-px-3 tw-gap-x-3">
-          <div className="tw-flex tw-items-center tw-gap-x-4">
+      <div className="tw-p-4 xl:tw-p-0 xl:tw-h-14 tw-rounded-lg tw-flex tw-bg-iron-900">
+        <div className="tw-h-full tw-w-full tw-flex lg:tw-items-center lg:tw-justify-center tw-px-3 tw-gap-x-3">
+          <div className="tw-flex tw-flex-col md:tw-flex-row lg:tw-items-center tw-gap-4">
             <CommonTimeSelect
               currentTime={profileProxyAction.end_time}
               onMillis={setEndTime}
             />
-
             <button
               onClick={onSubmit}
               type="button"
-              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
             >
               Update
             </button>
