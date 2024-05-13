@@ -112,7 +112,7 @@ export default function CommonTimeSelect({
             stroke-linejoin="round"
           />
         </svg>
-        <span className="tw-text-iron-400 tw-text-xs tw-font-medium tw-space-x-1">
+        <span className={`${disabled? '' : ''} tw-text-iron-400 tw-text-xs tw-font-medium tw-space-x-1`}>
           <span>Expires At:</span>
           <span className="tw-text-iron-300 tw-font-semibold">{expiresAt}</span>
         </span>
