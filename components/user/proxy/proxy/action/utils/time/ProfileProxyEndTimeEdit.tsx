@@ -72,7 +72,7 @@ export default function ProfileProxyEndTimeEdit({
   return (
     <div>
       <div className="xl:tw-h-14 tw-rounded-lg tw-flex tw-bg-iron-900">
-        <div className="tw-h-full tw-w-full tw-flex tw-items-center tw-justify-between tw-px-3 tw-gap-x-4">
+        <div className="tw-h-full tw-w-full tw-flex tw-items-center tw-justify-center tw-px-3 tw-gap-x-3">
           <div className="tw-flex tw-items-center tw-gap-x-4">
             <CommonTimeSelect
               currentTime={profileProxyAction.end_time}
