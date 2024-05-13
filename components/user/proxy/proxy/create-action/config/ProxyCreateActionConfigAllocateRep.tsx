@@ -2,16 +2,13 @@ import { useEffect, useState } from "react";
 import { CreateProxyAllocateRepAction } from "../../../../../../entities/IProxy";
 import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
 import CommonInput from "../../../../../utils/input/CommonInput";
-import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
 
 export default function ProxyCreateActionConfigAllocateRep({
   endTime,
-  repActions,
   onSubmit,
   onCancel,
 }: {
   readonly endTime: number | null;
-  readonly repActions: ProfileProxyAction[];
   readonly onSubmit: (action: CreateProxyAllocateRepAction) => void;
   readonly onCancel: () => void;
 }) {

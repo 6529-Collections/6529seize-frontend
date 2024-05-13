@@ -10,34 +10,25 @@ import ProxyCreateActionConfigCreateDropToWave from "./ProxyCreateActionConfigCr
 import ProxyCreateActionConfigCreateWave from "./ProxyCreateActionConfigCreateWave";
 import ProxyCreateActionConfigRateWaveDrop from "./ProxyCreateActionConfigRateWaveDrop";
 import ProxyCreateActionConfigReadWave from "./ProxyCreateActionConfigReadWave";
-
-import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
 import CommonTimeSelect from "../../../../../utils/time/CommonTimeSelect";
 import ProxyCreateActionConfigEndTimeSwitch from "./ProxyCreateActionConfigEndTimeSwitch";
 
 export default function ProxyCreateActionConfig({
   selectedActionType,
-  currentActions,
   onSubmit,
   onCancel,
 }: {
   readonly selectedActionType: ProfileProxyActionType;
-  readonly currentActions: ProfileProxyAction[];
   readonly onSubmit: (action: CreateProxyAction) => void;
   readonly onCancel: () => void;
 }) {
-  const [isEndTimeActive, setIsEndTimeActive] = useState<boolean>(false);
+  const [isEndTimeDisabled, setIsEndTimeDisabled] = useState<boolean>(true);
   const [endTime, setEndTime] = useState<number | null>(null);
 
-  const getRepActions = (): ProfileProxyAction[] =>
-    currentActions.filter(
-      (a) => a.action_type === ProfileProxyActionType.AllocateRep
-    );
 
-  const repActions = getRepActions();
 
   const submit = async (action: CreateProxyAction) => {
-    if (!isEndTimeActive) {
+    if (isEndTimeDisabled) {
       onSubmit({
         ...action,
         end_time: null,
@@ -51,7 +42,6 @@ export default function ProxyCreateActionConfig({
     [ProfileProxyActionType.AllocateRep]: (
       <ProxyCreateActionConfigAllocateRep
         endTime={endTime}
-        repActions={repActions}
         onSubmit={submit}
         onCancel={onCancel}
       />
@@ -98,14 +88,14 @@ export default function ProxyCreateActionConfig({
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
       <ProxyCreateActionConfigEndTimeSwitch
-        isActive={isEndTimeActive}
-        setIsActive={setIsEndTimeActive}
+        isActive={isEndTimeDisabled}
+        setIsActive={setIsEndTimeDisabled}
       />
       <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-gap-x-6 tw-gap-y-5">
         <div className="tw-w-full lg:tw-w-auto">
           <span
             className={`${
-              isEndTimeActive ? "tw-opacity-50" : ""
+              isEndTimeDisabled ? "tw-opacity-50" : ""
             } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300`}
           >
             End time
@@ -114,11 +104,13 @@ export default function ProxyCreateActionConfig({
             <CommonTimeSelect
               currentTime={endTime}
               onMillis={setEndTime}
-              disabled={isEndTimeActive}
+              disabled={isEndTimeDisabled}
             />
           </div>
         </div>
-        <div className="tw-w-full md:tw-w-auto">{components[selectedActionType]}</div>
+        <div className="tw-w-full md:tw-w-auto">
+          {components[selectedActionType]}
+        </div>
       </div>
     </div>
   );

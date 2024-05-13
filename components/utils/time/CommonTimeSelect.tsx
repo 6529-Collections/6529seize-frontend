@@ -103,8 +103,8 @@ export default function CommonTimeSelect({
       </div>
       <div
         className={`${
-          disabled ? "tw-opacity-50" : ""
-        } tw-hidden tw-flex tw-items-center tw-gap-x-1.5`}
+          disabled ? "tw-opacity-50 tw-hidden" : ""
+        }  tw-flex tw-items-center tw-gap-x-1.5`}
       >
         <svg
           className="tw-h-4 tw-w-4 tw-text-iron-400"
