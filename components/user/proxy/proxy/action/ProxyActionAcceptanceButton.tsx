@@ -46,9 +46,6 @@ export default function ProxyActionAcceptanceButton({
       return [];
     }
 
-    if (action.end_time && action.end_time < Time.currentMillis()) {
-      return [];
-    }
     if (connectedProfile.profile.external_id === profileProxy.created_by.id) {
       if (action.revoked_at) {
         return [AcceptActionRequestActionEnum.Restore];

@@ -111,6 +111,7 @@ export default function CommonDropdown<T, U = unknown>(
           type="button"
           aria-haspopup="true"
           onClick={() => setIsOpen(!isOpen)}
+          disabled={disabled}
           className={`${disabled ? "tw-opacity-50" : ""} ${
             theme === "dark"
               ? "tw-bg-iron-800 lg:tw-bg-iron-900"

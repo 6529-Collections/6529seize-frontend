@@ -107,7 +107,6 @@ export default function ProxyCreateAction({
           <div>
             <ProxyCreateActionConfig
               selectedActionType={selectedActionType}
-              currentActions={profileProxy.actions}
               onSubmit={onSubmit}
               onCancel={() => setSelectedActionType(null)}
             />
