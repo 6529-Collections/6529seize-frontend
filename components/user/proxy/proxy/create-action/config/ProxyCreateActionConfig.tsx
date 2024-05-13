@@ -93,8 +93,8 @@ export default function ProxyCreateActionConfig({
     ),
   };
   return (
-    <div className="tw-flex tw-flex-col">
-      <p className="tw-mb-0 tw-text-base tw-text-iron-50 tw-font-semibold">
+    <div className="tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-lg tw-p-6 tw-ring-1 tw-ring-inset tw-ring-iron-700">
+      <p className="tw-mb-0 tw-text-lg tw-text-iron-50 tw-font-semibold">
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
       <ProxyCreateActionConfigEndTimeSwitch
@@ -103,7 +103,11 @@ export default function ProxyCreateActionConfig({
       />
       <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
         <div>
-          <span className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+          <span
+            className={`${
+              isEndTimeActive? "tw-opacity-50" : ""
+            } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`}
+          >
             End time
           </span>
           <div className="tw-mt-1.5">
