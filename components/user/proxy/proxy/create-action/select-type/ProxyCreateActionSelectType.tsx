@@ -1,4 +1,4 @@
-import { PROFILE_PROXY_ACTION_LABELS } from "../../../../../../entities/IProxy";
+import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../../../entities/IProxy";
 import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
 import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
@@ -14,6 +14,9 @@ export default function ProxyCreateActionSelectType({
   readonly onCancel?: () => void;
 }) {
   const isActionAvailable = (actionType: ProfileProxyActionType): boolean => {
+    if (!PROFILE_PROXY_AVAILABLE_ACTIONS.includes(actionType)) {
+      return false;
+    }
     switch (actionType) {
       case ProfileProxyActionType.AllocateRep:
         return !currentActions.some(
