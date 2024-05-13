@@ -9,13 +9,13 @@ export default function ProxyCreateActionConfigEndTimeSwitch({
   readonly setIsActive: (isActive: boolean) => void;
 }) {
   return (
-    <div className="tw-mt-7 tw-flex tw-items-center">
+    <div className="tw-mt-4 tw-flex tw-items-center">
       <Switch
         checked={isActive}
         onChange={setIsActive}
         className={classNames(
-          isActive ? "tw-bg-indigo-600" : "tw-bg-gray-200",
-          "tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out"
+          isActive ? "tw-bg-primary-500" : "tw-bg-iron-700",
+          "tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out"
         )}
       >
         <span className="tw-sr-only">Use end time</span>
@@ -35,8 +35,9 @@ export default function ProxyCreateActionConfigEndTimeSwitch({
             aria-hidden="true"
           >
             <svg
-              className="tw-h-3 tw-w-3 tw-text-gray-400"
+              className="tw-h-3 tw-w-3 tw-text-iron-400"
               fill="none"
+              aria-hidden="true"
               viewBox="0 0 12 12"
             >
               <path
@@ -58,7 +59,7 @@ export default function ProxyCreateActionConfigEndTimeSwitch({
             aria-hidden="true"
           >
             <svg
-              className="tw-h-3 tw-w-3 tw-text-indigo-600"
+              className="tw-h-3 tw-w-3 tw-text-primary-500"
               fill="currentColor"
               viewBox="0 0 12 12"
             >
@@ -67,8 +68,8 @@ export default function ProxyCreateActionConfigEndTimeSwitch({
           </span>
         </span>
       </Switch>
-      <span className="tw-ml-3 tw-text-iron-400 tw-text-sm tw-font-medium">
-        Use end time
+      <span className="tw-ml-3 tw-text-iron-300 tw-text-sm tw-font-medium">
+        No end time
       </span>
     </div>
   );
