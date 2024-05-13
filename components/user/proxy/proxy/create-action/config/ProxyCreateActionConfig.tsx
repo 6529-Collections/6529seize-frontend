@@ -13,6 +13,7 @@ import ProxyCreateActionConfigReadWave from "./ProxyCreateActionConfigReadWave";
 
 import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
 import CommonTimeSelect from "../../../../../utils/time/CommonTimeSelect";
+import ProxyCreateActionConfigEndTimeSwitch from "./ProxyCreateActionConfigEndTimeSwitch";
 
 export default function ProxyCreateActionConfig({
   selectedActionType,
@@ -25,6 +26,7 @@ export default function ProxyCreateActionConfig({
   readonly onSubmit: (action: CreateProxyAction) => void;
   readonly onCancel: () => void;
 }) {
+  const [isEndTimeActive, setIsEndTimeActive] = useState<boolean>(false);
   const [endTime, setEndTime] = useState<number | null>(null);
 
   const getRepActions = (): ProfileProxyAction[] =>
@@ -34,47 +36,58 @@ export default function ProxyCreateActionConfig({
 
   const repActions = getRepActions();
 
+  const submit = async (action: CreateProxyAction) => {
+    if (!isEndTimeActive) {
+      onSubmit({
+        ...action,
+        end_time: null,
+      });
+      return;
+    }
+    onSubmit(action);
+  };
+
   const components: Record<ProfileProxyActionType, JSX.Element> = {
     [ProfileProxyActionType.AllocateRep]: (
       <ProxyCreateActionConfigAllocateRep
         endTime={endTime}
         repActions={repActions}
-        onSubmit={onSubmit}
+        onSubmit={submit}
         onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.AllocateCic]: (
       <ProxyCreateActionConfigAllocateCic
         endTime={endTime}
-        onSubmit={onSubmit}
+        onSubmit={submit}
         onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.CreateWave]: (
       <ProxyCreateActionConfigCreateWave
         endTime={endTime}
-        onSubmit={onSubmit}
+        onSubmit={submit}
         onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.ReadWave]: (
       <ProxyCreateActionConfigReadWave
         endTime={endTime}
-        onSubmit={onSubmit}
+        onSubmit={submit}
         onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.CreateDropToWave]: (
       <ProxyCreateActionConfigCreateDropToWave
         endTime={endTime}
-        onSubmit={onSubmit}
+        onSubmit={submit}
         onCancel={onCancel}
       />
     ),
     [ProfileProxyActionType.RateWaveDrop]: (
       <ProxyCreateActionConfigRateWaveDrop
         endTime={endTime}
-        onSubmit={onSubmit}
+        onSubmit={submit}
         onCancel={onCancel}
       />
     ),
@@ -84,30 +97,22 @@ export default function ProxyCreateActionConfig({
       <p className="tw-mb-0 tw-text-base tw-text-iron-50 tw-font-semibold">
         {PROFILE_PROXY_ACTION_LABELS[selectedActionType]}
       </p>
+      <ProxyCreateActionConfigEndTimeSwitch
+        isActive={isEndTimeActive}
+        setIsActive={setIsEndTimeActive}
+      />
       <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
         <div>
           <span className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
             End time
           </span>
           <div className="tw-mt-1.5">
-            <CommonTimeSelect currentTime={endTime} onMillis={setEndTime} />
+            <CommonTimeSelect
+              currentTime={endTime}
+              onMillis={setEndTime}
+              disabled={isEndTimeActive}
+            />
           </div>
-        </div>
-        <div className="tw-mt-7 tw-flex tw-items-center">
-          <button
-            type="button"
-            className="tw-bg-iron-700 tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2"
-            role="switch"
-            aria-checked="false"
-          >
-            <span
-              aria-hidden="true"
-              className="tw-translate-x-0 tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out"
-            ></span>
-          </button>
-          <span className="tw-ml-3 tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-300">No end time</span>
-          </span>
         </div>
       </div>
       <div className="tw-mt-4">{components[selectedActionType]}</div>

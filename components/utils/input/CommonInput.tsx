@@ -2,6 +2,7 @@ type InputProps = {
   readonly value: string;
   readonly placeholder?: string;
   readonly showSearchIcon?: boolean;
+  readonly disabled?: boolean;
   readonly onChange: (newV: string | null) => void;
   readonly onFocusChange?: (focus: boolean) => void;
 };
@@ -25,6 +26,7 @@ export default function CommonInput(props: NumberInputProps | TextInputProps) {
     onChange,
     onFocusChange,
     inputType = "text",
+    disabled = false,
   } = props;
 
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {

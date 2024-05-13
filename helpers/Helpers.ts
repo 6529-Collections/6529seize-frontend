@@ -711,3 +711,5 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 };
+
+export const classNames = (...classes: string[]) => classes.filter(Boolean).join(" ");
