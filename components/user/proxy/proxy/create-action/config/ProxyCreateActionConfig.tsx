@@ -102,11 +102,11 @@ export default function ProxyCreateActionConfig({
         setIsActive={setIsEndTimeActive}
       />
       <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
-        <div>
+        <div className="tw-w-full">
           <span
             className={`${
-              isEndTimeActive? "tw-opacity-50" : ""
-            } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`}
+              isEndTimeActive ? "tw-opacity-50" : ""
+            } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300`}
           >
             End time
           </span>
@@ -119,7 +119,7 @@ export default function ProxyCreateActionConfig({
           </div>
         </div>
       </div>
-      <div className="tw-mt-4">{components[selectedActionType]}</div>
+      <div className="tw-mt-5 md:tw-mt-4">{components[selectedActionType]}</div>
     </div>
   );
 }
