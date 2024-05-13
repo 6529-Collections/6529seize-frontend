@@ -66,8 +66,14 @@ export default function ProxyCreateTargetSearch({
             ) : (
               <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
             )}
-            <span className="tw-font-semibold tw-text-iron-50">{profileProxy.granted_to.handle}</span>
-            <button type="button" onClick={() => onTargetSelect(null)} className="tw-bg-transparent tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 focus:tw-outline-none hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+            <span className="tw-font-semibold tw-text-iron-50 tw-text-base">
+              {profileProxy.granted_to.handle}
+            </span>
+            <button
+              type="button"
+              onClick={() => onTargetSelect(null)}
+              className="tw-bg-transparent tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 focus:tw-outline-none hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+            >
               <svg
                 className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-red"
                 viewBox="0 0 24 24"

@@ -77,7 +77,7 @@ export default function CommonTimeSelect({
   }, [value, timeMode]);
 
   return (
-    <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-3">
+    <div className="tw-flex tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-3">
       <div className="tw-w-full md:tw-w-40">
         <CommonInput
           value={value.toString()}
