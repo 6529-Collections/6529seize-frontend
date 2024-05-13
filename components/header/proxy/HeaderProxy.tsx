@@ -5,8 +5,12 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { ProfileProxy } from "../../../generated/models/ProfileProxy";
 
 export default function HeaderProxy() {
-  const { activeProfileProxy, receivedProfileProxies, setActiveProfileProxy } =
-    useContext(AuthContext);
+  const {
+    activeProfileProxy,
+    receivedProfileProxies,
+    setActiveProfileProxy,
+    connectedProfile,
+  } = useContext(AuthContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,7 +22,7 @@ export default function HeaderProxy() {
     setIsOpen(false);
   };
 
-  if (!receivedProfileProxies.length) return null;
+  if (!receivedProfileProxies.length || !connectedProfile) return null;
   return (
     <div className="tailwind-scope tw-relative" ref={containerRef}>
       <button
@@ -45,6 +49,7 @@ export default function HeaderProxy() {
         </svg>
       </button>
       <HeaderProxyDropdown
+        connectedProfile={connectedProfile}
         receivedProfileProxies={receivedProfileProxies}
         activeProfileProxy={activeProfileProxy}
         setActiveProfileProxy={onActiveProfileProxy}
