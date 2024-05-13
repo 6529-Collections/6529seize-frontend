@@ -73,7 +73,9 @@ export default function HeaderConnect() {
             className={`${styles.userProfileBtn}`}
             onClick={() =>
               (window.location.href = `/${
-                profile?.profile?.handle ?? account.address
+                activeProfileProxy?.created_by.handle ??
+                profile?.profile?.handle ??
+                account.address
               }`)
             }
           >
