@@ -77,32 +77,34 @@ export default function CommonTimeSelect({
   }, [value, timeMode]);
 
   return (
-    <div className="tw-flex tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-3">
-      <div className="tw-w-full md:tw-w-40">
-        <CommonInput
-          value={value.toString()}
-          inputType="number"
-          disabled={disabled}
-          onChange={(newV) => setValue(parseInt(newV ?? "0"))}
-          placeholder="Time"
-          theme="light"
-        />
-      </div>
-      <div className="tw-w-full md:tw-w-40">
-        <CommonDropdown
-          items={timeModeItems}
-          activeItem={timeMode}
-          disabled={disabled}
-          dynamicPosition={false}
-          filterLabel="Time Mode"
-          theme="light"
-          setSelected={setTimeMode}
-        />
+    <div className="tw-flex tw-flex-col tw-gap-y-3">
+      <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-gap-4">
+        <div className="tw-w-full lg:tw-w-40">
+          <CommonInput
+            value={value.toString()}
+            inputType="number"
+            disabled={disabled}
+            onChange={(newV) => setValue(parseInt(newV ?? "0"))}
+            placeholder="Time"
+            theme="light"
+          />
+        </div>
+        <div className="tw-w-full lg:tw-w-40">
+          <CommonDropdown
+            items={timeModeItems}
+            activeItem={timeMode}
+            disabled={disabled}
+            dynamicPosition={false}
+            filterLabel="Time Mode"
+            theme="light"
+            setSelected={setTimeMode}
+          />
+        </div>
       </div>
       <div
         className={`${
           disabled ? "tw-opacity-50" : ""
-        } tw-inline-flex tw-items-center tw-gap-x-1.5`}
+        } tw-hidden tw-flex tw-items-center tw-gap-x-1.5`}
       >
         <svg
           className="tw-h-4 tw-w-4 tw-text-iron-400"
