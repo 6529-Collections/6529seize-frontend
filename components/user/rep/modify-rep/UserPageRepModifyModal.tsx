@@ -78,7 +78,7 @@ export default function UserPageRepModifyModal({
   });
 
   const getRepState = (): RatingStats | null => {
-    if (proxyGrantorRepRates) {
+    if (activeProfileProxy && proxyGrantorRepRates) {
       const target = proxyGrantorRepRates.rating_stats.find(
         (s) => s.category === category
       );
@@ -114,7 +114,7 @@ export default function UserPageRepModifyModal({
   };
 
   const getAvailableRep = (): number | null => {
-    if (proxyGrantorRepRates) {
+    if (activeProfileProxy && proxyGrantorRepRates) {
       const repProxy = activeProfileProxy?.actions.find(
         (a) => a.action_type === ProfileProxyActionType.AllocateRep
       );
@@ -133,12 +133,13 @@ export default function UserPageRepModifyModal({
     if (activeProfileProxy) {
       return null;
     }
+
     return connectedProfileRepRates?.rep_rates_left_for_rater ?? null;
   };
 
   const [repState, setRepState] = useState<RatingStats | null>(getRepState());
   const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
-    `${getRepState()?.rater_contribution}`
+    `${getRepState()?.rater_contribution ?? 0}`
   );
 
   const [availableRep, setAvailableRep] = useState<number | null>(
@@ -148,7 +149,7 @@ export default function UserPageRepModifyModal({
   useEffect(() => {
     const newState = getRepState();
     setRepState(newState);
-    setAdjustedRatingStr(`${newState?.rater_contribution}`);
+    setAdjustedRatingStr(`${newState?.rater_contribution ?? 0}`);
     setAvailableRep(getAvailableRep());
   }, [proxyGrantorRepRates, activeProfileProxy, connectedProfileRepRates]);
 
@@ -163,24 +164,25 @@ export default function UserPageRepModifyModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const getMaxPositiveValue = (): number => {
-    if (typeof availableRep === "number" && repState) {
-      return availableRep + Math.abs(repState.rater_contribution);
+  const getMinMaxValues = (): {
+    readonly min: number;
+    readonly max: number;
+  } => {
+    if (typeof availableRep !== "number" || !repState) {
+      return { min: 0, max: 0 };
     }
-    return 0;
+    if (!activeProfileProxy) {
+      const maxPositiveValue =
+        availableRep + Math.abs(repState.rater_contribution);
+      return { min: -maxPositiveValue, max: maxPositiveValue };
+    }
+    return {
+      min: repState.rater_contribution - availableRep,
+      max: repState.rater_contribution + availableRep,
+    };
   };
 
-  const getValueStrOrMax = (value: string): string => {
-    const maxPositiveValue = getMaxPositiveValue();
-    const valueAsNumber = getStringAsNumberOrZero(value);
-    if (valueAsNumber > maxPositiveValue) {
-      return `${maxPositiveValue}`;
-    }
-
-    if (valueAsNumber < -maxPositiveValue) {
-      return `-${maxPositiveValue}`;
-    }
-
+  const getValueStr = (value: string): string => {
     if (value.length > 1 && value.startsWith("0")) {
       return value.slice(1);
     }
@@ -188,14 +190,85 @@ export default function UserPageRepModifyModal({
     return value;
   };
 
+  const adjustStrValueToMinMax = (): void => {
+    const { min, max } = getMinMaxValues();
+    const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
+    if (valueAsNumber > max) {
+      setAdjustedRatingStr(`${max}`);
+      return;
+    }
+
+    if (valueAsNumber < min) {
+      setAdjustedRatingStr(`${min}`);
+      return;
+    }
+    return;
+  };
+
   const onValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value;
     const strCIC = ["-0", "0-"].includes(inputValue) ? "-" : inputValue;
     if (/^-?\d*$/.test(strCIC)) {
-      const newCicValue = getValueStrOrMax(strCIC);
+      const newCicValue = getValueStr(strCIC);
       setAdjustedRatingStr(newCicValue);
     }
   };
+
+  const getIsValidValue = (): boolean => {
+    const { min, max } = getMinMaxValues();
+    const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
+    if (valueAsNumber > max) {
+      return false;
+    }
+
+    if (valueAsNumber < min) {
+      return false;
+    }
+    return true;
+  };
+
+  const [isValidValue, setIsValidValue] = useState<boolean>(getIsValidValue());
+
+  useEffect(() => setIsValidValue(getIsValidValue()), [adjustedRatingStr]);
+
+  const [newRating, setNewRating] = useState<number>(
+    getStringAsNumberOrZero(adjustedRatingStr)
+  );
+
+  useEffect(() => {
+    setNewRating(getStringAsNumberOrZero(adjustedRatingStr));
+  }, [adjustedRatingStr]);
+
+  const [haveChanged, setHaveChanged] = useState<boolean>(
+    newRating !== repState?.rater_contribution
+  );
+
+  useEffect(() => {
+    setHaveChanged(newRating !== repState?.rater_contribution);
+  }, [newRating, repState]);
+
+  const getIsSaveDisabled = (): boolean => {
+    if (!repState || !availableRep) {
+      return true;
+    }
+    if (!haveChanged) {
+      return true;
+    }
+
+    if (!isValidValue) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const [isSaveDisabled, setIsSaveDisabled] = useState<boolean>(
+    getIsSaveDisabled()
+  );
+
+  useEffect(() => {
+    setIsSaveDisabled(getIsSaveDisabled());
+  }, [haveChanged, isValidValue, repState, availableRep]);
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -236,22 +309,6 @@ export default function UserPageRepModifyModal({
       setMutating(false);
     },
   });
-
-  const [newRating, setNewRating] = useState<number>(
-    getStringAsNumberOrZero(adjustedRatingStr)
-  );
-
-  useEffect(() => {
-    setNewRating(getStringAsNumberOrZero(adjustedRatingStr));
-  }, [adjustedRatingStr]);
-
-  const [haveChanged, setHaveChanged] = useState<boolean>(
-    newRating !== repState?.rater_contribution
-  );
-
-  useEffect(() => {
-    setHaveChanged(newRating !== repState?.rater_contribution);
-  }, [newRating, repState]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -338,7 +395,12 @@ export default function UserPageRepModifyModal({
                     autoComplete="off"
                     value={adjustedRatingStr}
                     onChange={onValueChange}
-                    className="tw-appearance-none -tw-ml-0.5 tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
+                    onBlur={adjustStrValueToMinMax}
+                    className={`${
+                      isValidValue
+                        ? "focus:tw-ring-primary-400"
+                        : "focus:tw-ring-red"
+                    } tw-appearance-none -tw-ml-0.5 tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-text-base tw-transition tw-duration-300 tw-ease-out`}
                   />
                 </div>
                 <UserRateAdjustmentHelper
@@ -353,9 +415,9 @@ export default function UserPageRepModifyModal({
                 <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
                   <button
                     type="submit"
-                    disabled={!haveChanged}
+                    disabled={isSaveDisabled}
                     className={`${
-                      haveChanged
+                      !isSaveDisabled
                         ? "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
                         : "tw-cursor-not-allowed tw-opacity-50"
                     } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid  tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}
