@@ -23,9 +23,11 @@ const TIME_MODE_LABEL: Record<TimeMode, string> = {
 export default function CommonTimeSelect({
   currentTime,
   onMillis,
+  disabled = false,
 }: {
   readonly currentTime: number | null;
   readonly onMillis: (millis: number) => void;
+  readonly disabled?: boolean;
 }) {
   const hours = currentTime
     ? +Time.millis(currentTime).diffFromNow().toHours().toFixed(0)
@@ -80,6 +82,7 @@ export default function CommonTimeSelect({
         <CommonInput
           value={value.toString()}
           inputType="number"
+          disabled={disabled}
           onChange={(newV) => setValue(parseInt(newV ?? "0"))}
           placeholder="Time"
         />
@@ -88,12 +91,13 @@ export default function CommonTimeSelect({
         <CommonDropdown
           items={timeModeItems}
           activeItem={timeMode}
+          disabled={disabled}
           dynamicPosition={false}
           filterLabel="Time Mode"
           setSelected={setTimeMode}
         />
       </div>
-      <div className="tw-inline-flex tw-items-centet tw-gap-x-1.5">
+      <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
         <svg
           className="tw-h-4 tw-w-4 tw-text-iron-400"
           viewBox="0 0 24 24"
