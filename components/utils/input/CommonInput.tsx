@@ -3,6 +3,7 @@ type InputProps = {
   readonly placeholder?: string;
   readonly showSearchIcon?: boolean;
   readonly disabled?: boolean;
+  readonly theme?: "dark" | "light";
   readonly onChange: (newV: string | null) => void;
   readonly onFocusChange?: (focus: boolean) => void;
 };
@@ -27,6 +28,7 @@ export default function CommonInput(props: NumberInputProps | TextInputProps) {
     onFocusChange,
     inputType = "text",
     disabled = false,
+    theme = "dark",
   } = props;
 
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,6 +98,8 @@ export default function CommonInput(props: NumberInputProps | TextInputProps) {
         onBlur={() => onFocusChange && onFocusChange(false)}
         className={`${showSearchIcon ? "tw-pl-11" : ""} ${
           disabled ? "tw-opacity-40" : "hover:tw-ring-iron-600"
+        } ${
+          theme === "dark" ? "" : ""
         } tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out`}
       />
     </div>

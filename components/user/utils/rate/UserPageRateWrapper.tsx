@@ -17,6 +17,15 @@ const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.REP]: "give Rep for",
 };
 
+enum RateContext {
+  NOT_CONNECTED = "NOT_CONNECTED",
+  DONT_HAVE_PROFILE = "DONT_HAVE_PROFILE",
+  PROXY_NO_ALLOWANCE = "PROXY_NO_ALLOWANCE",
+  PROXY_GRANTOR_PROFILE = "PROXY_GRANTOR_PROFILE",
+  MY_PROFILE = "MY_PROFILE",
+  CAN_RATE = "CAN_RATE",
+}
+
 export default function UserPageRateWrapper({
   profile,
   type,
@@ -36,6 +45,11 @@ export default function UserPageRateWrapper({
       }),
     enabled: !!address,
   });
+
+  const [rateContext, setRateContext] = useState<RateContext>(
+    RateContext.MY_PROFILE
+  );
+
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
   const [iHaveProfile, setIHaveProfile] = useState<boolean>(false);
   const [iAmConnected, setIAmConnected] = useState<boolean>(false);

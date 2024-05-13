@@ -85,6 +85,7 @@ export default function CommonTimeSelect({
           disabled={disabled}
           onChange={(newV) => setValue(parseInt(newV ?? "0"))}
           placeholder="Time"
+          theme="light"
         />
       </div>
       <div className="tw-w-40">
@@ -94,6 +95,7 @@ export default function CommonTimeSelect({
           disabled={disabled}
           dynamicPosition={false}
           filterLabel="Time Mode"
+          theme="light"
           setSelected={setTimeMode}
         />
       </div>
