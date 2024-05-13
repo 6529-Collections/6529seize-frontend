@@ -96,7 +96,7 @@ export default function ProxyCreateActionConfig({
         <div className="tw-mt-7 tw-flex tw-items-center">
           <button
             type="button"
-            className="tw-bg-iron-800 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2"
+            className="tw-bg-iron-700 tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2"
             role="switch"
             aria-checked="false"
           >
@@ -106,7 +106,7 @@ export default function ProxyCreateActionConfig({
             ></span>
           </button>
           <span className="tw-ml-3 tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-50">No end time</span>
+            <span className="tw-font-medium tw-text-iron-300">No end time</span>
           </span>
         </div>
       </div>
