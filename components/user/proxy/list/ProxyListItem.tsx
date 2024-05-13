@@ -5,6 +5,7 @@ import { AuthContext } from "../../../auth/Auth";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
+import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../entities/IProxy";
 
 enum VIEW_TYPE {
   LIST = "LIST",
@@ -27,8 +28,19 @@ export default function ProxyListItem({
   const [isGrantor, setIsGrantor] = useState(getIsGrantor());
 
   const [viewType, setViewType] = useState(VIEW_TYPE.LIST);
-  const getCanAddNewAction = () =>
-    isGrantor && isSelf && viewType === VIEW_TYPE.LIST;
+  const getCanAddNewAction = () => {
+    const haveActionsLeftToAdd =
+      PROFILE_PROXY_AVAILABLE_ACTIONS.filter(
+        (action) =>
+          profileProxy.actions.filter((a) => a.action_type === action)
+            .length === 0
+      ).length > 0;
+
+    return (
+      haveActionsLeftToAdd && isGrantor && isSelf && viewType === VIEW_TYPE.LIST
+    );
+  };
+
   const [canAddNewAction, setCanAddNewAction] = useState(getCanAddNewAction());
 
   useEffect(() => {
@@ -37,7 +49,7 @@ export default function ProxyListItem({
 
   useEffect(() => {
     setCanAddNewAction(getCanAddNewAction());
-  }, [isGrantor, isSelf, viewType]);
+  }, [isGrantor, isSelf, viewType, profileProxy]);
 
   const components: Record<VIEW_TYPE, JSX.Element> = {
     [VIEW_TYPE.LIST]: (
@@ -51,7 +63,7 @@ export default function ProxyListItem({
       <div className="tw-mt-4">
         <ProxyCreateAction
           profileProxy={profileProxy}
-          onActionCreated={() => {}}
+          onActionCreated={() => setViewType(VIEW_TYPE.LIST)}
           onCancel={() => setViewType(VIEW_TYPE.LIST)}
         />
       </div>

@@ -43,8 +43,8 @@ export default function UserPageProxy({
   });
 
   const getIsSelf = () =>
-    connectedProfile?.profile?.external_id &&
-    profile.profile?.external_id &&
+    !!connectedProfile?.profile?.external_id &&
+    !!profile.profile?.external_id &&
     connectedProfile.profile.external_id === profile.profile.external_id &&
     !activeProfileProxy;
 

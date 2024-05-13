@@ -76,3 +76,8 @@ export const PROFILE_PROXY_ACTION_HAVE_CREDIT: Record<
   [ProfileProxyActionType.CreateDropToWave]: false,
   [ProfileProxyActionType.RateWaveDrop]: false,
 };
+
+export const PROFILE_PROXY_AVAILABLE_ACTIONS: ProfileProxyActionType[] = [
+  ProfileProxyActionType.AllocateRep,
+  ProfileProxyActionType.AllocateCic,
+];
