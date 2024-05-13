@@ -2,7 +2,6 @@ import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import {
   PROFILE_PROXY_ACTION_HAVE_CREDIT,
   PROFILE_PROXY_ACTION_LABELS,
-  ProfileProxyActionStatus,
   ProfileProxySide,
 } from "../../../../../entities/IProxy";
 import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
@@ -13,23 +12,7 @@ import ProxyActionAcceptanceButton from "../action/ProxyActionAcceptanceButton";
 import ProfileProxyCredit from "../action/utils/credit/ProfileProxyCredit";
 import ProfileProxyEndTime from "../action/utils/time/ProfileProxyEndTime";
 import { PROXY_ACTION_ROW_VIEW_MODE } from "./ProxyActionRow";
-
-const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
-  [ProfileProxyActionStatus.ACTIVE]:
-    "tw-text-green tw-bg-green/10 tw-ring-green/20",
-  [ProfileProxyActionStatus.REJECTED]:
-    "tw-text-red tw-bg-red/10 tw-ring-red/20",
-  [ProfileProxyActionStatus.REVOKED]: "tw-text-red tw-bg-red/10 tw-ring-red/20",
-  [ProfileProxyActionStatus.PENDING]:
-    "tw-text-[#FEC84B] tw-bg-[#FEC84B]/10 tw-ring-[#FEC84B]/20",
-};
-
-const STATUS_LABELS: Record<ProfileProxyActionStatus, string> = {
-  [ProfileProxyActionStatus.ACTIVE]: "Active",
-  [ProfileProxyActionStatus.REJECTED]: "Rejected",
-  [ProfileProxyActionStatus.REVOKED]: "Revoked",
-  [ProfileProxyActionStatus.PENDING]: "Pending",
-};
+import ProxyActionRowStatus from "./ProxyActionRowStatus";
 
 export default function ProxyActionRowDataMode({
   action,
@@ -64,38 +47,14 @@ export default function ProxyActionRowDataMode({
       </div>
       <div className="tw-col-span-4 lg:tw-col-span-3">
         <div className="tw-flex tw-gap-x-3">
-          <div className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]">
-            {profileProxy.created_by.pfp ? (
-              <img
-                src={profileProxy.created_by.pfp}
-                alt="Profile picture"
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-              />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
-            )}
-            <div
-              className={`${STATUS_CLASSES[grantorStatus]} tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
-            >
-              {STATUS_LABELS[grantorStatus]}
-            </div>
-          </div>
-          <div className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]">
-            {profileProxy.granted_to.pfp ? (
-              <img
-                src={profileProxy.granted_to.pfp}
-                alt="Profile picture"
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-              />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
-            )}
-            <div
-              className={`${STATUS_CLASSES[receiverStatus]} tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
-            >
-              {STATUS_LABELS[receiverStatus]}
-            </div>
-          </div>
+          <ProxyActionRowStatus
+            status={grantorStatus}
+            statusOwnerProfile={profileProxy.created_by}
+          />
+          <ProxyActionRowStatus
+            status={receiverStatus}
+            statusOwnerProfile={profileProxy.granted_to}
+          />
         </div>
       </div>
       <div className="tw-col-span-full md:tw-col-span-2">
