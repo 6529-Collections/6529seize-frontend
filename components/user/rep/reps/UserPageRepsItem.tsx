@@ -13,12 +13,10 @@ import Tippy from "@tippyjs/react";
 export default function UserPageRepsItem({
   rep,
   profile,
-  giverAvailableRep,
   canEditRep,
 }: {
   readonly rep: RatingStats;
   readonly profile: IProfileAndConsolidations;
-  readonly giverAvailableRep: number;
   readonly canEditRep: boolean;
 }) {
   const router = useRouter();
