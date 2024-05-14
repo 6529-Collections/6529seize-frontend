@@ -37,7 +37,7 @@ export default function ProxyActionRowDataMode({
   });
 
   return (
-    <div className="tw-relative tw-grid tw-grid-cols-[repeat(13,minmax(0,1fr))] tw-gap-y-3 tw-gap-x-4 tw-justify-between lg:tw-items-center tw-w-full tw-py-4 tw-px-4">
+    <div className="xl:tw-h-14 tw-relative tw-grid tw-grid-cols-[repeat(13,minmax(0,1fr))] tw-gap-y-3 tw-gap-x-4 tw-justify-between lg:tw-items-center tw-w-full tw-py-4 xl:tw-py-0 tw-px-4">
       <div className="tw-col-span-full md:tw-col-span-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <p className="tw-mb-0 tw-text-md tw-font-medium tw-text-iron-50">
