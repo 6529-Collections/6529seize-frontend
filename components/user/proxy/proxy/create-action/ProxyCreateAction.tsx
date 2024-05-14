@@ -107,6 +107,7 @@ export default function ProxyCreateAction({
           <div>
             <ProxyCreateActionConfig
               selectedActionType={selectedActionType}
+              submitting={submitting}
               onSubmit={onSubmit}
               onCancel={() => setSelectedActionType(null)}
             />
