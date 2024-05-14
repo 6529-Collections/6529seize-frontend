@@ -15,17 +15,17 @@ import ProxyCreateActionConfigEndTimeSwitch from "./ProxyCreateActionConfigEndTi
 
 export default function ProxyCreateActionConfig({
   selectedActionType,
+  submitting,
   onSubmit,
   onCancel,
 }: {
   readonly selectedActionType: ProfileProxyActionType;
+  readonly submitting: boolean;
   readonly onSubmit: (action: CreateProxyAction) => void;
   readonly onCancel: () => void;
 }) {
   const [isEndTimeDisabled, setIsEndTimeDisabled] = useState<boolean>(true);
   const [endTime, setEndTime] = useState<number | null>(null);
-
-
 
   const submit = async (action: CreateProxyAction) => {
     if (isEndTimeDisabled) {
@@ -49,6 +49,7 @@ export default function ProxyCreateActionConfig({
     [ProfileProxyActionType.AllocateCic]: (
       <ProxyCreateActionConfigAllocateCic
         endTime={endTime}
+        submitting={submitting}
         onSubmit={submit}
         onCancel={onCancel}
       />
@@ -92,22 +93,24 @@ export default function ProxyCreateActionConfig({
         setIsActive={setIsEndTimeDisabled}
       />
       <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-gap-x-6 tw-gap-y-5">
-        <div className="tw-w-full lg:tw-w-auto">
-          <span
-            className={`${
-              isEndTimeDisabled ? "tw-opacity-50" : ""
-            } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300`}
-          >
-            End time
-          </span>
-          <div className="tw-mt-1.5">
-            <CommonTimeSelect
-              currentTime={endTime}
-              onMillis={setEndTime}
-              disabled={isEndTimeDisabled}
-            />
+        {!isEndTimeDisabled && (
+          <div className="tw-w-full lg:tw-w-auto">
+            <span
+              className={`${
+                isEndTimeDisabled ? "tw-opacity-50" : ""
+              } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300`}
+            >
+              End time
+            </span>
+            <div className="tw-mt-1.5">
+              <CommonTimeSelect
+                currentTime={endTime}
+                onMillis={setEndTime}
+                disabled={isEndTimeDisabled}
+              />
+            </div>
           </div>
-        </div>
+        )}
         <div className="tw-w-full md:tw-w-auto">
           {components[selectedActionType]}
         </div>

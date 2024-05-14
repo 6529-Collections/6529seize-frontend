@@ -99,7 +99,7 @@ export default function ProxyList({
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span>Create new</span>
+                <span>Assign Proxy</span>
               </button>
             </CommonAnimationOpacity>
           )}
