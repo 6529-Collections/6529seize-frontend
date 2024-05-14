@@ -50,10 +50,12 @@ export default function ProxyActionRowDataMode({
           <ProxyActionRowStatus
             status={grantorStatus}
             statusOwnerProfile={profileProxy.created_by}
+            side={ProfileProxySide.GRANTED}
           />
           <ProxyActionRowStatus
             status={receiverStatus}
             statusOwnerProfile={profileProxy.granted_to}
+            side={ProfileProxySide.RECEIVED}
           />
         </div>
       </div>
@@ -73,7 +75,7 @@ export default function ProxyActionRowDataMode({
           <p className="tw-flex tw-items-center tw-whitespace-nowrap tw-mb-0 tw-space-x-1 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
             <span>Start:</span>
             <span className="tw-text-iron-300 tw-font-normal">
-              {getTimeAgo(profileProxy.created_at)}
+              {getTimeAgo(action.created_at)}
             </span>
           </p>
           <div className="tw-flex tw-items-center tw-space-x-1">
