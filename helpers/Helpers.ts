@@ -666,6 +666,9 @@ export const getProfileTargetRoute = ({
   readonly router: NextRouter;
   readonly defaultPath: UserPageTabType;
 }): string => {
+  if (!handleOrWallet.length) {
+    return "/404";
+  }
   if (router.route.includes("[user]")) {
     return router.route.replace("[user]", handleOrWallet);
   }
@@ -712,4 +715,5 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 };
 
-export const classNames = (...classes: string[]) => classes.filter(Boolean).join(" ");
+export const classNames = (...classes: string[]) =>
+  classes.filter(Boolean).join(" ");
