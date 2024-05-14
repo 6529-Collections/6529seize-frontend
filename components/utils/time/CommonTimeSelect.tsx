@@ -25,11 +25,13 @@ export default function CommonTimeSelect({
   onMillis,
   disabled = false,
   inline = false,
+  size = "md",
 }: {
   readonly currentTime: number | null;
   readonly onMillis: (millis: number) => void;
   readonly disabled?: boolean;
   readonly inline?: boolean;
+  readonly size?: "sm" | "md";
 }) {
   const hours = currentTime
     ? +Time.millis(currentTime).diffFromNow().toHours().toFixed(0)
@@ -89,6 +91,7 @@ export default function CommonTimeSelect({
             onChange={(newV) => setValue(parseInt(newV ?? "0"))}
             placeholder="Time"
             theme="light"
+            size={size}
           />
         </div>
         <div className="tw-w-full lg:tw-w-40">
@@ -99,6 +102,7 @@ export default function CommonTimeSelect({
             dynamicPosition={false}
             filterLabel="Time Mode"
             theme="light"
+            size="sm"
             setSelected={setTimeMode}
           />
         </div>

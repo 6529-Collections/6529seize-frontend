@@ -110,6 +110,7 @@ export default function ProfileProxyEndTimeEdit({
               onMillis={setEndTime}
               disabled={isEndTimeDisabled}
               inline={true}
+              size="sm"
             />
           )}
           <div className="tw-mt-5 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
