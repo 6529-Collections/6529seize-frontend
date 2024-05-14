@@ -76,6 +76,7 @@ export default function ProfileProxyCreditEdit({
               onChange={(newV) => setCreditAmount(parseInt(newV ?? "0"))}
               placeholder="Credit Amount"
               theme="light"
+              size="sm"
             />
           </div>
           <div className="tw-mt-4 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end sm:tw-justify-start tw-gap-x-3">
