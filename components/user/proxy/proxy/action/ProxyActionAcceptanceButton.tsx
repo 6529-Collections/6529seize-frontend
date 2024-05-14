@@ -112,7 +112,7 @@ export default function ProxyActionAcceptanceButton({
 
   return (
     <div className="tw-flex md:tw-justify-end">
-      <div className="tw-grid tw-grid-cols-2 tw-gap-x-2">
+      <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-y-2 tw-gap-x-2">
         <div className="tw-col-span-1">
           {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
             <button
