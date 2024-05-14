@@ -71,7 +71,10 @@ export default function ProxyListItem({
   };
   return (
     <div>
-      <div className="tw-flex tw-items-center tw-gap-x-3 tw-py-1">
+      <p className="tw-mb-0 tw-text-iron-50 tw-text-lg tw-font-semibold">
+        Received
+      </p>
+      <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           {profileProxy.created_by.pfp ? (
             <img

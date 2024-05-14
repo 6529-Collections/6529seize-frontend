@@ -6,6 +6,7 @@ import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpac
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 import ProxyListItem from "./ProxyListItem";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import ProxyCreateTargetSearch from "../create/target/ProxyCreateTargetSearch";
 
 export enum ProfileProxyListType {
   RECEIVED = "RECEIVED",
@@ -76,8 +77,9 @@ export default function ProxyList({
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
-        <ProxyListFilters selected={proxyType} setSelected={setProxyType} />
+      <div className="tw-w-full tw-flex tw-items-end tw-justify-between tw-gap-x-3">
+        {/*   <ProxyListFilters selected={proxyType} setSelected={setProxyType} /> */}
+        <ProxyCreateTargetSearch />
         <div>
           {isSelf && (
             <CommonAnimationOpacity>
