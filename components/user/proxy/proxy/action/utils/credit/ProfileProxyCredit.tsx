@@ -28,7 +28,7 @@ export default function ProfileProxyCredit({
 
   return (
     <div className="tw-flex lg:tw-justify-center tw-items-center">
-      <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-1.5 tw-text-sm lg:tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
+      <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-text-iron-500">
         <span className="tw-font-normal tw-text-iron-500">Credit:</span>
         <span className="tw-text-iron-300 tw-font-medium">
           {profileProxyAction.credit_amount}
