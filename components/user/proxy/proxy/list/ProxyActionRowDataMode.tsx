@@ -37,16 +37,16 @@ export default function ProxyActionRowDataMode({
   });
 
   return (
-    <div className="tw-relative tw-grid tw-grid-cols-[repeat(13,minmax(0,1fr))] tw-gap-y-3 tw-gap-x-4 tw-justify-between lg:tw-items-center tw-w-full tw-py-4 xl:tw-py-0 xl:tw-h-14 tw-px-4">
-      <div className="tw-col-span-full lg:tw-col-span-2">
+    <div className="tw-relative tw-grid tw-grid-cols-[repeat(13,minmax(0,1fr))] tw-gap-y-3 tw-gap-x-4 tw-justify-between lg:tw-items-center tw-w-full tw-py-4 tw-px-4">
+      <div className="tw-col-span-full md:tw-col-span-2">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <p className="tw-mb-0 tw-text-md tw-font-medium tw-text-iron-50">
             {PROFILE_PROXY_ACTION_LABELS[action.action_type]}
           </p>
         </div>
       </div>
-      <div className="tw-col-span-full md:tw-col-span-4 lg:tw-col-span-3">
-        <div className="tw-flex  tw-gap-x-3">
+      <div className="tw-col-span-full md:tw-col-span-3">
+        <div className="tw-flex md:tw-flex-col lg:tw-flex-row tw-gap-3">
           <ProxyActionRowStatus
             status={grantorStatus}
             statusOwnerProfile={profileProxy.created_by}
@@ -57,7 +57,7 @@ export default function ProxyActionRowDataMode({
           />
         </div>
       </div>
-      <div className="tw-col-span-full md:tw-col-span-2 lg:tw-col-span-2">
+      <div className="tw-col-span-full md:tw-col-span-2">
         {PROFILE_PROXY_ACTION_HAVE_CREDIT[action.action_type] && (
           <ProfileProxyCredit
             profileProxy={profileProxy}
@@ -69,7 +69,7 @@ export default function ProxyActionRowDataMode({
         )}
       </div>
       <div className="tw-col-span-full md:tw-col-span-4">
-        <div className="tw-flex tw-gap-x-6">
+        <div className="tw-flex md:tw-flex-col lg:tw-flex-row tw-gap-y-3 tw-gap-x-6">
           <p className="tw-flex tw-items-center tw-whitespace-nowrap tw-mb-0 tw-space-x-1 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
             <span>Start:</span>
             <span className="tw-text-iron-300 tw-font-normal">
@@ -90,7 +90,7 @@ export default function ProxyActionRowDataMode({
           </div>
         </div>
       </div>
-      <div className="tw-col-span-full md:tw-col-span-3 lg:tw-col-span-2">
+      <div className="tw-col-span-full md:tw-col-span-2">
         {isSelf && (
           <ProxyActionAcceptanceButton
             action={action}
