@@ -39,7 +39,11 @@ export default function UserPageRepNewRepSearchHeader({
       !!activeProfileProxy?.created_by.handle && !!profile.profile?.handle,
   });
 
-  const getActiveRepRates = (): { available: number; rated: number } => {
+  const getActiveRepRates = (): {
+    available: number;
+    rated: number;
+    proxyCreditLeft: number | null;
+  } => {
     const repProxy = activeProfileProxy?.actions.find(
       (a) => a.action_type === ProfileProxyActionType.AllocateRep
     );
@@ -47,35 +51,34 @@ export default function UserPageRepNewRepSearchHeader({
       return {
         available: repRates?.rep_rates_left_for_rater ?? 0,
         rated: repRates?.total_rep_rating_by_rater ?? 0,
+        proxyCreditLeft: null,
       };
     }
     if (!proxyGrantorRepRates) {
       return {
         available: 0,
         rated: 0,
+        proxyCreditLeft: null,
       };
     }
     const proxyGrantorAvailableRep =
       proxyGrantorRepRates.rep_rates_left_for_rater ?? 0;
     const proxyGrantorTotalRep =
       proxyGrantorRepRates.total_rep_rating_by_rater ?? 0;
-    const repProxyAvailableRep =
-      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0);
-    if (repProxyAvailableRep <= 0) {
-      return {
-        available: 0,
-        rated: proxyGrantorTotalRep,
-      };
-    }
     return {
-      available: Math.min(repProxyAvailableRep, proxyGrantorAvailableRep),
+      available: proxyGrantorAvailableRep,
       rated: proxyGrantorTotalRep,
+      proxyCreditLeft: Math.max(
+        0,
+        (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0)
+      ),
     };
   };
 
   const [activeRepRates, setActiveRepRates] = useState<{
     available: number;
     rated: number;
+    proxyCreditLeft: number | null;
   }>(getActiveRepRates());
 
   useEffect(
@@ -100,6 +103,16 @@ export default function UserPageRepNewRepSearchHeader({
           {repRates ? formatNumberWithCommas(activeRepRates.available) : ""}
         </span>
       </span>
+      {typeof activeRepRates.proxyCreditLeft === "number" && (
+        <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
+          <span>Your available credit:</span>
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+            {repRates
+              ? formatNumberWithCommas(activeRepRates.proxyCreditLeft)
+              : ""}
+          </span>
+        </span>
+      )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
         <span>Your Rep assigned to {profile.profile?.handle}:</span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">

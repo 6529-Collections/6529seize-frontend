@@ -86,30 +86,98 @@ export default function UserPageIdentityHeaderCICRate({
     },
   });
 
-  const getCicLeftToGive = (): number => {
-    const cicProxyAction = activeProfileProxy?.actions.find(
+  const getProxyAvailableCredit = (): number | null => {
+    const repProxy = activeProfileProxy?.actions.find(
       (a) => a.action_type === ProfileProxyActionType.AllocateCic
     );
-    if (!cicProxyAction) {
-      return currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
+    if (!repProxy) {
+      return null;
     }
-    const proxyAvailableCredit = Math.max(
-      0,
-      (cicProxyAction?.credit_amount ?? 0) - (cicProxyAction?.credit_spent ?? 0)
-    );
-    return Math.min(
-      proxyAvailableCredit,
-      currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
+    return Math.max(
+      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0),
+      0
     );
   };
 
-  const [cicLeftToGive, setCicLeftToGive] = useState<number>(
-    getCicLeftToGive()
-  );
+  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
+    number | null
+  >(getProxyAvailableCredit());
+
   useEffect(
-    () => setCicLeftToGive(getCicLeftToGive()),
-    [currentCICState, activeProfileProxy]
+    () => setProxyAvailableCredit(getProxyAvailableCredit()),
+    [activeProfileProxy]
   );
+
+  const getMinValue = (): number => {
+    const currentCic = currentCICState?.cic_rating_by_rater ?? 0;
+    const heroAvailableCic =
+      currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
+    const minHeroCic = 0 - (Math.abs(currentCic) + heroAvailableCic);
+    if (typeof proxyAvailableCredit !== "number") {
+      return minHeroCic;
+    }
+    const minProxyRep = currentCic - proxyAvailableCredit;
+
+    return Math.abs(minHeroCic) < Math.abs(minProxyRep)
+      ? minHeroCic
+      : minProxyRep;
+  };
+
+  const getMaxValue = (): number => {
+    const currentCic = currentCICState?.cic_rating_by_rater ?? 0;
+    const heroAvailableCic =
+      currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
+    const maxHeroCic = Math.abs(currentCic) + heroAvailableCic;
+    if (typeof proxyAvailableCredit !== "number") {
+      return maxHeroCic;
+    }
+    const maxProxyRep = currentCic + proxyAvailableCredit;
+
+    return Math.min(maxHeroCic, maxProxyRep);
+  };
+
+  const getMinMaxValues = (): {
+    readonly min: number;
+    readonly max: number;
+  } => ({
+    min: getMinValue(),
+    max: getMaxValue(),
+  });
+
+  const [minMaxValues, setMinMaxValues] = useState<{
+    readonly min: number;
+    readonly max: number;
+  }>(getMinMaxValues());
+
+  useEffect(
+    () => setMinMaxValues(getMinMaxValues()),
+    [currentCICState, proxyAvailableCredit]
+  );
+
+  // const getCicLeftToGive = (): number => {
+  //   const cicProxyAction = activeProfileProxy?.actions.find(
+  //     (a) => a.action_type === ProfileProxyActionType.AllocateCic
+  //   );
+  //   if (!cicProxyAction) {
+  //     return currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
+  //   }
+  //   const proxyAvailableCredit = Math.max(
+  //     0,
+  //     (cicProxyAction?.credit_amount ?? 0) - (cicProxyAction?.credit_spent ?? 0)
+  //   );
+  //   return Math.min(
+  //     proxyAvailableCredit,
+  //     currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
+  //   );
+  // };
+
+  // const [cicLeftToGive, setCicLeftToGive] = useState<number>(
+  //   getCicLeftToGive()
+  // );
+  // useEffect(
+  //   () => setCicLeftToGive(getCicLeftToGive()),
+  //   [currentCICState, activeProfileProxy]
+  // );
 
   const [originalRating, setOriginalRating] = useState<number>(
     currentCICState?.cic_rating_by_rater ?? 0
@@ -119,11 +187,11 @@ export default function UserPageIdentityHeaderCICRate({
     `${originalRating}`
   );
 
-  const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
-    cicLeftToGive + Math.abs(originalRating)
-  );
+  // const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
+  //   cicLeftToGive + Math.abs(originalRating)
+  // );
 
-  const [availableCIC, setAvailableCIC] = useState<number>(cicLeftToGive);
+  // const [availableCIC, setAvailableCIC] = useState<number>(cicLeftToGive);
 
   const getValueStr = (strCIC: string): string => {
     if (strCIC.length > 1 && strCIC.startsWith("0")) {
@@ -135,29 +203,25 @@ export default function UserPageIdentityHeaderCICRate({
   useEffect(() => {
     setOriginalRating(currentCICState?.cic_rating_by_rater ?? 0);
     setAdjustedRatingStr(`${currentCICState?.cic_rating_by_rater ?? 0}`);
-    setMyMaxCICRatings(
-      cicLeftToGive + Math.abs(currentCICState?.cic_rating_by_rater ?? 0)
-    );
-    setAvailableCIC(cicLeftToGive);
-  }, [currentCICState, cicLeftToGive]);
+  }, [currentCICState]);
 
-  const getMinMaxValues = (): {
-    readonly min: number;
-    readonly max: number;
-  } => {
-    if (typeof availableCIC !== "number") {
-      return { min: 0, max: 0 };
-    }
-    if (!activeProfileProxy) {
-      const maxPositiveValue =
-        availableCIC + Math.abs(currentCICState?.cic_rating_by_rater ?? 0);
-      return { min: -maxPositiveValue, max: maxPositiveValue };
-    }
-    return {
-      min: (currentCICState?.cic_rating_by_rater ?? 0) - availableCIC,
-      max: (currentCICState?.cic_rating_by_rater ?? 0) + availableCIC,
-    };
-  };
+  // const getMinMaxValues = (): {
+  //   readonly min: number;
+  //   readonly max: number;
+  // } => {
+  //   if (typeof availableCIC !== "number") {
+  //     return { min: 0, max: 0 };
+  //   }
+  //   if (!activeProfileProxy) {
+  //     const maxPositiveValue =
+  //       availableCIC + Math.abs(currentCICState?.cic_rating_by_rater ?? 0);
+  //     return { min: -maxPositiveValue, max: maxPositiveValue };
+  //   }
+  //   return {
+  //     min: (currentCICState?.cic_rating_by_rater ?? 0) - availableCIC,
+  //     max: (currentCICState?.cic_rating_by_rater ?? 0) + availableCIC,
+  //   };
+  // };
 
   const onValueChange = (e: FormEvent<HTMLInputElement>) => {
     const inputValue = e.currentTarget.value;
@@ -184,7 +248,7 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   const getIsValidValue = (): boolean => {
-    const { min, max } = getMinMaxValues();
+    const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
       return false;
@@ -217,9 +281,6 @@ export default function UserPageIdentityHeaderCICRate({
   }, [newRating, originalRating]);
 
   const getIsSaveDisabled = (): boolean => {
-    if (!availableCIC) {
-      return true;
-    }
     if (!haveChanged) {
       return true;
     }
@@ -235,29 +296,29 @@ export default function UserPageIdentityHeaderCICRate({
     getIsSaveDisabled()
   );
 
-  useEffect(() => {
-    setIsSaveDisabled(getIsSaveDisabled());
-  }, [haveChanged, isValidValue, newRating, originalRating]);
+  // useEffect(() => {
+  //   setIsSaveDisabled(getIsSaveDisabled());
+  // }, [haveChanged, isValidValue, newRating, originalRating]);
 
-  const onSave = async () => {
-    const { success } = await requestAuth();
-    if (!success) {
-      setToast({
-        message: "You must be logged in.",
-        type: "error",
-      });
-      return;
-    }
-    if (!haveChanged || !isValidValue) {
-      return;
-    }
+  // const onSave = async () => {
+  //   const { success } = await requestAuth();
+  //   if (!success) {
+  //     setToast({
+  //       message: "You must be logged in.",
+  //       type: "error",
+  //     });
+  //     return;
+  //   }
+  //   if (!haveChanged || !isValidValue) {
+  //     return;
+  //   }
 
-    await updateCICMutation.mutateAsync(newRating);
-  };
+  //   await updateCICMutation.mutateAsync(newRating);
+  // };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await onSave();
+    // await onSave();
   };
 
   const breakpoint = useBreakpoint();
@@ -273,8 +334,10 @@ export default function UserPageIdentityHeaderCICRate({
       <UserPageIdentityHeaderCICRateStats
         isTooltip={isTooltip}
         profile={profile}
-        availableCIC={availableCIC}
-        currentCIC={currentCICState?.cic_rating_by_rater ?? 0}
+        minMaxValues={minMaxValues}
+        heroAvailableRep={
+          currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
+        }
       />
       <form
         onSubmit={onSubmit}
