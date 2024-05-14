@@ -37,18 +37,18 @@ export default function ProxyList({
   );
 
   return (
-    <div className="tailwind-scope">
-      <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-w-full tw-justify-between">
+    <div className="tailwind-scope tw-space-y-6">
+      <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-4">
         <ProxyListFilters selected={proxyType} setSelected={setProxyType} />
         {isSelf && (
           <CommonAnimationOpacity>
             <button
               type="button"
               onClick={() => onModeChange(ProxyMode.CREATE)}
-              className="tw-whitespace-nowrap w-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-whitespace-nowrap w-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-w-5 tw-h-5 tw-mr-1 -tw-ml-1"
+                className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -70,7 +70,7 @@ export default function ProxyList({
       {[ProfileProxyListType.ALL, ProfileProxyListType.RECEIVED].includes(
         proxyType
       ) && (
-        <div className="tw-mt-4 sm:tw-mt-6">
+        <div>
           <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-lg">
             Received proxies
           </p>
@@ -95,7 +95,7 @@ export default function ProxyList({
       {[ProfileProxyListType.ALL, ProfileProxyListType.GRANTED].includes(
         proxyType
       ) && (
-        <div className="tw-mt-4 sm:tw-mt-6">
+        <div>
           <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-lg">
             Granted proxies
           </p>
