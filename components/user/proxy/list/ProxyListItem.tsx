@@ -72,7 +72,7 @@ export default function ProxyListItem({
   };
   return (
     <div>
-      <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
+      <div className="tw-h-9 tw-mt-3 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
         <Link href={`/${profileProxy.created_by.handle}/proxy`}>
           <div className="tw-flex tw-items-center tw-gap-x-3">
             {profileProxy.created_by.pfp ? (
