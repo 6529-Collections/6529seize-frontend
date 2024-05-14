@@ -11,7 +11,7 @@ import ProfileActivityLogsSocialMediaVerificationPostIcon from "./ProfileActivit
 import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
 import ProfileActivityLogsProfileArchivedIcon from "./ProfileActivityLogsProfileArchivedIcon";
 import ProfileActivityLogsGeneralCICStatementIcon from "./ProfileActivityLogsGeneralCICStatementIcon";
-import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon"
+import ProfileActivityLogsNFTAccountStatementIcon from "./ProfileActivityLogsNFTAccountStatementIcon";
 
 export default function ProfileActivityLogsIcon({
   logType,
@@ -23,8 +23,6 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsCICRatingIcon />;
     case ProfileActivityLogType.HANDLE_EDIT:
       return <ProfileActivityLogsHandleIcon />;
-    case ProfileActivityLogType.PRIMARY_WALLET_EDIT:
-      return <ProfileActivityLogsPrimaryWalletIcon />;
     case ProfileActivityLogType.SOCIALS_EDIT:
       return <ProfileActivityLogsSocialMediaAccountIcon />;
     case ProfileActivityLogType.CONTACTS_EDIT:
@@ -45,6 +43,15 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsGeneralCICStatementIcon />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogsNFTAccountStatementIcon />;
+    // TODO: Add icons for these log types
+    case ProfileActivityLogType.PROXY_CREATED:
+    case ProfileActivityLogType.PROXY_ACTION_CREATED:
+    case ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED:
+    case ProfileActivityLogType.PROXY_ACTION_CHANGED:
+    case ProfileActivityLogType.DROP_COMMENT:
+    case ProfileActivityLogType.DROP_RATING_EDIT:
+    case ProfileActivityLogType.DROP_CREATED:
+      return <></>;
     default:
       assertUnreachable(logType);
   }

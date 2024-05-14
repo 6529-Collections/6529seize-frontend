@@ -10,8 +10,11 @@ import ProfileActivityLogGeneralStatement from "./items/ProfileActivityLogGenera
 import ProfileActivityLogHandle from "./items/ProfileActivityLogHandle";
 import ProfileActivityLogNFTAccount from "./items/ProfileActivityLogNFTAccount";
 import ProfileActivityLogPfp from "./items/ProfileActivityLogPfp";
-import ProfileActivityLogPrimaryWallet from "./items/ProfileActivityLogPrimaryWallet";
 import ProfileActivityLogProfileArchived from "./items/ProfileActivityLogProfileArchived";
+import ProfileActivityLogProxy from "./items/ProfileActivityLogProxy";
+import ProfileActivityLogProxyAction from "./items/ProfileActivityLogProxyAction";
+import ProfileActivityLogProxyActionChange from "./items/ProfileActivityLogProxyActionChange";
+import ProfileActivityLogProxyActionState from "./items/ProfileActivityLogProxyActionState";
 import ProfileActivityLogRate from "./items/ProfileActivityLogRate";
 import ProfileActivityLogSocialMedia from "./items/ProfileActivityLogSocialMedia";
 import ProfileActivityLogSocialMediaVerificationPost from "./items/ProfileActivityLogSocialMediaVerificationPost";
@@ -27,8 +30,6 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogRate log={log} />;
     case ProfileActivityLogType.HANDLE_EDIT:
       return <ProfileActivityLogHandle log={log} />;
-    case ProfileActivityLogType.PRIMARY_WALLET_EDIT:
-      return <ProfileActivityLogPrimaryWallet log={log} />;
     case ProfileActivityLogType.SOCIALS_EDIT:
       return <ProfileActivityLogSocialMedia log={log} />;
     case ProfileActivityLogType.CONTACTS_EDIT:
@@ -49,6 +50,19 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogGeneralStatement log={log} />;
     case ProfileActivityLogType.NFT_ACCOUNTS_EDIT:
       return <ProfileActivityLogNFTAccount log={log} />;
+    case ProfileActivityLogType.PROXY_CREATED:
+      return <ProfileActivityLogProxy log={log} />;
+    case ProfileActivityLogType.PROXY_ACTION_CREATED:
+      return <ProfileActivityLogProxyAction log={log} />;
+    case ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED:
+      return <ProfileActivityLogProxyActionState log={log} />;
+    case ProfileActivityLogType.PROXY_ACTION_CHANGED:
+      return <ProfileActivityLogProxyActionChange log={log} />;
+    // TODO: implement
+    case ProfileActivityLogType.DROP_COMMENT:
+    case ProfileActivityLogType.DROP_RATING_EDIT:
+    case ProfileActivityLogType.DROP_CREATED:
+      return <></>;
     default:
       assertUnreachable(logType);
   }
