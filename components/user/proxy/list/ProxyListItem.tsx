@@ -6,6 +6,7 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../entities/IProxy";
+import Link from "next/link";
 
 enum VIEW_TYPE {
   LIST = "LIST",
@@ -71,24 +72,23 @@ export default function ProxyListItem({
   };
   return (
     <div>
-      <p className="tw-mb-0 tw-text-iron-50 tw-text-lg tw-font-semibold">
-        Received
-      </p>
-      <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          {profileProxy.created_by.pfp ? (
-            <img
-              src={profileProxy.created_by.pfp}
-              alt="Profile picture"
-              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-            />
-          ) : (
-            <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
-          )}
-          <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
-            {profileProxy.created_by.handle}
-          </p>
-        </div>
+      <div className="tw-flex tw-items-center tw-gap-x-3 tw-py-1">
+        <Link href={`/${profileProxy.created_by.handle}/proxy`}>
+          <div className="tw-flex tw-items-center tw-gap-x-3">
+            {profileProxy.created_by.pfp ? (
+              <img
+                src={profileProxy.created_by.pfp}
+                alt="Profile picture"
+                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+              />
+            ) : (
+              <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+            )}
+            <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
+              {profileProxy.created_by.handle}
+            </p>
+          </div>
+        </Link>
         <svg
           className="tw-h-5 tw-w-5 tw-text-iron-300"
           width="24"
@@ -107,20 +107,22 @@ export default function ProxyListItem({
           />
         </svg>
         <div className="tw-flex tw-w-full tw-gap-x-4">
-          <div className="tw-flex tw-items-center tw-gap-x-3">
-            {profileProxy.granted_to.pfp ? (
-              <img
-                src={profileProxy.granted_to.pfp}
-                alt="Profile picture"
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-              />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
-            )}
-            <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
-              {profileProxy.granted_to.handle}
-            </p>
-          </div>
+          <Link href={`/${profileProxy.granted_to.handle}/proxy`}>
+            <div className="tw-flex tw-items-center tw-gap-x-3">
+              {profileProxy.granted_to.pfp ? (
+                <img
+                  src={profileProxy.granted_to.pfp}
+                  alt="Profile picture"
+                  className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+                />
+              ) : (
+                <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+              )}
+              <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
+                {profileProxy.granted_to.handle}
+              </p>
+            </div>
+          </Link>
         </div>
         <div>
           {canAddNewAction && (
