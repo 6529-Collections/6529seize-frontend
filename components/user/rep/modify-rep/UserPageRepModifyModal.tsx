@@ -21,6 +21,8 @@ import {
 } from "../../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
+import { ProxyAction } from "../../proxy/UserPageProxy";
+import { ProfileProxyAction } from "../../../../generated/models/ProfileProxyAction";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -77,6 +79,28 @@ export default function UserPageRepModifyModal({
     enabled: !!connectedProfile?.profile?.handle && !!profile.profile?.handle,
   });
 
+  const getProxyAvailableCredit = (): number | null => {
+    const repProxy = activeProfileProxy?.actions.find(
+      (a) => a.action_type === ProfileProxyActionType.AllocateRep
+    );
+    if (!repProxy) {
+      return null;
+    }
+    return Math.max(
+      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0),
+      0
+    );
+  };
+
+  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
+    number | null
+  >(getProxyAvailableCredit());
+
+  useEffect(
+    () => setProxyAvailableCredit(getProxyAvailableCredit()),
+    [activeProfileProxy]
+  );
+
   const getRepState = (): RatingStats | null => {
     if (activeProfileProxy && proxyGrantorRepRates) {
       const target = proxyGrantorRepRates.rating_stats.find(
@@ -113,45 +137,62 @@ export default function UserPageRepModifyModal({
     return null;
   };
 
-  const getAvailableRep = (): number | null => {
-    if (activeProfileProxy && proxyGrantorRepRates) {
-      const repProxy = activeProfileProxy?.actions.find(
-        (a) => a.action_type === ProfileProxyActionType.AllocateRep
-      );
-      if (!repProxy) {
-        return null;
-      }
-      const proxyGrantorAvailableRep =
-        proxyGrantorRepRates.rep_rates_left_for_rater ?? 0;
-      const repProxyAvailableRep =
-        (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0);
-      if (repProxyAvailableRep <= 0) {
-        return 0;
-      }
-      return Math.min(repProxyAvailableRep, proxyGrantorAvailableRep);
-    }
-    if (activeProfileProxy) {
-      return null;
-    }
-
-    return connectedProfileRepRates?.rep_rates_left_for_rater ?? null;
-  };
-
   const [repState, setRepState] = useState<RatingStats | null>(getRepState());
   const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
     `${getRepState()?.rater_contribution ?? 0}`
   );
 
-  const [availableRep, setAvailableRep] = useState<number | null>(
-    getAvailableRep()
-  );
+  const getMinValue = (): number => {
+    const currentRep = repState?.rater_contribution ?? 0;
+    const heroAvailableRep =
+      proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
+    const minHeroRep = 0 - (Math.abs(currentRep) + heroAvailableRep);
+    if (typeof proxyAvailableCredit !== "number") {
+      return minHeroRep;
+    }
+    const minProxyRep = currentRep - proxyAvailableCredit;
+
+    return Math.abs(minHeroRep) < Math.abs(minProxyRep)
+      ? minHeroRep
+      : minProxyRep;
+  };
+
+  const getMaxValue = (): number => {
+    const currentRep = repState?.rater_contribution ?? 0;
+    const heroAvailableRep =
+      proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
+    const maxHeroRep = Math.abs(currentRep) + heroAvailableRep;
+    if (typeof proxyAvailableCredit !== "number") {
+      return maxHeroRep;
+    }
+    const maxProxyRep = currentRep + proxyAvailableCredit;
+
+    return Math.min(maxHeroRep, maxProxyRep);
+  };
+
+  const getMinMaxValues = (): {
+    readonly min: number;
+    readonly max: number;
+  } => ({
+    min: getMinValue(),
+    max: getMaxValue(),
+  });
+
+  const [minMaxValues, setMinMaxValues] = useState<{
+    readonly min: number;
+    readonly max: number;
+  }>(getMinMaxValues());
 
   useEffect(() => {
     const newState = getRepState();
     setRepState(newState);
     setAdjustedRatingStr(`${newState?.rater_contribution ?? 0}`);
-    setAvailableRep(getAvailableRep());
   }, [proxyGrantorRepRates, activeProfileProxy, connectedProfileRepRates]);
+
+  useEffect(
+    () => setMinMaxValues(getMinMaxValues()),
+    [repState, proxyGrantorRepRates, proxyAvailableCredit]
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -164,24 +205,6 @@ export default function UserPageRepModifyModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const getMinMaxValues = (): {
-    readonly min: number;
-    readonly max: number;
-  } => {
-    if (typeof availableRep !== "number" || !repState) {
-      return { min: 0, max: 0 };
-    }
-    if (!activeProfileProxy) {
-      const maxPositiveValue =
-        availableRep + Math.abs(repState.rater_contribution);
-      return { min: -maxPositiveValue, max: maxPositiveValue };
-    }
-    return {
-      min: repState.rater_contribution - availableRep,
-      max: repState.rater_contribution + availableRep,
-    };
-  };
-
   const getValueStr = (value: string): string => {
     if (value.length > 1 && value.startsWith("0")) {
       return value.slice(1);
@@ -191,7 +214,7 @@ export default function UserPageRepModifyModal({
   };
 
   const adjustStrValueToMinMax = (): void => {
-    const { min, max } = getMinMaxValues();
+    const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
       setAdjustedRatingStr(`${max}`);
@@ -215,7 +238,7 @@ export default function UserPageRepModifyModal({
   };
 
   const getIsValidValue = (): boolean => {
-    const { min, max } = getMinMaxValues();
+    const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
       return false;
@@ -248,7 +271,7 @@ export default function UserPageRepModifyModal({
   }, [newRating, repState]);
 
   const getIsSaveDisabled = (): boolean => {
-    if (!repState || !availableRep) {
+    if (!repState) {
       return true;
     }
     if (!haveChanged) {
@@ -268,7 +291,7 @@ export default function UserPageRepModifyModal({
 
   useEffect(() => {
     setIsSaveDisabled(getIsSaveDisabled());
-  }, [haveChanged, isValidValue, repState, availableRep]);
+  }, [haveChanged, isValidValue, repState]);
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -349,7 +372,10 @@ export default function UserPageRepModifyModal({
             {repState && (
               <UserPageRepModifyModalRaterStats
                 repState={repState}
-                giverAvailableRep={availableRep ?? 0}
+                minMaxValues={minMaxValues}
+                heroAvailableRep={
+                  proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0
+                }
               />
             )}
             <form onSubmit={onSubmit} className="tw-mt-4">
