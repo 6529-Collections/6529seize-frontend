@@ -22,12 +22,14 @@ export default function ProxyList({
   grantedProfileProxies,
   isSelf,
   profile,
+  loading,
 }: {
   readonly onModeChange: (mode: ProxyMode) => void;
   readonly receivedProfileProxies: ProfileProxy[];
   readonly grantedProfileProxies: ProfileProxy[];
   readonly isSelf: boolean;
   readonly profile: IProfileAndConsolidations;
+  readonly loading: boolean;
 }) {
   const [proxyType, setProxyType] = useState<ProfileProxyListType>(
     ProfileProxyListType.RECEIVED
@@ -47,7 +49,7 @@ export default function ProxyList({
           ))
         ) : (
           <div className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
-            No received proxies
+            {loading ? "Loading proxies..." : "No received proxies"}
           </div>
         )}
       </div>
@@ -65,7 +67,7 @@ export default function ProxyList({
           ))
         ) : (
           <div className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
-            No granted proxies
+            {loading ? "Loading proxies..." : "No granted proxies"}
           </div>
         )}
       </div>

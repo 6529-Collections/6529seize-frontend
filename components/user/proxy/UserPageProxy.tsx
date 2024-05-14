@@ -54,7 +54,7 @@ export default function UserPageProxy({
     [connectedProfile, profile, activeProfileProxy]
   );
 
-  const { data: profileProxies } = useQuery<ProfileProxy[]>({
+  const { data: profileProxies, isFetching } = useQuery<ProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
       { handleOrWallet: profile.profile?.handle },
@@ -92,6 +92,7 @@ export default function UserPageProxy({
     [ProxyMode.LIST]: (
       <ProxyList
         isSelf={isSelf}
+        loading={isFetching}
         receivedProfileProxies={profileProxiesFiltered.received}
         grantedProfileProxies={profileProxiesFiltered.granted}
         profile={profile}
