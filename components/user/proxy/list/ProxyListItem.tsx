@@ -72,7 +72,8 @@ export default function ProxyListItem({
   };
   return (
     <div>
-      <div className="tw-flex tw-items-center tw-gap-x-3 tw-py-1">
+      <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-lg">Received</p>
+      <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
         <Link href={`/${profileProxy.created_by.handle}/proxy`}>
           <div className="tw-flex tw-items-center tw-gap-x-3">
             {profileProxy.created_by.pfp ? (
@@ -84,7 +85,7 @@ export default function ProxyListItem({
             ) : (
               <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
             )}
-            <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
+            <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 hover:tw-text-iron-400 tw-text-base tw-transition tw-duration-300 tw-ease-out">
               {profileProxy.created_by.handle}
             </p>
           </div>
@@ -107,7 +108,10 @@ export default function ProxyListItem({
           />
         </svg>
         <div className="tw-flex tw-w-full tw-gap-x-4">
-          <Link href={`/${profileProxy.granted_to.handle}/proxy`}>
+          <Link
+            href={`/${profileProxy.granted_to.handle}/proxy`}
+            className="tw-group"
+          >
             <div className="tw-flex tw-items-center tw-gap-x-3">
               {profileProxy.granted_to.pfp ? (
                 <img
@@ -118,7 +122,7 @@ export default function ProxyListItem({
               ) : (
                 <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
               )}
-              <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base">
+              <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
                 {profileProxy.granted_to.handle}
               </p>
             </div>
