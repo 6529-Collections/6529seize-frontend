@@ -151,11 +151,13 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
   readonly contents: {
-    change_reason: ProfileActivityLogRatingEditContentChangeReason;
-    new_rating: number;
-    old_rating: number;
-    rating_category: string;
-    rating_matter: RateMatter;
+    readonly change_reason: ProfileActivityLogRatingEditContentChangeReason;
+    readonly new_rating: number;
+    readonly old_rating: number;
+    readonly rating_category: string;
+    readonly rating_matter: RateMatter;
+    readonly proxy_handle?: string;
+    readonly proxy_id?: string;
   };
 }
 

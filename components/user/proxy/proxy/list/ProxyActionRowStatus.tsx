@@ -1,4 +1,7 @@
-import { ProfileProxyActionStatus } from "../../../../../entities/IProxy";
+import {
+  ProfileProxyActionStatus,
+  ProfileProxySide,
+} from "../../../../../entities/IProxy";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import Tippy from "@tippyjs/react";
 
@@ -12,19 +15,32 @@ const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
     "tw-text-[#FEC84B] tw-bg-[#FEC84B]/10 tw-ring-[#FEC84B]/20",
 };
 
-const STATUS_LABELS: Record<ProfileProxyActionStatus, string> = {
-  [ProfileProxyActionStatus.ACTIVE]: "Active",
-  [ProfileProxyActionStatus.REJECTED]: "Rejected",
-  [ProfileProxyActionStatus.REVOKED]: "Revoked",
-  [ProfileProxyActionStatus.PENDING]: "Pending",
+const STATUS_LABELS: Record<
+  ProfileProxySide,
+  Record<ProfileProxyActionStatus, string>
+> = {
+  [ProfileProxySide.GRANTED]: {
+    [ProfileProxyActionStatus.ACTIVE]: "Granted",
+    [ProfileProxyActionStatus.REJECTED]: "Rejected",
+    [ProfileProxyActionStatus.REVOKED]: "Revoked",
+    [ProfileProxyActionStatus.PENDING]: "Pending",
+  },
+  [ProfileProxySide.RECEIVED]: {
+    [ProfileProxyActionStatus.ACTIVE]: "Accepted",
+    [ProfileProxyActionStatus.REJECTED]: "Rejected",
+    [ProfileProxyActionStatus.REVOKED]: "Revoked",
+    [ProfileProxyActionStatus.PENDING]: "Pending",
+  },
 };
 
 export default function ProxyActionRowStatus({
   status,
   statusOwnerProfile,
+  side,
 }: {
   readonly status: ProfileProxyActionStatus;
   readonly statusOwnerProfile: ProfileMin;
+  readonly side: ProfileProxySide;
 }) {
   return (
     <Tippy content={statusOwnerProfile.handle}>
@@ -41,7 +57,7 @@ export default function ProxyActionRowStatus({
         <div
           className={`${STATUS_CLASSES[status]} tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
         >
-          {STATUS_LABELS[status]}
+          {STATUS_LABELS[side][status]}
         </div>
       </div>
     </Tippy>
