@@ -45,8 +45,8 @@ export default function ProxyActionRowDataMode({
           </p>
         </div>
       </div>
-      <div className="tw-col-span-4 lg:tw-col-span-3">
-        <div className="tw-flex tw-gap-x-3">
+      <div className="tw-col-span-full md:tw-col-span-4 lg:tw-col-span-3">
+        <div className="tw-flex  tw-gap-x-3">
           <ProxyActionRowStatus
             status={grantorStatus}
             statusOwnerProfile={profileProxy.created_by}

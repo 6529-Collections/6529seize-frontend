@@ -19,7 +19,7 @@ module.exports = {
         "3xl": "2048px",
       },
       fontSize: {
-        md: ["0.9375rem", "20px"],
+        md: ["0.9375rem", "24px"],
       },
       colors: {
         "primary-300": "#84ADFF",
