@@ -107,6 +107,12 @@ export default function ProfileActivityLogRate({
         tabTarget={tabTarget}
       />
 
+      {log.contents.proxy_handle && (
+        <span className="tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium">
+          (via Proxy)
+        </span>
+      )}
+
       {isSystemAdjustment && (
         <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">
           <svg
