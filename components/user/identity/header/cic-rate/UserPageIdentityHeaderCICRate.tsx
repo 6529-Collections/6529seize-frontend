@@ -154,31 +154,6 @@ export default function UserPageIdentityHeaderCICRate({
     [currentCICState, proxyAvailableCredit]
   );
 
-  // const getCicLeftToGive = (): number => {
-  //   const cicProxyAction = activeProfileProxy?.actions.find(
-  //     (a) => a.action_type === ProfileProxyActionType.AllocateCic
-  //   );
-  //   if (!cicProxyAction) {
-  //     return currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
-  //   }
-  //   const proxyAvailableCredit = Math.max(
-  //     0,
-  //     (cicProxyAction?.credit_amount ?? 0) - (cicProxyAction?.credit_spent ?? 0)
-  //   );
-  //   return Math.min(
-  //     proxyAvailableCredit,
-  //     currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
-  //   );
-  // };
-
-  // const [cicLeftToGive, setCicLeftToGive] = useState<number>(
-  //   getCicLeftToGive()
-  // );
-  // useEffect(
-  //   () => setCicLeftToGive(getCicLeftToGive()),
-  //   [currentCICState, activeProfileProxy]
-  // );
-
   const [originalRating, setOriginalRating] = useState<number>(
     currentCICState?.cic_rating_by_rater ?? 0
   );
@@ -186,12 +161,6 @@ export default function UserPageIdentityHeaderCICRate({
   const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
     `${originalRating}`
   );
-
-  // const [myMaxCICRatings, setMyMaxCICRatings] = useState<number>(
-  //   cicLeftToGive + Math.abs(originalRating)
-  // );
-
-  // const [availableCIC, setAvailableCIC] = useState<number>(cicLeftToGive);
 
   const getValueStr = (strCIC: string): string => {
     if (strCIC.length > 1 && strCIC.startsWith("0")) {
@@ -204,24 +173,6 @@ export default function UserPageIdentityHeaderCICRate({
     setOriginalRating(currentCICState?.cic_rating_by_rater ?? 0);
     setAdjustedRatingStr(`${currentCICState?.cic_rating_by_rater ?? 0}`);
   }, [currentCICState]);
-
-  // const getMinMaxValues = (): {
-  //   readonly min: number;
-  //   readonly max: number;
-  // } => {
-  //   if (typeof availableCIC !== "number") {
-  //     return { min: 0, max: 0 };
-  //   }
-  //   if (!activeProfileProxy) {
-  //     const maxPositiveValue =
-  //       availableCIC + Math.abs(currentCICState?.cic_rating_by_rater ?? 0);
-  //     return { min: -maxPositiveValue, max: maxPositiveValue };
-  //   }
-  //   return {
-  //     min: (currentCICState?.cic_rating_by_rater ?? 0) - availableCIC,
-  //     max: (currentCICState?.cic_rating_by_rater ?? 0) + availableCIC,
-  //   };
-  // };
 
   const onValueChange = (e: FormEvent<HTMLInputElement>) => {
     const inputValue = e.currentTarget.value;
@@ -296,29 +247,29 @@ export default function UserPageIdentityHeaderCICRate({
     getIsSaveDisabled()
   );
 
-  // useEffect(() => {
-  //   setIsSaveDisabled(getIsSaveDisabled());
-  // }, [haveChanged, isValidValue, newRating, originalRating]);
+  useEffect(() => {
+    setIsSaveDisabled(getIsSaveDisabled());
+  }, [haveChanged, isValidValue]);
 
-  // const onSave = async () => {
-  //   const { success } = await requestAuth();
-  //   if (!success) {
-  //     setToast({
-  //       message: "You must be logged in.",
-  //       type: "error",
-  //     });
-  //     return;
-  //   }
-  //   if (!haveChanged || !isValidValue) {
-  //     return;
-  //   }
+  const onSave = async () => {
+    const { success } = await requestAuth();
+    if (!success) {
+      setToast({
+        message: "You must be logged in.",
+        type: "error",
+      });
+      return;
+    }
+    if (!haveChanged || !isValidValue) {
+      return;
+    }
 
-  //   await updateCICMutation.mutateAsync(newRating);
-  // };
+    await updateCICMutation.mutateAsync(newRating);
+  };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // await onSave();
+    await onSave();
   };
 
   const breakpoint = useBreakpoint();
