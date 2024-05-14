@@ -72,7 +72,6 @@ export default function ProxyListItem({
   };
   return (
     <div>
-      <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-lg">Received</p>
       <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
         <Link href={`/${profileProxy.created_by.handle}/proxy`}>
           <div className="tw-flex tw-items-center tw-gap-x-3">

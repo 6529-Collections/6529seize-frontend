@@ -1,4 +1,6 @@
-import CommonSelect, { CommonSelectItem } from "../../../../utils/select/CommonSelect";
+import CommonSelect, {
+  CommonSelectItem,
+} from "../../../../utils/select/CommonSelect";
 import { ProfileProxyListType } from "../ProxyList";
 
 export default function ProxyListFilters({
@@ -15,6 +17,10 @@ export default function ProxyListFilters({
       readonly value: ProfileProxyListType;
     }
   > = {
+    [ProfileProxyListType.ALL]: {
+      label: "All",
+      value: ProfileProxyListType.ALL,
+    },
     [ProfileProxyListType.RECEIVED]: {
       label: "Received",
       value: ProfileProxyListType.RECEIVED,
@@ -32,7 +38,7 @@ export default function ProxyListFilters({
     value,
     key: value,
   }));
-  
+
   return (
     <CommonSelect
       items={items}
