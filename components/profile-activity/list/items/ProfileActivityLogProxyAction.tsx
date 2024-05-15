@@ -11,7 +11,6 @@ export default function ProfileActivityLogProxyAction({
   readonly log: ProfileActivityLogProxyActionCreated;
 }) {
   const router = useRouter();
-  // TODO: api response is empty for target_profile_handle
   const handleOrWallet = log.target_profile_handle ?? "";
 
   const isCurrentUser =

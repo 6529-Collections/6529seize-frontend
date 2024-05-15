@@ -240,7 +240,6 @@ export default function UserPageRepModifyModal({
       setAdjustedRatingStr(`${min}`);
       return;
     }
-    return;
   };
 
   const onValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {

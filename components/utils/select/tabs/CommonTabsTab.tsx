@@ -6,14 +6,10 @@ import { CommonSelectItemProps } from "../CommonSelect";
 export default function CommonTabsTab<T, U = unknown>(
   props: Readonly<CommonSelectItemProps<T, U>>
 ) {
-  const { item, activeItem, totalItems, itemIdx, setSelected, sortDirection } =
-    props;
+  const { item, activeItem, setSelected, sortDirection } = props;
 
   const getIsActive = (): boolean => item.value === activeItem;
   const [isActive, setIsActive] = useState<boolean>(getIsActive());
-
-  /*   const isFirst = itemIdx === 0;
-  const isLast = itemIdx === totalItems - 1; */
 
   useEffect(() => {
     setIsActive(getIsActive());
@@ -27,13 +23,6 @@ export default function CommonTabsTab<T, U = unknown>(
       response +=
         " tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100";
     }
-    /* 
-    if (isFirst) {
-      response += " tw-rounded-l-lg";
-    }
-    if (isLast) {
-      response += " tw-rounded-r-lg";
-    } */
     return response;
   };
 

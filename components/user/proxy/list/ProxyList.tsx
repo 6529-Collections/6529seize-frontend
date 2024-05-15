@@ -5,7 +5,6 @@ import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpac
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 import ProxyListItem from "./ProxyListItem";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import ProxyCreateTargetSearch from "../create/target/ProxyCreateTargetSearch";
 
 export enum ProfileProxyListType {
   ALL = "ALL",
