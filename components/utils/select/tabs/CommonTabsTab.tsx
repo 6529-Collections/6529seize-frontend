@@ -57,7 +57,7 @@ export default function CommonTabsTab<T, U = unknown>(
       onClick={onSelected}
       onMouseEnter={() => setShouldRotate(true)}
       onMouseLeave={() => setShouldRotate(false)}
-      className={`${dynamicClasses}  tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}
+      className={`${dynamicClasses} tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}
     >
       {item.label}
       {sortDirection && (
