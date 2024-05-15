@@ -5,6 +5,7 @@ export default function ProfileActivityLogProxyActionChange({
 }: {
   readonly log: ProfileActivityLogProxyActionChanged;
 }) {
+  console.log(log);
   // TODO: Implement ProfileActivityLogProxyActionChange
   return <></>;
 }
