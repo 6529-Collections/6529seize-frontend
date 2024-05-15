@@ -238,7 +238,6 @@ export default function UserPageRepModifyModal({
 
     if (valueAsNumber < min) {
       setAdjustedRatingStr(`${min}`);
-      return;
     }
   };
 

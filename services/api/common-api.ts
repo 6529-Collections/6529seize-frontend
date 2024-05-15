@@ -81,8 +81,8 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    return Promise.reject(
+      body?.error ?? res.statusText ?? "Something went wrong"
     );
   }
   return res.json();
