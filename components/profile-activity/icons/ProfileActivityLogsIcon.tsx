@@ -54,7 +54,6 @@ export default function ProfileActivityLogsIcon({
       return <ProfileActivityLogsProxyActionStateChangedIcon />;
     case ProfileActivityLogType.PROXY_ACTION_CHANGED:
       return <ProfileActivityLogsProxyActionChangedIcon />;
-    // TODO: Add icons for these log types
     case ProfileActivityLogType.DROP_COMMENT:
     case ProfileActivityLogType.DROP_RATING_EDIT:
     case ProfileActivityLogType.DROP_CREATED:

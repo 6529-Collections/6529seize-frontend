@@ -57,7 +57,7 @@ export default function UserPageRepModifyModalRaterStats({
             {formatNumberWithCommas(heroAvailableRep)}
           </span>
         </span>
-        {!!activeProfileProxy ? (
+        {activeProfileProxy ? (
           <>
             {typeof proxyAvailableCredit === "number" && (
               <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">

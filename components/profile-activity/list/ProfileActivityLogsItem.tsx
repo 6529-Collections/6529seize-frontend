@@ -58,7 +58,6 @@ export default function UserPageIdentityActivityLogItem({
       return <ProfileActivityLogProxyActionState log={log} />;
     case ProfileActivityLogType.PROXY_ACTION_CHANGED:
       return <ProfileActivityLogProxyActionChange log={log} />;
-    // TODO: implement
     case ProfileActivityLogType.DROP_COMMENT:
     case ProfileActivityLogType.DROP_RATING_EDIT:
     case ProfileActivityLogType.DROP_CREATED:

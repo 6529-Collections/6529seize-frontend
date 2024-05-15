@@ -7,7 +7,6 @@ import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageNoProfile from "../utils/no-profile/UserPageNoProfile";
 import UserPageRep from "./UserPageRep";
-import { useEffect } from "react";
 
 export default function UserPageRepWrapper({
   profile: initialProfile,
