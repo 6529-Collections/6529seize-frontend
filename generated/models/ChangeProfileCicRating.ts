@@ -12,28 +12,21 @@
 
 import { HttpFile } from '../http/http';
 
-export class UpdateActionRequest {
-    'credit_amount'?: number;
-    'end_time'?: number;
+export class ChangeProfileCicRating {
+    'amount': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "credit_amount",
-            "baseName": "credit_amount",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "end_time",
-            "baseName": "end_time",
+            "name": "amount",
+            "baseName": "amount",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return UpdateActionRequest.attributeTypeMap;
+        return ChangeProfileCicRating.attributeTypeMap;
     }
 
     public constructor() {
