@@ -21,8 +21,6 @@ import {
 } from "../../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
-import { ProxyAction } from "../../proxy/UserPageProxy";
-import { ProfileProxyAction } from "../../../../generated/models/ProfileProxyAction";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -142,10 +140,24 @@ export default function UserPageRepModifyModal({
     `${getRepState()?.rater_contribution ?? 0}`
   );
 
+  const getHeroAvailableRep = (): number => {
+    if (activeProfileProxy) {
+      return proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
+    }
+    return connectedProfileRepRates?.rep_rates_left_for_rater ?? 0;
+  };
+
+  const [heroAvailableRep, setHeroAvailableRep] = useState<number>(
+    getHeroAvailableRep()
+  );
+
+  useEffect(
+    () => setHeroAvailableRep(getHeroAvailableRep()),
+    [activeProfileProxy, proxyGrantorRepRates, connectedProfileRepRates]
+  );
+
   const getMinValue = (): number => {
     const currentRep = repState?.rater_contribution ?? 0;
-    const heroAvailableRep =
-      proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
     const minHeroRep = 0 - (Math.abs(currentRep) + heroAvailableRep);
     if (typeof proxyAvailableCredit !== "number") {
       return minHeroRep;
@@ -159,8 +171,6 @@ export default function UserPageRepModifyModal({
 
   const getMaxValue = (): number => {
     const currentRep = repState?.rater_contribution ?? 0;
-    const heroAvailableRep =
-      proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
     const maxHeroRep = Math.abs(currentRep) + heroAvailableRep;
     if (typeof proxyAvailableCredit !== "number") {
       return maxHeroRep;
@@ -187,7 +197,12 @@ export default function UserPageRepModifyModal({
     const newState = getRepState();
     setRepState(newState);
     setAdjustedRatingStr(`${newState?.rater_contribution ?? 0}`);
-  }, [proxyGrantorRepRates, activeProfileProxy, connectedProfileRepRates]);
+  }, [
+    proxyGrantorRepRates,
+    activeProfileProxy,
+    connectedProfileRepRates,
+    heroAvailableRep,
+  ]);
 
   useEffect(
     () => setMinMaxValues(getMinMaxValues()),
@@ -373,9 +388,7 @@ export default function UserPageRepModifyModal({
               <UserPageRepModifyModalRaterStats
                 repState={repState}
                 minMaxValues={minMaxValues}
-                heroAvailableRep={
-                  proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0
-                }
+                heroAvailableRep={heroAvailableRep}
               />
             )}
             <form onSubmit={onSubmit} className="tw-mt-4">
