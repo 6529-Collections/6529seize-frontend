@@ -195,7 +195,6 @@ export default function UserPageIdentityHeaderCICRate({
       setAdjustedRatingStr(`${min}`);
       return;
     }
-    return;
   };
 
   const getIsValidValue = (): boolean => {

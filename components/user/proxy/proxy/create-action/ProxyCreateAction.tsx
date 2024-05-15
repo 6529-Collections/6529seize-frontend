@@ -9,8 +9,6 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { AuthContext } from "../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import { useRouter } from "next/router";
 
 export default function ProxyCreateAction({
   profileProxy,
@@ -21,40 +19,12 @@ export default function ProxyCreateAction({
   readonly onActionCreated: () => void;
   readonly onCancel?: () => void;
 }) {
-  const router = useRouter();
-  const user = router.query.user as string;
-  const proxy = router.query.proxy as string;
+
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);
   const [selectedActionType, setSelectedActionType] =
     useState<ProfileProxyActionType | null>(null);
 
-  const goToAction = ({ actionId }: { readonly actionId: string }) =>
-    router.push(`/${user}/proxy/${proxy}/actions/${actionId}`);
-
-  const onSelectActionType = (actionType: ProfileProxyActionType) => {
-    switch (actionType) {
-      case ProfileProxyActionType.AllocateRep:
-        setSelectedActionType(actionType);
-        break;
-      case ProfileProxyActionType.AllocateCic:
-      case ProfileProxyActionType.CreateWave:
-      case ProfileProxyActionType.ReadWave:
-      case ProfileProxyActionType.CreateDropToWave:
-      case ProfileProxyActionType.RateWaveDrop:
-        const action = profileProxy.actions.find(
-          (a) => a.action_type === actionType
-        );
-        if (action) {
-          goToAction({ actionId: action.id });
-          return;
-        }
-        setSelectedActionType(actionType);
-        break;
-      default:
-        assertUnreachable(actionType);
-    }
-  };
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -99,7 +69,7 @@ export default function ProxyCreateAction({
       <CommonChangeAnimation>
         {!selectedActionType ? (
           <ProxyCreateActionSelectType
-            setSelectedActionType={onSelectActionType}
+            setSelectedActionType={setSelectedActionType}
             currentActions={profileProxy.actions}
             onCancel={onCancel}
           />

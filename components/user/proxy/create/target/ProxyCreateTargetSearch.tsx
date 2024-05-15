@@ -154,27 +154,25 @@ export default function ProxyCreateTargetSearch({
                   }
                 >
                   {({ selected }) => (
-                    <>
-                      <div className="tw-flex tw-items-center">
-                        {profile.pfp ? (
-                          <img
-                            src={profile.pfp}
-                            alt="Profile picture"
-                            className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full"
-                          />
-                        ) : (
-                          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+                    <div className="tw-flex tw-items-center">
+                      {profile.pfp ? (
+                        <img
+                          src={profile.pfp}
+                          alt="Profile picture"
+                          className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full"
+                        />
+                      ) : (
+                        <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+                      )}
+                      <span
+                        className={classNames(
+                          "tw-ml-3 tw-truncate",
+                          selected && "tw-font-semibold"
                         )}
-                        <span
-                          className={classNames(
-                            "tw-ml-3 tw-truncate",
-                            selected && "tw-font-semibold"
-                          )}
-                        >
-                          {profile.handle}
-                        </span>
-                      </div>
-                    </>
+                      >
+                        {profile.handle}
+                      </span>
+                    </div>
                   )}
                 </Combobox.Option>
               ))}

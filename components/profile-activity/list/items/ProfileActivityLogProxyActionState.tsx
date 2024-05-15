@@ -19,7 +19,6 @@ export default function ProfileActivityLogProxyActionState({
   readonly log: ProfileActivityLogProxyActionStateChanged;
 }) {
   const router = useRouter();
-  // TODO: api response is empty for target_profile_handle
   const handleOrWallet = log.target_profile_handle ?? "";
 
   const isCurrentUser =
@@ -27,8 +26,6 @@ export default function ProfileActivityLogProxyActionState({
     handleOrWallet.toLowerCase();
 
   const tabTarget = UserPageTabType.PROXY;
-
-  // TODO: wrong handles order if changer is receiver
   return (
     <>
       <ProfileActivityLogItemAction action="changed" />

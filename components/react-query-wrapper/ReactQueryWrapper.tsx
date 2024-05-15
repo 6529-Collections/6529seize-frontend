@@ -16,7 +16,6 @@ import {
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
-import { ProfileMin } from "../../generated/models/ProfileMin";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
