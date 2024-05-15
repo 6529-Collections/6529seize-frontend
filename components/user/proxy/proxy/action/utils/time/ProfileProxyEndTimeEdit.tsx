@@ -116,6 +116,7 @@ export default function ProfileProxyEndTimeEdit({
           <div className="tw-mt-5 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
             <button
               onClick={setViewMode}
+              
               type="button"
               disabled={submitting}
               aria-label="Cancel"

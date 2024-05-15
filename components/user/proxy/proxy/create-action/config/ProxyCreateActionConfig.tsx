@@ -42,6 +42,7 @@ export default function ProxyCreateActionConfig({
     [ProfileProxyActionType.AllocateRep]: (
       <ProxyCreateActionConfigAllocateRep
         endTime={endTime}
+        submitting={submitting}
         onSubmit={submit}
         onCancel={onCancel}
       />

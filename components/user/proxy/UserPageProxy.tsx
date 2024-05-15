@@ -42,6 +42,11 @@ export default function UserPageProxy({
     initialData: initialProfile,
   });
 
+  useEffect(
+    () => setMode(ProxyMode.LIST),
+    [connectedProfile, user, activeProfileProxy, profile]
+  );
+
   const getIsSelf = () =>
     !!connectedProfile?.profile?.external_id &&
     !!profile.profile?.external_id &&

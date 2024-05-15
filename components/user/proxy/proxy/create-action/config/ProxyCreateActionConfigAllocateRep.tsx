@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { CreateProxyAllocateRepAction } from "../../../../../../entities/IProxy";
 import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
 import CommonInput from "../../../../../utils/input/CommonInput";
+import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function ProxyCreateActionConfigAllocateRep({
   endTime,
+  submitting,
   onSubmit,
   onCancel,
 }: {
   readonly endTime: number | null;
+  readonly submitting: boolean;
   readonly onSubmit: (action: CreateProxyAllocateRepAction) => void;
   readonly onCancel: () => void;
 }) {
@@ -42,6 +45,7 @@ export default function ProxyCreateActionConfigAllocateRep({
       <div className="tw-mt-5 md:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
         <button
           type="button"
+          disabled={submitting}
           onClick={onCancel}
           className="tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-iron-300 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
         >
@@ -49,15 +53,15 @@ export default function ProxyCreateActionConfigAllocateRep({
         </button>
         <button
           type="button"
-          disabled={disabled}
+          disabled={disabled || submitting}
           onClick={handleSubmit}
           className={`${
             disabled
               ? "tw-opacity-50"
               : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-          } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+          } tw-w-full sm:tw-w-20  tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
         >
-          Save
+          {submitting ? <CircleLoader /> : "Save"}
         </button>
       </div>
     </div>

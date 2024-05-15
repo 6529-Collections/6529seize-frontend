@@ -1,11 +1,12 @@
 import { Combobox } from "@headlessui/react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
 import { useDebounce } from "react-use";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
+import { AuthContext } from "../../../../auth/Auth";
 
 const MIN_SEARCH_LENGTH = 3;
 function classNames(...classes: any) {
@@ -14,12 +15,14 @@ function classNames(...classes: any) {
 
 export default function ProxyCreateTargetSearch({
   profileProxy,
+  loading,
   onTargetSelect,
 }: {
   readonly profileProxy: ProfileProxy | null;
+  readonly loading: boolean;
   readonly onTargetSelect: (target: CommunityMemberMinimal | null) => void;
 }) {
-  // TODO make sure that user can't select themselves (disable the option)
+  const { connectedProfile } = useContext(AuthContext);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState<string | null>(query);
   useDebounce(
@@ -48,6 +51,27 @@ export default function ProxyCreateTargetSearch({
       }),
     enabled: !!debouncedQuery && debouncedQuery.length >= MIN_SEARCH_LENGTH,
   });
+
+  const getFilteredProfiles = () => {
+    if (!profiles?.length) {
+      return [];
+    }
+    if (!connectedProfile) {
+      return [];
+    }
+    return profiles.filter(
+      (profile) => profile.handle !== connectedProfile.profile?.handle
+    );
+  };
+
+  const [filteredProfiles, setFilteredProfiles] = useState<
+    CommunityMemberMinimal[]
+  >(getFilteredProfiles());
+
+  useEffect(
+    () => setFilteredProfiles(getFilteredProfiles()),
+    [profiles, connectedProfile]
+  );
 
   return (
     <Combobox as="div" value={null} onChange={onTargetSelect}>
@@ -113,12 +137,13 @@ export default function ProxyCreateTargetSearch({
               clipRule="evenodd"
             ></path>
           </svg>
-          {profiles && profiles.length > 0 && (
+          {!!filteredProfiles.length && (
             <Combobox.Options className="tw-list-none tw-px-2 tw-absolute tw-z-10 tw-mt-1 tw-max-h-56 tw-w-full tw-overflow-auto tw-rounded-md tw-bg-iron-800 tw-py-1 tw-text-base tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-ring-opacity-5 focus:tw-outline-none sm:tw-text-sm">
-              {profiles.map((profile) => (
+              {filteredProfiles.map((profile) => (
                 <Combobox.Option
                   key={profile.handle}
                   value={profile}
+                  disabled={loading}
                   className={({ active }) =>
                     classNames(
                       "tw-relative tw-cursor-pointer tw-select-none tw-rounded-lg tw-py-2 tw-px-2 tw-transition tw-duration-300 tw-ease-out",

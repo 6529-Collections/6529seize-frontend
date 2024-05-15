@@ -11,6 +11,7 @@ import {
   AcceptActionRequestActionEnum,
 } from "../../../../../generated/models/AcceptActionRequest";
 import { commonApiPost } from "../../../../../services/api/common-api";
+import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 
 const ACTION_LABEL: Record<AcceptActionRequestActionEnum, string> = {
   [AcceptActionRequestActionEnum.Accept]: "Accept",
@@ -117,10 +118,11 @@ export default function ProxyActionAcceptanceButton({
           {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
+              disabled={submitting}
               type="button"
               className="tw-text-green tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >
-              Accept
+              {submitting ? <CircleLoader /> : "Accept"}
             </button>
           )}
         </div>
@@ -129,27 +131,30 @@ export default function ProxyActionAcceptanceButton({
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}
               type="button"
+              disabled={submitting}
               className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >
-              Reject
+              {submitting ? <CircleLoader /> : "Reject"}
             </button>
           )}
           {possibleActions.includes(AcceptActionRequestActionEnum.Revoke) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Revoke)}
+              disabled={submitting}
               type="button"
               className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >
-              Revoke
+              {submitting ? <CircleLoader /> : "Revoke"}
             </button>
           )}
           {possibleActions.includes(AcceptActionRequestActionEnum.Restore) && (
             <button
               onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
+              disabled={submitting}
               type="button"
               className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >
-              Restore
+              {submitting ? <CircleLoader /> : "Restore"}
             </button>
           )}
         </div>
