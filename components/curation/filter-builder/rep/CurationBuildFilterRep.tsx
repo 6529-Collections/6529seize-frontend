@@ -5,9 +5,9 @@ import {
   GeneralFilter,
 } from "../../../../helpers/filters/Filters.types";
 import CommonInput from "../../../utils/input/CommonInput";
-import CurationBuildFiltersRepSearch from "../common/rep-search/CurationBuildFiltersRepSearch";
 import CurationBuildFiltersUserDirection from "../common/user-direction/CurationBuildFiltersUserDirection";
 import CurationBuildFiltersUserSearch from "../common/user-search/CurationBuildFiltersUserSearch";
+import CommonRepCategorySearch from "../../../utils/rep/CommonRepCategorySearch";
 
 export default function CurationBuildFilterRep({
   filters,
@@ -79,7 +79,7 @@ export default function CurationBuildFilterRep({
         placeholder="User"
         setValue={setUser}
       />
-      <CurationBuildFiltersRepSearch
+      <CommonRepCategorySearch
         category={filters.rep.category}
         setCategory={setCategory}
       />

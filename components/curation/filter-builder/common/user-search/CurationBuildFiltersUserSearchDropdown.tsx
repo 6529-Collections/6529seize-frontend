@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
-import CurationBuildFiltersUserSearchDropdownItem from "./CurationBuildFiltersUserSearchDropdownItem";
+import CommonProfileSearchItem from "../../../../utils/input/profile-search/CommonProfileSearchItem";
 
 export default function CurationBuildFiltersUserSearchDropdown({
   open,
@@ -33,11 +33,13 @@ export default function CurationBuildFiltersUserSearchDropdown({
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {profiles.length ? (
                     profiles.map((profile) => (
-                      <CurationBuildFiltersUserSearchDropdownItem
+                      <CommonProfileSearchItem
                         key={profile.wallet}
                         profile={profile}
                         selected={selected}
-                        onSelect={onSelect}
+                        onProfileSelect={(profile) =>
+                          onSelect(profile?.handle ?? profile?.wallet ?? null)
+                        }
                       />
                     ))
                   ) : (
