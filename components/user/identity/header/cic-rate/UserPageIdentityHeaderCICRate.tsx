@@ -193,7 +193,6 @@ export default function UserPageIdentityHeaderCICRate({
 
     if (valueAsNumber < min) {
       setAdjustedRatingStr(`${min}`);
-      return;
     }
   };
 
