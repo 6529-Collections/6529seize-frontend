@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CommonInput from "../../../../../../utils/input/CommonInput";
 import { ProfileProxy } from "../../../../../../../generated/models/ProfileProxy";
 import { ProfileProxyAction } from "../../../../../../../generated/models/ProfileProxyAction";
@@ -7,6 +7,7 @@ import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "../../../../../../../services/api/common-api";
 import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
+import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function ProfileProxyCreditEdit({
   profileProxy,
@@ -22,6 +23,23 @@ export default function ProfileProxyCreditEdit({
   const [creditAmount, setCreditAmount] = useState<number>(
     profileProxyAction.credit_amount ?? 0
   );
+
+  const getIsChangedAndValid = () => {
+    if (profileProxyAction.credit_amount === creditAmount) {
+      return false;
+    }
+    if (creditAmount <= 0) {
+      return false;
+    }
+    return true;
+  };
+
+  const [isChangedAndValid, setIsChangedAndValid] = useState(
+    getIsChangedAndValid()
+  );
+
+  useEffect(() => setIsChangedAndValid(getIsChangedAndValid()), [creditAmount]);
+
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
     mutationFn: async (body: UpdateActionRequest) => {
@@ -82,6 +100,7 @@ export default function ProfileProxyCreditEdit({
           <div className="tw-mt-4 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end sm:tw-justify-start tw-gap-x-3">
             <button
               onClick={setViewMode}
+              disabled={submitting}
               type="button"
               aria-label="Cancel"
               title="Cancel"
@@ -91,10 +110,15 @@ export default function ProfileProxyCreditEdit({
             </button>
             <button
               onClick={onSubmit}
+              disabled={submitting}
               type="button"
-              className="tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+              className={`${
+                !isChangedAndValid
+                  ? "tw-opacity-50"
+                  : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
+              } tw-w-full sm:tw-w-20 tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
             >
-              Update
+              {submitting ? <CircleLoader /> : "Update"}
             </button>
           </div>
         </div>
