@@ -180,6 +180,60 @@ paths:
                   $ref: "#/components/schemas/ProfileProxy"
         "404":
           description: Profile not found
+  /profiles/{handleOrWallet}/rep/rating:
+    post:
+      tags:
+        - ProfileREP
+      summary: Change profile REP rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
+      operationId: rateProfileRep
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProfileRepRating"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeProfileRepRatingResponse"
+        "400":
+          description: "Invalid request"
+  /profiles/{handleOrWallet}/cic/rating:
+    post:
+      tags:
+        - ProfileCIC
+      summary: Change profile CIC rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
+      operationId: rateProfileCic
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProfileCicRating"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeProfileCicRatingResponse"
+        "400":
+          description: "Invalid request"
   /drops:
     get:
       tags:
@@ -693,15 +747,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                credit_amount:
-                  type: number
-                  format: int64
-                end_time:
-                  type: number
-                  format: int64
-
+              $ref: "#/components/schemas/UpdateProxyActionRequest"
       responses:
         "201":
           description: successful operation
@@ -1092,6 +1138,17 @@ components:
         rating:
           type: number
           format: int64
+
+    UpdateProxyActionRequest:
+        type: object
+        properties:
+          credit_amount:
+            type: number
+            format: int64
+          end_time:
+            type: number
+            format: int64
+            nullable: true
 
     DropRatingCategory:
       type: object
@@ -1977,6 +2034,57 @@ components:
       properties:
         token:
           type: string
+
+    ChangeProfileRepRating:
+        type: object
+        required:
+            - amount
+            - category
+        properties:
+          amount:
+            type: number
+            format: int64
+          category:
+            type: string
+            maxLength: 100
+            minLength: 1
+            pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
+
+    ChangeProfileRepRatingResponse:
+      type: object
+      required:
+        - total_rep_rating_for_category
+        - rep_rating_for_category_by_user
+      properties:
+        total_rep_rating_for_category:
+          type: number
+          format: int64
+        rep_rating_for_category_by_user:
+          type: number
+          format: int64
+
+    ChangeProfileCicRating:
+      type: object
+      required:
+        - amount
+        - category
+      properties:
+        amount:
+          type: number
+          format: int64
+
+    ChangeProfileCicRatingResponse:
+      type: object
+      required:
+        - total_cic_rating
+        - cic_rating_by_user
+      properties:
+        total_cic_rating:
+          type: number
+          format: int64
+        cic_rating_by_user:
+          type: number
+          format: int64
 
 security:
   - bearerAuth: []

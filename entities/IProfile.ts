@@ -312,7 +312,7 @@ export interface ProfileActivityLogProxyActionChanged
   readonly contents: {
     readonly action_id: string;
     readonly end_time?: number | null;
-    readonly credit_amount?: number | null;
+    readonly credit_amount?: number;
     readonly proxy_id: string;
     readonly type: ProfileProxyActionType;
   };
