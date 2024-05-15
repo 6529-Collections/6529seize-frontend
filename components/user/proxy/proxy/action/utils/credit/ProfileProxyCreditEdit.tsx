@@ -6,8 +6,9 @@ import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "../../../../../../../services/api/common-api";
-import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
+
 import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
+import { UpdateProxyActionRequest } from "../../../../../../../generated/models/UpdateProxyActionRequest";
 
 export default function ProfileProxyCreditEdit({
   profileProxy,
@@ -42,8 +43,8 @@ export default function ProfileProxyCreditEdit({
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
-    mutationFn: async (body: UpdateActionRequest) => {
-      return await commonApiPut<UpdateActionRequest, ProfileProxyAction>({
+    mutationFn: async (body: UpdateProxyActionRequest) => {
+      return await commonApiPut<UpdateProxyActionRequest, ProfileProxyAction>({
         endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}`,
         body,
       });

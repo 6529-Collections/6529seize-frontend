@@ -6,10 +6,11 @@ import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "../../../../../../../services/api/common-api";
-import { UpdateActionRequest } from "../../../../../../../generated/models/UpdateActionRequest";
+
 import ProxyCreateActionConfigEndTimeSwitch from "../../../create-action/config/ProxyCreateActionConfigEndTimeSwitch";
 import { Time } from "../../../../../../../helpers/time";
 import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
+import { UpdateProxyActionRequest } from "../../../../../../../generated/models/UpdateProxyActionRequest";
 
 export default function ProfileProxyEndTimeEdit({
   profileProxy,
@@ -49,8 +50,8 @@ export default function ProfileProxyEndTimeEdit({
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
-    mutationFn: async (body: UpdateActionRequest) => {
-      return await commonApiPut<UpdateActionRequest, ProfileProxyAction>({
+    mutationFn: async (body: UpdateProxyActionRequest) => {
+      return await commonApiPut<UpdateProxyActionRequest, ProfileProxyAction>({
         endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}`,
         body,
       });
@@ -62,7 +63,7 @@ export default function ProfileProxyEndTimeEdit({
         createdByHandle: profileProxy.created_by.handle,
       });
       setToast({
-        message: "Action credit updated successfully!",
+        message: "Action end time updated successfully!",
         type: "success",
       });
       setViewMode();
@@ -79,7 +80,7 @@ export default function ProfileProxyEndTimeEdit({
   });
 
   const onSubmit = async () => {
-    if (!endTime) {
+    if (!endTime && !isEndTimeDisabled) {
       return;
     }
     setSubmitting(true);
@@ -90,7 +91,7 @@ export default function ProfileProxyEndTimeEdit({
     }
 
     await profileProxyActionCreditMutation.mutateAsync({
-      end_time: endTime,
+      end_time: isEndTimeDisabled ? null : endTime,
     });
   };
 
@@ -116,7 +117,6 @@ export default function ProfileProxyEndTimeEdit({
           <div className="tw-mt-5 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
             <button
               onClick={setViewMode}
-              
               type="button"
               disabled={submitting}
               aria-label="Cancel"

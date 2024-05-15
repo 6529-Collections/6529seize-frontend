@@ -1,5 +1,9 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/ChangeProfileCicRating';
+export * from '../models/ChangeProfileCicRatingResponse';
+export * from '../models/ChangeProfileRepRating';
+export * from '../models/ChangeProfileRepRatingResponse';
 export * from '../models/CreateDropMediaUrl201Response';
 export * from '../models/CreateDropMediaUrlRequest';
 export * from '../models/CreateDropPart';
@@ -45,7 +49,7 @@ export * from '../models/ProfileProxy';
 export * from '../models/ProfileProxyAction';
 export * from '../models/ProfileProxyActionType';
 export * from '../models/QuotedDrop';
-export * from '../models/UpdateActionRequest';
+export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
 export * from '../models/WaveCreditScope';
@@ -61,6 +65,10 @@ export * from '../models/WaveVotingConfig';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { ChangeProfileCicRating } from '../models/ChangeProfileCicRating';
+import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRatingResponse';
+import { ChangeProfileRepRating } from '../models/ChangeProfileRepRating';
+import { ChangeProfileRepRatingResponse } from '../models/ChangeProfileRepRatingResponse';
 import { CreateDropMediaUrl201Response } from '../models/CreateDropMediaUrl201Response';
 import { CreateDropMediaUrlRequest } from '../models/CreateDropMediaUrlRequest';
 import { CreateDropPart } from '../models/CreateDropPart';
@@ -106,7 +114,7 @@ import { ProfileProxy } from '../models/ProfileProxy';
 import { ProfileProxyAction             } from '../models/ProfileProxyAction';
 import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { QuotedDrop } from '../models/QuotedDrop';
-import { UpdateActionRequest } from '../models/UpdateActionRequest';
+import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
 import { WaveConfig      } from '../models/WaveConfig';
 import { WaveCreditScope } from '../models/WaveCreditScope';
@@ -146,6 +154,10 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "ChangeProfileCicRating": ChangeProfileCicRating,
+    "ChangeProfileCicRatingResponse": ChangeProfileCicRatingResponse,
+    "ChangeProfileRepRating": ChangeProfileRepRating,
+    "ChangeProfileRepRatingResponse": ChangeProfileRepRatingResponse,
     "CreateDropMediaUrl201Response": CreateDropMediaUrl201Response,
     "CreateDropMediaUrlRequest": CreateDropMediaUrlRequest,
     "CreateDropPart": CreateDropPart,
@@ -190,7 +202,7 @@ let typeMap: {[index: string]: any} = {
     "ProfileProxy": ProfileProxy,
     "ProfileProxyAction": ProfileProxyAction,
     "QuotedDrop": QuotedDrop,
-    "UpdateActionRequest": UpdateActionRequest,
+    "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
     "WaveOutcome": WaveOutcome,
