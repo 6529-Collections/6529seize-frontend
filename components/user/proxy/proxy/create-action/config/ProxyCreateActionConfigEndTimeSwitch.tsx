@@ -68,7 +68,7 @@ export default function ProxyCreateActionConfigEndTimeSwitch({
           </span>
         </span>
       </Switch>
-      <span className="tw-ml-3 tw-text-iron-300 tw-text-sm tw-font-medium">
+      <span className="tw-ml-3 tw-whitespace-nowrap tw-text-iron-300 tw-text-sm tw-font-medium">
         No end time
       </span>
     </div>

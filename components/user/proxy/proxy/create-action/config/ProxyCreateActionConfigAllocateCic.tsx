@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { CreateProxyAllocateCicAction } from "../../../../../../entities/IProxy";
 import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
 import CommonInput from "../../../../../utils/input/CommonInput";
-import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function ProxyCreateActionConfigAllocateCic({
   endTime,
@@ -60,9 +62,12 @@ export default function ProxyCreateActionConfigAllocateCic({
             disabled
               ? "tw-opacity-50"
               : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-          } tw-w-full sm:tw-w-20 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+          } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
         >
-          {submitting ? <CircleLoader /> : "Save"}
+          <div className="tw-inline-flex tw-items-center tw-justify-center tw-space-x-2">
+            {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
+            <span>Save</span>
+          </div>
         </button>
       </div>
     </div>

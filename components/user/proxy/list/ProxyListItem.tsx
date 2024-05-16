@@ -90,7 +90,7 @@ export default function ProxyListItem({
           </div>
         </Link>
         <svg
-          className="tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
           width="24"
           height="24"
           viewBox="0 0 24 24"

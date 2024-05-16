@@ -7,7 +7,7 @@ import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "../../../../../../../services/api/common-api";
 
-import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader, { CircleLoaderSize } from "../../../../../../distribution-plan-tool/common/CircleLoader";
 import { UpdateProxyActionRequest } from "../../../../../../../generated/models/UpdateProxyActionRequest";
 
 export default function ProfileProxyCreditEdit({
@@ -85,7 +85,7 @@ export default function ProfileProxyCreditEdit({
   };
 
   return (
-    <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600">
+    <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600/60">
       <div className="tw-h-full lg:tw-flex tw-items-center tw-px-3 tw-gap-x-3">
         <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
           <div className="tw-w-full sm:tw-w-40">
@@ -103,8 +103,6 @@ export default function ProfileProxyCreditEdit({
               onClick={setViewMode}
               disabled={submitting}
               type="button"
-              aria-label="Cancel"
-              title="Cancel"
               className="tw-w-full sm:tw-w-auto tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
             >
               Cancel
@@ -117,9 +115,12 @@ export default function ProfileProxyCreditEdit({
                 !isChangedAndValid
                   ? "tw-opacity-50"
                   : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-w-full sm:tw-w-20 tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+              } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
             >
-              {submitting ? <CircleLoader /> : "Update"}
+              <div className="tw-flex tw-items-center tw-space-x-2">
+                {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
+                <span>Update</span>
+              </div>
             </button>
           </div>
         </div>
