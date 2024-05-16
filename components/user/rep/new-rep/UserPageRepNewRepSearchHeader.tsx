@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Link from "next/link";
+import CommonInfoBox from "../../../utils/CommonInfoBox";
 
 export default function UserPageRepNewRepSearchHeader({
   repRates,
@@ -97,21 +98,29 @@ export default function UserPageRepNewRepSearchHeader({
           </span>
         </span>
       )}
-      <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-        <span>Your available Rep:</span>
-        <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-          {repRates ? formatNumberWithCommas(activeRepRates.available) : ""}
-        </span>
-      </span>
-      {typeof activeRepRates.proxyCreditLeft === "number" && (
-        <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-          <span>Your available credit:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-            {repRates
-              ? formatNumberWithCommas(activeRepRates.proxyCreditLeft)
-              : ""}
+      {!!activeProfileProxy && !activeRepRates.available ? (
+        <div className="tw-py-4">
+          <CommonInfoBox message="You don't have any rep left to rate" />
+        </div>
+      ) : (
+        <>
+          <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
+            <span>Your available Rep:</span>
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+              {formatNumberWithCommas(activeRepRates.available)}
+            </span>
           </span>
-        </span>
+          {typeof activeRepRates.proxyCreditLeft === "number" && (
+            <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
+              <span>Your available credit:</span>
+              <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+                {repRates
+                  ? formatNumberWithCommas(activeRepRates.proxyCreditLeft)
+                  : ""}
+              </span>
+            </span>
+          )}
+        </>
       )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
         <span>Your Rep assigned to {profile.profile?.handle}:</span>
