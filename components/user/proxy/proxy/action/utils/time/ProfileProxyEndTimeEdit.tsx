@@ -9,7 +9,9 @@ import { commonApiPut } from "../../../../../../../services/api/common-api";
 
 import ProxyCreateActionConfigEndTimeSwitch from "../../../create-action/config/ProxyCreateActionConfigEndTimeSwitch";
 import { Time } from "../../../../../../../helpers/time";
-import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../../../../distribution-plan-tool/common/CircleLoader";
 import { UpdateProxyActionRequest } from "../../../../../../../generated/models/UpdateProxyActionRequest";
 
 export default function ProfileProxyEndTimeEdit({
@@ -97,30 +99,30 @@ export default function ProfileProxyEndTimeEdit({
 
   return (
     <div>
-      <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600">
-        <div className="tw-px-3 tw-w-full tw-h-full tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-x-3">
-          <div className="tw-mb-3">
-            <ProxyCreateActionConfigEndTimeSwitch
-              isActive={isEndTimeDisabled}
-              setIsActive={setIsEndTimeDisabled}
-            />
+      <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600/60">
+        <div className="tw-px-3 tw-w-full tw-h-full tw-flex tw-flex-col sm:tw-flex-row md:tw-items-center sm:tw-justify-between tw-gap-x-3">
+          <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-y-3 tw-gap-x-4 tw-w-full tw-h-full tw-items-center">
+            <div className="tw-mb-3 tw-w-full md:tw-w-auto">
+              <ProxyCreateActionConfigEndTimeSwitch
+                isActive={isEndTimeDisabled}
+                setIsActive={setIsEndTimeDisabled}
+              />
+            </div>
+            {!isEndTimeDisabled && (
+              <CommonTimeSelect
+                currentTime={profileProxyAction.end_time}
+                onMillis={setEndTime}
+                disabled={isEndTimeDisabled}
+                inline={true}
+                size="sm"
+              />
+            )}
           </div>
-          {!isEndTimeDisabled && (
-            <CommonTimeSelect
-              currentTime={profileProxyAction.end_time}
-              onMillis={setEndTime}
-              disabled={isEndTimeDisabled}
-              inline={true}
-              size="sm"
-            />
-          )}
-          <div className="tw-mt-5 sm:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
+          <div className="tw-mt-5 sm:tw-mt-8 md:tw-mt-0 tw-flex tw-items-center tw-justify-end md:tw-justify-start tw-gap-x-3">
             <button
               onClick={setViewMode}
               type="button"
               disabled={submitting}
-              aria-label="Cancel"
-              title="Cancel"
               className="tw-w-full sm:tw-w-auto tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
             >
               Cancel
@@ -133,9 +135,12 @@ export default function ProfileProxyEndTimeEdit({
                 !isChangedAndValid
                   ? "tw-opacity-50"
                   : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-w-full sm:tw-w-20 tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+              } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
             >
-              {submitting ? <CircleLoader /> : "Update"}
+              <div className="tw-flex tw-items-center tw-space-x-2">
+                {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
+                <span>Update</span>
+              </div>
             </button>
           </div>
         </div>

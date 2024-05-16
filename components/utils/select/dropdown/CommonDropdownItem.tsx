@@ -40,12 +40,12 @@ export default function CommonDropdownItem<T, U = unknown>(
         type="button"
         className={`${
           isMobile ? "tw-py-3 hover:tw-bg-iron-800" : "hover:tw-bg-iron-700 tw-py-2"
-        } tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+        } tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left  tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}
       >
-        <div className="tw-w-44 tw-truncate">
+        <div className="tw-w-44 tw-truncate tw-flex tw-items-center">
           <span className="tw-text-sm tw-font-medium tw-text-white">
             {label}
           </span>
