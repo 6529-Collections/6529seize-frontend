@@ -10,12 +10,11 @@
  * Do not edit the class manually.
  */
 
-import { CreateNewProfileProxyActionType } from '../models/CreateNewProfileProxyActionType';
+import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
 export class CreateNewProfileProxyCreateWaveAction {
-    'action_type': CreateNewProfileProxyActionType;
-    'start_time': number;
+    'action_type': ProfileProxyActionType;
     'end_time': number | null;
 
     static readonly discriminator: string | undefined = undefined;
@@ -24,14 +23,8 @@ export class CreateNewProfileProxyCreateWaveAction {
         {
             "name": "action_type",
             "baseName": "action_type",
-            "type": "CreateNewProfileProxyActionType",
+            "type": "ProfileProxyActionType",
             "format": ""
-        },
-        {
-            "name": "start_time",
-            "baseName": "start_time",
-            "type": "number",
-            "format": "int64"
         },
         {
             "name": "end_time",

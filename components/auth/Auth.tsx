@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -16,12 +16,18 @@ import {
 } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-
+import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { NonceResponse } from "../../generated/models/NonceResponse";
+import { LoginRequest } from "../../generated/models/LoginRequest";
+import { LoginResponse } from "../../generated/models/LoginResponse";
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
   readonly connectionStatus: ProfileConnectedStatus;
+  readonly receivedProfileProxies: ProfileProxy[];
+  readonly activeProfileProxy: ProfileProxy | null;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: ({
     message,
@@ -30,18 +36,19 @@ type AuthContextType = {
     message: string | React.ReactNode;
     type: TypeOptions;
   }) => void;
+  readonly setActiveProfileProxy: (
+    profileProxy: ProfileProxy | null
+  ) => Promise<void>;
 };
-
-interface NonceResponse {
-  readonly nonce: string;
-  readonly serverSignature: string;
-}
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  receivedProfileProxies: [],
+  activeProfileProxy: null,
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
+  setActiveProfileProxy: async () => {},
 });
 
 export default function Auth({
@@ -61,14 +68,66 @@ export default function Auth({
     enabled: !!address,
   });
 
+  const { data: profileProxies } = useQuery<ProfileProxy[]>({
+    queryKey: [
+      QueryKey.PROFILE_PROFILE_PROXIES,
+      { handleOrWallet: connectedProfile?.profile?.handle },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ProfileProxy[]>({
+        endpoint: `profiles/${connectedProfile?.profile?.handle}/proxies/`,
+      }),
+    enabled: !!connectedProfile?.profile?.handle,
+  });
+
+  const [receivedProfileProxies, setReceivedProfileProxies] = useState<
+    ProfileProxy[]
+  >(
+    groupProfileProxies({
+      profileProxies: profileProxies ?? [],
+      onlyActive: true,
+      profileId: connectedProfile?.profile?.external_id ?? null,
+    }).received
+  );
+
+  const [activeProfileProxy, setActiveProfileProxy] =
+    useState<ProfileProxy | null>(null);
+
+  useEffect(() => {
+    const receivedProxies = groupProfileProxies({
+      profileProxies: profileProxies ?? [],
+      onlyActive: true,
+      profileId: connectedProfile?.profile?.external_id ?? null,
+    }).received;
+    setReceivedProfileProxies(receivedProxies);
+    const role = getRole({ jwt: getAuthJwt() });
+    if (role) {
+      const activeProxy = receivedProxies?.find(
+        (proxy) => proxy.created_by.id === role
+      );
+
+      setActiveProfileProxy(activeProxy ?? null);
+    }
+  }, [profileProxies, connectedProfile]);
+
   useEffect(() => {
     if (!address) {
+      removeAuthJwt();
+      setActiveProfileProxy(null);
       return;
     } else {
-      const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
-      if (!isAuth) removeAuthJwt();
+      const isAuth = validateJwt({
+        jwt: getAuthJwt(),
+        wallet: address,
+        role: activeProfileProxy?.created_by.id ?? null,
+      });
+      if (!isAuth) {
+        removeAuthJwt();
+        setActiveProfileProxy(null);
+        requestAuth();
+      }
     }
-  }, [address]);
+  }, [address, activeProfileProxy]);
 
   const getNonce = async ({
     signerAddress,
@@ -79,7 +138,7 @@ export default function Auth({
       return await commonApiFetch<NonceResponse>({
         endpoint: "auth/nonce",
         params: {
-          signerAddress,
+          signer_address: signerAddress,
         },
       });
     } catch {
@@ -156,24 +215,26 @@ export default function Auth({
 
   const requestSignIn = async ({
     signerAddress,
+    role,
   }: {
-    signerAddress: string;
-  }) => {
+    readonly signerAddress: string;
+    readonly role: string | null;
+  }): Promise<{ success: boolean }> => {
     const nonceResponse = await getNonce({ signerAddress });
     if (!nonceResponse) {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
-    const { nonce, serverSignature } = nonceResponse;
-    if (!nonce || !serverSignature) {
+    const { nonce, server_signature } = nonceResponse;
+    if (!nonce || !server_signature) {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
     const clientSignature = await getSignatureWithRetry({ message: nonce });
     if (clientSignature.userRejected) {
@@ -181,7 +242,7 @@ export default function Auth({
         message: "Authentication rejected",
         type: "error",
       });
-      return;
+      return { success: false };
     }
 
     if (!clientSignature.signature) {
@@ -189,38 +250,48 @@ export default function Auth({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
     try {
-      const tokenResponse = await commonApiPost<
-        {
-          serverSignature: string;
-          clientSignature: string;
-        },
-        { token: string }
-      >({
+      const tokenResponse = await commonApiPost<LoginRequest, LoginResponse>({
         endpoint: "auth/login",
         body: {
-          serverSignature,
-          clientSignature: clientSignature.signature,
+          server_signature,
+          client_signature: clientSignature.signature,
+          role: role ?? undefined,
         },
       });
       setAuthJwt(tokenResponse.token);
+      return { success: true };
     } catch {
       setToast({
         message: "Error requesting authentication, please try again",
         type: "error",
       });
-      return;
+      return { success: false };
     }
+  };
+
+  const getRole = ({ jwt }: { jwt: string | null }): string | null => {
+    if (!jwt) return null;
+    const decodedJwt = jwtDecode<{
+      id: string;
+      sub: string;
+      iat: number;
+      exp: number;
+      role: string;
+    }>(jwt);
+    return decodedJwt.role;
   };
 
   const validateJwt = ({
     jwt,
     wallet,
+    role,
   }: {
     jwt: string | null;
     wallet: string;
+    role: string | null;
   }): boolean => {
     if (!jwt) return false;
     const decodedJwt = jwtDecode<{
@@ -228,7 +299,9 @@ export default function Auth({
       sub: string;
       iat: number;
       exp: number;
+      role: string;
     }>(jwt);
+    if (role && decodedJwt.role !== role) return false;
     return (
       decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
       decodedJwt.exp > Date.now() / 1000
@@ -243,26 +316,51 @@ export default function Auth({
       });
       return { success: false };
     }
-    const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
+    const isAuth = validateJwt({
+      jwt: getAuthJwt(),
+      wallet: address,
+      role: activeProfileProxy?.created_by.id ?? null,
+    });
     if (!isAuth) {
       removeAuthJwt();
-      await requestSignIn({ signerAddress: address });
+      await requestSignIn({
+        signerAddress: address,
+        role: activeProfileProxy?.created_by.id ?? null,
+      });
     }
     return { success: !!getAuthJwt() };
   };
 
-  const value = useMemo(
-    () => ({
-      requestAuth,
-      setToast,
-      connectedProfile: connectedProfile ?? null,
-      connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
-    }),
-    [requestAuth, setToast, connectedProfile]
-  );
+  const onActiveProfileProxy = async (
+    profileProxy: ProfileProxy | null
+  ): Promise<void> => {
+    removeAuthJwt();
+    if (!address) {
+      setActiveProfileProxy(null);
+      return;
+    }
+
+    const { success } = await requestSignIn({
+      signerAddress: address,
+      role: profileProxy?.created_by.id ?? null,
+    });
+    if (success) {
+      setActiveProfileProxy(profileProxy);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        requestAuth,
+        setToast,
+        connectedProfile: connectedProfile ?? null,
+        receivedProfileProxies,
+        activeProfileProxy,
+        connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
+        setActiveProfileProxy: onActiveProfileProxy,
+      }}
+    >
       {children}
       <ToastContainer />
     </AuthContext.Provider>

@@ -7,12 +7,10 @@ import UserPageRepsItem from "./UserPageRepsItem";
 export default function UserPageRepRepsTop({
   reps,
   profile,
-  giverAvailableRep,
   canEditRep,
 }: {
   readonly reps: RatingStats[];
   readonly profile: IProfileAndConsolidations;
-  readonly giverAvailableRep: number;
   readonly canEditRep: boolean;
 }) {
   return (
@@ -22,7 +20,6 @@ export default function UserPageRepRepsTop({
           rep={rep}
           key={rep.category}
           profile={profile}
-          giverAvailableRep={giverAvailableRep}
           canEditRep={canEditRep}
         />
       ))}

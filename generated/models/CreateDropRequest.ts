@@ -17,6 +17,7 @@ import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { HttpFile } from '../http/http';
 
 export class CreateDropRequest {
+    'wave_id': string;
     'title'?: string | null;
     'parts': Array<CreateDropPart>;
     'referenced_nfts': Array<DropReferencedNFT>;
@@ -26,6 +27,12 @@ export class CreateDropRequest {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "wave_id",
+            "baseName": "wave_id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "title",
             "baseName": "title",

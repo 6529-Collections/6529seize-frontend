@@ -362,15 +362,8 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/about/subscriptions">
-                      <h3>Subscriptions</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/about/upcoming-drops">
-                      <h3>Upcoming Drops</h3>
+                    <Link href="/tools/subscriptions-report">
+                      <h3>Subscriptions Report</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -457,6 +450,13 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <Link href={`/about/${AboutSection.MEMES}`}>
                       <h3>The Memes</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href={`/about/${AboutSection.SUBSCRIPTIONS}`}>
+                      <h3>Subscriptions</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -790,14 +790,8 @@ export default function Header(props: Readonly<Props>) {
                             >
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Subscriptions",
-                                  path: "/about/subscriptions",
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Upcoming Drops",
-                                  path: "/about/upcoming-drops",
+                                  name: "Subscriptions Report",
+                                  path: "/tools/subscriptions-report",
                                 }}
                               />
                               <NavDropdown.Divider />
@@ -855,6 +849,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "The Memes",
                                   path: `/about/${AboutSection.MEMES}`,
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Subscriptions",
+                                  path: "/about/subscriptions",
                                 }}
                               />
                               <HeaderDesktopLink

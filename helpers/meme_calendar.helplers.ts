@@ -205,7 +205,7 @@ export function numberOfCardsForSeasonEnd() {
 
   if (!upcomingBlock) {
     return {
-      szn: "No upcoming season",
+      szn: 0,
       count: 0,
     };
   }
@@ -213,7 +213,7 @@ export function numberOfCardsForSeasonEnd() {
   const mintsInBlock = getRemainingMintsInBlock(upcomingBlock, now);
 
   return {
-    szn: upcomingBlock.szn,
+    szn: upcomingBlock.szn ?? 0,
     count: mintsInBlock,
   };
 }

@@ -10,13 +10,16 @@
  * Do not edit the class manually.
  */
 
+import { ProfileMin } from '../models/ProfileMin';
+import { ProfileProxyAction } from '../models/ProfileProxyAction';
 import { HttpFile } from '../http/http';
 
 export class ProfileProxy {
     'id': string;
-    'target_id': string;
+    'granted_to': ProfileMin;
     'created_at': number;
-    'created_by': string;
+    'created_by': ProfileMin;
+    'actions': Array<ProfileProxyAction>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,9 +31,9 @@ export class ProfileProxy {
             "format": ""
         },
         {
-            "name": "target_id",
-            "baseName": "target_id",
-            "type": "string",
+            "name": "granted_to",
+            "baseName": "granted_to",
+            "type": "ProfileMin",
             "format": ""
         },
         {
@@ -42,7 +45,13 @@ export class ProfileProxy {
         {
             "name": "created_by",
             "baseName": "created_by",
-            "type": "string",
+            "type": "ProfileMin",
+            "format": ""
+        },
+        {
+            "name": "actions",
+            "baseName": "actions",
+            "type": "Array<ProfileProxyAction>",
             "format": ""
         }    ];
 

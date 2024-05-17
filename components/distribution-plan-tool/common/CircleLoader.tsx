@@ -23,7 +23,7 @@ export default function CircleLoader({
     <svg
       aria-hidden="true"
       role="status"
-      className={`${classes[size]} tw-inline tw-text-primary-400 tw-animate-spin`}
+      className={`${classes[size]} tw-flex-shrink-0 tw-inline tw-text-primary-400 tw-animate-spin`}
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

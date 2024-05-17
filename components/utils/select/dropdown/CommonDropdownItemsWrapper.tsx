@@ -10,6 +10,7 @@ export default function CommonDropdownItemsWrapper({
   filterLabel,
   buttonRef,
   buttonPosition,
+  dynamicPosition = true,
   setOpen,
   onIsMobile,
   children,
@@ -18,6 +19,7 @@ export default function CommonDropdownItemsWrapper({
   readonly filterLabel: string;
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement>;
   readonly buttonPosition?: { readonly bottom: number; readonly right: number };
+  readonly dynamicPosition?: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly onIsMobile: (isMobile: boolean) => void;
   readonly children:
@@ -51,6 +53,7 @@ export default function CommonDropdownItemsWrapper({
         <CommonDropdownItemsDefaultWrapper
           isOpen={isOpen}
           setOpen={setOpen}
+          dynamicPosition={dynamicPosition}
           buttonRef={buttonRef}
           buttonPosition={buttonPosition}
         >

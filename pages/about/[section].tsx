@@ -26,7 +26,6 @@ import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
 import AboutHTML from "../../components/about/AboutHTML";
 import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
-import AboutSubscriptionsUpcoming from "../../components/about/AboutSubscriptionsUpcoming";
 import AboutCopyright from "../../components/about/AboutCopyright";
 import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
 
@@ -51,7 +50,6 @@ export enum AboutSection {
   PRIMARY_ADDRESS = "primary-address",
   ENS = "ens",
   SUBSCRIPTIONS = "subscriptions",
-  SUBSCRIPTIONS_UPCOMING = "upcoming-drops",
   NAKAMOTO_THRESHOLD = "nakamoto-threshold",
   COPYRIGHT = "copyright",
 }
@@ -151,8 +149,6 @@ export default function About(props: any) {
         return <AboutHTML title="ENS" html={pageProps.ensText} />;
       case AboutSection.SUBSCRIPTIONS:
         return <AboutSubscriptions />;
-      case AboutSection.SUBSCRIPTIONS_UPCOMING:
-        return <AboutSubscriptionsUpcoming />;
       case AboutSection.NAKAMOTO_THRESHOLD:
         return <AboutNakamotoThreshold />;
       case AboutSection.COPYRIGHT:
@@ -307,12 +303,6 @@ function AboutMenu(
         currentSection={currentSection}
         setSection={setSection}
         title="Subscriptions"
-      />
-      <AboutRow
-        section={AboutSection.SUBSCRIPTIONS_UPCOMING}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Upcoming Drops"
       />
       <AboutRow
         section={AboutSection.MEMES_CALENDAR}

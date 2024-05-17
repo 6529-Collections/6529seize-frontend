@@ -16,6 +16,7 @@ import {
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { Drop } from "../../generated/models/Drop";
+import { ProfileProxy } from "../../generated/models/ProfileProxy";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -49,6 +50,8 @@ export enum QueryKey {
   DROP = "DROP",
   DROP_DISCUSSION = "DROP_DISCUSSION",
   NFTS_SEARCH = "NFTS_SEARCH",
+  PROFILE_PROXY = "PROFILE_PROXY",
+  PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -95,18 +98,31 @@ export interface InitProfileIdentityPageParams {
 }
 
 type ReactQueryWrapperContextType = {
-  setProfile: (profile: IProfileAndConsolidations) => void;
+  readonly setProfile: (profile: IProfileAndConsolidations) => void;
+  readonly setProfileProxy: (profileProxy: ProfileProxy) => void;
+  readonly onProfileProxyModify: ({
+    profileProxyId,
+    createdByHandle,
+    grantedToHandle,
+  }: {
+    readonly profileProxyId: string;
+    readonly createdByHandle: string;
+    readonly grantedToHandle: string;
+  }) => void;
   onProfileCICModify: (params: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
     readonly rater: string | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => void;
   onProfileRepModify: ({
     targetProfile,
     connectedProfile,
+    profileProxy,
   }: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => void;
   onProfileEdit: ({
     profile,
@@ -157,6 +173,8 @@ type ReactQueryWrapperContextType = {
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
     setProfile: () => {},
+    setProfileProxy: () => {},
+    onProfileProxyModify: () => {},
     onProfileCICModify: () => {},
     onProfileRepModify: () => {},
     onProfileEdit: () => {},
@@ -231,6 +249,33 @@ export default function ReactQueryWrapper({
         profile
       );
     }
+  };
+
+  const setProfileProxy = (profileProxy: ProfileProxy) => {
+    queryClient.setQueryData<ProfileProxy>(
+      [QueryKey.PROFILE_PROXY, { id: profileProxy.id }],
+      profileProxy
+    );
+  };
+
+  const onProfileProxyModify = ({
+    profileProxyId,
+    createdByHandle,
+    grantedToHandle,
+  }: {
+    readonly profileProxyId: string;
+    readonly createdByHandle: string;
+    readonly grantedToHandle: string;
+  }): void => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROXY, { id: profileProxyId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
+    });
   };
 
   const invalidateProfileRaterCICState = ({
@@ -396,10 +441,12 @@ export default function ReactQueryWrapper({
     targetProfile,
     connectedProfile,
     rater,
+    profileProxy,
   }: {
     readonly targetProfile: IProfileAndConsolidations;
     readonly connectedProfile: IProfileAndConsolidations | null;
     readonly rater: string | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
@@ -422,14 +469,51 @@ export default function ReactQueryWrapper({
         rater: rater.toLowerCase(),
       });
     }
+    if (profileProxy) {
+      invalidateQueries({
+        key: QueryKey.PROFILE,
+        values: [
+          profileProxy.created_by.handle,
+          profileProxy.granted_to.handle,
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_RATERS,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+            matter: RateMatter.CIC,
+            given: false,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+            matter: RateMatter.CIC,
+            given: false,
+          },
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_PROFILE_PROXIES,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+          },
+        ],
+      });
+    }
   };
 
   const onProfileRepModify = ({
     targetProfile,
     connectedProfile,
+    profileProxy,
   }: {
-    targetProfile: IProfileAndConsolidations;
-    connectedProfile: IProfileAndConsolidations | null;
+    readonly targetProfile: IProfileAndConsolidations;
+    readonly connectedProfile: IProfileAndConsolidations | null;
+    readonly profileProxy: ProfileProxy | null;
   }) => {
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
@@ -445,6 +529,64 @@ export default function ReactQueryWrapper({
         profile: connectedProfile,
         matter: RateMatter.REP,
         given: true,
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_REP_RATINGS,
+        values: [
+          {
+            rater: connectedProfile.profile?.handle,
+            handleOrWallet: targetProfile.profile?.handle,
+          },
+        ],
+      });
+    }
+
+    if (profileProxy) {
+      invalidateQueries({
+        key: QueryKey.PROFILE,
+        values: [
+          profileProxy.created_by.handle,
+          profileProxy.granted_to.handle,
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_RATERS,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+            matter: RateMatter.REP,
+            given: false,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+            matter: RateMatter.REP,
+            given: false,
+          },
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_REP_RATINGS,
+        values: [
+          {
+            rater: profileProxy.created_by.handle,
+            handleOrWallet: targetProfile.profile?.handle,
+          },
+          {
+            rater: profileProxy.granted_to.handle,
+            handleOrWallet: targetProfile.profile?.handle,
+          },
+        ],
+      });
+      invalidateQueries({
+        key: QueryKey.PROFILE_PROFILE_PROXIES,
+        values: [
+          {
+            handleOrWallet: profileProxy.created_by.handle,
+          },
+          {
+            handleOrWallet: profileProxy.granted_to.handle,
+          },
+        ],
       });
     }
   };
@@ -674,6 +816,8 @@ export default function ReactQueryWrapper({
   const value = useMemo(
     () => ({
       setProfile,
+      setProfileProxy,
+      onProfileProxyModify,
       onProfileCICModify,
       onProfileRepModify,
       onProfileEdit,
@@ -691,6 +835,8 @@ export default function ReactQueryWrapper({
     }),
     [
       setProfile,
+      setProfileProxy,
+      onProfileProxyModify,
       onProfileCICModify,
       onProfileRepModify,
       onProfileEdit,

@@ -26,6 +26,12 @@ export interface SubscriptionCounts {
   count: number;
 }
 
+export interface RedeemedSubscriptionCounts extends SubscriptionCounts {
+  name: string;
+  image_url: string;
+  mint_date: string;
+}
+
 export interface SubscriptionLog {
   created_at: string;
   id: number;

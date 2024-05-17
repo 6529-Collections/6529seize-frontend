@@ -66,8 +66,7 @@ export default function UserPageTab({
       }}
       className={`${
         isActive ? "tw-pointer-events-none" : ""
-      }  tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold`}
-    >
+      }  tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold`}>
       <div className={classes}>{USER_PAGE_TAB_META[tab].title}</div>
     </Link>
   );

@@ -10,15 +10,13 @@
  * Do not edit the class manually.
  */
 
-import { CreateNewProfileProxyActionType } from '../models/CreateNewProfileProxyActionType';
+import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
 export class CreateNewProfileProxyAllocateCicAction {
-    'action_type': CreateNewProfileProxyActionType;
-    'start_time': number;
+    'action_type': ProfileProxyActionType;
     'end_time': number | null;
     'credit_amount': number;
-    'group_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,14 +24,8 @@ export class CreateNewProfileProxyAllocateCicAction {
         {
             "name": "action_type",
             "baseName": "action_type",
-            "type": "CreateNewProfileProxyActionType",
+            "type": "ProfileProxyActionType",
             "format": ""
-        },
-        {
-            "name": "start_time",
-            "baseName": "start_time",
-            "type": "number",
-            "format": "int64"
         },
         {
             "name": "end_time",
@@ -46,12 +38,6 @@ export class CreateNewProfileProxyAllocateCicAction {
             "baseName": "credit_amount",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "group_id",
-            "baseName": "group_id",
-            "type": "string",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
