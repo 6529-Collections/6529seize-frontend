@@ -1,24 +1,30 @@
-export default function CurationBuildFiltersRepSearchDropdownItem({
+export default function CommonRepCategorySearchResult({
   category,
   selected,
+  disabledCategories = [],
   onSelect,
 }: {
   readonly category: string;
   readonly selected: string | null;
+  readonly disabledCategories?: string[];
   readonly onSelect: (newV: string) => void;
 }) {
   const isSelected = selected === category;
+  const isDisabled = disabledCategories.includes(category);
+  const disabledClasses = "tw-text-gray-500 tw-cursor-not-allowed";
+  const nonDisabledClasses = "hover:tw-bg-iron-700 tw-text-white";
   return (
     <li className="tw-h-full">
       <button
         type="button"
-        className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        disabled={isDisabled}
+        className={`${
+          isDisabled ? disabledClasses : nonDisabledClasses
+        } tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between  tw-rounded-lg tw-relative tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         onClick={() => onSelect(category)}
       >
         <div className="tw-w-44 tw-truncate">
-          <span className="tw-text-sm tw-font-medium tw-text-white">
-            {category}
-          </span>
+          <span className="tw-text-sm tw-font-medium ">{category}</span>
           {isSelected && (
             <svg
               className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"

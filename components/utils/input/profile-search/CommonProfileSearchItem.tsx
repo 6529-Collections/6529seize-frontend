@@ -1,23 +1,23 @@
-import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
+import { CommunityMemberMinimal } from "../../../../entities/IProfile";
 import {
-  ImageScale,
   getScaledImageUri,
-} from "../../../../../helpers/image.helpers";
+  ImageScale,
+} from "../../../../helpers/image.helpers";
 
-export default function CurationBuildFiltersUserSearchDropdownItem({
+export default function CommonProfileSearchItem({
   profile,
   selected,
-  onSelect,
+  onProfileSelect,
 }: {
   readonly profile: CommunityMemberMinimal;
   readonly selected: string | null;
-  readonly onSelect: (newV: string | null) => void;
+  readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
 }) {
   const handleOrWallet = profile.handle ?? profile.wallet;
   const isSelected = selected?.toLowerCase() === handleOrWallet.toLowerCase();
   const title = profile.handle ?? profile.display;
 
-  const onProfileClick = () => onSelect(handleOrWallet);
+  const onProfileClick = () => onProfileSelect(profile);
 
   return (
     <li className="tw-h-full">
