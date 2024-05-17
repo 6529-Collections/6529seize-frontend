@@ -107,10 +107,14 @@ export default function Auth({
     if (!address) {
       return;
     } else {
-      const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
+      const isAuth = validateJwt({
+        jwt: getAuthJwt(),
+        wallet: address,
+        role: activeProfileProxy?.created_by.id ?? null,
+      });
       if (!isAuth) removeAuthJwt();
     }
-  }, [address]);
+  }, [address, activeProfileProxy]);
 
   const getNonce = async ({
     signerAddress,
@@ -270,9 +274,11 @@ export default function Auth({
   const validateJwt = ({
     jwt,
     wallet,
+    role,
   }: {
     jwt: string | null;
     wallet: string;
+    role: string | null;
   }): boolean => {
     if (!jwt) return false;
     const decodedJwt = jwtDecode<{
@@ -282,6 +288,7 @@ export default function Auth({
       exp: number;
       role: string;
     }>(jwt);
+    if (role && decodedJwt.role !== role) return false;
     return (
       decodedJwt.sub.toLowerCase() === wallet.toLowerCase() &&
       decodedJwt.exp > Date.now() / 1000
@@ -296,7 +303,11 @@ export default function Auth({
       });
       return { success: false };
     }
-    const isAuth = validateJwt({ jwt: getAuthJwt(), wallet: address });
+    const isAuth = validateJwt({
+      jwt: getAuthJwt(),
+      wallet: address,
+      role: activeProfileProxy?.created_by.id ?? null,
+    });
     if (!isAuth) {
       removeAuthJwt();
       await requestSignIn({

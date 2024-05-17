@@ -8,6 +8,7 @@ import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { UserPageTabType } from "../../../user/layout/UserPageTabs";
 import CommonProfileLink from "../../../user/utils/CommonProfileLink";
+import Link from "next/link";
 
 enum ProfileActivityLogRateType {
   ADDED = "ADDED",
@@ -108,9 +109,15 @@ export default function ProfileActivityLogRate({
       />
 
       {log.contents.proxy_handle && (
-        <span className="tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium">
-          (via Proxy)
-        </span>
+        <Link
+          href={`/${log.contents.proxy_handle}`}
+          target="_blank"
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+        >
+          <span className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-gray-50 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-gray-600 tw-ring-1 tw-ring-inset tw-ring-gray-500/10">
+            Proxy: {log.contents.proxy_handle}
+          </span>
+        </Link>
       )}
 
       {isSystemAdjustment && (
