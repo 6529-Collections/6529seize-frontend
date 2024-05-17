@@ -102,6 +102,7 @@ export interface CicStatement {
 
 export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
+  PROXY_RATING_EDIT = "PROXY_RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",
   CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
   SOCIALS_EDIT = "SOCIALS_EDIT",
@@ -120,6 +121,7 @@ export enum ProfileActivityLogType {
   DROP_COMMENT = "DROP_COMMENT",
   DROP_RATING_EDIT = "DROP_RATING_EDIT",
   DROP_CREATED = "DROP_CREATED",
+  PROXY_DROP_RATING_EDIT = "PROXY_DROP_RATING_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -127,6 +129,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   string
 > = {
   [ProfileActivityLogType.RATING_EDIT]: "Rating",
+  [ProfileActivityLogType.PROXY_RATING_EDIT]: "Proxy Rating",
   [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
   [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
@@ -147,6 +150,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.DROP_COMMENT]: "Drop Comment",
   [ProfileActivityLogType.DROP_RATING_EDIT]: "Drop Rating",
   [ProfileActivityLogType.DROP_CREATED]: "Drop Created",
+  [ProfileActivityLogType.PROXY_DROP_RATING_EDIT]: "Proxy Drop Rating",
 };
 
 export interface ProfileActivityLogBase {
@@ -173,6 +177,20 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
     readonly rating_matter: RateMatter;
     readonly proxy_handle?: string;
     readonly proxy_id?: string;
+  };
+}
+
+export interface ProfileActivityLogProxyRatingEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_RATING_EDIT;
+  readonly contents: {
+    readonly old_rating: number;
+    readonly new_rating: number;
+    readonly rating_matter: RateMatter;
+    readonly rating_category: string;
+    readonly change_reason: ProfileActivityLogRatingEditContentChangeReason;
+    readonly rater_profile_id: string;
+    readonly rater_profile_handle: string;
   };
 }
 
@@ -334,8 +352,14 @@ export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
+export interface ProfileActivityLogProxyDropRatingEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_DROP_RATING_EDIT;
+  readonly contents: {};
+}
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
+  | ProfileActivityLogProxyRatingEdit
   | ProfileActivityLogHandleEdit
   | ProfileActivityLogClassificationEdit
   | ProfileActivityLogSocialsEdit
@@ -353,7 +377,8 @@ export type ProfileActivityLog =
   | ProfileActivityLogProxyActionChanged
   | ProfileActivityLogDropComment
   | ProfileActivityLogDropRatingEdit
-  | ProfileActivityLogDropCreated;
+  | ProfileActivityLogDropCreated
+  | ProfileActivityLogProxyDropRatingEdit;
 
 export enum RateMatter {
   CIC = "CIC",
