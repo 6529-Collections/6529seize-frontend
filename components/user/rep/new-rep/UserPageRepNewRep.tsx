@@ -15,7 +15,8 @@ export default function UserPageRepNewRep({
 }: {
   readonly profile: IProfileAndConsolidations;
   readonly repRates: ApiProfileRepRatesState | null;
-}) {
+  }) {
+  
   const [isAddNewRepModalOpen, setIsAddNewRepModalOpen] =
     useState<boolean>(false);
 
@@ -56,8 +57,7 @@ export default function UserPageRepNewRep({
           >
             <UserPageRepModifyModal
               profile={profile}
-              repState={repToAdd}
-              giverAvailableRep={repRates?.rep_rates_left_for_rater ?? 0}
+              category={repToAdd.category}
               onClose={onCloseModal}
             />
           </CommonAnimationOpacity>

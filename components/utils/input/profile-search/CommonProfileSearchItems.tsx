@@ -1,17 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
-import CurationBuildFiltersUserSearchDropdownItem from "./CurationBuildFiltersUserSearchDropdownItem";
+import { CommunityMemberMinimal } from "../../../../entities/IProfile";
+import CommonProfileSearchItem from "./CommonProfileSearchItem";
 
-export default function CurationBuildFiltersUserSearchDropdown({
+export default function CommonProfileSearchItems({
   open,
   profiles,
   selected,
-  onSelect,
+  onProfileSelect,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
   readonly selected: string | null;
-  readonly onSelect: (newV: string | null) => void;
+  readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
 }) {
   const noResultsText =
     !selected || selected.length < 3
@@ -33,11 +33,11 @@ export default function CurationBuildFiltersUserSearchDropdown({
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {profiles.length ? (
                     profiles.map((profile) => (
-                      <CurationBuildFiltersUserSearchDropdownItem
+                      <CommonProfileSearchItem
                         key={profile.wallet}
                         profile={profile}
                         selected={selected}
-                        onSelect={onSelect}
+                        onProfileSelect={onProfileSelect}
                       />
                     ))
                   ) : (

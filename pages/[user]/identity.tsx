@@ -1,6 +1,10 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
-import { IProfileAndConsolidations, RateMatter } from "../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  ProfileActivityLogType,
+  RateMatter,
+} from "../../entities/IProfile";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -11,6 +15,7 @@ import {
 import { ActivityLogParams } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import UserPageIdentityWrapper from "../../components/user/identity/UserPageIdentityWrapper";
+import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 
 export interface UserPageIdentityProps {
   readonly profile: IProfileAndConsolidations;
@@ -24,7 +29,10 @@ const getInitialActivityLogParams = (
 ): ActivityLogParams => ({
   page: 1,
   pageSize: 10,
-  logTypes: [],
+  logTypes: getProfileLogTypes({
+    logTypes: [],
+    addDisabledLogTypes: [ProfileActivityLogType.PROXY_RATING_EDIT],
+  }),
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet,

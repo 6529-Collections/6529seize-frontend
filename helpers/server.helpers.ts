@@ -18,6 +18,7 @@ import {
   ProfileRatersParamsOrderBy,
 } from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { SortDirection } from "../entities/ISort";
+import { ProfileProxy } from "../generated/models/ProfileProxy";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -34,6 +35,19 @@ export const getUserProfile = async ({
 }): Promise<IProfileAndConsolidations> => {
   return await commonApiFetch<IProfileAndConsolidations>({
     endpoint: `profiles/${user}`,
+    headers: headers,
+  });
+};
+
+export const getProxyById = async ({
+  proxyId,
+  headers,
+}: {
+  proxyId: string;
+  headers: Record<string, string>;
+}): Promise<ProfileProxy> => {
+  return await commonApiFetch<ProfileProxy>({
+    endpoint: `proxies/${proxyId}`,
     headers: headers,
   });
 };

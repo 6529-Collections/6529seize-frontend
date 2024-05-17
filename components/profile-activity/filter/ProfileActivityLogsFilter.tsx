@@ -10,10 +10,12 @@ import {
 export default function ProfileActivityLogsFilter({
   user,
   selected,
+  options,
   setSelected,
 }: {
   readonly user: string | null;
   readonly selected: ProfileActivityLogType[];
+  readonly options: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,6 +92,7 @@ export default function ProfileActivityLogsFilter({
                 >
                   <ProfileActivityLogsFilterList
                     selected={selected}
+                    options={options}
                     setSelected={setSelected}
                     user={user}
                   />

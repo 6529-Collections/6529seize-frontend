@@ -16,6 +16,10 @@ export default function CommonDropdown<T, U = unknown>(
     filterLabel,
     setSelected,
     containerRef,
+    dynamicPosition = true,
+    disabled = false,
+    theme = "dark",
+    size = "md",
     renderItemChildren,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
@@ -101,15 +105,26 @@ export default function CommonDropdown<T, U = unknown>(
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   return (
-    <div>
-      <div className="tw-relative">
+    <div className="tw-w-full tw-h-full">
+      <div className="tw-relative tw-w-full">
         <button
           ref={buttonRef}
           type="button"
           aria-haspopup="true"
           onClick={() => setIsOpen(!isOpen)}
-          className="tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-bg-iron-800 lg:tw-bg-iron-900 tw-text-iron-300 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between"
+          disabled={disabled}
+          className={`${
+            disabled
+              ? "tw-opacity-50 tw-text-iron-400"
+              : "hover:tw-ring-iron-600 tw-text-iron-300"
+          } ${
+            theme === "dark"
+              ? "tw-bg-iron-800 lg:tw-bg-iron-900"
+              : "tw-bg-iron-800"
+          } ${
+            size === "md" ? "tw-py-3" : "tw-py-2.5"
+          } tw-w-full tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0  tw-pl-3.5 tw-pr-10   tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}
         >
           {label}
           {sortDirection && (
@@ -118,7 +133,7 @@ export default function CommonDropdown<T, U = unknown>(
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center -tw-mr-1 tw-pr-3.5">
             <svg
               ref={iconScope}
-              className="tw-h-5 tw-w-5 tw-text-white"
+              className="tw-h-5 tw-w-5"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -141,6 +156,7 @@ export default function CommonDropdown<T, U = unknown>(
         buttonRef={buttonRef}
         buttonPosition={buttonPosition}
         filterLabel={filterLabel}
+        dynamicPosition={dynamicPosition}
         onIsMobile={setIsMobile}
       >
         {Object.values(items).map((item, i) => (

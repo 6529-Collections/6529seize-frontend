@@ -605,6 +605,47 @@ export const getTimeAgo = (milliseconds: number): string => {
   }
 };
 
+export const getTimeUntil = (milliseconds: number): string => {
+  const currentTime = new Date().getTime();
+  let timeDifference = milliseconds - currentTime;
+
+  // Determine if the time is in the future or past
+  const isFuture = timeDifference >= 0;
+  // Use absolute value to handle future times
+  timeDifference = Math.abs(timeDifference);
+
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  if (years > 0) {
+    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (months > 0) {
+    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (days > 0) {
+    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (hours > 0) {
+    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (minutes > 0) {
+    return `${isFuture ? "in" : ""} ${minutes} minute${
+      minutes > 1 ? "s" : ""
+    } ${isFuture ? "" : "ago"}`;
+  } else {
+    return `Just now`;
+  }
+};
+
 export const truncateMiddle = (value: string): string => {
   if (value.length > 50) {
     return `${value.substring(0, 10)}...${value.substring(value.length - 30)}`;
@@ -625,6 +666,9 @@ export const getProfileTargetRoute = ({
   readonly router: NextRouter;
   readonly defaultPath: UserPageTabType;
 }): string => {
+  if (!handleOrWallet.length) {
+    return "/404";
+  }
   if (router.route.includes("[user]")) {
     return router.route.replace("[user]", handleOrWallet);
   }
@@ -670,3 +714,6 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 };
+
+export const classNames = (...classes: string[]) =>
+  classes.filter(Boolean).join(" ");

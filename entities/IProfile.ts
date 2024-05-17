@@ -1,3 +1,5 @@
+import { AcceptActionRequestActionEnum } from "../generated/models/AcceptActionRequest";
+import { ProfileProxyActionType } from "../generated/models/ProfileProxyActionType";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
 
 export interface IProfileWallet {
@@ -51,6 +53,7 @@ export const CLASSIFICATIONS: Record<
 };
 
 export interface IProfile {
+  readonly external_id: string;
   readonly normalised_handle: string;
   readonly handle: string;
   readonly primary_wallet: string;
@@ -99,18 +102,26 @@ export interface CicStatement {
 
 export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
+  PROXY_RATING_EDIT = "PROXY_RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",
-  PRIMARY_WALLET_EDIT = "PRIMARY_WALLET_EDIT",
   CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
   SOCIALS_EDIT = "SOCIALS_EDIT",
   CONTACTS_EDIT = "CONTACTS_EDIT",
-  NFT_ACCOUNTS_EDIT = "NFT_ACCOUNTS_EDIT",
   SOCIAL_VERIFICATION_POST_EDIT = "SOCIAL_VERIFICATION_POST_EDIT",
+  NFT_ACCOUNTS_EDIT = "NFT_ACCOUNTS_EDIT",
+  GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
   BANNER_1_EDIT = "BANNER_1_EDIT",
   BANNER_2_EDIT = "BANNER_2_EDIT",
   PFP_EDIT = "PFP_EDIT",
   PROFILE_ARCHIVED = "PROFILE_ARCHIVED",
-  GENERAL_CIC_STATEMENT_EDIT = "GENERAL_CIC_STATEMENT_EDIT",
+  PROXY_CREATED = "PROXY_CREATED",
+  PROXY_ACTION_CREATED = "PROXY_ACTION_CREATED",
+  PROXY_ACTION_STATE_CHANGED = "PROXY_ACTION_STATE_CHANGED",
+  PROXY_ACTION_CHANGED = "PROXY_ACTION_CHANGED",
+  DROP_COMMENT = "DROP_COMMENT",
+  DROP_RATING_EDIT = "DROP_RATING_EDIT",
+  DROP_CREATED = "DROP_CREATED",
+  PROXY_DROP_RATING_EDIT = "PROXY_DROP_RATING_EDIT",
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -118,8 +129,8 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   string
 > = {
   [ProfileActivityLogType.RATING_EDIT]: "Rating",
+  [ProfileActivityLogType.PROXY_RATING_EDIT]: "Proxy Rating",
   [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
-  [ProfileActivityLogType.PRIMARY_WALLET_EDIT]: "Primary Wallet",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
   [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
   [ProfileActivityLogType.NFT_ACCOUNTS_EDIT]: "NFT Account",
@@ -131,6 +142,15 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PFP_EDIT]: "Profile Picture",
   [ProfileActivityLogType.PROFILE_ARCHIVED]: "Profile Archived",
   [ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT]: "About",
+  [ProfileActivityLogType.PROXY_CREATED]: "Proxy Created",
+  [ProfileActivityLogType.PROXY_ACTION_CREATED]: "Proxy Action Created",
+  [ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED]:
+    "Proxy Action State Changed",
+  [ProfileActivityLogType.PROXY_ACTION_CHANGED]: "Proxy Action Changed",
+  [ProfileActivityLogType.DROP_COMMENT]: "Drop Comment",
+  [ProfileActivityLogType.DROP_RATING_EDIT]: "Drop Rating",
+  [ProfileActivityLogType.DROP_CREATED]: "Drop Created",
+  [ProfileActivityLogType.PROXY_DROP_RATING_EDIT]: "Proxy Drop Rating",
 };
 
 export interface ProfileActivityLogBase {
@@ -150,25 +170,32 @@ export enum ProfileActivityLogRatingEditContentChangeReason {
 export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.RATING_EDIT;
   readonly contents: {
-    change_reason: ProfileActivityLogRatingEditContentChangeReason;
-    new_rating: number;
-    old_rating: number;
-    rating_category: string;
-    rating_matter: RateMatter;
+    readonly change_reason: ProfileActivityLogRatingEditContentChangeReason;
+    readonly new_rating: number;
+    readonly old_rating: number;
+    readonly rating_category: string;
+    readonly rating_matter: RateMatter;
+    readonly proxy_handle?: string;
+    readonly proxy_id?: string;
+  };
+}
+
+export interface ProfileActivityLogProxyRatingEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_RATING_EDIT;
+  readonly contents: {
+    readonly old_rating: number;
+    readonly new_rating: number;
+    readonly rating_matter: RateMatter;
+    readonly rating_category: string;
+    readonly change_reason: ProfileActivityLogRatingEditContentChangeReason;
+    readonly rater_profile_id: string;
+    readonly rater_profile_handle: string;
   };
 }
 
 export interface ProfileActivityLogHandleEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.HANDLE_EDIT;
-  readonly contents: {
-    new_value: string;
-    old_value: string;
-  };
-}
-
-export interface ProfileActivityLogPrimaryWalletEdit
-  extends ProfileActivityLogBase {
-  readonly type: ProfileActivityLogType.PRIMARY_WALLET_EDIT;
   readonly contents: {
     new_value: string;
     old_value: string;
@@ -271,10 +298,69 @@ export interface ProfileActivityLogGeneralCicStatementEdit
   };
 }
 
+export interface ProfileActivityLogProxyCreated extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_CREATED;
+  readonly contents: {};
+}
+
+export interface ProfileActivityLogProxyActionCreated
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_ACTION_CREATED;
+  readonly contents: {
+    readonly action_id: string;
+    readonly proxy_id: string;
+    readonly type: ProfileProxyActionType;
+  };
+}
+
+export interface ProfileActivityLogProxyActionStateChanged
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED;
+  readonly contents: {
+    readonly action_id: string;
+    readonly proxy_id: string;
+    readonly state_change_type: AcceptActionRequestActionEnum;
+    readonly type: ProfileProxyActionType;
+  };
+}
+
+export interface ProfileActivityLogProxyActionChanged
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_ACTION_CHANGED;
+  readonly contents: {
+    readonly action_id: string;
+    readonly end_time?: number | null;
+    readonly credit_amount?: number;
+    readonly proxy_id: string;
+    readonly type: ProfileProxyActionType;
+  };
+}
+
+export interface ProfileActivityLogDropComment extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_COMMENT;
+  readonly contents: {};
+}
+
+export interface ProfileActivityLogDropRatingEdit
+  extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_RATING_EDIT;
+  readonly contents: {};
+}
+
+export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.DROP_CREATED;
+  readonly contents: {};
+}
+
+export interface ProfileActivityLogProxyDropRatingEdit extends ProfileActivityLogBase {
+  readonly type: ProfileActivityLogType.PROXY_DROP_RATING_EDIT;
+  readonly contents: {};
+}
+
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
+  | ProfileActivityLogProxyRatingEdit
   | ProfileActivityLogHandleEdit
-  | ProfileActivityLogPrimaryWalletEdit
   | ProfileActivityLogClassificationEdit
   | ProfileActivityLogSocialsEdit
   | ProfileActivityLogContactsEdit
@@ -284,7 +370,15 @@ export type ProfileActivityLog =
   | ProfileActivityLogPfpEdit
   | ProfileActivityLogArchived
   | ProfileActivityLogGeneralCicStatementEdit
-  | ProfileActivityLogNftAccountsEdit;
+  | ProfileActivityLogNftAccountsEdit
+  | ProfileActivityLogProxyCreated
+  | ProfileActivityLogProxyActionCreated
+  | ProfileActivityLogProxyActionStateChanged
+  | ProfileActivityLogProxyActionChanged
+  | ProfileActivityLogDropComment
+  | ProfileActivityLogDropRatingEdit
+  | ProfileActivityLogDropCreated
+  | ProfileActivityLogProxyDropRatingEdit;
 
 export enum RateMatter {
   CIC = "CIC",
@@ -302,6 +396,7 @@ export interface ProfilesMatterRating {
 }
 
 export interface CommunityMemberMinimal {
+  readonly profile_id: string | null;
   readonly handle: string | null;
   readonly normalised_handle: string | null;
   readonly primary_wallet: string | null;

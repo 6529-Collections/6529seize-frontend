@@ -17,7 +17,8 @@ export class ProfileProxyAction {
     'id': string;
     'proxy_id': string;
     'action_type': ProfileProxyActionType;
-    'action_data': any;
+    'credit_amount': number | null;
+    'credit_spent': number | null;
     'start_time': number;
     'end_time': number | null;
     'created_at': number;
@@ -48,10 +49,16 @@ export class ProfileProxyAction {
             "format": ""
         },
         {
-            "name": "action_data",
-            "baseName": "action_data",
-            "type": "any",
-            "format": ""
+            "name": "credit_amount",
+            "baseName": "credit_amount",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "credit_spent",
+            "baseName": "credit_spent",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "start_time",

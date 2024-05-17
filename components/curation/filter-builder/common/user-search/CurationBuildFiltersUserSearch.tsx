@@ -5,7 +5,7 @@ import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import CommonInput from "../../../../utils/input/CommonInput";
-import CurationBuildFiltersUserSearchDropdown from "./CurationBuildFiltersUserSearchDropdown";
+import CommonProfileSearchItems from "../../../../utils/input/profile-search/CommonProfileSearchItems";
 
 const MIN_SEARCH_LENGTH = 3;
 
@@ -85,11 +85,13 @@ export default function CurationBuildFiltersUserSearch({
         onChange={onSearchCriteriaChange}
         onFocusChange={onFocusChange}
       />
-      <CurationBuildFiltersUserSearchDropdown
+      <CommonProfileSearchItems
         open={isOpen}
         selected={value}
         profiles={data ?? []}
-        onSelect={onValueChange}
+        onProfileSelect={(profile) =>
+          onValueChange(profile?.handle ?? profile?.wallet ?? null)
+        }
       />
     </div>
   );

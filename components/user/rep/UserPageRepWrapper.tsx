@@ -32,6 +32,7 @@ export default function UserPageRepWrapper({
     initialData: initialProfile,
   });
 
+
   if (!profile.profile) {
     return <UserPageNoProfile profile={profile} />;
   }
