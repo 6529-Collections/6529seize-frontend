@@ -4,9 +4,10 @@ import {
 } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsStatement from "./UserPageIdentityStatementsStatement";
 import { useAccount } from "wagmi";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { amIUser } from "../../../../../helpers/Helpers";
 import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
+import { AuthContext } from "../../../../auth/Auth";
 
 export default function UserPageIdentityStatementsStatementsList({
   statements,
@@ -20,12 +21,17 @@ export default function UserPageIdentityStatementsStatementsList({
   readonly loading: boolean;
 }) {
   const { address } = useAccount();
+  const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
 
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
     [profile, address]
   );
+
+  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
+  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
+  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
 
   if (loading) {
     return (
@@ -42,7 +48,7 @@ export default function UserPageIdentityStatementsStatementsList({
           key={statement.id}
           statement={statement}
           profile={profile}
-          isMyProfile={isMyProfile}
+          canEdit={canEdit}
         />
       ))}
 

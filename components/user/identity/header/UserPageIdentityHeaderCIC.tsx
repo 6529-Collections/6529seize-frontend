@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { amIUser, formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICStatus from "../../utils/user-cic-status/UserCICStatus";
-import { useAccount } from "wagmi";
 
 export default function UserPageIdentityHeaderCIC({
   profile,
@@ -20,18 +19,8 @@ export default function UserPageIdentityHeaderCIC({
     setCicRaters(profile.cic.contributor_count);
   }, [profile]);
 
-  const { address } = useAccount();
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
-  useEffect(
-    () => setIsMyProfile(amIUser({ profile, address })),
-    [profile, address]
-  );
   return (
-    <div
-      className={`${
-        isMyProfile ? "" : "tw-mb-6"
-      } tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1`}
-    >
+    <div className="tw-mb-6 tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1">
       <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300">
         <div className="tw-flex tw items-center tw-space-x-1">
           <span>CIC:</span>

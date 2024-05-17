@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 import { useAccount } from "wagmi";
 import { createPossessionStr } from "../../../../../helpers/Helpers";
+import { AuthContext } from "../../../../auth/Auth";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,
@@ -10,7 +11,13 @@ export default function UserPageIdentityAddStatementsHeader({
   readonly profile: IProfileAndConsolidations;
 }) {
   const account = useAccount();
+  const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
+
+  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
+  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
+  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
+
   useEffect(() => {
     if (!account.address) {
       setIsMyProfile(false);
@@ -38,9 +45,7 @@ export default function UserPageIdentityAddStatementsHeader({
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           <span>{possessionName}</span> ID Statements
         </h3>
-        {isMyProfile && (
-          <UserPageIdentityStatementsAddButton profile={profile} />
-        )}
+        {canEdit && <UserPageIdentityStatementsAddButton profile={profile} />}
       </div>
     </div>
   );
