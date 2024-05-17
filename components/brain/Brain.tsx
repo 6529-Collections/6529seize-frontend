@@ -115,7 +115,7 @@ export default function Brain() {
         ...debouncedParams,
       };
       if (pageParam) {
-        params.id_less_than = `${pageParam}`;
+        params.serial_no_less_than = `${pageParam}`;
       }
       return await commonApiFetch<Drop[]>({
         endpoint: `drops/`,

@@ -8,11 +8,137 @@ servers:
   - url: /api
 
 paths:
+  /auth/nonce:
+    get:
+      tags:
+        - Authentication
+      summary: Get a message to sign by your web3 wallet
+      operationId: getNonce
+      parameters:
+        - name: signer_address
+          in: query
+          description: Your wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NonceResponse'
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Get a message to sign by your web3 wallet
+      operationId: getAuthToken
+      parameters:
+        - name: signer_address
+          in: query
+          description: Your wallet address
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 'Invalid request'
+
+  /nfts:
+    get:
+      tags:
+        - Nfts
+      summary: Get NFTs
+      operationId: getNfts
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 101
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: id
+          in: query
+          description: Filter by NFT ID
+          required: false
+          schema:
+            type: string
+        - name: contract
+          in: query
+          description: Filter by NFT ID
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NftsPage"
+  /profiles/{handleOrWallet}/proxies:
+    get:
+      tags:
+        - Proxies
+      summary: Get profile proxies
+      operationId: getProfileProxies
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileProxy"
+        "404":
+          description: Profile not found
   /profiles/{handleOrWallet}/proxies/received:
     get:
       tags:
         - Proxies
-      summary: Get proxies received by a profile, if authenticated, it will return the not accepted proxies as well
+      summary: Get proxies received by a profile
       operationId: getProxiesReceived
       parameters:
         - name: handleOrWallet
@@ -20,34 +146,94 @@ paths:
           required: true
           schema:
             type: string
-        - name: page
-          in: query
-          required: false
-          schema:
-            description: Default is 1
-            type: number
-            format: int64
-            minimum: 1
-        - name: page_size
-          in: query
-          required: false
-          schema:
-            description: Default is 50
-            type: number
-            format: int64
-            minimum: 1
-            maximum: 2000
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProfileProxy'
-        '404':
+                  $ref: "#/components/schemas/ProfileProxy"
+        "404":
           description: Profile not found
+  /profiles/{handleOrWallet}/proxies/granted:
+    get:
+      tags:
+        - Proxies
+      summary: Get proxies granted by a profile
+      operationId: getProxiesGranted
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileProxy"
+        "404":
+          description: Profile not found
+  /profiles/{handleOrWallet}/rep/rating:
+    post:
+      tags:
+        - ProfileREP
+      summary: Change profile REP rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
+      operationId: rateProfileRep
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProfileRepRating"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeProfileRepRatingResponse"
+        "400":
+          description: "Invalid request"
+  /profiles/{handleOrWallet}/cic/rating:
+    post:
+      tags:
+        - ProfileCIC
+      summary: Change profile CIC rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
+      operationId: rateProfileCic
+      parameters:
+        - name: handleOrWallet
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProfileCicRating"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeProfileCicRatingResponse"
+        "400":
+          description: "Invalid request"
   /drops:
     get:
       tags:
@@ -67,6 +253,12 @@ paths:
         - name: curation_criteria_id
           in: query
           description: Drops by authors that match the supplied criteria
+          required: false
+          schema:
+            type: string
+        - name: wave_id
+          in: query
+          description: Drops in wave with given ID
           required: false
           schema:
             type: string
@@ -100,35 +292,35 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Drop'
+                  $ref: "#/components/schemas/Drop"
     post:
       tags:
         - Drops
       summary: Create a drop
-      description: 'Requires the user to be authenticated'
+      description: "Requires the user to be authenticated"
       operationId: createDrop
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateDropRequest'
+              $ref: "#/components/schemas/CreateDropRequest"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Drop'
-        '400':
-          description: 'Invalid request'
+                $ref: "#/components/schemas/Drop"
+        "400":
+          description: "Invalid request"
   /drops/{dropId}:
     get:
       tags:
@@ -164,13 +356,13 @@ paths:
             format: int64
             minimum: 1
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Drop'
-        '404':
+                $ref: "#/components/schemas/Drop"
+        "404":
           description: Drop not found
 
   /drops/{dropId}/ratings:
@@ -178,7 +370,7 @@ paths:
       tags:
         - Drops
       summary: Rate a drop
-      description: 'Requires the user to be authenticated'
+      description: "Requires the user to be authenticated"
       operationId: rateDrop
       parameters:
         - name: dropId
@@ -191,18 +383,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DropRatingRequest'
+              $ref: "#/components/schemas/DropRatingRequest"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Drop'
-        '404':
+                $ref: "#/components/schemas/Drop"
+        "404":
           description: Drop not found
-        '400':
-          description: 'Invalid request'
+        "400":
+          description: "Invalid request"
 
   /drops/{dropId}/log:
     get:
@@ -261,15 +453,15 @@ paths:
             minimum: 1
             maximum: 2000
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DropActivityLog'
-        '404':
+                  $ref: "#/components/schemas/DropActivityLog"
+        "404":
           description: Drop not found
   /drops/{dropId}/parts/{dropPartId}/comments:
     get:
@@ -324,19 +516,19 @@ paths:
             minimum: 1
             maximum: 50
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DropCommentsPage'
-        '404':
+                $ref: "#/components/schemas/DropCommentsPage"
+        "404":
           description: Drop not found
     post:
       tags:
         - Drops
       summary: Write a discussion comment for drop part
-      description: 'Requires the user to be authenticated'
+      description: "Requires the user to be authenticated"
       operationId: commentDrop
       parameters:
         - name: dropId
@@ -355,25 +547,25 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewDropComment'
+              $ref: "#/components/schemas/NewDropComment"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DropComment'
-        '404':
+                $ref: "#/components/schemas/DropComment"
+        "404":
           description: Drop not found
-        '400':
-          description: 'Invalid request'
+        "400":
+          description: "Invalid request"
 
   /drop-media/prep:
     post:
       tags:
         - Drops
       summary: Create S3 URL for drop media upload
-      description: 'Requires the user to be authenticated'
+      description: "Requires the user to be authenticated"
       operationId: createDropMediaUrl
       requestBody:
         required: true
@@ -394,7 +586,7 @@ paths:
                   type: number
                   format: int64
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
@@ -411,8 +603,8 @@ paths:
                     type: string
                   media_url:
                     type: string
-        '400':
-          description: 'Invalid request'
+        "400":
+          description: "Invalid request"
   /proxies:
     post:
       tags:
@@ -425,15 +617,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateNewProfileProxy'
+              $ref: "#/components/schemas/CreateNewProfileProxy"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileProxy'
-        '400':
+                $ref: "#/components/schemas/ProfileProxy"
+        "400":
           description: Invalid request
   /proxies/{proxyId}:
     get:
@@ -448,13 +640,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileProxy'
-        '404':
+                $ref: "#/components/schemas/ProfileProxy"
+        "404":
           description: Proxy not found
   /proxies/{proxyId}/actions:
     post:
@@ -475,21 +667,93 @@ paths:
           application/json:
             schema:
               anyOf:
-                - $ref: '#/components/schemas/CreateNewProfileProxyAllocateRepAction'
-                - $ref: '#/components/schemas/CreateNewProfileProxyAllocateCicAction'
-                - $ref: '#/components/schemas/CreateNewProfileProxyCreateWaveAction'
-                - $ref: '#/components/schemas/CreateNewProfileProxyReadWaveAction'
-                - $ref: '#/components/schemas/CreateNewProfileProxyCreateWaveParticipationDropAction'
+                - $ref: "#/components/schemas/CreateNewProfileProxyAllocateRepAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyAllocateCicAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyCreateWaveAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyReadWaveAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyCreateWaveParticipationDropAction"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileProxyAction'
-        '404':
+                $ref: "#/components/schemas/ProfileProxyAction"
+        "404":
           description: Proxy not found
-        '400':
+        "400":
+          description: Invalid request
+
+  /proxies/{proxyId}/actions/{actionId}/acceptance:
+    post:
+      tags:
+        - Proxies
+      summary: Accept action
+      operationId: acceptAction
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - action
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - ACCEPT
+                    - REJECT
+                    - REVOKE
+                    - RESTORE
+      responses:
+        "201":
+          description: successful operation
+        "404":
+          description: Proxy or action not found
+        "400":
+          description: Invalid request
+
+  /proxies/{proxyId}/actions/{actionId}:
+    put:
+      tags:
+        - Proxies
+      summary: Update action
+      operationId: updateAction
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProxyActionRequest"
+      responses:
+        "201":
+          description: successful operation
+        "404":
+          description: Proxy or action not found
+        "400":
           description: Invalid request
 
   /waves:
@@ -522,14 +786,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Wave'
+                  $ref: "#/components/schemas/Wave"
     post:
       tags:
         - Waves
@@ -541,15 +805,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateNewWave'
+              $ref: "#/components/schemas/CreateNewWave"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Wave'
-        '400':
+                $ref: "#/components/schemas/Wave"
+        "400":
           description: Invalid request
 
   /waves/{id}:
@@ -565,13 +829,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Wave'
-        '404':
+                $ref: "#/components/schemas/Wave"
+        "404":
           description: Wave not found
 
 components:
@@ -580,7 +844,6 @@ components:
       type: http
       scheme: bearer
   schemas:
-
     IntRange:
       type: object
       required:
@@ -599,22 +862,22 @@ components:
           nullable: true
 
     Curation:
-        type: object
-        required:
-            - id
-            - name
-            - author
-            - created_at
-        properties:
-          id:
-            type: string
-          name:
-            type: string
-          author:
-            $ref: '#/components/schemas/ProfileMin'
-          created_at:
-            type: number
-            format: int64
+      type: object
+      required:
+        - id
+        - name
+        - author
+        - created_at
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        created_at:
+          type: number
+          format: int64
 
     PageBase:
       type: object
@@ -632,87 +895,107 @@ components:
         next:
           type: boolean
 
+    PageWithNextUriBase:
+      type: object
+      required:
+        - count
+        - page
+        - next
+      properties:
+        count:
+          type: number
+          format: int64
+        page:
+          type: number
+          format: int64
+        next:
+          type: string
+          nullable: true
+
     Drop:
       type: object
       required:
-          - id
-          - serial_no
-          - author
-          - created_at
-          - referenced_nfts
-          - mentioned_users
-          - metadata
-          - parts
-          - parts_count
-          - rating
-          - top_raters
-          - raters_count
-          - top_rating_categories
-          - rating_categories_count
-          - rating_logs_count
-          - title
-          - context_profile_context
+        - id
+        - serial_no
+        - wave_id
+        - author
+        - created_at
+        - referenced_nfts
+        - mentioned_users
+        - metadata
+        - parts
+        - parts_count
+        - rating
+        - top_raters
+        - raters_count
+        - top_rating_categories
+        - rating_categories_count
+        - rating_logs_count
+        - title
+        - context_profile_context
       properties:
-          id:
-            type: string
-          serial_no:
-            description: Sequence number of the drop in Seize
-            type: number
-            format: int64
-          author:
-            $ref: '#/components/schemas/ProfileMin'
-          created_at:
-            description: Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
-            type: number
-            format: int64
-          title:
-            type: string
-            maxLength: 250
-            nullable: true
-          parts:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropPart'
-          parts_count:
-            description: 'Number of drops in the storm'
-            type: number
-            format: int64
-          referenced_nfts:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropReferencedNFT'
-          mentioned_users:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropMentionedUser'
-          metadata:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropMetadata'
-          rating:
-            type: number
-            format: int64
-          top_raters:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropRater'
-          raters_count:
-            type: number
-            format: int64
-          top_rating_categories:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropRatingCategory'
-          rating_categories_count:
-            type: number
-            format: int64
-          rating_logs_count:
-            type: number
-            format: int64
-          context_profile_context:
-            anyOf:
-              - type: 'null'
-              - $ref: '#/components/schemas/DropContextProfileContext'
+        id:
+          type: string
+        serial_no:
+          description: Sequence number of the drop in Seize
+          type: number
+          format: int64
+        wave_id:
+          type: string
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        created_at:
+          description: Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
+          type: number
+          format: int64
+        title:
+          type: string
+          maxLength: 250
+          nullable: true
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropPart"
+        parts_count:
+          description: "Number of drops in the storm"
+          type: number
+          format: int64
+        referenced_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropReferencedNFT"
+        mentioned_users:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMentionedUser"
+        metadata:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMetadata"
+        rating:
+          type: number
+          format: int64
+        top_raters:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRater"
+        raters_count:
+          type: number
+          format: int64
+        top_rating_categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRatingCategory"
+        rating_categories_count:
+          type: number
+          format: int64
+        rating_logs_count:
+          type: number
+          format: int64
+        context_profile_context:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DropContextProfileContext"
 
     QuotedDrop:
       type: object
@@ -737,7 +1020,7 @@ components:
         - content
       properties:
         part_id:
-          description: 'Which drop in the storm is this drop'
+          description: "Which drop in the storm is this drop"
           type: number
           format: int64
         content:
@@ -747,11 +1030,11 @@ components:
         media:
           type: array
           items:
-              $ref: '#/components/schemas/DropMedia'
+            $ref: "#/components/schemas/DropMedia"
         quoted_drop:
           anyOf:
-            - $ref: '#/components/schemas/QuotedDrop'
-            - type: 'null'
+            - $ref: "#/components/schemas/QuotedDrop"
+            - type: "null"
         discussion_comments_count:
           type: number
           format: int64
@@ -760,8 +1043,8 @@ components:
           format: int64
         context_profile_context:
           anyOf:
-            - type: 'null'
-            - $ref: '#/components/schemas/DropPartContextProfileContext'
+            - type: "null"
+            - $ref: "#/components/schemas/DropPartContextProfileContext"
     ProfileMin:
       type: object
       required:
@@ -851,10 +1134,21 @@ components:
         - rating
       properties:
         profile:
-          $ref: '#/components/schemas/ProfileMin'
+          $ref: "#/components/schemas/ProfileMin"
         rating:
           type: number
           format: int64
+
+    UpdateProxyActionRequest:
+        type: object
+        properties:
+          credit_amount:
+            type: number
+            format: int64
+          end_time:
+            type: number
+            format: int64
+            nullable: true
 
     DropRatingCategory:
       type: object
@@ -869,18 +1163,18 @@ components:
           format: int64
 
     DropContextProfileContext:
-        type: object
-        required:
-          - categories
-          - rating
-        properties:
-          categories:
-            type: array
-            items:
-              $ref: '#/components/schemas/DropRatingCategory'
-          rating:
-            type: number
-            format: int64
+      type: object
+      required:
+        - categories
+        - rating
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRatingCategory"
+        rating:
+          type: number
+          format: int64
 
     DropPartContextProfileContext:
       type: object
@@ -906,21 +1200,24 @@ components:
           nullable: true
         quoted_drop:
           anyOf:
-            - $ref: '#/components/schemas/QuotedDrop'
-            - type: 'null'
+            - $ref: "#/components/schemas/QuotedDrop"
+            - type: "null"
         media:
           type: array
           items:
-            $ref: '#/components/schemas/DropMedia'
+            $ref: "#/components/schemas/DropMedia"
 
     CreateDropRequest:
       type: object
       required:
+        - wave_id
         - referenced_nfts
         - mentioned_users
         - metadata
         - parts
       properties:
+        wave_id:
+          type: string
         title:
           type: string
           maxLength: 250
@@ -929,19 +1226,19 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/CreateDropPart'
+            $ref: "#/components/schemas/CreateDropPart"
         referenced_nfts:
           type: array
           items:
-            $ref: '#/components/schemas/DropReferencedNFT'
+            $ref: "#/components/schemas/DropReferencedNFT"
         mentioned_users:
           type: array
           items:
-            $ref: '#/components/schemas/DropMentionedUser'
+            $ref: "#/components/schemas/DropMentionedUser"
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/DropMetadata'
+            $ref: "#/components/schemas/DropMetadata"
 
     DropMedia:
       type: object
@@ -986,7 +1283,7 @@ components:
           type: string
           format: uuid
         author:
-          $ref: '#/components/schemas/ProfileMin'
+          $ref: "#/components/schemas/ProfileMin"
         target_id:
           type: string
         contents:
@@ -1013,7 +1310,7 @@ components:
           type: number
           format: int64
         author:
-          $ref: '#/components/schemas/ProfileMin'
+          $ref: "#/components/schemas/ProfileMin"
         comment:
           type: string
           maxLength: 2000
@@ -1031,16 +1328,16 @@ components:
           maxLength: 2000
 
     DropCommentsPage:
-        type: object
-        required:
-          - data
-        allOf:
-          - $ref: '#/components/schemas/PageBase'
-        properties:
-          data:
-            type: array
-            items:
-                $ref: '#/components/schemas/DropComment'
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropComment"
 
     WaveScopeType:
       type: string
@@ -1055,9 +1352,9 @@ components:
         - curation_id
       properties:
         type:
-          $ref: '#/components/schemas/WaveScopeType'
+          $ref: "#/components/schemas/WaveScopeType"
         curation_id:
-          description: 'Only relevant when type=CURATED.'
+          description: "Only relevant when type=CURATED."
           type: string
           nullable: true
 
@@ -1070,12 +1367,12 @@ components:
         - curation
       properties:
         type:
-          $ref: '#/components/schemas/WaveScopeType'
+          $ref: "#/components/schemas/WaveScopeType"
         curation:
-          description: 'Only relevant when type=CURATED.'
+          description: "Only relevant when type=CURATED."
           anyOf:
-            - type: 'null'
-            - $ref: '#/components/schemas/Curation'
+            - type: "null"
+            - $ref: "#/components/schemas/Curation"
 
     WaveCreditType:
       type: string
@@ -1129,26 +1426,26 @@ components:
         - creditor_id
       properties:
         scope:
-          $ref: '#/components/schemas/CreateNewWaveScope'
+          $ref: "#/components/schemas/CreateNewWaveScope"
         credit_type:
-          $ref: '#/components/schemas/WaveCreditType'
+          $ref: "#/components/schemas/WaveCreditType"
         credit_scope:
-          $ref: '#/components/schemas/WaveCreditScope'
+          $ref: "#/components/schemas/WaveCreditScope"
         credit_category:
-          description: "Only relevant when credit_type=REP. 
-            The REP category which is usable as credit. 
+          description: "Only relevant when credit_type=REP.
+            The REP category which is usable as credit.
             If not set then all categories will be usable as voting credits."
           type: string
           nullable: true
         creditor_id:
-          description: 'Only relevant when credit_type=REP'
+          description: "Only relevant when credit_type=REP"
           type: string
           nullable: true
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
         period:
-          $ref: '#/components/schemas/IntRange'
+          $ref: "#/components/schemas/IntRange"
 
     WaveVotingConfig:
       type: object
@@ -1161,27 +1458,27 @@ components:
         - creditor
       properties:
         scope:
-          $ref: '#/components/schemas/WaveScope'
+          $ref: "#/components/schemas/WaveScope"
         credit_type:
-          $ref: '#/components/schemas/WaveCreditType'
+          $ref: "#/components/schemas/WaveCreditType"
         credit_scope:
-          $ref: '#/components/schemas/WaveCreditScope'
+          $ref: "#/components/schemas/WaveCreditScope"
         credit_category:
-          description: "Only relevant when credit_type=REP. 
-            The REP category which is usable as credit. 
+          description: "Only relevant when credit_type=REP.
+            The REP category which is usable as credit.
             If not set then all categories will be usable as voting credits."
           type: string
           nullable: true
         creditor:
-          description: 'Only relevant when credit_type=REP'
+          description: "Only relevant when credit_type=REP"
           anyOf:
-            - type: 'null'
-            - $ref: '#/components/schemas/ProfileMin'
+            - type: "null"
+            - $ref: "#/components/schemas/ProfileMin"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
         period:
-          $ref: '#/components/schemas/IntRange'
+          $ref: "#/components/schemas/IntRange"
 
     WaveVisibilityConfig:
       type: object
@@ -1189,7 +1486,7 @@ components:
         - scope
       properties:
         scope:
-          $ref: '#/components/schemas/WaveScope'
+          $ref: "#/components/schemas/WaveScope"
 
     CreateNewWaveVisibilityConfig:
       type: object
@@ -1197,7 +1494,7 @@ components:
         - scope
       properties:
         scope:
-          $ref: '#/components/schemas/CreateNewWaveScope'
+          $ref: "#/components/schemas/CreateNewWaveScope"
 
     WaveParticipationConfig:
       type: object
@@ -1208,9 +1505,9 @@ components:
         - no_of_applications_allowed_per_participant
       properties:
         scope:
-          $ref: '#/components/schemas/WaveScope'
+          $ref: "#/components/schemas/WaveScope"
         no_of_applications_allowed_per_participant:
-          description: 'The number of applications allowed per participant. Infinite if omitted.'
+          description: "The number of applications allowed per participant. Infinite if omitted."
           type: integer
           format: int64
           minimum: 1
@@ -1221,12 +1518,12 @@ components:
             Empty array if nothing is required.
           type: array
           items:
-            $ref: '#/components/schemas/WaveRequiredMetadata'
+            $ref: "#/components/schemas/WaveRequiredMetadata"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
         period:
-          $ref: '#/components/schemas/IntRange'
+          $ref: "#/components/schemas/IntRange"
 
     CreateNewWaveParticipationConfig:
       type: object
@@ -1237,9 +1534,9 @@ components:
         - no_of_applications_allowed_per_participant
       properties:
         scope:
-          $ref: '#/components/schemas/CreateNewWaveScope'
+          $ref: "#/components/schemas/CreateNewWaveScope"
         no_of_applications_allowed_per_participant:
-          description: 'The number of applications allowed per participant. Infinite if omitted.'
+          description: "The number of applications allowed per participant. Infinite if omitted."
           type: integer
           format: int64
           nullable: true
@@ -1250,12 +1547,12 @@ components:
             Empty array if nothing is required.
           type: array
           items:
-            $ref: '#/components/schemas/WaveRequiredMetadata'
+            $ref: "#/components/schemas/WaveRequiredMetadata"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
         period:
-          $ref: '#/components/schemas/IntRange'
+          $ref: "#/components/schemas/IntRange"
 
     WaveConfig:
       type: object
@@ -1267,12 +1564,12 @@ components:
         - max_winners
       properties:
         type:
-          $ref: '#/components/schemas/WaveType'
+          $ref: "#/components/schemas/WaveType"
         winning_thresholds:
           description: Drops which rate tally ends up in this range will win. Must be set if and only if type is VOTE_TALLY_IN_RANGE
           anyOf:
-            - type: 'null'
-            - $ref: '#/components/schemas/IntRange'
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
         max_winners:
           description: This amount of top rated drops will win. Must be set if and only if type is TOP_VOTED
           type: integer
@@ -1287,8 +1584,8 @@ components:
           minimum: 1
         period:
           anyOf:
-            - type: 'null'
-            - $ref: '#/components/schemas/IntRange'
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
 
     WaveOutcome:
       type: object
@@ -1327,7 +1624,7 @@ components:
           type: number
           format: int64
         author:
-          $ref: '#/components/schemas/ProfileMin'
+          $ref: "#/components/schemas/ProfileMin"
         name:
           description: The name of the wave
           type: string
@@ -1335,17 +1632,17 @@ components:
           description: The description of the wave
           type: string
         voting:
-          $ref: '#/components/schemas/WaveVotingConfig'
+          $ref: "#/components/schemas/WaveVotingConfig"
         visibility:
-          $ref: '#/components/schemas/WaveVisibilityConfig'
+          $ref: "#/components/schemas/WaveVisibilityConfig"
         participation:
-          $ref: '#/components/schemas/WaveParticipationConfig'
+          $ref: "#/components/schemas/WaveParticipationConfig"
         wave:
-          $ref: '#/components/schemas/WaveConfig'
+          $ref: "#/components/schemas/WaveConfig"
         outcomes:
           type: array
           items:
-            $ref: '#/components/schemas/WaveOutcome'
+            $ref: "#/components/schemas/WaveOutcome"
 
     CreateNewWave:
       type: object
@@ -1366,17 +1663,17 @@ components:
           description: The description of the wave
           type: string
         voting:
-          $ref: '#/components/schemas/CreateNewWaveVotingConfig'
+          $ref: "#/components/schemas/CreateNewWaveVotingConfig"
         visibility:
-          $ref: '#/components/schemas/CreateNewWaveVisibilityConfig'
+          $ref: "#/components/schemas/CreateNewWaveVisibilityConfig"
         participation:
-          $ref: '#/components/schemas/CreateNewWaveParticipationConfig'
+          $ref: "#/components/schemas/CreateNewWaveParticipationConfig"
         wave:
-          $ref: '#/components/schemas/WaveConfig'
+          $ref: "#/components/schemas/WaveConfig"
         outcomes:
           type: array
           items:
-            $ref: '#/components/schemas/WaveOutcome'
+            $ref: "#/components/schemas/WaveOutcome"
 
     CreateNewProfileProxy:
       type: object
@@ -1390,92 +1687,71 @@ components:
       type: object
       required:
         - id
-        - target_id
+        - granted_to
         - created_at
         - created_by
+        - actions
       properties:
         id:
           type: string
-        target_id:
-          type: string
+        granted_to:
+          $ref: "#/components/schemas/ProfileMin"
         created_at:
           type: number
         created_by:
-          type: string
+          $ref: "#/components/schemas/ProfileMin"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileProxyAction"
 
     CreateNewProfileProxyAllocateRepAction:
       type: object
       required:
         - action_type
-        - start_time
         - end_time
         - credit_amount
-        - credit_category
       properties:
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        start_time:
-          type: number
-          format: int64
+          $ref: "#/components/schemas/ProfileProxyActionType"
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
         credit_amount:
           type: number
           format: int64
-        group_id:
-          anyOf:
-            - type: 'null'
-            - type: string
-        credit_category:
-          anyOf:
-            - type: 'null'
-            - type: string
 
     CreateNewProfileProxyAllocateCicAction:
       type: object
       required:
         - action_type
-        - start_time
         - end_time
         - credit_amount
-        - group_id
       properties:
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        start_time:
-          type: number
-          format: int64
+          $ref: "#/components/schemas/ProfileProxyActionType"
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
         credit_amount:
           type: number
           format: int64
-        group_id:
-          anyOf:
-            - type: 'null'
-            - type: string
 
     CreateNewProfileProxyCreateWaveAction:
       type: object
       required:
         - action_type
-        - start_time
         - end_time
       properties:
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        start_time:
-          type: number
-          format: int64
+          $ref: "#/components/schemas/ProfileProxyActionType"
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
 
@@ -1483,17 +1759,13 @@ components:
       type: object
       required:
         - action_type
-        - start_time
         - end_time
       properties:
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        start_time:
-          type: number
-          format: int64
+          $ref: "#/components/schemas/ProfileProxyActionType"
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
 
@@ -1501,38 +1773,30 @@ components:
       type: object
       required:
         - action_type
-        - start_time
         - end_time
       properties:
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        start_time:
-          type: number
-          format: int64
+          $ref: "#/components/schemas/ProfileProxyActionType"
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
     CreateNewProfileProxyRateWaveDropAction:
       type: object
       required:
         - action_type
-        - start_time
         - end_time
       properties:
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        start_time:
-          type: number
-          format: int64
+          $ref: "#/components/schemas/ProfileProxyActionType"
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
 
-    CreateNewProfileProxyActionType:
+    ProfileProxyActionType:
       type: string
       enum:
         - ALLOCATE_REP
@@ -1547,7 +1811,8 @@ components:
         - id
         - proxy_id
         - action_type
-        - action_data
+        - credit_amount
+        - credit_spent
         - start_time
         - end_time
         - accepted_at
@@ -1561,15 +1826,23 @@ components:
         proxy_id:
           type: string
         action_type:
-          $ref: '#/components/schemas/CreateNewProfileProxyActionType'
-        action_data:
-          type: object
-        start_ime:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        credit_amount:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+        credit_spent:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+        start_time:
           type: number
           format: int64
         end_time:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
         created_at:
@@ -1577,23 +1850,241 @@ components:
           format: int64
         accepted_at:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
         rejected_at:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
         revoked_at:
           anyOf:
-            - type: 'null'
+            - type: "null"
             - type: number
               format: int64
         is_active:
           type: boolean
 
+    Nft:
+      type: object
+      required:
+        - id
+        - contract
+        - mint_price
+        - supply
+        - name
+        - collection
+        - token_type
+        - hodl_rate
+        - description
+        - artist
+        - uri
+        - thumbnail
+        - image
+        - animation
+        - metadata
+        - tdh
+        - tdh__raw
+        - tdh_rank
+        - market_cap
+        - floor_price
+        - scaled
+        - compressed_animation
+        - icon
+        - total_volume_last_24_hours
+        - total_volume_last_7_days
+        - total_volume_last_1_month
+        - total_volume
+        - created_at
+        - mint_date
+        - boosted_tdh
+        - artist_seize_handle
+        - has_distribution
+      properties:
+        id:
+          type: integer
+          format: int64
+        contract:
+          type: string
+        mint_price:
+          type: number
+          format: float
+        supply:
+          type: integer
+          format: int64
+        name:
+          type: string
+        collection:
+          type: string
+        token_type:
+          type: string
+          enum:
+            - ERC1155
+            - EEC721
+        hodl_rate:
+          type: number
+          format: float
+        description:
+          type: string
+        artist:
+          type: string
+        uri:
+          type: string
+          nullable: true
+        thumbnail:
+          type: string
+        image:
+          type: string
+          nullable: true
+        animation:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+        tdh:
+          type: number
+          format: int64
+        tdh__raw:
+          type: number
+          format: int64
+        tdh_rank:
+          type: number
+          format: int64
+        market_cap:
+          type: number
+          format: float
+        floor_price:
+          type: number
+          format: float
+        scaled:
+          type: string
+        compressed_animation:
+          type: string
+          nullable: true
+        icon:
+          type: string
+        total_volume_last_24_hours:
+          type: number
+          format: float
+        total_volume_last_7_days:
+          type: number
+          format: float
+        total_volume_last_1_month:
+          type: number
+          format: float
+        total_volume:
+          type: number
+          format: float
+        created_at:
+          type: string
+          format: date-time
+        mint_date:
+          type: string
+          format: date-time
+        boosted_tdh:
+          type: number
+          format: int64
+        artist_seize_handle:
+          type: string
+          nullable: true
+        has_distribution:
+          type: boolean
 
+    NftsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Nft"
+
+    NonceResponse:
+      type: object
+      required:
+        - nonce
+        - server_signature
+      properties:
+        nonce:
+          type: string
+        server_signature:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - client_signature
+        - server_signature
+      properties:
+        client_signature:
+          type: string
+        server_signature:
+          type: string
+        role:
+          type: string
+
+    LoginResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    ChangeProfileRepRating:
+        type: object
+        required:
+            - amount
+            - category
+        properties:
+          amount:
+            type: number
+            format: int64
+          category:
+            type: string
+            maxLength: 100
+            minLength: 1
+            pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
+
+    ChangeProfileRepRatingResponse:
+      type: object
+      required:
+        - total_rep_rating_for_category
+        - rep_rating_for_category_by_user
+      properties:
+        total_rep_rating_for_category:
+          type: number
+          format: int64
+        rep_rating_for_category_by_user:
+          type: number
+          format: int64
+
+    ChangeProfileCicRating:
+      type: object
+      required:
+        - amount
+        - category
+      properties:
+        amount:
+          type: number
+          format: int64
+
+    ChangeProfileCicRatingResponse:
+      type: object
+      required:
+        - total_cic_rating
+        - cic_rating_by_user
+      properties:
+        total_cic_rating:
+          type: number
+          format: int64
+        cic_rating_by_user:
+          type: number
+          format: int64
 
 security:
   - bearerAuth: []

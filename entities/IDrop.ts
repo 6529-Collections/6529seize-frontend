@@ -3,7 +3,7 @@ import { FullPageRequest } from "../helpers/Types";
 import {
   ProfileActivityLogDropCreated,
   ProfileActivityLogDropComment,
-  ProfileActivityLogDropRepEdit,
+  ProfileActivityLogDropRatingEdit,
   ProfileMinimal,
 } from "./IProfile";
 
@@ -51,14 +51,14 @@ export interface DropRateChangeRequest {
 
 export type DropActivityLogBase =
   | ProfileActivityLogDropComment
-  | ProfileActivityLogDropRepEdit;
+  | ProfileActivityLogDropRatingEdit;
 
 export interface DropActivityLogDiscussion
   extends ProfileActivityLogDropComment {
   readonly author: ProfileMin | null;
 }
 
-export interface DropActivityLogRepEdit extends ProfileActivityLogDropRepEdit {
+export interface DropActivityLogRepEdit extends ProfileActivityLogDropRatingEdit {
   readonly author: ProfileMin | null;
 }
 

@@ -179,7 +179,7 @@ export default function NewMentionsPlugin({
         .map(
           (result) =>
             new MentionTypeaheadOption({
-              id: result.profile_id,
+              id: result.profile_id ?? "",
               handle: result.handle ?? result.wallet,
               display: result.display,
               picture: result.pfp,

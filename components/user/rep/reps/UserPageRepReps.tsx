@@ -7,6 +7,7 @@ import {
 import UserPageRepRepsTop from "./UserPageRepRepsTop";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "../../../auth/Auth";
+import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
 
 const TOP_REPS_COUNT = 5;
 
@@ -17,7 +18,7 @@ export default function UserPageRepReps({
   readonly repRates: ApiProfileRepRatesState | null;
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const sortReps = (items: RatingStats[]) =>
     [...items].sort((a, d) => {
@@ -53,6 +54,14 @@ export default function UserPageRepReps({
     if (!myProfile?.profile?.handle) {
       return false;
     }
+    if (activeProfileProxy) {
+      if (profile.profile?.handle === activeProfileProxy.created_by.handle) {
+        return false;
+      }
+      return activeProfileProxy.actions.some(
+        (action) => action.action_type === ProfileProxyActionType.AllocateRep
+      );
+    }
     if (myProfile.profile.handle === targetProfile.profile?.handle) {
       return false;
     }
@@ -87,7 +96,6 @@ export default function UserPageRepReps({
           <UserPageRepRepsTop
             reps={topReps}
             profile={profile}
-            giverAvailableRep={repRates?.rep_rates_left_for_rater ?? 0}
             canEditRep={canEditRep}
           />
           <div className="tw-mt-6 lg:tw-mt-8">

@@ -1,19 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import CommonInput from "../../../../utils/input/CommonInput";
-import CurationBuildFiltersRepSearchDropdown from "./CurationBuildFiltersRepSearchDropdown";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
+import CommonInput from "../input/CommonInput";
+import CommonRepCategorySearchResults from "./CommonRepCategorySearchResults";
 
 const MIN_SEARCH_LENGTH = 3;
-
-export default function CurationBuildFiltersRepSearch({
+export default function CommonRepCategorySearch({
   category,
   setCategory,
+  disabledCategories = [],
 }: {
   readonly category: string | null;
   readonly setCategory: (newV: string | null) => void;
+  readonly disabledCategories?: string[];
 }) {
   const [searchCriteria, setSearchCriteria] = useState<string | null>(category);
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
@@ -73,10 +74,11 @@ export default function CurationBuildFiltersRepSearch({
         onChange={onSearchCriteriaChange}
         onFocusChange={onFocusChange}
       />
-      <CurationBuildFiltersRepSearchDropdown
+      <CommonRepCategorySearchResults
         open={isOpen}
         selected={category}
         categories={data ?? []}
+        disabledCategories={disabledCategories}
         onSelect={onValueChange}
       />
     </div>

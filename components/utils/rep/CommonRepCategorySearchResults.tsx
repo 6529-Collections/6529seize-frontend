@@ -1,15 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
-import CurationBuildFiltersRepSearchDropdownItem from "./CurationBuildFiltersRepSearchDropdownItem";
+import CommonRepCategorySearchResult from "./CommonRepCategorySearchResult";
 
-export default function CurationBuildFiltersRepSearchDropdown({
+export default function CommonRepCategorySearchResults({
   open,
   categories,
   selected,
+  disabledCategories = [],
   onSelect,
 }: {
   readonly open: boolean;
   readonly categories: string[];
   readonly selected: string | null;
+  readonly disabledCategories?: string[];
   readonly onSelect: (newV: string) => void;
 }) {
   const noResultsText =
@@ -32,10 +34,11 @@ export default function CurationBuildFiltersRepSearchDropdown({
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {categories.length ? (
                     categories.map((category) => (
-                      <CurationBuildFiltersRepSearchDropdownItem
+                      <CommonRepCategorySearchResult
                         key={category}
                         category={category}
                         selected={selected}
+                        disabledCategories={disabledCategories}
                         onSelect={onSelect}
                       />
                     ))

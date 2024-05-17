@@ -12,7 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export enum CreateNewProfileProxyActionType {
+export enum ProfileProxyActionType {
     AllocateRep = 'ALLOCATE_REP',
     AllocateCic = 'ALLOCATE_CIC',
     CreateWave = 'CREATE_WAVE',
