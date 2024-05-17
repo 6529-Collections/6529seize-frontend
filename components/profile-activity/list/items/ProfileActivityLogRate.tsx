@@ -1,6 +1,8 @@
 import {
+  ProfileActivityLogProxyRatingEdit,
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
+  ProfileActivityLogType,
   RateMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";
@@ -36,7 +38,9 @@ const TO_FROM: Record<ProfileActivityLogRateType, string> = {
 export default function ProfileActivityLogRate({
   log,
 }: {
-  readonly log: ProfileActivityLogRatingEdit;
+  readonly log:
+    | ProfileActivityLogRatingEdit
+    | ProfileActivityLogProxyRatingEdit;
 }) {
   const isSystemAdjustment =
     log.contents.change_reason ===
@@ -82,6 +86,16 @@ export default function ProfileActivityLogRate({
 
   return (
     <>
+      {log.type === ProfileActivityLogType.PROXY_RATING_EDIT &&
+        !!log.contents.rater_profile_handle && (
+          <Link
+            href={`/${log.contents.rater_profile_handle}`}
+            target="_blank"
+            className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+          >
+            (Proxy for {log.contents.rater_profile_handle})
+          </Link>
+        )}
       <ProfileActivityLogItemAction action={ACTION[ratingType]} />
       <span
         className={`${
@@ -111,15 +125,16 @@ export default function ProfileActivityLogRate({
         tabTarget={tabTarget}
       />
 
-      {log.contents.proxy_handle && (
-        <Link
-          href={`/${log.contents.proxy_handle}`}
-          target="_blank"
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
-        >
-          (Proxy: {log.contents.proxy_handle})
-        </Link>
-      )}
+      {log.type === ProfileActivityLogType.RATING_EDIT &&
+        !!log.contents.proxy_handle && (
+          <Link
+            href={`/${log.contents.proxy_handle}`}
+            target="_blank"
+            className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+          >
+            (Proxy: {log.contents.proxy_handle})
+          </Link>
+        )}
 
       {isSystemAdjustment && (
         <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">
