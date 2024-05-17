@@ -10,21 +10,18 @@
  * Do not edit the class manually.
  */
 
-import { CreateNewProfileProxyActionType } from '../models/CreateNewProfileProxyActionType';
 import { CreateNewProfileProxyAllocateCicAction } from '../models/CreateNewProfileProxyAllocateCicAction';
 import { CreateNewProfileProxyAllocateRepAction } from '../models/CreateNewProfileProxyAllocateRepAction';
 import { CreateNewProfileProxyCreateWaveAction } from '../models/CreateNewProfileProxyCreateWaveAction';
 import { CreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
 import { CreateNewProfileProxyReadWaveAction } from '../models/CreateNewProfileProxyReadWaveAction';
+import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
 export class AddActionToProxyRequest {
-    'action_type': CreateNewProfileProxyActionType;
-    'start_time': number;
+    'action_type': ProfileProxyActionType;
     'end_time': number | null;
     'credit_amount': number;
-    'group_id': string | null;
-    'credit_category': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,14 +29,8 @@ export class AddActionToProxyRequest {
         {
             "name": "action_type",
             "baseName": "action_type",
-            "type": "CreateNewProfileProxyActionType",
+            "type": "ProfileProxyActionType",
             "format": ""
-        },
-        {
-            "name": "start_time",
-            "baseName": "start_time",
-            "type": "number",
-            "format": "int64"
         },
         {
             "name": "end_time",
@@ -52,18 +43,6 @@ export class AddActionToProxyRequest {
             "baseName": "credit_amount",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "group_id",
-            "baseName": "group_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "credit_category",
-            "baseName": "credit_category",
-            "type": "string",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

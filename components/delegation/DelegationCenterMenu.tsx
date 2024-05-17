@@ -374,6 +374,19 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                       Consolidation Use Cases
                     </Col>
                   </Row>
+                  <Row className="pt-1 pb-2">
+                    <Col
+                      onClick={() =>
+                        props.setActiveSection(DelegationCenterSection.CHECKER)
+                      }
+                      className={`${styles.menuLeftItem} ${
+                        props.section === DelegationCenterSection.CHECKER
+                          ? styles.menuLeftItemActive
+                          : ""
+                      }`}>
+                      Wallet Checker
+                    </Col>
+                  </Row>
                 </Container>
               </Col>
               <Col>

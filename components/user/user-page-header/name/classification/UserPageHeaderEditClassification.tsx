@@ -85,7 +85,6 @@ export default function UserPageHeaderEditClassification({
 
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: profile.profile.handle,
-      primary_wallet: profile.profile?.primary_wallet,
       classification,
     };
 

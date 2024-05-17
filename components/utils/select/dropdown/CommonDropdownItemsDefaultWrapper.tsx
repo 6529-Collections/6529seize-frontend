@@ -7,12 +7,14 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
   setOpen,
   buttonRef,
   buttonPosition,
+  dynamicPosition = true,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement>;
   readonly buttonPosition?: { readonly bottom: number; readonly right: number };
+  readonly dynamicPosition?: boolean;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -26,13 +28,14 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!dynamicPosition) return;
     if (buttonPosition?.right && dropdownRef.current) {
       const { right } = buttonPosition;
       dropdownRef.current.style.left = `${
         right - dropdownRef.current.offsetWidth
       }px`;
     }
-  }, [buttonPosition, dropdownRef]);
+  }, [buttonPosition, dropdownRef, dynamicPosition]);
 
   return (
     <div className="tw-absolute" ref={dropdownRef}>

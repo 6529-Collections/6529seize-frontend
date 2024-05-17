@@ -1,6 +1,6 @@
 import {
   ProfileActivityLogRatingEditContentChangeReason,
-  type ProfileActivityLogDropRepEdit,
+  type ProfileActivityLogRatingEdit,
 } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -24,7 +24,7 @@ const TO_FROM: Record<ProfileActivityLogType, string> = {
 export default function ProfileActivityLogDropRepEdit({
   log,
 }: {
-  readonly log: ProfileActivityLogDropRepEdit;
+  readonly log: ProfileActivityLogRatingEdit;
 }) {
   const isSystemAdjustment =
     log.contents.change_reason ===
