@@ -27,6 +27,7 @@ export default function UserPageIdentityActivityLogItem({
   const logType = log.type;
   switch (logType) {
     case ProfileActivityLogType.RATING_EDIT:
+    case ProfileActivityLogType.PROXY_RATING_EDIT:
       return <ProfileActivityLogRate log={log} />;
     case ProfileActivityLogType.HANDLE_EDIT:
       return <ProfileActivityLogHandle log={log} />;
@@ -61,6 +62,7 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.DROP_COMMENT:
     case ProfileActivityLogType.DROP_RATING_EDIT:
     case ProfileActivityLogType.DROP_CREATED:
+    case ProfileActivityLogType.PROXY_DROP_RATING_EDIT:
       return <></>;
     default:
       assertUnreachable(logType);
