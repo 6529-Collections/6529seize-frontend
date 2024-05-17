@@ -114,9 +114,7 @@ export default function ProfileActivityLogRate({
           target="_blank"
           className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
         >
-          <span className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-gray-50 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-gray-600 tw-ring-1 tw-ring-inset tw-ring-gray-500/10">
-            Proxy: {log.contents.proxy_handle}
-          </span>
+          (Proxy: {log.contents.proxy_handle})
         </Link>
       )}
 
