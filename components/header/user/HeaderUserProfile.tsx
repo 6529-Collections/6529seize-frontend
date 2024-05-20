@@ -88,10 +88,10 @@ export default function HeaderUserProfile({
         <img
           src={userContent.pfpUrl}
           alt="Profile Picture"
-          className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+          className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
         />
       ) : (
-        <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+        <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
       )}
       <div className="tw-flex tw-gap-x-2 tw-items-center">
         <span>{userContent.label}</span>

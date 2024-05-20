@@ -15,12 +15,20 @@ export default function HeaderUserProxyDropdownItem({
     <li className="tw-h-full">
       <button
         type="button"
-        className="hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
         onClick={() => onActivateProfileProxy(isActive ? null : profileProxy)}
       >
-        <div className="tw-w-44 tw-truncate tw-inline-flex tw-items-center">
-          <span className="tw-text-sm tw-font-medium tw-text-white">
+        <img
+          src=""
+          alt="Profile Picture"
+          className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+        />
+        <div className="tw-w-44 tw-truncate tw-inline-flex tw-items-center tw-justify-between">
+          <span className="tw-text-md tw-font-medium tw-text-white">
             {profileProxy.created_by.handle}
+            <span className="tw-ml-2 tw-italic tw-text-sm tw-text-iron-400 tw-font-normal">
+              Proxy
+            </span>
           </span>
           {isActive && (
             <svg

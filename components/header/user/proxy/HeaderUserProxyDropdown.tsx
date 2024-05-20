@@ -34,17 +34,25 @@ export default function HeaderUserProxyDropdown({
             transition={{ duration: 0.2 }}
           >
             <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-              <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-                <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+              <div className="tw-py-2 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
+                <ul className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0 tw-mb-0 tw-list-none">
                   <li className="tw-h-full">
                     <button
                       type="button"
-                      className="hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                      className="hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
                       onClick={() => onActivateProfileProxy(null)}
                     >
-                      <div className="tw-w-44 tw-truncate tw-inline-flex tw-items-center">
-                        <span className="tw-text-sm tw-font-medium tw-text-white">
+                      <img
+                        src=""
+                        alt="Profile Picture"
+                        className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+                      />
+                      <div className="tw-w-44 tw-truncate tw-inline-flex tw-items-center tw-justify-between">
+                        <span className="tw-text-md tw-font-medium tw-text-white">
                           {profile.profile?.handle}
+                          <span className="tw-ml-2 tw-italic tw-text-sm tw-text-iron-400 tw-font-normal">
+                            Proxy
+                          </span>
                         </span>
                         {!activeProfileProxy && (
                           <svg
