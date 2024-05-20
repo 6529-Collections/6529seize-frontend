@@ -17,8 +17,8 @@ export default function HeaderUserProxyDropdown({
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
 
-  const onActivateProfileProxy = (profileProxy: ProfileProxy | null) => {
-    setActiveProfileProxy(profileProxy);
+  const onActivateProfileProxy = async (profileProxy: ProfileProxy | null) => {
+    await setActiveProfileProxy(profileProxy);
     onClose();
   };
 
@@ -27,7 +27,7 @@ export default function HeaderUserProxyDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-absolute tw-right-0 tw-z-10 tw-mt-1 tw-w-56 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-absolute tw-right-0 tw-z-10 tw-mt-1 tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -39,20 +39,25 @@ export default function HeaderUserProxyDropdown({
                   <li className="tw-h-full">
                     <button
                       type="button"
-                      className="hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                      className={`${
+                        activeProfileProxy
+                          ? "tw-bg-transparent hover:tw-bg-iron-700"
+                          : "tw-bg-iron-700"
+                      } tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
                       onClick={() => onActivateProfileProxy(null)}
                     >
-                      <img
-                        src=""
-                        alt="Profile Picture"
-                        className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
-                      />
-                      <div className="tw-w-44 tw-truncate tw-inline-flex tw-items-center tw-justify-between">
+                      {profile.profile?.pfp_url ? (
+                        <img
+                          src={profile.profile?.pfp_url}
+                          alt="Profile Picture"
+                          className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+                        />
+                      ) : (
+                        <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+                      )}
+                      <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                         <span className="tw-text-md tw-font-medium tw-text-white">
                           {profile.profile?.handle}
-                          <span className="tw-ml-2 tw-italic tw-text-sm tw-text-iron-400 tw-font-normal">
-                            Proxy
-                          </span>
                         </span>
                         {!activeProfileProxy && (
                           <svg

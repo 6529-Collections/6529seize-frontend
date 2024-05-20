@@ -21,7 +21,7 @@ export default function HeaderUserContext({
             <HeaderUserProxy profile={profile} />
           )}
         </div>
-        <button
+        {/* <button
           type="button"
           aria-label="Notifications"
           title="Notifications"
@@ -44,7 +44,7 @@ export default function HeaderUserContext({
             />
           </svg>
           <div className="tw-absolute tw-rounded-full -tw-right-1 -tw-top-1 tw-bg-red tw-h-3 tw-w-3"></div>
-        </button>
+        </button> */}
         <HeaderSearchButton />
         <HeaderUserDisconnect />
       </div>
