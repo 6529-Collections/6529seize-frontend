@@ -7,7 +7,6 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import HeaderConnect from "./HeaderConnect";
 import { useAccount } from "wagmi";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
