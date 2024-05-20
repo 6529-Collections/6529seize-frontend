@@ -284,7 +284,7 @@ export default function UserPageIdentityHeaderCICRate({
         isTooltip={isTooltip}
         profile={profile}
         minMaxValues={minMaxValues}
-        heroAvailableRep={
+        heroAvailableCredit={
           currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
         }
       />

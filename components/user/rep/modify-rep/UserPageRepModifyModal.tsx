@@ -386,7 +386,7 @@ export default function UserPageRepModifyModal({
               <UserPageRepModifyModalRaterStats
                 repState={repState}
                 minMaxValues={minMaxValues}
-                heroAvailableRep={heroAvailableRep}
+                heroAvailableCredit={heroAvailableRep}
               />
             )}
             <form onSubmit={onSubmit} className="tw-mt-4">
