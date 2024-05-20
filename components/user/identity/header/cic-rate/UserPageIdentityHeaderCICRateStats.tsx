@@ -9,7 +9,7 @@ export default function UserPageIdentityHeaderCICRateStats({
   isTooltip,
   profile,
   minMaxValues,
-  heroAvailableRep,
+  heroAvailableCredit,
 }: {
   readonly isTooltip: boolean;
   readonly profile: IProfileAndConsolidations;
@@ -17,20 +17,17 @@ export default function UserPageIdentityHeaderCICRateStats({
     readonly min: number;
     readonly max: number;
   };
-  readonly heroAvailableRep: number;
+  readonly heroAvailableCredit: number;
 }) {
   const { activeProfileProxy } = useContext(AuthContext);
   const getProxyAvailableCredit = (): number | null => {
-    const repProxy = activeProfileProxy?.actions.find(
+    const proxy = activeProfileProxy?.actions.find(
       (action) => action.action_type === ProfileProxyActionType.AllocateCic
     );
-    if (!repProxy) {
+    if (!proxy) {
       return null;
     }
-    return Math.max(
-      0,
-      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0)
-    );
+    return Math.max(0, (proxy.credit_amount ?? 0) - (proxy.credit_spent ?? 0));
   };
   const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
     number | null
@@ -39,6 +36,21 @@ export default function UserPageIdentityHeaderCICRateStats({
   useEffect(
     () => setProxyAvailableCredit(getProxyAvailableCredit()),
     [activeProfileProxy]
+  );
+
+  const getAvailableCredit = (): number => {
+    if (!activeProfileProxy) {
+      return heroAvailableCredit;
+    }
+    return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
+      ? heroAvailableCredit
+      : proxyAvailableCredit ?? 0;
+  };
+
+  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
+  useEffect(
+    () => setAvailableCredit(getAvailableCredit()),
+    [heroAvailableCredit, proxyAvailableCredit]
   );
   return (
     <div
@@ -59,19 +71,11 @@ export default function UserPageIdentityHeaderCICRateStats({
       <span className="tw-block tw-text-iron-300 tw-font-normal">
         <span>Your available CIC:</span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-          {formatNumberWithCommas(heroAvailableRep)}
+          {formatNumberWithCommas(availableCredit)}
         </span>
       </span>
       {activeProfileProxy ? (
         <>
-          {typeof proxyAvailableCredit === "number" && (
-            <span className="tw-block tw-text-iron-300 tw-font-normal">
-              <span>Your available Credit:</span>
-              <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-                {formatNumberWithCommas(proxyAvailableCredit)}
-              </span>
-            </span>
-          )}
           <span className="tw-block tw-text-iron-300 tw-font-normal">
             <span>Your max CIC Rating to {profile.profile?.handle}:</span>
             <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">

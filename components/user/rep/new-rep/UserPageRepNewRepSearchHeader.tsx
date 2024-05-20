@@ -86,6 +86,22 @@ export default function UserPageRepNewRepSearchHeader({
     () => setActiveRepRates(getActiveRepRates()),
     [activeProfileProxy, proxyGrantorRepRates, repRates]
   );
+
+  const getAvailableCredit = (): number => {
+    if (!activeProfileProxy) {
+      return activeRepRates.available;
+    }
+    return Math.abs(activeRepRates.available) <
+      Math.abs(activeRepRates.proxyCreditLeft ?? 0)
+      ? activeRepRates.available
+      : activeRepRates.proxyCreditLeft ?? 0;
+  };
+
+  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
+  useEffect(
+    () => setAvailableCredit(getAvailableCredit()),
+    [activeRepRates, activeRepRates.proxyCreditLeft]
+  );
   return (
     <div className="tw-flex tw-flex-col tw-space-y-1">
       {!!activeProfileProxy && (
@@ -107,19 +123,9 @@ export default function UserPageRepNewRepSearchHeader({
           <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
             <span>Your available Rep:</span>
             <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-              {formatNumberWithCommas(activeRepRates.available)}
+              {formatNumberWithCommas(availableCredit)}
             </span>
           </span>
-          {typeof activeRepRates.proxyCreditLeft === "number" && (
-            <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-              <span>Your available credit:</span>
-              <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-                {repRates
-                  ? formatNumberWithCommas(activeRepRates.proxyCreditLeft)
-                  : ""}
-              </span>
-            </span>
-          )}
         </>
       )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
