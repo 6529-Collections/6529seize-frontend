@@ -1,6 +1,7 @@
 import { useAccount } from "wagmi";
 import HeaderUserConnected from "./HeaderUserConnected";
 import HeaderUserConnect from "./HeaderUserConnect";
+import HeaderSearchButton from "../header-search/HeaderSearchButton";
 
 export default function HeaderUser() {
   const { address } = useAccount();
@@ -9,7 +10,10 @@ export default function HeaderUser() {
       {address ? (
         <HeaderUserConnected connectedAddress={address} />
       ) : (
-        <HeaderUserConnect />
+        <div className="tw-inline-flex">
+          <HeaderUserConnect />
+          <HeaderSearchButton />
+        </div>
       )}
     </div>
   );

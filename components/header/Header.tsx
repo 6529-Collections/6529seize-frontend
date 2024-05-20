@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { useAccount } from "wagmi";
-import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
@@ -137,7 +136,6 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
               >
-                {/* <HeaderConnect /> */}
                 <HeaderUser />
               </h3>
             </Col>
@@ -672,7 +670,6 @@ export default function Header(props: Readonly<Props>) {
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
                           <UserSetUpProfileCta />
-                          <HeaderSearchButton />
                           <Image
                             loading="eager"
                             priority
@@ -973,10 +970,8 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                             </NavDropdown>
-                            {/* <HeaderConnect /> */}
                             <HeaderUser />
                             <UserSetUpProfileCta />
-                            <HeaderSearchButton />
                           </Nav>
                         </Navbar>
                         <Image

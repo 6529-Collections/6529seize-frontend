@@ -4,6 +4,7 @@ import { AuthContext } from "../../auth/Auth";
 import HeaderUserProfile from "./HeaderUserProfile";
 import HeaderUserDisconnect from "./HeaderUserDisconnect";
 import HeaderUserProxy from "./proxy/HeaderUserProxy";
+import HeaderSearchButton from "../header-search/HeaderSearchButton";
 
 export default function HeaderUserContext({
   profile,
@@ -44,29 +45,7 @@ export default function HeaderUserContext({
           </svg>
           <div className="tw-absolute tw-rounded-full -tw-right-1 -tw-top-1 tw-bg-red tw-h-3 tw-w-3"></div>
         </button>
-        <button
-          type="button"
-          aria-label="Search"
-          title="Search"
-          className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-h-11 tw-w-11 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <svg
-            className="tw-h-5 tw-w-5 tw-flex-shrink-0"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        <HeaderSearchButton />
         <HeaderUserDisconnect />
       </div>
     </div>
