@@ -241,13 +241,11 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         </Col>
       </Row>
       {!connectedProfile && (
-        <>
-          <Row>
-            <Col className="d-flex align-item-center justify-content-center font-larger font-bolder">
-              Connect Wallet to continue
-            </Col>
-          </Row>
-        </>
+        <Row>
+          <Col className="d-flex align-item-center justify-content-center font-larger font-bolder">
+            Connect Wallet to continue
+          </Col>
+        </Row>
       )}
       {printContent()}
     </Container>

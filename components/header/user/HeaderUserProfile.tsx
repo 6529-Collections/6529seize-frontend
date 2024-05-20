@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { ProfileProxy } from "../../../generated/models/ProfileProxy";
 import { AuthContext } from "../../auth/Auth";
 import { useAccount } from "wagmi";
 import Link from "next/link";
