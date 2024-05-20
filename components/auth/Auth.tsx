@@ -105,6 +105,8 @@ export default function Auth({
 
   useEffect(() => {
     if (!address) {
+      removeAuthJwt();
+      setActiveProfileProxy(null);
       return;
     } else {
       const isAuth = validateJwt({

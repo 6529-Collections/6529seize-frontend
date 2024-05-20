@@ -2,7 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { ProfileProxy } from "../../../../../../../generated/models/ProfileProxy";
 import { ProfileProxyAction } from "../../../../../../../generated/models/ProfileProxyAction";
 import { AuthContext } from "../../../../../../auth/Auth";
-import PencilIcon, { PencilIconSize } from "../../../../../../utils/icons/PencilIcon";
+import PencilIcon, {
+  PencilIconSize,
+} from "../../../../../../utils/icons/PencilIcon";
+import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
 
 export default function ProfileProxyCredit({
   profileProxy,
@@ -31,7 +34,7 @@ export default function ProfileProxyCredit({
       <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-text-iron-500">
         <span className="tw-font-normal tw-text-iron-500">Credit:</span>
         <span className="tw-text-iron-300 tw-font-medium">
-          {profileProxyAction.credit_amount}
+          {formatNumberWithCommas(profileProxyAction.credit_amount ?? 0)}
         </span>
       </p>
       {isOwner && (
