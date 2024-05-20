@@ -8,14 +8,14 @@ import { ProfileProxyActionType } from "../../../../generated/models/ProfileProx
 export default function UserPageRepModifyModalRaterStats({
   repState,
   minMaxValues,
-  heroAvailableRep,
+  heroAvailableCredit,
 }: {
   readonly repState: RatingStats;
   readonly minMaxValues: {
     readonly min: number;
     readonly max: number;
   };
-  readonly heroAvailableRep: number;
+  readonly heroAvailableCredit: number;
 }) {
   const { activeProfileProxy } = useContext(AuthContext);
   const getProxyAvailableCredit = (): number | null => {
@@ -38,6 +38,21 @@ export default function UserPageRepModifyModalRaterStats({
     () => setProxyAvailableCredit(getProxyAvailableCredit()),
     [activeProfileProxy]
   );
+
+  const getAvailableCredit = (): number => {
+    if (!activeProfileProxy) {
+      return heroAvailableCredit;
+    }
+    return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
+      ? heroAvailableCredit
+      : proxyAvailableCredit ?? 0;
+  };
+
+  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
+  useEffect(
+    () => setAvailableCredit(getAvailableCredit()),
+    [heroAvailableCredit, proxyAvailableCredit]
+  );
   return (
     <div className="tw-mt-6 sm:tw-mt-8">
       <div className="tw-flex tw-flex-col tw-space-y-1">
@@ -54,19 +69,11 @@ export default function UserPageRepModifyModalRaterStats({
         <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
           <span>Your available Rep:</span>
           <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(heroAvailableRep)}
+            {formatNumberWithCommas(availableCredit)}
           </span>
         </span>
         {activeProfileProxy ? (
           <>
-            {typeof proxyAvailableCredit === "number" && (
-              <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
-                <span>Your available Credit:</span>
-                <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-                  {formatNumberWithCommas(proxyAvailableCredit)}
-                </span>
-              </span>
-            )}
             <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
               <span>Your max Rep Rating to {repState.category}:</span>
               <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
