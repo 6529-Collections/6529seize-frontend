@@ -81,7 +81,7 @@ export default function HeaderUserProfile({
   return (
     <Link
       href={`${userContent.path}`}
-      className="tw-group tw-relative tw-no-underline tw-px-3 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-sm tw-font-semibold tw-border-0 tw-rounded-s-lg focus:tw-outline-none tw-bg-iron-800 tw-text-white hover:tw-text-white hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-group tw-relative tw-no-underline tw-px-3 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-border-0 tw-rounded-s-lg focus:tw-outline-none tw-bg-iron-800 tw-text-white hover:tw-text-white hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
     >
       {userContent.pfpUrl ? (
         <img
