@@ -81,7 +81,13 @@ export default function HeaderUserProxyDropdown({
                             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />
                         ) : (
-                          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-600"></div>
+                          <div
+                            className={`${
+                              !activeProfileProxy
+                                ? "tw-bg-iron-600"
+                                : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
+                            } tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+                          ></div>
                         )}
                         <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                           <span className="tw-text-md tw-font-medium tw-text-white">
