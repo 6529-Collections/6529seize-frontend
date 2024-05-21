@@ -12,7 +12,7 @@ export default function HeaderUserProxyDropdownItem({
   const isActive = profileProxy.id === activeProfileProxy?.id;
 
   return (
-    <li className="tw-h-full">
+    <div className="tw-h-full">
       <button
         type="button"
         className={`${
@@ -61,6 +61,6 @@ export default function HeaderUserProxyDropdownItem({
           </div>
         </div>
       </button>
-    </li>
+    </div>
   );
 }

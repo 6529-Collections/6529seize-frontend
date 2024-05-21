@@ -10,7 +10,7 @@ export default function HeaderUser() {
       {address ? (
         <HeaderUserConnected connectedAddress={address} />
       ) : (
-        <div className="tw-inline-flex">
+        <div className="tw-flex tw-items-center tw-gap-x-3">
           <HeaderUserConnect />
           <HeaderSearchButton />
         </div>
