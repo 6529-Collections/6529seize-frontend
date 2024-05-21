@@ -14,6 +14,8 @@ export interface Page<T> {
   data: T[];
 }
 
+export type CountlessPage<T> = Omit<Page<T>, "count">;
+
 export type NonNullableRequired<T> = {
   [P in keyof T]-?: NonNullable<T[P]>;
 };
@@ -309,5 +311,3 @@ export const SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES = [
 
 export type SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPE =
   (typeof SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES)[number];
-
-

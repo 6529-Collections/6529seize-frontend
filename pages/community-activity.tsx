@@ -3,7 +3,7 @@ import {
   getCommonHeaders,
   getUserProfileActivityLogs,
 } from "../helpers/server.helpers";
-import { Page } from "../helpers/Types";
+import { CountlessPage, Page } from "../helpers/Types";
 import { ProfileActivityLog } from "../entities/IProfile";
 import ProfileActivityLogs, {
   ActivityLogParams,
@@ -29,7 +29,7 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
 };
 
 export interface CommunityActivityPage {
-  readonly logsPage: Page<ProfileActivityLog>;
+  readonly logsPage: CountlessPage<ProfileActivityLog>;
 }
 
 export default function CommunityActivityPage({

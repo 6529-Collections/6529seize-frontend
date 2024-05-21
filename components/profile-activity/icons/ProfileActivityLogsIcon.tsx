@@ -23,7 +23,6 @@ export default function ProfileActivityLogsIcon({
 }) {
   switch (logType) {
     case ProfileActivityLogType.RATING_EDIT:
-    case ProfileActivityLogType.PROXY_RATING_EDIT:
       return <ProfileActivityLogsCICRatingIcon />;
     case ProfileActivityLogType.HANDLE_EDIT:
       return <ProfileActivityLogsHandleIcon />;

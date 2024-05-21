@@ -31,7 +31,6 @@ const getInitialActivityLogParams = (
   pageSize: 10,
   logTypes: getProfileLogTypes({
     logTypes: [],
-    addDisabledLogTypes: [ProfileActivityLogType.PROXY_RATING_EDIT],
   }),
   matter: null,
   targetType: FilterTargetType.ALL,
