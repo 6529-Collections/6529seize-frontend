@@ -71,18 +71,17 @@ export default function HeaderUserProxyDropdown({
                           activeProfileProxy
                             ? "tw-bg-transparent hover:tw-bg-iron-700"
                             : "tw-bg-iron-700"
-                        } tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+                        } tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
                         onClick={() => onActivateProfileProxy(null)}
                       >
                         {profile.profile?.pfp_url ? (
                           <img
                             src={profile.profile?.pfp_url}
-                            
                             alt="Profile Picture"
-                            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700"
+                            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />
                         ) : (
-                          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700"></div>
+                          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
                         )}
                         <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                           <span className="tw-text-md tw-font-medium tw-text-white">
