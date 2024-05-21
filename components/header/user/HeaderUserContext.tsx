@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
 import HeaderUserProfile from "./HeaderUserProfile";
-import HeaderUserDisconnect from "./HeaderUserDisconnect";
 import HeaderUserProxy from "./proxy/HeaderUserProxy";
 import HeaderSearchButton from "../header-search/HeaderSearchButton";
 
@@ -15,11 +14,12 @@ export default function HeaderUserContext({
   return (
     <div className="tailwind-scope tw-mr-2">
       <div className="tw-flex tw-items-center tw-gap-x-3">
-        <div className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm" role="group">
+        <div
+          className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm"
+          role="group"
+        >
           <HeaderUserProfile profile={profile} />
-          {!!receivedProfileProxies.length && (
-            <HeaderUserProxy profile={profile} />
-          )}
+          <HeaderUserProxy profile={profile} />
         </div>
         {/* <button
           type="button"
@@ -46,7 +46,7 @@ export default function HeaderUserContext({
           <div className="tw-absolute tw-rounded-full -tw-right-1 -tw-top-1 tw-bg-red tw-h-3 tw-w-3"></div>
         </button> */}
         <HeaderSearchButton />
-       {/*  <HeaderUserDisconnect /> */}
+        {/*  <HeaderUserDisconnect /> */}
       </div>
     </div>
   );

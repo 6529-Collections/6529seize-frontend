@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 import { disconnect } from "@wagmi/core";
+import { useAccount } from "wagmi";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -15,6 +16,7 @@ export default function HeaderUserProxyDropdown({
   readonly profile: IProfileAndConsolidations;
   readonly onClose: () => void;
 }) {
+  const { address } = useAccount();
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
 
@@ -24,6 +26,25 @@ export default function HeaderUserProxyDropdown({
   };
 
   const onDisconnect = () => disconnect();
+
+  const getLabel = (): string => {
+    if (profile.profile?.handle) {
+      return profile.profile.handle;
+    }
+    const wallet = profile?.consolidation.wallets.find(
+      (w) => w.wallet.address.toLowerCase() === address?.toLocaleLowerCase()
+    );
+    if (wallet?.wallet?.ens) {
+      return wallet.wallet.ens;
+    }
+    if (address) {
+      return address.slice(0, 6);
+    }
+    throw new Error("No label found");
+  };
+
+  const [label, setLabel] = useState(getLabel());
+  useEffect(() => setLabel(getLabel()), [profile, address]);
 
   return (
     <div>
@@ -64,7 +85,7 @@ export default function HeaderUserProxyDropdown({
                         )}
                         <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                           <span className="tw-text-md tw-font-medium tw-text-white">
-                            {profile.profile?.handle}
+                            {label}
                           </span>
                           {!activeProfileProxy && (
                             <svg
