@@ -12,6 +12,7 @@ import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSet
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
 import HeaderUser from "./user/HeaderUser";
+import HeaderSearchButton from "./header-search/HeaderSearchButton";
 
 interface Props {
   onLoad?: () => void;
@@ -670,6 +671,9 @@ export default function Header(props: Readonly<Props>) {
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
                           <UserSetUpProfileCta />
+                          <div className="tw-mr-2">
+                            <HeaderSearchButton />
+                          </div>
                           <Image
                             loading="eager"
                             priority
@@ -972,6 +976,7 @@ export default function Header(props: Readonly<Props>) {
                             </NavDropdown>
                             <HeaderUser />
                             <UserSetUpProfileCta />
+                            <HeaderSearchButton />
                           </Nav>
                         </Navbar>
                         <Image

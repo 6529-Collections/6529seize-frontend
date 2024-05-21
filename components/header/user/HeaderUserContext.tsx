@@ -1,16 +1,12 @@
-import { useContext } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { AuthContext } from "../../auth/Auth";
 import HeaderUserProfile from "./HeaderUserProfile";
 import HeaderUserProxy from "./proxy/HeaderUserProxy";
-import HeaderSearchButton from "../header-search/HeaderSearchButton";
 
 export default function HeaderUserContext({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { receivedProfileProxies } = useContext(AuthContext);
   return (
     <div className="tailwind-scope tw-mr-2">
       <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -45,8 +41,7 @@ export default function HeaderUserContext({
           </svg>
           <div className="tw-absolute tw-rounded-full -tw-right-1 -tw-top-1 tw-bg-red tw-h-3 tw-w-3"></div>
         </button> */}
-        <HeaderSearchButton />
-        {/*  <HeaderUserDisconnect /> */}
+  
       </div>
     </div>
   );
