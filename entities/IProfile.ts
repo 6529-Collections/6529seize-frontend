@@ -102,7 +102,6 @@ export interface CicStatement {
 
 export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
-  PROXY_RATING_EDIT = "PROXY_RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",
   CLASSIFICATION_EDIT = "CLASSIFICATION_EDIT",
   SOCIALS_EDIT = "SOCIALS_EDIT",
@@ -129,7 +128,6 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   string
 > = {
   [ProfileActivityLogType.RATING_EDIT]: "Rating",
-  [ProfileActivityLogType.PROXY_RATING_EDIT]: "Proxy Rating",
   [ProfileActivityLogType.HANDLE_EDIT]: "Handle",
   [ProfileActivityLogType.CLASSIFICATION_EDIT]: "Classification",
   [ProfileActivityLogType.SOCIALS_EDIT]: "Social Media Account",
@@ -160,6 +158,8 @@ export interface ProfileActivityLogBase {
   readonly created_at: Date;
   readonly profile_handle: string;
   readonly target_profile_handle: string | null;
+  readonly proxy_handle: string | null;
+  readonly proxy_id: string | null;
 }
 
 export enum ProfileActivityLogRatingEditContentChangeReason {
@@ -175,22 +175,6 @@ export interface ProfileActivityLogRatingEdit extends ProfileActivityLogBase {
     readonly old_rating: number;
     readonly rating_category: string;
     readonly rating_matter: RateMatter;
-    readonly proxy_handle?: string;
-    readonly proxy_id?: string;
-  };
-}
-
-export interface ProfileActivityLogProxyRatingEdit
-  extends ProfileActivityLogBase {
-  readonly type: ProfileActivityLogType.PROXY_RATING_EDIT;
-  readonly contents: {
-    readonly old_rating: number;
-    readonly new_rating: number;
-    readonly rating_matter: RateMatter;
-    readonly rating_category: string;
-    readonly change_reason: ProfileActivityLogRatingEditContentChangeReason;
-    readonly rater_profile_id: string;
-    readonly rater_profile_handle: string;
   };
 }
 
@@ -352,14 +336,14 @@ export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-export interface ProfileActivityLogProxyDropRatingEdit extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyDropRatingEdit
+  extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_DROP_RATING_EDIT;
   readonly contents: {};
 }
 
 export type ProfileActivityLog =
   | ProfileActivityLogRatingEdit
-  | ProfileActivityLogProxyRatingEdit
   | ProfileActivityLogHandleEdit
   | ProfileActivityLogClassificationEdit
   | ProfileActivityLogSocialsEdit
