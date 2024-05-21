@@ -16,7 +16,8 @@ export default function HeaderUserProfile({
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { activeProfileProxy } = useContext(AuthContext);
+  const { activeProfileProxy, receivedProfileProxies } =
+    useContext(AuthContext);
   const { address } = useAccount();
   const getLabel = (): string => {
     if (activeProfileProxy) {
@@ -81,7 +82,9 @@ export default function HeaderUserProfile({
   return (
     <Link
       href={`${userContent.path}`}
-      className="tw-no-underline tw-px-4 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-border tw-border-solid tw-rounded-s-lg focus:tw-z-10 focus:tw-ring-2 focus:tw-ring-blue-700 focus:tw-text-blue-700 tw-bg-iron-800 tw-border-iron-700 tw-text-white hover:tw-bg-iron-700 tw-focus:ring-blue-500 tw-focus:text-white tw-transition tw-duration-300 tw-ease-out"
+      className={`${
+        !!receivedProfileProxies.length ? "" : "tw-rounded-e-lg"
+      } tw-relative tw-no-underline tw-px-3 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-border-0 tw-rounded-s-lg focus:tw-outline-none tw-bg-iron-800 tw-text-white hover:tw-text-white hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out`}
     >
       {userContent.pfpUrl ? (
         <img

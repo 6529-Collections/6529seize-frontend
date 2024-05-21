@@ -13,13 +13,13 @@ export default function HeaderUserProxy({
   useClickAway(containerRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
   return (
-    <div className="tailwind-scope tw-relative" ref={containerRef}>
+    <div className="tailwind-scope" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         type="button"
         aria-label="Choose proxy"
         title="Choose proxy"
-        className="tw-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-bg-iron-800 tw-px-2 tw-h-11 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-bg-iron-800 tw-px-2 tw-h-11 tw-border-solid tw-border-l tw-border-y-0 tw-border-r-0 tw-border-iron-700 tw-text-iron-300 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
           className="tw-h-5 tw-w-5 tw-flex-shrink-0"
