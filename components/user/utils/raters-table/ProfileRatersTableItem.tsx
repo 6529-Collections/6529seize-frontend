@@ -28,12 +28,6 @@ export default function ProfileRatersTableItem({
   readonly rating: RatingWithProfileInfoAndLevel;
   readonly type: ProfileRatersTableType;
 }) {
-  const TYPE_TO_TEXT: Record<ProfileRatersTableType, string> = {
-    [ProfileRatersTableType.CIC_RECEIVED]: "gave total CIC",
-    [ProfileRatersTableType.CIC_GIVEN]: "received total CIC",
-    [ProfileRatersTableType.REP_RECEIVED]: "gave total Rep",
-    [ProfileRatersTableType.REP_GIVEN]: "received total Rep",
-  };
   const [cicType, setCicType] = useState<CICType>(cicToType(rating.cic));
   useEffect(() => {
     setCicType(cicToType(rating.cic));
@@ -79,9 +73,6 @@ export default function ProfileRatersTableItem({
                 {rating.handle}
               </span>
             </Link>
-            <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-md tw-text-iron-400 tw-font-medium">
-              {TYPE_TO_TEXT[type]}
-            </span>
           </div>
         </div>
       </td>
