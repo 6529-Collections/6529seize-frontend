@@ -22,7 +22,11 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
 import Tippy from "@tippyjs/react";
-import { formatNameForUrl, getOpenseaLink } from "../../nextgen_helpers";
+import {
+  formatNameForUrl,
+  getBlurLink,
+  getOpenseaLink,
+} from "../../nextgen_helpers";
 import { DBResponse } from "../../../../entities/IDBResponse";
 import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { displayScore } from "./NextGenTokenProperties";
@@ -161,14 +165,14 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
       <Row>
         <Col className="pb-3 d-flex flex-column">
           <span className="font-color-h">Listed:</span>
-          <span className="d-flex align-items-center gap-2 pt-1">
+          <span className="d-flex flex-column align-items-start gap-2 pt-1">
             <span>
               <Tippy
                 content={
                   <Container>
                     <Row>
                       <Col>
-                        Opensea -{" "}
+                        Opensea:{" "}
                         {props.token.opensea_price > 0
                           ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
                           : "Not Listed"}
@@ -216,6 +220,50 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                           className="cursor-pointer"
                         />
                       )}
+                    </span>
+                  ) : (
+                    "No"
+                  )}
+                </a>
+              </Tippy>
+            </span>
+            <span>
+              <Tippy
+                content={
+                  <Container>
+                    <Row>
+                      <Col>
+                        Blur:{" "}
+                        {props.token.blur_price > 0
+                          ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                          : "Not Listed"}
+                      </Col>
+                    </Row>
+                  </Container>
+                }
+                theme={"light"}
+                placement="right"
+                delay={250}>
+                <a
+                  href={getBlurLink(props.token.id)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="d-flex gap-2 align-items-center decoration-none">
+                  <Image
+                    className={styles.marketplace}
+                    src="/blur.png"
+                    alt="blur"
+                    width={24}
+                    height={24}
+                  />
+                  {props.token.blur_price > 0 ? (
+                    <span className="d-flex gap-2 align-items-center">
+                      <span className="d-flex align-items-center">
+                        <span>{props.token.blur_price}</span>
+                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                          <EthereumIcon />
+                        </div>
+                      </span>
                     </span>
                   ) : (
                     "No"

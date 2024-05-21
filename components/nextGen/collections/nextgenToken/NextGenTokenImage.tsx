@@ -74,11 +74,14 @@ export function NextGenTokenImage(
                     : "Not Listed"}
                 </Col>
               </Row>
-              {props.token.opensea_price > 0 && (
-                <Row>
-                  <Col>Royalties: {props.token.opensea_royalty}%</Col>
-                </Row>
-              )}
+              <Row>
+                <Col>
+                  Blur:{" "}
+                  {props.token.blur_price > 0
+                    ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
             </Container>
           }
           theme={"light"}
@@ -112,11 +115,11 @@ export function NextGenTokenImage(
       listingDisplay = (
         <span className="d-flex align-items-center gap-2">
           <span className="d-flex align-items-center">
-            {props.token.opensea_price > 0 ? (
+            {props.token.price > 0 ? (
               <>
                 <span className="font-smaller font-color-h">Listed for</span>
                 &nbsp;
-                {props.token.opensea_price} {ETHEREUM_ICON_TEXT}
+                {props.token.price} {ETHEREUM_ICON_TEXT}
               </>
             ) : (
               "Not Listed"
