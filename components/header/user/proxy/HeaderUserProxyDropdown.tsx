@@ -81,7 +81,7 @@ export default function HeaderUserProxyDropdown({
                             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />
                         ) : (
-                          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+                          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-600"></div>
                         )}
                         <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                           <span className="tw-text-md tw-font-medium tw-text-white">

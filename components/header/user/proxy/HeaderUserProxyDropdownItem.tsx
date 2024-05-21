@@ -22,14 +22,14 @@ export default function HeaderUserProxyDropdownItem({
         } tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         onClick={() => onActivateProfileProxy(isActive ? null : profileProxy)}
       >
-        {profileProxy.created_by.pfp ? (
+        {!profileProxy.created_by.pfp ? (
           <img
             src={profileProxy.created_by.pfp}
             alt="Profile Picture"
-            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
           />
         ) : (
-          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700"></div>
         )}
         <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
           <div className="tw-truncate tw-inline-flex tw-items-center tw-justify-between">

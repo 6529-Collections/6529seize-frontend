@@ -9,7 +9,7 @@ export default function HeaderUserContext({
 }) {
   return (
     <div className="tailwind-scope">
-      <div className="tw-flex tw-items-center tw-gap-x-3">
+      <div className="tw-flex tw-items-center tw-mr-3">
         <div
           className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm"
           role="group"
