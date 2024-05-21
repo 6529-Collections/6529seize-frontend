@@ -84,6 +84,11 @@ export interface NextGenToken {
   last_sale_date: Date;
   max_sale_value: number;
   max_sale_date: Date;
+  normalised_handle: string;
+  handle: string;
+  level: number;
+  tdh: number;
+  rep_score: number;
 }
 
 export interface NextGenLog {

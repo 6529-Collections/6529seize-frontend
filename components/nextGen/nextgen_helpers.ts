@@ -633,8 +633,8 @@ export enum NextGenTokenRarityType {
 
 export enum NextGenTokenListedType {
   ALL = "All",
-  LISTED = "Yes",
-  NOT_LISTED = "No",
+  LISTED = "Listed",
+  NOT_LISTED = "Not Listed",
 }
 
 export function getCollectionBaseBreadcrums(
