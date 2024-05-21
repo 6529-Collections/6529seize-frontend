@@ -2,7 +2,11 @@ import Image from "next/image";
 import { NextGenToken } from "../../../../entities/INextgen";
 import { TraitScore } from "./NextGenTokenAbout";
 import { NextGenTokenRarityType } from "../../nextgen_helpers";
-import { getRoyaltyImage } from "../../../../helpers/Helpers";
+import {
+  cicToType,
+  formatAddress,
+  getRoyaltyImage,
+} from "../../../../helpers/Helpers";
 import {
   ETHEREUM_ICON_TEXT,
   NEXTGEN_MEDIA_BASE_URL,
@@ -10,6 +14,8 @@ import {
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col } from "react-bootstrap";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -25,6 +31,7 @@ export function NextGenTokenImage(
     show_listing?: boolean;
     show_max_sale?: boolean;
     show_last_sale?: boolean;
+    show_owner_info?: boolean;
     is_zoom?: boolean;
   }>
 ) {
@@ -35,7 +42,60 @@ export function NextGenTokenImage(
     }
     return props.token.thumbnail_url ?? props.token.image_url;
   }
-  function getInfo() {
+
+  function getOwnerInfo() {
+    let ownerInfoDisplay;
+    if (props.show_owner_info) {
+      const cicType = cicToType(props.token.tdh + props.token.rep_score);
+
+      const ownerInfo = (
+        <span className="d-flex align-items-center gap-2">
+          <UserCICAndLevel
+            level={props.token.level}
+            cicType={cicType}
+            color="black"
+          />
+          {props.token.normalised_handle ?? formatAddress(props.token.owner)}
+        </span>
+      );
+
+      ownerInfoDisplay = (
+        <Tippy
+          content={
+            <Container>
+              <Row className="pt-2 pb-2">
+                <Col>{ownerInfo}</Col>
+              </Row>
+              <Row>
+                <Col>
+                  Opensea:{" "}
+                  {props.token.opensea_price > 0
+                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  Blur:{" "}
+                  {props.token.blur_price > 0
+                    ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                    : "Not Listed"}
+                </Col>
+              </Row>
+            </Container>
+          }
+          theme={"light"}
+          placement="right"
+          delay={250}>
+          <FontAwesomeIcon height={18} icon="info-circle"></FontAwesomeIcon>
+        </Tippy>
+      );
+    }
+
+    return ownerInfoDisplay;
+  }
+
+  function getExtraInfo() {
     let rarityDisplay;
     if (props.rarity_type) {
       const rarityType = props.rarity_type.toLowerCase();
@@ -53,51 +113,29 @@ export function NextGenTokenImage(
     let listingDisplay;
     if (props.show_listing) {
       listingDisplay = (
-        <Tippy
-          content={
-            <Container>
-              <Row>
-                <Col>
-                  Opensea -{" "}
-                  {props.token.opensea_price > 0
-                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                    : "Not Listed"}
-                </Col>
-              </Row>
-              {props.token.opensea_price > 0 && (
-                <Row>
-                  <Col>Royalties: {props.token.opensea_royalty}%</Col>
-                </Row>
-              )}
-            </Container>
-          }
-          theme={"light"}
-          placement="right"
-          delay={250}>
-          <span className="d-flex align-items-center gap-2">
-            <span className="d-flex align-items-center">
-              {props.token.opensea_price > 0 ? (
-                <>
-                  <span className="font-smaller font-color-h">Listed for</span>
-                  &nbsp;
-                  {props.token.opensea_price} {ETHEREUM_ICON_TEXT}
-                </>
-              ) : (
-                "Not Listed"
-              )}
-            </span>
-            {props.token.opensea_royalty > 0 && (
-              <Image
-                width={0}
-                height={0}
-                style={{ height: "20px", width: "auto" }}
-                src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
-                alt={"pepe"}
-                className="cursor-pointer"
-              />
+        <span className="d-flex align-items-center gap-2">
+          <span className="d-flex align-items-center">
+            {props.token.price > 0 ? (
+              <>
+                <span className="font-smaller font-color-h">Listed for</span>
+                &nbsp;
+                {props.token.price} {ETHEREUM_ICON_TEXT}
+              </>
+            ) : (
+              "Not Listed"
             )}
           </span>
-        </Tippy>
+          {props.token.opensea_royalty > 0 && (
+            <Image
+              width={0}
+              height={0}
+              style={{ height: "20px", width: "auto" }}
+              src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
+              alt={"pepe"}
+              className="cursor-pointer"
+            />
+          )}
+        </span>
       );
     }
 
@@ -180,14 +218,18 @@ export function NextGenTokenImage(
               props.rarity_type ||
               props.show_listing ||
               props.show_max_sale ||
-              props.show_last_sale
+              props.show_last_sale ||
+              props.show_owner_info
                 ? "justify-content-between"
                 : "justify-content-center"
             }`}>
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
-            {getInfo()}
+            <span className="d-flex align-items-center gap-2">
+              {getExtraInfo()}
+              {getOwnerInfo()}
+            </span>
           </span>
         )}
       </>
