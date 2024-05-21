@@ -263,9 +263,10 @@ export default function CommunityMembers() {
           </div>
           {totalPages > 1 && (
             <CommonTablePagination
-              currentPage={params.page}
+              currentPage={members.page}
               setCurrentPage={setPage}
               totalPages={totalPages}
+              haveNextPage={members.next}
               small={false}
               loading={isLoading}
             />

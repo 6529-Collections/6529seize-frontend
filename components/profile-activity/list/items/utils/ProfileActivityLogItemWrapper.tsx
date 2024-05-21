@@ -18,9 +18,17 @@ export default function ProfileActivityLogItemWrapper({
 }) {
   const isArchived = log.type === ProfileActivityLogType.PROFILE_ARCHIVED;
 
-  const handleOrWallet = log?.profile_handle ?? "";
+  const getHandleOrWallet = (): string => {
+    if (!user || !log.proxy_handle) return log?.profile_handle ?? "";
+    if (user.toLowerCase() === log.proxy_handle.toLowerCase()) {
+      return log.proxy_handle;
+    }
+    return log.profile_handle ?? "";
+  };
+
+  const handleOrWallet = getHandleOrWallet();
   const isCurrentUser =
-    user?.toLowerCase() === log?.profile_handle?.toLowerCase();
+    user?.toLowerCase() === handleOrWallet.toLowerCase() || !user;
 
   const tabTarget =
     log.type === ProfileActivityLogType.RATING_EDIT &&

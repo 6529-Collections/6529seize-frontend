@@ -1,10 +1,6 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
-import {
-  IProfileAndConsolidations,
-  ProfileActivityLogType,
-  RateMatter,
-} from "../../entities/IProfile";
+import { IProfileAndConsolidations, RateMatter } from "../../entities/IProfile";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -31,7 +27,6 @@ const getInitialActivityLogParams = (
   pageSize: 10,
   logTypes: getProfileLogTypes({
     logTypes: [],
-    addDisabledLogTypes: [ProfileActivityLogType.PROXY_RATING_EDIT],
   }),
   matter: null,
   targetType: FilterTargetType.ALL,
