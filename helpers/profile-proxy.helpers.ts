@@ -80,8 +80,11 @@ export const groupProfileProxies = ({
     granted: profileProxiesFiltered.filter(
       (p) => p.created_by.id === profileId
     ),
-    received: profileProxiesFiltered.filter(
-      (p) => p.granted_to.id === profileId
-    ),
+    received: profileProxiesFiltered
+      .map((p) => ({
+        ...p,
+        actions: p.actions.filter((a) => !a.revoked_at),
+      }))
+      .filter((p) => p.granted_to.id === profileId && !!p.actions.length),
   };
 };

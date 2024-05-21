@@ -45,6 +45,7 @@ import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
 } from "../helpers/nft.helplers";
+import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -55,7 +56,9 @@ export interface IndexPageProps {
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
   pageSize: 20,
-  logTypes: [],
+  logTypes: getProfileLogTypes({
+    logTypes: [],
+  }),
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet: null,
