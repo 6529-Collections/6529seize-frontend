@@ -603,6 +603,12 @@ export function getOpenseaLink(chainId: number, tokenId?: number) {
   }/${tokenId ?? ""}`;
 }
 
+export function getBlurLink(tokenId: number) {
+  return `https://blur.io/eth/asset/${NEXTGEN_CORE[
+    NEXTGEN_CHAIN_ID
+  ].toLowerCase()}/${tokenId}`;
+}
+
 export function formatNameForUrl(name: string) {
   return name.replace(/ /g, "-").toLowerCase();
 }
@@ -633,8 +639,8 @@ export enum NextGenTokenRarityType {
 
 export enum NextGenTokenListedType {
   ALL = "All",
-  LISTED = "Yes",
-  NOT_LISTED = "No",
+  LISTED = "Listed",
+  NOT_LISTED = "Not Listed",
 }
 
 export function getCollectionBaseBreadcrums(
