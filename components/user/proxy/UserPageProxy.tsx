@@ -115,7 +115,7 @@ export default function UserPageProxy({
 
   return (
     <div className="tailwind-scope">
-      <HeaderProxyNewModal />
+      {/* <HeaderProxyNewModal /> */}
       <CommonChangeAnimation>{components[mode]}</CommonChangeAnimation>
     </div>
   );
