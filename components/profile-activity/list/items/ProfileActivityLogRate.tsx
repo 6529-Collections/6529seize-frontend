@@ -1,8 +1,6 @@
 import {
-  ProfileActivityLogProxyRatingEdit,
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
-  ProfileActivityLogType,
   RateMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";
@@ -34,10 +32,10 @@ const TO_FROM: Record<ProfileActivityLogRateType, string> = {
 
 export default function ProfileActivityLogRate({
   log,
+  user,
 }: {
-  readonly log:
-    | ProfileActivityLogRatingEdit
-    | ProfileActivityLogProxyRatingEdit;
+  readonly log: ProfileActivityLogRatingEdit;
+  readonly user: string | null;
 }) {
   const isSystemAdjustment =
     log.contents.change_reason ===
@@ -81,18 +79,28 @@ export default function ProfileActivityLogRate({
       ? UserPageTabType.REP
       : UserPageTabType.IDENTITY;
 
+  const getProxyHandle = (): string | null => {
+    if (!log.proxy_handle) return null;
+    if (!user) return log.proxy_handle;
+    if (user.toLowerCase() === log.proxy_handle.toLowerCase()) {
+      return log.profile_handle;
+    }
+    return log.proxy_handle;
+  };
+
+  const proxyHandle = getProxyHandle();
+  const isSelfProxy = user?.toLowerCase() === log.proxy_handle?.toLowerCase();
+
   return (
     <>
-      {log.type === ProfileActivityLogType.PROXY_RATING_EDIT &&
-        !!log.contents.rater_profile_handle && (
-          <Link
-            href={`/${log.contents.rater_profile_handle}`}
-            target="_blank"
-            className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
-          >
-            (Proxy for {log.contents.rater_profile_handle})
-          </Link>
-        )}
+      {!!proxyHandle && isSelfProxy && (
+        <Link
+          href={`/${proxyHandle}`}
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+        >
+          (Proxy for {proxyHandle})
+        </Link>
+      )}
       <ProfileActivityLogItemAction action={ACTION[ratingType]} />
       <span
         className={`${
@@ -122,16 +130,14 @@ export default function ProfileActivityLogRate({
         tabTarget={tabTarget}
       />
 
-      {log.type === ProfileActivityLogType.RATING_EDIT &&
-        !!log.contents.proxy_handle && (
-          <Link
-            href={`/${log.contents.proxy_handle}`}
-            target="_blank"
-            className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
-          >
-            (Proxy: {log.contents.proxy_handle})
-          </Link>
-        )}
+      {!!proxyHandle && !isSelfProxy && (
+        <Link
+          href={`/${proxyHandle}`}
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+        >
+          (Proxy: {proxyHandle})
+        </Link>
+      )}
 
       {isSystemAdjustment && (
         <span className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700">

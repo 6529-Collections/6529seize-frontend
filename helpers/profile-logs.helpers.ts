@@ -4,7 +4,6 @@ const DISABLED_LOG_TYPES = [
   ProfileActivityLogType.DROP_COMMENT,
   ProfileActivityLogType.DROP_RATING_EDIT,
   ProfileActivityLogType.DROP_CREATED,
-  ProfileActivityLogType.PROXY_RATING_EDIT,
 ];
 export const getProfileLogTypes = ({
   logTypes,

@@ -80,6 +80,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
                 currentPage={page}
                 setCurrentPage={setPage}
                 totalPages={totalPages}
+                haveNextPage={page < totalPages}
                 small={true}
                 loading={loading}
               />
