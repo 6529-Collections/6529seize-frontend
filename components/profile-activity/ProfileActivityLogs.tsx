@@ -191,7 +191,6 @@ export default function ProfileActivityLogs({
     if (isLoading) return;
     if (logs?.page === 1 && !logs.data.length) {
       setCurrentPage(1);
-      return;
     }
   }, [logs?.page, isLoading]);
   return (

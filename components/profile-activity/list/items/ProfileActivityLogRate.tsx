@@ -1,7 +1,6 @@
 import {
   ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
-  ProfileActivityLogType,
   RateMatter,
 } from "../../../../entities/IProfile";
 import { useRouter } from "next/router";

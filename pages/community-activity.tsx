@@ -3,7 +3,7 @@ import {
   getCommonHeaders,
   getUserProfileActivityLogs,
 } from "../helpers/server.helpers";
-import { CountlessPage, Page } from "../helpers/Types";
+import { CountlessPage } from "../helpers/Types";
 import { ProfileActivityLog } from "../entities/IProfile";
 import ProfileActivityLogs, {
   ActivityLogParams,

@@ -1,10 +1,6 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
-import {
-  IProfileAndConsolidations,
-  ProfileActivityLogType,
-  RateMatter,
-} from "../../entities/IProfile";
+import { IProfileAndConsolidations, RateMatter } from "../../entities/IProfile";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,

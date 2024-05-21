@@ -17,7 +17,7 @@ import {
 import { fetchUrl } from "../services/6529api";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { ProfileActivityLog } from "../entities/IProfile";
-import { CountlessPage, Page } from "../helpers/Types";
+import { CountlessPage } from "../helpers/Types";
 import {
   getCommonHeaders,
   getUserProfileActivityLogs,
