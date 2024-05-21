@@ -8,7 +8,7 @@ export default function HeaderUserContext({
   readonly profile: IProfileAndConsolidations;
 }) {
   return (
-    <div className="tailwind-scope tw-mr-2">
+    <div className="tailwind-scope">
       <div className="tw-flex tw-items-center tw-gap-x-3">
         <div
           className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm"

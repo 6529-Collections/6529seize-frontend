@@ -77,6 +77,7 @@ export default function HeaderUserProxyDropdown({
                         {profile.profile?.pfp_url ? (
                           <img
                             src={profile.profile?.pfp_url}
+                            
                             alt="Profile Picture"
                             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700"
                           />

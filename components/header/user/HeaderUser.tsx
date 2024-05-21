@@ -9,7 +9,9 @@ export default function HeaderUser() {
       {address ? (
         <HeaderUserConnected connectedAddress={address} />
       ) : (
-        <HeaderUserConnect />
+        <div className="tw-mx-3">
+          <HeaderUserConnect />
+        </div>
       )}
     </div>
   );

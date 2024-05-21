@@ -671,7 +671,7 @@ export default function Header(props: Readonly<Props>) {
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
                           <UserSetUpProfileCta />
-                          <div className="tw-mr-2">
+                          <div className="tw-mr-6 xl:tw-mr-2">
                             <HeaderSearchButton />
                           </div>
                           <Image
