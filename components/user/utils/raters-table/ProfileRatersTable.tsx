@@ -53,6 +53,7 @@ export default function ProfileRatersTable({
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
               totalPages={totalPages}
+              haveNextPage={currentPage < totalPages}
               small={true}
             />
           )}
