@@ -16,6 +16,7 @@ import {
 import { ActivityLogParams } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
+import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -34,7 +35,9 @@ const getInitialActivityLogParams = (
 ): ActivityLogParams => ({
   page: 1,
   pageSize: 10,
-  logTypes: [],
+  logTypes: getProfileLogTypes({
+    logTypes: [],
+  }),
   matter: RateMatter.REP,
   targetType: FilterTargetType.ALL,
   handleOrWallet,

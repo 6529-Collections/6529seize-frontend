@@ -4,6 +4,7 @@ import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import { UserPageTabType } from "../../../user/layout/UserPageTabs";
 import CommonProfileLink from "../../../user/utils/CommonProfileLink";
 import { PROFILE_PROXY_ACTION_LABELS } from "../../../../entities/IProxy";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 export default function ProfileActivityLogProxyActionChange({
   log,
@@ -35,7 +36,7 @@ export default function ProfileActivityLogProxyActionChange({
         : "indefinite";
     }
     if (log.contents.credit_amount !== undefined) {
-      return log.contents.credit_amount;
+      return formatNumberWithCommas(log.contents.credit_amount);
     }
     return "";
   };

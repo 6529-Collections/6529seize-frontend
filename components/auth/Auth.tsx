@@ -16,12 +16,12 @@ import {
 } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { NonceResponse } from "../../generated/models/NonceResponse";
 import { LoginRequest } from "../../generated/models/LoginRequest";
 import { LoginResponse } from "../../generated/models/LoginResponse";
+import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;

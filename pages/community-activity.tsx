@@ -14,11 +14,14 @@ import { useContext } from "react";
 import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { Crumb } from "../components/breadcrumb/Breadcrumb";
 import SidebarLayout from "../components/utils/sidebar/SidebarLayout";
+import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
   pageSize: 50,
-  logTypes: [],
+  logTypes: getProfileLogTypes({
+    logTypes: [],
+  }),
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet: null,
