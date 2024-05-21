@@ -31,7 +31,7 @@ interface Props {
   view: ContentView;
 }
 
-export default function NextGenToken(props: Readonly<Props>) {
+export default function NextGenTokenPage(props: Readonly<Props>) {
   const router = useRouter();
 
   const [view, setView] = useState<ContentView>(
