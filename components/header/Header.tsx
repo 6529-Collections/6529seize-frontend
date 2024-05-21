@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import { useAccount } from "wagmi";
-import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
 import HeaderUser from "./user/HeaderUser";
@@ -670,7 +669,6 @@ export default function Header(props: Readonly<Props>) {
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
-                          <UserSetUpProfileCta />
                           <div className="tw-mr-6 xl:tw-mr-2">
                             <HeaderSearchButton />
                           </div>
@@ -975,7 +973,6 @@ export default function Header(props: Readonly<Props>) {
                               />
                             </NavDropdown>
                             <HeaderUser />
-                            <UserSetUpProfileCta />
                             <HeaderSearchButton />
                           </Nav>
                         </Navbar>
