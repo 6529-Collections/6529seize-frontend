@@ -3,7 +3,6 @@ import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "../../../../entities/ISort";
 
-
 export default function CommonDropdownItem<T, U = unknown>(
   props: Readonly<CommonSelectItemProps<T, U>>
 ) {
@@ -39,8 +38,10 @@ export default function CommonDropdownItem<T, U = unknown>(
       <button
         type="button"
         className={`${
-          isMobile ? "tw-py-3 hover:tw-bg-iron-800" : "hover:tw-bg-iron-700 tw-py-2"
-        } tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left  tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+          isMobile
+            ? "tw-py-3 hover:tw-bg-iron-800"
+            : "hover:tw-bg-iron-700 tw-py-2"
+        } tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-inline-flex tw-justify-between  tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}
