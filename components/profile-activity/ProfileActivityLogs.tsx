@@ -205,6 +205,7 @@ export default function ProfileActivityLogs({
             >
               <ProfileActivityLogsFilter
                 user={initialParams.handleOrWallet}
+                options={initialParams.logTypes}
                 selected={selectedFilters}
                 setSelected={onFilter}
               />

@@ -6,10 +6,9 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { amIUser } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
-
+import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
-import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
 
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.CIC]: "CIC rate",
