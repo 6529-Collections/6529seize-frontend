@@ -84,10 +84,12 @@ export default function UserPageStats({
           balanceMemes={balanceMemes}
           seasons={seasons}
         />
-        <UserAddressesSelectDropdown
-          addresses={profile.consolidation.wallets}
-          onActiveAddress={setActiveAddress}
-        />
+        <div>
+          <UserAddressesSelectDropdown
+            addresses={profile.consolidation.wallets}
+            onActiveAddress={setActiveAddress}
+          />
+        </div>
       </div>
 
       <UserPageStatsCollected
