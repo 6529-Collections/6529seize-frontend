@@ -3,12 +3,14 @@ export default function CommonTablePagination({
   currentPage,
   setCurrentPage,
   totalPages,
+  haveNextPage,
   loading = false,
 }: {
   readonly small: boolean;
   readonly currentPage: number;
   readonly setCurrentPage: (page: number) => void;
-  readonly totalPages: number;
+  readonly totalPages: number | null;
+  readonly haveNextPage: boolean;
   readonly loading?: boolean;
 }) {
   return (
@@ -20,9 +22,13 @@ export default function CommonTablePagination({
       } tw-pt-4 tw-pb-3`}
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
-        <div className="tw-text-sm tw-text-iron-300 tw-font-medium tw-mr-3">
-          Page {currentPage} of {totalPages}
-        </div>
+        {typeof totalPages === "number" ? (
+          <div className="tw-text-sm tw-text-iron-300 tw-font-medium tw-mr-3">
+            Page {currentPage} of {totalPages}
+          </div>
+        ) : (
+          <div></div>
+        )}
 
         <span className="tw-isolate tw-inline-flex tw-gap-x-3 tw-rounded-md tw-shadow-sm">
           {currentPage > 1 && (
@@ -47,7 +53,7 @@ export default function CommonTablePagination({
               <span>Previous</span>
             </button>
           )}
-          {currentPage < totalPages && (
+          {haveNextPage && (
             <button
               disabled={loading}
               onClick={() => setCurrentPage(currentPage + 1)}

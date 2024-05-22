@@ -9,7 +9,7 @@ import {
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { UserPageRepPropsRepRates } from "../../pages/[user]";
-import { Page } from "../../helpers/Types";
+import { CountlessPage, Page } from "../../helpers/Types";
 import {
   ActivityLogParams,
   convertActivityLogParams,
@@ -71,7 +71,7 @@ export interface InitProfileRatersParamsAndData {
 
 export interface InitProfileActivityLogsParams {
   readonly params: ActivityLogParams;
-  readonly data: Page<ProfileActivityLog>;
+  readonly data: CountlessPage<ProfileActivityLog>;
 }
 
 export interface InitProfileRepPageParams {
@@ -612,7 +612,7 @@ export default function ReactQueryWrapper({
   }: {
     readonly params: ActivityLogParams;
     readonly disableActiveCurationFilter: boolean;
-    readonly data: Page<ProfileActivityLog>;
+    readonly data: CountlessPage<ProfileActivityLog>;
   }) => {
     queryClient.setQueryData(
       [
