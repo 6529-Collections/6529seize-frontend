@@ -171,6 +171,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                       props.sort === NextGenListFilters.HIGHEST_SALE
                     }
                     show_last_sale={props.sort === NextGenListFilters.LAST_SALE}
+                    show_owner_info={true}
                   />
                 </Col>
               ));

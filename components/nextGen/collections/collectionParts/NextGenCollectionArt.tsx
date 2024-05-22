@@ -275,6 +275,18 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 />
               </Tippy>
               <Dropdown className={styles.rarityDropdown} drop="down-centered">
+                <Dropdown.Toggle>Listing Status: {listedType}</Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {Object.values(NextGenTokenListedType).map((lt) => (
+                    <Dropdown.Item
+                      key={getRandomObjectId()}
+                      onClick={() => setListedType(lt)}>
+                      {lt}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+              <Dropdown className={styles.rarityDropdown} drop="down-centered">
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenListFilters).map((lf) => (
@@ -320,7 +332,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
-              <span className="d-flex align-items-center gap-2">
+              <span
+                className="d-flex align-items-center gap-2"
+                style={{
+                  paddingLeft: "15px",
+                }}>
                 <FontAwesomeIcon
                   icon="chevron-circle-up"
                   style={{
@@ -449,43 +465,6 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     ))}
                 </Col>
               </Row>
-              {routerLoaded && traitsLoaded && (
-                <Row>
-                  <Col className="d-flex flex-column pb-2 no-padding">
-                    <Accordion
-                      className={styles.traitsAccordion}
-                      defaultActiveKey={
-                        listedType === NextGenTokenListedType.ALL
-                          ? undefined
-                          : "0"
-                      }>
-                      <Accordion.Item
-                        defaultChecked={true}
-                        className={styles.traitsAccordionItem}
-                        eventKey={"0"}>
-                        <Accordion.Button className="d-flex">
-                          <span>Listed</span>&nbsp;&nbsp;
-                          <span className="font-color-h">x3</span>
-                        </Accordion.Button>
-                        <Accordion.Body
-                          className={`${styles.traitsAccordionBody} d-flex gap-3 flex-wrap`}>
-                          {Object.values(NextGenTokenListedType).map((l) => (
-                            <Form.Check
-                              key={getRandomObjectId()}
-                              checked={listedType === l}
-                              className="pt-1 pb-1"
-                              type="radio"
-                              label={l}
-                              name="listedRadio"
-                              onChange={() => setListedType(l)}
-                            />
-                          ))}
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    </Accordion>
-                  </Col>
-                </Row>
-              )}
             </Container>
           </Col>
         )}

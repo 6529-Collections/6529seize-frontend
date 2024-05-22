@@ -37,6 +37,7 @@ export default function UserPageCollectedCards({
               currentPage={page}
               setCurrentPage={setPage}
               totalPages={totalPages}
+              haveNextPage={page < totalPages}
               small={false}
               loading={false}
             />
