@@ -10,6 +10,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
 import { groupProfileProxies } from "../../../helpers/profile-proxy.helpers";
 import { useRouter } from "next/router";
+import HeaderProxyNewModal from "../../header/proxy/HeaderProxyNewModal";
 
 export enum ProxyMode {
   LIST = "LIST",
@@ -114,7 +115,7 @@ export default function UserPageProxy({
 
   return (
     <div className="tailwind-scope">
-    {/*  <HeaderProxyNewModal /> */}
+      <HeaderProxyNewModal />
       <CommonChangeAnimation>{components[mode]}</CommonChangeAnimation>
     </div>
   );
