@@ -65,6 +65,7 @@ export function SubscriptionLinks(
           show={showConfirm}
           handleClose={() => setShowConfirm(false)}
           onConfirm={async (contract: string, tokenId: string) => {
+            setShowConfirm(false);
             setDownloading(true);
             try {
               const downloadResponse = await download(
@@ -85,7 +86,6 @@ export function SubscriptionLinks(
                 message: "Something went wrong.",
               });
             } finally {
-              setShowConfirm(false);
               setDownloading(false);
             }
           }}

@@ -23,27 +23,25 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     tokenId: string,
     planId: string
   ) => {
+    setShowSubscriptionsReset(false);
     setIsResetting(true);
-    await commonApiPost({
-      endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/reset`,
-      body: {},
-    })
-      .then(() => {
-        setToast({
-          type: "success",
-          message: "Subscriptions reset successfully.",
-        });
-      })
-      .catch(() => {
-        setToast({
-          type: "error",
-          message: "Something went wrong.",
-        });
-      })
-      .finally(() => {
-        setIsResetting(false);
-        setShowSubscriptionsReset(false);
+    try {
+      await commonApiPost({
+        endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/reset`,
+        body: {},
       });
+      setToast({
+        type: "success",
+        message: "Subscriptions reset successfully.",
+      });
+    } catch (error: any) {
+      setToast({
+        type: "error",
+        message: `Reset failed: ${error}`,
+      });
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   if (!isSubscriptionsAdmin(connectedProfile)) {
@@ -97,6 +95,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             show={showPublicDownload}
             handleClose={() => setShowPublicDownload(false)}
             onConfirm={async (contract: string, tokenId: string) => {
+              setShowPublicDownload(false);
               setIsDownloading(true);
               try {
                 const downloadResponse = await download(
@@ -117,7 +116,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                 });
               } finally {
                 setIsDownloading(false);
-                setShowPublicDownload(false);
               }
             }}
           />
