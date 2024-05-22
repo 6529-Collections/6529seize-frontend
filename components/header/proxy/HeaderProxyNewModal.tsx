@@ -22,7 +22,7 @@ export default function HeaderProxyNewModal() {
                         stroke="currentColor"
                         strokeWidth="2"
                         strokeLinecap="round"
-                        stroke-Linejoin="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <div className="tw-absolute">
