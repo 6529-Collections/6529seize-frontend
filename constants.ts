@@ -36,6 +36,7 @@ export const DELEGATION_ALL_ADDRESS =
 
 export const API_AUTH_COOKIE = "x-6529-auth";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
+export const PROFILE_PROXY_ACCEPTANCE_COOKIE = "profile-proxy-acceptance";
 export const NEVER_DATE = 64060588800;
 
 export const OPENSEA_STORE_FRONT_CONTRACT =
