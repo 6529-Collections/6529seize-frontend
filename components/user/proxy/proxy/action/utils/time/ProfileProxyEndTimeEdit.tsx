@@ -99,7 +99,7 @@ export default function ProfileProxyEndTimeEdit({
 
   return (
     <div>
-      <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600/60">
+      <div className="tw-h-full tw-py-3 xl:tw-h-14 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600">
         <div className="tw-px-3 tw-w-full tw-h-full tw-flex tw-flex-col sm:tw-flex-row md:tw-items-center sm:tw-justify-between tw-gap-x-3">
           <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-y-3 tw-gap-x-4 tw-w-full tw-h-full tw-items-center">
             <div className="tw-mb-3 tw-w-full md:tw-w-auto">

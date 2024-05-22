@@ -73,7 +73,7 @@ export default function UserPageTabs() {
   return (
     <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0 tw-overflow-hidden">
       <div
-        className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
+        className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
         aria-label="Tabs"
       >
         {Object.values(UserPageTabType).map((tabType) => (
