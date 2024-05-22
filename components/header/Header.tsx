@@ -135,11 +135,7 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
               >
-<<<<<<< HEAD
-                <HeaderConnect />
-=======
                 <HeaderUser />
->>>>>>> main
               </h3>
             </Col>
           </Row>
@@ -672,14 +668,9 @@ export default function Header(props: Readonly<Props>) {
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
-<<<<<<< HEAD
-                          <UserSetUpProfileCta />
-                          <HeaderSearchButton />
-=======
                           <div className="tw-mr-6 xl:tw-mr-2">
                             <HeaderSearchButton />
                           </div>
->>>>>>> main
                           <Image
                             loading="eager"
                             priority
@@ -705,15 +696,9 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/brain" ? "active" : ""
                               }`}
-<<<<<<< HEAD
-                              onClick={() => goTo("/brain")}
-                            >
-                              Brain
-=======
                               onClick={() => goTo("/")}
                             >
                               Home
->>>>>>> main
                             </Nav.Link>
 
                             <NavDropdown
