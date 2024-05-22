@@ -9,7 +9,7 @@ import {
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
 import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
-import { CountlessPage } from "../../helpers/Types";
+import { CountlessPage, Page } from "../../helpers/Types";
 import {
   ActivityLogParams,
   convertActivityLogParams,
