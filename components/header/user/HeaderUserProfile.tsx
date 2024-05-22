@@ -47,19 +47,19 @@ export default function HeaderUserProfile({
 
   const getPath = (): string => {
     if (activeProfileProxy) {
-      return `${activeProfileProxy.created_by.handle}`;
+      return `/${activeProfileProxy.created_by.handle}`;
     }
     if (profile.profile?.handle) {
-      return `${profile.profile.handle}`;
+      return `/${profile.profile.handle}`;
     }
     const wallet = profile?.consolidation.wallets.find(
       (w) => w.wallet.address.toLowerCase() === address?.toLocaleLowerCase()
     );
     if (wallet?.wallet?.ens) {
-      return `${wallet.wallet.ens}`;
+      return `/${wallet.wallet.ens}`;
     }
     if (address) {
-      return `${address}`;
+      return `/${address}`;
     }
     throw new Error("No path found");
   };
