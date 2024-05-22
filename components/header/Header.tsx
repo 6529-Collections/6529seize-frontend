@@ -7,12 +7,11 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import HeaderConnect from "./HeaderConnect";
 import { useAccount } from "wagmi";
-import HeaderSearchButton from "./header-search/HeaderSearchButton";
-import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
+import HeaderUser from "./user/HeaderUser";
+import HeaderSearchButton from "./header-search/HeaderSearchButton";
 
 interface Props {
   onLoad?: () => void;
@@ -136,7 +135,11 @@ export default function Header(props: Readonly<Props>) {
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
               >
+<<<<<<< HEAD
                 <HeaderConnect />
+=======
+                <HeaderUser />
+>>>>>>> main
               </h3>
             </Col>
           </Row>
@@ -669,8 +672,14 @@ export default function Header(props: Readonly<Props>) {
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
+<<<<<<< HEAD
                           <UserSetUpProfileCta />
                           <HeaderSearchButton />
+=======
+                          <div className="tw-mr-6 xl:tw-mr-2">
+                            <HeaderSearchButton />
+                          </div>
+>>>>>>> main
                           <Image
                             loading="eager"
                             priority
@@ -696,9 +705,15 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/brain" ? "active" : ""
                               }`}
+<<<<<<< HEAD
                               onClick={() => goTo("/brain")}
                             >
                               Brain
+=======
+                              onClick={() => goTo("/")}
+                            >
+                              Home
+>>>>>>> main
                             </Nav.Link>
 
                             <NavDropdown
@@ -971,8 +986,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                             </NavDropdown>
-                            <HeaderConnect />
-                            <UserSetUpProfileCta />
+                            <HeaderUser />
                             <HeaderSearchButton />
                           </Nav>
                         </Navbar>

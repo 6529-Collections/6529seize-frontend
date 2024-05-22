@@ -25,7 +25,6 @@ import { AuthContext } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import DotLoader from "../dotLoader/DotLoader";
-import HeaderConnect from "../header/HeaderConnect";
 
 interface Props {
   address: string;
@@ -236,23 +235,17 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         </Col>
         <Col
           xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
+        >
           <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
         </Col>
       </Row>
       {!connectedProfile && (
-        <>
-          <Row>
-            <Col className="d-flex align-item-center justify-content-center font-larger font-bolder">
-              Connect Wallet to continue
-            </Col>
-          </Row>
-          <Row className="pt-3">
-            <Col className="d-flex align-item-center justify-content-center">
-              <HeaderConnect />
-            </Col>
-          </Row>
-        </>
+        <Row>
+          <Col className="d-flex align-item-center justify-content-center font-larger font-bolder">
+            Connect Wallet to continue
+          </Col>
+        </Row>
       )}
       {printContent()}
     </Container>
