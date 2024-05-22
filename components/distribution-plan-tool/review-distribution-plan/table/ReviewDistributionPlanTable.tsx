@@ -4,6 +4,7 @@ import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";
 import ReviewDistributionPlanTableHeader from "./ReviewDistributionPlanTableHeader";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
+import { ReviewDistributionPlanTableSubscriptionFooter } from "./ReviewDistributionPlanTableSubscriptionFooter";
 export enum ReviewDistributionPlanTableItemType {
   PHASE = "PHASE",
   COMPONENT = "COMPONENT",
@@ -71,7 +72,7 @@ export default function ReviewDistributionPlanTable() {
             componentId: null,
             type: ReviewDistributionPlanTableItemType.PHASE,
             name: phase.name,
-            description: '',
+            description: "",
             walletsCount: phase.walletsCount,
             spotsCount,
           },
@@ -81,9 +82,12 @@ export default function ReviewDistributionPlanTable() {
     );
   }, [phases]);
   return (
-    <DistributionPlanTableWrapper>
-      <ReviewDistributionPlanTableHeader rows={rows} />
-      <ReviewDistributionPlanTableBody rows={rows} />
-    </DistributionPlanTableWrapper>
+    <>
+      <DistributionPlanTableWrapper>
+        <ReviewDistributionPlanTableHeader rows={rows} />
+        <ReviewDistributionPlanTableBody rows={rows} />
+      </DistributionPlanTableWrapper>
+      <ReviewDistributionPlanTableSubscriptionFooter />
+    </>
   );
 }
