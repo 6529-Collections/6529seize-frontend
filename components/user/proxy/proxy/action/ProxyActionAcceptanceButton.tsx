@@ -11,6 +11,13 @@ import {
 } from "../../../../../generated/models/AcceptActionRequest";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
+import {
+  haveSeenProfileProxyActionAcceptanceModal,
+  setSeenProfileProxyActionAcceptanceModal,
+} from "../../../../../helpers/profile-proxy.helpers";
+import HeaderProxyNewModal from "../../../../header/proxy/HeaderProxyNewModal";
+import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
 
 const ACTION_LABEL: Record<AcceptActionRequestActionEnum, string> = {
   [AcceptActionRequestActionEnum.Accept]: "Accept",
@@ -71,6 +78,30 @@ export default function ProxyActionAcceptanceButton({
   const possibleActions = getPossibleActions();
 
   const [submitting, setSubmitting] = useState(false);
+  const [showAcceptanceModal, setAcceptanceShowModal] = useState(false);
+
+  const onAcceptanceModalClose = (setAsDontShowAgain: boolean) => {
+    setAcceptanceShowModal(false);
+    if (setAsDontShowAgain && connectedProfile?.profile?.external_id) {
+      setSeenProfileProxyActionAcceptanceModal({
+        profileId: connectedProfile.profile.external_id,
+      });
+    }
+  };
+
+  const onSuccessFullProxyAcceptance = () => {
+    if (!connectedProfile?.profile?.external_id) {
+      return;
+    }
+    const haveSeenModal = haveSeenProfileProxyActionAcceptanceModal({
+      profileId: connectedProfile.profile.external_id,
+    });
+    if (haveSeenModal) {
+      return;
+    }
+    setAcceptanceShowModal(true);
+  };
+
   const profileProxyAcceptanceMutation = useMutation({
     mutationFn: async (body: AcceptActionRequest) => {
       return await commonApiPost<AcceptActionRequest, ProfileProxyAction>({
@@ -78,7 +109,7 @@ export default function ProxyActionAcceptanceButton({
         body,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
         grantedToHandle: profileProxy.granted_to.handle,
@@ -88,6 +119,9 @@ export default function ProxyActionAcceptanceButton({
         message: "Action status changed",
         type: "success",
       });
+      if (variables.action === AcceptActionRequestActionEnum.Accept) {
+        onSuccessFullProxyAcceptance();
+      }
     },
     onError: (error) => {
       setToast({
@@ -107,57 +141,78 @@ export default function ProxyActionAcceptanceButton({
       setSubmitting(false);
       return;
     }
+
     await profileProxyAcceptanceMutation.mutateAsync({ action: actionType });
   };
 
   return (
-    <div className="tw-flex md:tw-justify-end">
-      <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-y-2 tw-gap-x-2">
-        <div className="tw-col-span-1">
-          {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
-            <button
-              onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
-              disabled={submitting}
-              type="button"
-              className="tw-text-green tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-            >
-              {submitting ? <CircleLoader /> : "Accept"}
-            </button>
-          )}
-        </div>
-        <div className="tw-col-span-1">
-          {possibleActions.includes(AcceptActionRequestActionEnum.Reject) && (
-            <button
-              onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}
-              type="button"
-              disabled={submitting}
-              className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-            >
-              {submitting ? <CircleLoader /> : "Reject"}
-            </button>
-          )}
-          {possibleActions.includes(AcceptActionRequestActionEnum.Revoke) && (
-            <button
-              onClick={() => onSubmit(AcceptActionRequestActionEnum.Revoke)}
-              disabled={submitting}
-              type="button"
-              className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-            >
-              {submitting ? <CircleLoader /> : "Revoke"}
-            </button>
-          )}
-          {possibleActions.includes(AcceptActionRequestActionEnum.Restore) && (
-            <button
-              onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
-              disabled={submitting}
-              type="button"
-              className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-            >
-              {submitting ? <CircleLoader /> : "Restore"}
-            </button>
-          )}
+    <>
+      <div className="tw-flex md:tw-justify-end">
+        <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-y-2 tw-gap-x-2">
+          <div className="tw-col-span-1">
+            {possibleActions.includes(AcceptActionRequestActionEnum.Accept) && (
+              <button
+                onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
+                disabled={submitting}
+                type="button"
+                className="tw-text-green tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+              >
+                {submitting ? <CircleLoader /> : "Accept"}
+              </button>
+            )}
+          </div>
+          <div className="tw-col-span-1">
+            {possibleActions.includes(AcceptActionRequestActionEnum.Reject) && (
+              <button
+                onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}
+                type="button"
+                disabled={submitting}
+                className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+              >
+                {submitting ? <CircleLoader /> : "Reject"}
+              </button>
+            )}
+            {possibleActions.includes(AcceptActionRequestActionEnum.Revoke) && (
+              <button
+                onClick={() => onSubmit(AcceptActionRequestActionEnum.Revoke)}
+                disabled={submitting}
+                type="button"
+                className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+              >
+                {submitting ? <CircleLoader /> : "Revoke"}
+              </button>
+            )}
+            {possibleActions.includes(
+              AcceptActionRequestActionEnum.Restore
+            ) && (
+              <button
+                onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
+                disabled={submitting}
+                type="button"
+                className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+              >
+                {submitting ? <CircleLoader /> : "Restore"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      <CommonAnimationWrapper mode="sync" initial={true}>
+        {showAcceptanceModal && !!connectedProfile && (
+          <CommonAnimationOpacity
+            key="modal"
+            elementClasses="tw-absolute tw-z-10"
+            elementRole="dialog"
+            onClicked={(e) => e.stopPropagation()}
+          >
+            <HeaderProxyNewModal
+              onClose={onAcceptanceModalClose}
+              connectedProfile={connectedProfile}
+              proxyGrantor={profileProxy.created_by}
+            />
+          </CommonAnimationOpacity>
+        )}
+      </CommonAnimationWrapper>
+    </>
   );
 }

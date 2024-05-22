@@ -1,10 +1,31 @@
-export default function HeaderProxyNewModal() {
+import { useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ProfileMin } from "../../../generated/models/ProfileMin";
+
+export default function HeaderProxyNewModal({
+  connectedProfile,
+  proxyGrantor,
+  onClose,
+}: {
+  readonly connectedProfile: IProfileAndConsolidations;
+  readonly proxyGrantor: ProfileMin;
+  readonly onClose: (setAsDontShowAgain: boolean) => void;
+}) {
+  const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useClickAway(modalRef, () => onClose(dontShowAgain));
+  useKeyPressEvent("Escape", () => onClose(dontShowAgain));
+
   return (
     <div className="tw-cursor-default tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
-          <div className="tw-overflow-hidden sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
+          <div
+            ref={modalRef}
+            className="tw-overflow-hidden sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
+          >
             <div className="tw-flex tw-justify-between">
               <div className="tw-max-w-xl sm:tw-flex sm:tw-space-x-4">
                 <div>
@@ -105,6 +126,7 @@ export default function HeaderProxyNewModal() {
                   type="button"
                   aria-label="Close"
                   title="Close"
+                  onClick={() => onClose(dontShowAgain)}
                   className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                 >
                   <svg
@@ -129,9 +151,17 @@ export default function HeaderProxyNewModal() {
                 <div>
                   <div className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm">
                     <div className="tw-relative tw-px-3 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-border-0 tw-rounded-s-lg focus:tw-outline-none tw-bg-iron-800 tw-text-white">
-                      <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700"></div>
+                      {connectedProfile.profile?.pfp_url ? (
+                        <img
+                          src={connectedProfile.profile.pfp_url}
+                          alt="Profile Picture"
+                          className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700"
+                        />
+                      ) : (
+                        <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700 group-hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"></div>
+                      )}
                       <div className="tw-flex tw-gap-x-2 tw-items-center">
-                        <span>Username</span>
+                        <span>{connectedProfile.profile?.handle}</span>
                       </div>
                     </div>
                     <div className="tw-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-bg-iron-800 tw-px-2 tw-h-11 tw-border-solid tw-border-l tw-border-y-0 tw-border-r-0 tw-border-iron-700 tw-text-iron-300 tw-shadow-sm  focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
@@ -163,29 +193,20 @@ export default function HeaderProxyNewModal() {
                           <div className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0">
                             <div className="tw-h-full">
                               <div className="tw-bg-iron-700 tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
-                                {/* {profileProxy.created_by.pfp ? (
-                                <img
-                                  src={profileProxy.created_by.pfp}
-                                  alt="Profile Picture"
-                                  className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
-                                />
-                              ) : (
-                                <div
-                                  className={`${
-                                    isActive
-                                      ? "tw-bg-iron-600"
-                                      : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
-                                  } tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
-                                ></div>
-                              )} */}
+                                {connectedProfile.profile?.pfp_url ? (
+                                  <img
+                                    src={connectedProfile.profile?.pfp_url}
+                                    alt="Profile Picture"
+                                    className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
+                                  />
+                                ) : (
+                                  <div className="tw-bg-iron-600 tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"></div>
+                                )}
                                 <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
                                   <div className="tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                                     <div className="tw-truncate tw-text-md tw-font-medium tw-text-white">
-                                      Username
+                                      {connectedProfile.profile?.handle}
                                     </div>
-                                    <span className="tw-pl-2 tw-pr-0.5 tw-italic tw-text-sm tw-text-iron-400 tw-font-normal">
-                                      Proxy
-                                    </span>
                                   </div>
                                   <div>
                                     <svg
@@ -203,6 +224,31 @@ export default function HeaderProxyNewModal() {
                                         strokeLinejoin="round"
                                       />
                                     </svg>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0">
+                            <div className="tw-h-full">
+                              <div className=" tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                                {proxyGrantor.pfp ? (
+                                  <img
+                                    src={proxyGrantor.pfp}
+                                    alt="Profile Picture"
+                                    className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
+                                  />
+                                ) : (
+                                  <div className="tw-bg-iron-600 tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"></div>
+                                )}
+                                <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
+                                  <div className="tw-truncate tw-inline-flex tw-items-center tw-justify-between">
+                                    <div className="tw-truncate tw-text-md tw-font-medium tw-text-white">
+                                      {proxyGrantor.handle}
+                                    </div>
+                                    <span className="tw-pl-2 tw-pr-0.5 tw-italic tw-text-sm tw-text-iron-400 tw-font-normal">
+                                      Proxy
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -241,12 +287,14 @@ export default function HeaderProxyNewModal() {
                 <div className="tw-flex tw-h-6 tw-items-center">
                   <input
                     type="checkbox"
+                    checked={dontShowAgain}
+                    onChange={() => setDontShowAgain(!dontShowAgain)}
                     className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
                   />
                 </div>
                 <div className="tw-ml-3 tw-text-sm tw-leading-6">
                   <label className="tw-font-medium tw-text-iron-300">
-                    Don't show again
+                    Don&apos;t show again
                   </label>
                 </div>
               </div>
