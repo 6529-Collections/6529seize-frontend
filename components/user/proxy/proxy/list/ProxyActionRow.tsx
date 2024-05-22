@@ -53,7 +53,7 @@ export default function ProxyActionRow({
   };
 
   return (
-    <div className="tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-iron-600/60">
+    <div className="tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-iron-600">
       <CommonChangeAnimation key={action.id}>
         {components[viewMode]}
       </CommonChangeAnimation>
