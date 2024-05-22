@@ -18,7 +18,7 @@ export default function HeaderProxyNewModal({
   useKeyPressEvent("Escape", () => onClose(dontShowAgain));
 
   return (
-    <div className="tw-hidden tw-cursor-default tw-relative tw-z-10">
+    <div className="tw-cursor-default tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
@@ -113,11 +113,14 @@ export default function HeaderProxyNewModal({
                 </div>
                 <div className="tw-relative tw-mt-3 sm:tw-mt-0 sm:tw-max-w-sm tw-flex tw-flex-col">
                   <p className="tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
-                    Congrats!
+                    Congratulations!
                   </p>
                   <p className="tw-mt-1 tw-mb-0 tw-text-base tw-text-iron-400">
-                    Use the arrow next to your profile name in the header to
-                    switch users.
+                    Click the arrow{" "}
+                    <span className="tw-font-medium tw-text-iron-50">
+                      next to your profile name in the menu
+                    </span>{" "}
+                    to switch users.
                   </p>
                 </div>
               </div>
@@ -149,8 +152,8 @@ export default function HeaderProxyNewModal({
             <div className="tw-relative tw-mt-6">
               <div className="tw-bg-iron-700 tw-rounded-lg tw-p-8 tw-flex tw-justify-center">
                 <div>
-                  <div className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm">
-                    <div className="tw-relative tw-px-3 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-border-0 tw-rounded-s-lg focus:tw-outline-none tw-bg-iron-800 tw-text-white">
+                  <div className="tw-ring-2 tw-ring-offset-4 tw-ring-offset-iron-700 tw-ring-primary-400 tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm">
+                    <div className="tw-relative tw-px-3.5 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-ring-1 tw-ring-white/10 tw-border-0 tw-rounded-s-lg tw-bg-iron-800 tw-text-white">
                       {connectedProfile.profile?.pfp_url ? (
                         <img
                           src={connectedProfile.profile.pfp_url}
@@ -164,7 +167,7 @@ export default function HeaderProxyNewModal({
                         <span>{connectedProfile.profile?.handle}</span>
                       </div>
                     </div>
-                    <div className="tw-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-bg-iron-800 tw-px-2 tw-h-11 tw-border-solid tw-border-l tw-border-y-0 tw-border-r-0 tw-border-iron-700 tw-text-iron-300 tw-shadow-sm  focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+                    <div className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-r-lg tw-bg-iron-800 tw-px-2 tw-h-11 tw-ring-1 tw-ring-white/10 tw-border-0 tw-text-iron-50 tw-shadow-sm">
                       <svg
                         className="tw-h-5 tw-w-5 tw-flex-shrink-0"
                         width="24"
@@ -183,7 +186,7 @@ export default function HeaderProxyNewModal({
                       </svg>
                     </div>
                   </div>
-                  <div className="tw-mt-1 tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5">
+                  <div className="tw-mt-3 tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5">
                     <div className="tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
                       <div className="tw-py-2 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                         <div
@@ -228,8 +231,6 @@ export default function HeaderProxyNewModal({
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0">
                             <div className="tw-h-full">
                               <div className=" tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                                 {proxyGrantor.pfp ? (
@@ -287,13 +288,17 @@ export default function HeaderProxyNewModal({
                 <div className="tw-flex tw-h-6 tw-items-center">
                   <input
                     type="checkbox"
+                    id="dontShowAgain"
                     checked={dontShowAgain}
                     onChange={() => setDontShowAgain(!dontShowAgain)}
                     className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
                   />
                 </div>
                 <div className="tw-ml-3 tw-text-sm tw-leading-6">
-                  <label className="tw-font-medium tw-text-iron-300">
+                  <label
+                    htmlFor="dontShowAgain"
+                    className="tw-cursor-pointer tw-font-medium tw-text-iron-300"
+                  >
                     Don&apos;t show again
                   </label>
                 </div>
