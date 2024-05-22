@@ -79,7 +79,13 @@ function SubscriptionsReportComponent({
   readonly upcomingCounts: SubscriptionCounts[];
   readonly redeemedCounts: RedeemedSubscriptionCounts[];
 }) {
-  const dates = getMintingDates(upcomingCounts.length);
+  const addDays = redeemedCounts.some((count) => {
+    const mintDate = Time.fromString(count.mint_date);
+    return mintDate.toIsoDateString() === Time.now().toIsoDateString();
+  })
+    ? 1
+    : 0;
+  const dates = getMintingDates(upcomingCounts.length, addDays);
 
   return (
     <Container className="pt-4">
