@@ -78,10 +78,10 @@ export default function ProxyActionAcceptanceButton({
   const possibleActions = getPossibleActions();
 
   const [submitting, setSubmitting] = useState(false);
-  const [showAcceptanceModal, setAcceptanceShowModal] = useState(false);
+  const [showAcceptanceModal, setShowAcceptanceModal] = useState(false);
 
   const onAcceptanceModalClose = (setAsDontShowAgain: boolean) => {
-    setAcceptanceShowModal(false);
+    setShowAcceptanceModal(false);
     if (setAsDontShowAgain && connectedProfile?.profile?.external_id) {
       setSeenProfileProxyActionAcceptanceModal({
         profileId: connectedProfile.profile.external_id,
@@ -99,7 +99,7 @@ export default function ProxyActionAcceptanceButton({
     if (haveSeenModal) {
       return;
     }
-    setAcceptanceShowModal(true);
+    setShowAcceptanceModal(true);
   };
 
   const profileProxyAcceptanceMutation = useMutation({
