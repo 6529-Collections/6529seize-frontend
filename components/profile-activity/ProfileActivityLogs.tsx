@@ -4,7 +4,7 @@ import {
   ProfileActivityLogType,
   RateMatter,
 } from "../../entities/IProfile";
-import { Page } from "../../helpers/Types";
+import { CountlessPage } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
@@ -15,9 +15,9 @@ import CommonFilterTargetSelect, {
 } from "../utils/CommonFilterTargetSelect";
 
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 import { useSelector } from "react-redux";
 import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
+import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -167,33 +167,32 @@ export default function ProfileActivityLogs({
     activeCurationFilterId,
   ]);
 
-  const { isLoading, data: logs } = useQuery<Page<ProfileActivityLog>>({
-    queryKey: [
-      QueryKey.PROFILE_LOGS,
-      {
-        ...params,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<
-        Page<ProfileActivityLog>,
-        ActivityLogParamsConverted
-      >({
-        endpoint: `profile-logs`,
-        params: params,
-      }),
-    placeholderData: keepPreviousData,
-  });
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(
+    {
+      queryKey: [
+        QueryKey.PROFILE_LOGS,
+        {
+          ...params,
+        },
+      ],
+      queryFn: async () =>
+        await commonApiFetch<
+          CountlessPage<ProfileActivityLog>,
+          ActivityLogParamsConverted
+        >({
+          endpoint: `profile-logs`,
+          params: params,
+        }),
+      placeholderData: keepPreviousData,
+    }
+  );
+
   useEffect(() => {
     if (isLoading) return;
-    if (!logs?.count) {
+    if (logs?.page === 1 && !logs.data.length) {
       setCurrentPage(1);
-      setTotalPages(1);
-      return;
     }
-    setTotalPages(Math.ceil(logs.count / initialParams.pageSize));
-  }, [logs?.count, logs?.page, isLoading]);
+  }, [logs?.page, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
       <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
@@ -227,14 +226,13 @@ export default function ProfileActivityLogs({
                 logs={logs.data}
                 user={initialParams.handleOrWallet}
               />
-              {totalPages > 1 && (
-                <CommonTablePagination
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  totalPages={totalPages}
-                  small={!!initialParams.handleOrWallet}
-                />
-              )}
+              <CommonTablePagination
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={null}
+                haveNextPage={logs.next}
+                small={!!initialParams.handleOrWallet}
+              />
             </div>
           ) : (
             <div className="tw-py-4">

@@ -24,14 +24,15 @@ import ProfileActivityLogSocialMediaVerificationPost from "./items/ProfileActivi
 
 export default function UserPageIdentityActivityLogItem({
   log,
+  user,
 }: {
   readonly log: ProfileActivityLog;
+  readonly user: string | null;
 }) {
   const logType = log.type;
   switch (logType) {
     case ProfileActivityLogType.RATING_EDIT:
-    case ProfileActivityLogType.PROXY_RATING_EDIT:
-      return <ProfileActivityLogRate log={log} />;
+      return <ProfileActivityLogRate log={log} user={user} />;
     case ProfileActivityLogType.HANDLE_EDIT:
       return <ProfileActivityLogHandle log={log} />;
     case ProfileActivityLogType.SOCIALS_EDIT:

@@ -43,6 +43,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
               currentPage={page}
               setCurrentPage={setPage}
               totalPages={totalPages}
+              haveNextPage={page < totalPages}
               small={true}
               loading={loading}
             />
