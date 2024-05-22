@@ -7,12 +7,11 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import HeaderConnect from "./HeaderConnect";
 import { useAccount } from "wagmi";
-import HeaderSearchButton from "./header-search/HeaderSearchButton";
-import UserSetUpProfileCta from "../user/utils/no-profile/set-up-profile/UserSetUpProfileCta";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
+import HeaderUser from "./user/HeaderUser";
+import HeaderSearchButton from "./header-search/HeaderSearchButton";
 
 interface Props {
   onLoad?: () => void;
@@ -99,7 +98,8 @@ export default function Header(props: Readonly<Props>) {
       <div
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
-        }`}>
+        }`}
+      >
         <Container className="pt-2 pb-2">
           <Row>
             <Col className="d-flex justify-content-end">
@@ -112,7 +112,8 @@ export default function Header(props: Readonly<Props>) {
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
-                }}></FontAwesomeIcon>
+                }}
+              ></FontAwesomeIcon>
             </Col>
           </Row>
         </Container>
@@ -133,8 +134,9 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-4 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
-                <HeaderConnect />
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
+              >
+                <HeaderUser />
               </h3>
             </Col>
           </Row>
@@ -167,7 +169,8 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuCollections
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}>
+                  }`}
+              >
                 Collections
               </h3>
             </Col>
@@ -256,7 +259,8 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}>
+                  }`}
+              >
                 Community
               </h3>
             </Col>
@@ -344,7 +348,8 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}>
+                  }`}
+              >
                 Tools
               </h3>
             </Col>
@@ -429,7 +434,8 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}>
+                  }`}
+              >
                 About
               </h3>
             </Col>
@@ -633,7 +639,8 @@ export default function Header(props: Readonly<Props>) {
                   sm={{ span: 8 }}
                   md={{ span: 8 }}
                   lg={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
+                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
+                >
                   <Link href="/">
                     <Image
                       loading="eager"
@@ -652,15 +659,19 @@ export default function Header(props: Readonly<Props>) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
-                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}>
+                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}
+                >
                   <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}>
+                        className={`d-flex align-items-center justify-content-end no-padding`}
+                      >
                         <div
-                          className={`${styles.dMdNone} d-flex align-items-center`}>
-                          <UserSetUpProfileCta />
-                          <HeaderSearchButton />
+                          className={`${styles.dMdNone} d-flex align-items-center`}
+                        >
+                          <div className="tw-mr-6 xl:tw-mr-2">
+                            <HeaderSearchButton />
+                          </div>
                           <Image
                             loading="eager"
                             priority
@@ -679,20 +690,23 @@ export default function Header(props: Readonly<Props>) {
                         </div>
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`justify-content-end d-none ${styles.dMdBlock}`}>
+                          className={`justify-content-end d-none ${styles.dMdBlock}`}
+                        >
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/" ? "active" : ""
                               }`}
-                              onClick={() => goTo("/")}>
+                              onClick={() => goTo("/")}
+                            >
                               Home
                             </Nav.Link>
 
                             <NavDropdown
                               title="Collections"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
+                            >
                               <HeaderDesktopLink
                                 link={{
                                   name: "The Memes",
@@ -730,7 +744,8 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Community"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
+                            >
                               <HeaderDesktopLink
                                 link={{
                                   name: "Community",
@@ -772,7 +787,8 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Tools"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
+                            >
                               <HeaderDesktopLink
                                 link={{
                                   name: "Subscriptions Report",
@@ -828,7 +844,8 @@ export default function Header(props: Readonly<Props>) {
                                   ? "active"
                                   : ""
                               }`}
-                              align={"start"}>
+                              align={"start"}
+                            >
                               <HeaderDesktopLink
                                 link={{
                                   name: "The Memes",
@@ -955,8 +972,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                             </NavDropdown>
-                            <HeaderConnect />
-                            <UserSetUpProfileCta />
+                            <HeaderUser />
                             <HeaderSearchButton />
                           </Nav>
                         </Navbar>
