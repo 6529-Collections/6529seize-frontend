@@ -1,8 +1,10 @@
+import Cookies from "js-cookie";
 import { ProfileProxyActionStatus, ProfileProxySide } from "../entities/IProxy";
 import { ProfileProxy } from "../generated/models/ProfileProxy";
 import { ProfileProxyAction } from "../generated/models/ProfileProxyAction";
 import { assertUnreachable } from "./AllowlistToolHelpers";
 import { Time } from "./time";
+import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "../constants";
 
 export const getProfileProxyActionStatus = ({
   action,
@@ -87,4 +89,32 @@ export const groupProfileProxies = ({
       }))
       .filter((p) => p.granted_to.id === profileId && !!p.actions.length),
   };
+};
+
+const getProfileProxyActionAcceptanceModalKey = ({
+  profileId,
+}: {
+  readonly profileId: string;
+}): string => {
+  return `${PROFILE_PROXY_ACCEPTANCE_COOKIE}-${profileId}`;
+};
+
+export const haveSeenProfileProxyActionAcceptanceModal = ({
+  profileId,
+}: {
+  readonly profileId: string;
+}): boolean => {
+  return !!Cookies.get(getProfileProxyActionAcceptanceModalKey({ profileId }));
+};
+
+export const setSeenProfileProxyActionAcceptanceModal = ({
+  profileId,
+}: {
+  readonly profileId: string;
+}): void => {
+  Cookies.set(
+    getProfileProxyActionAcceptanceModalKey({ profileId }),
+    `${Time.currentMillis()}`,
+    { expires: 365 }
+  );
 };
