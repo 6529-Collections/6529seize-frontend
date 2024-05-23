@@ -110,6 +110,7 @@ export default function Document() {
             |<a href={`/about/${AboutSection.COPYRIGHT}`}>Copyright</a>|
             <a href={`/about/${AboutSection.COOKIE_POLICY}`}>Cookie Policy</a>|
             <a href={`/about/${AboutSection.LICENSE}`}>License</a>|
+            <a href="https://api.seize.io/docs">API Documentation</a>|{" "}
             <a
               href={`https://status.seize.io/`}
               target="_blank"
