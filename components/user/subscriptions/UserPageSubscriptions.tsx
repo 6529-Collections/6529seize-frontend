@@ -18,7 +18,10 @@ import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsAirdropAddress, {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
-import { numberOfCardsForSeasonEnd } from "../../../helpers/meme_calendar.helplers";
+import {
+  isMintingToday,
+  numberOfCardsForSeasonEnd,
+} from "../../../helpers/meme_calendar.helplers";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -159,8 +162,12 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingMemeSubscriptions(true);
+    let upcomingLimit: number = remainingMintsForSeason.count;
+    if (isMintingToday()) {
+      upcomingLimit += 1;
+    }
     commonApiFetch<NFTSubscription[]>({
-      endpoint: `subscriptions/consolidation/upcoming-memes/${props.profile.consolidation.consolidation_key}?card_count=${remainingMintsForSeason.count}`,
+      endpoint: `subscriptions/consolidation/upcoming-memes/${props.profile.consolidation.consolidation_key}?card_count=${upcomingLimit}`,
     }).then((data) => {
       setMemeSubscriptions(data);
       setFetchingMemeSubscriptions(false);
@@ -210,8 +217,7 @@ export default function UserPageSubscriptions(
             <span>
               <a
                 href="/about/subscriptions"
-                className="font-smaller font-color-silver decoration-hover-underline"
-              >
+                className="font-smaller font-color-silver decoration-hover-underline">
                 Learn More
               </a>
             </span>
@@ -237,8 +243,7 @@ export default function UserPageSubscriptions(
                 <span>
                   <a
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline"
-                  >
+                    className="font-smaller font-color-silver decoration-hover-underline">
                     Learn More
                   </a>
                 </span>
