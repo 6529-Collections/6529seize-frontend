@@ -164,8 +164,8 @@ function isMintingDay(t: Time) {
   });
 }
 
-export function getMintingDates(cardCount: number) {
-  let now = Time.now();
+export function getMintingDates(cardCount: number, addDays = 0) {
+  let now = Time.now().plusDays(addDays);
   const dates = [];
 
   for (let i = 0; i < cardCount; i++) {
