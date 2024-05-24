@@ -60,35 +60,48 @@ export function NextGenTokenImage(
       );
 
       ownerInfoDisplay = (
-        <Tippy
-          content={
-            <Container>
-              <Row className="pt-2 pb-2">
-                <Col>{ownerInfo}</Col>
-              </Row>
-              <Row>
-                <Col>
-                  Opensea:{" "}
-                  {props.token.opensea_price > 0
-                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                    : "Not Listed"}
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  Blur:{" "}
-                  {props.token.blur_price > 0
-                    ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
-                    : "Not Listed"}
-                </Col>
-              </Row>
-            </Container>
-          }
-          theme={"light"}
-          placement="right"
-          delay={250}>
-          <FontAwesomeIcon height={18} icon="info-circle"></FontAwesomeIcon>
-        </Tippy>
+        <button
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+          }}
+          aria-label="More info"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}>
+          <Tippy
+            content={
+              <Container>
+                <Row className="pt-2 pb-2">
+                  <Col>{ownerInfo}</Col>
+                </Row>
+                <Row>
+                  <Col>
+                    Opensea:{" "}
+                    {props.token.opensea_price > 0
+                      ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                      : "Not Listed"}
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    Blur:{" "}
+                    {props.token.blur_price > 0
+                      ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                      : "Not Listed"}
+                  </Col>
+                </Row>
+              </Container>
+            }
+            theme={"light"}
+            placement="right"
+            delay={250}>
+            <FontAwesomeIcon height={18} icon="info-circle"></FontAwesomeIcon>
+          </Tippy>
+        </button>
       );
     }
 

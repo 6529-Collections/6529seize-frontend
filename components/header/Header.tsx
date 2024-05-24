@@ -638,6 +638,8 @@ export default function Header(props: Readonly<Props>) {
                   sm={{ span: 8 }}
                   md={{ span: 8 }}
                   lg={{ span: 3 }}
+                  xl={{ span: 2 }}
+                  xxl={{ span: 3 }}
                   className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
                 >
                   <Link href="/">
@@ -658,6 +660,8 @@ export default function Header(props: Readonly<Props>) {
                   sm={{ span: 4 }}
                   md={{ span: 4 }}
                   lg={{ span: 9 }}
+                  xl={{ span: 10 }}
+                  xxl={{ span: 9 }}
                   className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}
                 >
                   <Container className="no-padding">

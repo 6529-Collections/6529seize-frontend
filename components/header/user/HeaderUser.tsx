@@ -8,9 +8,11 @@ export default function HeaderUser() {
     <div className="tailwind-scope">
       {address ? (
         <HeaderUserConnected connectedAddress={address} />
+        
       ) : (
         <div className="tw-mx-3">
           <HeaderUserConnect />
+         
         </div>
       )}
     </div>
