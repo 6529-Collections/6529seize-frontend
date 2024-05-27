@@ -5,6 +5,7 @@ import WavesRating from "./WavesRating";
 import WavesGroups from "./WavesGroups";
 import WavesDates from "./WavesDates";
 import WavesOutcome from "./WavesOutcome";
+import WavesApproveApproval from "./WavesApproveApproval";
 
 export default function Waves() {
   return (
@@ -17,6 +18,7 @@ export default function Waves() {
           {/*  <WavesDates /> */}
           {/*  <WavesDrops /> */}
           {/*   <WavesRating /> */}
+          {/* <WavesApproveApproval /> */}
           {/* <WavesOutcome /> */}
         </div>
       </div>
