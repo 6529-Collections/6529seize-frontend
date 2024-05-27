@@ -609,6 +609,12 @@ export function getBlurLink(tokenId: number) {
   ].toLowerCase()}/${tokenId}`;
 }
 
+export function getMagicEdenLink(tokenId: number) {
+  return `https://magiceden.io/item-details/ethereum/${NEXTGEN_CORE[
+    NEXTGEN_CHAIN_ID
+  ].toLowerCase()}/${tokenId}`;
+}
+
 export function formatNameForUrl(name: string) {
   return name.replace(/ /g, "-").toLowerCase();
 }
