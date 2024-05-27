@@ -92,7 +92,7 @@ export default function WavesMainSteps() {
               </span>
               <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
                 <span className="tw-text-base tw-font-semibold tw-text-iron-600">
-                 Dates
+                  Dates
                 </span>
               </span>
             </button>
@@ -127,6 +127,36 @@ export default function WavesMainSteps() {
               </span>
             </button>
           </div>
+          <div className="tw-relative tw-mb-11">
+            <div
+              className="tw-absolute tw-left-3 tw-top-10 tw-h-full tw-rounded-sm tw-w-0.5 tw-bg-iron-800"
+              aria-hidden="true"
+            ></div>
+            <button
+              type="button"
+              className="tw-bg-transparent tw-p-0 tw-border-none focus:tw-outline-none tw-group tw-relative tw-flex tw-items-center"
+            >
+              <span className="tw-flex tw-h-9 tw-items-center">
+                <span className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-iron-700 tw-bg-iron-900">
+                  <svg
+                    width="8"
+                    height="8"
+                    className="tw-text-iron-500"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="currentColor" />
+                  </svg>
+                </span>
+              </span>
+              <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
+                <span className="tw-text-base tw-font-semibold tw-text-iron-600">
+                  Rating
+                </span>
+              </span>
+            </button>
+          </div>
           <div className="tw-relative">
             <button
               type="button"
@@ -148,7 +178,7 @@ export default function WavesMainSteps() {
               </span>
               <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
                 <span className="tw-text-base tw-font-semibold tw-text-iron-600">
-                 Rating/Voting
+                  Approval
                 </span>
               </span>
             </button>
