@@ -34,7 +34,7 @@ interface Props {
   minting_link: string;
 }
 
-export default function Distribution(props: Readonly<Props>) {
+export default function DistributionPage(props: Readonly<Props>) {
   const router = useRouter();
   const [pageProps, setPageProps] = useState<{
     page: number;
@@ -270,7 +270,9 @@ export default function Distribution(props: Readonly<Props>) {
               )}
               <Row>
                 <Col>
-                  {nftId && distributions.length > 0 && printDistribution()}
+                  {nftId &&
+                    (distributions.length > 0 || searchWallets.length > 0) &&
+                    printDistribution()}
                 </Col>
               </Row>
               <Row>
