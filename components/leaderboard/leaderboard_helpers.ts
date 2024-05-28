@@ -45,6 +45,7 @@ export interface LeaderboardMetrics {
   rep_score: number;
   cic_score: number;
   primary_wallet: string;
+  total_tdh: number;
   boosted_tdh: number;
   day_change: number;
   level: number;
