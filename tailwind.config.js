@@ -15,10 +15,6 @@ module.exports = {
   },
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial":
-          "radial-gradient(50% 50% at 50% 50%, #A47CF3 0%, #683FEA 100%)",
-      },
       boxShadow: {
         "drop-btn-inactive":
           "0px -4px 2px 0px rgba(0, 0, 0, 0.25) inset, 0px 2px 1px 0px rgba(255, 255, 255, 0.25) inset",
