@@ -4,7 +4,7 @@ export default function WavesDropsTypes() {
       <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
         Required Types
       </p>
-      <div className="tw-mt-3 tw-grid tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
         <div className="tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400 tw-bg-primary-400/10 tw-px-5 tw-py-4 tw-shadow-sm focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out">
           <div className="tw-flex tw-h-6 tw-items-center">
             <input

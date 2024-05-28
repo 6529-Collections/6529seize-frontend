@@ -6,7 +6,7 @@ export default function WavesGroupInputs() {
           <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
             Select start date
           </p>
-          <div className="tw-mt-4 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-700">
+          <div className="tw-mt-4 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
             <button
               type="button"
               className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute 
@@ -34,7 +34,6 @@ export default function WavesGroupInputs() {
               className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-1.5 tw-text-iron-300 hover:tw-text-iron-500"
             >
               <span className="tw-sr-only">Next month</span>
-
               <svg
                 className="tw-h-6 tw-w-6 tw-text-iron-300"
                 viewBox="0 0 24 24"
@@ -133,7 +132,7 @@ export default function WavesGroupInputs() {
               (optional)
             </span>
           </p>
-          <div className="tw-mt-4 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-700">
+          <div className="tw-mt-4 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
             <button
               type="button"
               className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-1.5 tw-text-iron-300 hover:tw-text-iron-500"
@@ -143,6 +142,7 @@ export default function WavesGroupInputs() {
                 className="tw-h-6 tw-w-6 tw-text-iron-300"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -164,6 +164,7 @@ export default function WavesGroupInputs() {
                 className="tw-h-6 tw-w-6 tw-text-iron-300"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -375,7 +376,7 @@ export default function WavesGroupInputs() {
       <div className="tw-mt-6 tw-text-right">
         <button
           type="button"
-          className="tw-w-full sm:tw-w-auto tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
         >
           <span>Next step</span>
         </button>
