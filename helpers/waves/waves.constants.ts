@@ -115,3 +115,9 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
   [CreateWaveGroupConfigType.CAN_VOTE]: "Anyone",
   [CreateWaveGroupConfigType.ADMIN]: "None",
 };
+
+export const CREATE_WAVE_START_DATE_LABELS: Record<WaveType, string> = {
+  [WaveType.CHAT]: "Start date",
+  [WaveType.RANK]: "Submissions open",
+  [WaveType.APPROVE]: "Start date",
+};
