@@ -1,10 +1,10 @@
 import CreateWave from "./CreateWave";
-import WavesCard from "./WavesCard";
+import WavesList from "./WavesList";
 
 export default function Waves() {
   return (
     <div className="tailwind-scope">
-      <WavesCard />
+      <WavesList />
       {/*    <CreateWave /> */}
     </div>
   );
