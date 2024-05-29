@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { generateCalendar } from "../../../helpers/calendar/calendar.helpers";
+import CommonCalendarDay from "./CommonCalendarDay";
 
 const MONTHS = [
   "January",
@@ -15,9 +17,22 @@ const MONTHS = [
   "December",
 ];
 
-export default function CommonCalendar() {
-  const [month, setMonth] = useState(new Date().getMonth());
-  const [year, setYear] = useState(new Date().getFullYear());
+export default function CommonCalendar({
+  initialMonth,
+  initialYear,
+  selectedTimestamp,
+  setSelectedTimestamp,
+}: {
+  readonly initialMonth: number;
+  readonly initialYear: number;
+  readonly selectedTimestamp: number | null;
+  readonly setSelectedTimestamp: (timestamp: number) => void;
+}) {
+  const [month, setMonth] = useState(initialMonth);
+  const [year, setYear] = useState(initialYear);
+
+  const [days, setDays] = useState(generateCalendar({ month, year }));
+  useEffect(() => setDays(generateCalendar({ month, year })), [month, year]);
 
   const setNextMonth = () => {
     if (month === 11) {
@@ -36,6 +51,7 @@ export default function CommonCalendar() {
       setMonth(month - 1);
     }
   };
+
   return (
     <div className="tw-mt-4 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
       <button
@@ -97,63 +113,14 @@ export default function CommonCalendar() {
           <div>Su</div>
         </div>
         <div className="tw-p-1 tw-isolate tw-mt-2 tw-grid tw-grid-cols-7 tw-gap-px ">
-          <button
-            type="button"
-            className="tw-relative tw-bg-primary-500 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-50 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out 
-              focus:tw-z-10 tw-font-semibold"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              1
-            </div>
-          </button>
-          <button
-            type="button"
-            className="tw-relative tw-bg-iron-800 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-300 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              2
-            </div>
-          </button>
-          <button
-            type="button"
-            className="tw-relative tw-bg-iron-800 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-300 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              3
-            </div>
-          </button>
-          <button
-            type="button"
-            className="tw-relative tw-bg-iron-800 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-300 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              4
-            </div>
-          </button>
-          <button
-            type="button"
-            className="tw-relative tw-bg-iron-800 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-300 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              5
-            </div>
-          </button>
-          <button
-            type="button"
-            className="tw-relative tw-bg-iron-800 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-300 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              6
-            </div>
-          </button>
-          <button
-            type="button"
-            className="tw-relative tw-bg-iron-800 tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-text-iron-300 hover:tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10"
-          >
-            <div className="tw-mx-auto tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full">
-              7
-            </div>
-          </button>
+          {days.map((day) => (
+            <CommonCalendarDay
+              key={`calendar-${day}`}
+              day={day}
+              selectedTimestamp={selectedTimestamp}
+              setSelectedTimestamp={setSelectedTimestamp}
+            />
+          ))}
         </div>
       </section>
     </div>

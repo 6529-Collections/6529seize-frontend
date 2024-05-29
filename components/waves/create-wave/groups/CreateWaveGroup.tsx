@@ -9,7 +9,9 @@ import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
 } from "../../../../helpers/waves/waves.constants";
-import WavesGroupInputs from "../../WavesGroupInputs";
+import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
+import SelectGroupModal from "../../../utils/select-group/SelectGroupModal";
 
 export default function CreateWaveGroup({
   waveType,
@@ -39,7 +41,20 @@ export default function CreateWaveGroup({
           label="A Group"
           onChange={setSelected}
         />
-        {selected === CreateWaveGroupStatus.GROUP && <WavesGroupInputs />}
+        <CommonAnimationWrapper mode="sync" initial={true}>
+          {selected === CreateWaveGroupStatus.GROUP && (
+            <CommonAnimationOpacity
+              key="modal"
+              elementClasses="tw-absolute tw-z-10"
+              elementRole="dialog"
+              onClicked={(e) => e.stopPropagation()}
+            >
+              <SelectGroupModal
+                onClose={() => setSelected(CreateWaveGroupStatus.NONE)}
+              />
+            </CommonAnimationOpacity>
+          )}
+        </CommonAnimationWrapper>
       </div>
     </div>
   );
