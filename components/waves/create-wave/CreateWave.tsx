@@ -3,7 +3,7 @@ import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import WavesRating from "../WavesRating";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
-import WavesDates from "../WavesDates";
+import CreateWaveDates from "./dates/CreateWaveDates";
 import WavesOutcome from "../WavesOutcome";
 import WavesApproveApproval from "../WavesApproveApproval";
 import { useState } from "react";
@@ -13,10 +13,11 @@ import {
   WaveSignatureType,
   WaveType,
 } from "../../../types/waves.types";
+import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
 
 export default function CreateWave() {
   const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DATES);
-
+  const currentDayStartTimestamp = getCurrentDayStartTimestamp();
   const [config, setConfig] = useState<CreateWaveConfig>({
     overview: {
       type: WaveType.CHAT,
@@ -30,12 +31,24 @@ export default function CreateWave() {
       canVote: null,
       admin: null,
     },
+    dates: {
+      submissionStartDate: currentDayStartTimestamp,
+      votingStartDate: currentDayStartTimestamp,
+      endDate: null,
+    },
   });
 
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
     setConfig((prev) => ({
       ...prev,
       overview,
+    }));
+  };
+
+  const setDates = (dates: CreateWaveConfig["dates"]) => {
+    setConfig((prev) => ({
+      ...prev,
+      dates,
     }));
   };
 
@@ -49,7 +62,13 @@ export default function CreateWave() {
     [CreateWaveStep.GROUPS]: (
       <CreateWaveGroups waveType={config.overview.type} />
     ),
-    [CreateWaveStep.DATES]: <WavesDates />,
+    [CreateWaveStep.DATES]: (
+      <CreateWaveDates
+        waveType={config.overview.type}
+        dates={config.dates}
+        setDates={setDates}
+      />
+    ),
     [CreateWaveStep.DROPS]: <WavesDrops />,
     [CreateWaveStep.VOTING]: <WavesRating />,
     [CreateWaveStep.APPROVAL]: <WavesApproveApproval />,

@@ -41,9 +41,16 @@ export enum CreateWaveStep {
   APPROVAL = "APPROVAL",
 }
 
+export interface CreateWaveDatesConfig {
+  readonly submissionStartDate: number;
+  readonly votingStartDate: number;
+  readonly endDate: number | null;
+}
+
 export interface CreateWaveConfig {
   readonly overview: WaveOverviewConfig;
   readonly groups: WaveGroupsConfig;
+  readonly dates: CreateWaveDatesConfig;
 }
 
 export enum CreateWaveStepStatus {
