@@ -82,6 +82,8 @@ export interface NextGenToken {
   opensea_price: number;
   opensea_royalty: number;
   blur_price: number;
+  me_price: number;
+  me_royalty: number;
   last_sale_value: number;
   last_sale_date: Date;
   max_sale_value: number;
