@@ -11,6 +11,17 @@ export enum WaveSignatureType {
   DROPS_AND_VOTING = "DROPS_AND_VOTING",
 }
 
+export enum WaveRequiredType {
+  IMAGE = "IMAGE",
+  AUDIO = "AUDIO",
+  VIDEO = "VIDEO",
+}
+
+export enum WaveRequiredMetadataType {
+  STRING = "STRING",
+  NUMBER = "NUMBER",
+}
+
 export enum CreateWaveGroupConfigType {
   CAN_VIEW = "CAN_VIEW",
   CAN_DROP = "CAN_DROP",
@@ -32,6 +43,16 @@ export interface WaveGroupsConfig {
   readonly admin: string | null;
 }
 
+export interface CreateWaveDropsRequiredMetadata {
+  readonly key: string;
+  readonly type: WaveRequiredMetadataType;
+}
+
+export interface CreateWaveDropsConfig {
+  readonly requiredTypes: WaveRequiredType[];
+  readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
+}
+
 export enum CreateWaveStep {
   OVERVIEW = "OVERVIEW",
   GROUPS = "GROUPS",
@@ -51,6 +72,7 @@ export interface CreateWaveConfig {
   readonly overview: WaveOverviewConfig;
   readonly groups: WaveGroupsConfig;
   readonly dates: CreateWaveDatesConfig;
+  readonly drops: CreateWaveDropsConfig;
 }
 
 export enum CreateWaveStepStatus {

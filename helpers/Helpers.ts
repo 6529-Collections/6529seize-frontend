@@ -19,6 +19,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "../components/nextGen/nextgen_contracts";
+import { Period } from "./Types";
 
 export function formatAddress(address: string) {
   if (
@@ -758,3 +759,11 @@ export const getCanProfileSeeDrops = ({
 };
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
+
+export const PERIOD_LABELS: Record<Period, string> = {
+  [Period.MINUTES]: "Minutes",
+  [Period.HOURS]: "Hours",
+  [Period.DAYS]: "Days",
+  [Period.WEEKS]: "Weeks",
+  [Period.MONTHS]: "Months",
+};
