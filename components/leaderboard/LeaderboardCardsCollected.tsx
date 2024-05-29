@@ -55,19 +55,19 @@ export default function LeaderboardCardsCollectedComponent(
     );
 
   function getTDHChange(lead: LeaderboardMetrics) {
-    if (!lead.boosted_tdh) {
+    if (!lead.total_tdh) {
       return "";
     }
 
-    const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    const tdhChange = (lead.day_change / lead.total_tdh) * 100;
     return ` (${tdhChange.toFixed(2)}%)`;
   }
 
   function calculateTdhVsCommunity(lead: LeaderboardMetrics) {
-    if (!props.globalTdhRateChange || !lead.day_change || !lead.boosted_tdh) {
+    if (!props.globalTdhRateChange || !lead.day_change || !lead.total_tdh) {
       return "-";
     }
-    const tdhChange = (lead.day_change / lead.boosted_tdh) * 100;
+    const tdhChange = (lead.day_change / lead.total_tdh) * 100;
     return `${Math.abs(tdhChange / props.globalTdhRateChange).toFixed(2)}x`;
   }
 
