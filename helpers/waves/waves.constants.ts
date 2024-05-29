@@ -1,6 +1,8 @@
 import {
   CreateWaveGroupConfigType,
   CreateWaveStep,
+  WaveRequiredMetadataType,
+  WaveRequiredType,
   WaveSignatureType,
   WaveType,
 } from "../../types/waves.types";
@@ -120,4 +122,21 @@ export const CREATE_WAVE_START_DATE_LABELS: Record<WaveType, string> = {
   [WaveType.CHAT]: "Start date",
   [WaveType.RANK]: "Submissions open",
   [WaveType.APPROVE]: "Start date",
+};
+
+export const CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS: Record<
+  WaveRequiredType,
+  string
+> = {
+  [WaveRequiredType.IMAGE]: "Image",
+  [WaveRequiredType.AUDIO]: "Audio",
+  [WaveRequiredType.VIDEO]: "Video",
+};
+
+export const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
+  WaveRequiredMetadataType,
+  string
+> = {
+  [WaveRequiredMetadataType.STRING]: "Text",
+  [WaveRequiredMetadataType.NUMBER]: "Number",
 };

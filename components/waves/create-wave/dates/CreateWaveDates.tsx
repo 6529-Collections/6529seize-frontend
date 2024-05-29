@@ -3,7 +3,7 @@ import { getCurrentDayStartTimestamp } from "../../../../helpers/calendar/calend
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig, WaveType } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
-import CreateWaveDatesEndDate from "./CreateWaveDatesEndDate";
+import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 
 export default function CreateWaveDates({
   waveType,
@@ -18,7 +18,6 @@ export default function CreateWaveDates({
   const currentYear = new Date().getFullYear();
 
   const haveVotingStartDate = waveType === WaveType.RANK;
-
 
   const onStartTimestampChange = (timestamp: number) => {
     setDates({
@@ -62,7 +61,7 @@ export default function CreateWaveDates({
             />
           </div>
         )}
-        <CreateWaveDatesEndDate/>
+        <CreateWaveDatesEndDate waveType={waveType} />
       </div>
 
       <div className="tw-mt-6 tw-text-right">

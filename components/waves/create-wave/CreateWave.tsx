@@ -1,4 +1,4 @@
-import WavesDrops from "../WavesDrops";
+import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import WavesRating from "../WavesRating";
@@ -16,7 +16,7 @@ import {
 import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
 
 export default function CreateWave() {
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DATES);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DROPS);
   const currentDayStartTimestamp = getCurrentDayStartTimestamp();
   const [config, setConfig] = useState<CreateWaveConfig>({
     overview: {
@@ -36,6 +36,10 @@ export default function CreateWave() {
       votingStartDate: currentDayStartTimestamp,
       endDate: null,
     },
+    drops: {
+      requiredTypes: [],
+      requiredMetadata: [],
+    },
   });
 
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
@@ -49,6 +53,13 @@ export default function CreateWave() {
     setConfig((prev) => ({
       ...prev,
       dates,
+    }));
+  };
+
+  const setDrops = (drops: CreateWaveConfig["drops"]) => {
+    setConfig((prev) => ({
+      ...prev,
+      drops,
     }));
   };
 
@@ -69,7 +80,9 @@ export default function CreateWave() {
         setDates={setDates}
       />
     ),
-    [CreateWaveStep.DROPS]: <WavesDrops />,
+    [CreateWaveStep.DROPS]: (
+      <CreateWaveDrops drops={config.drops} setDrops={setDrops} />
+    ),
     [CreateWaveStep.VOTING]: <WavesRating />,
     [CreateWaveStep.APPROVAL]: <WavesApproveApproval />,
   };
@@ -140,7 +153,7 @@ export default function CreateWave() {
                     filterUnits="userSpaceOnUse"
                     color-interpolation-filters="sRGB"
                   >
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feBlend
                       mode="normal"
                       in="SourceGraphic"
@@ -161,7 +174,7 @@ export default function CreateWave() {
                     filterUnits="userSpaceOnUse"
                     color-interpolation-filters="sRGB"
                   >
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feBlend
                       mode="normal"
                       in="SourceGraphic"
@@ -182,7 +195,7 @@ export default function CreateWave() {
                     filterUnits="userSpaceOnUse"
                     color-interpolation-filters="sRGB"
                   >
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feBlend
                       mode="normal"
                       in="SourceGraphic"
@@ -203,7 +216,7 @@ export default function CreateWave() {
                     filterUnits="userSpaceOnUse"
                     color-interpolation-filters="sRGB"
                   >
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feBlend
                       mode="normal"
                       in="SourceGraphic"
