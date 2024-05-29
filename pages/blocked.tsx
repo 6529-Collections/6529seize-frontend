@@ -8,8 +8,9 @@ import Image from "next/image";
 
 export default function Access() {
   const router = useRouter();
+  const [disabled, setDisabled] = useState(false);
   const [image, setImage] = useState();
-  const [inputDisabled, setInputDisabled] = useState(false);
+  const [country, setCountry] = useState();
 
   useEffect(() => {
     if (!image && router.isReady) {
@@ -19,41 +20,26 @@ export default function Access() {
       }).then((r: any) => {
         r.json().then((response: any) => {
           setImage(response.image);
+          setCountry(response.country);
         });
-        if (r.status != 401) {
-          setInputDisabled(true);
+        if (r.status != 403) {
+          setDisabled(true);
         }
       });
     }
   }, [router.isReady]);
 
-  function doLogin(target: any) {
-    target.select();
-    const pass = target.value;
-    fetch(`${process.env.API_ENDPOINT}/api/`, {
-      headers: { "x-6529-auth": pass },
-    }).then((r: any) => {
-      if (r.status === 401) {
-        alert("Access Denied!");
-      } else {
-        alert("gm!");
-        Cookies.set(API_AUTH_COOKIE, pass);
-        window.location.href = "/";
-      }
-    });
-  }
-
   return (
     <>
       <Head>
-        <title>Access Page | 6529 SEIZE</title>
+        <title>Blocked Page | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Access Page | 6529 SEIZE" />
+        <meta name="description" content="Blocked Page | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/access`}
+          content={`${process.env.BASE_ENDPOINT}/blocked`}
         />
-        <meta property="og:title" content={`Access Page`} />
+        <meta property="og:title" content={`Blocked Page`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -78,14 +64,14 @@ export default function Access() {
         )}
         <div className={styles.loginPrompt}>
           <input
-            disabled={inputDisabled}
+            disabled={true}
             type="text"
-            placeholder={inputDisabled ? "Go to seize.io" : "Team Login"}
-            onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
-              if (event.key.toLowerCase() === "enter") {
-                doLogin(event.target);
-              }
-            }}
+            className="text-center font-color"
+            value={
+              disabled
+                ? "Go to seize.io"
+                : `Your country (${country}) is blocked`
+            }
           />
         </div>
       </main>
