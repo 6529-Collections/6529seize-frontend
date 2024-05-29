@@ -66,6 +66,7 @@ export function NextGenTokenImage(
             border: "none",
             padding: 0,
             cursor: "pointer",
+            display: "flex",
           }}
           aria-label="More info"
           onClick={(e) => {
@@ -78,7 +79,7 @@ export function NextGenTokenImage(
                 <Row className="pt-2 pb-2">
                   <Col>{ownerInfo}</Col>
                 </Row>
-                <Row>
+                <Row className="pt-1">
                   <Col>
                     Opensea:{" "}
                     {props.token.opensea_price > 0
@@ -86,11 +87,19 @@ export function NextGenTokenImage(
                       : "Not Listed"}
                   </Col>
                 </Row>
-                <Row>
+                <Row className="pt-1">
                   <Col>
                     Blur:{" "}
                     {props.token.blur_price > 0
                       ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                      : "Not Listed"}
+                  </Col>
+                </Row>
+                <Row className="pt-1">
+                  <Col>
+                    Magic Eden:{" "}
+                    {props.token.me_price > 0
+                      ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
                       : "Not Listed"}
                   </Col>
                 </Row>
@@ -138,16 +147,28 @@ export function NextGenTokenImage(
               "Not Listed"
             )}
           </span>
-          {props.token.opensea_royalty > 0 && (
-            <Image
-              width={0}
-              height={0}
-              style={{ height: "20px", width: "auto" }}
-              src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
-              alt={"pepe"}
-              className="cursor-pointer"
-            />
-          )}
+          {props.token.opensea_price == props.token.price &&
+            props.token.opensea_royalty > 0 && (
+              <Image
+                width={0}
+                height={0}
+                style={{ height: "20px", width: "auto" }}
+                src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
+                alt={"pepe"}
+                className="cursor-pointer"
+              />
+            )}
+          {props.token.me_price == props.token.price &&
+            props.token.me_price > 0 && (
+              <Image
+                width={0}
+                height={0}
+                style={{ height: "20px", width: "auto" }}
+                src={`/${getRoyaltyImage(props.token.me_royalty / 100)}`}
+                alt={"pepe"}
+                className="cursor-pointer"
+              />
+            )}
         </span>
       );
     }
