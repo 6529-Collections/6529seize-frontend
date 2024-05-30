@@ -30,7 +30,7 @@ export default function CreateWavesMainStep({
       {!isLast && (
         <div
           className={`${
-            isDone ? "tw-bg-primary-500" : "tw-bg-iron-800"
+            isDone ? "tw-bg-primary-500" : "tw-bg-iron-700"
           } tw-absolute tw-left-3 tw-top-10 tw-h-full tw-rounded-sm tw-w-0.5`}
           aria-hidden="true"
         ></div>
