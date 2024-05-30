@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import styles from "./CookiesBanner.module.scss";
 import { useCookieConsent } from "./CookieConsentContext";
+import Link from "next/link";
 
 export default function CookiesBanner() {
   const router = useRouter();
@@ -21,6 +22,9 @@ export default function CookiesBanner() {
         accept
       </button>
       <span className="font-bolder">to make me go away</span>
+      <Link className={styles.learnMore} href="/about/cookie-policy">
+        Learn more
+      </Link>
     </div>
   );
 }

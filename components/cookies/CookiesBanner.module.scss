@@ -10,7 +10,7 @@
   width: 100%;
   z-index: 1000;
   background-color: rgba(240, 240, 240, 0.8);
-  color: black;
+  color: $very-dark-grey;
 }
 
 .accept {
@@ -28,4 +28,11 @@
     color: white;
     transform: scale(1.02);
   }
+}
+
+.learnMore {
+  margin-left: 5px;
+  margin-right: 5px;
+  color: $very-dark-grey;
+  font-size: smaller;
 }
