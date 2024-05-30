@@ -8,9 +8,8 @@ import Image from "next/image";
 
 export default function Access() {
   const router = useRouter();
-  const [disabled, setDisabled] = useState(false);
   const [image, setImage] = useState();
-  const [country, setCountry] = useState();
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!image && router.isReady) {
@@ -20,11 +19,16 @@ export default function Access() {
       }).then((r: any) => {
         r.json().then((response: any) => {
           setImage(response.image);
-          setCountry(response.country);
+          if (r.status === 403) {
+            const country = response.country;
+            const msg = `Access from your country ${
+              country ? `(${country}) ` : ""
+            }is restricted`;
+            setMessage(msg);
+          } else {
+            setMessage("Go to seize.io");
+          }
         });
-        if (r.status != 403) {
-          setDisabled(true);
-        }
       });
     }
   }, [router.isReady]);
@@ -32,14 +36,14 @@ export default function Access() {
   return (
     <>
       <Head>
-        <title>Blocked Page | 6529 SEIZE</title>
+        <title>Restricted | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Blocked Page | 6529 SEIZE" />
+        <meta name="description" content="Restricted | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/blocked`}
+          content={`${process.env.BASE_ENDPOINT}/restricted`}
         />
-        <meta property="og:title" content={`Blocked Page`} />
+        <meta property="og:title" content={`Restricted`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -66,12 +70,8 @@ export default function Access() {
           <input
             disabled={true}
             type="text"
-            className="text-center font-color"
-            value={
-              disabled
-                ? "Go to seize.io"
-                : `Your country (${country}) is blocked`
-            }
+            className="text-center"
+            value={message}
           />
         </div>
       </main>

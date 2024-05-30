@@ -80,6 +80,8 @@ export default function Access() {
           <input
             disabled={inputDisabled}
             type="text"
+            className={inputDisabled ? "text-center" : ""}
+            defaultValue={inputDisabled ? "Go to seize.io" : ""}
             placeholder={inputDisabled ? "Go to seize.io" : "Team Login"}
             onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
               if (event.key.toLowerCase() === "enter") {
