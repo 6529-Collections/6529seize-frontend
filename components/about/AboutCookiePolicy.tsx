@@ -1,3 +1,4 @@
+import { CONSENT_COOKIE } from "../../constants";
 import styles from "./About.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 
@@ -82,6 +83,12 @@ export default function AboutCookiePolicy() {
                 <td>wallet-auth (JWT Authentication)</td>
                 <td>First Party</td>
                 <td>7 days</td>
+              </tr>
+              <tr>
+                <td>seize.io</td>
+                <td>{CONSENT_COOKIE}</td>
+                <td>First Party</td>
+                <td>30 days</td>
               </tr>
             </tbody>
           </Table>
