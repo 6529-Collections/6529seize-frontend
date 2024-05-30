@@ -7,6 +7,9 @@ import React, {
   ReactNode,
 } from "react";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
+import Cookies from "js-cookie";
+import { CONSENT_COOKIE } from "../../constants";
+import { AuthContext } from "../auth/Auth";
 
 type CookieConsentContextType = {
   showCookieConsent: boolean;
@@ -38,10 +41,16 @@ type CookieConsentProviderProps = {
 export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   children,
 }) => {
+  const { setToast } = useContext(AuthContext);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
 
   const getCookieConsent = async () => {
     try {
+      const cookie = Cookies.get(CONSENT_COOKIE);
+      if (cookie && cookie === "true") {
+        setShowCookieConsent(false);
+        return;
+      }
       const response = await commonApiFetch<CookieConsentResponse>({
         endpoint: `policies/cookies_consent`,
       });
@@ -54,9 +63,18 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const consent = async () => {
     try {
       await commonApiPost({ endpoint: `policies/cookies_consent`, body: {} });
+      Cookies.set(CONSENT_COOKIE, "true", { expires: 30 });
+      setToast({
+        type: "success",
+        message: "Cookie policy accepted!",
+      });
       getCookieConsent();
     } catch (error) {
       console.error("Failed to post cookie consent", error);
+      setToast({
+        type: "error",
+        message: "Something went wrong...",
+      });
     }
   };
 
