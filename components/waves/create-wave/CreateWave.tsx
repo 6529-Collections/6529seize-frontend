@@ -2,30 +2,35 @@ import React, { useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
-import WavesRating from "../WavesRating";
+
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import WavesOutcome from "../WavesOutcome";
-import WavesApproveApproval from "../WavesApproveApproval";
 import {
   CreateWaveConfig,
+  CreateWaveGroupConfigType,
   CreateWaveStep,
   WaveSignatureType,
   WaveType,
+  WaveVotingType,
 } from "../../../types/waves.types";
 import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
 import dynamic from "next/dynamic";
+import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
+import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import CreateWaveVoting from "./voting/CreateWaveVoting";
+import CreateWaveApproval from "./approval/CreateWaveApproval";
 
 const CreateWaveSvg = dynamic(() => import("./utils/CreateWaveSvg"), {
   ssr: false,
 });
 
 export default function CreateWave() {
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DROPS);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.APPROVAL);
   const currentDayStartTimestamp = getCurrentDayStartTimestamp();
   const [config, setConfig] = useState<CreateWaveConfig>({
     overview: {
-      type: WaveType.CHAT,
+      type: WaveType.APPROVE,
       signatureType: WaveSignatureType.NONE,
       name: "",
       description: "",
@@ -44,6 +49,15 @@ export default function CreateWave() {
     drops: {
       requiredTypes: [],
       requiredMetadata: [],
+    },
+    voting: {
+      type: WaveVotingType.REP,
+      category: null,
+      profileId: null,
+    },
+    approval: {
+      threshold: null,
+      thresholdTimeMs: null,
     },
   });
 
@@ -68,6 +82,106 @@ export default function CreateWave() {
     }));
   };
 
+  const onGroupSelect = ({
+    group,
+    groupType,
+  }: {
+    readonly group: CurationFilterResponse | null;
+    readonly groupType: CreateWaveGroupConfigType;
+  }) => {
+    switch (groupType) {
+      case CreateWaveGroupConfigType.CAN_VIEW:
+        setConfig((prev) => ({
+          ...prev,
+          groups: {
+            ...prev.groups,
+            canView: group?.id ?? null,
+          },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_DROP:
+        setConfig((prev) => ({
+          ...prev,
+          groups: {
+            ...prev.groups,
+            canDrop: group?.id ?? null,
+          },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_VOTE:
+        setConfig((prev) => ({
+          ...prev,
+          groups: {
+            ...prev.groups,
+            canVote: group?.id ?? null,
+          },
+        }));
+        break;
+      case CreateWaveGroupConfigType.ADMIN:
+        setConfig((prev) => ({
+          ...prev,
+          groups: {
+            ...prev.groups,
+            admin: group?.id ?? null,
+          },
+        }));
+        break;
+      default:
+        assertUnreachable(groupType);
+    }
+  };
+
+  const onVotingTypeChange = (type: WaveVotingType) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        type,
+        category: null,
+        profileId: null,
+      },
+    }));
+  };
+
+  const onCategoryChange = (category: string | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        category,
+      },
+    }));
+  };
+
+  const onProfileIdChange = (profileId: string | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        profileId,
+      },
+    }));
+  };
+
+  const onThresholdChange = (threshold: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      approval: {
+        ...prev.approval,
+        threshold,
+      },
+    }));
+  };
+
+  const onThresholdTimeChange = (thresholdTimeMs: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      approval: {
+        ...prev.approval,
+        thresholdTimeMs,
+      },
+    }));
+  };
+
   const stepComponent: Record<CreateWaveStep, JSX.Element> = {
     [CreateWaveStep.OVERVIEW]: (
       <CreateWaveOverview
@@ -76,7 +190,10 @@ export default function CreateWave() {
       />
     ),
     [CreateWaveStep.GROUPS]: (
-      <CreateWaveGroups waveType={config.overview.type} />
+      <CreateWaveGroups
+        waveType={config.overview.type}
+        onGroupSelect={onGroupSelect}
+      />
     ),
     [CreateWaveStep.DATES]: (
       <CreateWaveDates
@@ -88,8 +205,24 @@ export default function CreateWave() {
     [CreateWaveStep.DROPS]: (
       <CreateWaveDrops drops={config.drops} setDrops={setDrops} />
     ),
-    [CreateWaveStep.VOTING]: <WavesRating />,
-    [CreateWaveStep.APPROVAL]: <WavesApproveApproval />,
+    [CreateWaveStep.VOTING]: (
+      <CreateWaveVoting
+        selectedType={config.voting.type}
+        category={config.voting.category}
+        profileId={config.voting.profileId}
+        onTypeChange={onVotingTypeChange}
+        setCategory={onCategoryChange}
+        setProfileId={onProfileIdChange}
+      />
+    ),
+    [CreateWaveStep.APPROVAL]: (
+      <CreateWaveApproval
+        threshold={config.approval.threshold}
+        thresholdTimeMs={config.approval.thresholdTimeMs}
+        setThreshold={onThresholdChange}
+        setThresholdTimeMs={onThresholdTimeChange}
+      />
+    ),
   };
 
   return (

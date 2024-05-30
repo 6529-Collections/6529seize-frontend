@@ -79,7 +79,7 @@ export default function CreateWaveSvg() {
           width="999.366"
           height="998.2"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend
@@ -100,7 +100,7 @@ export default function CreateWaveSvg() {
           width="1240.95"
           height="1213.97"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend
@@ -121,7 +121,7 @@ export default function CreateWaveSvg() {
           width="1302.82"
           height="1279.56"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend
@@ -142,7 +142,7 @@ export default function CreateWaveSvg() {
           width="1370"
           height="1263.11"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend
@@ -163,7 +163,7 @@ export default function CreateWaveSvg() {
           width="1370"
           height="1263.11"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend
