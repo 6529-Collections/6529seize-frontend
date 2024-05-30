@@ -1,3 +1,4 @@
+import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
 import {
   CreateWaveGroupConfigType,
   WaveType,
@@ -6,8 +7,13 @@ import CreateWaveGroup from "./CreateWaveGroup";
 
 export default function CreateWaveGroups({
   waveType,
+  onGroupSelect,
 }: {
   readonly waveType: WaveType;
+  readonly onGroupSelect: ({}: {
+    group: CurationFilterResponse | null;
+    groupType: CreateWaveGroupConfigType;
+  }) => void;
 }) {
   return (
     <div className="tw-max-w-xl tw-mx-auto tw-w-full">
@@ -17,6 +23,7 @@ export default function CreateWaveGroups({
             key={groupType}
             groupType={groupType}
             waveType={waveType}
+            onGroupSelect={(group) => onGroupSelect({ group, groupType })}
           />
         ))}
       </div>

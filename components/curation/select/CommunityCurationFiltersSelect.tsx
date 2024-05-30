@@ -10,11 +10,7 @@ import CommunityCurationFiltersSelectItems from "./CommunityCurationFiltersSelec
 import { useSelector } from "react-redux";
 import { selectActiveCurationFilterId } from "../../../store/curationFilterSlice";
 import CommunityCurationFiltersSelectActiveFilter from "./CommunityCurationFiltersSelectActiveFilter";
-
-interface CurationFilterRequestParams {
-  readonly curation_criteria_name: string | null;
-  readonly curation_criteria_user: string | null;
-}
+import { CurationFilterRequestParams } from "../../../helpers/groups/groups.helpers";
 
 export default function CommunityCurationFiltersSelect({
   onEditClick,

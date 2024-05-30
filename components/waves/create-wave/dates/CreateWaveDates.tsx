@@ -34,6 +34,13 @@ export default function CreateWaveDates({
     });
   };
 
+  const onEndTimestampChange = (timestamp: number | null) => {
+    setDates({
+      ...dates,
+      endDate: timestamp,
+    });
+  };
+
   return (
     <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
       <div className="tw-relative tw-grid tw-grid-cols-1 tw-gap-y-10 tw-gap-x-10 md:tw-grid-cols-2">
@@ -61,7 +68,10 @@ export default function CreateWaveDates({
             />
           </div>
         )}
-        <CreateWaveDatesEndDate waveType={waveType} />
+        <CreateWaveDatesEndDate
+          waveType={waveType}
+          onEndTimestampChange={onEndTimestampChange}
+        />
       </div>
 
       <div className="tw-mt-6 tw-text-right">

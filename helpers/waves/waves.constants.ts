@@ -5,12 +5,19 @@ import {
   WaveRequiredType,
   WaveSignatureType,
   WaveType,
+  WaveVotingType,
 } from "../../types/waves.types";
 
 export const WAVE_LABELS: Record<WaveType, string> = {
   [WaveType.CHAT]: "Chat",
   [WaveType.RANK]: "Rank",
   [WaveType.APPROVE]: "Approve",
+};
+
+export const WAVE_VOTING_LABELS: Record<WaveVotingType, string> = {
+  [WaveVotingType.TDH]: "By TDH",
+  [WaveVotingType.REP]: "By Rep",
+  [WaveVotingType.UNIQUE_IDENTITY]: "By Unique Identity",
 };
 
 export const WAVE_SIGNATURE_LABELS: Record<
