@@ -465,3 +465,9 @@ pre code {
 .react-toggle--disabled {
   opacity: 0.75;
 }
+
+@-moz-document url-prefix() {
+  .firefox-svg {
+    opacity: 0.3 !important;
+  }
+}
