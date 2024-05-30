@@ -101,12 +101,12 @@ export default function CreateWave() {
             waveType={config.overview.type}
             onStep={setStep}
           />
-          <div className="tw-relative tw-bg-iron-900 tw-w-full tw-h-full lg:tw-rounded-l-[40px] tw-px-8 tw-pt-12 tw-pb-12 lg:tw-col-span-9">
+          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-h-full lg:tw-rounded-l-[40px] tw-px-8 tw-pt-12 tw-pb-12 lg:tw-col-span-9">
             <div className="tw-relative tw-z-[1]">
               {stepComponent[step]}
               {/* <WavesOutcome /> */}
             </div>
-            <div className="tw-absolute tw-inset-0">
+            <div className="tw-absolute tw-inset-0 tw-translate-x-64">
               <CreateWaveSvg />
             </div>
           </div>
