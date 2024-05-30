@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import styles from "./CookiesBanner.module.scss";
 import { useCookieConsent } from "./CookieConsentContext";
-import { commonApiPost } from "../../services/api/common-api";
 
 export default function CookiesBanner() {
   const router = useRouter();
@@ -11,7 +10,7 @@ export default function CookiesBanner() {
     return <></>;
   }
 
-  if (["/blocked", "/access"].includes(router.pathname)) {
+  if (["/restricted", "/access"].includes(router.pathname)) {
     return <></>;
   }
 

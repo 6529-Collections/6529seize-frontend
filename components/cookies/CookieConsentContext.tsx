@@ -1,5 +1,3 @@
-// contexts/CookieConsentContext.tsx
-import { useQuery } from "@tanstack/react-query";
 import React, {
   createContext,
   useContext,
