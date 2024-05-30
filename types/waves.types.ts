@@ -53,6 +53,17 @@ export interface CreateWaveDropsConfig {
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }
 
+export enum WaveVotingType {
+  TDH = "TDH",
+  REP = "REP",
+  UNIQUE_IDENTITY = "UNIQUE_IDENTITY",
+}
+export interface CreateWaveVotingConfig {
+  readonly type: WaveVotingType;
+  readonly category: string | null;
+  readonly profileId: string | null;
+}
+
 export enum CreateWaveStep {
   OVERVIEW = "OVERVIEW",
   GROUPS = "GROUPS",
@@ -68,11 +79,18 @@ export interface CreateWaveDatesConfig {
   readonly endDate: number | null;
 }
 
+export interface CreateWaveApprovalConfig {
+  readonly threshold: number | null;
+  readonly thresholdTimeMs: number | null;
+}
+
 export interface CreateWaveConfig {
   readonly overview: WaveOverviewConfig;
   readonly groups: WaveGroupsConfig;
   readonly dates: CreateWaveDatesConfig;
   readonly drops: CreateWaveDropsConfig;
+  readonly voting: CreateWaveVotingConfig;
+  readonly approval: CreateWaveApprovalConfig;
 }
 
 export enum CreateWaveStepStatus {
