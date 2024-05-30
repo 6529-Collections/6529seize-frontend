@@ -61,21 +61,7 @@ export default function Access() {
         />
       </Head>
       <main className={styles.login}>
-        {image && (
-          <Image
-            width="0"
-            height="0"
-            style={{
-              height: "auto",
-              width: "auto",
-              maxWidth: "100%",
-              maxHeight: "100%",
-            }}
-            src={image}
-            className={styles.loginImage}
-            alt="access"
-          />
-        )}
+        {image && <LoginImage image={image} alt="access" />}
         <div className={styles.loginPrompt}>
           <input
             disabled={inputDisabled}
@@ -92,5 +78,23 @@ export default function Access() {
         </div>
       </main>
     </>
+  );
+}
+
+export function LoginImage(props: Readonly<{ image: string; alt: string }>) {
+  return (
+    <Image
+      width="0"
+      height="0"
+      style={{
+        height: "auto",
+        width: "auto",
+        maxWidth: "100%",
+        maxHeight: "100%",
+      }}
+      src={props.image}
+      className={styles.loginImage}
+      alt={props.alt}
+    />
   );
 }
