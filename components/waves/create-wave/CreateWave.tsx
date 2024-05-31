@@ -62,7 +62,7 @@ export default function CreateWave() {
     },
   });
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.APPROVAL);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DROPS);
 
   const onNextStep = () => {
     switch (step) {
