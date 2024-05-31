@@ -3,15 +3,18 @@ import {
   CreateWaveDropsRequiredMetadata,
   WaveRequiredType,
 } from "../../../../types/waves.types";
+import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
 
 export default function CreateWaveDrops({
   drops,
   setDrops,
+  onNextStep,
 }: {
   readonly drops: CreateWaveDropsConfig;
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
+  readonly onNextStep: () => void;
 }) {
   const onRequiredTypeChange = (type: WaveRequiredType) => {
     const requiredTypes = drops.requiredTypes.includes(type)
@@ -73,6 +76,9 @@ export default function CreateWaveDrops({
           onRequiredMetadataChange={onRequiredMetadataChange}
           onRequiredMetadataRemove={onRequiredMetadataRemove}
         />
+      </div>
+      <div className="tw-mt-6 tw-text-right">
+        <CreateWaveNextStep disabled={false} onClick={onNextStep} />
       </div>
     </div>
   );
