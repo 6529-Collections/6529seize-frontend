@@ -16,12 +16,15 @@ export default function CookiesBanner() {
   }
 
   return (
-    <div className={styles.banner}>
-      <span className="font-bolder">I am cookie consent</span>
+    <div
+      className={`${styles.banner} d-flex align-items-center justify-content-center gap-2 flex-wrap`}>
+      <span className="font-bolder">
+        I am the dreaded cookie consent and I&apos;ll go away if you
+      </span>
       <button className={styles.accept} onClick={consent}>
         accept
       </button>
-      <span className="font-bolder">to make me go away</span>
+      <span className="font-bolder">my essential cookies</span>
       <Link className={styles.learnMore} href="/about/cookie-policy">
         Learn more
       </Link>

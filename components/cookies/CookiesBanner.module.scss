@@ -1,9 +1,6 @@
 @import "../../styles/variables.scss";
 
 .banner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 8px 0;
   position: fixed;
   bottom: 0;
@@ -20,9 +17,6 @@
 
   transition: transform 0.3s ease;
 
-  margin-left: 5px;
-  margin-right: 5px;
-
   &:hover {
     background-color: $green;
     color: white;
@@ -31,8 +25,6 @@
 }
 
 .learnMore {
-  margin-left: 5px;
-  margin-right: 5px;
   color: $very-dark-grey;
   font-size: smaller;
 }
