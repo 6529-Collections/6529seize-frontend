@@ -39,7 +39,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
           className={
             activePeriod
               ? "tw-text-primary-400"
-              : "tw-text-iron-500 tw-font-medium"
+              : "tw-text-iron-500"
           }
         >
           {label}
