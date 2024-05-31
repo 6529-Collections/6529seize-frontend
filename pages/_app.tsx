@@ -254,12 +254,10 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         <WagmiConfig config={wagmiConfig}>
           <ReactQueryWrapper>
             <Auth>
-              {getLayout(
-                <CookieConsentProvider>
-                  <Component {...props} />
-                  <CookiesBanner />
-                </CookieConsentProvider>
-              )}
+              {getLayout(<Component {...props} />)}
+              <CookieConsentProvider>
+                <CookiesBanner />
+              </CookieConsentProvider>
             </Auth>
           </ReactQueryWrapper>
         </WagmiConfig>
