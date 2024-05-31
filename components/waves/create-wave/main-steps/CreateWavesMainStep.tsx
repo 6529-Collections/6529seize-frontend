@@ -25,6 +25,7 @@ export default function CreateWavesMainStep({
     activeStepIndex,
   });
   const isDone = stepStatus === CreateWaveStepStatus.DONE;
+  const isActive = stepStatus === CreateWaveStepStatus.ACTIVE;
   return (
     <div className="tw-relative tw-mb-11">
       {!isLast && (
@@ -37,6 +38,7 @@ export default function CreateWavesMainStep({
       )}
       <button
         type="button"
+        disabled={!isDone}
         onClick={() => onStep(step)}
         className="tw-bg-transparent tw-p-0 tw-border-none focus:tw-outline-none tw-group tw-relative tw-flex tw-items-center"
       >
@@ -44,7 +46,11 @@ export default function CreateWavesMainStep({
           <CreateWavesMainStepIcon stepStatus={stepStatus} />
         </span>
         <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
-          <span className="tw-text-base tw-font-semibold tw-text-iron-600">
+          <span
+            className={`${
+              isActive ? "tw-text-primary-400" : "tw-text-iron-600"
+            } tw-text-base tw-font-semibold `}
+          >
             {label}
           </span>
         </span>

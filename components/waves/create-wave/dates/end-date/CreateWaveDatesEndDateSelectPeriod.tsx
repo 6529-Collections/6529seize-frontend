@@ -28,7 +28,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
     onPeriodSelect(period);
   };
   return (
-    <div className="tw-relative">
+    <div className="tw-relative tw-z-50">
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -36,11 +36,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         className="tw-w-full tw-flex tw-items-center tw-text-left tw-relative tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-py-3 tw-pl-10 tw-pr-10 tw-bg-iron-800 lg:tw-bg-iron-900 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base hover:tw-bg-iron-800 focus:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between"
       >
         <span
-          className={
-            activePeriod
-              ? "tw-text-primary-400"
-              : "tw-text-iron-500"
-          }
+          className={activePeriod ? "tw-text-primary-400" : "tw-text-iron-500"}
         >
           {label}
         </span>
