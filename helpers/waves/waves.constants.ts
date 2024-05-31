@@ -96,21 +96,21 @@ export const CREATE_WAVE_SELECT_GROUP_LABELS: Record<
   Record<CreateWaveGroupConfigType, string>
 > = {
   [WaveType.CHAT]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Can view",
-    [CreateWaveGroupConfigType.CAN_DROP]: "Can drop",
-    [CreateWaveGroupConfigType.CAN_VOTE]: "Can rate",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
+    [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
+    [CreateWaveGroupConfigType.CAN_VOTE]: "Who can rate",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
   [WaveType.RANK]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Can view",
-    [CreateWaveGroupConfigType.CAN_DROP]: "Can drop",
-    [CreateWaveGroupConfigType.CAN_VOTE]: "Can vote",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
+    [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
+    [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
   [WaveType.APPROVE]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Can view",
-    [CreateWaveGroupConfigType.CAN_DROP]: "Can drop",
-    [CreateWaveGroupConfigType.CAN_VOTE]: "Can vote",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
+    [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
+    [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
 };

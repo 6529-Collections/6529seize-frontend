@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
-
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import WavesOutcome from "../WavesOutcome";
@@ -227,14 +226,14 @@ export default function CreateWave() {
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-overflow-hidden">
-        <div className="lg:tw-grid lg:tw-grid-cols-12 lg:tw-min-h-[95vh] tw-h-full tw-w-full">
+      <div className="tw-overflow-hidden lg:tw-min-h-[95vh] tw-h-full tw-w-full">
+        <div className="tw-max-w-[58rem] tw-mx-auto tw-flex tw-gap-x-24 tw-pt-12">
           <CreateWavesMainSteps
             activeStep={step}
             waveType={config.overview.type}
             onStep={setStep}
           />
-          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-h-full lg:tw-rounded-l-[40px] tw-px-8 tw-pt-12 tw-pb-12 lg:tw-col-span-9">
+          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-h-full">
             <div className="tw-relative tw-z-[1]">
               {stepComponent[step]}
               {/* <WavesOutcome /> */}

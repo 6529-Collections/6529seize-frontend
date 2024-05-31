@@ -15,10 +15,10 @@ export default function CreateWaveApproval({
   return (
     <div className="tw-max-w-xl tw-mx-auto tw-w-full">
       <div className="tw-pt-6">
-        <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
           Approval
         </p>
-        <div className="tw-mt-4">
+        <div className="tw-mt-3">
           <CreateWaveApprovalThreshold
             threshold={threshold}
             setThreshold={setThreshold}

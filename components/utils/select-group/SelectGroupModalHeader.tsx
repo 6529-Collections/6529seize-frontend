@@ -1,4 +1,4 @@
-export default function SelectGroupModalHeader({ 
+export default function SelectGroupModalHeader({
   onClose,
 }: {
   readonly onClose: () => void;

@@ -21,7 +21,7 @@ export default function CreateWaveVoting({
 }) {
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-max-w-xl tw-mx-auto tw-w-full">
+      <div className="tw-w-full">
         <div>
           <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
             How Drops are Rated
