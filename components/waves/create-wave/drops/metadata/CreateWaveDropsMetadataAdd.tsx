@@ -33,8 +33,8 @@ export default function CreateWaveDropsMetadataAdd({
 
   return (
     <div className="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
-      <div className="tw-col-span-full tw-grid tw-grid-cols-3 tw-gap-4">
-        {Object.values(WaveRequiredMetadataType).map((type) => (
+      <div className="tw-col-span-full tw-flex tw-gap-x-5">
+        {/*   {Object.values(WaveRequiredMetadataType).map((type) => (
           <CommonBorderedRadioButton
             key={type}
             type={type}
@@ -42,10 +42,27 @@ export default function CreateWaveDropsMetadataAdd({
             label={CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS[type]}
             onChange={setSelectedType}
           />
-        ))}
-      </div>
-      <div className="tw-col-span-full">
-        <div className="tw-group tw-w-full tw-relative">
+          
+        ))} */}
+        <div className="tw-relative tw-cursor-pointer tw-py-4 tw-shadow-sm focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out">
+          <input
+            type="radio"
+            className="tw-form-radio tw-h-5 tw-w-5 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-cursor-pointer"
+          />
+          <span className="tw-flex tw-items-center">
+            <span className="tw-flex tw-flex-col tw-text-md">Text</span>
+          </span>
+        </div>
+        <div className="tw-relative tw-cursor-pointer tw-py-4 tw-shadow-sm focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out">
+          <input
+            type="radio"
+            className="tw-form-radio tw-h-5 tw-w-5 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-cursor-pointer"
+          />
+          <span className="tw-flex tw-items-center">
+            <span className="tw-flex tw-flex-col tw-text-md">Number</span>
+          </span>
+        </div>
+        <div className="tw-flex-1 tw-group tw-relative">
           <input
             type="text"
             value={key}
@@ -64,7 +81,28 @@ export default function CreateWaveDropsMetadataAdd({
           </label>
         </div>
       </div>
-      <button onClick={onAddRequiredMetadata}>Add</button>
+
+      <button
+        type="button"
+        onClick={onAddRequiredMetadata}
+        className="tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-sm twtextiron-400 tw-font-medium"
+      >
+        <svg
+          className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 5V19M5 12H19"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>Add</span>
+      </button>
     </div>
   );
 }

@@ -53,16 +53,16 @@ export default function CommonCalendar({
   };
 
   return (
-    <div className="tw-mt-4 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
+    <div className="tw-mt-3 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
       <button
         onClick={setPreviousMonth}
         type="button"
         aria-label="Previous month"
         className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute 
-              tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-1.5 tw-text-iron-300 hover:tw-text-iron-500"
+              tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-h-6 tw-w-6 tw-text-iron-300"
+          className="tw-h-6 tw-w-6"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -81,10 +81,10 @@ export default function CommonCalendar({
         onClick={setNextMonth}
         type="button"
         aria-label="Next month"
-        className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-1.5 tw-text-iron-300 hover:tw-text-iron-500"
+        className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-h-6 tw-w-6 tw-text-iron-300"
+          className="tw-h-6 tw-w-6"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
