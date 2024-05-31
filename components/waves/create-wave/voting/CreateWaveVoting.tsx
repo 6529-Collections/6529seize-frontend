@@ -1,24 +1,30 @@
 import { WaveVotingConfig } from "../../../../generated/models/WaveVotingConfig";
 import { WAVE_VOTING_LABELS } from "../../../../helpers/waves/waves.constants";
-import { WaveVotingType } from "../../../../types/waves.types";
+import { WaveType, WaveVotingType } from "../../../../types/waves.types";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
+import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 
 export default function CreateWaveVoting({
+  waveType,
   selectedType,
   category,
   profileId,
   onTypeChange,
   setCategory,
   setProfileId,
+  onNextStep,
 }: {
+  readonly waveType: WaveType;
   readonly selectedType: WaveVotingType;
   readonly category: string | null;
   readonly profileId: string | null;
   readonly onTypeChange: (type: WaveVotingType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
+  readonly onNextStep: () => void;
 }) {
+  const nextStepLabel = waveType === WaveType.APPROVE ? "Next Step" : "Finish";
   return (
     <div className="tw-flex tw-flex-col">
       <div className="tw-w-full">
@@ -48,12 +54,11 @@ export default function CreateWaveVoting({
             )}
           </div>
           <div className="tw-mt-6 tw-text-right">
-            <button
-              type="button"
-              className="tw-w-full sm:tw-w-auto tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-base tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <span>Next step</span>
-            </button>
+            <CreateWaveNextStep
+              disabled={false}
+              onClick={onNextStep}
+              label={nextStepLabel}
+            />
           </div>
         </div>
       </div>
