@@ -9,7 +9,7 @@ export default function CreateWaveOverviewInputs({
   }) => void;
 }) {
   return (
-    <div className="tw-flex tw-items-center tw-gap-5">
+    <div className="tw-flex tw-flex-col tw-gap-5">
       <div className="tw-group tw-w-full tw-relative">
         <CreateWaveOverviewInput valueKey="name" onValueChange={onChange} />
       </div>

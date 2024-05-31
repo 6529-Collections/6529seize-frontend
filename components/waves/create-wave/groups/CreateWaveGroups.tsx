@@ -16,7 +16,7 @@ export default function CreateWaveGroups({
   }) => void;
 }) {
   return (
-    <div className="tw-max-w-xl tw-mx-auto tw-w-full">
+    <div className="tw-w-full">
       <div className="tw-flex tw-flex-col tw-gap-y-6">
         {Object.values(CreateWaveGroupConfigType).map((groupType) => (
           <CreateWaveGroup

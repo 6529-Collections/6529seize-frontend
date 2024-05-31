@@ -74,7 +74,7 @@ export default function SelectGroupModal({
   }, [data]);
 
   return (
-    <div className="tw-relative tw-z-10">
+    <div className="tw-relative tw-z-10 tailwind-scope">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
@@ -89,10 +89,12 @@ export default function SelectGroupModal({
               onUserSelect={onUserSelect}
               onFilterNameSearch={onFilterNameSearch}
             />
-            <SelectGroupModalItems
-              groups={groups}
-              onGroupSelect={onGroupSelect}
-            />
+            <div className="tw-h-64 tw-overflow-y-auto tw-mt-4">
+              <SelectGroupModalItems
+                groups={groups}
+                onGroupSelect={onGroupSelect}
+              />
+            </div>
           </div>
         </div>
       </div>

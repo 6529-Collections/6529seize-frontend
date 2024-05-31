@@ -42,7 +42,7 @@ export default function CreateWaveDates({
   };
 
   return (
-    <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
+    <div className="tw-w-full">
       <div className="tw-relative tw-grid tw-grid-cols-1 tw-gap-y-10 tw-gap-x-10 md:tw-grid-cols-2">
         <div className="tw-col-span-1">
           <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
