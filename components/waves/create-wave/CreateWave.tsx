@@ -227,7 +227,7 @@ export default function CreateWave() {
   return (
     <div className="tailwind-scope">
       <div className="tw-overflow-hidden lg:tw-min-h-[95vh] tw-h-full tw-w-full">
-        <div className="tw-max-w-[58rem] tw-mx-auto tw-flex tw-gap-x-24 tw-pt-12">
+        <div className="tw-max-w-[58rem] tw-mx-auto tw-flex tw-gap-x-24 tw-pt-12 tw-pb-12">
           <CreateWavesMainSteps
             activeStep={step}
             waveType={config.overview.type}
