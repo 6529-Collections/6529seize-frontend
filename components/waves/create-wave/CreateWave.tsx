@@ -25,11 +25,13 @@ const CreateWaveSvg = dynamic(() => import("./utils/CreateWaveSvg"), {
 });
 
 export default function CreateWave() {
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.APPROVAL);
-  const currentDayStartTimestamp = getCurrentDayStartTimestamp();
-  const [config, setConfig] = useState<CreateWaveConfig>({
+  const getInitialConfig = ({
+    type,
+  }: {
+    readonly type: WaveType;
+  }): CreateWaveConfig => ({
     overview: {
-      type: WaveType.APPROVE,
+      type,
       signatureType: WaveSignatureType.NONE,
       name: "",
       description: "",
@@ -41,8 +43,8 @@ export default function CreateWave() {
       admin: null,
     },
     dates: {
-      submissionStartDate: currentDayStartTimestamp,
-      votingStartDate: currentDayStartTimestamp,
+      submissionStartDate: getCurrentDayStartTimestamp(),
+      votingStartDate: getCurrentDayStartTimestamp(),
       endDate: null,
     },
     drops: {
@@ -60,9 +62,43 @@ export default function CreateWave() {
     },
   });
 
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.APPROVAL);
+
+  const onNextStep = () => {
+    switch (step) {
+      case CreateWaveStep.OVERVIEW:
+        setStep(CreateWaveStep.GROUPS);
+        break;
+      case CreateWaveStep.GROUPS:
+        setStep(CreateWaveStep.DATES);
+        break;
+      case CreateWaveStep.DATES:
+        setStep(CreateWaveStep.DROPS);
+        break;
+      case CreateWaveStep.DROPS:
+        setStep(CreateWaveStep.VOTING);
+        break;
+      case CreateWaveStep.VOTING:
+        if (config.overview.type === WaveType.APPROVE) {
+          setStep(CreateWaveStep.APPROVAL);
+        }
+        break;
+      case CreateWaveStep.APPROVAL:
+        break;
+      default:
+        assertUnreachable(step);
+    }
+  };
+
+  const [config, setConfig] = useState<CreateWaveConfig>(
+    getInitialConfig({
+      type: WaveType.APPROVE,
+    })
+  );
+
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
     setConfig((prev) => ({
-      ...prev,
+      ...getInitialConfig({ type: overview.type }),
       overview,
     }));
   };
@@ -186,12 +222,14 @@ export default function CreateWave() {
       <CreateWaveOverview
         overview={config.overview}
         setOverview={setOverview}
+        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.GROUPS]: (
       <CreateWaveGroups
         waveType={config.overview.type}
         onGroupSelect={onGroupSelect}
+        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.DATES]: (
@@ -199,19 +237,26 @@ export default function CreateWave() {
         waveType={config.overview.type}
         dates={config.dates}
         setDates={setDates}
+        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.DROPS]: (
-      <CreateWaveDrops drops={config.drops} setDrops={setDrops} />
+      <CreateWaveDrops
+        drops={config.drops}
+        setDrops={setDrops}
+        onNextStep={onNextStep}
+      />
     ),
     [CreateWaveStep.VOTING]: (
       <CreateWaveVoting
+        waveType={config.overview.type}
         selectedType={config.voting.type}
         category={config.voting.category}
         profileId={config.voting.profileId}
         onTypeChange={onVotingTypeChange}
         setCategory={onCategoryChange}
         setProfileId={onProfileIdChange}
+        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.APPROVAL]: (
@@ -220,6 +265,7 @@ export default function CreateWave() {
         thresholdTimeMs={config.approval.thresholdTimeMs}
         setThreshold={onThresholdChange}
         setThresholdTimeMs={onThresholdTimeChange}
+        onNextStep={onNextStep}
       />
     ),
   };
