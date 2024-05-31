@@ -28,7 +28,7 @@ export default function CommonCalendarDay({
       type="button"
       onClick={() => setSelectedTimestamp(day.startTimestamp)}
       disabled={!day.isActiveMonth}
-      className={`${buttonClasses} tw-relative  tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 `}
+      className={`${buttonClasses} tw-relative tw-border tw-border-transparent tw-border-solid tw-h-8 tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 `}
     >
       <span className="tw-text-sm tw-mx-auto tw-flex tw-items-center tw-justify-center tw-rounded-full">
         {day.date}
