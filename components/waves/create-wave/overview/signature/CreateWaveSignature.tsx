@@ -12,7 +12,7 @@ export default function CreateWaveSignature({
 }) {
   return (
     <div>
-      <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
         Signature Type
       </p>
       <CreateWaveSignatureInputs
