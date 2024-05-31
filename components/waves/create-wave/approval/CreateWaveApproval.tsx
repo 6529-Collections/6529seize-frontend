@@ -35,28 +35,45 @@ export default function CreateWaveApproval({
   }, [threshold, thresholdTimeMs]);
 
   return (
-    <div className="tw-max-w-xl tw-mx-auto tw-w-full">
-      <div className="tw-pt-6">
-        <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
-          Approval
-        </p>
-        <div className="tw-mt-3">
-          <CreateWaveApprovalThreshold
-            threshold={threshold}
-            setThreshold={setThreshold}
-          />
-          <CreateWaveApprovalThresholdTime
-            thresholdTimeMs={thresholdTimeMs}
-            setThresholdTimeMs={setThresholdTimeMs}
-          />
-        </div>
-        <div className="tw-mt-6 tw-text-right">
-          <CreateWaveNextStep
-            disabled={isNextStepDisabled}
-            onClick={onNextStep}
-            label="Finish"
-          />
-        </div>
+    <div className="tw-w-full">
+      <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
+        Approval
+      </p>
+      <div className="tw-mt-4">
+        <CreateWaveApprovalThreshold
+          threshold={threshold}
+          setThreshold={setThreshold}
+        />
+        <CreateWaveApprovalThresholdTime
+          thresholdTimeMs={thresholdTimeMs}
+          setThresholdTimeMs={setThresholdTimeMs}
+        />
+      </div>
+      <div className="tw-mt-6 tw-text-right">
+       {/*  <button className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-6 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-md tw-text-white tw-bg-gradient-to-r tw-from-purple-600 tw-to-indigo-600 hover:tw-from-indigo-600 hover:tw-to-purple-600 tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg">
+          <span className="tw-absolute tw-left-0 tw-flex tw-items-center tw-pl-3">
+            <svg
+              className="tw-h-5 tw-w-5 tw-text-white tw-animate-bounce"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-11.293a1 1 0 00-1.414-1.414L9 8.586 7.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </span>
+          Finish! 🎉
+        </button> */}
+
+       <CreateWaveNextStep
+          disabled={isNextStepDisabled}
+          onClick={onNextStep}
+          label="Finish"
+        /> 
       </div>
     </div>
   );
