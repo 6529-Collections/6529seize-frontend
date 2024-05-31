@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   WaveOverviewConfig,
   WaveSignatureType,
@@ -9,13 +9,16 @@ import CreateWaveOverviewInputs from "./CreateWaveOverviewInputs";
 
 import CreateWaveSignature from "./signature/CreateWaveSignature";
 import CreateWaveType from "./type/CreateWaveType";
+import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 
 export default function CreateWaveOverview({
   overview,
   setOverview,
+  onNextStep,
 }: {
   readonly overview: WaveOverviewConfig;
   readonly setOverview: (overview: WaveOverviewConfig) => void;
+  readonly onNextStep: () => void;
 }) {
   const onChange = <K extends keyof WaveOverviewConfig>({
     key,
@@ -28,6 +31,24 @@ export default function CreateWaveOverview({
       ...overview,
       [key]: value,
     });
+
+  const getIsNextStepDisabled = () => {
+    if (!overview.name || !overview.description) {
+      return true;
+    }
+
+    if (!overview.type || !overview.signatureType) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const [isNextStepDisabled, setIsNextStepDisabled] = useState(
+    getIsNextStepDisabled()
+  );
+
+  useEffect(() => setIsNextStepDisabled(getIsNextStepDisabled()), [overview]);
 
   return (
     <div className="tw-w-full">
@@ -48,12 +69,10 @@ export default function CreateWaveOverview({
           onChange={(type) => onChange({ key: "signatureType", value: type })}
         />
         <div className="tw-text-right">
-          <button
-            type="button"
-            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-          >
-            <span>Next step</span>
-          </button>
+          <CreateWaveNextStep
+            disabled={isNextStepDisabled}
+            onClick={onNextStep}
+          />
         </div>
       </div>
     </div>
