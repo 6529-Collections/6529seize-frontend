@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getCurrentDayStartTimestamp } from "../../../../helpers/calendar/calendar.helpers";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig, WaveType } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
+import CreateWaveNextStep from "../utils/CreateWaveNextStep";
+import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateWaveDates({
   waveType,
   dates,
   setDates,
+  onNextStep,
 }: {
   readonly waveType: WaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
+  readonly onNextStep: () => void;
 }) {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -40,6 +44,36 @@ export default function CreateWaveDates({
       endDate: timestamp,
     });
   };
+
+  const getIsNextStepDisabled = () => {
+    switch (waveType) {
+      case WaveType.CHAT:
+      case WaveType.APPROVE:
+        return (
+          !dates.submissionStartDate ||
+          dates.submissionStartDate !== dates.votingStartDate
+        );
+      case WaveType.RANK:
+        return (
+          !dates.submissionStartDate ||
+          !dates.votingStartDate ||
+          dates.votingStartDate < dates.submissionStartDate ||
+          !dates.endDate ||
+          dates.endDate < dates.votingStartDate
+        );
+      default:
+        assertUnreachable(waveType);
+        return true;
+    }
+  };
+
+  const [isNextStepDisabled, setIsNextStepDisabled] = useState(
+    getIsNextStepDisabled()
+  );
+
+  useEffect(() => {
+    setIsNextStepDisabled(getIsNextStepDisabled());
+  }, [dates, waveType]);
 
   return (
     <div className="tw-w-full">
@@ -75,12 +109,10 @@ export default function CreateWaveDates({
       </div>
 
       <div className="tw-mt-6 tw-text-right">
-        <button
-          type="button"
-          className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span>Next step</span>
-        </button>
+        <CreateWaveNextStep
+          onClick={onNextStep}
+          disabled={isNextStepDisabled}
+        />
       </div>
     </div>
   );

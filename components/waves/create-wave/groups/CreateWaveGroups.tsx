@@ -3,17 +3,20 @@ import {
   CreateWaveGroupConfigType,
   WaveType,
 } from "../../../../types/waves.types";
+import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 import CreateWaveGroup from "./CreateWaveGroup";
 
 export default function CreateWaveGroups({
   waveType,
   onGroupSelect,
+  onNextStep,
 }: {
   readonly waveType: WaveType;
   readonly onGroupSelect: ({}: {
     group: CurationFilterResponse | null;
     groupType: CreateWaveGroupConfigType;
   }) => void;
+  readonly onNextStep: () => void;
 }) {
   return (
     <div className="tw-w-full">
@@ -28,12 +31,7 @@ export default function CreateWaveGroups({
         ))}
       </div>
       <div className="tw-mt-6 tw-text-right">
-        <button
-          type="button"
-          className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span>Next step</span>
-        </button>
+        <CreateWaveNextStep onClick={onNextStep} disabled={false} />
       </div>
     </div>
   );
