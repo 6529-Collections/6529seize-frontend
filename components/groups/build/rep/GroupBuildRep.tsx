@@ -56,7 +56,7 @@ export default function GroupBuildRep({
   };
 
   const showDirection: boolean =
-    !!filters.rep.user_identity?.length ?? !!filters.rep.category;
+    !!filters.rep.user_identity?.length || !!filters.rep.category;
 
   useEffect(() => {
     if (!showDirection) {
