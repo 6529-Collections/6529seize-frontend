@@ -12,18 +12,18 @@ export default function GroupItemDelete({
 
   return (
     <>
-      <div
+      <button
         onClick={(e) => {
           e.stopPropagation();
           setIsDeleteModalOpen(true);
         }}
-        className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-transparent tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
         role="menuitem"
         tabIndex={-1}
         id="options-menu-0-item-1"
       >
         Delete
-      </div>
+      </button>
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isDeleteModalOpen && (
           <CommonAnimationOpacity

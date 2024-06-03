@@ -148,18 +148,18 @@ export default function GroupItem({
                     transition={{ duration: 0.2 }}
                   >
                     <div>
-                      <div
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onEditClick(group);
                         }}
-                        className="tw-cursor-pointer tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+                        className="tw-bg-transparent tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
                         role="menuitem"
                         tabIndex={-1}
                         id="options-menu-0-item-0"
                       >
                         {editTitle}
-                      </div>
+                      </button>
                       {isMyFilter && <GroupItemDelete groupId={group.id} />}
                     </div>
                   </motion.div>
@@ -194,14 +194,12 @@ export default function GroupItem({
               </div>
             </div>
           )}
-          <div
-            className="tw-flex tw-items-center tw-space-x-2"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
+          <div className="tw-flex tw-items-center tw-space-x-2">
             <Link
               href={`/${group.created_by?.handle}`}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
               className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-medium"
             >
               {group.created_by?.handle}
