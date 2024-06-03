@@ -21,7 +21,7 @@ export enum CommunityMembersSortOption {
 
 export interface CommunityMembersQuery
   extends FullPageRequest<CommunityMembersSortOption> {
-  curation_criteria_id?: string;
+  group_id?: string;
 }
 
 export default function CommunityPage() {

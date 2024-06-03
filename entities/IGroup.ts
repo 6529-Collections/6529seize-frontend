@@ -1,4 +1,4 @@
-export interface GroupsSearchRequestParams {
-  readonly curation_criteria_name: string | null;
-  readonly curation_criteria_user: string | null;
+export interface GroupsRequestParams {
+  readonly group_name: string | null;
+  readonly author_identity: string | null;
 }
