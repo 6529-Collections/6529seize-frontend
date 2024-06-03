@@ -64,7 +64,7 @@ export default function SelectGroupModalSearchUser({
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
   return (
-    <div className="tw-relative" ref={wrapperRef}>
+    <div className="tw-relative tw-w-full" ref={wrapperRef}>
       <svg
         className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
         viewBox="0 0 20 20"

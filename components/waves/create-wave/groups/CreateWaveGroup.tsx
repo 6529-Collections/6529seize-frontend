@@ -66,7 +66,7 @@ export default function CreateWaveGroup({
               {selectedGroup.created_by?.handle} - {selectedGroup.name}
             </div>
             <button onClick={() => switchSelected(CreateWaveGroupStatus.NONE)}>
-              remove
+              Remove
             </button>
           </div>
         )}
