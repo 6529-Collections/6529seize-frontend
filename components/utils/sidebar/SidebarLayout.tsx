@@ -2,15 +2,15 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
-import CommunityCurationFiltersSidebarToggleButton from "../../curation/sidebar/CommunityCurationFiltersSidebarToggleButton";
-import CommunityCurationFilters from "../../curation/CommunityCurationFilters";
+import GroupsSidebarToggleButton from "../../groups/sidebar/GroupsSidebarToggleButton";
+import Groups from "../../groups/Groups";
 import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectActiveCurationFilterId,
-  setActiveCurationFilterId,
-} from "../../../store/curationFilterSlice";
+  selectActiveGroupId,
+  setActiveGroupId,
+} from "../../../store/groupSlice";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -28,7 +28,7 @@ export default function SidebarLayout({
   const breakpoint = useBreakpoint();
   const router = useRouter();
 
-  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const activeGroupId = useSelector(selectActiveGroupId);
   const dispatch = useDispatch();
 
   const headerRef = useRef<HTMLDivElement>(null);
@@ -61,9 +61,9 @@ export default function SidebarLayout({
 
   useEffect(() => {
     if (router.isReady && !init) {
-      const { curation } = router.query as { curation: string | undefined };
-      if (curation && curation !== activeCurationFilterId) {
-        dispatch(setActiveCurationFilterId(curation));
+      const { group } = router.query as { group: string | undefined };
+      if (group && group !== activeGroupId) {
+        dispatch(setActiveGroupId(group));
       }
       setInit(true);
     }
@@ -120,7 +120,7 @@ export default function SidebarLayout({
           !open ? "tw-ml-0" : "tw-ml-[320px]"
         }`}
       >
-        <CommunityCurationFiltersSidebarToggleButton
+        <GroupsSidebarToggleButton
           ref={openButtonRef}
           open={open}
           setOpen={setOpen}
@@ -134,8 +134,8 @@ export default function SidebarLayout({
             }`}
             ref={sidebarRef}
           >
-            <div className="tw-bg-iron-950 tw-min-h-screen tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
-              <CommunityCurationFilters setOpen={setOpen} />
+            <div className="tw-bg-iron-950 tw-min-h-screen  tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
+              <Groups />
             </div>
           </div>
           <div className="tw-w-full">
