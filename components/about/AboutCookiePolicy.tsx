@@ -147,7 +147,7 @@ export default function AboutCookiePolicy() {
             <Row className="pb-3">
               <Col className="d-flex align-items-center justify-content-between">
                 <h4 className="mb-0">Performance Cookies</h4>
-                <span className="d-flex align-items-center gap-3">
+                <span className="d-flex align-items-center gap-2">
                   <label
                     htmlFor={"performance-cookies-toggle"}
                     className={"font-color"}>
