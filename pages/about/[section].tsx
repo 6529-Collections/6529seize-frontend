@@ -18,7 +18,6 @@ import AboutContactUs from "../../components/about/AboutContactUs";
 import AboutReleaseNotes from "../../components/about/AboutReleaseNotes";
 import AboutTermsOfService from "../../components/about/AboutTermsOfService";
 import AboutPrivacyPolicy from "../../components/about/AboutPrivacyPolicy";
-import AboutCookiePolicy from "../../components/about/AboutCookiePolicy";
 import Head from "next/head";
 import AboutDataDecentral from "../../components/about/AboutDataDecentral";
 import AboutGDRC1 from "../../components/about/AboutGDRC1";
@@ -28,6 +27,11 @@ import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
 import AboutCopyright from "../../components/about/AboutCopyright";
 import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
+
+const AboutCookiePolicy = dynamic(
+  () => import("../../components/about/AboutCookiePolicy"),
+  { ssr: false }
+);
 
 export enum AboutSection {
   MEMES = "the-memes",

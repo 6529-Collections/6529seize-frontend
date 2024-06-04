@@ -1,18 +1,18 @@
 @import "../../styles/variables.scss";
 
 .banner {
-  padding: 8px 0;
+  padding: 5px 20px;
   position: fixed;
   bottom: 0;
   width: 100%;
   z-index: 1000;
-  background-color: rgba(240, 240, 240, 0.8);
+  background-color: rgb(195, 225, 252);
   color: $very-dark-grey;
 }
 
 .accept {
   border: none;
-  padding: 5px;
+  padding: 5px 10px;
   background-color: $bg-color-2;
 
   transition: transform 0.3s ease;
@@ -24,7 +24,15 @@
   }
 }
 
-.learnMore {
+.learnMore,
+.reject {
+  border: none;
+  background-color: transparent;
   color: $very-dark-grey;
-  font-size: smaller;
+  font-size: smaller !important;
+  text-decoration: none;
+
+  &:hover {
+    color: $lighter-grey-2;
+  }
 }

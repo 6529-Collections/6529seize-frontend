@@ -6,14 +6,24 @@ import React, {
   useMemo,
   ReactNode,
 } from "react";
-import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
+import {
+  commonApiDelete,
+  commonApiFetch,
+  commonApiPost,
+} from "../../services/api/common-api";
 import Cookies from "js-cookie";
-import { CONSENT_COOKIE } from "../../constants";
+import {
+  CONSENT_ESSENTIAL_COOKIE,
+  CONSENT_PERFORMANCE_COOKIE,
+} from "../../constants";
 import { AuthContext } from "../auth/Auth";
+
+const GTM_ID = "G-71NLVV3KY3";
 
 type CookieConsentContextType = {
   showCookieConsent: boolean;
   consent: () => void;
+  reject: () => void;
 };
 
 interface CookieConsentResponse {
@@ -38,6 +48,19 @@ type CookieConsentProviderProps = {
   children: ReactNode;
 };
 
+type CookieConsent = boolean | undefined;
+
+export const getCookieConsentByName = (name: string): CookieConsent => {
+  const cookie = Cookies.get(name);
+  if (cookie === "true") {
+    return true;
+  }
+  if (cookie === "false") {
+    return false;
+  }
+  return undefined;
+};
+
 export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   children,
 }) => {
@@ -46,13 +69,21 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
   const getCookieConsent = async () => {
     try {
-      const cookie = Cookies.get(CONSENT_COOKIE);
-      if (cookie && cookie === "true") {
+      const essentialCookies = getCookieConsentByName(CONSENT_ESSENTIAL_COOKIE);
+      const performanceCookies = getCookieConsentByName(
+        CONSENT_PERFORMANCE_COOKIE
+      );
+
+      if (performanceCookies) {
+        loadPerformanceCookies();
+      }
+
+      if (essentialCookies != undefined && performanceCookies != undefined) {
         setShowCookieConsent(false);
         return;
       }
       const response = await commonApiFetch<CookieConsentResponse>({
-        endpoint: `policies/cookies_consent`,
+        endpoint: `policies/country-check`,
       });
       setShowCookieConsent(response.is_eu);
     } catch (error) {
@@ -62,8 +93,9 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
   const consent = async () => {
     try {
-      await commonApiPost({ endpoint: `policies/cookies_consent`, body: {} });
-      Cookies.set(CONSENT_COOKIE, "true", { expires: 30 });
+      await commonApiPost({ endpoint: `policies/cookies-consent`, body: {} });
+      Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
+      Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 365 });
       setToast({
         type: "success",
         message: "Cookie policy accepted!",
@@ -78,9 +110,45 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     }
   };
 
+  const reject = async () => {
+    try {
+      await commonApiDelete({ endpoint: `policies/cookies-consent` });
+      Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true");
+      Cookies.set(CONSENT_PERFORMANCE_COOKIE, "false");
+      setToast({
+        type: "success",
+        message: "Cookie preferences updated",
+      });
+      getCookieConsent();
+    } catch (error) {
+      console.error("Failed to delete cookie consent", error);
+      setToast({
+        type: "error",
+        message: "Something went wrong...",
+      });
+    }
+  };
+
+  const loadPerformanceCookies = () => {
+    const script1 = document.createElement("script");
+    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
+    script1.async = true;
+    document.head.appendChild(script1);
+
+    // Create inline script for GTM configuration
+    const script2 = document.createElement("script");
+    script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${GTM_ID}');
+      `;
+    document.head.appendChild(script2);
+  };
+
   const value = useMemo(
-    () => ({ showCookieConsent, consent }),
-    [showCookieConsent, consent]
+    () => ({ showCookieConsent, consent, reject }),
+    [showCookieConsent, consent, reject]
   );
 
   useEffect(() => {
