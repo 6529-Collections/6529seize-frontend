@@ -20,7 +20,7 @@ export default function CreateWaveGroups({
 }) {
   return (
     <div className="tw-max-w-xl tw-mx-auto tw-w-full">
-      <div className="tw-flex tw-flex-col tw-gap-y-6">
+      <div className="tw-flex tw-flex-col tw-gap-y-8">
         {Object.values(CreateWaveGroupConfigType).map((groupType) => (
           <CreateWaveGroup
             key={groupType}
@@ -30,7 +30,7 @@ export default function CreateWaveGroups({
           />
         ))}
       </div>
-      <div className="tw-mt-6 tw-text-right">
+      <div className="tw-mt-8 tw-text-right">
         <CreateWaveNextStep onClick={onNextStep} disabled={false} />
       </div>
     </div>

@@ -27,8 +27,8 @@ export default function CreateWaveVoting({
   const nextStepLabel = waveType === WaveType.APPROVE ? "Next Step" : "Finish";
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
-        <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
+      <div className="tw-max-w-xl tw-mx-auto tw-w-full">
+        <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
           How Drops are Rated
         </p>
         <div className="tw-mt-4 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
@@ -52,7 +52,7 @@ export default function CreateWaveVoting({
             </div>
           )}
         </div>
-        <div className="tw-mt-6 tw-text-right">
+        <div className="tw-mt-8 tw-text-right">
           <CreateWaveNextStep
             disabled={false}
             onClick={onNextStep}

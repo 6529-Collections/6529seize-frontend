@@ -12,7 +12,7 @@ export default function CreateWaveDropsType({
 }) {
   const isChecked = requiredTypes.includes(type);
   const buttonClasses = isChecked
-    ? "tw-ring-primary-400 tw-bg-primary-400/10"
+    ? "tw-ring-primary-400 tw-bg-[#202B45]"
     : "tw-ring-iron-700 tw-bg-iron-800 hover:tw-ring-iron-600";
 
   const labelClasses = isChecked

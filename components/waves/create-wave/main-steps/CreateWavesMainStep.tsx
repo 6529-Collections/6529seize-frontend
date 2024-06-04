@@ -32,7 +32,7 @@ export default function CreateWavesMainStep({
         <div
           className={`${
             isDone ? "tw-bg-primary-500" : "tw-bg-iron-700"
-          } tw-absolute tw-left-3 tw-top-10 tw-h-full tw-rounded-sm tw-w-0.5`}
+          } tw-absolute tw-right-3 tw-top-10 tw-h-full tw-rounded-sm tw-w-0.5`}
           aria-hidden="true"
         ></div>
       )}
@@ -42,17 +42,19 @@ export default function CreateWavesMainStep({
         onClick={() => onStep(step)}
         className="tw-bg-transparent tw-p-0 tw-border-none focus:tw-outline-none tw-group tw-relative tw-flex tw-items-center"
       >
-        <span className="tw-flex tw-h-9 tw-items-center">
-          <CreateWavesMainStepIcon stepStatus={stepStatus} />
-        </span>
-        <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
+        <span className="tw-mr-6 tw-flex tw-min-w-0 tw-flex-col">
           <span
             className={`${
-              isActive ? "tw-text-primary-400 tw-font-bold" : "tw-text-iron-500 tw-font-semibold"
+              isActive
+                ? "tw-text-primary-400 tw-font-bold"
+                : "tw-text-iron-600 tw-font-semibold"
             } tw-text-base`}
           >
             {label}
           </span>
+        </span>
+        <span className="tw-flex tw-h-9 tw-items-center">
+          <CreateWavesMainStepIcon stepStatus={stepStatus} />
         </span>
       </button>
     </div>

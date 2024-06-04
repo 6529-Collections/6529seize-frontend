@@ -52,7 +52,7 @@ export default function CreateWaveOverview({
 
   return (
     <div className="tw-max-w-xl tw-mx-auto tw-w-full">
-      <div className="tw-flex tw-flex-col tw-space-y-6">
+      <div className="tw-flex tw-flex-col tw-space-y-8">
         <CreateWaveOverviewInputs onChange={onChange} />
         <CreateWaveType
           selected={overview.type}

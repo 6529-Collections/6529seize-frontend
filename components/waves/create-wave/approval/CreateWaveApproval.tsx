@@ -36,7 +36,7 @@ export default function CreateWaveApproval({
 
   return (
     <div className="tw-max-w-xl tw-mx-auto tw-w-full">
-      <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
         Approval
       </p>
       <div className="tw-mt-4">
@@ -49,7 +49,7 @@ export default function CreateWaveApproval({
           setThresholdTimeMs={setThresholdTimeMs}
         />
       </div>
-      <div className="tw-mt-6 tw-text-right">
+      <div className="tw-mt-8 tw-text-right">
         <button className="tw-relative tw-inline-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-4 tw-py-3 tw-border-0 tw-text-base tw-font-medium tw-rounded-lg tw-text-white tw-bg-gradient-to-r tw-from-blue-500 tw-via-blue-600 tw-to-blue-700 hover:tw-bg-gradient-to-br tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg">
           <svg
             className="tw-h-5 tw-w-5 -tw-ml-1 tw-text-white tw-animate-bounce"
@@ -65,7 +65,7 @@ export default function CreateWaveApproval({
             />
           </svg>
 
-          <span>Finish!</span>
+          <span>Complete</span>
         </button>
 
         {/* <CreateWaveNextStep

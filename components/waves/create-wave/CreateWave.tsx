@@ -273,18 +273,18 @@ export default function CreateWave() {
   return (
     <div className="tailwind-scope tw-bg-iron-950">
       <div className="tw-overflow-hidden tw-h-full tw-w-full">
-        <div className="lg:tw-flex tw-h-full tw-w-full">
+        <div className="tw-max-w-4xl tw-mx-auto lg:tw-flex tw-gap-x-24 tw-justify-center tw-h-full tw-w-full">
           <CreateWavesMainSteps
             activeStep={step}
             waveType={config.overview.type}
             onStep={setStep}
           />
-          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-px-8 tw-pt-12 tw-pb-12 lg:tw-col-span-9">
+          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-px-8 tw-pt-12 tw-pb-12">
             <div className="tw-relative tw-z-[1]">
               {stepComponent[step]}
               {/* <WavesOutcome /> */}
             </div>
-            <div className="tw-absolute tw-inset-0 tw-translate-x-64">
+            <div className="tw-absolute tw-inset-0">
               <CreateWaveSvg />
             </div>
           </div>

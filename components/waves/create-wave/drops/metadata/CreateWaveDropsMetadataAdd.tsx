@@ -47,7 +47,7 @@ export default function CreateWaveDropsMetadataAdd({
           <span className="tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
             <button
               title="Text"
-              className="tw-flex-shrink-0 tw-z-10 tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-bg-primary-500 tw-rounded-l-lg tw-text-white tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out"
+              className="tw-flex-shrink-0 tw-z-10 tw-ring-1 tw-ring-inset tw-ring-primary-400 tw-bg-[#202B45] tw-rounded-l-lg tw-text-primary-400 tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out"
               type="button"
             >
               <svg
