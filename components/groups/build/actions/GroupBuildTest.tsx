@@ -105,7 +105,7 @@ export default function GroupBuildTest({
     const response = await createNewFilterMutation.mutateAsync({
       name: name.length
         ? name
-        : `${connectedProfile?.profile?.handle} Test Run`,
+        : `${connectedProfile?.input_identity} Test Run`,
       group: groupDescription,
     });
     if (response) {

@@ -1,10 +1,8 @@
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-
 export default function UserPageRepModifyModalHeader({
-  profile,
+  handleOrWallet,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly handleOrWallet: string;
   readonly onClose: () => void;
 }) {
   return (
@@ -40,7 +38,7 @@ export default function UserPageRepModifyModalHeader({
           </span>
         </div>
         <p className="tw-mt-3 sm:tw-mt-0 tw-whitespace-wrap md:tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
-          Add Rep to {profile.profile?.handle}
+          Add Rep to {handleOrWallet}
         </p>
       </div>
       <div className="tw-absolute tw-right-4 tw-top-4 sm:tw-top-6 tw-flex tw-justify-between tw-items-center">
