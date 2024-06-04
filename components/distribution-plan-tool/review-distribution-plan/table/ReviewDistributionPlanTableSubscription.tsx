@@ -25,6 +25,7 @@ interface WalletResult {
 
 interface SubscriptionResult {
   airdrops: WalletResult[];
+  airdrops_unconsolidated: WalletResult[];
   allowlists: WalletResult[];
 }
 
@@ -235,6 +236,11 @@ const processResults = (phaseName: string, results: SubscriptionResult) => {
     const merged = mergeResults([...results.airdrops, ...results.allowlists]);
     downloadCSV(phaseName, merged, "merged");
     downloadCSV(phaseName, results.airdrops, "airdrops");
+    downloadCSV(
+      phaseName,
+      results.airdrops_unconsolidated,
+      "airdrops_unconsolidated"
+    );
     downloadCSV(phaseName, results.allowlists, "allowlists");
   }
 };
