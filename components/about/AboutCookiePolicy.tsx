@@ -43,12 +43,12 @@ export default function AboutCookiePolicy() {
       <Row>
         <Col>
           <Container className="no-padding">
-            <Row>
+            <Row className="pb-3">
               <Col>
-                <h3>Cookie List</h3>
+                <h3 className="mb-0">Cookie List</h3>
               </Col>
             </Row>
-            <Row>
+            <Row className="pt-2 pb-2">
               <Col>
                 <p>
                   A cookie is a small piece of data (text file) that a website -
@@ -66,9 +66,9 @@ export default function AboutCookiePolicy() {
       <Row className="pt-3 pb-3">
         <Col>
           <Container className="no-padding">
-            <Row>
+            <Row className="pb-3">
               <Col>
-                <h4>Strictly Necessary Cookies</h4>
+                <h4 className="mb-0">Strictly Necessary Cookies</h4>
               </Col>
             </Row>
             <Row className="pt-2">
@@ -144,9 +144,9 @@ export default function AboutCookiePolicy() {
       <Row className="pt-3 pb-3">
         <Col>
           <Container className="no-padding">
-            <Row>
+            <Row className="pb-3">
               <Col className="d-flex align-items-center justify-content-between">
-                <h4>Performance Cookies</h4>
+                <h4 className="mb-0">Performance Cookies</h4>
                 <span className="d-flex align-items-center gap-3">
                   <label
                     htmlFor={"performance-cookies-toggle"}
@@ -244,9 +244,9 @@ export default function AboutCookiePolicy() {
             <Row className="pt-2">
               <Col>
                 <Container className="no-padding">
-                  <Row>
+                  <Row className="pb-3">
                     <Col>
-                      <h5>Retention Policy</h5>
+                      <h5 className="mb-0">Retention Policy</h5>
                     </Col>
                   </Row>
                   <Row>
