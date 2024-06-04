@@ -223,7 +223,7 @@ export default function AboutSubscriptions() {
                 <li className="mt-1">
                   For popular mints, your opportunity will be determined by your
                   phase, how many other subscription mints are in place for that
-                  mint, and when you funded your subscription
+                  mint, and when you subscribed relative to other subscribers
                 </li>
               </ul>
             </li>
