@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: Seize API
-  description: Following is the API interface description for most common operations in Seize API. Some modifying endpoints may need authentication token.
+  description: This is the API interface description for the most commonly used operations in Seize API.  Some modifying endpoints require an authentication token.   We are in the process of documenting all Seize APIs.   If there is an API that you need, please ping us in Discord and we will aim to prioritize its documentation.
   version: 1.0.0
 servers:
   - url: /api
@@ -12,7 +12,7 @@ paths:
     get:
       tags:
         - Authentication
-      summary: Get a message to sign by your web3 wallet
+      summary: Get a message to sign with your web3 wallet
       operationId: getNonce
       parameters:
         - name: signer_address
@@ -32,7 +32,7 @@ paths:
     post:
       tags:
         - Authentication
-      summary: Get a message to sign by your web3 wallet
+      summary: Authenticate and get JWT token
       operationId: getAuthToken
       parameters:
         - name: signer_address
@@ -60,7 +60,7 @@ paths:
   /nfts:
     get:
       tags:
-        - Nfts
+        - NFTs
       summary: Get NFTs
       operationId: getNfts
       parameters:
@@ -111,14 +111,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/NftsPage"
-  /profiles/{handleOrWallet}/proxies:
+  /profiles/{identity}/proxies:
     get:
       tags:
         - Proxies
       summary: Get profile proxies
       operationId: getProfileProxies
       parameters:
-        - name: handleOrWallet
+        - name: identity
           in: path
           required: true
           schema:
@@ -134,14 +134,14 @@ paths:
                   $ref: "#/components/schemas/ProfileProxy"
         "404":
           description: Profile not found
-  /profiles/{handleOrWallet}/proxies/received:
+  /profiles/{identity}/proxies/received:
     get:
       tags:
         - Proxies
       summary: Get proxies received by a profile
       operationId: getProxiesReceived
       parameters:
-        - name: handleOrWallet
+        - name: identity
           in: path
           required: true
           schema:
@@ -157,14 +157,14 @@ paths:
                   $ref: "#/components/schemas/ProfileProxy"
         "404":
           description: Profile not found
-  /profiles/{handleOrWallet}/proxies/granted:
+  /profiles/{identity}/proxies/granted:
     get:
       tags:
         - Proxies
       summary: Get proxies granted by a profile
       operationId: getProxiesGranted
       parameters:
-        - name: handleOrWallet
+        - name: identity
           in: path
           required: true
           schema:
@@ -180,14 +180,14 @@ paths:
                   $ref: "#/components/schemas/ProfileProxy"
         "404":
           description: Profile not found
-  /profiles/{handleOrWallet}/rep/rating:
+  /profiles/{identity}/rep/rating:
     post:
       tags:
         - ProfileREP
       summary: Change profile REP rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
       operationId: rateProfileRep
       parameters:
-        - name: handleOrWallet
+        - name: identity
           in: path
           required: true
           schema:
@@ -207,14 +207,44 @@ paths:
                 $ref: "#/components/schemas/ChangeProfileRepRatingResponse"
         "400":
           description: "Invalid request"
-  /profiles/{handleOrWallet}/cic/rating:
+    get:
+      tags:
+          - ProfileREP
+      summary: Get profile REP rating
+      operationId: getProfileRepRating
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: from_identity
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepRating"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/cic/rating:
     post:
       tags:
         - ProfileCIC
       summary: Change profile CIC rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
       operationId: rateProfileCic
       parameters:
-        - name: handleOrWallet
+        - name: identity
           in: path
           required: true
           schema:
@@ -250,9 +280,9 @@ paths:
             format: int64
             minimum: 1
             maximum: 20
-        - name: curation_criteria_id
+        - name: group_id
           in: query
-          description: Drops by authors that match the supplied criteria
+          description: Drops by authors that fall into supplied group
           required: false
           schema:
             type: string
@@ -287,7 +317,7 @@ paths:
             minimum: 1
         - name: context_profile
           in: query
-          description: If supplied, each drop has some context related to given profile. It can be wallet, ENS, handle or profile ID.
+          description: If supplied, each drop has some context related to given profile. It can be wallet address, ENS, handle or profile ID.
           required: false
           schema:
             type: string
@@ -335,7 +365,7 @@ paths:
             type: string
         - name: context_profile
           in: query
-          description: If supplied drop has some context related to given profile. It can be wallet, ENS, handle or profile ID.
+          description: If supplied drop has some context related to given profile. It can be wallet address, ENS, handle or profile ID.
           required: false
           schema:
             type: string
@@ -779,9 +809,9 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: curation_criteria_id
+        - name: group_id
           in: query
-          description: Waves by authors that match the supplied criteria
+          description: Waves by authors that fall into supplied group
           required: false
           schema:
             type: string
@@ -838,6 +868,84 @@ paths:
         "404":
           description: Wave not found
 
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Search for user groups
+      operationId: searchUserGroups
+      parameters:
+        - name: group_name
+          description: Partial or full name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: author_identity
+          description: Group author identity
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GroupFull"
+    post:
+      tags:
+        - Groups
+      summary: Create a group
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroup"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupFull"
+        "400":
+          description: Invalid request
+  /groups/{id}/visibility:
+    post:
+      tags:
+        - Groups
+      summary: Change group visibility
+      operationId: changeGroupVisibility
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeGroupVisibility"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupFull"
+        "404":
+          description: Group not found
+        "400":
+          description: Invalid request
+
 components:
   securitySchemes:
     bearerAuth:
@@ -861,7 +969,7 @@ components:
           format: int64
           nullable: true
 
-    Curation:
+    Group:
       type: object
       required:
         - id
@@ -878,6 +986,193 @@ components:
         created_at:
           type: number
           format: int64
+
+    GroupFull:
+      type: object
+      required:
+        - id
+        - name
+        - group
+        - created_at
+        - created_by
+        - visible
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        group:
+          $ref: "#/components/schemas/GroupDescription"
+        created_at:
+          type: number
+          format: int64
+        created_by:
+          $ref: "#/components/schemas/ProfileMin"
+        visible:
+          type: boolean
+
+    GroupDescription:
+      type: object
+      required:
+        - tdh
+        - rep
+        - cic
+        - level
+        - owns_nfts
+      properties:
+        tdh:
+          $ref: "#/components/schemas/GroupTdhFilter"
+        rep:
+          $ref: "#/components/schemas/GroupRepFilter"
+        cic:
+          $ref: "#/components/schemas/GroupCicFilter"
+        level:
+          $ref: "#/components/schemas/GroupLevelFilter"
+        owns_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupOwnsNft"
+
+    GroupOwnsNft:
+      type: object
+      required:
+        - name
+        - tokens
+      properties:
+        name:
+          type: string
+          enum:
+            - MEMES
+            - MEMELAB
+            - NEXTGEN
+            - GRADIENTS
+        tokens:
+          type: array
+          items:
+            type: string
+
+    GroupTdhFilter:
+      type: object
+      required:
+        - min
+        - max
+      properties:
+        min:
+          type: number
+          minimum: 0
+          format: int64
+          nullable: true
+        max:
+          type: number
+          minimum: 0
+          format: int64
+          nullable: true
+
+    GroupCicFilter:
+      type: object
+      required:
+        - min
+        - max
+        - direction
+        - user_identity
+      properties:
+        min:
+          type: number
+          format: int64
+          nullable: true
+        max:
+          type: number
+          format: int64
+          nullable: true
+        user_identity:
+          type: string
+          minLength: 1
+          maxLength: 200
+          nullable: true
+        direction:
+          example: "RECEIVED"
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/GroupFilterDirection"
+
+    GroupRepFilter:
+      type: object
+      required:
+        - min
+        - max
+        - category
+        - direction
+        - user_identity
+      properties:
+        min:
+          type: number
+          format: int64
+          nullable: true
+        max:
+          type: number
+          format: int64
+          nullable: true
+        category:
+          type: string
+          minLength: 1
+          maxLength: 200
+          nullable: true
+        user_identity:
+          type: string
+          minLength: 1
+          maxLength: 200
+          nullable: true
+        direction:
+          example: "RECEIVED"
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/GroupFilterDirection"
+
+    GroupLevelFilter:
+      type: object
+      required:
+        - min
+        - max
+      properties:
+        min:
+          type: number
+          format: int64
+          nullable: true
+        max:
+          type: number
+          format: int64
+          nullable: true
+
+    GroupFilterDirection:
+        type: string
+        enum:
+          - RECEIVED
+          - SENT
+
+    CreateGroup:
+      type: object
+      required:
+        - name
+        - group
+        - visible
+      properties:
+        name:
+          type: string
+        group:
+          $ref: "#/components/schemas/GroupDescription"
+
+    ChangeGroupVisibility:
+      type: object
+      required:
+        - visible
+        - old_version_id
+      properties:
+        visible:
+          type: boolean
+        old_version_id:
+          type: string
+          minLength: 1
+          nullable: true
 
     PageBase:
       type: object
@@ -1339,22 +1634,13 @@ components:
           items:
             $ref: "#/components/schemas/DropComment"
 
-    WaveScopeType:
-      type: string
-      enum:
-        - ALL
-        - CURATED
-
     CreateNewWaveScope:
       type: object
       required:
-        - type
-        - curation_id
+        - group_id
       properties:
-        type:
-          $ref: "#/components/schemas/WaveScopeType"
-        curation_id:
-          description: "Only relevant when type=CURATED."
+        group_id:
+          description: "If null, everyone is included"
           type: string
           nullable: true
 
@@ -1363,16 +1649,13 @@ components:
       description: A scope of audience
       type: object
       required:
-        - type
-        - curation
+        - group
       properties:
-        type:
-          $ref: "#/components/schemas/WaveScopeType"
-        curation:
-          description: "Only relevant when type=CURATED."
+        group:
+          description: "If null, everyone is included"
           anyOf:
             - type: "null"
-            - $ref: "#/components/schemas/Curation"
+            - $ref: "#/components/schemas/Group"
 
     WaveCreditType:
       type: string
@@ -2034,6 +2317,16 @@ components:
       properties:
         token:
           type: string
+
+    RepRating:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: number
+          format: int64
+
 
     ChangeProfileRepRating:
         type: object

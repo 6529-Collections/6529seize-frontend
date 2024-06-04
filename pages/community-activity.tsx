@@ -25,7 +25,7 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet: null,
-  activeCurationFilterId: null,
+  groupId: null,
 };
 
 export interface CommunityActivityPage {
@@ -95,7 +95,7 @@ export async function getServerSideProps(
       headers,
       params: convertActivityLogParams({
         params: INITIAL_ACTIVITY_LOGS_PARAMS,
-        disableActiveCurationFilter: true,
+        disableActiveGroup: true,
       }),
     });
     return {
