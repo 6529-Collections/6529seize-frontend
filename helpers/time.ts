@@ -248,7 +248,7 @@ export class Time {
       "Friday",
       "Saturday",
     ];
-    return daysOfWeek[this.toDate().getDay()];
+    return daysOfWeek[this.toDate().getUTCDay()];
   }
 
   public formatAsDuration() {

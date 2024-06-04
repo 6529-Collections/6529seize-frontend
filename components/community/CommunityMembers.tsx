@@ -16,7 +16,7 @@ import { useDebounce } from "react-use";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 
 import { useSelector } from "react-redux";
-import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
+import { selectActiveGroupId } from "../../store/groupSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 interface QueryUpdateInput {
@@ -28,7 +28,7 @@ const SEARCH_PARAMS_FIELDS = {
   page: "page",
   sortBy: "sort-by",
   sortDirection: "sort-direction",
-  curation: "curation",
+  group: "group",
 } as const;
 
 export default function CommunityMembers() {
@@ -41,7 +41,7 @@ export default function CommunityMembers() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const activeGroupId = useSelector(selectActiveGroupId);
 
   const convertSortBy = (sort: string | null): CommunityMembersSortOption => {
     if (!sort) return defaultSortBy;
@@ -71,15 +71,15 @@ export default function CommunityMembers() {
     const page = parseInt(searchParams.get(SEARCH_PARAMS_FIELDS.page) || "");
     const sortBy = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
     const sortDirection = searchParams.get(SEARCH_PARAMS_FIELDS.sortDirection);
-    const curation = searchParams.get(SEARCH_PARAMS_FIELDS.curation);
+    const group = searchParams.get(SEARCH_PARAMS_FIELDS.group);
     const query: CommunityMembersQuery = {
       page: page || defaultPage,
       page_size: defaultPageSize,
       sort: convertSortBy(sortBy),
       sort_direction: convertSortDirection(sortDirection),
     };
-    if (curation) {
-      query.curation_criteria_id = curation;
+    if (group) {
+      query.group_id = group;
     }
     return query;
   };
@@ -131,7 +131,16 @@ export default function CommunityMembers() {
     isFetching,
     data: members,
   } = useQuery<Page<CommunityMemberOverview>>({
-    queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, debouncedParams],
+    queryKey: [
+      QueryKey.COMMUNITY_MEMBERS_TOP,
+      {
+        page: debouncedParams.page,
+        pageSize: debouncedParams.page_size,
+        sort: debouncedParams.sort,
+        sortDirection: debouncedParams.sort_direction,
+        groupId: debouncedParams.group_id,
+      },
+    ],
     queryFn: async () =>
       await commonApiFetch<
         Page<CommunityMemberOverview>,
@@ -179,11 +188,11 @@ export default function CommunityMembers() {
   };
 
   useEffect(() => {
-    if (params.curation_criteria_id !== activeCurationFilterId) {
+    if (params.group_id !== activeGroupId) {
       const items: QueryUpdateInput[] = [
         {
-          name: "curation",
-          value: activeCurationFilterId,
+          name: "group",
+          value: activeGroupId,
         },
         {
           name: "page",
@@ -192,7 +201,7 @@ export default function CommunityMembers() {
       ];
       updateFields(items, false);
     }
-  }, [activeCurationFilterId]);
+  }, [activeGroupId]);
 
   const setPage = async (page: number): Promise<void> => {
     const items: QueryUpdateInput[] = [

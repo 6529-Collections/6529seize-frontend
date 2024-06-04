@@ -6,15 +6,17 @@ export default function CommonProfileSearchItems({
   open,
   profiles,
   selected,
+  searchCriteria,
   onProfileSelect,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
   readonly selected: string | null;
+  readonly searchCriteria: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
 }) {
   const noResultsText =
-    !selected || selected.length < 3
+    !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
       : "No results";
   return (

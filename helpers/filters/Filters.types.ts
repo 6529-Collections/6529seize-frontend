@@ -1,7 +1,5 @@
-export enum FilterDirection {
-  RECEIVED = "RECEIVED",
-  SENT = "SENT",
-}
+import { GroupFilterDirection } from "../../generated/models/GroupFilterDirection";
+
 
 export interface FilterMinMax {
   readonly min: number | null;
@@ -9,7 +7,7 @@ export interface FilterMinMax {
 }
 
 export interface FilterMinMaxDirectionAndUser extends FilterMinMax {
-  readonly direction: FilterDirection;
+  readonly direction: GroupFilterDirection;
   readonly user: string | null;
 }
 
@@ -21,18 +19,6 @@ export type TDHFilter = FilterMinMax;
 export type CICFilter = FilterMinMaxDirectionAndUser;
 export type LevelFilter = FilterMinMax;
 
-export interface GeneralFilter {
-  readonly tdh: TDHFilter;
-  readonly rep: RepFilter;
-  readonly cic: CICFilter;
-  readonly level: LevelFilter;
-}
-
-export interface CurationFilterRequest {
-  readonly name: string;
-  readonly criteria: GeneralFilter;
-}
-
 export interface ProfileMin {
   readonly id: string;
   readonly handle: string;
@@ -43,9 +29,3 @@ export interface ProfileMin {
   readonly level: number;
 }
 
-export interface CurationFilterResponse extends CurationFilterRequest {
-  readonly id: string;
-  readonly created_at: string;
-  readonly created_by: ProfileMin | null;
-  readonly visible: boolean;
-}

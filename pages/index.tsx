@@ -62,7 +62,7 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet: null,
-  activeCurationFilterId: null,
+  groupId: null,
 };
 
 const Header = dynamic(() => import("../components/header/Header"), {
@@ -462,7 +462,7 @@ export default function Home({
                 {/* <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}
-                  disableActiveCurationFilter={true}
+                  disableActiveGroup={true}
                 >
                   <span className="d-flex align-items-center gap-3">
                     <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
@@ -525,7 +525,7 @@ export async function getServerSideProps(
       headers,
       params: convertActivityLogParams({
         params: INITIAL_ACTIVITY_LOGS_PARAMS,
-        disableActiveCurationFilter: true,
+        disableActiveGroup: true,
       }),
     });
     const nextGenFeatured = await commonApiFetch<NextGenCollection>({
