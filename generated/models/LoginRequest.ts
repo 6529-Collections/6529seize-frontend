@@ -1,6 +1,6 @@
 /**
  * Seize API
- * Following is the API interface description for most common operations in Seize API. Some modifying endpoints may need authentication token.
+ * This is the API interface description for the most commonly used operations in Seize API.  Some modifying endpoints require an authentication token.   We are in the process of documenting all Seize APIs.   If there is an API that you need, please ping us in Discord and we will aim to prioritize its documentation.
  *
  * OpenAPI spec version: 1.0.0
  * 
