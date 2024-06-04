@@ -31,7 +31,7 @@ const getInitialActivityLogParams = (
   matter: null,
   targetType: FilterTargetType.ALL,
   handleOrWallet,
-  activeCurationFilterId: null,
+  groupId: null,
 });
 
 const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({

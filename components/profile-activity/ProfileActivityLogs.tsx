@@ -16,7 +16,7 @@ import CommonFilterTargetSelect, {
 
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 import { useSelector } from "react-redux";
-import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
+import { selectActiveGroupId } from "../../store/groupSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 export interface ActivityLogParams {
@@ -26,7 +26,7 @@ export interface ActivityLogParams {
   readonly matter: RateMatter | null;
   readonly targetType: FilterTargetType;
   readonly handleOrWallet: string | null;
-  readonly activeCurationFilterId: string | null;
+  readonly groupId: string | null;
 }
 
 export interface ActivityLogParamsConverted {
@@ -37,15 +37,15 @@ export interface ActivityLogParamsConverted {
   rating_matter?: string;
   profile?: string;
   target?: string;
-  curation_criteria_id?: string;
+  group_id?: string;
 }
 
 export const convertActivityLogParams = ({
   params,
-  disableActiveCurationFilter,
+  disableActiveGroup,
 }: {
   readonly params: ActivityLogParams;
-  readonly disableActiveCurationFilter: boolean;
+  readonly disableActiveGroup: boolean;
 }): ActivityLogParamsConverted => {
   const converted: ActivityLogParamsConverted = {
     page: `${params.page}`,
@@ -58,12 +58,8 @@ export const convertActivityLogParams = ({
   if (params.matter) {
     converted.rating_matter = params.matter;
   }
-  if (
-    params.activeCurationFilterId &&
-    !params.handleOrWallet &&
-    !disableActiveCurationFilter
-  ) {
-    converted.curation_criteria_id = params.activeCurationFilterId;
+  if (params.groupId && !params.handleOrWallet && !disableActiveGroup) {
+    converted.group_id = params.groupId;
   }
 
   if (!params.handleOrWallet) {
@@ -92,15 +88,15 @@ export const convertActivityLogParams = ({
 export default function ProfileActivityLogs({
   initialParams,
   withFilters,
-  disableActiveCurationFilter = false,
+  disableActiveGroup = false,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
-  readonly disableActiveCurationFilter?: boolean;
+  readonly disableActiveGroup?: boolean;
   readonly children?: React.ReactNode;
 }) {
-  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const activeGroupId = useSelector(selectActiveGroupId);
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -138,9 +134,9 @@ export default function ProfileActivityLogs({
         matter: initialParams.matter,
         targetType,
         handleOrWallet: initialParams.handleOrWallet,
-        activeCurationFilterId,
+        groupId: activeGroupId,
       },
-      disableActiveCurationFilter: !!disableActiveCurationFilter,
+      disableActiveGroup: !!disableActiveGroup,
     })
   );
 
@@ -154,9 +150,9 @@ export default function ProfileActivityLogs({
           matter: initialParams.matter,
           targetType,
           handleOrWallet: initialParams.handleOrWallet,
-          activeCurationFilterId,
+          groupId: activeGroupId,
         },
-        disableActiveCurationFilter: !!disableActiveCurationFilter,
+        disableActiveGroup: !!disableActiveGroup,
       })
     );
   }, [
@@ -164,7 +160,7 @@ export default function ProfileActivityLogs({
     selectedFilters,
     initialParams.handleOrWallet,
     targetType,
-    activeCurationFilterId,
+    activeGroupId,
   ]);
 
   const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(

@@ -40,8 +40,8 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
-  CURATION_FILTERS = "CURATION_FILTERS",
-  CURATION_FILTER = "CURATION_FILTER",
+  GROUPS = "GROUPS",
+  GROUP = "GROUP",
   NFTS_SEARCH = "NFTS_SEARCH",
   PROFILE_PROXY = "PROFILE_PROXY",
   PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
@@ -142,16 +142,8 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onCurationFilterRemoved: ({
-    filterId,
-  }: {
-    readonly filterId: string;
-  }) => void;
-  onCurationFilterChanged: ({
-    filterId,
-  }: {
-    readonly filterId: string;
-  }) => void;
+  onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
+  onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -168,8 +160,8 @@ export const ReactQueryWrapperContext =
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
-    onCurationFilterRemoved: () => {},
-    onCurationFilterChanged: () => {},
+    onGroupRemoved: () => {},
+    onGroupChanged: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -286,39 +278,26 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const inValidateCurationFilter = ({
-    filterId,
-  }: {
-    readonly filterId: string;
-  }) => {
+  const invalidateGroup = ({ groupId }: { readonly groupId: string }) => {
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.CURATION_FILTERS],
+      queryKey: [QueryKey.GROUPS],
     });
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.CURATION_FILTER, filterId],
+      queryKey: [QueryKey.GROUP, groupId],
     });
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_LOGS, { curation_criteria_id: filterId }],
+      queryKey: [QueryKey.PROFILE_LOGS, { groupId }],
     });
     queryClient.invalidateQueries({
-      queryKey: [
-        QueryKey.COMMUNITY_MEMBERS_TOP,
-        { curation_criteria_id: filterId },
-      ],
+      queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP, { groupId }],
     });
   };
 
-  const onCurationFilterRemoved = ({
-    filterId,
-  }: {
-    readonly filterId: string;
-  }) => inValidateCurationFilter({ filterId });
+  const onGroupRemoved = ({ groupId }: { readonly groupId: string }) =>
+    invalidateGroup({ groupId });
 
-  const onCurationFilterChanged = ({
-    filterId,
-  }: {
-    readonly filterId: string;
-  }) => inValidateCurationFilter({ filterId });
+  const onGroupChanged = ({ groupId }: { readonly groupId: string }) =>
+    invalidateGroup({ groupId });
 
   const setRepRates = ({
     data,
@@ -607,17 +586,17 @@ export default function ReactQueryWrapper({
 
   const initProfileActivityLogs = ({
     params,
-    disableActiveCurationFilter,
+    disableActiveGroup,
     data,
   }: {
     readonly params: ActivityLogParams;
-    readonly disableActiveCurationFilter: boolean;
+    readonly disableActiveGroup: boolean;
     readonly data: CountlessPage<ProfileActivityLog>;
   }) => {
     queryClient.setQueryData(
       [
         QueryKey.PROFILE_LOGS,
-        convertActivityLogParams({ params, disableActiveCurationFilter }),
+        convertActivityLogParams({ params, disableActiveGroup }),
       ],
       data
     );
@@ -636,7 +615,7 @@ export default function ReactQueryWrapper({
     initProfileActivityLogs({
       params: repLogs.params,
       data: repLogs.data,
-      disableActiveCurationFilter: true,
+      disableActiveGroup: true,
     });
     setProfileRaters(repGivenToUsers);
     setProfileRaters(repReceivedFromUsers);
@@ -652,7 +631,7 @@ export default function ReactQueryWrapper({
     initProfileActivityLogs({
       params: activityLogs.params,
       data: activityLogs.data,
-      disableActiveCurationFilter: true,
+      disableActiveGroup: true,
     });
     setProfileRaters(cicGivenToUsers);
     setProfileRaters(cicReceivedFromUsers);
@@ -666,7 +645,7 @@ export default function ReactQueryWrapper({
     initProfileActivityLogs({
       params: activityLogs.params,
       data: activityLogs.data,
-      disableActiveCurationFilter: true,
+      disableActiveGroup: true,
     });
   };
 
@@ -678,7 +657,7 @@ export default function ReactQueryWrapper({
     initProfileActivityLogs({
       params: activityLogs.params,
       data: activityLogs.data,
-      disableActiveCurationFilter: false,
+      disableActiveGroup: false,
     });
   };
 
@@ -697,8 +676,8 @@ export default function ReactQueryWrapper({
         initProfileIdentityPage,
         initLandingPage,
         initCommunityActivityPage,
-        onCurationFilterRemoved,
-        onCurationFilterChanged,
+        onGroupRemoved,
+        onGroupChanged,
       }}
     >
       {children}
