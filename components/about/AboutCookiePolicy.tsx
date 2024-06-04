@@ -6,7 +6,10 @@ import {
   useCookieConsent,
   getCookieConsentByName,
 } from "../cookies/CookieConsentContext";
-import { CONSENT_PERFORMANCE_COOKIE } from "../../constants";
+import {
+  CONSENT_ESSENTIAL_COOKIE,
+  CONSENT_PERFORMANCE_COOKIE,
+} from "../../constants";
 
 export default function AboutCookiePolicy() {
   const { showCookieConsent, consent, reject } = useCookieConsent();
@@ -125,6 +128,12 @@ export default function AboutCookiePolicy() {
                       <td>First Party</td>
                       <td>7 days</td>
                     </tr>
+                    <tr>
+                      <td>seize.io</td>
+                      <td>{CONSENT_ESSENTIAL_COOKIE}</td>
+                      <td>First Party</td>
+                      <td>1 year</td>
+                    </tr>
                   </tbody>
                 </Table>
               </Col>
@@ -181,6 +190,12 @@ export default function AboutCookiePolicy() {
                   </thead>
                   <tbody>
                     <tr>
+                      <td>seize.io</td>
+                      <td>{CONSENT_PERFORMANCE_COOKIE}</td>
+                      <td>First Party</td>
+                      <td>1 year</td>
+                    </tr>
+                    <tr>
                       <td>.seize.io</td>
                       <td>
                         <a
@@ -192,7 +207,7 @@ export default function AboutCookiePolicy() {
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
-                      <td>2 years</td>
+                      <td>1 year</td>
                     </tr>
                     <tr>
                       <td>.seize.io</td>
@@ -206,7 +221,7 @@ export default function AboutCookiePolicy() {
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
-                      <td>2 years</td>
+                      <td>1 year</td>
                     </tr>
                     <tr>
                       <td>.seize.io</td>
@@ -220,7 +235,7 @@ export default function AboutCookiePolicy() {
                         (Google Analytics)
                       </td>
                       <td>First Party</td>
-                      <td>2 years</td>
+                      <td>1 year</td>
                     </tr>
                   </tbody>
                 </Table>
