@@ -88,6 +88,7 @@ export default function GroupBuildUserSearch({
       <CommonProfileSearchItems
         open={isOpen}
         selected={value}
+        searchCriteria={searchCriteria}
         profiles={data ?? []}
         onProfileSelect={(profile) =>
           onValueChange(profile?.handle ?? profile?.wallet ?? null)
