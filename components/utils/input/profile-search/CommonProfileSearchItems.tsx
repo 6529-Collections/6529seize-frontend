@@ -22,7 +22,7 @@ export default function CommonProfileSearchItems({
       <AnimatePresence mode="wait" initial={false}>
         {open && (
           <motion.div
-            className="tw-absolute tw-z-10 tw-mt-1 tw-w-full tw-min-w-[17.4rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-absolute tw-z-10 tw-mt-1.5 tw-w-full tw-min-w-[17.4rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

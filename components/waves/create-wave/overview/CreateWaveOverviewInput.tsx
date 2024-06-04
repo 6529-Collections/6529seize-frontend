@@ -9,8 +9,8 @@ export default function CreateWaveOverviewInput({
   }) => void;
 }) {
   const LABELS: Record<"name" | "description", string> = {
-    name: "Name",
-    description: "Description",
+    name: "Name*",
+    description: "Description*",
   };
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {

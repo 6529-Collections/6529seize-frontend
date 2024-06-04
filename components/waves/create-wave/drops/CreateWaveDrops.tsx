@@ -76,9 +76,9 @@ export default function CreateWaveDrops({
           onRequiredMetadataChange={onRequiredMetadataChange}
           onRequiredMetadataRemove={onRequiredMetadataRemove}
         />
-      </div>
-      <div className="tw-mt-6 tw-text-right">
-        <CreateWaveNextStep disabled={false} onClick={onNextStep} />
+        <div className="tw-text-right">
+          <CreateWaveNextStep disabled={false} onClick={onNextStep} />
+        </div>
       </div>
     </div>
   );
