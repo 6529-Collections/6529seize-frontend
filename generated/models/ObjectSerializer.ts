@@ -1,5 +1,6 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/ChangeGroupVisibility';
 export * from '../models/ChangeProfileCicRating';
 export * from '../models/ChangeProfileCicRatingResponse';
 export * from '../models/ChangeProfileRepRating';
@@ -8,6 +9,7 @@ export * from '../models/CreateDropMediaUrl201Response';
 export * from '../models/CreateDropMediaUrlRequest';
 export * from '../models/CreateDropPart';
 export * from '../models/CreateDropRequest';
+export * from '../models/CreateGroup';
 export * from '../models/CreateNewProfileProxy';
 export * from '../models/CreateNewProfileProxyAllocateCicAction';
 export * from '../models/CreateNewProfileProxyAllocateRepAction';
@@ -20,7 +22,6 @@ export * from '../models/CreateNewWaveParticipationConfig';
 export * from '../models/CreateNewWaveScope';
 export * from '../models/CreateNewWaveVisibilityConfig';
 export * from '../models/CreateNewWaveVotingConfig';
-export * from '../models/Curation';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
 export * from '../models/DropComment';
@@ -35,6 +36,15 @@ export * from '../models/DropRater';
 export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
+export * from '../models/Group';
+export * from '../models/GroupCicFilter';
+export * from '../models/GroupDescription';
+export * from '../models/GroupFilterDirection';
+export * from '../models/GroupFull';
+export * from '../models/GroupLevelFilter';
+export * from '../models/GroupOwnsNft';
+export * from '../models/GroupRepFilter';
+export * from '../models/GroupTdhFilter';
 export * from '../models/IntRange';
 export * from '../models/LoginRequest';
 export * from '../models/LoginResponse';
@@ -49,6 +59,7 @@ export * from '../models/ProfileProxy';
 export * from '../models/ProfileProxyAction';
 export * from '../models/ProfileProxyActionType';
 export * from '../models/QuotedDrop';
+export * from '../models/RepRating';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
@@ -58,13 +69,13 @@ export * from '../models/WaveOutcome';
 export * from '../models/WaveParticipationConfig';
 export * from '../models/WaveRequiredMetadata';
 export * from '../models/WaveScope';
-export * from '../models/WaveScopeType';
 export * from '../models/WaveType';
 export * from '../models/WaveVisibilityConfig';
 export * from '../models/WaveVotingConfig';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { ChangeGroupVisibility } from '../models/ChangeGroupVisibility';
 import { ChangeProfileCicRating } from '../models/ChangeProfileCicRating';
 import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRatingResponse';
 import { ChangeProfileRepRating } from '../models/ChangeProfileRepRating';
@@ -73,6 +84,7 @@ import { CreateDropMediaUrl201Response } from '../models/CreateDropMediaUrl201Re
 import { CreateDropMediaUrlRequest } from '../models/CreateDropMediaUrlRequest';
 import { CreateDropPart } from '../models/CreateDropPart';
 import { CreateDropRequest } from '../models/CreateDropRequest';
+import { CreateGroup } from '../models/CreateGroup';
 import { CreateNewProfileProxy } from '../models/CreateNewProfileProxy';
 import { CreateNewProfileProxyAllocateCicAction    } from '../models/CreateNewProfileProxyAllocateCicAction';
 import { CreateNewProfileProxyAllocateRepAction    } from '../models/CreateNewProfileProxyAllocateRepAction';
@@ -82,10 +94,9 @@ import { CreateNewProfileProxyRateWaveDropAction   } from '../models/CreateNewPr
 import { CreateNewProfileProxyReadWaveAction   } from '../models/CreateNewProfileProxyReadWaveAction';
 import { CreateNewWave } from '../models/CreateNewWave';
 import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
-import { CreateNewWaveScope   } from '../models/CreateNewWaveScope';
+import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
 import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
 import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
-import { Curation } from '../models/Curation';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
 import { DropComment } from '../models/DropComment';
@@ -100,6 +111,15 @@ import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { Group } from '../models/Group';
+import { GroupCicFilter     } from '../models/GroupCicFilter';
+import { GroupDescription } from '../models/GroupDescription';
+import { GroupFilterDirection } from '../models/GroupFilterDirection';
+import { GroupFull } from '../models/GroupFull';
+import { GroupLevelFilter } from '../models/GroupLevelFilter';
+import { GroupOwnsNft, GroupOwnsNftNameEnum    } from '../models/GroupOwnsNft';
+import { GroupRepFilter      } from '../models/GroupRepFilter';
+import { GroupTdhFilter } from '../models/GroupTdhFilter';
 import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
@@ -114,6 +134,7 @@ import { ProfileProxy } from '../models/ProfileProxy';
 import { ProfileProxyAction             } from '../models/ProfileProxyAction';
 import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { QuotedDrop } from '../models/QuotedDrop';
+import { RepRating } from '../models/RepRating';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
 import { WaveConfig      } from '../models/WaveConfig';
@@ -122,8 +143,7 @@ import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveOutcome } from '../models/WaveOutcome';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
-import { WaveScope   } from '../models/WaveScope';
-import { WaveScopeType } from '../models/WaveScopeType';
+import { WaveScope } from '../models/WaveScope';
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
 import { WaveVotingConfig        } from '../models/WaveVotingConfig';
@@ -143,17 +163,19 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "DropActivityLogTypeEnum",
+    "GroupFilterDirection",
+    "GroupOwnsNftNameEnum",
     "NftTokenTypeEnum",
     "ProfileProxyActionType",
     "WaveCreditScope",
     "WaveCreditType",
-    "WaveScopeType",
     "WaveType",
 ]);
 
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "ChangeGroupVisibility": ChangeGroupVisibility,
     "ChangeProfileCicRating": ChangeProfileCicRating,
     "ChangeProfileCicRatingResponse": ChangeProfileCicRatingResponse,
     "ChangeProfileRepRating": ChangeProfileRepRating,
@@ -162,6 +184,7 @@ let typeMap: {[index: string]: any} = {
     "CreateDropMediaUrlRequest": CreateDropMediaUrlRequest,
     "CreateDropPart": CreateDropPart,
     "CreateDropRequest": CreateDropRequest,
+    "CreateGroup": CreateGroup,
     "CreateNewProfileProxy": CreateNewProfileProxy,
     "CreateNewProfileProxyAllocateCicAction": CreateNewProfileProxyAllocateCicAction,
     "CreateNewProfileProxyAllocateRepAction": CreateNewProfileProxyAllocateRepAction,
@@ -174,7 +197,6 @@ let typeMap: {[index: string]: any} = {
     "CreateNewWaveScope": CreateNewWaveScope,
     "CreateNewWaveVisibilityConfig": CreateNewWaveVisibilityConfig,
     "CreateNewWaveVotingConfig": CreateNewWaveVotingConfig,
-    "Curation": Curation,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
     "DropComment": DropComment,
@@ -189,6 +211,14 @@ let typeMap: {[index: string]: any} = {
     "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
+    "Group": Group,
+    "GroupCicFilter": GroupCicFilter,
+    "GroupDescription": GroupDescription,
+    "GroupFull": GroupFull,
+    "GroupLevelFilter": GroupLevelFilter,
+    "GroupOwnsNft": GroupOwnsNft,
+    "GroupRepFilter": GroupRepFilter,
+    "GroupTdhFilter": GroupTdhFilter,
     "IntRange": IntRange,
     "LoginRequest": LoginRequest,
     "LoginResponse": LoginResponse,
@@ -202,6 +232,7 @@ let typeMap: {[index: string]: any} = {
     "ProfileProxy": ProfileProxy,
     "ProfileProxyAction": ProfileProxyAction,
     "QuotedDrop": QuotedDrop,
+    "RepRating": RepRating,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
