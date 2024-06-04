@@ -17,9 +17,9 @@ export default function CreateWavesMainSteps({
   const steps = CREATE_WAVE_MAIN_STEPS[waveType];
   const activeStepIndex = steps.indexOf(activeStep);
   return (
-    <div className="tw-hidden lg:tw-block tw-w-1/3 tw-min-h-full tw-pl-24 tw-pt-12 tw-bg-iron-900">
+    <div className="tw-hidden lg:tw-block tw-min-h-full tw-pt-12 tw-bg-iron-950">
       <nav aria-label="Progress">
-        <div className="tw-flex tw-flex-col">
+        <div className="tw-flex tw-flex-col tw-items-end">
           {steps.map((step, stepIndex) => (
             <CreateWavesMainStep
               key={step}
