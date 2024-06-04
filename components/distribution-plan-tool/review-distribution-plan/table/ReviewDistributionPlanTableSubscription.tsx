@@ -233,8 +233,6 @@ const processResults = (phaseName: string, results: SubscriptionResult) => {
   if (phaseName === "public") {
     downloadCSV(phaseName, results.airdrops, "airdrops");
   } else {
-    const merged = mergeResults([...results.airdrops, ...results.allowlists]);
-    downloadCSV(phaseName, merged, "merged");
     downloadCSV(phaseName, results.airdrops, "airdrops");
     downloadCSV(
       phaseName,
@@ -242,6 +240,8 @@ const processResults = (phaseName: string, results: SubscriptionResult) => {
       "airdrops_unconsolidated"
     );
     downloadCSV(phaseName, results.allowlists, "allowlists");
+    const merged = mergeResults([...results.airdrops, ...results.allowlists]);
+    downloadCSV(phaseName, merged, "merged");
   }
 };
 
