@@ -26,20 +26,23 @@ export default function CookiesBanner() {
         isMobile ? `flex-column` : ""
       }`}>
       <span className="d-flex align-items-center gap-2">
-        {!isMobile && (
-          <Image src="/intern.png" alt="Cookie" width={40} height={40} />
-        )}
-        <span className="font-bolder">seize the cookies of production</span>
+        <Image
+          src="/intern.png"
+          alt="Cookie"
+          width={isMobile ? 22 : 40}
+          height={isMobile ? 22 : 40}
+        />
+        <span className="font-bolder">seize the cookies of consent</span>
       </span>
       <span className="d-flex align-items-center justify-content-between gap-3">
         <button className={styles.accept} onClick={consent}>
           Accept
         </button>
         <button className={styles.reject} onClick={reject}>
-          Reject Non-Essential
+          <span className="font-smaller">Reject Non-Essential</span>
         </button>
         <Link className={styles.learnMore} href="/about/cookie-policy">
-          Learn more
+          <span className="font-smaller">Learn more</span>
         </Link>
       </span>
     </div>
