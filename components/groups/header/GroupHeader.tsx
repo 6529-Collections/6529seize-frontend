@@ -1,4 +1,4 @@
-import { GroupsView } from "../Groups";
+import { GroupsView } from "../sidebar/GroupsSidebar";
 import GroupHeaderBuild from "./GroupHeaderBuild";
 import GroupHeaderSelect from "./GroupHeaderSelect";
 

@@ -1,11 +1,11 @@
-import GroupBuild from "./build/GroupBuild";
-import GroupHeader from "./header/GroupHeader";
-import GroupSelect from "./select/GroupSelect";
+import GroupBuild from "../build/GroupBuild";
+import GroupHeader from "../header/GroupHeader";
+import GroupSelect from "../select/GroupSelect";
 import { useContext, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setActiveGroupId } from "../../store/groupSlice";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-import { GroupFull } from "../../generated/models/GroupFull";
+import { setActiveGroupId } from "../../../store/groupSlice";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { GroupFull } from "../../../generated/models/GroupFull";
 
 export enum GroupsView {
   SELECT = "SELECT",
