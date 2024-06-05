@@ -298,8 +298,12 @@ export default function UserPageIdentityHeaderCICRate({
           } tw-flex tw-items-end tw-gap-3`}
         >
           <div className="tw-w-full sm:tw-w-auto">
-            <label className="tw-block tw-text-sm tw-font-normal tw-text-iron-400">
-              Your total CIC Rating of {profile.profile?.handle}:
+            <label
+              className={`${
+                isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
+              } tw-block tw-text-sm tw-font-normal tw-text-iron-400 `}
+            >
+              Your total CIC Rating of {profile.input_identity}:
             </label>
             <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
               <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
