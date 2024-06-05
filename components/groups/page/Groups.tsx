@@ -1,6 +1,6 @@
 export default function Groups() {
   return (
-    <div className="tailwind-scope">
+    <div className="tailwind-scope tw-relative tw-z-10">
       <div className="tw-max-w-2xl tw-mx-auto">
         <div className="tw-flex tw-flex-col tw-gap-y-8">
           <div className="tw-space-y-5">
