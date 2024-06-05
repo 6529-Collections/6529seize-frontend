@@ -85,7 +85,13 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       const response = await commonApiFetch<CookieConsentResponse>({
         endpoint: `policies/country-check`,
       });
-      setShowCookieConsent(response.is_eu);
+      if (response.is_eu) {
+        setShowCookieConsent(true);
+      } else {
+        Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
+        Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 365 });
+        getCookieConsent();
+      }
     } catch (error) {
       console.error("Failed to fetch cookie consent status", error);
     }
