@@ -46,11 +46,11 @@ export default function UserPageIdentityHeaderCICRate({
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRaterCicState>({
-        endpoint: `profiles/${profile.profile?.handle}/cic/rating/${
+        endpoint: `profiles/${profile.input_identity}/cic/rating/${
           activeProfileProxy?.created_by.handle ?? address?.toLowerCase()
         }`,
       }),
-    enabled: !!profile.profile?.handle && !!address,
+    enabled: !!address,
     staleTime: 0,
   });
 
@@ -60,7 +60,7 @@ export default function UserPageIdentityHeaderCICRate({
     mutationFn: async (amount: number) => {
       setMutating(true);
       return await commonApiPost({
-        endpoint: `profiles/${profile.profile?.handle}/cic/rating`,
+        endpoint: `profiles/${profile.input_identity}/cic/rating`,
         body: {
           amount,
         },
