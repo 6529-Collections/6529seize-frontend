@@ -7,13 +7,14 @@ import GroupBuildUserSearch from "../common/user-search/GroupBuildUserSearch";
 import CommonRepCategorySearch from "../../../utils/rep/CommonRepCategorySearch";
 import { GroupFilterDirection } from "../../../../generated/models/GroupFilterDirection";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
+import { CreateGroupDescription } from "../../../../generated/models/CreateGroupDescription";
 
 export default function GroupBuildRep({
   filters,
   setFilters,
 }: {
-  readonly filters: GroupDescription;
-  readonly setFilters: (filters: GroupDescription) => void;
+  readonly filters: CreateGroupDescription;
+  readonly setFilters: (filters: CreateGroupDescription) => void;
 }) {
   const setUser = (value: string | null) => {
     setFilters({

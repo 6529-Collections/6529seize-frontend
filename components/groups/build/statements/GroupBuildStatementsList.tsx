@@ -1,3 +1,4 @@
+import { CreateGroupDescription } from "../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
 import { GroupFilterDirection } from "../../../../generated/models/GroupFilterDirection";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
@@ -14,7 +15,8 @@ export default function GroupBuildStatementsList({
   onRemoveFilters,
   onStatementType,
 }: {
-  readonly groupDescription: GroupDescription;
+  // TODO: CreateGroupDescription | GroupDescription
+  readonly groupDescription: CreateGroupDescription | GroupDescription;
   readonly onRemoveFilters?: (keys: GroupDescriptionStatement[]) => void;
   readonly onStatementType?: (type: GroupDescriptionStatement) => void;
 }) {

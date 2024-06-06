@@ -17,14 +17,13 @@ import { GroupRepFilter } from '../models/GroupRepFilter';
 import { GroupTdhFilter } from '../models/GroupTdhFilter';
 import { HttpFile } from '../http/http';
 
-export class GroupDescription {
+export class CreateGroupDescription {
     'tdh': GroupTdhFilter;
     'rep': GroupRepFilter;
     'cic': GroupCicFilter;
     'level': GroupLevelFilter;
     'owns_nfts': Array<GroupOwnsNft>;
-    'wallet_group_id': string | null;
-    'wallet_group_wallets_count': number;
+    'wallets': Array<string> | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -60,20 +59,14 @@ export class GroupDescription {
             "format": ""
         },
         {
-            "name": "wallet_group_id",
-            "baseName": "wallet_group_id",
-            "type": "string",
+            "name": "wallets",
+            "baseName": "wallets",
+            "type": "Array<string>",
             "format": ""
-        },
-        {
-            "name": "wallet_group_wallets_count",
-            "baseName": "wallet_group_wallets_count",
-            "type": "number",
-            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return GroupDescription.attributeTypeMap;
+        return CreateGroupDescription.attributeTypeMap;
     }
 
     public constructor() {

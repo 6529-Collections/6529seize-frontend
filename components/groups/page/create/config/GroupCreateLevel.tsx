@@ -1,3 +1,4 @@
+import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
@@ -5,8 +6,8 @@ export default function GroupCreateLevel({
   level,
   setLevel,
 }: {
-  readonly level: GroupDescription["level"];
-  readonly setLevel: (level: GroupDescription["level"]) => void;
+  readonly level: CreateGroupDescription["level"];
+  readonly setLevel: (level: CreateGroupDescription["level"]) => void;
 }) {
   return (
     <div>

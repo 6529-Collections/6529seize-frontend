@@ -10,6 +10,7 @@ import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { GroupFull } from "../../../generated/models/GroupFull";
 import { GroupDescription } from "../../../generated/models/GroupDescription";
 import { GroupFilterDirection } from "../../../generated/models/GroupFilterDirection";
+import { CreateGroupDescription } from "../../../generated/models/CreateGroupDescription";
 
 export enum GroupDescriptionStatement {
   TDH = "TDH",
@@ -30,26 +31,38 @@ export default function GroupBuild({
     GroupDescriptionStatement.LEVEL
   );
 
-  const [groupDescription, setGroupDescription] = useState<GroupDescription>(
-    originalGroup?.group ?? {
-      tdh: { min: null, max: null },
-      rep: {
-        min: null,
-        max: null,
-        direction: GroupFilterDirection.Received,
-        user_identity: null,
-        category: null,
-      },
-      cic: {
-        min: null,
-        max: null,
-        direction: GroupFilterDirection.Received,
-        user_identity: null,
-      },
-      level: { min: null, max: null },
-      owns_nfts: [],
-    }
-  );
+  const [groupDescription, setGroupDescription] =
+    useState<CreateGroupDescription>(
+      originalGroup?.group
+        ? {
+            tdh: originalGroup.group.tdh,
+            rep: originalGroup.group.rep,
+            cic: originalGroup.group.cic,
+            level: originalGroup.group.level,
+            owns_nfts: originalGroup.group.owns_nfts,
+            // TODO: originalGroupWallets
+            wallets: null,
+          }
+        : {
+            tdh: { min: null, max: null },
+            rep: {
+              min: null,
+              max: null,
+              direction: GroupFilterDirection.Received,
+              user_identity: null,
+              category: null,
+            },
+            cic: {
+              min: null,
+              max: null,
+              direction: GroupFilterDirection.Received,
+              user_identity: null,
+            },
+            level: { min: null, max: null },
+            owns_nfts: [],
+            wallets: null,
+          }
+    );
 
   const onRemoveGroupDescription = (keys: GroupDescriptionStatement[]) => {
     for (const key of keys) {

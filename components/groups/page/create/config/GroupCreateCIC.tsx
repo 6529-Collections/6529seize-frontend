@@ -1,3 +1,4 @@
+import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateIdentitySearch from "./common/GroupCreateIdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
@@ -6,13 +7,13 @@ export default function GroupCreateCIC({
   cic,
   setCIC,
 }: {
-  readonly cic: GroupDescription["cic"];
-  readonly setCIC: (cic: GroupDescription["cic"]) => void;
+  readonly cic: CreateGroupDescription["cic"];
+  readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
 }) {
   return (
     <div className="tw-flex tw-flex-col">
-      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">CIC</p>
-      <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-3">
+      <p className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-50">CIC</p>
+      <div className="tw-flex tw-items-center tw-gap-x-3">
         <GroupCreateIdentitySearch
           identity={cic.user_identity}
           setIdentity={(identity) =>
