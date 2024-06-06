@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
 import GroupCreateConfig from "./config/GroupCreateConfig";
-import GroupCreateActions from "./GroupCreateActions";
+import GroupCreateActions from "./actions/GroupCreateActions";
 import GroupCreateConfigHeader from "./GroupCreateConfigHeader";
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
@@ -10,7 +10,11 @@ import { GroupFilterDirection } from "../../../../generated/models/GroupFilterDi
 import { CreateGroup } from "../../../../generated/models/CreateGroup";
 import { group } from "console";
 
-export default function GroupCreate() {
+export default function GroupCreate({
+  onCompleted,
+}: {
+  readonly onCompleted: () => void;
+}) {
   const [groupConfig, setGroupConfig] = useState<CreateGroup>({
     name: "",
     group: {
@@ -92,7 +96,10 @@ export default function GroupCreate() {
                 }))
               }
             />
-            <GroupCreateActions groupConfig={groupConfig} />
+            <GroupCreateActions
+              groupConfig={groupConfig}
+              onCompleted={onCompleted}
+            />
           </div>
         </div>
       </div>
