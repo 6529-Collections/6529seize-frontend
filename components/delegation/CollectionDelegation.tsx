@@ -10,13 +10,11 @@ import {
 } from "react-bootstrap";
 import {
   useAccount,
-  useContractRead,
-  useContractReads,
-  useContractWrite,
+  useReadContract,
+  useReadContracts,
+  useWriteContract,
   useEnsName,
-  useNetwork,
-  usePrepareContractWrite,
-  useWaitForTransaction,
+  useWaitForTransactionReceipt,
 } from "wagmi";
 import { Fragment, useEffect, useRef, useState } from "react";
 
@@ -155,7 +153,7 @@ function getConsolidationReadParams(
 
     return params;
   }
-  return null;
+  return [];
 }
 
 function formatExpiry(myDate: any) {
@@ -181,7 +179,7 @@ function getDelegationsFromData(data: any) {
       useCase = CONSOLIDATION_USE_CASE;
     }
 
-    if (useCase) {
+    if (useCase && d.result) {
       const delegationsArray = d.result as any[];
       delegationsArray[0].map((wallet: string, i: number) => {
         const myDate = delegationsArray[1][i];
@@ -210,7 +208,7 @@ function getDelegationsFromData(data: any) {
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const toastRef = useRef<HTMLDivElement>(null);
   const accountResolution = useAccount();
-  const networkResolution = useNetwork();
+  const networkResolution = accountResolution.chain;
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
     chainId: 1,
@@ -260,7 +258,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     useState(false);
 
   function chainsMatch() {
-    return networkResolution.chain?.id === DELEGATION_CONTRACT.chain_id;
+    return networkResolution?.id === DELEGATION_CONTRACT.chain_id;
   }
 
   useEffect(() => {
@@ -275,91 +273,107 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     }</span>`;
   }
 
-  const retrieveOutgoingDelegations = useContractReads({
+  const retrieveOutgoingDelegations = useReadContracts({
     contracts: getActiveDelegationsReadParams(
       accountResolution.address,
       props.collection.contract,
       "retrieveDelegationAddressesTokensIDsandExpiredDates"
     ),
-    watch: true,
-    enabled: accountResolution.isConnected,
-    onSettled(data, error) {
-      if (data) {
-        const myDelegations = getDelegationsFromData(data);
-        setOutgoingDelegations(myDelegations);
-        setOutgoingDelegationsLoaded(true);
-      }
+    query: {
+      enabled: accountResolution.isConnected,
+      refetchInterval: 10000,
     },
   });
 
-  useContractReads({
+  useEffect(() => {
+    if (retrieveOutgoingDelegations.data) {
+      const myDelegations = getDelegationsFromData(
+        retrieveOutgoingDelegations.data
+      );
+      setOutgoingDelegations(myDelegations);
+      setOutgoingDelegationsLoaded(true);
+    }
+  }, [retrieveOutgoingDelegations.data]);
+
+  const retrieveOutgoingConsolidations = useReadContracts({
     contracts: getConsolidationReadParams(
       accountResolution.address,
       props.collection.contract,
       outgoingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
-    watch: true,
-    enabled: accountResolution.isConnected && outgoingDelegations.length > 0,
-    onSettled(data, error) {
-      if (data && outgoingDelegations[CONSOLIDATION_USE_CASE.index]) {
-        const activeConsolidations: any[] = [];
-        outgoingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
-          (w, index) => {
-            activeConsolidations.push({
-              wallet: w.wallet,
-              status: data[index].result
-                ? "consolidation active"
-                : "consolidation incomplete",
-            });
-          }
-        );
-        setOutgoingActiveConsolidations(activeConsolidations);
-      }
+    query: {
+      enabled: accountResolution.isConnected && outgoingDelegations.length > 0,
+      refetchInterval: 10000,
     },
   });
 
-  const retrieveIncomingDelegations = useContractReads({
+  useEffect(() => {
+    if (retrieveOutgoingConsolidations.data) {
+      const activeConsolidations: any[] = [];
+      outgoingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
+        (w, index) => {
+          activeConsolidations.push({
+            wallet: w.wallet,
+            status: retrieveOutgoingConsolidations.data[index].result
+              ? "consolidation active"
+              : "consolidation incomplete",
+          });
+        }
+      );
+      setOutgoingActiveConsolidations(activeConsolidations);
+    }
+  }, [retrieveOutgoingConsolidations.data]);
+
+  const retrieveIncomingDelegations = useReadContracts({
     contracts: getActiveDelegationsReadParams(
       accountResolution.address,
       props.collection.contract,
       "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
-    watch: true,
-    enabled: accountResolution.isConnected && incomingDelegations.length > 0,
-    onSettled(data, error) {
-      if (data) {
-        const myDelegations = getDelegationsFromData(data);
-        setIncomingDelegations(myDelegations);
-        setIncomingDelegationsLoaded(true);
-      }
+    query: {
+      enabled: accountResolution.isConnected && incomingDelegations.length > 0,
+      refetchInterval: 10000,
     },
   });
 
-  useContractReads({
+  useEffect(() => {
+    if (retrieveIncomingDelegations.data) {
+      const myDelegations = getDelegationsFromData(
+        retrieveIncomingDelegations.data
+      );
+      setIncomingDelegations(myDelegations);
+      setIncomingDelegationsLoaded(true);
+    }
+  }, [retrieveIncomingDelegations.data]);
+
+  const retrieveIncomingConsolidations = useReadContracts({
     contracts: getConsolidationReadParams(
       accountResolution.address,
       props.collection.contract,
       incomingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
-    watch: true,
-    enabled: accountResolution.isConnected && incomingDelegations.length > 0,
-    onSettled(data, error) {
-      if (data && incomingDelegations[CONSOLIDATION_USE_CASE.index]) {
-        const activeConsolidations: any[] = [];
-        incomingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
-          (w, index) => {
-            activeConsolidations.push({
-              wallet: w.wallet,
-              status: data[index].result
-                ? "consolidation active"
-                : "consolidation incomplete",
-            });
-          }
-        );
-        setIncomingActiveConsolidations(activeConsolidations);
-      }
+    query: {
+      enabled: accountResolution.isConnected && incomingDelegations.length > 0,
+      refetchInterval: 10000,
     },
   });
+
+  useEffect(() => {
+    if (retrieveIncomingConsolidations.data) {
+      const activeConsolidations: any[] = [];
+      incomingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
+        (w, index) => {
+          activeConsolidations.push({
+            wallet: w.wallet,
+            status: retrieveIncomingConsolidations.data[index].result
+              ? "consolidation active"
+              : "consolidation incomplete",
+          });
+        }
+      );
+      setIncomingActiveConsolidations(activeConsolidations);
+    }
+  }, [retrieveIncomingConsolidations.data]);
 
   const useCaseLockStatusesGlobalParams = areEqualAddresses(
     props.collection.contract,
@@ -372,66 +386,44 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           accountResolution.address,
           "retrieveCollectionUseCaseLockStatus"
         ),
-        enabled: accountResolution.isConnected,
-        watch: true,
+        query: {
+          enabled: accountResolution.isConnected,
+          refetchInterval: 10000,
+        },
       };
-  const useCaseLockStatusesGlobal = useContractReads(
+
+  const useCaseLockStatusesGlobal = useReadContracts(
     useCaseLockStatusesGlobalParams
   );
 
-  const useCaseLockStatuses = useContractReads({
+  const useCaseLockStatuses = useReadContracts({
     contracts: getReadParams(
       props.collection.contract,
       accountResolution.address,
       "retrieveCollectionUseCaseLockStatus",
       ALL_USE_CASES
     ),
-    enabled: accountResolution.isConnected,
-    watch: true,
+    query: {
+      enabled: accountResolution.isConnected,
+      refetchInterval: 10000,
+    },
   });
 
   const [revokeDelegationParams, setRevokeDelegationParams] = useState<any>();
   const [batchRevokeDelegationParams, setBatchRevokeDelegationParams] =
     useState<any>();
 
-  const contractWriteRevokeConfig = usePrepareContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [
-      revokeDelegationParams ? revokeDelegationParams.collection : NULL_ADDRESS,
-      revokeDelegationParams ? revokeDelegationParams.address : NULL_ADDRESS,
-      revokeDelegationParams ? revokeDelegationParams.use_case : 0,
-    ],
-    enabled: chainsMatch(),
-    functionName: "revokeDelegationAddress",
-  });
-  const contractWriteRevoke = useContractWrite(
-    contractWriteRevokeConfig.config
-  );
-  const waitContractWriteRevoke = useWaitForTransaction({
+  const contractWriteRevoke = useWriteContract();
+
+  const waitContractWriteRevoke = useWaitForTransactionReceipt({
     confirmations: 1,
-    hash: contractWriteRevoke.data?.hash,
+    hash: contractWriteRevoke.data,
   });
 
-  const contractWriteBatchRevokeConfig = usePrepareContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [
-      batchRevokeDelegationParams && batchRevokeDelegationParams.collections,
-      batchRevokeDelegationParams && batchRevokeDelegationParams.addresses,
-      batchRevokeDelegationParams && batchRevokeDelegationParams.use_cases,
-    ],
-    enabled: chainsMatch(),
-    functionName: batchRevokeDelegationParams ? "batchRevocations" : undefined,
-  });
-  const contractWriteBatchRevoke = useContractWrite(
-    contractWriteBatchRevokeConfig.config
-  );
-  const waitContractWriteBatchRevoke = useWaitForTransaction({
+  const contractWriteBatchRevoke = useWriteContract();
+  const waitContractWriteBatchRevoke = useWaitForTransactionReceipt({
     confirmations: 1,
-    hash: contractWriteBatchRevoke.data?.hash,
+    hash: contractWriteBatchRevoke.data,
   });
 
   const [toast, setToast] = useState<
@@ -459,58 +451,38 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         chainId: DELEGATION_CONTRACT.chain_id,
         functionName: "retrieveCollectionLockStatus",
         args: [DELEGATION_ALL_ADDRESS, accountResolution.address],
-        enabled: accountResolution.isConnected,
-        watch: true,
+        query: {
+          enabled: accountResolution.isConnected,
+          refetchInterval: 10000,
+        },
       };
 
-  const collectionLockReadGlobal = useContractRead(
+  const collectionLockReadGlobal = useReadContract(
     collectionLockReadGlobalParams
   );
 
-  const collectionLockRead = useContractRead({
+  const collectionLockRead = useReadContract({
     address: DELEGATION_CONTRACT.contract,
     abi: DELEGATION_ABI,
     chainId: DELEGATION_CONTRACT.chain_id,
     functionName: "retrieveCollectionLockStatus",
     args: [props.collection.contract, accountResolution.address],
-    enabled: accountResolution.isConnected,
-    watch: true,
+    query: {
+      enabled: accountResolution.isConnected,
+      refetchInterval: 10000,
+    },
   });
 
-  const collectionLockWriteConfig = usePrepareContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [props.collection.contract, collectionLockRead.data ? false : true],
-    enabled: chainsMatch(),
-    functionName: "setCollectionLock",
-  });
-  const collectionLockWrite = useContractWrite(
-    collectionLockWriteConfig.config
-  );
-  const waitCollectionLockWrite = useWaitForTransaction({
+  const collectionLockWrite = useWriteContract();
+  const waitCollectionLockWrite = useWaitForTransactionReceipt({
     confirmations: 1,
-    hash: collectionLockWrite.data?.hash,
+    hash: collectionLockWrite.data,
   });
 
-  const useCaseLockWriteConfig = usePrepareContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [
-      props.collection.contract,
-      lockUseCaseValue,
-      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseIndex]
-        ? false
-        : true,
-    ],
-    enabled: chainsMatch(),
-    functionName: "setCollectionUsecaseLock",
-  });
-  const useCaseLockWrite = useContractWrite(useCaseLockWriteConfig.config);
-  const waitUseCaseLockWrite = useWaitForTransaction({
+  const useCaseLockWrite = useWriteContract();
+  const waitUseCaseLockWrite = useWaitForTransactionReceipt({
     confirmations: 1,
-    hash: useCaseLockWrite.data?.hash,
+    hash: useCaseLockWrite.data,
   });
 
   useEffect(() => {
@@ -528,7 +500,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       });
     }
     if (contractWriteRevoke.data) {
-      if (contractWriteRevoke.data?.hash) {
+      if (contractWriteRevoke.data) {
         if (waitContractWriteRevoke.isLoading) {
           setToast({
             title: "Revoking Delegation",
@@ -536,7 +508,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      contractWriteRevoke.data.hash
+                      contractWriteRevoke.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -551,7 +523,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      contractWriteRevoke.data.hash
+                      contractWriteRevoke.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -577,7 +549,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       });
     }
     if (contractWriteBatchRevoke.data) {
-      if (contractWriteBatchRevoke.data?.hash) {
+      if (contractWriteBatchRevoke.data) {
         if (waitContractWriteBatchRevoke.isLoading) {
           setToast({
             title: "Batch Revoking Delegations",
@@ -585,7 +557,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      contractWriteBatchRevoke.data.hash
+                      contractWriteBatchRevoke.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -601,7 +573,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      contractWriteBatchRevoke.data.hash
+                      contractWriteBatchRevoke.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -627,7 +599,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       });
     }
     if (collectionLockWrite.data) {
-      if (collectionLockWrite.data?.hash) {
+      if (collectionLockWrite.data) {
         if (waitCollectionLockWrite.isLoading) {
           setToast({
             title: `Locking Wallet`,
@@ -635,7 +607,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      collectionLockWrite.data.hash
+                      collectionLockWrite.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -650,7 +622,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      collectionLockWrite.data.hash
+                      collectionLockWrite.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -682,7 +654,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       });
     }
     if (useCaseLockWrite.data) {
-      if (useCaseLockWrite.data?.hash) {
+      if (useCaseLockWrite.data) {
         if (waitUseCaseLockWrite.isLoading) {
           setToast({
             title: title,
@@ -690,7 +662,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      useCaseLockWrite.data.hash
+                      useCaseLockWrite.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -705,7 +677,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <a
                     href=${getTransactionLink(
                       DELEGATION_CONTRACT.chain_id,
-                      useCaseLockWrite.data.hash
+                      useCaseLockWrite.data
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -735,29 +707,46 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }, [toast]);
 
   useEffect(() => {
-    if (
-      revokeDelegationParams &&
-      !revokeDelegationParams.loading &&
-      contractWriteRevoke.write
-    ) {
+    if (revokeDelegationParams && !revokeDelegationParams.loading) {
       setRevokeDelegationParams({ ...revokeDelegationParams, loading: true });
-      contractWriteRevoke.write();
+      contractWriteRevoke.writeContract({
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        args: [
+          revokeDelegationParams
+            ? revokeDelegationParams.collection
+            : NULL_ADDRESS,
+          revokeDelegationParams
+            ? revokeDelegationParams.address
+            : NULL_ADDRESS,
+          revokeDelegationParams ? revokeDelegationParams.use_case : 0,
+        ],
+        functionName: "revokeDelegationAddress",
+      });
     }
-  }, [revokeDelegationParams, contractWriteRevoke.write]);
+  }, [revokeDelegationParams]);
 
   useEffect(() => {
-    if (
-      batchRevokeDelegationParams &&
-      !batchRevokeDelegationParams.loading &&
-      contractWriteBatchRevoke.write
-    ) {
+    if (batchRevokeDelegationParams && !batchRevokeDelegationParams.loading) {
       setBatchRevokeDelegationParams({
         ...batchRevokeDelegationParams,
         loading: true,
       });
-      contractWriteBatchRevoke.write();
+      contractWriteBatchRevoke.writeContract({
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        args: [
+          batchRevokeDelegationParams &&
+            batchRevokeDelegationParams.collections,
+          batchRevokeDelegationParams && batchRevokeDelegationParams.addresses,
+          batchRevokeDelegationParams && batchRevokeDelegationParams.use_cases,
+        ],
+        functionName: batchRevokeDelegationParams ? "batchRevocations" : "",
+      });
     }
-  }, [batchRevokeDelegationParams, contractWriteBatchRevoke.write]);
+  }, [batchRevokeDelegationParams, contractWriteBatchRevoke]);
 
   function reset() {
     setOutgoingDelegations([]);
@@ -1313,7 +1302,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             setToast({ title, message });
                           }}>
                           Batch Revoke
-                          {(contractWriteBatchRevoke.isLoading ||
+                          {(contractWriteBatchRevoke.isPending ||
                             waitContractWriteBatchRevoke.isLoading) && (
                             <div className="d-inline">
                               <div
@@ -1586,7 +1575,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     let message = "Confirm in your wallet...";
 
                     if (chainsMatch()) {
-                      collectionLockWrite.write?.();
+                      collectionLockWrite.writeContract({
+                        address: DELEGATION_CONTRACT.contract,
+                        abi: DELEGATION_ABI,
+                        chainId: DELEGATION_CONTRACT.chain_id,
+                        args: [
+                          props.collection.contract,
+                          collectionLockRead.data ? false : true,
+                        ],
+                        functionName: "setCollectionLock",
+                      });
                     } else {
                       message = getSwitchToHtml();
                     }
@@ -1604,7 +1602,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   )
                     ? ` *`
                     : ``}
-                  {(collectionLockWrite.isLoading ||
+                  {(collectionLockWrite.isPending ||
                     waitCollectionLockWrite.isLoading) && (
                     <div className="d-inline">
                       <div
@@ -1708,7 +1706,20 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       let message = "Confirm in your wallet...";
 
                       if (chainsMatch()) {
-                        useCaseLockWrite.write?.();
+                        useCaseLockWrite.writeContract({
+                          address: DELEGATION_CONTRACT.contract,
+                          abi: DELEGATION_ABI,
+                          chainId: DELEGATION_CONTRACT.chain_id,
+                          args: [
+                            props.collection.contract,
+                            lockUseCaseValue,
+                            useCaseLockStatuses.data &&
+                            useCaseLockStatuses.data[lockUseCaseIndex]
+                              ? false
+                              : true,
+                          ],
+                          functionName: "setCollectionUsecaseLock",
+                        });
                       } else {
                         message = getSwitchToHtml();
                       }
@@ -1728,7 +1739,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       ? "Unlock"
                       : "Lock"}{" "}
                     Use Case
-                    {(useCaseLockWrite.isLoading ||
+                    {(useCaseLockWrite.isPending ||
                       waitUseCaseLockWrite.isLoading) && (
                       <div className="d-inline">
                         <div

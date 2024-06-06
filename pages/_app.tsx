@@ -100,7 +100,8 @@ import { ReactElement, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
-import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
+import { createWeb3Modal } from "@web3modal/wagmi/react";
+import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 
 library.add(
   faArrowUp,
@@ -184,33 +185,41 @@ library.add(
   faAnglesUp
 );
 
-const CONTRACT_CHAINS: Chain[] = [mainnet];
-if (
-  DELEGATION_CONTRACT.chain_id === sepolia.id ||
-  (NEXTGEN_CHAIN_ID as number) === sepolia.id
-) {
-  CONTRACT_CHAINS.push(sepolia);
+export function getChains() {
+  const chains: Chain[] = [mainnet];
+  if (
+    DELEGATION_CONTRACT.chain_id === sepolia.id ||
+    (NEXTGEN_CHAIN_ID as number) === sepolia.id
+  ) {
+    chains.push(sepolia);
+  }
+  if (
+    DELEGATION_CONTRACT.chain_id === goerli.id ||
+    (NEXTGEN_CHAIN_ID as number) === goerli.id
+  ) {
+    chains.push(goerli);
+  }
+  return chains;
 }
-if (
-  DELEGATION_CONTRACT.chain_id === goerli.id ||
-  (NEXTGEN_CHAIN_ID as number) === goerli.id
-) {
-  CONTRACT_CHAINS.push(goerli);
-}
+
+const CONTRACT_CHAINS = getChains();
 
 const metadata = {
   name: "Seize",
   description: "6529 Seize",
-  url: process.env.BASE_ENDPOINT,
+  url: process.env.BASE_ENDPOINT!,
   icons: [
     "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
   ],
 };
 
+const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
+
 export const wagmiConfig = defaultWagmiConfig({
-  chains: CONTRACT_CHAINS,
+  chains,
   projectId: CW_PROJECT_ID,
   metadata,
+  coinbasePreference: "all",
 });
 
 createWeb3Modal({
