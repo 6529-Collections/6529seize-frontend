@@ -1,5 +1,6 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
+import GroupCreateDirection from "./common/GroupCreateDirection";
 import GroupCreateIdentitySearch from "./common/GroupCreateIdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import GroupRepCategorySearch from "./common/GroupRepCategorySearch";
@@ -17,6 +18,15 @@ export default function GroupCreateRep({
         <p className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-50">
           Rep
         </p>
+        {rep.user_identity && rep.direction && (
+          <div className="tw-mb-3">
+            <GroupCreateDirection
+              direction={rep.direction}
+              label="Rep"
+              setDirection={(direction) => setRep({ ...rep, direction })}
+            />
+          </div>
+        )}
         <div className="tw-flex tw-gap-x-5">
           <GroupCreateIdentitySearch
             identity={rep.user_identity}

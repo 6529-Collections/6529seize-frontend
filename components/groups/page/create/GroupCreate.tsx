@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
 import GroupCreateConfig from "./config/GroupCreateConfig";
-import GroupCreateActions from "./GroupCreateActions";
+import GroupCreateActions from "./actions/GroupCreateActions";
 import GroupCreateConfigHeader from "./GroupCreateConfigHeader";
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
@@ -33,6 +33,8 @@ export default function GroupCreate() {
       wallets: null,
     },
   });
+
+
 
   return (
     <GroupCreateWrapper>

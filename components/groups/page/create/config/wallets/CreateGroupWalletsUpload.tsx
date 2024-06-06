@@ -21,7 +21,7 @@ export default function CreateGroupWalletsUpload({
           return line.split(delimiterRegex).map((part) => {
             const address = part.trim();
             if (address.match(/^0x[a-fA-F0-9]{40}$/)) {
-              return address;
+              return address.toLowerCase();
             }
             // if (address.match(/\.eth$/)) {
             //   return address;

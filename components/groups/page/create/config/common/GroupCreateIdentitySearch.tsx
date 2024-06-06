@@ -62,7 +62,7 @@ export default function GroupCreateIdentitySearch({
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
   return (
-    <div className="tw-group tw-w-full tw-relative tw-z-20" ref={wrapperRef}>
+    <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
       <input
         type="text"
         value={searchCriteria ?? ""}
