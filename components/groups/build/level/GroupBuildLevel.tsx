@@ -1,3 +1,4 @@
+import { CreateGroupDescription } from "../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
 import { convertStringOrNullToNumberOrNull } from "../../../../helpers/Helpers";
 import CommonInput from "../../../utils/input/CommonInput";
@@ -6,8 +7,8 @@ export default function GroupBuildLevel({
   filters,
   setFilters,
 }: {
-  readonly filters: GroupDescription;
-  readonly setFilters: (filters: GroupDescription) => void;
+  readonly filters: CreateGroupDescription;
+  readonly setFilters: (filters: CreateGroupDescription) => void;
 }) {
   const setMin = (value: number | null) => {
     setFilters({

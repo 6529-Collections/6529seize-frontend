@@ -22,6 +22,7 @@ import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { CreateGroup } from "../../../../generated/models/CreateGroup";
+import { CreateGroupDescription } from "../../../../generated/models/CreateGroupDescription";
 
 export default function GroupBuildTest({
   groupDescription,
@@ -29,7 +30,7 @@ export default function GroupBuildTest({
   disabled,
   onTestRunMembersCount,
 }: {
-  readonly groupDescription: GroupDescription;
+  readonly groupDescription: CreateGroupDescription;
   readonly name: string;
   readonly disabled: boolean;
   readonly onTestRunMembersCount: (count: number | null) => void;

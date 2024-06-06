@@ -54,7 +54,7 @@ export default function GroupRepCategorySearch({
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
   return (
-    <div className="tw-group tw-w-full tw-relative">
+    <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
       <input
         type="text"
         value={searchCriteria ?? ""}

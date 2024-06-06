@@ -1,3 +1,4 @@
+import { CreateGroupDescription } from "../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../generated/models/GroupDescription";
 import { GroupDescriptionStatement } from "./GroupBuild";
 import GroupBuildCIC from "./cic/GroupBuildCIC";
@@ -6,8 +7,8 @@ import GroupBuildRep from "./rep/GroupBuildRep";
 import GroupBuildTDH from "./tdh/GroupBuildTDH";
 
 interface FilterComponentProps {
-  filters: GroupDescription;
-  setFilters: (filters: GroupDescription) => void;
+  filters: CreateGroupDescription;
+  setFilters: (filters: CreateGroupDescription) => void;
 }
 
 type FilterComponentType = React.ComponentType<FilterComponentProps>;
@@ -18,8 +19,8 @@ export default function GroupBuildStatement({
   setFilters,
 }: {
   readonly statementType: GroupDescriptionStatement;
-  readonly filters: GroupDescription;
-  readonly setFilters: (filters: GroupDescription) => void;
+  readonly filters: CreateGroupDescription;
+  readonly setFilters: (filters: CreateGroupDescription) => void;
 }) {
   const components: Record<GroupDescriptionStatement, FilterComponentType> = {
     [GroupDescriptionStatement.LEVEL]: GroupBuildLevel,

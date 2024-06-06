@@ -7,6 +7,7 @@ import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { CreateGroup } from "../../../../generated/models/CreateGroup";
 import { GroupDescription } from "../../../../generated/models/GroupDescription";
+import { CreateGroupDescription } from "../../../../generated/models/CreateGroupDescription";
 
 export default function GroupBuildSave({
   originalFilter,
@@ -16,7 +17,7 @@ export default function GroupBuildSave({
   onSaved,
 }: {
   readonly originalFilter: GroupFull | null;
-  readonly groupDescription: GroupDescription;
+  readonly groupDescription: CreateGroupDescription;
   readonly name: string;
   readonly disabled: boolean;
   readonly onSaved: (response: GroupFull) => void;

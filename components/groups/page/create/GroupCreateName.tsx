@@ -1,9 +1,17 @@
-export default function GroupCreateName() {
+export default function GroupCreateName({
+  name,
+  setName,
+ }: {
+  readonly name: string;
+  readonly setName: (name: string) => void;
+}) {
   return (
     <div className="tw-p-8 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-group tw-w-full tw-relative">
         <input
           type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           id="floating_name"
           autoComplete="off"
           className="tw-form-input tw-block tw-px-4 tw-pb-3 tw-pt-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer

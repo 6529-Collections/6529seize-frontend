@@ -1,3 +1,4 @@
+import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateIdentitySearch from "./common/GroupCreateIdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
@@ -7,16 +8,16 @@ export default function GroupCreateRep({
   rep,
   setRep,
 }: {
-  readonly rep: GroupDescription["rep"];
-  readonly setRep: (rep: GroupDescription["rep"]) => void;
+  readonly rep: CreateGroupDescription["rep"];
+  readonly setRep: (rep: CreateGroupDescription["rep"]) => void;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-space-y-4">
       <div className="tw-flex tw-flex-col">
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-50">
           Rep
         </p>
-        <div className="tw-mt-2 tw-flex tw-gap-x-5">
+        <div className="tw-flex tw-gap-x-5">
           <GroupCreateIdentitySearch
             identity={rep.user_identity}
             setIdentity={(identity) =>

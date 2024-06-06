@@ -945,6 +945,34 @@ paths:
           description: Group not found
         "400":
           description: Invalid request
+  /groups/{id}/wallet_groups/{wallet_group_id}:
+    get:
+      tags:
+        - Groups
+      summary: Get groups wallet group wallets
+      operationId: getGroupsWalletGroupWallets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wallet_group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: Group not found
 
 components:
   securitySchemes:
@@ -1019,6 +1047,8 @@ components:
         - cic
         - level
         - owns_nfts
+        - wallet_group_id
+        - wallet_group_wallets_count
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1032,6 +1062,42 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
+        wallet_group_id:
+          type: string
+          nullable: true
+        wallet_group_wallets_count:
+          type: number
+          format: int64
+          nullable: false
+
+    CreateGroupDescription:
+      type: object
+      required:
+        - tdh
+        - rep
+        - cic
+        - level
+        - owns_nfts
+        - wallets
+      properties:
+        tdh:
+          $ref: "#/components/schemas/GroupTdhFilter"
+        rep:
+          $ref: "#/components/schemas/GroupRepFilter"
+        cic:
+          $ref: "#/components/schemas/GroupCicFilter"
+        level:
+          $ref: "#/components/schemas/GroupLevelFilter"
+        owns_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupOwnsNft"
+        wallets:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
 
     GroupOwnsNft:
       type: object
@@ -1159,7 +1225,7 @@ components:
         name:
           type: string
         group:
-          $ref: "#/components/schemas/GroupDescription"
+          $ref: "#/components/schemas/CreateGroupDescription"
 
     ChangeGroupVisibility:
       type: object
@@ -1668,15 +1734,10 @@ components:
 
     WaveType:
       type: string
-      description: |
-        Type of the wave:
-        * VOTE_TALLY_IN_RANGE - Everybody who will end up in specified range will win.
-        * TOP_VOTED - Top voted participant(s) will win.
-        * NONE - No winners.
       enum:
-        - VOTE_TALLY_IN_RANGE
-        - TOP_VOTED
-        - NONE
+        - APPROVE
+        - RANK
+        - CHAT
 
     WaveCreditScope:
       description: |
@@ -1845,16 +1906,17 @@ components:
         - winning_thresholds
         - period
         - max_winners
+        - admin_group_id
       properties:
         type:
           $ref: "#/components/schemas/WaveType"
         winning_thresholds:
-          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is VOTE_TALLY_IN_RANGE
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is APPROVE
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
         max_winners:
-          description: This amount of top rated drops will win. Must be set if and only if type is TOP_VOTED
+          description: This amount of top rated drops will win. Must be set if and only if type is RANK
           type: integer
           format: int64
           minimum: 1
@@ -1865,6 +1927,9 @@ components:
           type: integer
           format: int64
           minimum: 1
+        admin_group_id:
+          type: string
+          nullable: true
         period:
           anyOf:
             - type: "null"
