@@ -1,7 +1,7 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
-import GroupCreateIdentitySearch from "./common/GroupCreateIdentitySearch";
+import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import GroupRepCategorySearch from "./common/GroupRepCategorySearch";
 
@@ -39,7 +39,7 @@ export default function GroupCreateRep({
           setValue={(value) => setRep({ ...rep, min: value })}
         />
         <div className="tw-mt-5 tw-flex tw-gap-x-5">
-          <GroupCreateIdentitySearch
+          <IdentitySearch
             identity={rep.user_identity}
             setIdentity={(identity) =>
               setRep({ ...rep, user_identity: identity })

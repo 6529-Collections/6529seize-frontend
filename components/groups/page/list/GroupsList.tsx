@@ -6,6 +6,8 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../../helpers/Types";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import GroupCard from "./card/GroupCard";
+import GroupsListSearch from "./search/GroupsListSearch";
+import { useDebounce } from "react-use";
 
 export default function GroupsList() {
   const [filters, setFilters] = useState<GroupsRequestParams>({
@@ -13,15 +15,20 @@ export default function GroupsList() {
     author_identity: null,
   });
 
+  const [debouncedFilters, setDebouncedFilters] =
+    useState<GroupsRequestParams>(filters);
+
+  useDebounce(() => setDebouncedFilters(filters), 200, [filters]);
+
   const { data } = useQuery<GroupFull[]>({
-    queryKey: [QueryKey.GROUPS, filters],
+    queryKey: [QueryKey.GROUPS, debouncedFilters],
     queryFn: async () => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
-      if (filters.group_name) {
-        params.group_name = filters.group_name;
+      if (debouncedFilters.group_name) {
+        params.group_name = debouncedFilters.group_name;
       }
-      if (filters.author_identity) {
-        params.author_identity = filters.author_identity;
+      if (debouncedFilters.author_identity) {
+        params.author_identity = debouncedFilters.author_identity;
       }
 
       return await commonApiFetch<
@@ -34,11 +41,33 @@ export default function GroupsList() {
     },
     placeholderData: keepPreviousData,
   });
+
+  const setGroupName = (value: string | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      group_name: value,
+    }));
+  };
+
+  const setAuthorIdentity = (value: string | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      author_identity: value,
+    }));
+  };
   return (
-    <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
-      {data?.map((group) => (
-        <GroupCard key={group.id} group={group} />
-      ))}
-    </div>
+    <>
+      <GroupsListSearch
+        identity={filters.author_identity}
+        groupName={filters.group_name}
+        setIdentity={setAuthorIdentity}
+        setGroupName={setGroupName}
+      />
+      <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
+        {data?.map((group) => (
+          <GroupCard key={group.id} group={group} />
+        ))}
+      </div>
+    </>
   );
 }

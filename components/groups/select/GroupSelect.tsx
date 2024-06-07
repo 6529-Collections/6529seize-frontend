@@ -3,7 +3,6 @@ import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import GroupBuildUserSearch from "../build/common/user-search/GroupBuildUserSearch";
 
 import GroupItems from "./GroupItems";
 import { useSelector } from "react-redux";
@@ -12,12 +11,9 @@ import GroupsSelectActiveGroup from "./GroupsSelectActiveGroup";
 import { GroupFull } from "../../../generated/models/GroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
 import CommonInput from "../../utils/input/CommonInput";
+import IdentitySearch from "../../utils/input/identity/IdentitySearch";
 
-export default function GroupSelect({
-  onEditClick,
-}: {
-  readonly onEditClick: (filter: GroupFull) => void;
-}) {
+export default function GroupSelect() {
   const activeGroupId = useSelector(selectActiveGroupId);
 
   const [filters, setFilters] = useState<GroupsRequestParams>({
@@ -75,7 +71,6 @@ export default function GroupSelect({
       {activeGroupId && (
         <GroupsSelectActiveGroup
           activeGroupId={activeGroupId}
-          onEditClick={onEditClick}
         />
       )}
       <div className="tw-px-4 tw-pt-3">
@@ -83,10 +78,9 @@ export default function GroupSelect({
           Filter by Group
         </p>
         <div className="tw-space-y-3">
-          <GroupBuildUserSearch
-            value={filters.author_identity}
-            setValue={onUserSelect}
-            placeholder="Search by user"
+          <IdentitySearch
+            identity={filters.author_identity}
+            setIdentity={onUserSelect}
           />
           <CommonInput
             inputType="text"
@@ -98,7 +92,7 @@ export default function GroupSelect({
         </div>
         <div className="tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
           <div className="tw-pt-4">
-            <GroupItems groups={groups} onEditClick={onEditClick} />
+            <GroupItems groups={groups} />
           </div>
         </div>
       </div>

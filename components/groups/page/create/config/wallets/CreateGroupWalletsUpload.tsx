@@ -37,8 +37,10 @@ export default function CreateGroupWalletsUpload({
 
         // Create a set to remove duplicates
         const uniqueAddresses = new Set(filteredAddresses);
-
-        setWallets(Array.from(uniqueAddresses));
+        const uniqueAddressesArray: string[] = Array.from(
+          uniqueAddresses
+        ) as string[];
+        setWallets(uniqueAddressesArray);
       };
       reader.readAsText(file);
     },
