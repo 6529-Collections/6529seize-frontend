@@ -717,3 +717,39 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
 
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
+
+const hashSeed = (seed: string): number => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+const seededRandom = (seed: number) => {
+  return () => {
+    const a = 1664525;
+    const c = 1013904223;
+    const m = 2 ** 32;
+    seed = (a * seed + c) % m;
+    return seed / m;
+  };
+};
+
+export const getRandomColorWithSeed = (seedString: string) => {
+  let seed = hashSeed(seedString);
+  const random = seededRandom(seed);
+  const r = Math.floor(random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+  const g = Math.floor(random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+  const b = Math.floor(random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+
+  return `#${r}${g}${b}`;
+};

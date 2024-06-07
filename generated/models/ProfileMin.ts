@@ -16,6 +16,8 @@ export class ProfileMin {
     'id': string;
     'handle': string;
     'pfp': string | null;
+    'banner1_color': string | null;
+    'banner2_color'?: string | null;
     'cic': number;
     'rep': number;
     'tdh': number;
@@ -40,6 +42,18 @@ export class ProfileMin {
         {
             "name": "pfp",
             "baseName": "pfp",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "banner1_color",
+            "baseName": "banner1_color",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "banner2_color",
+            "baseName": "banner2_color",
             "type": "string",
             "format": ""
         },

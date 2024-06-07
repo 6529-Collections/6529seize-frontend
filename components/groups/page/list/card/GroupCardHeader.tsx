@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import { getTimeAgo } from "../../../../../helpers/Helpers";
 
@@ -21,9 +22,11 @@ export default function GroupCardHeader({
         )}
       </div>
       <div className="tw-mt-2 tw-flex tw-items-center tw-w-full tw-justify-between">
-        <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-          {group.created_by.handle}
-        </span>
+        <Link href={group.created_by.handle} className="tw-no-underline">
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {group.created_by.handle}
+          </span>
+        </Link>
         <div className="tw-flex tw-items-center tw-gap-x-4">
           <span className="tw-text-sm tw-text-iron-400 tw-font-normal">
             {timeAgo}
