@@ -1,0 +1,37 @@
+@import "../../styles/variables.scss";
+
+.banner {
+  padding: 5px 20px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: rgb(195, 225, 252);
+  color: $very-dark-grey;
+}
+
+.accept {
+  border: none;
+  padding: 5px 10px;
+  background-color: $bg-color-2;
+
+  transition: transform 0.3s ease;
+
+  &:hover {
+    background-color: $green;
+    color: white;
+    transform: scale(1.02);
+  }
+}
+
+.learnMore,
+.reject {
+  border: none;
+  background-color: transparent;
+  color: $very-dark-grey;
+  text-decoration: none;
+
+  &:hover {
+    color: $lighter-grey-2;
+  }
+}
