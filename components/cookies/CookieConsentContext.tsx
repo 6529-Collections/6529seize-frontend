@@ -88,8 +88,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       if (response.is_eu) {
         setShowCookieConsent(true);
       } else {
-        Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
-        Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 365 });
+        Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
+        Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
         getCookieConsent();
       }
     } catch (error) {
