@@ -8,17 +8,17 @@ export default function CroupCardActions({
 }) {
   return (
     <div className="tw-pt-3 tw-px-4 sm:tw-px-6 tw-flex tw-items-center tw-justify-between">
-      <div className="-tw-ml-3.5 tw-flex tw-gap-x-3 tw-divide-x tw-divide-iron-700 tw-divide-solid tw-divide-y-0">
+      <div className="-tw-ml-3.5 tw-flex tw-gap-x-3">
         <CroupCardActionViewMembers group={group} />
         <button
           type="button"
-          className="tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-inline-flex tw-items-center tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
         >
           Rep all
         </button>
         <button
           type="button"
-          className="tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-inline-flex tw-items-center tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
         >
           CIC all
         </button>

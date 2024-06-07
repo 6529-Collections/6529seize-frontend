@@ -21,11 +21,11 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
       >
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
       </div>
-      <div className="-tw-mt-1 tw-h-[194px] tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700">
+      <div className="-tw-mt-1 tw-h-[196.5px] tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700">
 
-        <div>
+        <div className="tw-flex tw-flex-col tw-h-full">
           <GroupCardHeader group={group} />
-          <div className="tw-pt-2 tw-pb-2 tw-flex tw-flex-col tw-h-full tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
+          <div className="tw-pt-3 tw-pb-3 tw-flex tw-flex-col tw-h-full tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
             <GroupCardContent group={group} />
             <div className="tw-mt-auto">
               <CroupCardActions group={group} />
@@ -212,7 +212,6 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
             </div>
           </div>
         </div>
-
 
       </div>
     </div>
