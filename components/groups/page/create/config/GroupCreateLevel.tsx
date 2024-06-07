@@ -10,12 +10,12 @@ export default function GroupCreateLevel({
   readonly setLevel: (level: CreateGroupDescription["level"]) => void;
 }) {
   return (
-    <div>
-      <div className="tw-mb-3">
+    <div className="tw-p-5 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+      <div className="tw-mb-4">
         <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           Level
         </p>
-        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-500">
+        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-400">
           Lorem ipsum dolor sit amet consectetur adipisicing elit.
         </p>
       </div>

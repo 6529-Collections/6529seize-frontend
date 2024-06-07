@@ -1,12 +1,12 @@
 export default function GroupCreateName({
   name,
   setName,
- }: {
+}: {
   readonly name: string;
   readonly setName: (name: string) => void;
 }) {
   return (
-    <div className="tw-p-8 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-p-5 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-group tw-w-full tw-relative">
         <input
           type="text"

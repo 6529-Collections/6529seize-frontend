@@ -9,6 +9,7 @@ import GroupCreateWrapper from "./GroupCreateWrapper";
 import { GroupFilterDirection } from "../../../../generated/models/GroupFilterDirection";
 import { CreateGroup } from "../../../../generated/models/CreateGroup";
 import { group } from "console";
+import GroupCreateWallets from "./config/wallets/GroupCreateWallets";
 
 export default function GroupCreate({
   onCompleted,
@@ -40,22 +41,24 @@ export default function GroupCreate({
 
   return (
     <GroupCreateWrapper>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-8">
-        <div className="tw-space-y-5 tw-col-span-1">
+      <div className="tw-flex tw-flex-col tw-gap-y-8">
+        <div className="tw-space-y-5">
           <GroupCreateHeader />
-          <GroupCreateName
-            name={groupConfig.name}
-            setName={(name) =>
-              setGroupConfig((prev) => ({
-                ...prev,
-                name,
-              }))
-            }
-          />
+          <div className="tw-grid tw-grid-cols-2 tw-gap-x-8">
+            <GroupCreateName
+              name={groupConfig.name}
+              setName={(name) =>
+                setGroupConfig((prev) => ({
+                  ...prev,
+                  name,
+                }))
+              }
+            />
+          </div>
         </div>
-        <div className="tw-space-y-5 tw-col-span-2">
+        <div className="tw-space-y-5">
           <GroupCreateConfigHeader />
-          <div className="tw-py-8 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+          <div>
             <GroupCreateConfig
               level={groupConfig.group.level}
               tdh={groupConfig.group.tdh}
@@ -101,7 +104,9 @@ export default function GroupCreate({
               onCompleted={onCompleted}
             />
           </div>
+          
         </div>
+     
       </div>
     </GroupCreateWrapper>
   );
