@@ -119,8 +119,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const reject = async () => {
     try {
       await commonApiDelete({ endpoint: `policies/cookies-consent` });
-      Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true");
-      Cookies.set(CONSENT_PERFORMANCE_COOKIE, "false");
+      Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
+      Cookies.set(CONSENT_PERFORMANCE_COOKIE, "false", { expires: 365 });
       setToast({
         type: "success",
         message: "Cookie preferences updated",
