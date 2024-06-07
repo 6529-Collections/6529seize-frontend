@@ -1,4 +1,3 @@
-import { useState } from "react";
 import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 
 export default function GroupsListSearch({
