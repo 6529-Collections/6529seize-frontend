@@ -4,8 +4,8 @@ export default function GroupCreateWrapper({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="tailwind-scope tw-relative">
-      <div className="tw-max-w-2xl tw-mx-auto">{children}</div>
+    <div className="tw-mt-4 lg:tw-mt-6 tailwind-scope tw-relative">
+      <div>{children}</div>
     </div>
   );
 }

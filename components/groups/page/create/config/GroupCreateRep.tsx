@@ -15,9 +15,14 @@ export default function GroupCreateRep({
   return (
     <div className="tw-flex tw-flex-col tw-space-y-4">
       <div className="tw-flex tw-flex-col">
-        <p className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-50">
-          Rep
-        </p>
+        <div className="tw-mb-3">
+          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+            Rep
+          </p>
+          <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-500">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          </p>
+        </div>
         {rep.user_identity && rep.direction && (
           <div className="tw-mb-3">
             <GroupCreateDirection
@@ -27,7 +32,13 @@ export default function GroupCreateRep({
             />
           </div>
         )}
-        <div className="tw-flex tw-gap-x-5">
+        <GroupCreateNumericValue
+          value={rep.min}
+          label="Rep at least"
+          labelId="floating_rep"
+          setValue={(value) => setRep({ ...rep, min: value })}
+        />
+        <div className="tw-mt-5 tw-flex tw-gap-x-5">
           <GroupCreateIdentitySearch
             identity={rep.user_identity}
             setIdentity={(identity) =>
@@ -40,12 +51,6 @@ export default function GroupCreateRep({
           />
         </div>
       </div>
-      <GroupCreateNumericValue
-        value={rep.min}
-        label="Rep at least"
-        labelId="floating_rep"
-        setValue={(value) => setRep({ ...rep, min: value })}
-      />
     </div>
   );
 }

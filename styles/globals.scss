@@ -421,6 +421,10 @@ h5 {
   }
 }
 
+.scrollbar-width {
+  scrollbar-width: thin;
+}
+
 .horizontal-menu-hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */

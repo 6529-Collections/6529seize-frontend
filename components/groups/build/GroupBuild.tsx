@@ -159,7 +159,7 @@ export default function GroupBuild({
   }, [groupDescription]);
 
   return (
-    <div className="tw-mt-4 tw-pb-6 tw-w-full tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
+    <div className="tw-mt-4 lg:tw-mt-6 tw-pb-6 tw-w-full tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
       <div className="tw-px-4 tw-pt-4">
         <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-4">
           Create a Group

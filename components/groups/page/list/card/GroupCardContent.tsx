@@ -7,13 +7,14 @@ export default function GroupCardContent({
   readonly group: GroupFull;
 }) {
   return (
-    <div className="tw-px-4 sm:tw-px-6 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
-      <div>
-        <p className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold">
-          {group.name}
-        </p>
-        <GroupCardConfigs group={group} />
-      </div>
+    <div className="tw-px-4 sm:tw-px-6">
+      <p
+        title={group.name}
+        className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold tw-whitespace-nowrap tw-overflow-hidden tw-text-overflow-ellipsis tw-truncate"
+      >
+        {group.name}
+      </p>
+      <GroupCardConfigs group={group} />
     </div>
   );
 }

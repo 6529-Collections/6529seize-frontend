@@ -117,6 +117,7 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
             </div>
           </div>
         </div>
+        
       </div>
     </div>
   );

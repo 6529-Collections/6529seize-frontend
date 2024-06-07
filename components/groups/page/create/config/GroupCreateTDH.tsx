@@ -33,7 +33,14 @@ export default function GroupCreateTDH({
   };
   return (
     <div>
-      <p className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-50">TDH</p>
+      <div className="tw-mb-3">
+        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+         TDH
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-500">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        </p>
+      </div>
       <GroupCreateNumericValue
         value={tdh.min}
         label="TDH at least"

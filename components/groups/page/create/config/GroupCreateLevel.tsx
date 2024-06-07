@@ -11,9 +11,14 @@ export default function GroupCreateLevel({
 }) {
   return (
     <div>
-      <p className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-50">
-        Level
-      </p>
+      <div className="tw-mb-3">
+        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+          Level
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-500">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        </p>
+      </div>
       <GroupCreateNumericValue
         value={level.min}
         label="Level at least"

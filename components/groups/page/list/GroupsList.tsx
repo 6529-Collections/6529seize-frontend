@@ -35,7 +35,7 @@ export default function GroupsList() {
     placeholderData: keepPreviousData,
   });
   return (
-    <div className="tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-8">
+    <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
       {data?.map((group) => (
         <GroupCard key={group.id} group={group} />
       ))}

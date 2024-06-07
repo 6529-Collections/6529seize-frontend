@@ -30,12 +30,12 @@ export default function GroupCreateConfig({
   readonly setWallets: (wallets: CreateGroupDescription["wallets"]) => void;
 }) {
   return (
-    <div className="tw-px-8 tw-flex tw-flex-col tw-gap-y-6">
+    <div className="tw-px-8 tw-grid tw-grid-cols-2 tw-gap-8 tw-gap-y-6">
       <GroupCreateLevel level={level} setLevel={setLevel} />
       <GroupCreateTDH tdh={tdh} setTDH={setTDH} />
       <GroupCreateCIC cic={cic} setCIC={setCIC} />
       <GroupCreateRep rep={rep} setRep={setRep} />
-      <GroupCreateWallets wallets={wallets} setWallets={setWallets} />
+     {/*  <GroupCreateWallets wallets={wallets} setWallets={setWallets} /> */}
     </div>
   );
 }

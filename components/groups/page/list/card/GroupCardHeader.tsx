@@ -12,7 +12,7 @@ export default function GroupCardHeader({
       <div className="tw-flex tw-gap-x-4">
         {group.created_by.pfp ? (
           <img
-            className="-tw-mt-3 tw-h-12 tw-w-12 tw-rounded-lg tw-bg-iron-700 tw-ring-[3px] tw-ring-iron-900"
+            className="-tw-mt-3 tw-flex-shrink-0 tw-object-contain tw-h-12 tw-w-12 tw-rounded-lg tw-bg-iron-700 tw-ring-[3px] tw-ring-iron-900"
             src={group.created_by.pfp}
             alt=""
           />
