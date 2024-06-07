@@ -28,7 +28,7 @@ export default function GroupCardHeader({
           <span className="tw-text-sm tw-text-iron-400 tw-font-normal">
             {timeAgo}
           </span>
-          <button
+          {/* <button
             type="button"
             className="tw-p-1 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
           >
@@ -61,7 +61,7 @@ export default function GroupCardHeader({
                 stroke-Linejoin="round"
               />
             </svg>
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

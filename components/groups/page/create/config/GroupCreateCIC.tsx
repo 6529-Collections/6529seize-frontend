@@ -1,7 +1,6 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
-import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
-import GroupCreateIdentitySearch from "./common/GroupCreateIdentitySearch";
+import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
 export default function GroupCreateCIC({
@@ -32,7 +31,7 @@ export default function GroupCreateCIC({
           </div>
         )}
         <div className="tw-flex tw-flex-col tw-gap-y-5 tw-gap-x-3">
-          <GroupCreateIdentitySearch
+          <IdentitySearch
             identity={cic.user_identity}
             setIdentity={(identity) =>
               setCIC({ ...cic, user_identity: identity })

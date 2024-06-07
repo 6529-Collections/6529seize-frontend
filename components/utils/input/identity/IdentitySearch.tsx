@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
-import CommonProfileSearchItems from "../../../../../utils/input/profile-search/CommonProfileSearchItems";
+import { CommunityMemberMinimal } from "../../../../entities/IProfile";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
 
 const MIN_SEARCH_LENGTH = 3;
-export default function GroupCreateIdentitySearch({
+export default function IdentitySearch({
   identity,
   setIdentity,
 }: {

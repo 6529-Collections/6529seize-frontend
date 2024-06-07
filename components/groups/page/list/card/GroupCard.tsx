@@ -1,5 +1,5 @@
 import { GroupFull } from "../../../../../generated/models/GroupFull";
-import CroupCardActions from "./CroupCardActions";
+import CroupCardActions from "./actions/CroupCardActions";
 import GroupCardContent from "./GroupCardContent";
 import GroupCardHeader from "./GroupCardHeader";
 
@@ -14,7 +14,7 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
           <GroupCardHeader group={group} />
           <div className="tw-pt-2 tw-pb-2 tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
             <GroupCardContent group={group} />
-            <CroupCardActions />
+            <CroupCardActions group={group} />
           </div>
         </div>
 
@@ -117,7 +117,6 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   );
