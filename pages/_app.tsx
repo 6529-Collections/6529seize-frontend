@@ -102,6 +102,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
+import CookiesBanner from "../components/cookies/CookiesBanner";
+import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 
 library.add(
   faArrowUp,
@@ -260,7 +262,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         </Head>
         <WagmiConfig config={wagmiConfig}>
           <ReactQueryWrapper>
-            <Auth>{getLayout(<Component {...props} />)}</Auth>
+            <Auth>
+              <CookieConsentProvider>
+                {getLayout(<Component {...props} />)}
+                <CookiesBanner />
+              </CookieConsentProvider>
+            </Auth>
           </ReactQueryWrapper>
         </WagmiConfig>
       </Provider>
