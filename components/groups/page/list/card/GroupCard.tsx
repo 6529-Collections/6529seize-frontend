@@ -1,12 +1,24 @@
 import { GroupFull } from "../../../../../generated/models/GroupFull";
+import { getRandomColorWithSeed } from "../../../../../helpers/Helpers";
 import CroupCardActions from "./actions/CroupCardActions";
 import GroupCardContent from "./GroupCardContent";
 import GroupCardHeader from "./GroupCardHeader";
 
 export default function GroupCard({ group }: { readonly group: GroupFull }) {
+  const banner1 =
+    group.created_by.banner1_color ??
+    getRandomColorWithSeed(group.created_by.handle);
+  const banner2 =
+    group.created_by.banner2_color ??
+    getRandomColorWithSeed(group.created_by.handle);
   return (
     <div className="tw-col-span-1">
-      <div className="tw-bg-gradient-to-r tw-from-indigo-500 tw-relative tw-w-full tw-h-12 tw-rounded-t-2xl">
+      <div
+        className="tw-relative tw-w-full tw-h-12 tw-rounded-t-2xl"
+        style={{
+          background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
+        }}
+      >
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
       </div>
       <div className="-tw-mt-1 tw-h-[194px] tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700">

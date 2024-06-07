@@ -887,6 +887,13 @@ paths:
           required: false
           schema:
             type: string
+        - name: created_at_less_than
+          description: created at date less than
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
       responses:
         "200":
           description: successful operation
@@ -1416,6 +1423,8 @@ components:
         - rep
         - tdh
         - level
+        - banner1_color
+        - banner2_coloe
         - archived
       properties:
         id:
@@ -1424,6 +1433,12 @@ components:
         handle:
           type: string
         pfp:
+          type: string
+          nullable: true
+        banner1_color:
+          type: string
+          nullable: true
+        banner2_color:
           type: string
           nullable: true
         cic:
