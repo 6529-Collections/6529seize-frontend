@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 import {
   NEXTGEN_CORE,

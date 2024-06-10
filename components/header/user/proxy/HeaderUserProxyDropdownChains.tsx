@@ -3,7 +3,7 @@ import { getChains } from "../../../../pages/_app";
 
 export default function HeaderUserProxyDropdownChains() {
   const { chain } = useAccount();
-  const { chains, switchChain } = useSwitchChain();
+  const { switchChain } = useSwitchChain();
   const myChains = getChains();
 
   if (myChains.length <= 1) return <></>;

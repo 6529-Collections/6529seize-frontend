@@ -18,7 +18,7 @@ export default function HeaderUserProxyDropdown({
   readonly profile: IProfileAndConsolidations;
   readonly onClose: () => void;
 }) {
-  const { address, chain } = useAccount();
+  const { address } = useAccount();
 
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);

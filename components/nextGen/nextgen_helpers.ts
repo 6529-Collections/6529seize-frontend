@@ -23,7 +23,6 @@ import {
   Status,
   TokensPerAddress,
 } from "./nextgen_entities";
-import { NEVER_DATE } from "../../constants";
 import { useEffect, useState } from "react";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import { goerli, mainnet, sepolia } from "viem/chains";
@@ -431,8 +430,8 @@ export function useTokensIndex(
   });
 
   useEffect(() => {
-    if (data) {
-      const d = parseInt(data as any);
+    if (typeof data === "string" || typeof data === "number") {
+      const d = parseInt(data.toString(), 10);
       callback(d);
     }
   }, [data, callback]);

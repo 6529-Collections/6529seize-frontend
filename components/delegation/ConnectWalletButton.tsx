@@ -1,7 +1,6 @@
 import styles from "./Delegation.module.scss";
 import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import { Container, Row, Col } from "react-bootstrap";
-import { useSwitchChain } from "wagmi";
 
 interface Props {
   chain_id: number;

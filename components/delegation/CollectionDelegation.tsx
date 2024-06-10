@@ -50,6 +50,7 @@ import NewSubDelegationComponent from "./NewSubDelegation";
 import UpdateDelegationComponent from "./UpdateDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
+import { Spinner } from "../dotLoader/DotLoader";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -75,8 +76,8 @@ interface Revocation {
 }
 
 function getParams(
-  address: `0x${string}` | string | undefined,
-  collection: `0x${string}` | string | undefined,
+  address: string | undefined,
+  collection: string | undefined,
   functionName: string,
   useCases: any[]
 ) {
@@ -592,8 +593,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   useEffect(() => {
     if (collectionLockWrite.error) {
+      const title = `${
+        collectionLockRead.data ? `Unlocking` : `Locking`
+      } Wallet`;
       setToast({
-        title: `${collectionLockRead.data ? `Unlocking` : `Locking`} Wallet`,
+        title,
         message:
           collectionLockWrite.error.message.split("Request Arguments")[0],
       });
@@ -642,9 +646,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   useEffect(() => {
     const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
     const title = `${
-      useCaseLockStatuses.data && useCaseLockStatuses.data[lockUseCaseIndex]
-        ? "Unlocking"
-        : "Locking"
+      useCaseLockStatuses.data?.[lockUseCaseIndex] ? "Unlocking" : "Locking"
     } Wallet on Use Case #${useCase?.use_case} - ${useCase?.display}`;
 
     if (useCaseLockWrite.error) {
@@ -738,12 +740,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
         args: [
-          batchRevokeDelegationParams &&
-            batchRevokeDelegationParams.collections,
-          batchRevokeDelegationParams && batchRevokeDelegationParams.addresses,
-          batchRevokeDelegationParams && batchRevokeDelegationParams.use_cases,
+          batchRevokeDelegationParams.collections,
+          batchRevokeDelegationParams.addresses,
+          batchRevokeDelegationParams.use_cases,
         ],
-        functionName: batchRevokeDelegationParams ? "batchRevocations" : "",
+        functionName: "batchRevocations",
       });
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke]);
@@ -1261,61 +1262,59 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   </tr>
                 )}
                 {delegations > 1 && (
-                  <>
-                    <tr>
-                      <td colSpan={4} className="pt-3">
-                        selected:{" "}
-                        {bulkRevocations.length === MAX_BULK_ACTIONS
-                          ? `${MAX_BULK_ACTIONS} (max)`
-                          : bulkRevocations.length}
-                        &nbsp;&nbsp;
-                        <button
-                          disabled={bulkRevocations.length < 2}
-                          className={`${styles.useCaseWalletRevoke} ${
-                            bulkRevocations.length < 2
-                              ? `${styles.useCaseWalletRevokeDisabled}`
-                              : ``
-                          }`}
-                          onClick={() => {
-                            const title = "Batch Revoking Delegations";
-                            let message = "Confirm in your wallet...";
-                            if (chainsMatch()) {
-                              setBatchRevokeDelegationParams({
-                                collections: [...bulkRevocations].map((br) =>
-                                  areEqualAddresses(
-                                    props.collection.contract,
-                                    DELEGATION_ALL_ADDRESS
-                                  )
-                                    ? DELEGATION_ALL_ADDRESS
-                                    : props.collection.contract
-                                ),
-                                addresses: [...bulkRevocations].map(
-                                  (br) => br.wallet
-                                ),
-                                use_cases: [...bulkRevocations].map(
-                                  (br) => br.use_case
-                                ),
-                              });
-                            } else {
-                              message = getSwitchToHtml();
-                            }
-                            setToast({ title, message });
-                          }}>
-                          Batch Revoke
-                          {(contractWriteBatchRevoke.isPending ||
-                            waitContractWriteBatchRevoke.isLoading) && (
-                            <div className="d-inline">
-                              <div
-                                className={`spinner-border ${styles.loader}`}
-                                role="status">
-                                <span className="sr-only"></span>
-                              </div>
+                  <tr>
+                    <td colSpan={4} className="pt-3">
+                      selected:{" "}
+                      {bulkRevocations.length === MAX_BULK_ACTIONS
+                        ? `${MAX_BULK_ACTIONS} (max)`
+                        : bulkRevocations.length}
+                      &nbsp;&nbsp;
+                      <button
+                        disabled={bulkRevocations.length < 2}
+                        className={`${styles.useCaseWalletRevoke} ${
+                          bulkRevocations.length < 2
+                            ? `${styles.useCaseWalletRevokeDisabled}`
+                            : ``
+                        }`}
+                        onClick={() => {
+                          const title = "Batch Revoking Delegations";
+                          let message = "Confirm in your wallet...";
+                          if (chainsMatch()) {
+                            setBatchRevokeDelegationParams({
+                              collections: [...bulkRevocations].map((br) =>
+                                areEqualAddresses(
+                                  props.collection.contract,
+                                  DELEGATION_ALL_ADDRESS
+                                )
+                                  ? DELEGATION_ALL_ADDRESS
+                                  : props.collection.contract
+                              ),
+                              addresses: [...bulkRevocations].map(
+                                (br) => br.wallet
+                              ),
+                              use_cases: [...bulkRevocations].map(
+                                (br) => br.use_case
+                              ),
+                            });
+                          } else {
+                            message = getSwitchToHtml();
+                          }
+                          setToast({ title, message });
+                        }}>
+                        Batch Revoke
+                        {(contractWriteBatchRevoke.isPending ||
+                          waitContractWriteBatchRevoke.isLoading) && (
+                          <div className="d-inline">
+                            <div
+                              className={`spinner-border ${styles.loader}`}
+                              role="status">
+                              <span className="sr-only"></span>
                             </div>
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  </>
+                          </div>
+                        )}
+                      </button>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </Table>
@@ -1560,67 +1559,54 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           </Row>
           <Row className="pt-2 pb-2">
             <Col>
-              <>
-                {/* {collectionLockRead.data != null && ( */}
-                <span
-                  className={`${styles.lockDelegationBtn} ${
-                    collectionLockReadGlobal?.data
-                      ? styles.lockDelegationBtnDisabled
-                      : ""
-                  }`}
-                  onClick={() => {
-                    const title = `${
-                      collectionLockRead.data ? `Unlocking` : `Locking`
-                    } Wallet`;
-                    let message = "Confirm in your wallet...";
-
-                    if (chainsMatch()) {
-                      collectionLockWrite.writeContract({
-                        address: DELEGATION_CONTRACT.contract,
-                        abi: DELEGATION_ABI,
-                        chainId: DELEGATION_CONTRACT.chain_id,
-                        args: [
-                          props.collection.contract,
-                          collectionLockRead.data ? false : true,
-                        ],
-                        functionName: "setCollectionLock",
-                      });
-                    } else {
-                      message = getSwitchToHtml();
-                    }
-                    setToast({ title, message });
-                  }}>
-                  <FontAwesomeIcon
-                    icon={collectionLockRead.data ? "lock" : "lock-open"}
-                    className={styles.buttonIcon}
-                  />
-                  {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
-                  {collectionLockReadGlobal?.data &&
-                  !areEqualAddresses(
-                    props.collection.contract,
-                    DELEGATION_ALL_ADDRESS
-                  )
-                    ? ` *`
-                    : ``}
-                  {(collectionLockWrite.isPending ||
-                    waitCollectionLockWrite.isLoading) && (
-                    <div className="d-inline">
-                      <div
-                        className={`spinner-border ${styles.loader}`}
-                        role="status">
-                        <span className="sr-only"></span>
-                      </div>
-                    </div>
-                  )}
-                </span>
-                {/* )} */}
-              </>
+              <button
+                className={`${styles.lockDelegationBtn} ${
+                  collectionLockReadGlobal?.data
+                    ? styles.lockDelegationBtnDisabled
+                    : ""
+                }`}
+                onClick={() => {
+                  const title = `${
+                    collectionLockRead.data ? `Unlocking` : `Locking`
+                  } Wallet`;
+                  let message = "Confirm in your wallet...";
+                  if (chainsMatch()) {
+                    collectionLockWrite.writeContract({
+                      address: DELEGATION_CONTRACT.contract,
+                      abi: DELEGATION_ABI,
+                      chainId: DELEGATION_CONTRACT.chain_id,
+                      args: [
+                        props.collection.contract,
+                        !collectionLockRead.data,
+                      ],
+                      functionName: "setCollectionLock",
+                    });
+                  } else {
+                    message = getSwitchToHtml();
+                  }
+                  setToast({ title, message });
+                }}>
+                <FontAwesomeIcon
+                  icon={collectionLockRead.data ? "lock" : "lock-open"}
+                  className={styles.buttonIcon}
+                />
+                {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
+                {collectionLockReadGlobal?.data &&
+                !areEqualAddresses(
+                  props.collection.contract,
+                  DELEGATION_ALL_ADDRESS
+                )
+                  ? ` *`
+                  : ``}
+                {(collectionLockWrite.isPending ||
+                  waitCollectionLockWrite.isLoading) && <Spinner />}
+              </button>
             </Col>
           </Row>
           <Row className="pt-3 pb-2">
             <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
               <Form.Select
-                disabled={collectionLockRead.data ? true : false}
+                disabled={!!collectionLockRead.data}
                 className={`${styles.formInputLockUseCase} ${
                   collectionLockRead.data || collectionLockReadGlobal?.data
                     ? styles.formInputDisabled
@@ -1642,12 +1628,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   useCaseLockWrite.reset();
                 }}>
                 <option value={0}>
-                  <>
-                    Lock/Unlock Use Case
-                    {collectionLockRead.data || collectionLockReadGlobal?.data
-                      ? ` *`
-                      : ``}
-                  </>
+                  Lock/Unlock Use Case
+                  {collectionLockRead.data || collectionLockReadGlobal?.data
+                    ? ` *`
+                    : ``}
                 </option>
                 {ALL_USE_CASES.map((uc, index) => {
                   if (uc.use_case != 1) {
@@ -1656,19 +1640,17 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         key={`collection-delegation-select-use-case-${uc.use_case}`}
                         value={uc.use_case}>
                         #{uc.use_case} - {uc.display}
-                        {(useCaseLockStatuses.data &&
-                          (useCaseLockStatuses.data[index] as any as boolean) ==
-                            true) ||
-                        (useCaseLockStatusesGlobal?.data &&
-                          (useCaseLockStatusesGlobal?.data[
-                            index
-                          ] as any as boolean) === true) ||
+                        {(useCaseLockStatuses.data?.[
+                          index
+                        ] as any as boolean) ||
+                        (useCaseLockStatusesGlobal?.data?.[
+                          index
+                        ] as any as boolean) ||
                         collectionLockRead.data
                           ? ` - LOCKED${
-                              useCaseLockStatusesGlobal?.data &&
-                              (useCaseLockStatusesGlobal?.data[
+                              (useCaseLockStatusesGlobal?.data?.[
                                 index
-                              ] as any as boolean) === true
+                              ] as any as boolean)
                                 ? ` *`
                                 : ``
                             }`
@@ -1696,8 +1678,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     onClick={() => {
                       const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
                       const title = `${
-                        useCaseLockStatuses.data &&
-                        useCaseLockStatuses.data[lockUseCaseIndex]
+                        useCaseLockStatuses?.data?.[lockUseCaseIndex]
                           ? "Unlocking"
                           : "Locking"
                       } Wallet on Use Case #${useCase.use_case} - ${
@@ -1713,10 +1694,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           args: [
                             props.collection.contract,
                             lockUseCaseValue,
-                            useCaseLockStatuses.data &&
-                            useCaseLockStatuses.data[lockUseCaseIndex]
-                              ? false
-                              : true,
+                            !useCaseLockStatuses.data?.[lockUseCaseIndex],
                           ],
                           functionName: "setCollectionUsecaseLock",
                         });
@@ -1727,28 +1705,18 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     }}>
                     <FontAwesomeIcon
                       icon={
-                        useCaseLockStatuses.data &&
-                        useCaseLockStatuses.data[lockUseCaseIndex]
+                        useCaseLockStatuses.data?.[lockUseCaseIndex]
                           ? "lock"
                           : "lock-open"
                       }
                       className={styles.buttonIcon}
                     />
-                    {useCaseLockStatuses.data &&
-                    useCaseLockStatuses.data[lockUseCaseIndex]
+                    {useCaseLockStatuses.data?.[lockUseCaseIndex]
                       ? "Unlock"
                       : "Lock"}{" "}
                     Use Case
                     {(useCaseLockWrite.isPending ||
-                      waitUseCaseLockWrite.isLoading) && (
-                      <div className="d-inline">
-                        <div
-                          className={`spinner-border ${styles.loader}`}
-                          role="status">
-                          <span className="sr-only"></span>
-                        </div>
-                      </div>
-                    )}
+                      waitUseCaseLockWrite.isLoading) && <Spinner />}
                   </button>
                 ) : (
                   <div>
@@ -1799,7 +1767,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pb-4">
                 <Col className="d-flex align-items-center justify-content-start">
-                  <span
+                  <button
                     className={styles.backBtn}
                     onClick={() =>
                       props.setSection(DelegationCenterSection.CENTER)
@@ -1808,7 +1776,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <span className="font-smaller">
                       Back to Delegation Center
                     </span>
-                  </span>
+                  </button>
                 </Col>
               </Row>
               {!showUpdateDelegation &&
@@ -1825,14 +1793,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     <Container className="no-padding">
                       <Row className="pt-5 pb-3">
                         <Col className="d-flex align-items-center justify-content-start">
-                          <span
+                          <button
                             className={styles.backBtn}
                             onClick={() =>
                               props.setSection(DelegationCenterSection.CENTER)
                             }>
                             <FontAwesomeIcon icon="circle-arrow-left" />
                             Back to Delegation Center
-                          </span>
+                          </button>
                         </Col>
                       </Row>
                     </Container>

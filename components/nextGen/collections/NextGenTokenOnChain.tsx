@@ -50,7 +50,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   useEffect(() => {
     const data = tokenUriRead.data;
     if (data) {
-      const tokenUri = data as any;
+      const tokenUri = data as string;
       setTokenMetadataUrl(tokenUri);
       fetch(tokenUri).then((meta) => {
         meta.json().then((metaJson) => {
