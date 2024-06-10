@@ -1,9 +1,14 @@
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function GroupCardActionStats({
   membersCount,
+  loadingMembersCount,
 }: {
   readonly membersCount: number | null;
+  readonly loadingMembersCount: boolean;
 }) {
   const count =
     typeof membersCount === "number"
@@ -37,7 +42,13 @@ export default function GroupCardActionStats({
         </svg>
         <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-iron-400 tw-font-normal">Members count</span>
-          <span className="tw-font-medium tw-text-iron-50">{count}</span>
+          <span className="tw-font-medium tw-text-iron-50">
+            {loadingMembersCount ? (
+              <CircleLoader size={CircleLoaderSize.SMALL} />
+            ) : (
+              count
+            )}
+          </span>
         </div>
       </div>
     </div>

@@ -1,10 +1,31 @@
-export default function GroupCardCICAllInput() {
+export default function GroupCardCICAllInput({
+  cicToGive,
+  setCicToGive,
+}: {
+  readonly cicToGive: number | null;
+  readonly setCicToGive: (cicToGive: number | null) => void;
+}) {
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setCicToGive(null);
+      return;
+    }
+    const numberCIC = parseInt(value);
+    if (isNaN(numberCIC)) {
+      setCicToGive(null);
+      return;
+    }
+    setCicToGive(numberCIC);
+  };
   return (
     <div className="tw-w-full xl:tw-max-w-[17.156rem]">
       <div className="tw-group tw-w-full tw-relative">
         <input
-          type="text"
+          type="number"
           id="floating_cic_number"
+          value={cicToGive ?? ""}
+          onChange={onChange}
           autoComplete="off"
           className="tw-form-input tw-block tw-py-3 tw-text-sm tw-px-4 tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer
       tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
