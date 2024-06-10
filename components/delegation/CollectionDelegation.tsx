@@ -1635,26 +1635,23 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 </option>
                 {ALL_USE_CASES.map((uc, index) => {
                   if (uc.use_case != 1) {
+                    const asteriskDisplay = useCaseLockStatusesGlobal.data?.[
+                      index
+                    ]
+                      ? ` *`
+                      : ``;
+                    const lockDisplay =
+                      useCaseLockStatuses.data?.[index] ||
+                      useCaseLockStatusesGlobal.data?.[index] ||
+                      collectionLockRead.data
+                        ? ` - LOCKED${asteriskDisplay}`
+                        : ` - UNLOCKED`;
                     return (
                       <option
                         key={`collection-delegation-select-use-case-${uc.use_case}`}
                         value={uc.use_case}>
                         #{uc.use_case} - {uc.display}
-                        {(useCaseLockStatuses.data?.[
-                          index
-                        ] as any as boolean) ||
-                        (useCaseLockStatusesGlobal?.data?.[
-                          index
-                        ] as any as boolean) ||
-                        collectionLockRead.data
-                          ? ` - LOCKED${
-                              (useCaseLockStatusesGlobal?.data?.[
-                                index
-                              ] as any as boolean)
-                                ? ` *`
-                                : ``
-                            }`
-                          : ` - UNLOCKED`}
+                        {lockDisplay}
                       </option>
                     );
                   }
