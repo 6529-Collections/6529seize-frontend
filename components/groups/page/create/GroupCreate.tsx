@@ -104,9 +104,7 @@ export default function GroupCreate({
               onCompleted={onCompleted}
             />
           </div>
-          
         </div>
-     
       </div>
     </GroupCreateWrapper>
   );

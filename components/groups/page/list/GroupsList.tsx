@@ -114,7 +114,7 @@ export default function GroupsList() {
         loading={isFetching}
         onBottomIntersection={onBottomIntersection}
       >
-        <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6">
+        <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-5 lg:tw-gap-6">
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} />
           ))}

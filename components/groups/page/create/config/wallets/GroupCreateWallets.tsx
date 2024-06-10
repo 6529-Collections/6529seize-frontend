@@ -97,10 +97,10 @@ export default function GroupCreateWallets({
               onClick={removeWallets}
               type="button"
               aria-label="Remove wallets"
-              className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20"
+              className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-650 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-4 tw-w-4 tw-text-error tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

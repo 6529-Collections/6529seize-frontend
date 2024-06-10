@@ -11,10 +11,11 @@ export default function CroupCardActionViewMembers({
     <Link
       href={href}
       target="_blank"
-      className="tw-group tw-no-underline tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+      title="View members"
+      className="tw-group tw-whitespace-nowrap tw-no-underline tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
     >
       <svg
-        className="tw-size-5 t w-flex-shrink-0 tw-mr-2 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-size-5 t w-flex-shrink-0 tw-mr-2"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
@@ -28,7 +29,7 @@ export default function CroupCardActionViewMembers({
           strokeLinejoin="round"
         />
       </svg>
-      <span>View members</span>
+      <span className="tw-hidden sm:tw-inline-flex">View members</span>
     </Link>
   );
 }
