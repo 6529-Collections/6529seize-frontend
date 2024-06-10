@@ -1,4 +1,4 @@
-export default function CommonRepCategorySearchResult({
+export default function RepCategorySearchItem({
   category,
   selected,
   disabledCategories = [],

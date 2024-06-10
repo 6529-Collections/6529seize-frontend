@@ -19,7 +19,7 @@ export default function CreateGroupWalletsEmma({
 }) {
   const { requestAuth, connectedProfile } = useContext(AuthContext);
   const [selected, setSelected] = useState<AllowlistDescription | null>(null);
-  const { data: emmaList } = useQuery<AllowlistResult[]>({
+  const { data: emmaList, isFetching } = useQuery<AllowlistResult[]>({
     queryKey: [QueryKey.EMMA_ALLOWLIST_RESULT, { allowlistId: selected?.id }],
     queryFn: async () => {
       await requestAuth();
@@ -61,6 +61,7 @@ export default function CreateGroupWalletsEmma({
 
       <GroupCreateWalletsCount
         walletsCount={wallets?.length ?? null}
+        loading={isFetching}
         removeWallets={onWalletsRemove}
       />
     </div>

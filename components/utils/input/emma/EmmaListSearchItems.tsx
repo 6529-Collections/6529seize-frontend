@@ -19,7 +19,7 @@ export default function EmmaListSearchItems({
   readonly onSelect: (item: AllowlistDescription) => void;
 }) {
   const { connectedProfile, requestAuth } = useContext(AuthContext);
-  const { data } = useQuery<AllowlistDescription[]>({
+  const { data, isFetching } = useQuery<AllowlistDescription[]>({
     queryKey: [
       QueryKey.EMMA_IDENTITY_ALLOWLISTS,
       { identity: connectedProfile?.profile?.handle },
@@ -65,7 +65,11 @@ export default function EmmaListSearchItems({
             <div className="tw-z-10 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {items.length ? (
+                  {isFetching ? (
+                    <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
+                      Loading...
+                    </li>
+                  ) : items.length ? (
                     items.map((item) => (
                       <EmmaListSearchItem
                         key={item.id}

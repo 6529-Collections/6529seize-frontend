@@ -11,7 +11,9 @@ import GroupsSelectActiveGroup from "./GroupsSelectActiveGroup";
 import { GroupFull } from "../../../generated/models/GroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
 import CommonInput from "../../utils/input/CommonInput";
-import IdentitySearch from "../../utils/input/identity/IdentitySearch";
+import IdentitySearch, {
+  IdentitySearchSize,
+} from "../../utils/input/identity/IdentitySearch";
 
 export default function GroupSelect() {
   const activeGroupId = useSelector(selectActiveGroupId);
@@ -69,9 +71,7 @@ export default function GroupSelect() {
   return (
     <div className="tw-mt-4 tw-w-full tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0  tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       {activeGroupId && (
-        <GroupsSelectActiveGroup
-          activeGroupId={activeGroupId}
-        />
+        <GroupsSelectActiveGroup activeGroupId={activeGroupId} />
       )}
       <div className="tw-px-4 tw-pt-3">
         <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-3">
@@ -81,14 +81,40 @@ export default function GroupSelect() {
           <IdentitySearch
             identity={filters.author_identity}
             setIdentity={onUserSelect}
+            size={IdentitySearchSize.SM}
           />
-          <CommonInput
-            inputType="text"
-            placeholder="Search by group name"
-            value={filters.group_name ?? ""}
-            showSearchIcon={true}
-            onChange={onFilterNameSearch}
-          />
+
+          <div className="tw-group tw-w-full tw-relative">
+            <input
+              type="text"
+              id="floating-sidebar-group-name"
+              value={filters.group_name ?? ""}
+              onChange={(e) => onFilterNameSearch(e.target.value)}
+              autoComplete="off"
+              className="tw-py-2.5 tw-text-sm tw-form-input tw-block tw-pl-11 tw-pr-4 tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer
+      tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+              placeholder=" "
+            />
+            <svg
+              className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-2.5 tw-h-5 tw-w-5 tw-text-iron-300"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                clipRule="evenodd"
+              ></path>
+            </svg>
+            <label
+              htmlFor="floating-sidebar-group-name"
+              className="tw-absolute tw-cursor-text tw-text-base tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 tw-rounded-lg group-hover:tw-bg-iron-800 peer-focus:tw-bg-iron-900 tw-ml-8 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
+                        peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
+            >
+              Group name
+            </label>
+          </div>
         </div>
         <div className="tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
           <div className="tw-pt-4">
