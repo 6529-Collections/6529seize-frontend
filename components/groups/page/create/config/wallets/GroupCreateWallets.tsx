@@ -55,7 +55,7 @@ export default function GroupCreateWallets({
           Wallets
         </p>
       </div>
-      <div className="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-8">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
         <CreateGroupWalletsUpload
           setWallets={onUploadedWalletsChange}
           wallets={uploadedWallets}
@@ -66,11 +66,11 @@ export default function GroupCreateWallets({
         />
       </div>
       {wallets?.length && (
-        <div className="tw-mt-4">
-          <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-3 tw-items-center tw-rounded-xl tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
-            <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm">
+        <div className="tw-mt-4 lg:tw-inline-flex">
+          <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl tw-bg-[#272D3C] tw-border tw-border-solid tw-border-primary-400">
+            <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-base">
               <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300"
+                className="tw-size-6 tw-flex-shrink-0 tw-text-primary-400"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -85,8 +85,8 @@ export default function GroupCreateWallets({
                 />
               </svg>
               <span className="tw-inline-flex tw-gap-x-1.5">
-                <span className="tw-text-iron-400 tw-font-medium">
-                  Unique wallets:
+                <span className="tw-text-iron-50 tw-font-medium">
+                  Total unique wallets:
                 </span>
                 <span className="tw-text-primary-400 tw-font-semibold">
                   {wallets.length}

@@ -82,13 +82,12 @@ export default function CreateGroupWalletsUpload({
         </p>
         <label
           className="tw-mt-3
-        tw-bg-iron-900 tw-border-iron-650
-      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-32 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+        tw-bg-iron-900 tw-border-iron-650 tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-32 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragEnter={handleDragEnter}
         >
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-5 lg:tw-p-6">
             <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
               Drag and drop your CSV file here, or click to select a file
             </p>
@@ -107,7 +106,6 @@ export default function CreateGroupWalletsUpload({
             }}
           />
         </label>
-
         <GroupCreateWalletsCount
           walletsCount={wallets?.length ?? null}
           removeWallets={() => setWallets(null)}

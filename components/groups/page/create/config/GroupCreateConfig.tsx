@@ -31,7 +31,7 @@ export default function GroupCreateConfig({
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-8">
-      <div className="tw-col-span-full tw-gap-x-8 tw-grid tw-grid-cols-2 tw-gap-y-8">
+      <div className="tw-col-span-full tw-gap-x-8 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-y-6 lg:tw-gap-y-8">
         <GroupCreateLevel level={level} setLevel={setLevel} />
         <GroupCreateTDH tdh={tdh} setTDH={setTDH} />
         <GroupCreateCIC cic={cic} setCIC={setCIC} />

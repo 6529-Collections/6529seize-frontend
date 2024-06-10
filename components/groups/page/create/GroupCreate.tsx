@@ -44,7 +44,7 @@ export default function GroupCreate({
       <div className="tw-flex tw-flex-col tw-gap-y-8">
         <div className="tw-space-y-5">
           <GroupCreateHeader />
-          <div className="tw-grid tw-grid-cols-2 tw-gap-x-8">
+          <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-x-8">
             <GroupCreateName
               name={groupConfig.name}
               setName={(name) =>

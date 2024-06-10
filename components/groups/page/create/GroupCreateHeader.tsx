@@ -6,6 +6,7 @@ export default function GroupCreateHeader() {
           className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 tw-size-6"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
+          aria-hidden="true"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
