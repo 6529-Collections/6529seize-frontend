@@ -1,17 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
-import CommonRepCategorySearchResults from "../../../../../utils/rep/CommonRepCategorySearchResults";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
+
+export enum RepCategorySearchSize {
+  SM = "SM",
+  MD = "MD",
+}
+
 const MIN_SEARCH_LENGTH = 3;
-export default function GroupRepCategorySearch({
+
+export default function RepCategorySearch({
   category,
+  size = RepCategorySearchSize.MD,
+  disableInputCategoryAsValue = false,
   setCategory,
 }: {
   readonly category: string | null;
+  readonly size?: RepCategorySearchSize;
+  readonly disableInputCategoryAsValue?: boolean;
   readonly setCategory: (category: string | null) => void;
 }) {
+  const INPUT_CLASSES: Record<RepCategorySearchSize, string> = {
+    [RepCategorySearchSize.SM]: "tw-py-2.5 tw-text-sm",
+    [RepCategorySearchSize.MD]: "tw-py-3 tw-text-base",
+  };
+
+  const SVG_CLASSES: Record<RepCategorySearchSize, string> = {
+    [RepCategorySearchSize.SM]: "tw-top-2.5",
+    [RepCategorySearchSize.MD]: "tw-top-3.5",
+  };
+
   const [searchCriteria, setSearchCriteria] = useState<string | null>(category);
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
@@ -53,6 +74,33 @@ export default function GroupRepCategorySearch({
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
+
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!debouncedValue) {
+      setCategories([]);
+      return;
+    }
+    if (debouncedValue.length < MIN_SEARCH_LENGTH) {
+      setCategories([]);
+      return;
+    }
+
+    if (disableInputCategoryAsValue) {
+      setCategories(data ?? []);
+      return;
+    }
+    if (!data?.length) {
+      setCategories([debouncedValue]);
+      return;
+    }
+    setCategories([
+      debouncedValue,
+      ...data.filter((i) => i !== debouncedValue),
+    ]);
+  }, [data, debouncedValue]);
+
   return (
     <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
       <input
@@ -62,12 +110,12 @@ export default function GroupRepCategorySearch({
         onFocus={() => onFocusChange(true)}
         onBlur={() => onFocusChange(false)}
         id="floating_rep_category"
-        className="tw-form-input tw-block tw-pb-3 tw-pt-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer
-     tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className={`${INPUT_CLASSES[size]} tw-form-input tw-block tw-pl-11 tw-pr-4 tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer
+      tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         placeholder=" "
       />
       <svg
-        className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-4 tw-h-5 tw-w-5 tw-text-iron-300"
+        className={`tw-pointer-events-none tw-absolute tw-left-4 tw-h-5 tw-w-5 tw-text-iron-300 ${SVG_CLASSES[size]}`}
         viewBox="0 0 20 20"
         fill="currentColor"
         aria-hidden="true"
@@ -85,10 +133,10 @@ export default function GroupRepCategorySearch({
       >
         Rep Category
       </label>
-      <CommonRepCategorySearchResults
+      <RepCategorySearchDropdown
         open={isOpen}
         selected={category}
-        categories={data ?? []}
+        categories={categories}
         onSelect={onValueChange}
       />
     </div>

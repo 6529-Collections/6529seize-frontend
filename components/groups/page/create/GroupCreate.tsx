@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { GroupDescription } from "../../../../generated/models/GroupDescription";
+import { useState } from "react";
 import GroupCreateConfig from "./config/GroupCreateConfig";
 import GroupCreateActions from "./actions/GroupCreateActions";
 import GroupCreateConfigHeader from "./GroupCreateConfigHeader";
@@ -8,8 +7,6 @@ import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
 import { GroupFilterDirection } from "../../../../generated/models/GroupFilterDirection";
 import { CreateGroup } from "../../../../generated/models/CreateGroup";
-import { group } from "console";
-import GroupCreateWallets from "./config/wallets/GroupCreateWallets";
 
 export default function GroupCreate({
   onCompleted,

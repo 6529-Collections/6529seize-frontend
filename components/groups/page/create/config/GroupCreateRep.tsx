@@ -2,7 +2,7 @@ import { CreateGroupDescription } from "../../../../../generated/models/CreateGr
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
-import GroupRepCategorySearch from "./common/GroupRepCategorySearch";
+import RepCategorySearch from "../../../../utils/input/rep-category/RepCategorySearch";
 
 export default function GroupCreateRep({
   rep,
@@ -39,7 +39,7 @@ export default function GroupCreateRep({
                 setRep({ ...rep, user_identity: identity })
               }
             />
-            <GroupRepCategorySearch
+            <RepCategorySearch
               category={rep.category}
               setCategory={(category) => setRep({ ...rep, category })}
             />

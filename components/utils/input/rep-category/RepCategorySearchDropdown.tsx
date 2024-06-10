@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import CommonRepCategorySearchResult from "./CommonRepCategorySearchResult";
+import RepCategorySearchItem from "./RepCategorySearchItem";
 
-export default function CommonRepCategorySearchResults({
+export default function RepCategorySearchDropdown({
   open,
   categories,
   selected,
@@ -34,7 +34,7 @@ export default function CommonRepCategorySearchResults({
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                   {categories.length ? (
                     categories.map((category) => (
-                      <CommonRepCategorySearchResult
+                      <RepCategorySearchItem
                         key={category}
                         category={category}
                         selected={selected}
