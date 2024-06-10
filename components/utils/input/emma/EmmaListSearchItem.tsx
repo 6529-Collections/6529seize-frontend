@@ -18,7 +18,7 @@ export default function EmmaListSearchItem({
         onClick={() => onSelect(item)}
         className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
       >
-        <div className="tw-w-[15rem] tw-truncate tw-inline-flex tw-justify-between tw-items-center">
+        <div className="tw-w-full tw-truncate tw-inline-flex tw-justify-between tw-items-center">
           <div className="tw-inline-flex tw-space-x-2 tw-items-center">
             <div>
               <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">

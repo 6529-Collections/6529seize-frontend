@@ -68,7 +68,7 @@ export default function GroupCreateWallets({
       {wallets?.length && (
         <div className="tw-mt-4 lg:tw-inline-flex">
           <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl tw-bg-[#272D3C] tw-border tw-border-solid tw-border-primary-400">
-            <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-base">
+            <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
               <svg
                 className="tw-size-6 tw-flex-shrink-0 tw-text-primary-400"
                 viewBox="0 0 24 24"
