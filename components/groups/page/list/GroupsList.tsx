@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GroupsRequestParams } from "../../../../entities/IGroup";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../../helpers/Types";
@@ -8,6 +12,9 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import GroupCard from "./card/GroupCard";
 import GroupsListSearch from "./search/GroupsListSearch";
 import { useDebounce } from "react-use";
+import CommonInfiniteScrollWrapper from "../../../utils/infinite-scroll/CommonInfiniteScrollWrapper";
+
+const REQUEST_SIZE = 20;
 
 export default function GroupsList() {
   const [filters, setFilters] = useState<GroupsRequestParams>({
@@ -20,9 +27,16 @@ export default function GroupsList() {
 
   useDebounce(() => setDebouncedFilters(filters), 200, [filters]);
 
-  const { data } = useQuery<GroupFull[]>({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
     queryKey: [QueryKey.GROUPS, debouncedFilters],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
       if (debouncedFilters.group_name) {
         params.group_name = debouncedFilters.group_name;
@@ -31,6 +45,9 @@ export default function GroupsList() {
         params.author_identity = debouncedFilters.author_identity;
       }
 
+      if (pageParam) {
+        params.created_at_less_than = `${pageParam}`;
+      }
       return await commonApiFetch<
         GroupFull[],
         NonNullableNotRequired<GroupsRequestParams>
@@ -39,7 +56,8 @@ export default function GroupsList() {
         params,
       });
     },
-    placeholderData: keepPreviousData,
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.at(-1)?.created_at ?? null,
   });
 
   const setGroupName = (value: string | null) => {
@@ -55,6 +73,35 @@ export default function GroupsList() {
       author_identity: value,
     }));
   };
+
+  const [groups, setGroups] = useState<GroupFull[]>([]);
+
+  useEffect(() => setGroups(data?.pages.flat() ?? []), [data]);
+
+  const onBottomIntersection = (state: boolean) => {
+    if (groups.length < REQUEST_SIZE) {
+      return;
+    }
+
+    if (!state) {
+      return;
+    }
+    if (status === "pending") {
+      return;
+    }
+    if (isFetching) {
+      return;
+    }
+    if (isFetchingNextPage) {
+      return;
+    }
+    if (!hasNextPage) {
+      return;
+    }
+
+    fetchNextPage();
+  };
+
   return (
     <>
       <GroupsListSearch
@@ -63,11 +110,16 @@ export default function GroupsList() {
         setIdentity={setAuthorIdentity}
         setGroupName={setGroupName}
       />
-      <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6">
-        {data?.map((group) => (
-          <GroupCard key={group.id} group={group} />
-        ))}
-      </div>
+      <CommonInfiniteScrollWrapper
+        loading={isFetching}
+        onBottomIntersection={onBottomIntersection}
+      >
+        <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6">
+          {groups.map((group) => (
+            <GroupCard key={group.id} group={group} />
+          ))}
+        </div>
+      </CommonInfiniteScrollWrapper>
     </>
   );
 }
