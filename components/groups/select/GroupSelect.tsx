@@ -1,4 +1,8 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -14,6 +18,7 @@ import CommonInput from "../../utils/input/CommonInput";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "../../utils/input/identity/IdentitySearch";
+import { useDebounce } from "react-use";
 
 export default function GroupSelect() {
   const activeGroupId = useSelector(selectActiveGroupId);
@@ -23,17 +28,32 @@ export default function GroupSelect() {
     author_identity: null,
   });
 
-  const { data } = useQuery<GroupFull[]>({
-    queryKey: [QueryKey.GROUPS, filters],
-    queryFn: async () => {
+  const [debouncedFilters, setDebouncedFilters] =
+    useState<GroupsRequestParams>(filters);
+
+  useDebounce(() => setDebouncedFilters(filters), 200, [filters]);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: [QueryKey.GROUPS, debouncedFilters],
+    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
-      if (filters.group_name) {
-        params.group_name = filters.group_name;
+      if (debouncedFilters.group_name) {
+        params.group_name = debouncedFilters.group_name;
       }
-      if (filters.author_identity) {
-        params.author_identity = filters.author_identity;
+      if (debouncedFilters.author_identity) {
+        params.author_identity = debouncedFilters.author_identity;
       }
 
+      if (pageParam) {
+        params.created_at_less_than = `${pageParam}`;
+      }
       return await commonApiFetch<
         GroupFull[],
         NonNullableNotRequired<GroupsRequestParams>
@@ -42,7 +62,8 @@ export default function GroupSelect() {
         params,
       });
     },
-    placeholderData: keepPreviousData,
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.at(-1)?.created_at ?? null,
   });
 
   const onUserSelect = (value: string | null) => {
@@ -60,13 +81,8 @@ export default function GroupSelect() {
   };
 
   const [groups, setGroups] = useState<GroupFull[]>([]);
-  useEffect(() => {
-    if (data?.length) {
-      setGroups(data);
-    } else {
-      setGroups([]);
-    }
-  }, [data, activeGroupId]);
+
+  useEffect(() => setGroups(data?.pages?.flat() ?? []), [data, activeGroupId]);
 
   return (
     <div className="tw-mt-4 tw-w-full tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0  tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">

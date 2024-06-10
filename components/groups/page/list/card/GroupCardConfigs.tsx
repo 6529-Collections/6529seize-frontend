@@ -1,3 +1,4 @@
+import { RefObject, useEffect, useRef, useState } from "react";
 import { GroupDescriptionType } from "../../../../../entities/IGroup";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";
@@ -158,32 +159,91 @@ export default function GroupCardConfigs({
 
   const configs = getConfigs();
 
+  const [isLeftHidden, setIsLeftHidden] = useState(false);
+  const [isRightHidden, setIsRightHidden] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const checkForHiddenContent = () => {
+    const container = containerRef.current;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setIsLeftHidden(scrollLeft > 0);
+      setIsRightHidden(scrollLeft < scrollWidth - clientWidth);
+    }
+  };
+
+  const scrollContainer = (direction: "left" | "right") => {
+    const container = containerRef.current;
+    if (container) {
+      const scrollAmount = direction === "left" ? -200 : 200; // Adjust scroll amount as needed
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    checkForHiddenContent();
+    // Optionally, add an event listener for resize to handle dynamic resizing
+    window.addEventListener("resize", checkForHiddenContent);
+    return () => window.removeEventListener("resize", checkForHiddenContent);
+  }, [configs]);
+
   return (
     <div className="tw-mt-2 tw-relative">
       <div className="tw-overflow-x-hidden">
-        <div className="tw-flex tw-items-center tw-gap-x-3 tw-overflow-x-auto horizontal-menu-hide-scrollbar">
-          {configs.map((config) => (
-            <GroupCardConfig key={config.key} config={config} />
+        {isLeftHidden && (
+          <button
+            onClick={() => scrollContainer("left")}
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0 tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
+          >
+            <svg
+              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
+        <div
+          className="tw-flex tw-items-center tw-gap-x-3 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
+          ref={containerRef}
+          onScroll={checkForHiddenContent}
+        >
+          {configs.map((config, i) => (
+            <GroupCardConfig config={config} key={config.key} />
           ))}
         </div>
+        {isRightHidden && (
+          <button
+            onClick={() => scrollContainer("right")}
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0 tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
+          >
+            <svg
+              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
       </div>
-      <button className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0 tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none">
-        <svg
-          className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6 9L12 15L18 9"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
     </div>
   );
 }

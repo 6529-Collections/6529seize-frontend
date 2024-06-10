@@ -146,6 +146,7 @@ type ReactQueryWrapperContextType = {
   }) => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
+  onGroupCreate: () => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -164,6 +165,7 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
+    onGroupCreate: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -300,6 +302,12 @@ export default function ReactQueryWrapper({
 
   const onGroupChanged = ({ groupId }: { readonly groupId: string }) =>
     invalidateGroup({ groupId });
+
+  const onGroupCreate = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.GROUPS],
+    });
+  };
 
   const setRepRates = ({
     data,
@@ -680,6 +688,7 @@ export default function ReactQueryWrapper({
         initCommunityActivityPage,
         onGroupRemoved,
         onGroupChanged,
+        onGroupCreate,
       }}
     >
       {children}
