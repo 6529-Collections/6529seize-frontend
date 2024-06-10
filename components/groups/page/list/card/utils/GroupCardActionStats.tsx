@@ -1,4 +1,14 @@
-export default function GroupCardActionStats() {
+import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+
+export default function GroupCardActionStats({
+  membersCount,
+}: {
+  readonly membersCount: number | null;
+}) {
+  const count =
+    typeof membersCount === "number"
+      ? formatNumberWithCommas(membersCount)
+      : null;
   return (
     <div className="tw-mt-4 tw-flex tw-space-x-6">
       <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-1.5">
@@ -27,7 +37,7 @@ export default function GroupCardActionStats() {
         </svg>
         <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-iron-400 tw-font-normal">Members count</span>
-          <span className="tw-font-medium tw-text-iron-50">720</span>
+          <span className="tw-font-medium tw-text-iron-50">{count}</span>
         </div>
       </div>
     </div>

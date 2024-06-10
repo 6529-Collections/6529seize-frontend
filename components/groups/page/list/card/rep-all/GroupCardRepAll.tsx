@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GroupFull } from "../../../../../../generated/models/GroupFull";
 import RepCategorySearch, {
   RepCategorySearchSize,
 } from "../../../../../utils/input/rep-category/RepCategorySearch";
 import GroupCardActionFooter from "../utils/GroupCardActionFooter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Page } from "../../../../../../helpers/Types";
+import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
+import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import {
+  CommunityMembersQuery,
+  CommunityMembersSortOption,
+} from "../../../../../../pages/community";
+import { SortDirection } from "../../../../../../entities/ISort";
+import { commonApiFetch } from "../../../../../../services/api/common-api";
 
 export default function GroupCardRepAll({
   group,
@@ -14,6 +24,42 @@ export default function GroupCardRepAll({
   readonly onCancel: () => void;
 }) {
   const [category, setCategory] = useState<string | null>(null);
+  const { data: members } = useQuery<Page<CommunityMemberOverview>>({
+    queryKey: [
+      QueryKey.COMMUNITY_MEMBERS_TOP,
+      {
+        page: 1,
+        pageSize: 1,
+        sort: CommunityMembersSortOption.LEVEL,
+        sortDirection: SortDirection.DESC,
+        groupId: group.id,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<
+        Page<CommunityMemberOverview>,
+        CommunityMembersQuery
+      >({
+        endpoint: `community-members/top`,
+        params: {
+          page: 1,
+          page_size: 1,
+          sort: CommunityMembersSortOption.LEVEL,
+          sort_direction: SortDirection.DESC,
+          group_id: group.id,
+        },
+      }),
+    placeholderData: keepPreviousData,
+  });
+
+  const [membersCount, setMembersCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (members) {
+      setMembersCount(members.count);
+    } else {
+      setMembersCount(null);
+    }
+  }, [members]);
   return (
     <div className="tw-py-4 tw-flex tw-flex-col tw-h-full tw-gap-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
       <div className="tw-px-4 sm:tw-px-6">
@@ -41,7 +87,7 @@ export default function GroupCardRepAll({
             size={RepCategorySearchSize.SM}
           />
         </div>
-        <GroupCardActionStats />
+        <GroupCardActionStats membersCount={membersCount} />
       </div>
       <GroupCardActionFooter onCancel={onCancel} />
     </div>

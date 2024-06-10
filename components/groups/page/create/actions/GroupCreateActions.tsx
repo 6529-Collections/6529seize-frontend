@@ -6,6 +6,7 @@ import { commonApiPost } from "../../../../../services/api/common-api";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 import GroupCreateTest from "./GroupCreateTest";
+import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreateActions({
   groupConfig,
@@ -14,7 +15,8 @@ export default function GroupCreateActions({
   readonly groupConfig: CreateGroup;
   readonly onCompleted: () => void;
 }) {
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
+  const { onGroupCreate } = useContext(ReactQueryWrapperContext);
 
   const getIsActionsDisabled = () => {
     if (
@@ -84,6 +86,7 @@ export default function GroupCreateActions({
         message: "Group created.",
         type: "success",
       });
+      onGroupCreate();
       onCompleted();
     },
     onError: (error) => {

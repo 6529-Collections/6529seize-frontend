@@ -264,6 +264,29 @@ paths:
                 $ref: "#/components/schemas/ChangeProfileCicRatingResponse"
         "400":
           description: "Invalid request"
+
+  /ratings:
+    post:
+      tags:
+        - Ratings
+      summary: Bulk rate
+      operationId: bulkRate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkRateRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkRateResponse"
+        "400":
+          description: "Invalid request"
+
   /drops:
     get:
       tags:
@@ -1003,6 +1026,50 @@ components:
           type: number
           format: int64
           nullable: true
+
+    BulkRateResponse:
+      type: object
+      required:
+        - skipped
+      properties:
+        skipped:
+          type: array
+          items:
+            type: string
+
+    BulkRateRequest:
+      type: object
+      required:
+        - matter
+        - category
+        - amount
+        - target_wallet_addresses
+      properties:
+        matter:
+          $ref: "#/components/schemas/RateMatter"
+        category:
+          type: string
+          maxLength: 100
+          nullable: true
+          pattern: "^[a-zA-Z0-9?!,.'() ]$"
+          description: "Category of the rating must be set when matter is REP and null if matter is CIC"
+        amount:
+          type: number
+          format: int64
+        target_wallet_addresses:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: "0x[a-fA-F0-9]{40}"
+            description: "Wallet address of the target profile"
+
+    RateMatter:
+      type: string
+      enum:
+        - REP
+        - CIC
 
     Group:
       type: object

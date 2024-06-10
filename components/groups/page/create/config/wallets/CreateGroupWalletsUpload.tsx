@@ -8,7 +8,6 @@ export default function CreateGroupWalletsUpload({
   readonly wallets: string[] | null;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
-  const haveWallets = !!wallets?.length;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onFileChange = useCallback(
@@ -127,6 +126,7 @@ export default function CreateGroupWalletsUpload({
         </label>
         <GroupCreateWalletsCount
           walletsCount={wallets?.length ?? null}
+          loading={false}
           removeWallets={() => setWallets(null)}
         />
       </div>
