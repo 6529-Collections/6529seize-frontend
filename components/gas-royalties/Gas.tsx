@@ -12,7 +12,7 @@ import {
 } from "./GasRoyalties";
 import { useRouter } from "next/router";
 
-export default function Gas() {
+export default function GasComponent() {
   const router = useRouter();
 
   useEffect(() => {

@@ -83,7 +83,8 @@ export default function NextGenAdminArtistSignCollection(
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [collectionID, signature],
       });
     }
@@ -135,7 +136,7 @@ export default function NextGenAdminArtistSignCollection(
             </Form>
             <NextGenContractWriteStatus
               isLoading={contractWrite.isLoading}
-              hash={contractWrite.data?.hash}
+              hash={contractWrite.data}
               error={contractWrite.error}
             />
           </Col>

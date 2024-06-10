@@ -16,8 +16,12 @@ import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../../../../searchModal/SearchModal";
-import PdfViewer from "../../../../pdfViewer/PdfViewer";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+import dynamic from "next/dynamic";
+
+const PdfViewer = dynamic(() => import("../../../../pdfViewer/PdfViewer"), {
+  ssr: false,
+});
 
 interface Props {
   collection: NextGenCollection;

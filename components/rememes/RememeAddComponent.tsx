@@ -58,10 +58,12 @@ export default function RememeAddComponent(props: Readonly<Props>) {
   }
 
   const ensResolution = useEnsName({
-    enabled:
-      !verifying &&
-      contractResponse?.contractDeployer != undefined &&
-      isValidEthAddress(contractResponse?.contractDeployer),
+    query: {
+      enabled:
+        !verifying &&
+        contractResponse?.contractDeployer != undefined &&
+        isValidEthAddress(contractResponse?.contractDeployer),
+    },
     address: contractResponse?.contractDeployer as `0x${string}`,
     chainId: 1,
   });

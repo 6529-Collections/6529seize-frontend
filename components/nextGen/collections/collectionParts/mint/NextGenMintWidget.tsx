@@ -19,9 +19,9 @@ import {
 import {
   useAccount,
   useChainId,
-  useContractWrite,
   useEnsAddress,
   useEnsName,
+  useWriteContract,
 } from "wagmi";
 import { useEffect, useState } from "react";
 import { NULL_ADDRESS } from "../../../../../constants";
@@ -178,16 +178,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     }
   }, [props.collection, account.address, mintForAddress]);
 
-  const mintWrite = useContractWrite({
-    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    value: getMintValue(mintCount, props.mint_price),
-    functionName: "mint",
-    onError() {
-      setIsMinting(false);
-    },
-  });
+  const mintWrite = useWriteContract();
 
   useEffect(() => {
     setIsMinting(false);
@@ -251,7 +242,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     if (isMinting) {
-      mintWrite.write({
+      mintWrite.writeContract({
+        address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
+        abi: NEXTGEN_MINTER.abi,
+        chainId: NEXTGEN_CHAIN_ID,
+        value: getMintValue(mintCount, props.mint_price),
+        functionName: "mint",
         args: [
           props.collection.id,
           mintCount,
@@ -571,8 +567,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </Form.Group>
             )}
             <NextGenContractWriteStatus
-              isLoading={mintWrite.isLoading}
-              hash={mintWrite.data?.hash}
+              isLoading={mintWrite.isPending}
+              hash={mintWrite.data}
               error={mintWrite.error}
               onSuccess={() => {
                 setCurrentProof(findActiveProof(originalProofs));
