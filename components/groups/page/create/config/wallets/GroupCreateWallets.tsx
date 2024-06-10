@@ -67,12 +67,13 @@ export default function GroupCreateWallets({
       </div>
       {wallets?.length && (
         <div className="tw-mt-4">
-          <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-3 tw-items-center tw-rounded-xl tw bg-iron-900 tw-border tw-border-solid tw-border-iron-700">
+          <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-3 tw-items-center tw-rounded-xl tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
             <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm">
               <svg
                 className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path

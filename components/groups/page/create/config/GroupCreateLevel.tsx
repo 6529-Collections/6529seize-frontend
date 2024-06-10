@@ -15,7 +15,7 @@ export default function GroupCreateLevel({
         <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           Level
         </p>
-        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-400">
+        <p className="tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">
           Lorem ipsum dolor sit amet consectetur adipisicing elit.
         </p>
       </div>

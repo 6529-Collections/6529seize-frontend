@@ -8,7 +8,7 @@ export default function GroupCreateWalletsCount({
   const haveWallets = walletsCount !== null;
   return (
     <div className="tw-mt-4">
-      <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-3 tw-items-center tw-rounded-xl tw bg-iron-900 tw-border tw-border-solid tw-border-iron-700">
+      <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-3 tw-items-center tw-rounded-xl tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
         <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm">
           <svg
             className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300"
@@ -27,7 +27,7 @@ export default function GroupCreateWalletsCount({
           <span className="tw-inline-flex tw-gap-x-1.5">
             <span className="tw-text-iron-400 tw-font-medium">Wallets:</span>
             {!!haveWallets ? (
-              <span className="tw-text-primary-400 tw-font-semibold">
+              <span className="tw-text-iron-50 tw-font-semibold">
                 {walletsCount}
               </span>
             ) : (
