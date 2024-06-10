@@ -64,6 +64,7 @@ export default function GroupSelect() {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.created_at ?? null,
+    placeholderData: keepPreviousData,
   });
 
   const onUserSelect = (value: string | null) => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { GroupsRequestParams } from "../../../../entities/IGroup";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../../helpers/Types";
@@ -54,6 +54,7 @@ export default function GroupsList() {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.created_at ?? null,
+    placeholderData: keepPreviousData
   });
 
   const setGroupName = (value: string | null) => {
