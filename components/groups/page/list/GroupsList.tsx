@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { GroupsRequestParams } from "../../../../entities/IGroup";
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQuery,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../../helpers/Types";
@@ -76,7 +72,7 @@ export default function GroupsList() {
 
   const [groups, setGroups] = useState<GroupFull[]>([]);
 
-  useEffect(() => setGroups(data?.pages.flat() ?? []), [data]);
+  useEffect(() => setGroups(data?.pages?.flat() ?? []), [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (groups.length < REQUEST_SIZE) {
