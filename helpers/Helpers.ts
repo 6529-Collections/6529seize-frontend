@@ -753,3 +753,7 @@ export const getRandomColorWithSeed = (seedString: string) => {
 
   return `#${r}${g}${b}`;
 };
+
+export const waitForMilliseconds = async (milliseconds: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+};
