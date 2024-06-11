@@ -32,7 +32,7 @@ export default function GroupCreateRep({
               />
             </div>
           )}
-          <div className="tw-flex tw-flex-col xl:tw-flex-row tw-gap-5">
+          <div className="tw-flex tw-flex-col xl:tw-flex-row tw-gap-4 lg:tw-gap-5">
             <IdentitySearch
               identity={rep.user_identity}
               setIdentity={(identity) =>
@@ -44,7 +44,7 @@ export default function GroupCreateRep({
               setCategory={(category) => setRep({ ...rep, category })}
             />
           </div>
-          <div className="tw-mt-5">
+          <div className="tw-mt-4 lg:tw-mt-5">
             <GroupCreateNumericValue
               value={rep.min}
               label="Rep at least"

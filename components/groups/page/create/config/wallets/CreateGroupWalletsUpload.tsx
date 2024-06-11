@@ -106,7 +106,7 @@ export default function CreateGroupWalletsUpload({
                 </svg>
               </div>
             </div>
-            <p className="tw-mt-4 tw-mb-0 tw-text-sm tw-text-iron-500">
+            <p className="tw-mt-4 tw-mb-0 tw-text-sm tw-text-center tw-text-pretty tw-text-iron-500">
               Drag and drop your CSV file here, or click to select a file
             </p>
           </div>

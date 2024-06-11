@@ -25,17 +25,17 @@ export default function IdentitySearch({
 }) {
   const INPUT_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-py-3 tw-text-sm",
-    [IdentitySearchSize.MD]: "tw-pb-3 tw-pt-4 tw-text-base",
+    [IdentitySearchSize.MD]: "tw-pb-3 tw-pt-3 tw-text-md",
   };
 
   const LABEL_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-text-sm",
-    [IdentitySearchSize.MD]: "tw-text-base",
+    [IdentitySearchSize.MD]: "tw-text-md",
   };
 
   const SEARCH_ICON_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-top-3",
-    [IdentitySearchSize.MD]: "tw-top-4",
+    [IdentitySearchSize.MD]: "tw-top-3.5",
   };
 
   const randomId = getRandomObjectId();

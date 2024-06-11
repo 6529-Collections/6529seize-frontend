@@ -85,10 +85,10 @@ export default function GroupCreateWallets({
                 />
               </svg>
               <span className="tw-inline-flex tw-gap-x-1.5">
-                <span className="tw-text-iron-50 tw-font-medium">
+                <span className="tw-text-primary-400 tw-font-medium">
                   Total unique wallets:
                 </span>
-                <span className="tw-text-primary-400 tw-font-semibold">
+                <span className="tw-text-primary-400 tw-font-bold">
                   {wallets.length}
                 </span>
               </span>

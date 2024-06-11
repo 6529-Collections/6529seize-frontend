@@ -25,17 +25,17 @@ export default function RepCategorySearch({
 }) {
   const INPUT_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-py-3 tw-text-sm",
-    [RepCategorySearchSize.MD]: "tw-pb-3 tw-pt-4 tw-text-base",
+    [RepCategorySearchSize.MD]: "tw-pb-3 tw-pt-3 tw-text-md",
   };
 
   const LABEL_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-text-sm",
-    [RepCategorySearchSize.MD]: "tw-text-base",
+    [RepCategorySearchSize.MD]: "tw-text-md",
   };
 
   const SVG_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-top-3",
-    [RepCategorySearchSize.MD]: "tw-top-4",
+    [RepCategorySearchSize.MD]: "tw-top-3.5",
   };
 
   const [searchCriteria, setSearchCriteria] = useState<string | null>(category);

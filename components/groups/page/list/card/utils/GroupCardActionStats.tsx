@@ -15,13 +15,13 @@ export default function GroupCardActionStats({
       ? formatNumberWithCommas(membersCount)
       : null;
   return (
-    <div className="tw-mt-4 tw-flex tw-space-x-6">
+    <div className="tw-mt-4 tw-flex tw-flex-wrap lg:tw-flex-nowrap tw-gap-x-4 xl:tw-gap-x-6 tw-gap-y-3">
       <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-1.5">
-        <span className="tw-text-iron-400 tw-font-normal">Min rep</span>
+        <span className="tw-text-iron-400 tw-font-normal">Min rep:</span>
         <span className="tw-font-medium tw-text-red">-443</span>
       </div>
       <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-1.5">
-        <span className="tw-text-iron-400 tw-font-normal">Max rep</span>
+        <span className="tw-text-iron-400 tw-font-normal">Max rep:</span>
         <span className="tw-font-medium tw-text-green">654</span>
       </div>
       <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2">
@@ -41,7 +41,7 @@ export default function GroupCardActionStats({
           />
         </svg>
         <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-iron-400 tw-font-normal">Members count</span>
+          <span className="tw-text-iron-400 tw-font-normal">Members count:</span>
           <span className="tw-font-medium tw-text-iron-50">
             {loadingMembersCount ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />

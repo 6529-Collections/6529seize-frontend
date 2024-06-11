@@ -70,7 +70,7 @@ export default function GroupCardRepAll({
       disabled={false}
       onSave={() => {}}
     >
-      <div className="tw-flex tw-space-x-4">
+      <div className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
         <div className="tw-group tw-w-full tw-relative">
           <input
             type="text"
