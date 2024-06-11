@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import { getRandomColorWithSeed } from "../../../../../helpers/Helpers";
 import GroupCardView from "./GroupCardView";
 import GroupCardRepAll from "./rep-all/GroupCardRepAll";
 import GroupCardCICAll from "./cic-all/GroupCardCICAll";
+import { AuthContext } from "../../../../auth/Auth";
 
 export enum GroupCardState {
   IDLE = "IDLE",
@@ -12,6 +13,7 @@ export enum GroupCardState {
 }
 
 export default function GroupCard({ group }: { readonly group: GroupFull }) {
+  const { connectedProfile } = useContext(AuthContext);
   const [state, setState] = useState<GroupCardState>(GroupCardState.IDLE);
 
   const banner1 =
@@ -22,6 +24,12 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
     getRandomColorWithSeed(group.created_by.handle);
 
   const onActionCancel = () => setState(GroupCardState.IDLE);
+
+  useEffect(() => {
+    if (!connectedProfile?.profile?.handle) {
+      setState(GroupCardState.IDLE);
+    }
+  }, [connectedProfile?.profile?.handle]);
 
   const components: Record<GroupCardState, JSX.Element> = {
     [GroupCardState.IDLE]: <GroupCardView group={group} setState={setState} />,

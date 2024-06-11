@@ -287,6 +287,31 @@ paths:
         "400":
           description: "Invalid request"
 
+  /ratings/credit:
+    get:
+      tags:
+        - Ratings
+      summary: Get available credit for rating
+      operationId: getCreditLeft
+      parameters:
+        - name: rater
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: rater_representative
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailableRatingCredit"
+
   /drops:
     get:
       tags:
@@ -1026,6 +1051,18 @@ components:
           type: number
           format: int64
           nullable: true
+
+    AvailableRatingCredit:
+      type: object
+      required:
+        - credit
+      properties:
+        cic_credit:
+          type: number
+          format: int64
+        rep_credit:
+          type: number
+          format: int64
 
     BulkRateResponse:
       type: object

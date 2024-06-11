@@ -1,21 +1,29 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { GroupFull } from "../../../../../../generated/models/GroupFull";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
-import GroupCardCICAllInput from "./GroupCardCICAllInput";
+
 import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import {
   CommunityMembersQuery,
   CommunityMembersSortOption,
 } from "../../../../../../pages/community";
 import { SortDirection } from "../../../../../../entities/ISort";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../../../../services/api/common-api";
 import { Page } from "../../../../../../helpers/Types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import GroupCardActionWrapper from "../GroupCardActionWrapper";
 import { BulkRateRequest } from "../../../../../../generated/models/BulkRateRequest";
 import { RateMatter } from "../../../../../../generated/models/RateMatter";
-import { waitForMilliseconds } from "../../../../../../helpers/Helpers";
+import { BulkRateResponse } from "../../../../../../generated/models/BulkRateResponse";
+import { AuthContext } from "../../../../../auth/Auth";
+import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
 
 export default function GroupCardCICAll({
   group,
@@ -24,7 +32,11 @@ export default function GroupCardCICAll({
   readonly group: GroupFull;
   readonly onCancel: () => void;
 }) {
-  const [cicToGive, setCicToGive] = useState<number | null>(null);
+  const matter = RateMatter.Cic;
+  const category = null;
+  const { onIdentityBulkRate } = useContext(ReactQueryWrapperContext);
+  const { setToast, requestAuth } = useContext(AuthContext);
+  const [amountToGive, setAmountToGive] = useState<number | null>(null);
   const { data: members, isFetching } = useQuery<Page<CommunityMemberOverview>>(
     {
       queryKey: [
@@ -64,17 +76,35 @@ export default function GroupCardCICAll({
     }
   }, [members]);
 
-  const [givingCic, setGivingCic] = useState<boolean>(false);
+  const [doingRates, setDoingRates] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(true);
 
-  useEffect(() => setLoading(isFetching || givingCic), [isFetching, givingCic]);
+  useEffect(
+    () => setLoading(isFetching || doingRates),
+    [isFetching, doingRates]
+  );
   useEffect(
     () =>
-      setDisabled(typeof cicToGive !== "number" || !membersCount || loading),
-    [cicToGive, membersCount, loading]
+      setDisabled(typeof amountToGive !== "number" || !membersCount || loading),
+    [amountToGive, membersCount, loading]
   );
+
+  const bulkRateMutation = useMutation({
+    mutationFn: async (body: BulkRateRequest) =>
+      await commonApiPost<BulkRateRequest, BulkRateResponse>({
+        endpoint: `ratings`,
+        body: body,
+      }),
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+      throw error;
+    },
+  });
 
   const getMembersPage = async (
     page: number
@@ -94,17 +124,17 @@ export default function GroupCardCICAll({
     });
   };
 
-  const giveCicToMembers = async (body: BulkRateRequest): Promise<void> => {
-    await waitForMilliseconds(2000);
-  };
-
   const [doneMembersCount, setDoneMembersCount] = useState<number>(0);
 
   const onSave = async (): Promise<void> => {
-    if (disabled || typeof cicToGive !== "number") {
+    if (disabled || typeof amountToGive !== "number") {
       return;
     }
-    setGivingCic(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      return;
+    }
+    setDoingRates(true);
     let page = 1;
 
     let haveNextPage = true;
@@ -116,16 +146,31 @@ export default function GroupCardCICAll({
         break;
       }
       const members = membersPage.data;
-      await giveCicToMembers({
-        matter: RateMatter.Cic,
-        category: null,
-        amount: cicToGive,
-        target_wallet_addresses: members.map((m) => m.detail_view_key),
-      });
-      setDoneMembersCount((prev) => prev + members.length);
+      try {
+        await bulkRateMutation.mutateAsync({
+          matter,
+          category,
+          amount: amountToGive,
+          target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
+        });
+        setDoneMembersCount((prev) => prev + members.length);
+      } catch {
+        haveNextPage = false;
+        setDoingRates(false);
+        setDoneMembersCount(0);
+        onIdentityBulkRate();
+        onCancel();
+        return;
+      }
     }
-    console.log("done");
-    setGivingCic(false);
+    setToast({
+      message: "CIC distributed.",
+      type: "success",
+    });
+    setDoingRates(false);
+    setDoneMembersCount(0);
+    onIdentityBulkRate();
+    onCancel();
   };
 
   return (
@@ -133,13 +178,21 @@ export default function GroupCardCICAll({
       onCancel={onCancel}
       loading={loading}
       disabled={disabled}
-      addingRates={givingCic}
+      addingRates={doingRates}
       membersCount={membersCount}
       doneMembersCount={doneMembersCount}
       onSave={onSave}
     >
-      <GroupCardCICAllInput cicToGive={cicToGive} setCicToGive={setCicToGive} />
+      <div className="tw-w-full xl:tw-max-w-[17.156rem]">
+        <GroupCardActionNumberInput
+          label="CIC"
+          componentId={`${group.id}_cic`}
+          amount={amountToGive}
+          setAmount={setAmountToGive}
+        />
+      </div>
       <GroupCardActionStats
+        matter={matter}
         membersCount={membersCount}
         loadingMembersCount={isFetching}
       />

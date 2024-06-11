@@ -1,21 +1,32 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GroupFull } from "../../../../../../generated/models/GroupFull";
 import RepCategorySearch, {
   RepCategorySearchSize,
 } from "../../../../../utils/input/rep-category/RepCategorySearch";
 import GroupCardActionFooter from "../utils/GroupCardActionFooter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../../helpers/Types";
 import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import {
   CommunityMembersQuery,
   CommunityMembersSortOption,
 } from "../../../../../../pages/community";
 import { SortDirection } from "../../../../../../entities/ISort";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../../../../services/api/common-api";
 import GroupCardActionWrapper from "../GroupCardActionWrapper";
+import { RateMatter } from "../../../../../../generated/models/RateMatter";
+import { AuthContext } from "../../../../../auth/Auth";
+import GroupCardRepAllInputs from "./GroupCardRepAllInputs";
+import { BulkRateRequest } from "../../../../../../generated/models/BulkRateRequest";
+import { BulkRateResponse } from "../../../../../../generated/models/BulkRateResponse";
 
 export default function GroupCardRepAll({
   group,
@@ -24,7 +35,11 @@ export default function GroupCardRepAll({
   readonly group: GroupFull;
   readonly onCancel: () => void;
 }) {
+  const matter = RateMatter.Rep;
   const [category, setCategory] = useState<string | null>(null);
+  const { setToast, requestAuth } = useContext(AuthContext);
+  const { onIdentityBulkRate } = useContext(ReactQueryWrapperContext);
+  const [amountToGive, setAmountToGive] = useState<number | null>(null);
   const { data: members, isFetching } = useQuery<Page<CommunityMemberOverview>>(
     {
       queryKey: [
@@ -63,38 +78,128 @@ export default function GroupCardRepAll({
       setMembersCount(null);
     }
   }, [members]);
+
+  const [doingRates, setDoingRates] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [disabled, setDisabled] = useState<boolean>(true);
+
+  useEffect(
+    () => setLoading(isFetching || doingRates),
+    [isFetching, doingRates]
+  );
+  useEffect(
+    () =>
+      setDisabled(
+        typeof amountToGive !== "number" ||
+          !membersCount ||
+          loading ||
+          !category
+      ),
+    [amountToGive, membersCount, loading, category]
+  );
+
+  const bulkRateMutation = useMutation({
+    mutationFn: async (body: BulkRateRequest) =>
+      await commonApiPost<BulkRateRequest, BulkRateResponse>({
+        endpoint: `ratings`,
+        body: body,
+      }),
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+      throw error;
+    },
+  });
+
+  const getMembersPage = async (
+    page: number
+  ): Promise<Page<CommunityMemberOverview>> => {
+    return await commonApiFetch<
+      Page<CommunityMemberOverview>,
+      CommunityMembersQuery
+    >({
+      endpoint: `community-members/top`,
+      params: {
+        page: page,
+        page_size: 100,
+        sort: CommunityMembersSortOption.LEVEL,
+        sort_direction: SortDirection.DESC,
+        group_id: group.id,
+      },
+    });
+  };
+
+  const [doneMembersCount, setDoneMembersCount] = useState<number>(0);
+
+  const onSave = async (): Promise<void> => {
+    if (disabled || typeof amountToGive !== "number") {
+      return;
+    }
+    const { success } = await requestAuth();
+    if (!success) {
+      return;
+    }
+    setDoingRates(true);
+    let page = 1;
+
+    let haveNextPage = true;
+    while (haveNextPage) {
+      const membersPage = await getMembersPage(page);
+      haveNextPage = membersPage.next !== null;
+      page++;
+      if (!membersPage.data.length) {
+        break;
+      }
+      const members = membersPage.data;
+      try {
+        await bulkRateMutation.mutateAsync({
+          matter,
+          category,
+          amount: amountToGive,
+          target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
+        });
+        setDoneMembersCount((prev) => prev + members.length);
+      } catch {
+        haveNextPage = false;
+        setDoingRates(false);
+        setDoneMembersCount(0);
+        onIdentityBulkRate();
+        onCancel();
+
+        return;
+      }
+    }
+    setToast({
+      message: "Rep distributed.",
+      type: "success",
+    });
+    setDoingRates(false);
+    setDoneMembersCount(0);
+    onIdentityBulkRate();
+    onCancel();
+  };
   return (
     <GroupCardActionWrapper
       onCancel={onCancel}
-      loading={false}
-      disabled={false}
-      onSave={() => {}}
+      loading={loading}
+      disabled={disabled}
+      addingRates={doingRates}
+      membersCount={membersCount}
+      doneMembersCount={doneMembersCount}
+      onSave={onSave}
     >
-      <div className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
-        <div className="tw-group tw-w-full tw-relative">
-          <input
-            type="text"
-            id="floating_rep_number"
-            autoComplete="off"
-            className="tw-form-input tw-block tw-py-3 tw-text-sm tw-px-4 tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer
-      tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-            placeholder=" "
-          />
-          <label
-            htmlFor="floating_rep_number"
-            className="tw-absolute tw-cursor-text tw-text-sm tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-[1] tw-origin-[0] tw-bg-iron-900 tw-rounded-lg group-hover:tw-bg-iron-800 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
-  peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
-          >
-            Rep
-          </label>
-        </div>
-        <RepCategorySearch
-          category={category}
-          setCategory={setCategory}
-          size={RepCategorySearchSize.SM}
-        />
-      </div>
+      <GroupCardRepAllInputs
+        category={category}
+        setCategory={setCategory}
+        group={group}
+        amountToGive={amountToGive}
+        setAmountToGive={setAmountToGive}
+      />
       <GroupCardActionStats
+        matter={matter}
         membersCount={membersCount}
         loadingMembersCount={isFetching}
       />
