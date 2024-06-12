@@ -8,9 +8,10 @@ import {
 } from "../../../../../../../store/groupSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { useMutation } from "wagmi";
+
 import { commonApiPost } from "../../../../../../../services/api/common-api";
 import { createPortal } from "react-dom";
+import { useMutation } from "@tanstack/react-query";
 
 export default function GroupCardDeleteModal({
   group,
