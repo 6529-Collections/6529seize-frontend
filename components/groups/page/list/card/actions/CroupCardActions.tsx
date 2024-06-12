@@ -22,7 +22,7 @@ export default function CroupCardActions({
               type="button"
               className="tw-opacity-50 tw-text-iron-600 tw-border-iron-800 tw-inline-flex tw-items-center tw-bg-iron-800 tw-border  tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
             >
-              Rep all
+              disabled
             </button>
             <button
               onClick={() => setState(GroupCardState.REP)}
