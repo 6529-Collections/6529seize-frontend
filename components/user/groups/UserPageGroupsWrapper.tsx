@@ -3,7 +3,6 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageNoProfile from "../utils/no-profile/UserPageNoProfile";
 import UserPageGroups from "./UserPageGroups";
 
 export default function UserPageGroupsWrapper({
@@ -23,10 +22,6 @@ export default function UserPageGroupsWrapper({
     enabled: !!user,
     initialData: initialProfile,
   });
-
-  if (!profile.profile) {
-    return <UserPageNoProfile profile={profile} />;
-  }
 
   return <UserPageGroups profile={profile} />;
 }
