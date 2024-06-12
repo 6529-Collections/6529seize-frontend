@@ -92,7 +92,7 @@ export default function GroupSelect() {
       )}
       <div className="tw-px-4 tw-pt-3">
         <p className="tw-text-base tw-text-iron-50 tw-font-semibold tw-mb-3">
-          Filter by Group
+          Search Groups
         </p>
         <div className="tw-space-y-3">
           <IdentitySearch
@@ -112,6 +112,23 @@ export default function GroupSelect() {
       tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
               placeholder=" "
             />
+            {!!filters.group_name?.length && (
+              <svg
+                onClick={() => onFilterNameSearch(null)}
+                className="tw-top-3.5 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 7L7 17M7 7L17 17"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
             <svg
               className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300"
               viewBox="0 0 20 20"
