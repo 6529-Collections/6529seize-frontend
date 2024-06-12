@@ -126,7 +126,14 @@ export default function GroupCardActionStats({
         <span className="tw-text-primary-400 tw-font-semibold">89,555</span> rep
         to each of
         <span>
-          <span className="tw-text-primary-400 tw-font-semibold">121</span>{" "}
+          <span className="tw-text-primary-400 tw-font-semibold">
+            {" "}
+            {loadingMembersCount ? (
+              <CircleLoader size={CircleLoaderSize.SMALL} />
+            ) : (
+              count
+            )}
+          </span>{" "}
           members of the group.
         </span>
       </p>

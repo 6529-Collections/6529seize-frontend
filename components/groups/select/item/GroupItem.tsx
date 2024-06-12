@@ -7,10 +7,6 @@ import {
 } from "../../../../helpers/image.helpers";
 import Link from "next/link";
 
-import GroupItemDelete from "./delete/GroupItemDelete";
-import { AnimatePresence, motion } from "framer-motion";
-import { useClickAway, useKeyPressEvent } from "react-use";
-
 import GroupItemWrapper from "./GroupItemWrapper";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,14 +14,10 @@ import {
   setActiveGroupId,
 } from "../../../../store/groupSlice";
 import { GroupFull } from "../../../../generated/models/GroupFull";
+import { getTimeAgo } from "../../../../helpers/Helpers";
 
-export default function GroupItem({
-  group,
+export default function GroupItem({ group }: { readonly group: GroupFull }) {
 
-}: {
-  readonly group: GroupFull;
-
-}) {
   const { connectedProfile } = useContext(AuthContext);
 
   const activeGroupId = useSelector(selectActiveGroupId);
@@ -64,16 +56,17 @@ export default function GroupItem({
   };
 
   const [deactivateHover, setDeactivateHover] = useState(false);
+  const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
 
   return (
     <GroupItemWrapper
-      filter={group}
+      group={group}
       isActive={isActive}
       deactivateHover={deactivateHover}
     >
-      <div className="tw-px-4 tw-py-2.5 tw-relative">
+      <div className="-tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-xl tw-relative ">
         {isActive && (
-          <div className="tw-absolute -tw-right-2 -tw-top-3">
+          <div className="tw-absolute -tw-right-2 -tw-top-10">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -101,53 +94,45 @@ export default function GroupItem({
             </button>
           </div>
         )}
-        <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
-          <p className="tw-text-sm tw-font-normal tw-mb-0 tw-truncate">
-            <span className="tw-text-iron-400 tw-pr-1.5">Name:</span>
-            <span className="tw-text-iron-50 tw-font-medium">{group.name}</span>
-          </p>
-
-        </div>
-      </div>
-
-      <div className="tw-w-full tw-inline-flex tw-px-4 tw-py-2 tw-gap-x-2 tw-items-center">
-        <p className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400 tw-mb-0">
-          Created by
-        </p>
-        <div className="tw-flex tw-gap-x-2 tw-items-center">
-          {group.created_by?.pfp && (
-            <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
-              <div className="tw-h-full tw-w-full tw-max-w-full">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
-                  <img
-                    src={getScaledImageUri(
-                      group.created_by.pfp,
-                      ImageScale.W_AUTO_H_50
-                    )}
-                    alt="Community Table Profile Picture"
-                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
-                  />
-                </div>
-              </div>
+        <div className="tw-flex tw-flex-col tw-h-full">
+          <div className="tw-px-4 tw-flex tw-gap-x-3">
+            {group.created_by.pfp ? (
+              <img
+                className="-tw-mt-2 tw-flex-shrink-0 tw-object-contain tw-h-8 tw-w-8 tw-rounded-lg tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+                src={getScaledImageUri(
+                  group.created_by.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
+                alt=""
+              />
+            ) : (
+              <div className="-tw-mt-2 tw-flex-shrink-0 tw-object-contain tw-h-8 tw-w-8 tw-rounded-lg tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"></div>
+            )}
+            <div className="tw-mt-1 tw-text-sm tw-flex tw-items-center tw-w-full tw-justify-between">
+              <span className="tw-text-iron-50 tw-font-semibold">
+                <Link
+                  href={`/${group.created_by?.handle}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-medium"
+                >
+                  {group.created_by?.handle}
+                </Link>
+              </span>
+              <span className="tw-text-iron-400 tw-font-normal tw-text-xs">
+                {timeAgo}
+              </span>
             </div>
-          )}
-          <div className="tw-flex tw-items-center tw-space-x-2">
-            <Link
-              href={`/${group.created_by?.handle}`}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="tw-no-underline hover:tw-underline tw-group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-text-iron-50 tw-text-sm tw-font-medium"
-            >
-              {group.created_by?.handle}
-            </Link>
+          </div>
+          <div className="tw-pt-3 tw-pb-3 tw-flex tw-flex-col tw-h-full tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
+            <div className="tw-flex-1 tw-px-4">
+              <p className="tw-mb-0 tw-text-sm tw-text-iron-50 tw-font-semibold tw-whitespace-nowrap tw-overflow-hidden tw-text-overflow-ellipsis tw-truncate">
+                {group.name}
+              </p>
+            </div>
           </div>
         </div>
-        {!group.visible && (
-          <div className="tw-text-xs tw-w-full tw-text-right tw-text-red">
-            Not saved
-          </div>
-        )}
       </div>
     </GroupItemWrapper>
   );

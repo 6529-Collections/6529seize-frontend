@@ -2,14 +2,22 @@ import { useContext, useEffect, useState } from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "../../auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
+import { useSearchParams } from "next/navigation";
 
 enum GroupsViewMode {
   CREATE = "CREATE",
   VIEW = "VIEW",
 }
 
+const GROUP_EDIT_SEARCH_PARAM = "edit";
+
 export default function Groups() {
-  const { connectedProfile, requestAuth } = useContext(AuthContext);
+  const searchParams = useSearchParams();
+
+  const { connectedProfile, requestAuth, activeProfileProxy } =
+    useContext(AuthContext);
+
+  const edit = searchParams.get(GROUP_EDIT_SEARCH_PARAM);
 
   const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
 
@@ -22,6 +30,12 @@ export default function Groups() {
     setViewMode(mode);
   };
 
+  useEffect(() => {
+    if (edit) {
+      onViewModeChange(GroupsViewMode.CREATE);
+    }
+  }, [edit]);
+
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (
       <GroupsPageListWrapper
@@ -29,19 +43,22 @@ export default function Groups() {
       />
     ),
     [GroupsViewMode.CREATE]: (
-      <GroupCreate onCompleted={() => onViewModeChange(GroupsViewMode.VIEW)} />
+      <GroupCreate
+        onCompleted={() => onViewModeChange(GroupsViewMode.VIEW)}
+        edit={edit ?? "new"}
+      />
     ),
   };
 
   useEffect(() => {
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
       onViewModeChange(GroupsViewMode.VIEW);
     }
-  }, [connectedProfile]);
+  }, [connectedProfile, activeProfileProxy]);
 
   return (
     <div>
-      <div className="tw-mb-4 lg:tw-mb-8">
+      <div className="tailwind-scope tw-mb-4 lg:tw-mb-8">
         {viewMode === GroupsViewMode.CREATE && (
           <button
             onClick={() => onViewModeChange(GroupsViewMode.VIEW)}

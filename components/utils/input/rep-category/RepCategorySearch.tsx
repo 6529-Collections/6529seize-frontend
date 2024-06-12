@@ -41,6 +41,11 @@ export default function RepCategorySearch({
   };
 
   const [searchCriteria, setSearchCriteria] = useState<string | null>(category);
+
+  useEffect(() => {
+    setSearchCriteria(category);
+  }, [category]);
+
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
   );

@@ -13,7 +13,15 @@ export enum GroupCardState {
   CIC = "CIC",
 }
 
-export default function GroupCard({ group }: { readonly group: GroupFull }) {
+export default function GroupCard({
+  group,
+  activeGroupIdVoteAll,
+  setActiveGroupIdVoteAll,
+}: {
+  readonly group: GroupFull;
+  readonly activeGroupIdVoteAll: string | null;
+  readonly setActiveGroupIdVoteAll: (value: string | null) => void;
+}) {
   const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);
   const [state, setState] = useState<GroupCardState>(GroupCardState.IDLE);
@@ -25,16 +33,48 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
     group.created_by.banner2_color ??
     getRandomColorWithSeed(group.created_by.handle);
 
-  const onActionCancel = () => setState(GroupCardState.IDLE);
+  const onGroupStateChange = (state: GroupCardState) => {
+    if (state === GroupCardState.IDLE) {
+      setActiveGroupIdVoteAll(null);
+    } else {
+      setActiveGroupIdVoteAll(group.id);
+    }
+    setState(state);
+  };
+
+  const getIsActiveGroupVoteAll = () => {
+    return activeGroupIdVoteAll === group.id;
+  };
+
+  const isActiveGroupVoteAll = getIsActiveGroupVoteAll();
+
+  useEffect(() => {
+    if (!isActiveGroupVoteAll) {
+      setState(GroupCardState.IDLE);
+    }
+  });
+
+  const onActionCancel = () => onGroupStateChange(GroupCardState.IDLE);
 
   useEffect(() => {
     if (!connectedProfile?.profile?.handle) {
-      setState(GroupCardState.IDLE);
+      onGroupStateChange(GroupCardState.IDLE);
     }
   }, [connectedProfile?.profile?.handle]);
 
+  const onEditClick = (group: GroupFull) => {
+    router.push(`/groups?edit=${group.id}`);
+  };
+
   const components: Record<GroupCardState, JSX.Element> = {
-    [GroupCardState.IDLE]: <GroupCardView group={group} setState={setState} />,
+    [GroupCardState.IDLE]: (
+      <GroupCardView
+        group={group}
+        setState={onGroupStateChange}
+        haveActiveGroupVoteAll={!!activeGroupIdVoteAll}
+        onEditClick={onEditClick}
+      />
+    ),
     [GroupCardState.REP]: (
       <GroupCardRepAll group={group} onCancel={onActionCancel} />
     ),
@@ -50,7 +90,9 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
 
   return (
     <div
-      className="tw-col-span-1 tw-cursor-pointer"
+      className={`${
+        state === GroupCardState.IDLE && "tw-cursor-pointer"
+      } tw-col-span-1`}
       onClick={goToCommunityView}
     >
       <div

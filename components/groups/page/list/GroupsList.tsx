@@ -94,6 +94,10 @@ export default function GroupsList({
     fetchNextPage();
   };
 
+  const [activeGroupIdVoteAll, setActiveGroupIdVoteAll] = useState<
+    string | null
+  >(null);
+
   return (
     <>
       <GroupsListSearch
@@ -111,7 +115,12 @@ export default function GroupsList({
       >
         <div className="tw-mt-4 lg:tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-5 lg:tw-gap-6">
           {groups.map((group) => (
-            <GroupCard key={group.id} group={group} />
+            <GroupCard
+              key={group.id}
+              group={group}
+              activeGroupIdVoteAll={activeGroupIdVoteAll}
+              setActiveGroupIdVoteAll={setActiveGroupIdVoteAll}
+            />
           ))}
         </div>
       </CommonInfiniteScrollWrapper>

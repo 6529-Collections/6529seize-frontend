@@ -4,7 +4,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 
@@ -14,15 +14,15 @@ import { selectActiveGroupId } from "../../../store/groupSlice";
 import GroupsSelectActiveGroup from "./GroupsSelectActiveGroup";
 import { GroupFull } from "../../../generated/models/GroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
-import CommonInput from "../../utils/input/CommonInput";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "../../utils/input/identity/IdentitySearch";
 import { useDebounce } from "react-use";
+import { AuthContext } from "../../auth/Auth";
 
 export default function GroupSelect() {
   const activeGroupId = useSelector(selectActiveGroupId);
-
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [filters, setFilters] = useState<GroupsRequestParams>({
     group_name: null,
     author_identity: null,
@@ -85,6 +85,15 @@ export default function GroupSelect() {
 
   useEffect(() => setGroups(data?.pages?.flat() ?? []), [data, activeGroupId]);
 
+  const onShowMyGroups = () => {
+    const handle =
+      activeProfileProxy?.created_by.handle ??
+      connectedProfile?.profile?.handle ??
+      null;
+    if (!handle) return;
+    onUserSelect(handle);
+  };
+
   return (
     <div className="tw-mt-4 tw-w-full tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0 tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       {activeGroupId && (
@@ -95,12 +104,15 @@ export default function GroupSelect() {
           Search Groups
         </p>
         <div className="tw-space-y-3">
-          <button
-            type="button"
-            className="tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-          >
-            Show my groups
-          </button>
+          {!!connectedProfile?.profile?.handle && (
+            <button
+              onClick={onShowMyGroups}
+              type="button"
+              className="tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+            >
+              My groups
+            </button>
+          )}
           <IdentitySearch
             identity={filters.author_identity}
             setIdentity={onUserSelect}

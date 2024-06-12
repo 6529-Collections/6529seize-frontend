@@ -8,6 +8,7 @@ import { GroupsRequestParams } from "../../../entities/IGroup";
 const IDENTITY_SEARCH_PARAM = "identity";
 const GROUP_NAME_SEARCH_PARAM = "group";
 
+
 export default function GroupsPageListWrapper({
   onCreateNewGroup,
 }: {
@@ -30,6 +31,7 @@ export default function GroupsPageListWrapper({
   const searchParams = useSearchParams();
   const identity = searchParams.get(IDENTITY_SEARCH_PARAM);
   const group = searchParams.get(GROUP_NAME_SEARCH_PARAM);
+
 
   const [filters, setFilters] = useState<GroupsRequestParams>({
     group_name: group,
@@ -59,8 +61,6 @@ export default function GroupsPageListWrapper({
     }
     return params.toString();
   };
-
-
 
   const setGroupName = (value: string | null) => {
     router.replace(

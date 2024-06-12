@@ -51,13 +51,15 @@ export default function UserPageGroups({
     });
   };
   return (
-    <GroupsList
-      filters={filters}
-      showIdentitySearch={false}
-      showCreateNewGroupButton={showCreateNewGroupButton}
-      onCreateNewGroup={() => {}}
-      setGroupName={setGroupName}
-      setAuthorIdentity={setAuthorIdentity}
-    />
+    <div className="tailwind-scope">
+      <GroupsList
+        filters={filters}
+        showIdentitySearch={false}
+        showCreateNewGroupButton={showCreateNewGroupButton}
+        onCreateNewGroup={() => {}}
+        setGroupName={setGroupName}
+        setAuthorIdentity={setAuthorIdentity}
+      />
+    </div>
   );
 }
