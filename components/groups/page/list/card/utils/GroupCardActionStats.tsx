@@ -117,14 +117,14 @@ export default function GroupCardActionStats({
   return (
     <div className="tw-mt-4">
       <p className="tw-text-sm tw-block tw-mb-0 tw-text-iron-50 tw-font-medium">
-        You can grant up to{" "}
-        <span className="tw-text-primary-400 tw-font-semibold">89,555</span> rep
-        to each of{" "}
         <img
           src="/pepe-xglasses.png"
           className="-tw-mt-0.5 tw-w-4 tw-h-4 tw-ml-1 tw-mr-1.5 tw-object-contain tw-flex-shrink-0 tw-inline"
           alt="pepe-xglasses"
         />
+        You can grant up to
+        <span className="tw-text-primary-400 tw-font-semibold">89,555</span> rep
+        to each of
         <span>
           <span className="tw-text-primary-400 tw-font-semibold">121</span>{" "}
           members of the group.

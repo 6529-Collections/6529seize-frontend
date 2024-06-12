@@ -95,6 +95,12 @@ export default function GroupSelect() {
           Filter by Group
         </p>
         <div className="tw-space-y-3">
+          <button
+            type="button"
+            className="tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+          >
+            Show my groups
+          </button>
           <IdentitySearch
             identity={filters.author_identity}
             setIdentity={onUserSelect}
