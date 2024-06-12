@@ -192,7 +192,10 @@ export default function GroupCardConfigs({
       <div className="tw-overflow-x-hidden">
         {isLeftHidden && (
           <button
-            onClick={() => scrollContainer("left")}
+            onClick={(e) => {
+              e.stopPropagation();
+              scrollContainer("left");
+            }}
             className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-10 tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-rounded-md tw-border-none"
           >
             <svg
@@ -223,7 +226,10 @@ export default function GroupCardConfigs({
         </div>
         {isRightHidden && (
           <button
-            onClick={() => scrollContainer("right")}
+            onClick={(e) => {
+              e.stopPropagation();
+              scrollContainer("right");
+            }}
             className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-10 tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-rounded-md tw-border-none"
           >
             <svg

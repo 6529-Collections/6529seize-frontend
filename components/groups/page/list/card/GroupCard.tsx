@@ -5,6 +5,7 @@ import GroupCardView from "./GroupCardView";
 import GroupCardRepAll from "./rep-all/GroupCardRepAll";
 import GroupCardCICAll from "./cic-all/GroupCardCICAll";
 import { AuthContext } from "../../../../auth/Auth";
+import { useRouter } from "next/router";
 
 export enum GroupCardState {
   IDLE = "IDLE",
@@ -13,6 +14,7 @@ export enum GroupCardState {
 }
 
 export default function GroupCard({ group }: { readonly group: GroupFull }) {
+  const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);
   const [state, setState] = useState<GroupCardState>(GroupCardState.IDLE);
 
@@ -40,8 +42,17 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
       <GroupCardCICAll group={group} onCancel={onActionCancel} />
     ),
   };
+
+  const goToCommunityView = () => {
+    if (state !== GroupCardState.IDLE) return;
+    router.push(`/community?page=1&group=${group.id}`);
+  };
+
   return (
-    <div className="tw-col-span-1">
+    <div
+      className="tw-col-span-1 tw-cursor-pointer"
+      onClick={goToCommunityView}
+    >
       <div
         className="tw-relative tw-w-full tw-h-12 tw-rounded-t-2xl"
         style={{

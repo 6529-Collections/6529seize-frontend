@@ -22,7 +22,11 @@ export default function GroupCardHeader({
         )}
       </div>
       <div className="tw-mt-2 tw-flex tw-items-center tw-w-full tw-justify-between">
-        <Link href={group.created_by.handle} className="tw-no-underline">
+        <Link
+          onClick={(e) => e.stopPropagation()}
+          href={group.created_by.handle}
+          className="tw-no-underline"
+        >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
             {group.created_by.handle}
           </span>
