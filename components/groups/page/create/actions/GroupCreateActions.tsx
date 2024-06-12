@@ -119,6 +119,13 @@ export default function GroupCreateActions({
     if (mutating) {
       return;
     }
+    if (!groupConfig.name.length) {
+      setToast({
+        message: "Please name your group",
+        type: "error",
+      });
+      return;
+    }
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
