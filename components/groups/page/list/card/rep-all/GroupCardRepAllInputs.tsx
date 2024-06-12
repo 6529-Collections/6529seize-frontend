@@ -18,18 +18,22 @@ export default function GroupCardRepAllInputs({
   readonly setAmountToGive: (amountToGive: number | null) => void;
 }) {
   return (
-    <div className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
-      <GroupCardActionNumberInput
-        label="Rep"
-        componentId={`${group.id}_rep`}
-        amount={amountToGive}
-        setAmount={setAmountToGive}
-      />
-      <RepCategorySearch
-        category={category}
-        setCategory={setCategory}
-        size={RepCategorySearchSize.SM}
-      />
+    <div className="tw-w-full tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-w-full md:tw-w-[58%]">
+        <GroupCardActionNumberInput
+          label="Rep"
+          componentId={`${group.id}_rep`}
+          amount={amountToGive}
+          setAmount={setAmountToGive}
+        />
+      </div>
+      <div className="tw-w-full md:tw-w-[42%]">
+        <RepCategorySearch
+          category={category}
+          setCategory={setCategory}
+          size={RepCategorySearchSize.SM}
+        />
+      </div>
     </div>
   );
 }

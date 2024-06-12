@@ -66,7 +66,6 @@ export default function Groups() {
       </div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <h1 className="tw-float-none">Groups</h1>
-
         {viewMode !== GroupsViewMode.CREATE &&
           !!connectedProfile?.profile?.handle && (
             <button

@@ -101,7 +101,6 @@ export default function GroupSelect() {
             size={IdentitySearchSize.SM}
             label="By Identity"
           />
-
           <div className="tw-group tw-w-full tw-relative">
             <input
               type="text"
