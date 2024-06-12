@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import GroupCreate from "./create/GroupCreate";
 import GroupsList from "./list/GroupsList";
 import { AuthContext } from "../../auth/Auth";
+import { useRouter } from "next/router";
 
 enum GroupsViewMode {
   CREATE = "CREATE",
@@ -9,6 +10,7 @@ enum GroupsViewMode {
 }
 
 export default function Groups() {
+
   const { connectedProfile, requestAuth } = useContext(AuthContext);
   const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
 

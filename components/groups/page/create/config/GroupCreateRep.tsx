@@ -35,6 +35,7 @@ export default function GroupCreateRep({
           <div className="tw-flex tw-flex-col xl:tw-flex-row tw-gap-4 lg:tw-gap-5">
             <IdentitySearch
               identity={rep.user_identity}
+              label="From Identity"
               setIdentity={(identity) =>
                 setRep({ ...rep, user_identity: identity })
               }

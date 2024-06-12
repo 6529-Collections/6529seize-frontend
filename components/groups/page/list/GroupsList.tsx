@@ -9,14 +9,48 @@ import GroupCard from "./card/GroupCard";
 import GroupsListSearch from "./search/GroupsListSearch";
 import { useDebounce } from "react-use";
 import CommonInfiniteScrollWrapper from "../../../utils/infinite-scroll/CommonInfiniteScrollWrapper";
+import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
 
 const REQUEST_SIZE = 20;
+const IDENTITY_SEARCH_PARAM = "identity";
+const GROUP_NAME_SEARCH_PARAM = "group";
 
 export default function GroupsList() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const identity = searchParams.get(IDENTITY_SEARCH_PARAM);
+  const group = searchParams.get(GROUP_NAME_SEARCH_PARAM);
+
   const [filters, setFilters] = useState<GroupsRequestParams>({
-    group_name: null,
-    author_identity: null,
+    group_name: group,
+    author_identity: identity,
   });
+
+  useEffect(() => {
+    setFilters({
+      group_name: group,
+      author_identity: identity,
+    });
+  }, [group, identity]);
+
+  const createQueryString = (
+    config: {
+      name: string;
+      value: string | null;
+    }[]
+  ): string => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const { name, value } of config) {
+      if (!value) {
+        params.delete(name);
+      } else {
+        params.set(name, value);
+      }
+    }
+    return params.toString();
+  };
 
   const [debouncedFilters, setDebouncedFilters] =
     useState<GroupsRequestParams>(filters);
@@ -54,21 +88,51 @@ export default function GroupsList() {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.created_at ?? null,
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
   });
 
+  // const setGroupName = (value: string | null) => {
+  //   setFilters((prev) => ({
+  //     ...prev,
+  //     group_name: value,
+  //   }));
+  // };
+
+  // const setAuthorIdentity = (value: string | null) => {
+  //   setFilters((prev) => ({
+  //     ...prev,
+  //     author_identity: value,
+  //   }));
+  // };
+
   const setGroupName = (value: string | null) => {
-    setFilters((prev) => ({
-      ...prev,
-      group_name: value,
-    }));
+    router.replace(
+      pathname +
+        "?" +
+        createQueryString([
+          {
+            name: GROUP_NAME_SEARCH_PARAM,
+            value,
+          },
+        ]),
+      undefined,
+      { shallow: true }
+    );
   };
 
   const setAuthorIdentity = (value: string | null) => {
-    setFilters((prev) => ({
-      ...prev,
-      author_identity: value,
-    }));
+    router.replace(
+      pathname +
+        "?" +
+        createQueryString([
+          {
+            name: IDENTITY_SEARCH_PARAM,
+            value,
+          },
+        ]),
+      undefined,
+      { shallow: true }
+    );
   };
 
   const [groups, setGroups] = useState<GroupFull[]>([]);

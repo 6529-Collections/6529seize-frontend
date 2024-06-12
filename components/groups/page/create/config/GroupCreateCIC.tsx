@@ -33,6 +33,7 @@ export default function GroupCreateCIC({
         <div className="tw-flex tw-flex-col tw-gap-y-4 lg:tw-gap-y-5 tw-gap-x-3">
           <IdentitySearch
             identity={cic.user_identity}
+            label="From Identity"
             setIdentity={(identity) =>
               setCIC({ ...cic, user_identity: identity })
             }
