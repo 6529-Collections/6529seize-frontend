@@ -50,7 +50,7 @@ export default function GroupCard({ group }: { readonly group: GroupFull }) {
       >
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
       </div>
-      <div className="-tw-mt-1 sm:tw-h-[196.5px] tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700">
+      <div className="-tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700">
         {components[state]}
       </div>
     </div>

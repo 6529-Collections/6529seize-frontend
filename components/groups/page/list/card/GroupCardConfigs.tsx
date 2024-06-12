@@ -193,7 +193,7 @@ export default function GroupCardConfigs({
         {isLeftHidden && (
           <button
             onClick={() => scrollContainer("left")}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-10 tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-600 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-10 tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-600 tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-rounded-md tw-border-none"
           >
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-50 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
@@ -224,7 +224,7 @@ export default function GroupCardConfigs({
         {isRightHidden && (
           <button
             onClick={() => scrollContainer("right")}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-10 tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-600 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-10 tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-600 tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-rounded-md tw-border-none"
           >
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-50 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"

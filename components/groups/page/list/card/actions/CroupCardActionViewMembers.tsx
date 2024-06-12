@@ -10,7 +10,6 @@ export default function CroupCardActionViewMembers({
   return (
     <Link
       href={href}
-      target="_blank"
       title="View members"
       className="tw-group tw-whitespace-nowrap tw-no-underline tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
     >

@@ -86,7 +86,7 @@ export default function GroupSelect() {
   useEffect(() => setGroups(data?.pages?.flat() ?? []), [data, activeGroupId]);
 
   return (
-    <div className="tw-mt-4 tw-w-full tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0  tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+    <div className="tw-mt-4 tw-w-full tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0 tw-divide-y tw-space-y-4 tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       {activeGroupId && (
         <GroupsSelectActiveGroup activeGroupId={activeGroupId} />
       )}

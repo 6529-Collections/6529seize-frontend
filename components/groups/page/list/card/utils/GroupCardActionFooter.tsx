@@ -22,7 +22,7 @@ export default function GroupCardActionFooter({
           Cancel
         </button>
         <PrimaryButton loading={loading} disabled={disabled} onClicked={onSave}>
-          Save
+          Grant
         </PrimaryButton>
       </div>
     </div>
