@@ -19,7 +19,11 @@ export default function GroupsListSearch({
 
   return (
     <div className="tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row tw-w-full md:tw-w-2/3 xl:tw-w-1/2 xl:tw-pr-3 tw-gap-4">
-      <IdentitySearch identity={identity} setIdentity={setIdentity} />
+      <IdentitySearch
+        identity={identity}
+        setIdentity={setIdentity}
+        label="By Identity"
+      />
       <div className="tw-group tw-w-full tw-relative">
         <input
           type="text"

@@ -91,20 +91,6 @@ export default function GroupsList() {
     placeholderData: keepPreviousData,
   });
 
-  // const setGroupName = (value: string | null) => {
-  //   setFilters((prev) => ({
-  //     ...prev,
-  //     group_name: value,
-  //   }));
-  // };
-
-  // const setAuthorIdentity = (value: string | null) => {
-  //   setFilters((prev) => ({
-  //     ...prev,
-  //     author_identity: value,
-  //   }));
-  // };
-
   const setGroupName = (value: string | null) => {
     router.replace(
       pathname +
