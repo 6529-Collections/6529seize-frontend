@@ -9,6 +9,7 @@ import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_ADDRESS_ENS,
+  SUBSCRIPTIONS_CHAIN_ID,
 } from "../../../constants";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../../dotLoader/DotLoader";
@@ -16,9 +17,6 @@ import {
   numberOfCardsForCalendarEnd,
   numberOfCardsForSeasonEnd,
 } from "../../../helpers/meme_calendar.helplers";
-import { mainnet } from "wagmi/chains";
-
-const CHAIN_ID = mainnet.id;
 
 export default function UserPageSubscriptionsTopUp(
   props: Readonly<{
@@ -32,7 +30,7 @@ export default function UserPageSubscriptionsTopUp(
   const remainingMintsForYear = numberOfCardsForCalendarEnd();
 
   const waitSendTransaction = useWaitForTransactionReceipt({
-    chainId: CHAIN_ID,
+    chainId: SUBSCRIPTIONS_CHAIN_ID,
     confirmations: 1,
     hash: sendTransaction.data,
   });
@@ -47,7 +45,7 @@ export default function UserPageSubscriptionsTopUp(
     }
     sendTransaction.reset();
     sendTransaction.sendTransaction({
-      chainId: CHAIN_ID,
+      chainId: SUBSCRIPTIONS_CHAIN_ID,
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther(value.toString()),
     });
@@ -83,7 +81,10 @@ export default function UserPageSubscriptionsTopUp(
         <>
           {getStatusMessage()}{" "}
           <a
-            href={getTransactionLink(CHAIN_ID, sendTransaction.data)}
+            href={getTransactionLink(
+              SUBSCRIPTIONS_CHAIN_ID,
+              sendTransaction.data
+            )}
             target="_blank"
             rel="noreferrer">
             view
