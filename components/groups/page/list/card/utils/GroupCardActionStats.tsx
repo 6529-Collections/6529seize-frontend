@@ -116,10 +116,21 @@ export default function GroupCardActionStats({
 
   return (
     <div className="tw-mt-4">
-      <p className="tw-text-sm tw-block tw-mb-0 tw-text-iron-200 tw-font-medium">
-        You can grant up to 89,555 rep to each of 121 members of the group.
+      <p className="tw-text-sm tw-block tw-mb-0 tw-text-iron-50 tw-font-medium">
+        You can grant up to{" "}
+        <span className="tw-text-primary-400 tw-font-semibold">89,555</span> rep
+        to each of{" "}
+        <img
+          src="/pepe-xglasses.png"
+          className="-tw-mt-0.5 tw-w-4 tw-h-4 tw-ml-1 tw-mr-1.5 tw-object-contain tw-flex-shrink-0 tw-inline"
+          alt="pepe-xglasses"
+        />
+        <span>
+          <span className="tw-text-primary-400 tw-font-semibold">121</span>{" "}
+          members of the group.
+        </span>
       </p>
-      <div className="tw-mt-2 tw-flex tw-flex-wrap lg:tw-flex-nowrap tw-gap-x-4 xl:tw-gap-x-6 tw-gap-y-3">
+      <div className="tw-hidden tw-mt-2 tw-flex tw-flex-wrap lg:tw-flex-nowrap tw-gap-x-4 xl:tw-gap-x-6 tw-gap-y-3">
         <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-iron-400 tw-font-normal">Min rep:</span>
           <span className="tw-font-medium tw-text-red">
