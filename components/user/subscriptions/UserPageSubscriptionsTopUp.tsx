@@ -9,7 +9,7 @@ import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_ADDRESS_ENS,
-  SUBSCRIPTIONS_CHAIN_ID,
+  SUBSCRIPTIONS_CHAIN,
 } from "../../../constants";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../../dotLoader/DotLoader";
@@ -30,7 +30,7 @@ export default function UserPageSubscriptionsTopUp(
   const remainingMintsForYear = numberOfCardsForCalendarEnd();
 
   const waitSendTransaction = useWaitForTransactionReceipt({
-    chainId: SUBSCRIPTIONS_CHAIN_ID,
+    chainId: SUBSCRIPTIONS_CHAIN.id,
     confirmations: 1,
     hash: sendTransaction.data,
   });
@@ -45,7 +45,7 @@ export default function UserPageSubscriptionsTopUp(
     }
     sendTransaction.reset();
     sendTransaction.sendTransaction({
-      chainId: SUBSCRIPTIONS_CHAIN_ID,
+      chainId: SUBSCRIPTIONS_CHAIN.id,
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther(value.toString()),
     });
@@ -82,7 +82,7 @@ export default function UserPageSubscriptionsTopUp(
           {getStatusMessage()}{" "}
           <a
             href={getTransactionLink(
-              SUBSCRIPTIONS_CHAIN_ID,
+              SUBSCRIPTIONS_CHAIN.id,
               sendTransaction.data
             )}
             target="_blank"

@@ -9,7 +9,7 @@ import { wrapper } from "../store/store";
 import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { WagmiConfig } from "wagmi";
+import { WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -260,7 +260,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
             content="width=device-width, initial-scale=1.0, maximum-scale=1"
           />
         </Head>
-        <WagmiConfig config={wagmiConfig}>
+        <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <Auth>
               <CookieConsentProvider>
@@ -269,7 +269,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
               </CookieConsentProvider>
             </Auth>
           </ReactQueryWrapper>
-        </WagmiConfig>
+        </WagmiProvider>
       </Provider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
