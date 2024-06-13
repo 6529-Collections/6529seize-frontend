@@ -1,8 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "../../auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 
 enum GroupsViewMode {
   CREATE = "CREATE",
@@ -13,6 +14,8 @@ const GROUP_EDIT_SEARCH_PARAM = "edit";
 
 export default function Groups() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const { connectedProfile, requestAuth, activeProfileProxy } =
     useContext(AuthContext);
@@ -25,6 +28,10 @@ export default function Groups() {
     if (mode === GroupsViewMode.CREATE) {
       const { success } = await requestAuth();
       if (!success) return;
+    } else {
+      router.replace(pathname, undefined, {
+        shallow: true,
+      });
     }
 
     setViewMode(mode);
@@ -35,6 +42,12 @@ export default function Groups() {
       onViewModeChange(GroupsViewMode.CREATE);
     }
   }, [edit]);
+
+  useEffect(() => {
+    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
+      onViewModeChange(GroupsViewMode.VIEW);
+    }
+  }, [connectedProfile, activeProfileProxy]);
 
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (
@@ -49,12 +62,6 @@ export default function Groups() {
       />
     ),
   };
-
-  useEffect(() => {
-    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.VIEW);
-    }
-  }, [connectedProfile, activeProfileProxy]);
 
   return (
     <div>

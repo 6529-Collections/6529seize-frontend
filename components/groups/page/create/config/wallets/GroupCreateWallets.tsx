@@ -65,7 +65,7 @@ export default function GroupCreateWallets({
           wallets={emmaWallets}
         />
       </div>
-      {wallets?.length && (
+      {!!wallets?.length && (
         <div className="tw-mt-4 lg:tw-inline-flex">
           <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-primary-400">
             <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
