@@ -18,7 +18,7 @@ export default function GroupCardView({
   return (
     <div className="tw-flex tw-flex-col tw-h-full">
       <GroupCardHeader group={group} onEditClick={onEditClick} />
-      <div className="tw-pt-3 tw-pb-3 tw-flex tw-flex-col tw-h-full tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
+      <div className="tw-pt-2 tw-pb-4 tw-flex tw-flex-col tw-h-full">
         <GroupCardContent group={group} />
         <div className="tw-mt-auto">
           <CroupCardActions

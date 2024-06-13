@@ -96,7 +96,7 @@ export default function GroupCard({
       onClick={goToCommunityView}
     >
       <div
-        className="tw-relative tw-w-full tw-h-12 tw-rounded-t-2xl"
+        className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
         style={{
           background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
         }}

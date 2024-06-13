@@ -122,7 +122,7 @@ export default function GroupCardActionStats({
           className="-tw-mt-0.5 tw-w-4 tw-h-4 tw-ml-1 tw-mr-1.5 tw-object-contain tw-flex-shrink-0 tw-inline"
           alt="pepe-xglasses"
         />
-        You can grant up to
+        You can grant up to{" "}
         <span className="tw-text-primary-400 tw-font-semibold">89,555</span> rep
         to each of
         <span>
@@ -137,7 +137,7 @@ export default function GroupCardActionStats({
           members of the group.
         </span>
       </p>
-      <div className="tw-hidden tw-mt-2 tw-flex tw-flex-wrap lg:tw-flex-nowrap tw-gap-x-4 xl:tw-gap-x-6 tw-gap-y-3">
+      {/*  <div className="tw-mt-2 tw-flex tw-flex-wrap lg:tw-flex-nowrap tw-gap-x-4 xl:tw-gap-x-6 tw-gap-y-3">
         <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-iron-400 tw-font-normal">Min rep:</span>
           <span className="tw-font-medium tw-text-red">
@@ -188,7 +188,7 @@ export default function GroupCardActionStats({
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

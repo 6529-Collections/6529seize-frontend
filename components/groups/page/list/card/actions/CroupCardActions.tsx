@@ -16,12 +16,12 @@ export default function CroupCardActions({
   const disabledClasses =
     "tw-opacity-50 tw-text-iron-600 tw-border-iron-800 tw-cursor-default";
   const nonDisabledClasses =
-    " hover:tw-bg-iron-700 tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50";
+    "hover:tw-bg-iron-700 tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50";
   return (
-    <div className="tw-pt-3 tw-px-4 sm:tw-px-6 tw-flex tw-items-center tw-justify-between">
-      <div className="-tw-ml-3.5 tw-flex tw-gap-x-3">
-        {!!connectedProfile?.profile?.handle && (
-          <>
+    <div>
+      {!!connectedProfile?.profile?.handle && (
+        <div className="tw-mt-4 tw-pt-3 tw-px-4 sm:tw-px-6 tw-flex tw-items-center tw-justify-end tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
+          <div className="tw-flex tw-gap-x-3">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -48,10 +48,8 @@ export default function CroupCardActions({
             >
               CIC all
             </button>
-          </>
-        )}
-      </div>
-      <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2">
+          </div>
+          {/*   <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2">
         <svg
           className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-300"
           viewBox="0 0 24 24"
@@ -68,7 +66,9 @@ export default function CroupCardActions({
           />
         </svg>
         <span className="tw-font-medium tw-text-iron-400">100</span>
-      </div>
+      </div> */}
+        </div>
+      )}
     </div>
   );
 }

@@ -63,7 +63,7 @@ export default function GroupCardEditActions({
       <AnimatePresence mode="wait" initial={false}>
         {isOptionsOpen && (
           <motion.div
-            className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-md tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/5 tw-focus:tw-outline-none"
+            className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="options-menu-0-button"
@@ -79,7 +79,7 @@ export default function GroupCardEditActions({
                   e.stopPropagation();
                   onEditClick(group);
                 }}
-                className="tw-bg-transparent tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-bg-transparent tw-w-full tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
                 role="menuitem"
                 tabIndex={-1}
                 id="options-menu-0-item-0"
