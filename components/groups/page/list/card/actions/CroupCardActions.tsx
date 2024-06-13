@@ -16,7 +16,7 @@ export default function CroupCardActions({
   const nonDisabledClasses =
     "hover:tw-bg-iron-700 tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50";
   return (
-    <div className="tw-mt-4 tw-pt-3 tw-pb-3 tw-px-4 sm:tw-px-6 tw-flex tw-items-center tw-justify-end tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
+    <div className="tw-hidden tw-mt-4 tw-pt-3 tw-pb-3 tw-px-4 sm:tw-px-6 tw-flex tw-items-center tw-justify-end tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
       <div className="tw-flex tw-gap-x-3">
         <button
           onClick={(e) => {

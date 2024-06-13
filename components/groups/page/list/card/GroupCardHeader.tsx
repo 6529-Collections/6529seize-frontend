@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import { getTimeAgo } from "../../../../../helpers/Helpers";
-import { useContext} from "react";
+import { useContext } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import GroupCardEditActions from "./actions/GroupCardEditActions";
 
@@ -16,7 +16,7 @@ export default function GroupCardHeader({
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
 
   return (
-    <div className="tw-px-4 sm:tw-px-5 tw-mt-3 tw-flex tw-items-center tw-gap-x-3">
+    <div className="tw-px-4 sm:tw-px-5 tw-mt-4 tw-flex tw-items-center tw-gap-x-3">
       <div className="tw-flex tw-gap-x-4">
         {group.created_by.pfp ? (
           <img
@@ -32,9 +32,9 @@ export default function GroupCardHeader({
         <Link
           onClick={(e) => e.stopPropagation()}
           href={group.created_by.handle}
-          className="tw-no-underline hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className="tw-no-underline hover:tw-underline tw-transition tw-duration-300 tw-ease-out  tw-text-iron-50 hover:tw-text-iron-400"
         >
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+          <span className="tw-text-sm tw-font-semibold">
             {group.created_by.handle}
           </span>
         </Link>

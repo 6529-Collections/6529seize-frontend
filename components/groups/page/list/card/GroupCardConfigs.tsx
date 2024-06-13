@@ -188,7 +188,7 @@ export default function GroupCardConfigs({
   }, [configs]);
 
   return (
-    <div className="tw-mt-2 tw-relative">
+    <div className="tw-mt-2 tw-pb-4 tw-relative">
       <div className="tw-overflow-x-hidden">
         {isLeftHidden && (
           <button

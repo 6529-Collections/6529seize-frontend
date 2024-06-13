@@ -105,8 +105,8 @@ export default function GroupCard({
       </div>
       <div
         className={` ${
-          connectedProfile?.profile?.handle ? "" : ""
-        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700`}
+          connectedProfile?.profile?.handle ? "tw-h-[151.5px]" : ""
+        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 hover:tw-bg-iron-800 tw-transition tw-duration-500 tw-ease-out`}
       >
         {components[state]}
       </div>
