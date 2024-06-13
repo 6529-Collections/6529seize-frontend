@@ -10,10 +10,11 @@
  * Do not edit the class manually.
  */
 
+import { BulkRateSkippedIdentity } from '../models/BulkRateSkippedIdentity';
 import { HttpFile } from '../http/http';
 
 export class BulkRateResponse {
-    'skipped': Array<string>;
+    'skipped': Array<BulkRateSkippedIdentity>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -21,7 +22,7 @@ export class BulkRateResponse {
         {
             "name": "skipped",
             "baseName": "skipped",
-            "type": "Array<string>",
+            "type": "Array<BulkRateSkippedIdentity>",
             "format": ""
         }    ];
 

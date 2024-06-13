@@ -1,13 +1,20 @@
+import { CreditDirection } from "../GroupCard";
+import GroupCardActionCreditDirection from "./GroupCardActionCreditDirection";
+
 export default function GroupCardActionNumberInput({
   label,
   componentId,
   amount,
+  creditDirection,
   setAmount,
+  setCreditDirection,
 }: {
   readonly label: string;
   readonly componentId: string;
   readonly amount: number | null;
+  readonly creditDirection: CreditDirection;
   readonly setAmount: (cicToGive: number | null) => void;
+  readonly setCreditDirection: (creditDirection: CreditDirection) => void;
 }) {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -20,58 +27,23 @@ export default function GroupCardActionNumberInput({
       setAmount(null);
       return;
     }
+    if (numberAmount < 0) {
+      setAmount(0);
+      return;
+    }
     setAmount(numberAmount);
   };
   return (
     <div className="tw-flex tw-w-full tw-items-center tw-gap-x-3">
-      <div className="tw-flex tw-gap-x-2">
-        <button
-          type="button"
-          title="Subtract"
-          className="tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-650 tw-rounded-lg tw-bg-iron-900 
-          tw-w-8 tw-h-8 tw-text-base tw-font-semibold tw-text-iron-400 tw-shadow-sm hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <svg
-            className="tw-size-4 tw-flex-shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <button
-          type="button"
-          title="Add"
-          className="tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-green tw-text-green tw-bg-iron-900 tw-rounded-lg tw-w-8 tw-h-8 tw-text-base tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <svg
-            className="tw-size-4 tw-flex-shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
+      <GroupCardActionCreditDirection
+        creditDirection={creditDirection}
+        setCreditDirection={setCreditDirection}
+      />
       <div className="tw-group tw-w-full tw-relative">
         <input
           type="number"
           id={componentId}
+          min={0}
           value={amount ?? ""}
           onChange={onChange}
           autoComplete="off"

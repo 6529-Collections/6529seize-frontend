@@ -24,6 +24,7 @@ import { RateMatter } from "../../../../../../generated/models/RateMatter";
 import { BulkRateResponse } from "../../../../../../generated/models/BulkRateResponse";
 import { AuthContext } from "../../../../../auth/Auth";
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
+import { CreditDirection } from "../GroupCard";
 
 export default function GroupCardCICAll({
   group,
@@ -36,7 +37,10 @@ export default function GroupCardCICAll({
   const category = null;
   const { onIdentityBulkRate } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
-  const [amountToGive, setAmountToGive] = useState<number | null>(null);
+  const [amountToAdd, setAmountToAdd] = useState<number | null>(null);
+  const [creditDirection, setCreditDirection] = useState<CreditDirection>(
+    CreditDirection.ADD
+  );
   const { data: members, isFetching } = useQuery<Page<CommunityMemberOverview>>(
     {
       queryKey: [
@@ -87,8 +91,8 @@ export default function GroupCardCICAll({
   );
   useEffect(
     () =>
-      setDisabled(typeof amountToGive !== "number" || !membersCount || loading),
-    [amountToGive, membersCount, loading]
+      setDisabled(typeof amountToAdd !== "number" || !membersCount || loading),
+    [amountToAdd, membersCount, loading]
   );
 
   const bulkRateMutation = useMutation({
@@ -127,7 +131,7 @@ export default function GroupCardCICAll({
   const [doneMembersCount, setDoneMembersCount] = useState<number>(0);
 
   const onSave = async (): Promise<void> => {
-    if (disabled || typeof amountToGive !== "number") {
+    if (disabled || typeof amountToAdd !== "number") {
       return;
     }
     const { success } = await requestAuth();
@@ -150,7 +154,10 @@ export default function GroupCardCICAll({
         await bulkRateMutation.mutateAsync({
           matter,
           category,
-          amount: amountToGive,
+          amount_to_add:
+            creditDirection === CreditDirection.ADD
+              ? amountToAdd
+              : -amountToAdd,
           target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
         });
         setDoneMembersCount((prev) => prev + members.length);
@@ -181,14 +188,17 @@ export default function GroupCardCICAll({
       addingRates={doingRates}
       membersCount={membersCount}
       doneMembersCount={doneMembersCount}
+      matter={matter}
       onSave={onSave}
     >
       <div className="tw-w-full xl:tw-max-w-[17.156rem]">
         <GroupCardActionNumberInput
           label="CIC"
           componentId={`${group.id}_cic`}
-          amount={amountToGive}
-          setAmount={setAmountToGive}
+          amount={amountToAdd}
+          creditDirection={creditDirection}
+          setCreditDirection={setCreditDirection}
+          setAmount={setAmountToAdd}
         />
       </div>
       <GroupCardActionStats
