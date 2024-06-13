@@ -3,13 +3,16 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import GroupsList from "../../groups/page/list/GroupsList";
 import { AuthContext } from "../../auth/Auth";
 import { GroupsRequestParams } from "../../../entities/IGroup";
+import { useRouter } from "next/router";
 
 export default function UserPageGroups({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const router = useRouter();
+  const { connectedProfile, activeProfileProxy, requestAuth } =
+    useContext(AuthContext);
   const getShowCreateNewGroupButton = () => {
     return (
       !!connectedProfile?.profile?.handle &&
@@ -50,13 +53,22 @@ export default function UserPageGroups({
       author_identity: value,
     });
   };
+
+  const onCreateNewGroup = async () => {
+    const { success } = await requestAuth();
+    if (!success) {
+      return;
+    }
+    router.push("/groups?edit=new");
+  };
+
   return (
     <div className="tailwind-scope">
       <GroupsList
         filters={filters}
         showIdentitySearch={false}
         showCreateNewGroupButton={showCreateNewGroupButton}
-        onCreateNewGroup={() => {}}
+        onCreateNewGroup={onCreateNewGroup}
         setGroupName={setGroupName}
         setAuthorIdentity={setAuthorIdentity}
       />
