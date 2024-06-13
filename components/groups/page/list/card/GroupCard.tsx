@@ -96,7 +96,7 @@ export default function GroupCard({
   return (
     <div
       className={`${
-        state === GroupCardState.IDLE && "tw-cursor-pointer"
+        state === GroupCardState.IDLE && "tw-group tw-cursor-pointer"
       } tw-col-span-1`}
       onClick={goToCommunityView}
     >
@@ -111,7 +111,7 @@ export default function GroupCard({
       <div
         className={` ${
           connectedProfile?.profile?.handle ? "tw-h-[151.5px]" : ""
-        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 hover:tw-bg-iron-800 tw-transition tw-duration-500 tw-ease-out`}
+        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-bg-iron-800 tw-transition tw-duration-500 tw-ease-out`}
       >
         {components[state]}
       </div>
