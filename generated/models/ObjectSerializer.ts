@@ -3,6 +3,7 @@ export * from '../models/AddActionToProxyRequest';
 export * from '../models/AvailableRatingCredit';
 export * from '../models/BulkRateRequest';
 export * from '../models/BulkRateResponse';
+export * from '../models/BulkRateSkippedIdentity';
 export * from '../models/ChangeGroupVisibility';
 export * from '../models/ChangeProfileCicRating';
 export * from '../models/ChangeProfileCicRatingResponse';
@@ -85,6 +86,7 @@ import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
 import { AvailableRatingCredit } from '../models/AvailableRatingCredit';
 import { BulkRateRequest     } from '../models/BulkRateRequest';
 import { BulkRateResponse } from '../models/BulkRateResponse';
+import { BulkRateSkippedIdentity } from '../models/BulkRateSkippedIdentity';
 import { ChangeGroupVisibility } from '../models/ChangeGroupVisibility';
 import { ChangeProfileCicRating } from '../models/ChangeProfileCicRating';
 import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRatingResponse';
@@ -193,6 +195,7 @@ let typeMap: {[index: string]: any} = {
     "AvailableRatingCredit": AvailableRatingCredit,
     "BulkRateRequest": BulkRateRequest,
     "BulkRateResponse": BulkRateResponse,
+    "BulkRateSkippedIdentity": BulkRateSkippedIdentity,
     "ChangeGroupVisibility": ChangeGroupVisibility,
     "ChangeProfileCicRating": ChangeProfileCicRating,
     "ChangeProfileCicRatingResponse": ChangeProfileCicRatingResponse,

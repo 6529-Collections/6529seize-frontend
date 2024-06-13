@@ -13,6 +13,11 @@ export enum GroupCardState {
   CIC = "CIC",
 }
 
+export enum CreditDirection {
+  ADD = "ADD",
+  SUBTRACT = "SUBTRACT",
+}
+
 export default function GroupCard({
   group,
   activeGroupIdVoteAll,

@@ -10,53 +10,33 @@
  * Do not edit the class manually.
  */
 
-import { RateMatter } from '../models/RateMatter';
 import { HttpFile } from '../http/http';
 
-export class BulkRateRequest {
-    'matter': RateMatter;
-    /**
-    * Category of the rating must be set when matter is REP and null if matter is CIC
-    */
-    'category': string | null;
-    'amount_to_add': number;
-    'target_wallet_addresses': Array<string>;
+export class BulkRateSkippedIdentity {
+    'identity': string;
+    'reason': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "matter",
-            "baseName": "matter",
-            "type": "RateMatter",
-            "format": ""
-        },
-        {
-            "name": "category",
-            "baseName": "category",
+            "name": "identity",
+            "baseName": "identity",
             "type": "string",
             "format": ""
         },
         {
-            "name": "amount_to_add",
-            "baseName": "amount_to_add",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "target_wallet_addresses",
-            "baseName": "target_wallet_addresses",
-            "type": "Array<string>",
+            "name": "reason",
+            "baseName": "reason",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return BulkRateRequest.attributeTypeMap;
+        return BulkRateSkippedIdentity.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-
 

@@ -27,6 +27,7 @@ import { AuthContext } from "../../../../../auth/Auth";
 import GroupCardRepAllInputs from "./GroupCardRepAllInputs";
 import { BulkRateRequest } from "../../../../../../generated/models/BulkRateRequest";
 import { BulkRateResponse } from "../../../../../../generated/models/BulkRateResponse";
+import { CreditDirection } from "../GroupCard";
 
 export default function GroupCardRepAll({
   group,
@@ -39,7 +40,11 @@ export default function GroupCardRepAll({
   const [category, setCategory] = useState<string | null>(null);
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onIdentityBulkRate } = useContext(ReactQueryWrapperContext);
-  const [amountToGive, setAmountToGive] = useState<number | null>(null);
+  const [amountToAdd, setAmountToAdd] = useState<number | null>(null);
+  const [creditDirection, setCreditDirection] = useState<CreditDirection>(
+    CreditDirection.ADD
+  );
+
   const { data: members, isFetching } = useQuery<Page<CommunityMemberOverview>>(
     {
       queryKey: [
@@ -91,12 +96,9 @@ export default function GroupCardRepAll({
   useEffect(
     () =>
       setDisabled(
-        typeof amountToGive !== "number" ||
-          !membersCount ||
-          loading ||
-          !category
+        typeof amountToAdd !== "number" || !membersCount || loading || !category
       ),
-    [amountToGive, membersCount, loading, category]
+    [amountToAdd, membersCount, loading, category]
   );
 
   const bulkRateMutation = useMutation({
@@ -135,7 +137,7 @@ export default function GroupCardRepAll({
   const [doneMembersCount, setDoneMembersCount] = useState<number>(0);
 
   const onSave = async (): Promise<void> => {
-    if (disabled || typeof amountToGive !== "number") {
+    if (disabled || typeof amountToAdd !== "number") {
       return;
     }
     const { success } = await requestAuth();
@@ -158,7 +160,10 @@ export default function GroupCardRepAll({
         await bulkRateMutation.mutateAsync({
           matter,
           category,
-          amount: amountToGive,
+          amount_to_add:
+            creditDirection === CreditDirection.ADD
+              ? amountToAdd
+              : -amountToAdd,
           target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
         });
         setDoneMembersCount((prev) => prev + members.length);
@@ -189,14 +194,17 @@ export default function GroupCardRepAll({
       addingRates={doingRates}
       membersCount={membersCount}
       doneMembersCount={doneMembersCount}
+      matter={matter}
       onSave={onSave}
     >
       <GroupCardRepAllInputs
         category={category}
         setCategory={setCategory}
         group={group}
-        amountToGive={amountToGive}
-        setAmountToGive={setAmountToGive}
+        amountToAdd={amountToAdd}
+        creditDirection={creditDirection}
+        setCreditDirection={setCreditDirection}
+        setAmountToAdd={setAmountToAdd}
       />
       <GroupCardActionStats
         matter={matter}

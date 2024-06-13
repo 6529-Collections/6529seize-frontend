@@ -324,6 +324,54 @@ paths:
                 $ref: "#/components/schemas/ChangeProfileCicRatingResponse"
         "400":
           description: "Invalid request"
+
+  /ratings:
+    post:
+      tags:
+        - Ratings
+      summary: Bulk rate. Supplied amount will be added to all target identities. If same identity is supplied multiple times, all the additions will be summed up. Targets must be represented as Ethereum wallet addresses. ENS names and profile handles are not supported.
+      operationId: bulkRate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkRateRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkRateResponse"
+        "400":
+          description: "Invalid request"
+
+  /ratings/credit:
+    get:
+      tags:
+        - Ratings
+      summary: Get available credit for rating
+      operationId: getCreditLeft
+      parameters:
+        - name: rater
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: rater_representative
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailableRatingCredit"
+
   /profiles/{identity}/repcic/ratings/by-rater:
     get:
       tags:
@@ -379,53 +427,6 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
-
-  /ratings:
-    post:
-      tags:
-        - Ratings
-      summary: Bulk rate
-      operationId: bulkRate
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BulkRateRequest"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BulkRateResponse"
-        "400":
-          description: "Invalid request"
-
-  /ratings/credit:
-    get:
-      tags:
-        - Ratings
-      summary: Get available credit for rating
-      operationId: getCreditLeft
-      parameters:
-        - name: rater
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: rater_representative
-          in: query
-          required: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AvailableRatingCredit"
 
   /drops:
     get:
@@ -1187,14 +1188,25 @@ components:
         skipped:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/BulkRateSkippedIdentity"
+
+    BulkRateSkippedIdentity:
+      type: object
+      required:
+        - identity
+        - reason
+      properties:
+        identity:
+          type: string
+        reason:
+          type: string
 
     BulkRateRequest:
       type: object
       required:
         - matter
         - category
-        - amount
+        - amount_to_add
         - target_wallet_addresses
       properties:
         matter:
@@ -1205,9 +1217,10 @@ components:
           nullable: true
           pattern: "^[a-zA-Z0-9?!,.'() ]$"
           description: "Category of the rating must be set when matter is REP and null if matter is CIC"
-        amount:
+        amount_to_add:
           type: number
           format: int64
+          example: 1
         target_wallet_addresses:
           type: array
           items:

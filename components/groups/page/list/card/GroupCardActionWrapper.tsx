@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
+import { RateMatter } from "../../../../../generated/models/RateMatter";
 
 export default function GroupCardActionWrapper({
   loading,
@@ -7,6 +8,7 @@ export default function GroupCardActionWrapper({
   addingRates,
   doneMembersCount,
   membersCount,
+  matter,
   onSave,
   onCancel,
   children,
@@ -16,11 +18,16 @@ export default function GroupCardActionWrapper({
   readonly addingRates: boolean;
   readonly membersCount: number | null;
   readonly doneMembersCount: number | null;
+  readonly matter: RateMatter;
   readonly onSave: () => void;
   readonly onCancel: () => void;
 
   readonly children: React.ReactNode;
 }) {
+  const MATTER_LABEL: Record<RateMatter, string> = {
+    [RateMatter.Rep]: "Rep",
+    [RateMatter.Cic]: "CIC",
+  };
   const getProgress = (): string => {
     if (
       typeof membersCount !== "number" ||
@@ -42,10 +49,11 @@ export default function GroupCardActionWrapper({
         {addingRates ? (
           <div>
             <p className="tw-mb-0 tw-text-base tw-text-iron-100 tw-font-semibold">
-              Rep Progress
+              {MATTER_LABEL[matter]} Progress
             </p>
             <p className="tw-mt-1 tw-text-iron-400 tw-text-sm">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Please do not leave the page or close this window until the
+              process is complete.
             </p>
             <p className="tw-mt-4 tw-mb-0 tw-text-xl tw-text-primary-400 tw-font-bold">
               {doneMembersCount}/{membersCount}
