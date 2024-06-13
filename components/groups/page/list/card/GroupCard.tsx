@@ -106,12 +106,12 @@ export default function GroupCard({
           background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
         }}
       >
-        <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
+        <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 tw-ring-inset tw-pointer-events-none tw-transition tw-duration-500 tw-ease-out"></div>
       </div>
       <div
         className={` ${
-          connectedProfile?.profile?.handle ? "tw-h-[151.5px]" : ""
-        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-bg-iron-800 tw-transition tw-duration-500 tw-ease-out`}
+          connectedProfile?.profile?.handle ? "tw-min-h-[151.5px]" : ""
+        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}
       >
         {components[state]}
       </div>

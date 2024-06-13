@@ -44,8 +44,8 @@ export default function GroupCardActionWrapper({
     setProgress(getProgress());
   }, [membersCount, doneMembersCount]);
   return (
-    <div className="tw-py-4 tw-flex tw-flex-col tw-h-full tw-gap-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700 tw-relative">
-      <div className="tw-px-4 sm:tw-px-6">
+    <div className="tw-pt-4 tw-pb-3 tw-flex tw-flex-col tw-h-full tw-gap-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700 tw-relative">
+      <div className="tw-px-4">
         {addingRates ? (
           <div>
             <p className="tw-mb-0 tw-text-base tw-text-iron-100 tw-font-semibold">

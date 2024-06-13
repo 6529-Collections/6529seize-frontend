@@ -12,7 +12,7 @@ export default function GroupCardActionFooter({
   readonly onCancel: () => void;
 }) {
   return (
-    <div className="tw-pt-3 tw-px-4 sm:tw-px-6 tw-mt-auto">
+    <div className="tw-pt-3 tw-px-4 tw-mt-auto">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-justify-end">
         <button
           type="button"
