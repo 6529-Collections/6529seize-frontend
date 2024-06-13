@@ -16,19 +16,19 @@ export default function GroupCardHeader({
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
 
   return (
-    <div className="tw-px-4 sm:tw-px-5 tw-mt-4 tw-flex tw-items-center tw-gap-x-3">
-      <div className="tw-flex tw-gap-x-4">
+    <div className="tw-px-4 sm:tw-px-5 tw-flex tw-items-center tw-gap-x-3">
+      <div className="-tw-mt-2 tw-flex tw-gap-x-4">
         {group.created_by.pfp ? (
           <img
-            className="tw-flex-shrink-0 tw-object-contain tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"
+            className="tw-flex-shrink-0 tw-object-contain tw-h-9 tw-w-9 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"
             src={group.created_by.pfp}
             alt="Profile Picture"
           />
         ) : (
-          <div className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"></div>
+          <div className="tw-h-9 tw-w-9 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"></div>
         )}
       </div>
-      <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
+      <div className="tw-mt-1.5 tw-flex tw-items-center tw-w-full tw-justify-between">
         <Link
           onClick={(e) => e.stopPropagation()}
           href={group.created_by.handle}

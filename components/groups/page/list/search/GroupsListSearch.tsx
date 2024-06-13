@@ -1,4 +1,3 @@
-
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 
@@ -25,8 +24,8 @@ export default function GroupsListSearch({
   };
 
   return (
-    <div className="tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row tw-w-full tw-items-center tw-justify-between tw-gap-4">
-      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 lg:tw-w-2/3 xl:tw-w-1/2 xl:tw-pr-3">
+    <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
+      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
         {showIdentitySearch && (
           <IdentitySearch
             identity={identity}
@@ -83,30 +82,38 @@ export default function GroupsListSearch({
           </label>
         </div>
       </div>
-      {showCreateNewGroupButton && (
+      <div className="tw-flex tw-gap-x-4">
         <button
-          onClick={onCreateNewGroup}
           type="button"
-          className="tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
         >
-          <svg
-            className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>Create New</span>
+          My groups
         </button>
-      )}
+        {showCreateNewGroupButton && (
+          <button
+            onClick={onCreateNewGroup}
+            type="button"
+            className="tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
+          >
+            <svg
+              className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 5V19M5 12H19"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Create New</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
