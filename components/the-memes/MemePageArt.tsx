@@ -68,7 +68,7 @@ export function MemePageArt(props: {
                 }
               />
             )}
-            {props.nft.animation ? (
+            {props.nft.animation || props.nft.metadata.animation ? (
               <Carousel
                 className={styles.memesCarousel}
                 interval={null}

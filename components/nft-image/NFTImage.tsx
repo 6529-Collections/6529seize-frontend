@@ -52,8 +52,8 @@ export default function NFTImage(props: Readonly<Props>) {
 
   if (
     props.animation &&
-    props.nft.animation &&
     "metadata" in props.nft &&
+    props.nft.metadata.animation &&
     props.nft.metadata.animation_details?.format === "GLB"
   ) {
     return (
