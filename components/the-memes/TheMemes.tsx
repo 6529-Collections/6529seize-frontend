@@ -274,7 +274,9 @@ export default function TheMemesComponent(props: Readonly<Props>) {
     setNftBalances([]);
     setNftBalancesTokenIds(new Set());
     setConnectedConsolidationKey(
-      connectedProfile?.consolidation?.consolidation_key ?? ""
+      connectedProfile?.consolidation?.consolidation_key ??
+        connectedProfile?.consolidation.wallets?.[0]?.wallet.address ??
+        ""
     );
   }, [connectedProfile]);
 
