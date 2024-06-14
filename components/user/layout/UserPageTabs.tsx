@@ -9,6 +9,7 @@ export enum UserPageTabType {
   STATS = "STATS",
   SUBSCRIPTIONS = "SUBSCRIPTIONS",
   PROXY = "PROXY",
+  GROUPS = "GROUPS",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -44,6 +45,11 @@ export const USER_PAGE_TAB_META: Record<
     tab: UserPageTabType.PROXY,
     title: "Proxy",
     route: "proxy",
+  },
+  [UserPageTabType.GROUPS]: {
+    tab: UserPageTabType.GROUPS,
+    title: "Groups",
+    route: "groups",
   },
 };
 
