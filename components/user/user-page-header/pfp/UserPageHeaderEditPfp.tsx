@@ -70,7 +70,7 @@ export default function UserPageHeaderEditPfp({
     mutationFn: async (body: FormData) => {
       setSaving(true);
       return await commonApiPostForm<{ pfp_url: string }>({
-        endpoint: `profiles/${profile.profile?.handle}/pfp`,
+        endpoint: `profiles/${profile.input_identity}/pfp`,
         body: body,
       });
     },

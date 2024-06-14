@@ -427,7 +427,6 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
-
   /drops:
     get:
       tags:

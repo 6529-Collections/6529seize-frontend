@@ -30,7 +30,7 @@ export default function UserPageIdentityDeleteStatementModal({
     mutationFn: async () => {
       setLoading(true);
       return await commonApiDelete({
-        endpoint: `profiles/${profile.profile?.handle}/cic/statements/${statement.id}`,
+        endpoint: `profiles/${profile.input_identity}/cic/statements/${statement.id}`,
       });
     },
     onError: (error) => {

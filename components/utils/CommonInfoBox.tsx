@@ -1,7 +1,7 @@
 export default function CommonInfoBox({
-  message
- }: {
-  readonly message: string
+  message,
+}: {
+  readonly message: string;
 }) {
   return (
     <div className="tw-w-full sm:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
@@ -21,7 +21,7 @@ export default function CommonInfoBox({
           />
         </svg>
         <div className="tw-ml-3 tw-self-center">
-          <h3 className="tw-text-sm sm:tw-text-md tw-mb-0 tw-font-semibold tw-text-primary-300">
+          <h3 className="tw-text-sm sm:tw-text-md tw-mb-0 tw-font-semibold tw-text-primary-300 tw-break-all">
             {message}
           </h3>
         </div>

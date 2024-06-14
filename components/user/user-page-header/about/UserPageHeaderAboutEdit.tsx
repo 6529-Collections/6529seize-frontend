@@ -81,7 +81,7 @@ export default function UserPageHeaderAboutEdit({
         ApiCreateOrUpdateProfileCicStatement,
         CicStatement
       >({
-        endpoint: `profiles/${profile.profile?.handle}/cic/statements`,
+        endpoint: `profiles/${profile.input_identity}/cic/statements`,
         body: {
           statement_group: STATEMENT_GROUP.GENERAL,
           statement_type: STATEMENT_TYPE.BIO,

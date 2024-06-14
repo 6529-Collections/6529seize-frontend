@@ -90,7 +90,7 @@ export default function UserPageIdentityHeaderCICRateStats({
           </span>
         </>
       ) : (
-        <span className="tw-block tw-text-iron-300 tw-font-normal">
+        <span className="tw-block tw-text-iron-300 tw-font-normal tw-break-all">
           <span>Your max/min CIC Rating to {profile.profile?.handle}:</span>
           <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/- {formatNumberWithCommas(minMaxValues.max)}

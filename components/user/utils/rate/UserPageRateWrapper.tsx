@@ -56,6 +56,9 @@ export default function UserPageRateWrapper({
     if (!connectedProfile) {
       return RaterContext.NOT_CONNECTED;
     }
+    if (!activeProfileProxy && amIUser({ profile, address })) {
+      return RaterContext.MY_PROFILE;
+    }
     if (!connectedProfile.profile?.handle) {
       return RaterContext.DONT_HAVE_PROFILE;
     }
@@ -68,20 +71,18 @@ export default function UserPageRateWrapper({
     ) {
       return RaterContext.PROXY_GRANTOR_PROFILE;
     }
-    if (!activeProfileProxy && amIUser({ profile, address })) {
-      return RaterContext.MY_PROFILE;
-    }
+
     return RaterContext.CAN_RATE;
   };
 
   const getRaterContextMessage = (context: RaterContext): string | null => {
     switch (context) {
       case RaterContext.NOT_CONNECTED:
-        return `Please connect to ${SUB_TITLE[type]} ${profile.profile?.handle}`;
+        return `Please connect to ${SUB_TITLE[type]} ${profile.input_identity}`;
       case RaterContext.DONT_HAVE_PROFILE:
-        return `Please make profile to ${SUB_TITLE[type]} ${profile.profile?.handle}`;
+        return `Please make profile to ${SUB_TITLE[type]} ${profile.input_identity}`;
       case RaterContext.PROXY_NO_ALLOWANCE:
-        return `You are acting as proxy and don't have allowance to ${SUB_TITLE[type]} ${profile.profile?.handle}`;
+        return `You are acting as proxy and don't have allowance to ${SUB_TITLE[type]} ${profile.input_identity}`;
       case RaterContext.PROXY_GRANTOR_PROFILE:
         return `You are acting as proxy and can't ${SUB_TITLE[type]} proxy grantor profile`;
       case RaterContext.MY_PROFILE:

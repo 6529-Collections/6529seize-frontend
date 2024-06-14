@@ -23,7 +23,7 @@ export default function HeaderUserProfile({
       return `${activeProfileProxy.created_by.handle}`;
     }
     if (profile.profile?.handle) {
-      return profile.profile.handle;
+      return profile.profile.handle.slice(0, 20);
     }
     const wallet = profile?.consolidation.wallets.find(
       (w) => w.wallet.address.toLowerCase() === address?.toLocaleLowerCase()

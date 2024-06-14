@@ -177,7 +177,7 @@ export const getProfileRatings = async ({
       })
     : null;
 
-  const rater = raterProfile?.profile?.handle.toLowerCase() ?? null;
+  const rater = raterProfile?.input_identity.toLowerCase() ?? null;
 
   const params: Record<string, string> = {};
   if (rater) {

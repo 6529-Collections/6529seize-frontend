@@ -14,7 +14,8 @@ export default function UserPageIdentityAddStatementsHeader({
   const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
 
-  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
+  const getCanEdit = (): boolean =>
+    isMyProfile && !activeProfileProxy && !!profile.profile?.handle;
   const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
   useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
 

@@ -31,13 +31,12 @@ export default function UserPageRepNewRepSearchHeader({
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.profile?.handle}/rep/ratings/received`,
+        endpoint: `profiles/${profile.input_identity}/rep/ratings/received`,
         params: activeProfileProxy?.created_by.handle
           ? { rater: activeProfileProxy.created_by.handle }
           : {},
       }),
-    enabled:
-      !!activeProfileProxy?.created_by.handle && !!profile.profile?.handle,
+    enabled: !!activeProfileProxy?.created_by.handle,
   });
 
   const getActiveRepRates = (): {
@@ -129,7 +128,7 @@ export default function UserPageRepNewRepSearchHeader({
         </>
       )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-        <span>Your Rep assigned to {profile.profile?.handle}:</span>
+        <span>Your Rep assigned to {profile.input_identity}:</span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
           {repRates ? formatNumberWithCommas(activeRepRates.rated) : ""}
         </span>

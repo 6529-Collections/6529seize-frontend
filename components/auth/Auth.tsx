@@ -64,13 +64,13 @@ export default function Auth({
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
-      { handleOrWallet: connectedProfile?.profile?.handle },
+      { handleOrWallet: connectedProfile?.input_identity },
     ],
     queryFn: async () =>
       await commonApiFetch<ProfileProxy[]>({
-        endpoint: `profiles/${connectedProfile?.profile?.handle}/proxies/`,
+        endpoint: `profiles/${connectedProfile?.input_identity}/proxies/`,
       }),
-    enabled: !!connectedProfile?.profile?.handle,
+    enabled: !!connectedProfile?.input_identity,
   });
 
   const [receivedProfileProxies, setReceivedProfileProxies] = useState<
