@@ -86,7 +86,7 @@ export default function GroupsListSearch({
           </label>
         </div>
       </div>
-      <div className="tw-flex tw-gap-x-4">
+      <div className="tw-flex tw-gap-x-3">
         {showMyGroupsButton && (
           <button
             onClick={onMyGroups}
