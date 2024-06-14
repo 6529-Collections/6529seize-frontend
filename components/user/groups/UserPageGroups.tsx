@@ -68,9 +68,11 @@ export default function UserPageGroups({
         filters={filters}
         showIdentitySearch={false}
         showCreateNewGroupButton={showCreateNewGroupButton}
+        showMyGroupsButton={false}
         onCreateNewGroup={onCreateNewGroup}
         setGroupName={setGroupName}
         setAuthorIdentity={setAuthorIdentity}
+        onMyGroups={() => {}}
       />
     </div>
   );

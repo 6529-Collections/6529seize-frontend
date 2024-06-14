@@ -37,7 +37,7 @@ export default function GroupCreateConfig({
         <GroupCreateCIC cic={cic} setCIC={setCIC} />
         <GroupCreateRep rep={rep} setRep={setRep} />
       </div>
-      <GroupCreateWallets wallets={wallets} setWallets={setWallets} />
+      {/* <GroupCreateWallets wallets={wallets} setWallets={setWallets} /> */}
     </div>
   );
 }

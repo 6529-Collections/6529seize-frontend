@@ -27,7 +27,7 @@ export default function GroupCardContent({
         >
           {group.name}
         </p>
-        {!!connectedProfile?.profile?.handle && (
+        {/* {!!connectedProfile?.profile?.handle && (
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <button
               onClick={(e) => {
@@ -56,7 +56,7 @@ export default function GroupCardContent({
               CIC all
             </button>
           </div>
-        )}
+        )} */}
       </div>
       <GroupCardConfigs group={group} />
     </div>

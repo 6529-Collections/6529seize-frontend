@@ -9,13 +9,15 @@ import GroupCreateTest from "./GroupCreateTest";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreateActions({
+  originalGroup,
   groupConfig,
   onCompleted,
 }: {
+  readonly originalGroup: GroupFull | null;
   readonly groupConfig: CreateGroup;
   readonly onCompleted: () => void;
 }) {
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onGroupCreate } = useContext(ReactQueryWrapperContext);
 
   const getIsActionsDisabled = () => {
@@ -138,7 +140,12 @@ export default function GroupCreateActions({
         id: response.id,
         body: {
           visible: true,
-          old_version_id: null,
+          old_version_id:
+            originalGroup &&
+            originalGroup.created_by?.handle.toLowerCase() ===
+              connectedProfile?.profile?.handle.toLowerCase()
+              ? originalGroup.id
+              : null,
         },
       });
     }

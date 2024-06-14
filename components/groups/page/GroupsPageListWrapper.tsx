@@ -8,7 +8,6 @@ import { GroupsRequestParams } from "../../../entities/IGroup";
 const IDENTITY_SEARCH_PARAM = "identity";
 const GROUP_NAME_SEARCH_PARAM = "group";
 
-
 export default function GroupsPageListWrapper({
   onCreateNewGroup,
 }: {
@@ -22,8 +21,16 @@ export default function GroupsPageListWrapper({
   const [showCreateNewGroupButton, setShowCreateNewGroupButton] = useState(
     getShowCreateNewGroupButton()
   );
+
+  const getShowMyGroupsButton = () =>
+    !!connectedProfile?.profile?.handle || !!activeProfileProxy;
+
+  const [showMyGroupsButton, setShowMyGroupsButton] = useState(
+    getShowMyGroupsButton()
+  );
   useEffect(() => {
     setShowCreateNewGroupButton(getShowCreateNewGroupButton());
+    setShowMyGroupsButton(getShowMyGroupsButton());
   }, [connectedProfile, activeProfileProxy]);
 
   const router = useRouter();
@@ -31,7 +38,6 @@ export default function GroupsPageListWrapper({
   const searchParams = useSearchParams();
   const identity = searchParams.get(IDENTITY_SEARCH_PARAM);
   const group = searchParams.get(GROUP_NAME_SEARCH_PARAM);
-
 
   const [filters, setFilters] = useState<GroupsRequestParams>({
     group_name: group,
@@ -92,14 +98,27 @@ export default function GroupsPageListWrapper({
     );
   };
 
+  const onMyGroups = () => {
+    if (!connectedProfile?.profile?.handle) {
+      return;
+    }
+    if (activeProfileProxy?.created_by.handle) {
+      setAuthorIdentity(activeProfileProxy.created_by.handle);
+      return;
+    }
+    setAuthorIdentity(connectedProfile.profile.handle);
+  };
+
   return (
     <GroupsList
       filters={filters}
       showIdentitySearch={true}
       showCreateNewGroupButton={showCreateNewGroupButton}
+      showMyGroupsButton={showMyGroupsButton}
       onCreateNewGroup={onCreateNewGroup}
       setGroupName={setGroupName}
       setAuthorIdentity={setAuthorIdentity}
+      onMyGroups={onMyGroups}
     />
   );
 }

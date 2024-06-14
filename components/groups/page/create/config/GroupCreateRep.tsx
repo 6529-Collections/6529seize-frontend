@@ -3,6 +3,7 @@ import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import RepCategorySearch from "../../../../utils/input/rep-category/RepCategorySearch";
+import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";
 
 export default function GroupCreateRep({
   rep,
@@ -11,6 +12,14 @@ export default function GroupCreateRep({
   readonly rep: CreateGroupDescription["rep"];
   readonly setRep: (rep: CreateGroupDescription["rep"]) => void;
 }) {
+  const IDENTITY_LABEL: Record<GroupFilterDirection, string> = {
+    [GroupFilterDirection.Received]: "From Identity",
+    [GroupFilterDirection.Sent]: "To Identity",
+  };
+
+  const identityLabel = rep.direction
+    ? IDENTITY_LABEL[rep.direction]
+    : "Identity";
   return (
     <div className="tw-p-5 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-flex tw-flex-col tw-space-y-4">
@@ -35,7 +44,7 @@ export default function GroupCreateRep({
           <div className="tw-flex tw-flex-col xl:tw-flex-row tw-gap-4 lg:tw-gap-5">
             <IdentitySearch
               identity={rep.user_identity}
-              label="From Identity"
+              label={identityLabel}
               setIdentity={(identity) =>
                 setRep({ ...rep, user_identity: identity })
               }

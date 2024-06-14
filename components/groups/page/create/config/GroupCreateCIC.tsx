@@ -2,6 +2,7 @@ import { CreateGroupDescription } from "../../../../../generated/models/CreateGr
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
+import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";
 
 export default function GroupCreateCIC({
   cic,
@@ -10,6 +11,14 @@ export default function GroupCreateCIC({
   readonly cic: CreateGroupDescription["cic"];
   readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
 }) {
+  const IDENTITY_LABEL: Record<GroupFilterDirection, string> = {
+    [GroupFilterDirection.Received]: "From Identity",
+    [GroupFilterDirection.Sent]: "To Identity",
+  };
+
+  const identityLabel = cic.direction
+    ? IDENTITY_LABEL[cic.direction]
+    : "Identity";
   return (
     <div className="tw-p-5 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-flex tw-flex-col">
@@ -33,7 +42,7 @@ export default function GroupCreateCIC({
         <div className="tw-flex tw-flex-col tw-gap-y-4 lg:tw-gap-y-5 tw-gap-x-3">
           <IdentitySearch
             identity={cic.user_identity}
-            label="From Identity"
+            label={identityLabel}
             setIdentity={(identity) =>
               setCIC({ ...cic, user_identity: identity })
             }

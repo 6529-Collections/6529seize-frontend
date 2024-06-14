@@ -21,7 +21,7 @@ export default function GroupCreate({
 }) {
   const isEditMode = !!edit && edit !== "new";
 
-  const { data, isFetching } = useQuery<GroupFull>({
+  const { data: originalGroup, isFetching } = useQuery<GroupFull>({
     queryKey: [QueryKey.GROUP, edit],
     queryFn: async () =>
       await commonApiFetch<GroupFull>({
@@ -55,38 +55,38 @@ export default function GroupCreate({
   });
 
   useEffect(() => {
-    if (!data) {
+    if (!originalGroup) {
       return;
     }
     setGroupConfig({
-      name: data.name,
+      name: originalGroup.name,
       group: {
         tdh: {
-          min: data.group.tdh?.min,
-          max: data.group.tdh?.max,
+          min: originalGroup.group.tdh?.min,
+          max: originalGroup.group.tdh?.max,
         },
         rep: {
-          min: data.group.rep?.min,
-          max: data.group.rep?.max,
-          direction: data.group.rep?.direction,
-          user_identity: data.group.rep?.user_identity,
-          category: data.group.rep?.category,
+          min: originalGroup.group.rep?.min,
+          max: originalGroup.group.rep?.max,
+          direction: originalGroup.group.rep?.direction,
+          user_identity: originalGroup.group.rep?.user_identity,
+          category: originalGroup.group.rep?.category,
         },
         cic: {
-          min: data.group.cic?.min,
-          max: data.group.cic?.max,
-          direction: data.group.cic?.direction,
-          user_identity: data.group.cic?.user_identity,
+          min: originalGroup.group.cic?.min,
+          max: originalGroup.group.cic?.max,
+          direction: originalGroup.group.cic?.direction,
+          user_identity: originalGroup.group.cic?.user_identity,
         },
         level: {
-          min: data.group.level?.min,
-          max: data.group.level?.max,
+          min: originalGroup.group.level?.min,
+          max: originalGroup.group.level?.max,
         },
-        owns_nfts: data.group.owns_nfts,
+        owns_nfts: originalGroup.group.owns_nfts,
         wallets: [], // TODO: we need to fetch wallets,
       },
     });
-  }, [data]);
+  }, [originalGroup]);
 
   if (isFetching) {
     return <div>Loading...</div>;
@@ -153,6 +153,7 @@ export default function GroupCreate({
               }
             />
             <GroupCreateActions
+              originalGroup={originalGroup ?? null}
               groupConfig={groupConfig}
               onCompleted={onCompleted}
             />

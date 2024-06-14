@@ -6,17 +6,21 @@ export default function GroupsListSearch({
   groupName,
   showIdentitySearch,
   showCreateNewGroupButton,
+  showMyGroupsButton,
   setIdentity,
   setGroupName,
   onCreateNewGroup,
+  onMyGroups,
 }: {
   readonly identity: string | null;
   readonly groupName: string | null;
   readonly showIdentitySearch: boolean;
   readonly showCreateNewGroupButton: boolean;
+  readonly showMyGroupsButton: boolean;
   readonly setIdentity: (identity: string | null) => void;
   readonly setGroupName: (groupName: string | null) => void;
   readonly onCreateNewGroup: () => void;
+  readonly onMyGroups: () => void;
 }) {
   const randomId = getRandomObjectId();
   const onGroupNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,12 +87,15 @@ export default function GroupsListSearch({
         </div>
       </div>
       <div className="tw-flex tw-gap-x-4">
-        <button
-          type="button"
-          className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-        >
-          My groups
-        </button>
+        {showMyGroupsButton && (
+          <button
+            onClick={onMyGroups}
+            type="button"
+            className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+          >
+            My groups
+          </button>
+        )}
         {showCreateNewGroupButton && (
           <button
             onClick={onCreateNewGroup}

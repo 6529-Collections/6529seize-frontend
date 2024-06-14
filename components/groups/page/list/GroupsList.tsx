@@ -16,16 +16,20 @@ export default function GroupsList({
   filters,
   showIdentitySearch,
   showCreateNewGroupButton,
+  showMyGroupsButton,
   onCreateNewGroup,
   setGroupName,
   setAuthorIdentity,
+  onMyGroups,
 }: {
   readonly filters: GroupsRequestParams;
   readonly showIdentitySearch: boolean;
   readonly showCreateNewGroupButton: boolean;
+  readonly showMyGroupsButton: boolean;
   readonly onCreateNewGroup: () => void;
   readonly setGroupName: (value: string | null) => void;
   readonly setAuthorIdentity: (value: string | null) => void;
+  readonly onMyGroups: () => void;
 }) {
   const [debouncedFilters, setDebouncedFilters] =
     useState<GroupsRequestParams>(filters);
@@ -105,9 +109,11 @@ export default function GroupsList({
         groupName={filters.group_name}
         showIdentitySearch={showIdentitySearch}
         showCreateNewGroupButton={showCreateNewGroupButton}
+        showMyGroupsButton={showMyGroupsButton}
         setIdentity={setAuthorIdentity}
         setGroupName={setGroupName}
         onCreateNewGroup={onCreateNewGroup}
+        onMyGroups={onMyGroups}
       />
       <CommonInfiniteScrollWrapper
         loading={isFetching}
