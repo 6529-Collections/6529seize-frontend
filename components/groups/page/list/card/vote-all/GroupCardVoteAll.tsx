@@ -1,12 +1,14 @@
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { GroupFull } from "../../../../../../generated/models/GroupFull";
-import GroupCardActionStats from "../utils/GroupCardActionStats";
-
+import { useContext, useEffect, useState } from "react";
 import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
+import { GroupFull } from "../../../../../../generated/models/GroupFull";
+import { AuthContext } from "../../../../../auth/Auth";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { CreditDirection } from "../GroupCard";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { Page } from "../../../../../../helpers/Types";
 import {
   CommunityMembersQuery,
   CommunityMembersSortOption,
@@ -16,31 +18,35 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "../../../../../../services/api/common-api";
-import { Page } from "../../../../../../helpers/Types";
-import { useContext, useEffect, useState } from "react";
-import GroupCardActionWrapper from "../GroupCardActionWrapper";
 import { BulkRateRequest } from "../../../../../../generated/models/BulkRateRequest";
-import { RateMatter } from "../../../../../../generated/models/RateMatter";
 import { BulkRateResponse } from "../../../../../../generated/models/BulkRateResponse";
-import { AuthContext } from "../../../../../auth/Auth";
-import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
-import { CreditDirection } from "../GroupCard";
+import GroupCardActionWrapper from "../GroupCardActionWrapper";
+import { RateMatter } from "../../../../../../generated/models/RateMatter";
+import GroupCardActionStats from "../utils/GroupCardActionStats";
+import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
 
-export default function GroupCardCICAll({
+export default function GroupCardVoteAll({
+  matter,
   group,
   onCancel,
 }: {
+  readonly matter: RateMatter;
   readonly group: GroupFull;
   readonly onCancel: () => void;
 }) {
-  const matter = RateMatter.Cic;
-  const category = null;
-  const { onIdentityBulkRate } = useContext(ReactQueryWrapperContext);
+  const SUCCESS_LABEL: Record<RateMatter, string> = {
+    [RateMatter.Cic]: "CIC distributed.",
+    [RateMatter.Rep]: "Rep distributed.",
+  };
+
+  const [category, setCategory] = useState<string | null>(null);
   const { setToast, requestAuth } = useContext(AuthContext);
+  const { onIdentityBulkRate } = useContext(ReactQueryWrapperContext);
   const [amountToAdd, setAmountToAdd] = useState<number | null>(null);
   const [creditDirection, setCreditDirection] = useState<CreditDirection>(
     CreditDirection.ADD
   );
+
   const { data: members, isFetching } = useQuery<Page<CommunityMemberOverview>>(
     {
       queryKey: [
@@ -83,16 +89,35 @@ export default function GroupCardCICAll({
   const [doingRates, setDoingRates] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [disabled, setDisabled] = useState<boolean>(true);
+
+  const getIsDisabled = (): boolean => {
+    if (typeof amountToAdd !== "number") {
+      return true;
+    }
+
+    if (!membersCount) {
+      return true;
+    }
+
+    if (loading) {
+      return true;
+    }
+
+    if (matter === RateMatter.Rep && !category) {
+      return true;
+    }
+    return false;
+  };
+
+  const [disabled, setDisabled] = useState<boolean>(getIsDisabled());
 
   useEffect(
     () => setLoading(isFetching || doingRates),
     [isFetching, doingRates]
   );
   useEffect(
-    () =>
-      setDisabled(typeof amountToAdd !== "number" || !membersCount || loading),
-    [amountToAdd, membersCount, loading]
+    () => setDisabled(getIsDisabled()),
+    [amountToAdd, membersCount, loading, category]
   );
 
   const bulkRateMutation = useMutation({
@@ -170,7 +195,7 @@ export default function GroupCardCICAll({
       }
     }
     setToast({
-      message: "CIC distributed.",
+      message: SUCCESS_LABEL[matter],
       type: "success",
     });
     setDoingRates(false);
@@ -178,7 +203,6 @@ export default function GroupCardCICAll({
     onIdentityBulkRate();
     onCancel();
   };
-
   return (
     <GroupCardActionWrapper
       onCancel={onCancel}
@@ -190,16 +214,16 @@ export default function GroupCardCICAll({
       matter={matter}
       onSave={onSave}
     >
-      <div className="tw-w-full xl:tw-max-w-[17.156rem]">
-        <GroupCardActionNumberInput
-          label="CIC"
-          componentId={`${group.id}_cic`}
-          amount={amountToAdd}
-          creditDirection={creditDirection}
-          setCreditDirection={setCreditDirection}
-          setAmount={setAmountToAdd}
-        />
-      </div>
+      <GroupCardVoteAllInputs
+        matter={matter}
+        category={category}
+        setCategory={setCategory}
+        group={group}
+        amountToAdd={amountToAdd}
+        creditDirection={creditDirection}
+        setCreditDirection={setCreditDirection}
+        setAmountToAdd={setAmountToAdd}
+      />
       <GroupCardActionStats
         matter={matter}
         membersCount={membersCount}
