@@ -4,7 +4,7 @@ import { BaseNFT } from "../../entities/INFT";
 
 export default function NFTModel(props: Readonly<{ nft: BaseNFT }>) {
   return (
-    <div className={styles.modelViewer} style={{ width: "100vw" }}>
+    <div className={styles.modelViewer} style={{ width: "100%" }}>
       <model-viewer
         src={props.nft.metadata.animation ?? props.nft.metadata.animation_url}
         alt={props.nft.name}
