@@ -5,7 +5,6 @@ import { AllowlistDescription } from "../../../allowlist-tool/allowlist-tool.typ
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
 import { AnimatePresence, motion } from "framer-motion";
-import EmmaListSearchItem from "./EmmaListSearchItem";
 import EmmaListSearchItemsContent from "./EmmaListSearchItemsContent";
 
 export default function EmmaListSearchItems({

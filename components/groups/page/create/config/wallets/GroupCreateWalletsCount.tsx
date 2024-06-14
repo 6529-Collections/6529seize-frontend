@@ -29,11 +29,13 @@ export default function GroupCreateWalletsCount({
               strokeLinejoin="round"
             />
           </svg>
-          <GroupCreateWalletsCountText
-            loading={loading}
-            walletsCount={walletsCount}
-            haveWallets={haveWallets}
-          />
+          <span className="tw-inline-flex tw-gap-x-1.5">
+            <span className="tw-text-iron-400 tw-font-medium">Wallets:</span>
+            <GroupCreateWalletsCountText
+              loading={loading}
+              walletsCount={walletsCount}
+            />
+          </span>
         </div>
         {haveWallets && (
           <button

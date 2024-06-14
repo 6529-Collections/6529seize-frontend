@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../auth/Auth";
+import { useEffect, useState } from "react";
 import {
   ImageScale,
   getScaledImageUri,
@@ -16,8 +15,6 @@ import { GroupFull } from "../../../../generated/models/GroupFull";
 import { getTimeAgo } from "../../../../helpers/Helpers";
 
 export default function GroupItem({ group }: { readonly group: GroupFull }) {
-  const { connectedProfile } = useContext(AuthContext);
-
   const activeGroupId = useSelector(selectActiveGroupId);
   const dispatch = useDispatch();
   const getIsActive = (): boolean =>
@@ -28,20 +25,6 @@ export default function GroupItem({ group }: { readonly group: GroupFull }) {
   useEffect(() => {
     setIsActive(getIsActive());
   }, [activeGroupId]);
-
-  const [isMyFilter, setIsMyFilter] = useState(
-    connectedProfile?.profile?.handle.toLowerCase() ===
-      group.created_by?.handle.toLowerCase()
-  );
-
-  useEffect(
-    () =>
-      setIsMyFilter(
-        connectedProfile?.profile?.handle.toLowerCase() ===
-          group.created_by?.handle.toLowerCase()
-      ),
-    [connectedProfile]
-  );
 
   const deActivate = () => {
     if (!isActive) return;

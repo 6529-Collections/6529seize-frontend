@@ -1,8 +1,6 @@
-import { useContext } from "react";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import { GroupCardState } from "./GroupCard";
 import GroupCardConfigs from "./GroupCardConfigs";
-import { AuthContext } from "../../../../auth/Auth";
 
 export default function GroupCardContent({
   group,
