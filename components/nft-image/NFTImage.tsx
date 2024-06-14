@@ -3,6 +3,7 @@ import { Col } from "react-bootstrap";
 import { BaseNFT, NFTLite } from "../../entities/INFT";
 import Image from "next/image";
 import { useEffect } from "react";
+import NFTModel from "./NFTModel";
 
 interface Props {
   nft: BaseNFT | NFTLite;
@@ -45,6 +46,23 @@ export default function NFTImage(props: Readonly<Props>) {
           }
           id={`${props.id && `${props.id}`}`}
         />
+      </Col>
+    );
+  }
+
+  if (
+    props.animation &&
+    props.nft.animation &&
+    "metadata" in props.nft &&
+    props.nft.metadata.animation_details?.format === "GLB"
+  ) {
+    return (
+      <Col
+        className={`${styles.nftAnimation} ${
+          props.transparentBG ? styles.transparentBG : ""
+        } d-flex justify-content-center align-items-center`}>
+        <NFTImageBalance {...props} />
+        <NFTModel nft={props.nft} />
       </Col>
     );
   }
