@@ -14,9 +14,9 @@ import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
 import DotLoader from "../dotLoader/DotLoader";
-import { MEMES_CONTRACT } from "../../constants";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import { MEMELAB_CONTRACT } from "../../constants";
 
 enum Sort {
   AGE = "age",
@@ -118,9 +118,12 @@ export default function MemeLabComponent(props: Readonly<Props>) {
   }, []);
 
   useEffect(() => {
-    if (connectedProfile?.consolidation.consolidation_key) {
+    const connected =
+      connectedProfile?.consolidation?.consolidation_key ??
+      connectedProfile?.consolidation.wallets?.[0]?.wallet.address;
+    if (connected) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation.consolidation_key}?contract=${MEMES_CONTRACT}`
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connected}?contract=${MEMELAB_CONTRACT}`
       ).then((owners: NftOwner[]) => {
         setNftBalances(owners);
         setBalancesLoaded(true);
