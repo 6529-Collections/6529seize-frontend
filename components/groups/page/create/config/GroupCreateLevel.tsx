@@ -1,5 +1,4 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
-import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
 export default function GroupCreateLevel({

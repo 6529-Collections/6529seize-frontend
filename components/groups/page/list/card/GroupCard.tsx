@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import { getRandomColorWithSeed } from "../../../../../helpers/Helpers";
 import GroupCardView from "./GroupCardView";
-import GroupCardRepAll from "./rep-all/GroupCardRepAll";
-import GroupCardCICAll from "./cic-all/GroupCardCICAll";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
+import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
+import { RateMatter } from "../../../../../generated/models/RateMatter";
 
 export enum GroupCardState {
   IDLE = "IDLE",
@@ -81,10 +81,18 @@ export default function GroupCard({
       />
     ),
     [GroupCardState.REP]: (
-      <GroupCardRepAll group={group} onCancel={onActionCancel} />
+      <GroupCardVoteAll
+        group={group}
+        onCancel={onActionCancel}
+        matter={RateMatter.Rep}
+      />
     ),
     [GroupCardState.CIC]: (
-      <GroupCardCICAll group={group} onCancel={onActionCancel} />
+      <GroupCardVoteAll
+        group={group}
+        onCancel={onActionCancel}
+        matter={RateMatter.Cic}
+      />
     ),
   };
 
@@ -110,7 +118,9 @@ export default function GroupCard({
       </div>
       <div
         className={` ${
-          connectedProfile?.profile?.handle ? "tw-min-h-[134px]" : "tw-h-[123.5px]"
+          connectedProfile?.profile?.handle
+            ? "tw-min-h-[134px]"
+            : "tw-h-[123.5px]"
         } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}
       >
         {components[state]}

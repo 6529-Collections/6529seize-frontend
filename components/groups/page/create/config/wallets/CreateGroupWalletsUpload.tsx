@@ -10,40 +10,33 @@ export default function CreateGroupWalletsUpload({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const getAddresses = (lines: string[]): string[] => {
+    const delimiterRegex = /[\s,;]+/;
+    const addresses = lines.flatMap((line) => {
+      return line.split(delimiterRegex).map((part) => {
+        const address = part.trim();
+        if (address.match(/^0x[a-fA-F0-9]{40}$/)) {
+          return address.toLowerCase();
+        }
+        return null;
+      });
+    });
+
+    // Filter out nulls
+    const filteredAddresses = addresses.filter((address) => address !== null);
+
+    // Create a set to remove duplicates
+    const uniqueAddresses = new Set(filteredAddresses);
+    return Array.from(uniqueAddresses) as string[];
+  };
+
   const onFileChange = useCallback(
     (file: File) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result;
         const lines = (content as string).split(/\r?\n/);
-        // Regular expression for splitting by common delimiters
-        const delimiterRegex = /[\s,;]+/;
-
-        // Find Ethereum addresses or .eth names
-        const addresses = lines.flatMap((line) => {
-          return line.split(delimiterRegex).map((part) => {
-            const address = part.trim();
-            if (address.match(/^0x[a-fA-F0-9]{40}$/)) {
-              return address.toLowerCase();
-            }
-            // if (address.match(/\.eth$/)) {
-            //   return address;
-            // }
-            return null;
-          });
-        });
-
-        // Filter out nulls
-        const filteredAddresses = addresses.filter(
-          (address) => address !== null
-        );
-
-        // Create a set to remove duplicates
-        const uniqueAddresses = new Set(filteredAddresses);
-        const uniqueAddressesArray: string[] = Array.from(
-          uniqueAddresses
-        ) as string[];
-        setWallets(uniqueAddressesArray);
+        setWallets(getAddresses(lines));
       };
       reader.readAsText(file);
     },

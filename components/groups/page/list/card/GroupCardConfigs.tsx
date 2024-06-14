@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GroupDescriptionType } from "../../../../../entities/IGroup";
 import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";

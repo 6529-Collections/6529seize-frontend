@@ -1,3 +1,5 @@
+import GroupCreateWalletsCountText from "./GroupCreateWalletsCountText";
+
 export default function GroupCreateWalletsCount({
   walletsCount,
   loading,
@@ -29,17 +31,10 @@ export default function GroupCreateWalletsCount({
           </svg>
           <span className="tw-inline-flex tw-gap-x-1.5">
             <span className="tw-text-iron-400 tw-font-medium">Wallets:</span>
-            {loading ? (
-              <span className="tw-text-iron-50 tw-font-semibold">
-                Loading...
-              </span>
-            ) : !!haveWallets ? (
-              <span className="tw-text-iron-50 tw-font-semibold">
-                {walletsCount}
-              </span>
-            ) : (
-              <span className="tw-text-iron-400 tw-font-medium">Not added</span>
-            )}
+            <GroupCreateWalletsCountText
+              loading={loading}
+              walletsCount={walletsCount}
+            />
           </span>
         </div>
         {haveWallets && (

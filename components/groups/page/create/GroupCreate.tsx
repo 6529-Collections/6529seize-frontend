@@ -83,7 +83,7 @@ export default function GroupCreate({
           max: originalGroup.group.level?.max,
         },
         owns_nfts: originalGroup.group.owns_nfts,
-        wallets: [], // TODO: we need to fetch wallets,
+        wallets: [],
       },
     });
   }, [originalGroup]);

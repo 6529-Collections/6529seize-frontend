@@ -17,7 +17,7 @@ export default function GroupCardHeader({
 
   return (
     <div className="tw-px-4 sm:tw-px-5 tw-flex tw-items-center tw-gap-x-3">
-      <div className="-tw-mt-2 tw-flex tw-gap-x-4">
+      <div className="-tw-mt-3 tw-flex tw-gap-x-4">
         {group.created_by.pfp ? (
           <img
             className="tw-flex-shrink-0 tw-object-contain tw-h-9 tw-w-9 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"
