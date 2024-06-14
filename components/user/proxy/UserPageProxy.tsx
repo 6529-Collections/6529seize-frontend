@@ -66,7 +66,7 @@ export default function UserPageProxy({
     ],
     queryFn: async () =>
       await commonApiFetch<ProfileProxy[]>({
-        endpoint: `profiles/${profile.profile?.handle}/proxies/`,
+        endpoint: `profiles/${profile.input_identity}/proxies/`,
       }),
     enabled: !!profile.profile?.handle,
     placeholderData: keepPreviousData,
