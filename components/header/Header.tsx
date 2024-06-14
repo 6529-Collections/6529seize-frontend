@@ -287,6 +287,13 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <Link href="/groups">
+                      <h3>Groups</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <Link href="/nft-activity">
                       <h3>NFT Activity</h3>
                     </Link>
@@ -760,6 +767,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Community Activity",
                                   path: "/community-activity",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Groups",
+                                  path: "/groups",
                                 }}
                               />
                               <HeaderDesktopLink
