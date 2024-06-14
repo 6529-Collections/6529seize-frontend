@@ -29,6 +29,7 @@ export enum QueryKey {
   PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
+  IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -45,6 +46,8 @@ export enum QueryKey {
   NFTS_SEARCH = "NFTS_SEARCH",
   PROFILE_PROXY = "PROFILE_PROXY",
   PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
+  EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
+  EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -144,6 +147,8 @@ type ReactQueryWrapperContextType = {
   }) => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
+  onGroupCreate: () => void;
+  onIdentityBulkRate: () => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -162,6 +167,8 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
+    onGroupCreate: () => {},
+    onIdentityBulkRate: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -299,6 +306,12 @@ export default function ReactQueryWrapper({
   const onGroupChanged = ({ groupId }: { readonly groupId: string }) =>
     invalidateGroup({ groupId });
 
+  const onGroupCreate = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.GROUPS],
+    });
+  };
+
   const setRepRates = ({
     data,
     handleOrWallet,
@@ -397,6 +410,24 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const invalidateIdentityAvailableCredit = ({
+    rater,
+    rater_representative,
+  }: {
+    rater: string;
+    rater_representative: string | null;
+  }) => {
+    queryClient.invalidateQueries({
+      queryKey: [
+        QueryKey.IDENTITY_AVAILABLE_CREDIT,
+        {
+          rater,
+          rater_representative,
+        },
+      ],
+    });
+  };
+
   const onProfileCICModify = ({
     targetProfile,
     connectedProfile,
@@ -462,6 +493,20 @@ export default function ReactQueryWrapper({
             handleOrWallet: profileProxy.granted_to.handle,
           },
         ],
+      });
+    }
+    const raterTarget =
+      profileProxy?.created_by.handle ??
+      connectedProfile?.profile?.handle ??
+      null;
+    const raterRepresentative = profileProxy
+      ? connectedProfile?.profile?.handle ?? null
+      : null;
+
+    if (raterTarget) {
+      invalidateIdentityAvailableCredit({
+        rater: raterTarget,
+        rater_representative: raterRepresentative,
       });
     }
   };
@@ -547,6 +592,21 @@ export default function ReactQueryWrapper({
             handleOrWallet: profileProxy.granted_to.handle,
           },
         ],
+      });
+    }
+
+    const raterTarget =
+      profileProxy?.created_by.handle ??
+      connectedProfile?.profile?.handle ??
+      null;
+    const raterRepresentative = profileProxy
+      ? connectedProfile?.profile?.handle ?? null
+      : null;
+
+    if (raterTarget) {
+      invalidateIdentityAvailableCredit({
+        rater: raterTarget,
+        rater_representative: raterRepresentative,
       });
     }
   };
@@ -661,6 +721,42 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onIdentityBulkRate = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_LOGS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_RATERS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_RATER_CIC_STATE],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_AVAILABLE_CREDIT],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROXY],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_REP_RATINGS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.GROUP],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.GROUPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
+    });
+  };
+
   return (
     <ReactQueryWrapperContext.Provider
       value={{
@@ -678,6 +774,8 @@ export default function ReactQueryWrapper({
         initCommunityActivityPage,
         onGroupRemoved,
         onGroupChanged,
+        onGroupCreate,
+        onIdentityBulkRate,
       }}
     >
       {children}
