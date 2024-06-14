@@ -1,5 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
-
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import {
   ImageScale,
@@ -17,7 +16,6 @@ import { GroupFull } from "../../../../generated/models/GroupFull";
 import { getTimeAgo } from "../../../../helpers/Helpers";
 
 export default function GroupItem({ group }: { readonly group: GroupFull }) {
-
   const { connectedProfile } = useContext(AuthContext);
 
   const activeGroupId = useSelector(selectActiveGroupId);
@@ -44,11 +42,6 @@ export default function GroupItem({ group }: { readonly group: GroupFull }) {
       ),
     [connectedProfile]
   );
-
-  const getEditTitle = () => (isMyFilter ? "Edit" : "Clone");
-
-  const [editTitle, setEditTitle] = useState<string>(getEditTitle());
-  useEffect(() => setEditTitle(getEditTitle()), [isMyFilter]);
 
   const deActivate = () => {
     if (!isActive) return;

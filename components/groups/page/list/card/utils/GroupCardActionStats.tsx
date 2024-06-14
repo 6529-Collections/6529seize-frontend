@@ -48,41 +48,40 @@ export default function GroupCardActionStats({
     setRaterRepresentative(null);
   }, [connectedProfile, activeProfileProxy]);
 
-  const { data: creditLeft, isFetching } =
-    useQuery<AvailableRatingCredit | null>({
-      queryKey: [
-        QueryKey.IDENTITY_AVAILABLE_CREDIT,
-        {
-          rater,
-          rater_representative: raterRepresentative,
-        },
-      ],
-      queryFn: async () => {
-        if (!rater) {
-          return null;
-        }
-        const params: {
-          rater: string;
-          rater_representative?: string;
-        } = {
-          rater,
-        };
-
-        if (raterRepresentative) {
-          params.rater_representative = raterRepresentative;
-        }
-
-        return await commonApiFetch<
-          AvailableRatingCredit,
-          { rater: string; rater_representative?: string }
-        >({
-          endpoint: `ratings/credit`,
-          params,
-        });
+  const { data: creditLeft } = useQuery<AvailableRatingCredit | null>({
+    queryKey: [
+      QueryKey.IDENTITY_AVAILABLE_CREDIT,
+      {
+        rater,
+        rater_representative: raterRepresentative,
       },
-      placeholderData: keepPreviousData,
-      enabled: !!rater,
-    });
+    ],
+    queryFn: async () => {
+      if (!rater) {
+        return null;
+      }
+      const params: {
+        rater: string;
+        rater_representative?: string;
+      } = {
+        rater,
+      };
+
+      if (raterRepresentative) {
+        params.rater_representative = raterRepresentative;
+      }
+
+      return await commonApiFetch<
+        AvailableRatingCredit,
+        { rater: string; rater_representative?: string }
+      >({
+        endpoint: `ratings/credit`,
+        params,
+      });
+    },
+    placeholderData: keepPreviousData,
+    enabled: !!rater,
+  });
 
   const getCreditLeft = () => {
     switch (matter) {

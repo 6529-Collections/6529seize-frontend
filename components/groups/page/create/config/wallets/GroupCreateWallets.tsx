@@ -1,7 +1,6 @@
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useEffect, useState } from "react";
-import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
 
 export default function GroupCreateWallets({
   wallets,

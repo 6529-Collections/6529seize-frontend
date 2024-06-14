@@ -1,10 +1,8 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
-import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
 import GroupCreateRep from "./GroupCreateRep";
 import GroupCreateTDH from "./GroupCreateTDH";
-import GroupCreateWallets from "./wallets/GroupCreateWallets";
 
 export default function GroupCreateConfig({
   level,

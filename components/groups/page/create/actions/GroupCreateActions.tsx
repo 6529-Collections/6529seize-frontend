@@ -54,10 +54,10 @@ export default function GroupCreateActions({
     if (groupConfig.group.cic.user_identity !== null) {
       return false;
     }
-    if (!!groupConfig.group.owns_nfts.length) {
+    if (groupConfig.group.owns_nfts.length) {
       return false;
     }
-    if (!!groupConfig.group.wallets?.length) {
+    if (groupConfig.group.wallets?.length) {
       return false;
     }
     return true;

@@ -1,9 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { GroupFull } from "../../../../../../generated/models/GroupFull";
-import RepCategorySearch, {
-  RepCategorySearchSize,
-} from "../../../../../utils/input/rep-category/RepCategorySearch";
-import GroupCardActionFooter from "../utils/GroupCardActionFooter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../../helpers/Types";
@@ -168,12 +164,10 @@ export default function GroupCardRepAll({
         });
         setDoneMembersCount((prev) => prev + members.length);
       } catch {
-        haveNextPage = false;
         setDoingRates(false);
         setDoneMembersCount(0);
         onIdentityBulkRate();
         onCancel();
-
         return;
       }
     }

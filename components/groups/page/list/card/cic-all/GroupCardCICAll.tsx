@@ -162,7 +162,6 @@ export default function GroupCardCICAll({
         });
         setDoneMembersCount((prev) => prev + members.length);
       } catch {
-        haveNextPage = false;
         setDoingRates(false);
         setDoneMembersCount(0);
         onIdentityBulkRate();

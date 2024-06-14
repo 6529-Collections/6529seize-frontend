@@ -1,5 +1,4 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
-import { GroupDescription } from "../../../../../generated/models/GroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
 export default function GroupCreateTDH({
@@ -9,28 +8,7 @@ export default function GroupCreateTDH({
   readonly tdh: CreateGroupDescription["tdh"];
   readonly setTDH: (tdh: CreateGroupDescription["tdh"]) => void;
 }) {
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setTDH({
-        ...tdh,
-        min: null,
-      });
-      return;
-    }
-    const numericValue = parseFloat(value);
-    if (isNaN(numericValue)) {
-      setTDH({
-        ...tdh,
-        min: null,
-      });
-      return;
-    }
-    setTDH({
-      ...tdh,
-      min: numericValue,
-    });
-  };
+
   return (
     <div className="tw-p-5 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-mb-4">

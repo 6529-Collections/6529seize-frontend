@@ -33,14 +33,7 @@ export default function GroupSelect() {
 
   useDebounce(() => setDebouncedFilters(filters), 200, [filters]);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
+  const { data } = useInfiniteQuery({
     queryKey: [QueryKey.GROUPS, debouncedFilters],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
