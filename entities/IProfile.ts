@@ -494,4 +494,5 @@ export interface CommunityMemberOverview {
   readonly cic: number;
   readonly pfp: string | null;
   readonly last_activity: number | null;
+  readonly wallet: string;
 }

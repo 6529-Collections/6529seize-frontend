@@ -23,6 +23,8 @@ export class GroupDescription {
     'cic': GroupCicFilter;
     'level': GroupLevelFilter;
     'owns_nfts': Array<GroupOwnsNft>;
+    'wallet_group_id': string | null;
+    'wallet_group_wallets_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -56,6 +58,18 @@ export class GroupDescription {
             "baseName": "owns_nfts",
             "type": "Array<GroupOwnsNft>",
             "format": ""
+        },
+        {
+            "name": "wallet_group_id",
+            "baseName": "wallet_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wallet_group_wallets_count",
+            "baseName": "wallet_group_wallets_count",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

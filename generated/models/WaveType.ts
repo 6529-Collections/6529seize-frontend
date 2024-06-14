@@ -12,11 +12,8 @@
 
 import { HttpFile } from '../http/http';
 
-/**
-* Type of the wave: * VOTE_TALLY_IN_RANGE - Everybody who will end up in specified range will win. * TOP_VOTED - Top voted participant(s) will win. * NONE - No winners. 
-*/
 export enum WaveType {
-    VoteTallyInRange = 'VOTE_TALLY_IN_RANGE',
-    TopVoted = 'TOP_VOTED',
-    None = 'NONE'
+    Approve = 'APPROVE',
+    Rank = 'RANK',
+    Chat = 'CHAT'
 }

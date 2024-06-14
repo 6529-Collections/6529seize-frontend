@@ -10,12 +10,12 @@
  * Do not edit the class manually.
  */
 
-import { GroupDescription } from '../models/GroupDescription';
+import { CreateGroupDescription } from '../models/CreateGroupDescription';
 import { HttpFile } from '../http/http';
 
 export class CreateGroup {
     'name': string;
-    'group': GroupDescription;
+    'group': CreateGroupDescription;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,7 +29,7 @@ export class CreateGroup {
         {
             "name": "group",
             "baseName": "group",
-            "type": "GroupDescription",
+            "type": "CreateGroupDescription",
             "format": ""
         }    ];
 

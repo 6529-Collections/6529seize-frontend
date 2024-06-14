@@ -1,5 +1,9 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/AvailableRatingCredit';
+export * from '../models/BulkRateRequest';
+export * from '../models/BulkRateResponse';
+export * from '../models/BulkRateSkippedIdentity';
 export * from '../models/ChangeGroupVisibility';
 export * from '../models/ChangeProfileCicRating';
 export * from '../models/ChangeProfileCicRatingResponse';
@@ -10,6 +14,7 @@ export * from '../models/CreateDropMediaUrlRequest';
 export * from '../models/CreateDropPart';
 export * from '../models/CreateDropRequest';
 export * from '../models/CreateGroup';
+export * from '../models/CreateGroupDescription';
 export * from '../models/CreateNewProfileProxy';
 export * from '../models/CreateNewProfileProxyAllocateCicAction';
 export * from '../models/CreateNewProfileProxyAllocateRepAction';
@@ -59,6 +64,9 @@ export * from '../models/ProfileProxy';
 export * from '../models/ProfileProxyAction';
 export * from '../models/ProfileProxyActionType';
 export * from '../models/QuotedDrop';
+export * from '../models/RateMatter';
+export * from '../models/RatingWithProfileInfoAndLevel';
+export * from '../models/RatingWithProfileInfoAndLevelPage';
 export * from '../models/RepRating';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
@@ -75,6 +83,10 @@ export * from '../models/WaveVotingConfig';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { AvailableRatingCredit } from '../models/AvailableRatingCredit';
+import { BulkRateRequest     } from '../models/BulkRateRequest';
+import { BulkRateResponse } from '../models/BulkRateResponse';
+import { BulkRateSkippedIdentity } from '../models/BulkRateSkippedIdentity';
 import { ChangeGroupVisibility } from '../models/ChangeGroupVisibility';
 import { ChangeProfileCicRating } from '../models/ChangeProfileCicRating';
 import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRatingResponse';
@@ -85,6 +97,7 @@ import { CreateDropMediaUrlRequest } from '../models/CreateDropMediaUrlRequest';
 import { CreateDropPart } from '../models/CreateDropPart';
 import { CreateDropRequest } from '../models/CreateDropRequest';
 import { CreateGroup } from '../models/CreateGroup';
+import { CreateGroupDescription } from '../models/CreateGroupDescription';
 import { CreateNewProfileProxy } from '../models/CreateNewProfileProxy';
 import { CreateNewProfileProxyAllocateCicAction    } from '../models/CreateNewProfileProxyAllocateCicAction';
 import { CreateNewProfileProxyAllocateRepAction    } from '../models/CreateNewProfileProxyAllocateRepAction';
@@ -134,10 +147,13 @@ import { ProfileProxy } from '../models/ProfileProxy';
 import { ProfileProxyAction             } from '../models/ProfileProxyAction';
 import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { QuotedDrop } from '../models/QuotedDrop';
+import { RateMatter } from '../models/RateMatter';
+import { RatingWithProfileInfoAndLevel } from '../models/RatingWithProfileInfoAndLevel';
+import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileInfoAndLevelPage';
 import { RepRating } from '../models/RepRating';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
-import { WaveConfig      } from '../models/WaveConfig';
+import { WaveConfig       } from '../models/WaveConfig';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveOutcome } from '../models/WaveOutcome';
@@ -167,6 +183,7 @@ let enumsMap: Set<string> = new Set<string>([
     "GroupOwnsNftNameEnum",
     "NftTokenTypeEnum",
     "ProfileProxyActionType",
+    "RateMatter",
     "WaveCreditScope",
     "WaveCreditType",
     "WaveType",
@@ -175,6 +192,10 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "AvailableRatingCredit": AvailableRatingCredit,
+    "BulkRateRequest": BulkRateRequest,
+    "BulkRateResponse": BulkRateResponse,
+    "BulkRateSkippedIdentity": BulkRateSkippedIdentity,
     "ChangeGroupVisibility": ChangeGroupVisibility,
     "ChangeProfileCicRating": ChangeProfileCicRating,
     "ChangeProfileCicRatingResponse": ChangeProfileCicRatingResponse,
@@ -185,6 +206,7 @@ let typeMap: {[index: string]: any} = {
     "CreateDropPart": CreateDropPart,
     "CreateDropRequest": CreateDropRequest,
     "CreateGroup": CreateGroup,
+    "CreateGroupDescription": CreateGroupDescription,
     "CreateNewProfileProxy": CreateNewProfileProxy,
     "CreateNewProfileProxyAllocateCicAction": CreateNewProfileProxyAllocateCicAction,
     "CreateNewProfileProxyAllocateRepAction": CreateNewProfileProxyAllocateRepAction,
@@ -232,6 +254,8 @@ let typeMap: {[index: string]: any} = {
     "ProfileProxy": ProfileProxy,
     "ProfileProxyAction": ProfileProxyAction,
     "QuotedDrop": QuotedDrop,
+    "RatingWithProfileInfoAndLevel": RatingWithProfileInfoAndLevel,
+    "RatingWithProfileInfoAndLevelPage": RatingWithProfileInfoAndLevelPage,
     "RepRating": RepRating,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,

@@ -18,13 +18,14 @@ export class WaveConfig {
     'type': WaveType;
     'winning_thresholds': IntRange | null;
     /**
-    * This amount of top rated drops will win. Must be set if and only if type is TOP_VOTED
+    * This amount of top rated drops will win. Must be set if and only if type is RANK
     */
     'max_winners': number | null;
     /**
     * Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
     */
     'time_lock_ms': number | null;
+    'admin_group_id': string | null;
     'period': IntRange | null;
 
     static readonly discriminator: string | undefined = undefined;
@@ -53,6 +54,12 @@ export class WaveConfig {
             "baseName": "time_lock_ms",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "admin_group_id",
+            "baseName": "admin_group_id",
+            "type": "string",
+            "format": ""
         },
         {
             "name": "period",

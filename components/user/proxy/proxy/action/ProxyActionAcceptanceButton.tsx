@@ -119,7 +119,6 @@ export default function ProxyActionAcceptanceButton({
         message: "Action status changed",
         type: "success",
       });
-      console.log(variables)
       if (variables.action === AcceptActionRequestActionEnum.Accept) {
         onSuccessFullProxyAcceptance();
       }
