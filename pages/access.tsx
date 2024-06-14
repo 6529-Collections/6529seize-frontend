@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
 
-export default function Login() {
+export default function Access() {
   const router = useRouter();
   const [image, setImage] = useState();
   const [inputDisabled, setInputDisabled] = useState(false);
@@ -61,25 +61,13 @@ export default function Login() {
         />
       </Head>
       <main className={styles.login}>
-        {image && (
-          <Image
-            width="0"
-            height="0"
-            style={{
-              height: "auto",
-              width: "auto",
-              maxWidth: "100%",
-              maxHeight: "100%",
-            }}
-            src={image}
-            className={styles.loginImage}
-            alt="access"
-          />
-        )}
+        {image && <LoginImage image={image} alt="access" />}
         <div className={styles.loginPrompt}>
           <input
             disabled={inputDisabled}
             type="text"
+            className={inputDisabled ? "text-center" : ""}
+            defaultValue={inputDisabled ? "Go to seize.io" : ""}
             placeholder={inputDisabled ? "Go to seize.io" : "Team Login"}
             onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>): void => {
               if (event.key.toLowerCase() === "enter") {
@@ -90,5 +78,23 @@ export default function Login() {
         </div>
       </main>
     </>
+  );
+}
+
+export function LoginImage(props: Readonly<{ image: string; alt: string }>) {
+  return (
+    <Image
+      width="0"
+      height="0"
+      style={{
+        height: "auto",
+        width: "auto",
+        maxWidth: "100%",
+        maxHeight: "100%",
+      }}
+      src={props.image}
+      className={styles.loginImage}
+      alt={props.alt}
+    />
   );
 }
