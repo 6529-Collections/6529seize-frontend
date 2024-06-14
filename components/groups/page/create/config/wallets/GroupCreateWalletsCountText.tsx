@@ -8,7 +8,7 @@ export default function GroupCreateWalletsCountText({
   readonly walletsCount: number | null;
 }) {
   if (loading) {
-    <span className="tw-text-iron-50 tw-font-semibold">Loading...</span>;
+    return <span className="tw-text-iron-50 tw-font-semibold">Loading...</span>;
   }
 
   if (typeof walletsCount === "number") {
