@@ -237,6 +237,66 @@ paths:
                 $ref: "#/components/schemas/RepRating"
         "404":
           description: Profile not found
+  /profiles/{identity}/rep/ratings/by-rater:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get profile REP ratings by rater
+      operationId: getProfileRepRatingsByRater
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: given
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 2000
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_modified
+              - rating
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
+        "404":
+          description: Profile not found
   /profiles/{identity}/cic/rating:
     post:
       tags:
@@ -264,6 +324,110 @@ paths:
                 $ref: "#/components/schemas/ChangeProfileCicRatingResponse"
         "400":
           description: "Invalid request"
+
+  /ratings:
+    post:
+      tags:
+        - Ratings
+      summary: Bulk rate. Supplied amount will be added to all target identities. If same identity is supplied multiple times, all the additions will be summed up. Targets must be represented as Ethereum wallet addresses. ENS names and profile handles are not supported.
+      operationId: bulkRate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkRateRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkRateResponse"
+        "400":
+          description: "Invalid request"
+
+  /ratings/credit:
+    get:
+      tags:
+        - Ratings
+      summary: Get available credit for rating
+      operationId: getCreditLeft
+      parameters:
+        - name: rater
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: rater_representative
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailableRatingCredit"
+
+  /profiles/{identity}/repcic/ratings/by-rater:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get profile CIC ratings by rater
+      operationId: getProfileCicRatingsByRater
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: given
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 2000
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_modified
+              - rating
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
+        "404":
+          description: Profile not found
+
   /drops:
     get:
       tags:
@@ -887,6 +1051,13 @@ paths:
           required: false
           schema:
             type: string
+        - name: created_at_less_than
+          description: created at date less than
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
       responses:
         "200":
           description: successful operation
@@ -945,6 +1116,34 @@ paths:
           description: Group not found
         "400":
           description: Invalid request
+  /groups/{id}/wallet_groups/{wallet_group_id}:
+    get:
+      tags:
+        - Groups
+      summary: Get groups wallet group wallets
+      operationId: getGroupsWalletGroupWallets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wallet_group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: Group not found
 
 components:
   securitySchemes:
@@ -968,6 +1167,118 @@ components:
           type: number
           format: int64
           nullable: true
+
+    AvailableRatingCredit:
+      type: object
+      required:
+        - credit
+      properties:
+        cic_credit:
+          type: number
+          format: int64
+        rep_credit:
+          type: number
+          format: int64
+
+    BulkRateResponse:
+      type: object
+      required:
+        - skipped
+      properties:
+        skipped:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkRateSkippedIdentity"
+
+    BulkRateSkippedIdentity:
+      type: object
+      required:
+        - identity
+        - reason
+      properties:
+        identity:
+          type: string
+        reason:
+          type: string
+
+    BulkRateRequest:
+      type: object
+      required:
+        - matter
+        - category
+        - amount_to_add
+        - target_wallet_addresses
+      properties:
+        matter:
+          $ref: "#/components/schemas/RateMatter"
+        category:
+          type: string
+          maxLength: 100
+          nullable: true
+          pattern: "^[a-zA-Z0-9?!,.'() ]$"
+          description: "Category of the rating must be set when matter is REP and null if matter is CIC"
+        amount_to_add:
+          type: number
+          format: int64
+          example: 1
+        target_wallet_addresses:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: "0x[a-fA-F0-9]{40}"
+            description: "Wallet address of the target profile"
+
+    RateMatter:
+      type: string
+      enum:
+        - REP
+        - CIC
+
+    RatingWithProfileInfoAndLevel:
+      type: object
+      required:
+        - profile_id
+        - handle
+        - wallets
+        - tdh
+        - rating
+        - cic
+        - last_modified
+        - level
+      properties:
+        profile_id:
+          type: string
+        handle:
+          type: string
+        wallets:
+          type: array
+          items:
+            type: string
+        tdh:
+          type: number
+          format: int64
+        rating:
+          type: number
+          format: int64
+        cic:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+
+    RatingWithProfileInfoAndLevelPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RatingWithProfileInfoAndLevel"
 
     Group:
       type: object
@@ -1019,6 +1330,8 @@ components:
         - cic
         - level
         - owns_nfts
+        - wallet_group_id
+        - wallet_group_wallets_count
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1032,6 +1345,42 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
+        wallet_group_id:
+          type: string
+          nullable: true
+        wallet_group_wallets_count:
+          type: number
+          format: int64
+          nullable: false
+
+    CreateGroupDescription:
+      type: object
+      required:
+        - tdh
+        - rep
+        - cic
+        - level
+        - owns_nfts
+        - wallets
+      properties:
+        tdh:
+          $ref: "#/components/schemas/GroupTdhFilter"
+        rep:
+          $ref: "#/components/schemas/GroupRepFilter"
+        cic:
+          $ref: "#/components/schemas/GroupCicFilter"
+        level:
+          $ref: "#/components/schemas/GroupLevelFilter"
+        owns_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupOwnsNft"
+        wallets:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
 
     GroupOwnsNft:
       type: object
@@ -1159,7 +1508,7 @@ components:
         name:
           type: string
         group:
-          $ref: "#/components/schemas/GroupDescription"
+          $ref: "#/components/schemas/CreateGroupDescription"
 
     ChangeGroupVisibility:
       type: object
@@ -1350,6 +1699,8 @@ components:
         - rep
         - tdh
         - level
+        - banner1_color
+        - banner2_coloe
         - archived
       properties:
         id:
@@ -1358,6 +1709,12 @@ components:
         handle:
           type: string
         pfp:
+          type: string
+          nullable: true
+        banner1_color:
+          type: string
+          nullable: true
+        banner2_color:
           type: string
           nullable: true
         cic:
@@ -1668,15 +2025,10 @@ components:
 
     WaveType:
       type: string
-      description: |
-        Type of the wave:
-        * VOTE_TALLY_IN_RANGE - Everybody who will end up in specified range will win.
-        * TOP_VOTED - Top voted participant(s) will win.
-        * NONE - No winners.
       enum:
-        - VOTE_TALLY_IN_RANGE
-        - TOP_VOTED
-        - NONE
+        - APPROVE
+        - RANK
+        - CHAT
 
     WaveCreditScope:
       description: |
@@ -1845,16 +2197,17 @@ components:
         - winning_thresholds
         - period
         - max_winners
+        - admin_group_id
       properties:
         type:
           $ref: "#/components/schemas/WaveType"
         winning_thresholds:
-          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is VOTE_TALLY_IN_RANGE
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is APPROVE
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
         max_winners:
-          description: This amount of top rated drops will win. Must be set if and only if type is TOP_VOTED
+          description: This amount of top rated drops will win. Must be set if and only if type is RANK
           type: integer
           format: int64
           minimum: 1
@@ -1865,6 +2218,9 @@ components:
           type: integer
           format: int64
           minimum: 1
+        admin_group_id:
+          type: string
+          nullable: true
         period:
           anyOf:
             - type: "null"
