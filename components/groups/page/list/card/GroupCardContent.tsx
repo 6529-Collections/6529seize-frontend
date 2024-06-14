@@ -1,8 +1,7 @@
-import { useContext } from "react";
 import { GroupFull } from "../../../../../generated/models/GroupFull";
 import { GroupCardState } from "./GroupCard";
 import GroupCardConfigs from "./GroupCardConfigs";
-import { AuthContext } from "../../../../auth/Auth";
+
 
 export default function GroupCardContent({
   group,
@@ -13,11 +12,11 @@ export default function GroupCardContent({
   readonly haveActiveGroupVoteAll: boolean;
   readonly setState: (state: GroupCardState) => void;
 }) {
-  const { connectedProfile } = useContext(AuthContext);
-  const disabledClasses =
-    "tw-opacity-50 tw-text-iron-600 tw-border-iron-800 tw-cursor-default";
-  const nonDisabledClasses =
-    "hover:tw-bg-iron-700 tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50";
+  // const { connectedProfile } = useContext(AuthContext);
+  // const disabledClasses =
+  //   "tw-opacity-50 tw-text-iron-600 tw-border-iron-800 tw-cursor-default";
+  // const nonDisabledClasses =
+  //   "hover:tw-bg-iron-700 tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50";
   return (
     <div className="tw-flex-1 tw-px-4 sm:tw-px-5">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-justify-between">
@@ -27,7 +26,7 @@ export default function GroupCardContent({
         >
           {group.name}
         </p>
-        {!!connectedProfile?.profile?.handle && (
+        {/* {!!connectedProfile?.profile?.handle && (
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <button
               onClick={(e) => {
@@ -56,7 +55,7 @@ export default function GroupCardContent({
               CIC all
             </button>
           </div>
-        )}
+        )} */}
       </div>
       <GroupCardConfigs group={group} />
     </div>
