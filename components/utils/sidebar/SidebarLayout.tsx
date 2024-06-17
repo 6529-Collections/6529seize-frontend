@@ -3,7 +3,7 @@ import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import GroupsSidebarToggleButton from "../../groups/sidebar/GroupsSidebarToggleButton";
-import Groups from "../../groups/Groups";
+import GroupsSidebar from "../../groups/sidebar/GroupsSidebar";
 import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
@@ -85,7 +85,7 @@ export default function SidebarLayout({
         ? headerRef.current.clientHeight
         : 0;
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const newPosition =
+       const newPosition =
         scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
       sidebarRef.current!.style.top = `${newPosition}px`;
       openButtonRef.current!.style.top = `${newPosition}px`;
@@ -135,7 +135,7 @@ export default function SidebarLayout({
             ref={sidebarRef}
           >
             <div className="tw-bg-iron-950 tw-min-h-screen  tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
-              <Groups />
+              <GroupsSidebar />
             </div>
           </div>
           <div className="tw-w-full">
