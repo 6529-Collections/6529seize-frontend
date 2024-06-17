@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
+import Link from "next/link";
 
-export default function GroupHeaderSelect({ onView }: { readonly onView: () => void }) {
+export default function GroupHeaderSelect() {
   const { connectedProfile } = useContext(AuthContext);
   const getHaveProfile = (): boolean => !!connectedProfile?.profile?.handle;
   const [haveProfile, setHaveProfile] = useState(getHaveProfile());
@@ -14,10 +15,9 @@ export default function GroupHeaderSelect({ onView }: { readonly onView: () => v
 
   if (haveProfile) {
     return (
-      <button
-        type="button"
-        onClick={onView}
-        className="tw-w-full tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-white tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
+      <Link
+        href="groups"
+        className="tw-no-underline tw-w-full tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-white hover:tw-text-white tw-bg-primary-500 tw-border-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600"
       >
         <svg
           className="tw-w-5 tw-h-5"
@@ -35,7 +35,7 @@ export default function GroupHeaderSelect({ onView }: { readonly onView: () => v
           />
         </svg>
         <span>Create A Group</span>
-      </button>
+      </Link>
     );
   }
 

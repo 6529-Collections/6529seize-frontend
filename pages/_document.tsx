@@ -11,35 +11,18 @@ export default function Document() {
         <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
-        {/* Google Analytics tracking code */}
-        <script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=G-71NLVV3KY3`}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-71NLVV3KY3');
-            `,
-          }}
-        />
       </Head>
       <body>
         <Main />
         <NextScript />
         <footer
           className="d-flex flex-column align-items-center justify-content-center gap-2"
-          id="footer"
-        >
+          id="footer">
           <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
             <a
               href="https://twitter.com/punk6529"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <Image
                 width="0"
                 height="0"
@@ -53,8 +36,7 @@ export default function Document() {
             <a
               href="https://twitter.com/6529Collections"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <Image
                 width="0"
                 height="0"
@@ -68,8 +50,7 @@ export default function Document() {
             <a
               href="https://discord.gg/join-om"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <Image
                 width="0"
                 height="0"
@@ -94,8 +75,7 @@ export default function Document() {
             <a
               href="https://github.com/6529-Collections"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <Image
                 width="0"
                 height="0"
@@ -118,16 +98,14 @@ export default function Document() {
             <a
               href="https://api.seize.io/docs"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               API Documentation
             </a>
             |{" "}
             <a
               href={`https://status.seize.io/`}
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               Status
             </a>
           </span>

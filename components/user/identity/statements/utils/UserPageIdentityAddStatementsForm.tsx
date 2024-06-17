@@ -43,7 +43,7 @@ export default function UserPageIdentityAddStatementsForm({
         ApiCreateOrUpdateProfileCicStatement,
         CicStatement
       >({
-        endpoint: `profiles/${profile.profile?.handle}/cic/statements`,
+        endpoint: `profiles/${profile.input_identity}/cic/statements`,
         body: {
           statement_group: group,
           statement_type: activeType,

@@ -35,8 +35,6 @@ export default function UserPageRep({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-
-
   const [rater, setRater] = useState<string | undefined>(undefined);
   useEffect(
     () =>
