@@ -15,10 +15,8 @@ import { GroupFull } from "../../../generated/models/GroupFull";
 
 export default function GroupsSelectActiveGroup({
   activeGroupId,
-  onEditClick,
 }: {
   readonly activeGroupId: string;
-  readonly onEditClick: (filter: GroupFull) => void;
 }) {
   const { data } = useQuery<GroupFull>({
     queryKey: [QueryKey.GROUP, activeGroupId],
@@ -100,7 +98,7 @@ export default function GroupsSelectActiveGroup({
         </div>
       )}
 
-      <GroupItem key={data.id} group={data} onEditClick={onEditClick} />
+      <GroupItem key={data.id} group={data} />
     </div>
   );
 }

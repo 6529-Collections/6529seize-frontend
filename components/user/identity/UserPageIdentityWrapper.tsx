@@ -5,7 +5,6 @@ import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRaters
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageNoProfile from "../utils/no-profile/UserPageNoProfile";
 import UserPageIdentity from "./UserPageIdentity";
 
 export default function UserPageIdentityWrapper({
@@ -31,10 +30,6 @@ export default function UserPageIdentityWrapper({
     enabled: !!user,
     initialData: initialProfile,
   });
-
-  if (!profile.profile) {
-    return <UserPageNoProfile profile={profile} />;
-  }
 
   return (
     <UserPageIdentity
