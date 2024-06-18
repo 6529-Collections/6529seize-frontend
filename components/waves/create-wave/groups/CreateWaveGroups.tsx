@@ -1,4 +1,4 @@
-import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
+import { GroupFull } from "../../../../generated/models/GroupFull";
 import {
   CreateWaveGroupConfigType,
   WaveType,
@@ -13,7 +13,7 @@ export default function CreateWaveGroups({
 }: {
   readonly waveType: WaveType;
   readonly onGroupSelect: ({}: {
-    group: CurationFilterResponse | null;
+    group: GroupFull | null;
     groupType: CreateWaveGroupConfigType;
   }) => void;
   readonly onNextStep: () => void;

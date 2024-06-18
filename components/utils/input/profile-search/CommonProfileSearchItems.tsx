@@ -20,37 +20,6 @@ export default function CommonProfileSearchItems({
       ? "Type at least 3 characters"
       : "No results";
   return (
-<<<<<<< HEAD
-    <div className="tw-relative tw-w-full">
-      <AnimatePresence mode="wait" initial={false}>
-        {open && (
-          <motion.div
-            className="tw-absolute tw-z-10 tw-mt-1.5 tw-w-full tw-min-w-[17.4rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="tw-z-10 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
-              <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-                <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {profiles.length ? (
-                    profiles.map((profile) => (
-                      <CommonProfileSearchItem
-                        key={profile.wallet}
-                        profile={profile}
-                        selected={selected}
-                        onProfileSelect={onProfileSelect}
-                      />
-                    ))
-                  ) : (
-                    <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
-                      {noResultsText}
-                    </li>
-                  )}
-                </ul>
-              </div>
-=======
     <AnimatePresence mode="wait" initial={false}>
       {open && (
         <motion.div
@@ -78,7 +47,6 @@ export default function CommonProfileSearchItems({
                   </li>
                 )}
               </ul>
->>>>>>> main
             </div>
           </div>
         </motion.div>

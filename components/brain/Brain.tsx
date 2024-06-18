@@ -5,7 +5,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "../drops/view/DropListWrapper";
 import { useSelector } from "react-redux";
-import { selectActiveCurationFilterId } from "../../store/curationFilterSlice";
+import { selectActiveGroupId } from "../../store/groupSlice";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Mutable } from "../../helpers/Types";
@@ -36,7 +36,7 @@ export default function Brain() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeCurationFilterId = useSelector(selectActiveCurationFilterId);
+  const activeCurationFilterId = useSelector(selectActiveGroupId);
   const { connectedProfile } = useContext(AuthContext);
 
   const getParamsFromUrl = (): BrainQuery => {
