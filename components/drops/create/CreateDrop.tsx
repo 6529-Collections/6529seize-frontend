@@ -58,11 +58,6 @@ export default function CreateDrop({
     CreateDropViewType.COMPACT
   );
 
-  const onDrop = (updatedDrop: CreateDropConfig) => {
-    setDrop(updatedDrop);
-    // setDropEditorRefreshKey((prev) => prev + 1);
-  };
-
   const [submitting, setSubmitting] = useState(false);
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
@@ -191,7 +186,7 @@ export default function CreateDrop({
       drop={drop}
       viewType={viewType}
       setViewType={setViewType}
-      setDrop={onDrop}
+      setDrop={setDrop}
       setMentionedUsers={setMentionedUsers}
       setReferencedNfts={setReferencedNfts}
       setTitle={setTitle}

@@ -63,7 +63,7 @@ export default function CreateWave() {
     },
   });
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.APPROVAL);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.OVERVIEW);
 
   const onNextStep = () => {
     switch (step) {
@@ -93,7 +93,7 @@ export default function CreateWave() {
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
-      type: WaveType.APPROVE,
+      type: WaveType.CHAT,
     })
   );
 
@@ -281,7 +281,6 @@ export default function CreateWave() {
             onStep={setStep}
           />
           <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-px-8 tw-pt-12 tw-pb-12">
-            <div>{JSON.stringify(config, null, 2)}</div>
             <div className="tw-relative tw-z-[1]">
               {stepComponent[step]}
               {/* <WavesOutcome /> */}
