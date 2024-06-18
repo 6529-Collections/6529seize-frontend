@@ -15,10 +15,10 @@ import {
 } from "../../../types/waves.types";
 import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
 import dynamic from "next/dynamic";
-import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
+import { GroupFull } from "../../../generated/models/GroupFull";
 
 const CreateWaveSvg = dynamic(() => import("./utils/CreateWaveSvg"), {
   ssr: false,
@@ -121,7 +121,7 @@ export default function CreateWave() {
     group,
     groupType,
   }: {
-    readonly group: CurationFilterResponse | null;
+    readonly group: GroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
   }) => {
     switch (groupType) {
