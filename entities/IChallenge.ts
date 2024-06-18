@@ -2,7 +2,7 @@ export interface ChallengeMetadata {}
 
 export enum ChallengeTargetType {
   ANYONE = "ANYONE",
-  CURATION_FILTER = "CURATION_FILTER",
+  GROUP = "GROUP",
   SPECIFIED_WALLETS = "SPECIFIED_WALLETS",
 }
 
@@ -10,8 +10,8 @@ export interface ChallengeTargetAnyone {
   readonly type: ChallengeTargetType.ANYONE;
 }
 
-export interface ChallengeTargetCurationFilter {
-  readonly type: ChallengeTargetType.CURATION_FILTER;
+export interface ChallengeTargetGroupFilter {
+  readonly type: ChallengeTargetType.GROUP;
   readonly filterId: string;
 }
 
@@ -22,7 +22,7 @@ export interface ChallengeTargetSpecifiedWallets {
 
 export type ChallengeTarget =
   | ChallengeTargetAnyone
-  | ChallengeTargetCurationFilter
+  | ChallengeTargetGroupFilter
   | ChallengeTargetSpecifiedWallets;
 
 export enum ChallengeType {

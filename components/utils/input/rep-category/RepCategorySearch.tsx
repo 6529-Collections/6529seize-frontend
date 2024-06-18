@@ -35,7 +35,7 @@ export default function RepCategorySearch({
     [RepCategorySearchSize.MD]: "tw-text-md",
   };
 
-  const SVG_CLASSES: Record<RepCategorySearchSize, string> = {
+  const ICON_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-top-3",
     [RepCategorySearchSize.MD]: "tw-top-3.5",
   };
@@ -127,7 +127,7 @@ export default function RepCategorySearch({
         placeholder=" "
       />
       <svg
-        className={`tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300 ${SVG_CLASSES[size]}`}
+        className={`tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300 ${ICON_CLASSES[size]}`}
         viewBox="0 0 20 20"
         fill="currentColor"
         aria-hidden="true"
@@ -138,6 +138,23 @@ export default function RepCategorySearch({
           clipRule="evenodd"
         ></path>
       </svg>
+      {!!category?.length && (
+        <svg
+          onClick={() => onValueChange(null)}
+          className={`${ICON_CLASSES[size]} tw-top-3.5 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M17 7L7 17M7 7L17 17"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
       <label
         htmlFor={randomId}
         className={`${LABEL_CLASSES[size]} tw-absolute tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 group-hover:tw-bg-iron-800 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 

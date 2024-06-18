@@ -1,5 +1,6 @@
+import { WaveType } from "../../../../../generated/models/WaveType";
 import { WAVE_SIGNATURE_LABELS } from "../../../../../helpers/waves/waves.constants";
-import { WaveSignatureType, WaveType } from "../../../../../types/waves.types";
+import { WaveSignatureType } from "../../../../../types/waves.types";
 import CommonBorderedRadioButton from "../../../../utils/radio/CommonBorderedRadioButton";
 
 export default function CreateWaveSignatureInputs({

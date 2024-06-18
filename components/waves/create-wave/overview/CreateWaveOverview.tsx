@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  WaveOverviewConfig,
-  WaveSignatureType,
-  WaveType,
-} from "../../../../types/waves.types";
+import { WaveOverviewConfig } from "../../../../types/waves.types";
 
 import CreateWaveOverviewInputs from "./CreateWaveOverviewInputs";
 
