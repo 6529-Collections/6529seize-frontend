@@ -11,8 +11,6 @@ import {
   CreateWaveStep,
   WaveRequiredMetadataType,
   WaveSignatureType,
-  WaveType,
-  WaveVotingType,
 } from "../../../types/waves.types";
 import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
 import dynamic from "next/dynamic";
@@ -20,6 +18,10 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import { GroupFull } from "../../../generated/models/GroupFull";
+import { CreateNewWave } from "../../../generated/models/CreateNewWave";
+import { WaveCreditType } from "../../../generated/models/WaveCreditType";
+import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
+import { WaveType } from "../../../generated/models/WaveType";
 
 const CreateWaveSvg = dynamic(() => import("./utils/CreateWaveSvg"), {
   ssr: false,
@@ -53,7 +55,7 @@ export default function CreateWave() {
       requiredMetadata: [{ key: "", type: WaveRequiredMetadataType.STRING }],
     },
     voting: {
-      type: WaveVotingType.REP,
+      type: WaveCreditType.Rep,
       category: null,
       profileId: null,
     },
@@ -63,9 +65,66 @@ export default function CreateWave() {
     },
   });
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.OVERVIEW);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.VOTING);
 
-  const onNextStep = () => {
+  const getIsVotingSignatureRequired = (): boolean => {
+    return (
+      config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+      config.overview.signatureType === WaveSignatureType.VOTING
+    );
+  };
+
+  const getIsParticipationSignatureRequired = (): boolean => {
+    return (
+      config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+      config.overview.signatureType === WaveSignatureType.DROPS
+    );
+  };
+
+  // const getCreateNewWaveBody = (): CreateNewWave => {
+  //   return {
+  //     name: config.overview.name,
+  //     description: config.overview.description,
+  //     voting: {
+  //       scope: {
+  //         group_id: config.groups.canVote,
+  //       },
+  //       credit_type: WaveCreditType.Rep,
+  //       // TODO: whats this???
+  //       credit_scope: WaveCreditScope.Wave,
+  //       credit_category: config.voting.category,
+  //       creditor_id: config.voting.profileId,
+  //       signature_required: getIsVotingSignatureRequired(),
+  //     },
+  //     visibility: {
+  //       scope: {
+  //         group_id: config.groups.canView,
+  //       },
+  //     },
+  //     participation: {
+  //       scope: {
+  //         group_id: config.groups.canDrop,
+  //       },
+  //       // TODO: whats this???
+  //       no_of_applications_allowed_per_participant: null,
+  //       // TODO: needs also type
+  //       required_metadata: config.drops.requiredMetadata.map((metadata) => ({
+  //         name: metadata.key,
+  //       })),
+  //       signature_required: getIsParticipationSignatureRequired(),
+  //       // TODO: whats this???
+  //       period: undefined,
+  //     },
+  //     wave: {
+  //       type: config.overview.type,
+  //     }
+  //     outcomes: [],
+  //   };
+  // };
+
+  const onComplete = async (): Promise<void> => {};
+
+  const onNextStep = async (): Promise<void> => {
     switch (step) {
       case CreateWaveStep.OVERVIEW:
         setStep(CreateWaveStep.GROUPS);
@@ -80,11 +139,14 @@ export default function CreateWave() {
         setStep(CreateWaveStep.VOTING);
         break;
       case CreateWaveStep.VOTING:
-        if (config.overview.type === WaveType.APPROVE) {
+        if (config.overview.type === WaveType.Approve) {
           setStep(CreateWaveStep.APPROVAL);
+        } else {
+          await onComplete();
         }
         break;
       case CreateWaveStep.APPROVAL:
+        await onComplete();
         break;
       default:
         assertUnreachable(step);
@@ -93,7 +155,7 @@ export default function CreateWave() {
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
-      type: WaveType.CHAT,
+      type: WaveType.Chat,
     })
   );
 
@@ -167,7 +229,7 @@ export default function CreateWave() {
     }
   };
 
-  const onVotingTypeChange = (type: WaveVotingType) => {
+  const onVotingTypeChange = (type: WaveCreditType) => {
     setConfig((prev) => ({
       ...prev,
       voting: {

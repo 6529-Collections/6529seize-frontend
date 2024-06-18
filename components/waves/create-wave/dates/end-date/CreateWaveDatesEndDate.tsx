@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { WaveType } from "../../../../../types/waves.types";
 import CreateWaveDatesEndDateSelectPeriod from "./CreateWaveDatesEndDateSelectPeriod";
 import { Period } from "../../../../../helpers/Types";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { WaveType } from "../../../../../generated/models/WaveType";
 
 export default function CreateWaveDatesEndDate({
   waveType,
@@ -13,7 +13,7 @@ export default function CreateWaveDatesEndDate({
   readonly startTimestamp: number | null;
   readonly onEndTimestampChange: (timestamp: number | null) => void;
 }) {
-  const endDateIsOptional = waveType !== WaveType.RANK;
+  const endDateIsOptional = waveType !== WaveType.Rank;
   const [time, setTime] = useState<number | null>(null);
   const [period, setPeriod] = useState<Period | null>(null);
 
