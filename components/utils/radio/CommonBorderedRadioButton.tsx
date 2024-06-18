@@ -24,7 +24,7 @@ export default function CommonBorderedRadioButton<T extends string>({
   return (
     <div
       onClick={() => onChange(type)}
-      className={`${wrapperClasses} tw-min-w-[180px] tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 tw-shadow-xl focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${wrapperClasses} tw-min-w-[180px] tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 tw-shadow-xl focus:tw-outline-none tw-flex tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       <input
         id={type}
@@ -35,13 +35,22 @@ export default function CommonBorderedRadioButton<T extends string>({
       />
       <div className="tw-flex tw-items-center">
         <span className="tw-flex tw-flex-col tw-text-base">
-          <span className={labelClasses}>{label}</span>
-          {/* <span className="tw-flex tw-flex-wrap tw-gap-x-1">
-            <span className="tw-text-primary-400 tw-font-bold">
+          {/*   <span className={labelClasses}>{label}</span> */}
+          <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-2">
+            <div className="tw-text-primary-400 tw-font-bold">
               my awesome stuff
-            </span>
-            <span className="tw-text-primary-400 tw-font-bold">simo</span>
-          </span> */}
+            </div>
+            <div className="tw-flex tw-items-center tw-gap-x-2">
+              <img
+                className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+                src=""
+                alt="Profile Picture"
+              />
+              <span className="tw-text-primary-400 tw-font-bold tw-text-sm">
+                simo
+              </span>
+            </div>
+          </div>
         </span>
       </div>
     </div>
