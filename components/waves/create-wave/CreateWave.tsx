@@ -81,46 +81,55 @@ export default function CreateWave() {
     );
   };
 
-  // const getCreateNewWaveBody = (): CreateNewWave => {
-  //   return {
-  //     name: config.overview.name,
-  //     description: config.overview.description,
-  //     voting: {
-  //       scope: {
-  //         group_id: config.groups.canVote,
-  //       },
-  //       credit_type: WaveCreditType.Rep,
-  //       // TODO: whats this???
-  //       credit_scope: WaveCreditScope.Wave,
-  //       credit_category: config.voting.category,
-  //       creditor_id: config.voting.profileId,
-  //       signature_required: getIsVotingSignatureRequired(),
-  //     },
-  //     visibility: {
-  //       scope: {
-  //         group_id: config.groups.canView,
-  //       },
-  //     },
-  //     participation: {
-  //       scope: {
-  //         group_id: config.groups.canDrop,
-  //       },
-  //       // TODO: whats this???
-  //       no_of_applications_allowed_per_participant: null,
-  //       // TODO: needs also type
-  //       required_metadata: config.drops.requiredMetadata.map((metadata) => ({
-  //         name: metadata.key,
-  //       })),
-  //       signature_required: getIsParticipationSignatureRequired(),
-  //       // TODO: whats this???
-  //       period: undefined,
-  //     },
-  //     wave: {
-  //       type: config.overview.type,
-  //     }
-  //     outcomes: [],
-  //   };
-  // };
+  const getCreateNewWaveBody = (): CreateNewWave => {
+    return {
+      name: config.overview.name,
+      description: config.overview.description,
+      voting: {
+        scope: {
+          group_id: config.groups.canVote,
+        },
+        credit_type: WaveCreditType.Rep,
+        // TODO: whats this???
+        credit_scope: WaveCreditScope.Wave,
+        credit_category: config.voting.category,
+        creditor_id: config.voting.profileId,
+        signature_required: getIsVotingSignatureRequired(),
+      },
+      visibility: {
+        scope: {
+          group_id: config.groups.canView,
+        },
+      },
+      participation: {
+        scope: {
+          group_id: config.groups.canDrop,
+        },
+        // TODO: whats this???
+        no_of_applications_allowed_per_participant: null,
+        // TODO: needs also type
+        required_metadata: config.drops.requiredMetadata.map((metadata) => ({
+          name: metadata.key,
+        })),
+        signature_required: getIsParticipationSignatureRequired(),
+        // TODO: whats this???
+        period: undefined,
+      },
+      wave: {
+        type: config.overview.type,
+        // TODO: whats this???
+        winning_thresholds: null,
+        // TODO: whats this???
+        max_winners: null,
+        // TODO: needs new name
+        time_lock_ms: config.approval.thresholdTimeMs,
+        admin_group_id: config.groups.admin,
+        // TODO: whats this???
+        period: null
+      },
+      outcomes: [],
+    };
+  };
 
   const onComplete = async (): Promise<void> => {};
 
