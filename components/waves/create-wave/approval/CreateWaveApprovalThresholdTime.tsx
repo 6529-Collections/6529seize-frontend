@@ -26,6 +26,7 @@ export default function CreateWaveApprovalThresholdTime({
       return null;
     }
     const now = new Date();
+    const currentMillis = now.getTime();
     switch (period) {
       case Period.MINUTES:
         now.setMinutes(now.getMinutes() + time);
@@ -45,7 +46,7 @@ export default function CreateWaveApprovalThresholdTime({
       default:
         assertUnreachable(period);
     }
-    return now.getTime();
+    return now.getTime() - currentMillis;
   };
 
   useEffect(() => {
