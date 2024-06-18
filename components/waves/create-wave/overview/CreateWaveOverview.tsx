@@ -10,6 +10,7 @@ import CreateWaveOverviewInputs from "./CreateWaveOverviewInputs";
 import CreateWaveSignature from "./signature/CreateWaveSignature";
 import CreateWaveType from "./type/CreateWaveType";
 import CreateWaveNextStep from "../utils/CreateWaveNextStep";
+import CreateWaveBackStep from "../utils/CreateWaveBackStep";
 
 export default function CreateWaveOverview({
   overview,
@@ -68,7 +69,8 @@ export default function CreateWaveOverview({
           selectedSignatureType={overview.signatureType}
           onChange={(type) => onChange({ key: "signatureType", value: type })}
         />
-        <div className="tw-text-right">
+        <div className="tw-flex tw-gap-x-6 tw-items-center tw-justify-end">
+          <CreateWaveBackStep />
           <CreateWaveNextStep
             disabled={isNextStepDisabled}
             onClick={onNextStep}
