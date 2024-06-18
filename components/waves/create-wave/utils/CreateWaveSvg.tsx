@@ -37,8 +37,8 @@ export default function CreateWaveSvg() {
             gradientUnits="userSpaceOnUse"
             gradientTransform="translate(350 350) scale(350)"
           >
-            <stop stop-color="#94979D" />
-            <stop offset="1" stop-color="#131316" />
+            <stop stopColor="#94979D" />
+            <stop offset="1" stopColor="#131316" />
           </radialGradient>
           <clipPath id="clip0_1973_2242">
             <rect width="700" height="700" fill="white" />

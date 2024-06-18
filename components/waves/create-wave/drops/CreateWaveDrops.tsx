@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
@@ -27,41 +28,49 @@ export default function CreateWaveDrops({
     });
   };
 
-  const onRequiredMetadataChange = ({
-    key,
-    type,
-  }: CreateWaveDropsRequiredMetadata) => {
-    const requiredMetadataIndex = drops.requiredMetadata.findIndex(
-      (metadata) => metadata.key === key
-    );
-    // if requiredmetada exists, overwrite it
-    if (requiredMetadataIndex !== -1) {
-      const requiredMetadata = [...drops.requiredMetadata];
-      requiredMetadata[requiredMetadataIndex] = { key, type };
-      setDrops({
-        ...drops,
-        requiredMetadata,
-      });
-      return;
-    }
-    // if requiredmetadata does not exist, add it
-    const requiredMetadata = [...drops.requiredMetadata, { key, type }];
-
+  const onRequiredMetadataChange = (
+    requiredMetadata: CreateWaveDropsRequiredMetadata[]
+  ) => {
     setDrops({
       ...drops,
       requiredMetadata,
     });
   };
 
-  const onRequiredMetadataRemove = (key: string) => {
+  const getHaveNonUniqueRequiredMetadataRow = (): boolean => {
+    const keys = drops.requiredMetadata.map((item) => item.key);
+    return new Set(keys).size !== keys.length;
+  };
+
+  const getIsNextStepDisabled = (): boolean => {
+    if (!drops.requiredMetadata.length) {
+      return false;
+    }
+
+    if (getHaveNonUniqueRequiredMetadataRow()) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const [nextStepDisabled, setNextStepDisabled] = useState(
+    getIsNextStepDisabled()
+  );
+
+  useEffect(() => setNextStepDisabled(getIsNextStepDisabled()), [drops]);
+
+  const cleanUpRequiredMetadataAndSetNextStep = () => {
     const requiredMetadata = drops.requiredMetadata.filter(
-      (metadata) => metadata.key !== key
+      (item) => item.key && item.type
     );
 
     setDrops({
       ...drops,
       requiredMetadata,
     });
+
+    onNextStep();
   };
 
   return (
@@ -74,10 +83,12 @@ export default function CreateWaveDrops({
         <CreateWaveDropsMetadata
           requiredMetadata={drops.requiredMetadata}
           onRequiredMetadataChange={onRequiredMetadataChange}
-          onRequiredMetadataRemove={onRequiredMetadataRemove}
         />
         <div className="tw-text-right">
-          <CreateWaveNextStep disabled={false} onClick={onNextStep} />
+          <CreateWaveNextStep
+            disabled={nextStepDisabled}
+            onClick={cleanUpRequiredMetadataAndSetNextStep}
+          />
         </div>
       </div>
     </div>

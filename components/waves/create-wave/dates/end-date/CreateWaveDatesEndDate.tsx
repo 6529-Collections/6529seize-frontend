@@ -6,9 +6,11 @@ import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateWaveDatesEndDate({
   waveType,
+  startTimestamp,
   onEndTimestampChange,
 }: {
   readonly waveType: WaveType;
+  readonly startTimestamp: number | null;
   readonly onEndTimestampChange: (timestamp: number | null) => void;
 }) {
   const endDateIsOptional = waveType !== WaveType.RANK;
@@ -24,10 +26,10 @@ export default function CreateWaveDatesEndDate({
   };
 
   const getMillis = (): number | null => {
-    if (!time || !period) {
+    if (!time || !period || !startTimestamp) {
       return null;
     }
-    const now = new Date();
+    const now = new Date(startTimestamp);
     switch (period) {
       case Period.MINUTES:
         now.setMinutes(now.getMinutes() + time);
@@ -63,7 +65,7 @@ export default function CreateWaveDatesEndDate({
   useEffect(() => {
     setEndDate(getEndDate());
     onEndTimestampChange(getMillis());
-  }, [time, period]);
+  }, [time, period, startTimestamp]);
   return (
     <div className="tw-col-span-full">
       <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
