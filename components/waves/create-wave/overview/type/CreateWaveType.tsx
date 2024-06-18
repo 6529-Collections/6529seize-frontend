@@ -1,5 +1,6 @@
 
-import { WaveType } from "../../../../../types/waves.types";
+
+import { WaveType } from "../../../../../generated/models/WaveType";
 import CreateWaveTypeInputs from "./CreateWaveTypeInputs";
 
 export default function CreateWaveType({

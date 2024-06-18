@@ -3,7 +3,6 @@ import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioB
 import {
   CreateWaveGroupConfigType,
   CreateWaveGroupStatus,
-  WaveType,
 } from "../../../../types/waves.types";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
@@ -14,6 +13,7 @@ import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpac
 import SelectGroupModal from "../../../utils/select-group/SelectGroupModal";
 import { createPortal } from "react-dom";
 import { GroupFull } from "../../../../generated/models/GroupFull";
+import { WaveType } from "../../../../generated/models/WaveType";
 
 export default function CreateWaveGroup({
   waveType,

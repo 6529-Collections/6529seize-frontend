@@ -1,8 +1,9 @@
+import { WaveType } from "../../../../generated/models/WaveType";
 import {
   CREATE_WAVE_MAIN_STEPS,
   CREATE_WAVE_STEPS_LABELS,
 } from "../../../../helpers/waves/waves.constants";
-import { CreateWaveStep, WaveType } from "../../../../types/waves.types";
+import { CreateWaveStep } from "../../../../types/waves.types";
 import CreateWavesMainStep from "./CreateWavesMainStep";
 
 export default function CreateWavesMainSteps({

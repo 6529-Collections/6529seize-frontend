@@ -50,7 +50,10 @@ export default function CreateWaveApproval({
         />
       </div>
       <div className="tw-mt-8 tw-text-right">
-        <button className="tw-relative tw-inline-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-4 tw-py-3 tw-border-0 tw-text-base tw-font-medium tw-rounded-lg tw-text-white tw-bg-gradient-to-r tw-from-blue-500 tw-via-blue-600 tw-to-blue-700 hover:tw-bg-gradient-to-br tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg">
+        <button
+          onClick={onNextStep}
+          className="tw-relative tw-inline-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-4 tw-py-3 tw-border-0 tw-text-base tw-font-medium tw-rounded-lg tw-text-white tw-bg-gradient-to-r tw-from-blue-500 tw-via-blue-600 tw-to-blue-700 hover:tw-bg-gradient-to-br tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg"
+        >
           <svg
             className="tw-h-5 tw-w-5 -tw-ml-1 tw-text-white tw-animate-bounce"
             xmlns="http://www.w3.org/2000/svg"
