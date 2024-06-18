@@ -1,4 +1,5 @@
-import { WaveSignatureType, WaveType } from "../../../../../types/waves.types";
+import { WaveType } from "../../../../../generated/models/WaveType";
+import { WaveSignatureType } from "../../../../../types/waves.types";
 import CreateWaveSignatureInputs from "./CreateWaveSignatureInputs";
 
 export default function CreateWaveSignature({

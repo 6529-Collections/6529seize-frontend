@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
-import { CreateWaveDatesConfig, WaveType } from "../../../../types/waves.types";
+import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { WaveType } from "../../../../generated/models/WaveType";
 
 export default function CreateWaveDates({
   waveType,
@@ -20,7 +21,7 @@ export default function CreateWaveDates({
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const haveVotingStartDate = waveType === WaveType.RANK;
+  const haveVotingStartDate = waveType === WaveType.Rank;
 
   const onStartTimestampChange = (timestamp: number) => {
     setDates({
@@ -46,13 +47,13 @@ export default function CreateWaveDates({
 
   const getIsNextStepDisabled = () => {
     switch (waveType) {
-      case WaveType.CHAT:
-      case WaveType.APPROVE:
+      case WaveType.Chat:
+      case WaveType.Approve:
         return (
           !dates.submissionStartDate ||
           dates.submissionStartDate !== dates.votingStartDate
         );
-      case WaveType.RANK:
+      case WaveType.Rank:
         return (
           !dates.submissionStartDate ||
           !dates.votingStartDate ||

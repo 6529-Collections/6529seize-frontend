@@ -1,5 +1,5 @@
+import { WaveType } from "../../../../../generated/models/WaveType";
 import { WAVE_LABELS } from "../../../../../helpers/waves/waves.constants";
-import { WaveType } from "../../../../../types/waves.types";
 import CommonBorderedRadioButton from "../../../../utils/radio/CommonBorderedRadioButton";
 
 export default function CreateWaveTypeInputs({
