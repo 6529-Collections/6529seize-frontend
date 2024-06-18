@@ -20,7 +20,7 @@ interface QueryUpdateInput {
 }
 
 interface BrainQuery {
-  readonly curation_criteria_id?: string;
+  readonly group_id?: string;
   readonly limit: string;
   readonly storm_id?: string;
   readonly context_profile?: string;
@@ -29,23 +29,23 @@ interface BrainQuery {
 const REQUEST_SIZE = 10;
 
 const SEARCH_PARAMS_FIELDS = {
-  curation: "curation",
+  group: "group",
 } as const;
 
 export default function Brain() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeCurationFilterId = useSelector(selectActiveGroupId);
+  const activeGroupId = useSelector(selectActiveGroupId);
   const { connectedProfile } = useContext(AuthContext);
 
   const getParamsFromUrl = (): BrainQuery => {
-    const curation = searchParams.get(SEARCH_PARAMS_FIELDS.curation);
+    const group = searchParams.get(SEARCH_PARAMS_FIELDS.group);
     const query: Mutable<BrainQuery> = {
       limit: `${REQUEST_SIZE}`,
     };
-    if (curation) {
-      query.curation_criteria_id = curation;
+    if (group) {
+      query.group_id = group;
     }
     if (connectedProfile?.profile?.handle) {
       query.context_profile = connectedProfile.profile.handle;
@@ -81,16 +81,16 @@ export default function Brain() {
   };
 
   useEffect(() => {
-    if (params.curation_criteria_id !== activeCurationFilterId) {
+    if (params.group_id !== activeGroupId) {
       const items: QueryUpdateInput[] = [
         {
-          name: "curation",
-          value: activeCurationFilterId,
+          name: "group",
+          value: activeGroupId,
         },
       ];
       updateFields(items, false);
     }
-  }, [activeCurationFilterId]);
+  }, [activeGroupId]);
 
   const [params, setParams] = useState(getParamsFromUrl());
   useEffect(
