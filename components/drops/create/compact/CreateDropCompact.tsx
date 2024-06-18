@@ -18,7 +18,7 @@ import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import CreateDropStormView from "../utils/storm/CreateDropStormView";
 
 export interface CreateDropCompactHandles {
