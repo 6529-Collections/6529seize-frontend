@@ -1,11 +1,11 @@
-import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
+import { GroupFull } from "../../../generated/models/GroupFull";
 
 export default function SelectGroupModalItems({
   groups,
   onGroupSelect,
 }: {
-  readonly groups: CurationFilterResponse[];
-  readonly onGroupSelect: (group: CurationFilterResponse) => void;
+  readonly groups: GroupFull[];
+  readonly onGroupSelect: (group: GroupFull) => void;
 }) {
   return (
     <ul className="tw-list-none tw-pl-0 tw-gap-y-4 tw-flex tw-flex-col">

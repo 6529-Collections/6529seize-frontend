@@ -1,5 +1,6 @@
+import IdentitySearch from "../input/identity/IdentitySearch";
 import SelectGroupModalSearchName from "./SelectGroupModalSearchName";
-import SelectGroupModalSearchUser from "./SelectGroupModalSearchUser";
+
 
 export default function SelectGroupModalSearch({
   groupName,
@@ -15,7 +16,7 @@ export default function SelectGroupModalSearch({
   return (
     <div className="tw-mt-4 tw-px-4 tw-col-span-full">
       <div className="tw-grid tw-grid-cols-1 tw-gap-y-3">
-        <SelectGroupModalSearchUser value={groupUser} setValue={onUserSelect} />
+        <IdentitySearch identity={groupUser} setIdentity={onUserSelect} />
         <SelectGroupModalSearchName
           filterName={groupName}
           setFilterName={onFilterNameSearch}

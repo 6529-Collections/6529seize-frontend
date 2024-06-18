@@ -1,7 +1,5 @@
-import { useState } from "react";
-import CreateWaveVotingRepCategory from "./CreateWaveVotingRepCategory";
-import CreateWaveVotingRepUser from "./CreateWaveVotingRepUser";
-import { CommunityMemberMinimal } from "../../../../entities/IProfile";
+import IdentitySearch from "../../../utils/input/identity/IdentitySearch";
+import RepCategorySearch from "../../../utils/input/rep-category/RepCategorySearch";
 
 export default function CreateWaveVotingRep({
   category,
@@ -21,20 +19,14 @@ export default function CreateWaveVotingRep({
           {category} <button onClick={() => setCategory(null)}>Remove</button>
         </div>
       ) : (
-        <CreateWaveVotingRepCategory
-          category={category}
-          setCategory={setCategory}
-        />
+        <RepCategorySearch category={category} setCategory={setCategory} />
       )}
       {profileId ? (
         <div>
           {profileId} <button onClick={() => setProfileId(null)}>Remove</button>
         </div>
       ) : (
-        <CreateWaveVotingRepUser
-          profileId={profileId}
-          setProfileId={setProfileId}
-        />
+        <IdentitySearch identity={profileId} setIdentity={setProfileId} />
       )}
     </div>
   );

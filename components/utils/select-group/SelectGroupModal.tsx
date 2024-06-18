@@ -4,18 +4,18 @@ import SelectGroupModalSearch from "./SelectGroupModalSearch";
 import SelectGroupModalHeader from "./SelectGroupModalHeader";
 import { CurationFilterRequestParams } from "../../../helpers/groups/groups.helpers";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CurationFilterResponse } from "../../../helpers/filters/Filters.types";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SelectGroupModalItems from "./SelectGroupModalItems";
+import { GroupFull } from "../../../generated/models/GroupFull";
 
 export default function SelectGroupModal({
   onClose,
   onGroupSelect,
 }: {
   readonly onClose: () => void;
-  readonly onGroupSelect: (group: CurationFilterResponse) => void;
+  readonly onGroupSelect: (group: GroupFull) => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
@@ -40,8 +40,8 @@ export default function SelectGroupModal({
     }));
   };
 
-  const { data } = useQuery<CurationFilterResponse[]>({
-    queryKey: [QueryKey.CURATION_FILTERS, filters],
+  const { data } = useQuery<GroupFull[]>({
+    queryKey: [QueryKey.GROUPS, filters],
     queryFn: async () => {
       const params: Mutable<
         NonNullableNotRequired<CurationFilterRequestParams>
@@ -54,7 +54,7 @@ export default function SelectGroupModal({
       }
 
       return await commonApiFetch<
-        CurationFilterResponse[],
+        GroupFull[],
         NonNullableNotRequired<CurationFilterRequestParams>
       >({
         endpoint: "community-members-curation",
@@ -64,7 +64,7 @@ export default function SelectGroupModal({
     placeholderData: keepPreviousData,
   });
 
-  const [groups, setGroups] = useState<CurationFilterResponse[]>([]);
+  const [groups, setGroups] = useState<GroupFull[]>([]);
   useEffect(() => {
     if (data) {
       setGroups(data);

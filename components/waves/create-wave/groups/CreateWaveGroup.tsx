@@ -13,7 +13,7 @@ import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrap
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import SelectGroupModal from "../../../utils/select-group/SelectGroupModal";
 import { createPortal } from "react-dom";
-import { CurationFilterResponse } from "../../../../helpers/filters/Filters.types";
+import { GroupFull } from "../../../../generated/models/GroupFull";
 
 export default function CreateWaveGroup({
   waveType,
@@ -22,14 +22,13 @@ export default function CreateWaveGroup({
 }: {
   readonly waveType: WaveType;
   readonly groupType: CreateWaveGroupConfigType;
-  readonly onGroupSelect: (group: CurationFilterResponse | null) => void;
+  readonly onGroupSelect: (group: GroupFull | null) => void;
 }) {
   const [selected, setSelected] = useState<CreateWaveGroupStatus>(
     CreateWaveGroupStatus.NONE
   );
 
-  const [selectedGroup, setSelectedGroup] =
-    useState<CurationFilterResponse | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<GroupFull | null>(null);
 
   const switchSelected = (selectedType: CreateWaveGroupStatus) => {
     setSelected(selectedType);
@@ -37,7 +36,7 @@ export default function CreateWaveGroup({
     onGroupSelect(null);
   };
 
-  const setGroup = (group: CurationFilterResponse) => {
+  const setGroup = (group: GroupFull) => {
     onGroupSelect(group);
     setSelectedGroup(group);
     setSelected(CreateWaveGroupStatus.GROUP);
