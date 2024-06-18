@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -9,6 +9,7 @@ import {
   CreateWaveConfig,
   CreateWaveGroupConfigType,
   CreateWaveStep,
+  WaveRequiredMetadataType,
   WaveSignatureType,
   WaveType,
   WaveVotingType,
@@ -49,7 +50,7 @@ export default function CreateWave() {
     },
     drops: {
       requiredTypes: [],
-      requiredMetadata: [],
+      requiredMetadata: [{ key: "", type: WaveRequiredMetadataType.STRING }],
     },
     voting: {
       type: WaveVotingType.REP,
@@ -62,7 +63,7 @@ export default function CreateWave() {
     },
   });
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DROPS);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.APPROVAL);
 
   const onNextStep = () => {
     switch (step) {
@@ -280,6 +281,7 @@ export default function CreateWave() {
             onStep={setStep}
           />
           <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-px-8 tw-pt-12 tw-pb-12">
+            <div>{JSON.stringify(config, null, 2)}</div>
             <div className="tw-relative tw-z-[1]">
               {stepComponent[step]}
               {/* <WavesOutcome /> */}

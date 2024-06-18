@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import SelectGroupModalSearch from "./SelectGroupModalSearch";
 import SelectGroupModalHeader from "./SelectGroupModalHeader";
-import { CurationFilterRequestParams } from "../../../helpers/groups/groups.helpers";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SelectGroupModalItems from "./SelectGroupModalItems";
 import { GroupFull } from "../../../generated/models/GroupFull";
+import { GroupsRequestParams } from "../../../entities/IGroup";
 
 export default function SelectGroupModal({
   onClose,
@@ -21,43 +22,41 @@ export default function SelectGroupModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const [filters, setFilters] = useState<CurationFilterRequestParams>({
-    curation_criteria_name: null,
-    curation_criteria_user: null,
+  const [filters, setFilters] = useState<GroupsRequestParams>({
+    group_name: null,
+    author_identity: null,
   });
 
   const onUserSelect = (value: string | null) => {
     setFilters((prev) => ({
       ...prev,
-      curation_criteria_user: value,
+      author_identity: value,
     }));
   };
 
   const onFilterNameSearch = (value: string | null) => {
     setFilters((prev) => ({
       ...prev,
-      curation_criteria_name: value,
+      group_name: value,
     }));
   };
 
   const { data } = useQuery<GroupFull[]>({
     queryKey: [QueryKey.GROUPS, filters],
     queryFn: async () => {
-      const params: Mutable<
-        NonNullableNotRequired<CurationFilterRequestParams>
-      > = {};
-      if (filters.curation_criteria_name) {
-        params.curation_criteria_name = filters.curation_criteria_name;
+      const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
+      if (filters.group_name) {
+        params.group_name = filters.group_name;
       }
-      if (filters.curation_criteria_user) {
-        params.curation_criteria_user = filters.curation_criteria_user;
+      if (filters.author_identity) {
+        params.author_identity = filters.author_identity;
       }
 
       return await commonApiFetch<
         GroupFull[],
-        NonNullableNotRequired<CurationFilterRequestParams>
+        NonNullableNotRequired<GroupsRequestParams>
       >({
-        endpoint: "community-members-curation",
+        endpoint: "groups",
         params,
       });
     },
@@ -84,8 +83,8 @@ export default function SelectGroupModal({
           >
             <SelectGroupModalHeader onClose={onClose} />
             <SelectGroupModalSearch
-              groupName={filters.curation_criteria_name}
-              groupUser={filters.curation_criteria_user}
+              groupName={filters.group_name}
+              groupUser={filters.author_identity}
               onUserSelect={onUserSelect}
               onFilterNameSearch={onFilterNameSearch}
             />

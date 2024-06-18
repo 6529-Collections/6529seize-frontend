@@ -67,12 +67,6 @@ export default function CreateWaveApproval({
 
           <span>Complete</span>
         </button>
-
-        {/* <CreateWaveNextStep
-          disabled={isNextStepDisabled}
-          onClick={onNextStep}
-          label="Finish"
-        />  */}
       </div>
     </div>
   );

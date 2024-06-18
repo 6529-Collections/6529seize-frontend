@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { getCurrentDayStartTimestamp } from "../../../../helpers/calendar/calendar.helpers";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig, WaveType } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
@@ -104,6 +103,7 @@ export default function CreateWaveDates({
         )}
         <CreateWaveDatesEndDate
           waveType={waveType}
+          startTimestamp={dates.votingStartDate}
           onEndTimestampChange={onEndTimestampChange}
         />
         <div className="tw-col-span-full tw-text-right">
