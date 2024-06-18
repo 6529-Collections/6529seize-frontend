@@ -35,7 +35,7 @@ export default function IdentitySearch({
     [IdentitySearchSize.MD]: "tw-text-md",
   };
 
-  const SEARCH_ICON_CLASSES: Record<IdentitySearchSize, string> = {
+  const ICON_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-top-3",
     [IdentitySearchSize.MD]: "tw-top-3.5",
   };
@@ -106,7 +106,7 @@ export default function IdentitySearch({
         placeholder=" "
       />
       <svg
-        className={`${SEARCH_ICON_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+        className={`${ICON_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
         viewBox="0 0 20 20"
         fill="currentColor"
         aria-hidden="true"
@@ -120,7 +120,7 @@ export default function IdentitySearch({
       {!!identity?.length && (
         <svg
           onClick={() => onValueChange(null)}
-          className={`${SEARCH_ICON_CLASSES[size]} tw-top-3.5 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+          className={`${ICON_CLASSES[size]} tw-top-3.5 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300`}
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

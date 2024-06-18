@@ -1,8 +1,6 @@
 import { GroupFull } from "../../../../generated/models/GroupFull";
-import {
-  CreateWaveGroupConfigType,
-  WaveType,
-} from "../../../../types/waves.types";
+import { WaveType } from "../../../../generated/models/WaveType";
+import { CreateWaveGroupConfigType } from "../../../../types/waves.types";
 import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 import CreateWaveGroup from "./CreateWaveGroup";
 

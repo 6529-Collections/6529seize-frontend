@@ -1,8 +1,5 @@
-export enum WaveType {
-  CHAT = "CHAT",
-  RANK = "RANK",
-  APPROVE = "APPROVE",
-}
+import { WaveCreditType } from "../generated/models/WaveCreditType";
+import { WaveType } from "../generated/models/WaveType";
 
 export enum WaveSignatureType {
   NONE = "NONE",
@@ -53,13 +50,8 @@ export interface CreateWaveDropsConfig {
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }
 
-export enum WaveVotingType {
-  TDH = "TDH",
-  REP = "REP",
-  UNIQUE_IDENTITY = "UNIQUE_IDENTITY",
-}
 export interface CreateWaveVotingConfig {
-  readonly type: WaveVotingType;
+  readonly type: WaveCreditType;
   readonly category: string | null;
   readonly profileId: string | null;
 }
