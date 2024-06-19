@@ -52,18 +52,18 @@ export default function Timeline(props: Readonly<Props>) {
     return ["animation"].includes(key);
   };
 
-  const isUrl = (key: string) => {
+  const isUrlKey = (key: string) => {
     return ["animation_url", "image_url"].includes(key);
   };
 
-  function printAttribute(label: string, value: any) {
+  function printAttribute(label: string, value: any, fullWidth?: boolean) {
     return (
-      <Col xs={12}>
+      <Col sm={12} md={fullWidth ? 12 : 6}>
         <b>{label}:</b>{" "}
-        <span
+        <div
           dangerouslySetInnerHTML={{
             __html: numberWithCommasFromString(value).replaceAll("\n", "<br>"),
-          }}></span>
+          }}></div>
       </Col>
     );
   }
@@ -80,7 +80,7 @@ export default function Timeline(props: Readonly<Props>) {
 
     const label = from ? "Removed Value" : "Added Value";
     const nonUndefined = from || to;
-    return printAttribute(label, nonUndefined);
+    return printAttribute(label, nonUndefined, true);
   }
 
   function printLink(label: string, value: any) {
@@ -163,12 +163,12 @@ export default function Timeline(props: Readonly<Props>) {
       content = printFromToImages(change.from, change.to);
     } else if (isAnimation(change.key)) {
       content = printFromToAnimation(change.from, change.to);
-    } else if (isUrl(change.key)) {
+    } else if (isUrlKey(change.key)) {
       content = printFromToUrls(change.from, change.to);
     } else if (change.key.endsWith("(Added)")) {
-      content = printAttribute("Value", change.to);
+      content = printAttribute("Value", change.to, true);
     } else if (change.key.endsWith("(Removed)")) {
-      content = printAttribute("Value", change.from);
+      content = printAttribute("Value", change.from, true);
     } else {
       content = printFromToFields(change.from, change.to);
     }
