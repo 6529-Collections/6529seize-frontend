@@ -14,6 +14,7 @@ import SelectGroupModal from "../../../utils/select-group/SelectGroupModal";
 import { createPortal } from "react-dom";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { WaveType } from "../../../../generated/models/WaveType";
+import CreateWaveGroupItem from "./CreateWaveGroupItem";
 
 export default function CreateWaveGroup({
   waveType,
@@ -53,34 +54,10 @@ export default function CreateWaveGroup({
           label={CREATE_WAVE_NONE_GROUP_LABELS[groupType]}
           onChange={switchSelected}
         />
-        <CommonBorderedRadioButton
-          type={CreateWaveGroupStatus.GROUP}
-          selected={selected}
-          label="A Group"
-          onChange={switchSelected}
+        <CreateWaveGroupItem
+          selectedGroup={selectedGroup}
+          switchSelected={switchSelected}
         />
-        {selectedGroup && (
-          <div className="tw-col-span-2 tw-flex tw-items-center tw-gap-4 tw-bg-iron-800 tw-rounded-lg tw-px-6 tw-py-2">
-            <div className="tw-text-primary-400 tw-font-bold">
-              {selectedGroup.name}
-            </div>
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
-                src=""
-                alt="Profile Picture"
-              />
-              <span className="tw-text-iron-50 tw-font-medium tw-text-sm">
-                {selectedGroup.created_by?.handle}
-              </span>
-              <button
-                onClick={() => switchSelected(CreateWaveGroupStatus.NONE)}
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        )}
         {createPortal(
           <CommonAnimationWrapper mode="sync" initial={true}>
             {selected === CreateWaveGroupStatus.GROUP && !selectedGroup && (

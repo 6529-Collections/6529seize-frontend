@@ -1,14 +1,19 @@
+type CommonBorderedRadioButtonProps<T extends string> = {
+  readonly type: T;
+  readonly selected: T;
+  readonly onChange: (type: T) => void;
+} & (
+  | { readonly label: string; readonly children?: never }
+  | { readonly label?: never; readonly children: React.ReactNode }
+);
+
 export default function CommonBorderedRadioButton<T extends string>({
   type,
   selected,
   label,
   onChange,
-}: {
-  readonly type: T;
-  readonly selected: T;
-  readonly label: string;
-  readonly onChange: (type: T) => void;
-}) {
+  children,
+}: CommonBorderedRadioButtonProps<T>) {
   const isSelected = selected === type;
   const wrapperClasses = isSelected
     ? "tw-ring-primary-400 tw-bg-[#202B45]"
@@ -35,7 +40,7 @@ export default function CommonBorderedRadioButton<T extends string>({
       />
       <div className="tw-flex tw-items-center">
         <span className="tw-flex tw-flex-col tw-text-base">
-          <span className={labelClasses}>{label}</span>
+          {label ? <span className={labelClasses}>{label}</span> : children}
         </span>
       </div>
     </div>
