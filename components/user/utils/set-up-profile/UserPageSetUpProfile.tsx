@@ -1,19 +1,20 @@
 import { useContext, useEffect, useState } from "react";
 import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
-import UserSettingsUsername from "../../../settings/UserSettingsUsername";
+
+import { useRouter } from "next/router";
+import { useMutation } from "@tanstack/react-query";
 import {
   ApiCreateOrUpdateProfileRequest,
   IProfileAndConsolidations,
   PROFILE_CLASSIFICATION,
-} from "../../../../../entities/IProfile";
-import UserSettingsClassification from "../../../settings/UserSettingsClassification";
-import UserSettingsPrimaryWallet from "../../../settings/UserSettingsPrimaryWallet";
-import UserSettingsSave from "../../../settings/UserSettingsSave";
-import { AuthContext } from "../../../../auth/Auth";
-import { commonApiPost } from "../../../../../services/api/common-api";
-import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { useRouter } from "next/router";
-import { useMutation } from "@tanstack/react-query";
+} from "../../../../entities/IProfile";
+import { AuthContext } from "../../../auth/Auth";
+import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "../../../../services/api/common-api";
+import UserSettingsUsername from "../../settings/UserSettingsUsername";
+import UserSettingsClassification from "../../settings/UserSettingsClassification";
+import UserSettingsPrimaryWallet from "../../settings/UserSettingsPrimaryWallet";
+import UserSettingsSave from "../../settings/UserSettingsSave";
 
 export default function UserPageSetUpProfile({
   profile,

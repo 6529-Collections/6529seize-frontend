@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../../auth/Auth";
+
 import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
+import { AuthContext } from "../../../auth/Auth";
 export default function UserSetUpProfileCta() {
   const { connectedProfile } = useContext(AuthContext);
   const { address } = useAccount();

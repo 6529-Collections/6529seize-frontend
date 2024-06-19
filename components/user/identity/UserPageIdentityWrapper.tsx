@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageIdentity from "./UserPageIdentity";
+import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 
 export default function UserPageIdentityWrapper({
   profile: initialProfile,
@@ -32,11 +33,13 @@ export default function UserPageIdentityWrapper({
   });
 
   return (
-    <UserPageIdentity
-      profile={profile}
-      initialCICReceivedParams={initialCICReceivedParams}
-      initialCICGivenParams={initialCICGivenParams}
-      initialActivityLogParams={initialActivityLogParams}
-    />
+    <UserPageSetUpProfileWrapper profile={profile}>
+      <UserPageIdentity
+        profile={profile}
+        initialCICReceivedParams={initialCICReceivedParams}
+        initialCICGivenParams={initialCICGivenParams}
+        initialActivityLogParams={initialActivityLogParams}
+      />
+    </UserPageSetUpProfileWrapper>
   );
 }
