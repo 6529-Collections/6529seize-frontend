@@ -57,7 +57,7 @@ const nextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
   images: {
-    domains: ["6529.io", "arweave.net"],
+    domains: ["6529.io", "arweave.net", "localhost"],
     unoptimized: true,
     minimumCacheTTL: 86400,
   },

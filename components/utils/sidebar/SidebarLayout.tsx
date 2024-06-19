@@ -35,7 +35,7 @@ export default function SidebarLayout({
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (breakpoint === "S") {
@@ -85,7 +85,7 @@ export default function SidebarLayout({
         ? headerRef.current.clientHeight
         : 0;
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const newPosition =
+       const newPosition =
         scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
       sidebarRef.current!.style.top = `${newPosition}px`;
       openButtonRef.current!.style.top = `${newPosition}px`;
@@ -126,10 +126,10 @@ export default function SidebarLayout({
           setOpen={setOpen}
         />
       </div>
-      <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex">
           <div
-            className={`tw-fixed  tw-z-50 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
+            className={`tw-fixed tw-z-50 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
               !open ? "-tw-translate-x-full" : ""
             }`}
             ref={sidebarRef}

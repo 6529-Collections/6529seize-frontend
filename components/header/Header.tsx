@@ -27,7 +27,6 @@ export interface HeaderLink {
 export default function Header(props: Readonly<Props>) {
   const router = useRouter();
   const account = useAccount();
-
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 
@@ -142,8 +141,8 @@ export default function Header(props: Readonly<Props>) {
           </Row>
           <Row className="pt-3 pb-3">
             <Col>
-              <Link href="/">
-                <h3>Home</h3>
+              <Link href="/brain">
+                <h3>Brain</h3>
               </Link>
             </Col>
           </Row>
@@ -289,6 +288,13 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <Link href="/groups">
                       <h3>Groups</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href="/waves">
+                      <h3>Waves</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -706,7 +712,7 @@ export default function Header(props: Readonly<Props>) {
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
-                                router.pathname === "/" ? "active" : ""
+                                router.pathname === "/brain" ? "active" : ""
                               }`}
                               onClick={() => goTo("/")}
                             >
@@ -773,6 +779,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Groups",
                                   path: "/groups",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Waves",
+                                  path: "/waves",
                                 }}
                               />
                               <HeaderDesktopLink

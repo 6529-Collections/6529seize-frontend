@@ -19,6 +19,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "../components/nextGen/nextgen_contracts";
+import { Period } from "./Types";
 
 export function formatAddress(address: string) {
   if (
@@ -719,9 +720,57 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 };
 
+export const formatLargeNumber = (num: number): string => {
+  const isNegative = num < 0;
+  const absNum = Math.abs(num);
+
+  let formattedNum;
+  if (absNum < 1000) {
+    formattedNum = absNum.toString(); // less than 1000
+  } else if (absNum < 10000) {
+    formattedNum = (absNum / 1000).toFixed(1) + "k"; // less than 1 million
+  } else if (absNum < 1000000) {
+    formattedNum = (absNum / 1000).toFixed(0) + "k"; // less than 1 million
+  } else {
+    formattedNum = (absNum / 1000000).toFixed(1) + "M"; // 1 million or more
+  }
+
+  return isNegative ? "-" + formattedNum : formattedNum;
+};
+
+const CAN_SEE_DROPS_CONFIG = {
+  minLevel: 16,
+  minTDH: 30000,
+};
+
+// TODO
+export const getCanProfileSeeDrops = ({
+  profile,
+}: {
+  profile: IProfileAndConsolidations | null;
+}): boolean => {
+  return true;
+  // if (!profile?.profile?.handle) {
+  //   return false;
+  // }
+  // return (
+  //   (profile.level >= CAN_SEE_DROPS_CONFIG.minLevel &&
+  //     profile.consolidation.tdh >= CAN_SEE_DROPS_CONFIG.minTDH) ||
+  //   ["simo", "ragne", "gelato2"].includes(
+  //     profile.profile?.handle.toLocaleLowerCase()
+  //   )
+  // );
+};
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
 
+export const PERIOD_LABELS: Record<Period, string> = {
+  [Period.MINUTES]: "Minutes",
+  [Period.HOURS]: "Hours",
+  [Period.DAYS]: "Days",
+  [Period.WEEKS]: "Weeks",
+  [Period.MONTHS]: "Months",
+};
 const hashSeed = (seed: string): number => {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
