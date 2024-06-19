@@ -5,9 +5,11 @@ import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioB
 export default function CreateWaveGroupItem({
   selectedGroup,
   switchSelected,
+  onSelectedClick,
 }: {
   readonly selectedGroup: GroupFull | null;
   readonly switchSelected: (selectedType: CreateWaveGroupStatus) => void;
+  readonly onSelectedClick: () => void;
 }) {
   if (selectedGroup) {
     return (
@@ -18,7 +20,7 @@ export default function CreateWaveGroupItem({
             ? CreateWaveGroupStatus.GROUP
             : CreateWaveGroupStatus.NONE
         }
-        onChange={() => undefined}
+        onChange={onSelectedClick}
       >
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
