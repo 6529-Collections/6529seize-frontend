@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageGroups from "./UserPageGroups";
+import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 
 export default function UserPageGroupsWrapper({
   profile: initialProfile,
@@ -23,5 +24,9 @@ export default function UserPageGroupsWrapper({
     initialData: initialProfile,
   });
 
-  return <UserPageGroups profile={profile} />;
+  return (
+    <UserPageSetUpProfileWrapper profile={profile}>
+      <UserPageGroups profile={profile} />
+    </UserPageSetUpProfileWrapper>
+  );
 }
