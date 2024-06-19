@@ -22,6 +22,7 @@ import { CreateNewWave } from "../../../generated/models/CreateNewWave";
 import { WaveCreditType } from "../../../generated/models/WaveCreditType";
 import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
+import CreateWaveActions from "./utils/CreateWaveActions";
 
 const CreateWaveSvg = dynamic(() => import("./utils/CreateWaveSvg"), {
   ssr: false,
@@ -59,7 +60,7 @@ export default function CreateWave({
       requiredMetadata: [{ key: "", type: WaveRequiredMetadataType.STRING }],
     },
     voting: {
-      type: WaveCreditType.Rep,
+      type: WaveCreditType.Tdh,
       category: null,
       profileId: null,
     },
@@ -75,7 +76,7 @@ export default function CreateWave({
     })
   );
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.VOTING);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.OVERVIEW);
 
   const getIsVotingSignatureRequired = (): boolean => {
     return (
@@ -117,7 +118,7 @@ export default function CreateWave({
         },
         // TODO: whats this???
         no_of_applications_allowed_per_participant: null,
-        // TODO: needs also type
+        // TODO: needs also type and make sure to filter out empty strings
         required_metadata: config.drops.requiredMetadata.map((metadata) => ({
           name: metadata.key,
         })),
@@ -139,37 +140,6 @@ export default function CreateWave({
       },
       outcomes: [],
     };
-  };
-
-  const onComplete = async (): Promise<void> => {};
-
-  const onNextStep = async (): Promise<void> => {
-    switch (step) {
-      case CreateWaveStep.OVERVIEW:
-        setStep(CreateWaveStep.GROUPS);
-        break;
-      case CreateWaveStep.GROUPS:
-        setStep(CreateWaveStep.DATES);
-        break;
-      case CreateWaveStep.DATES:
-        setStep(CreateWaveStep.DROPS);
-        break;
-      case CreateWaveStep.DROPS:
-        setStep(CreateWaveStep.VOTING);
-        break;
-      case CreateWaveStep.VOTING:
-        if (config.overview.type === WaveType.Approve) {
-          setStep(CreateWaveStep.APPROVAL);
-        } else {
-          await onComplete();
-        }
-        break;
-      case CreateWaveStep.APPROVAL:
-        await onComplete();
-        break;
-      default:
-        assertUnreachable(step);
-    }
   };
 
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
@@ -298,14 +268,12 @@ export default function CreateWave({
       <CreateWaveOverview
         overview={config.overview}
         setOverview={setOverview}
-        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.GROUPS]: (
       <CreateWaveGroups
         waveType={config.overview.type}
         onGroupSelect={onGroupSelect}
-        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.DATES]: (
@@ -313,26 +281,19 @@ export default function CreateWave({
         waveType={config.overview.type}
         dates={config.dates}
         setDates={setDates}
-        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.DROPS]: (
-      <CreateWaveDrops
-        drops={config.drops}
-        setDrops={setDrops}
-        onNextStep={onNextStep}
-      />
+      <CreateWaveDrops drops={config.drops} setDrops={setDrops} />
     ),
     [CreateWaveStep.VOTING]: (
       <CreateWaveVoting
-        waveType={config.overview.type}
         selectedType={config.voting.type}
         category={config.voting.category}
         profileId={config.voting.profileId}
         onTypeChange={onVotingTypeChange}
         setCategory={onCategoryChange}
         setProfileId={onProfileIdChange}
-        onNextStep={onNextStep}
       />
     ),
     [CreateWaveStep.APPROVAL]: (
@@ -341,7 +302,6 @@ export default function CreateWave({
         thresholdTimeMs={config.approval.thresholdTimeMs}
         setThreshold={onThresholdChange}
         setThresholdTimeMs={onThresholdTimeChange}
-        onNextStep={onNextStep}
       />
     ),
   };
@@ -379,8 +339,14 @@ export default function CreateWave({
           />
           <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-pt-12 tw-pb-12">
             <div className="tw-relative tw-z-[1]">
-              {stepComponent[step]}
-              {/* <WavesOutcome /> */}
+              <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
+                {stepComponent[step]}
+                <CreateWaveActions
+                  setStep={setStep}
+                  step={step}
+                  config={config}
+                />
+              </div>
             </div>
             <div className="tw-absolute tw-inset-0">
               <CreateWaveSvg />
