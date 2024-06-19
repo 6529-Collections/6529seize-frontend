@@ -37,11 +37,11 @@ export default function Waves() {
     setViewMode(mode);
   };
 
-  // useEffect(() => {
-  //   if (!connectedProfile?.profile?.handle || activeProfileProxy) {
-  //     onViewModeChange(WavesViewMode.VIEW);
-  //   }
-  // }, [connectedProfile, activeProfileProxy]);
+  useEffect(() => {
+    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
+      onViewModeChange(WavesViewMode.VIEW);
+    }
+  }, [connectedProfile, activeProfileProxy]);
 
   const components: Record<WavesViewMode, JSX.Element> = {
     [WavesViewMode.VIEW]: (

@@ -1,7 +1,9 @@
 export default function CreateWaveOverviewInput({
+  value,
   valueKey,
   onValueChange,
 }: {
+  readonly value: string;
   readonly valueKey: "name" | "description";
   readonly onValueChange: (param: {
     readonly key: "name" | "description";
@@ -22,6 +24,7 @@ export default function CreateWaveOverviewInput({
       <input
         type="text"
         onChange={onChange}
+        value={value}
         id={valueKey}
         autoComplete="off"
         className="tw-form-input tw-block tw-px-4 tw-py-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-600 focus:tw-border-blue-500 tw-peer
