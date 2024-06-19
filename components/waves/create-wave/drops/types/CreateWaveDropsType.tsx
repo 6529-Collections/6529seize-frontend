@@ -21,7 +21,7 @@ export default function CreateWaveDropsType({
   return (
     <div
       onClick={() => onRequiredTypeChange(type)}
-      className={`${buttonClasses} tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset  tw-px-5 tw-py-4 tw-shadow-sm focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${buttonClasses} tw-min-w-[213.34px] tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset  tw-px-5 tw-py-4 tw-shadow-sm focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       <div className="tw-flex tw-h-6 tw-items-center">
         <input
