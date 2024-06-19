@@ -35,7 +35,7 @@ export default function WavesList({
             <span>Create New</span>
           </button>
         )}
-        <div className="tw-flex tw-flex-col tw-gap-y-6">
+        <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-6">
           <WavesCard />
         </div>
       </div>

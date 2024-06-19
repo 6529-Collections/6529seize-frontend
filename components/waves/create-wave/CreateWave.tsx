@@ -382,9 +382,9 @@ export default function CreateWave({
               {stepComponent[step]}
               {/* <WavesOutcome /> */}
             </div>
-            {/*  <div className="tw-absolute tw-inset-0">
+            <div className="tw-absolute tw-inset-0">
               <CreateWaveSvg />
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

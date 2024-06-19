@@ -26,12 +26,12 @@ export default function CreateWaveGroupItem({
           <div className="tw-flex tw-items-center tw-gap-x-2">
             {selectedGroup.created_by.pfp ? (
               <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md"
+                className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md tw-ring-1 tw-ring-iron-700"
                 src={selectedGroup.created_by.pfp}
                 alt="Profile Picture"
               />
             ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md" />
+              <div className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-iron-700" />
             )}
             <span className="tw-text-iron-50 tw-text-sm">
               {selectedGroup.created_by.handle}
