@@ -23,7 +23,7 @@ export default function CreateWaveSvg() {
       >
         <g clip-path="url(#clip0_1973_2242)">
           <path
-            opacity="0.16"
+            opacity="0.1"
             d="M700 0H0V700H700V0Z"
             fill="url(#paint0_radial_1973_2242)"
           />
