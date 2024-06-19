@@ -35,7 +35,7 @@ export default function CreateWaveApproval({
   }, [threshold, thresholdTimeMs]);
 
   return (
-    <div className="tw-max-w-xl tw-mx-auto tw-w-full">
+    <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
       <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
         Approval
       </p>
