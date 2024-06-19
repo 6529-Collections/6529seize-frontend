@@ -20,22 +20,22 @@ export default function CreateWaveGroupItem({
         }
         onChange={() => undefined}
       >
-        <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-2">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-flex-col tw-gap-x-3 tw-gap-y-0.5 tw-truncate">
+          <div className="tw-flex tw-items-center tw-gap-x-2 tw-truncate">
             {selectedGroup.created_by.pfp ? (
               <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+                className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md"
                 src={selectedGroup.created_by.pfp}
                 alt="Profile Picture"
               />
             ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-700 tw-ring-2 tw-ring-iron-900" />
+              <div className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md" />
             )}
-            <span className="tw-text-primary-400 tw-font-bold tw-text-sm">
+            <span className="tw-text-iron-50 tw-text-sm">
               {selectedGroup.created_by.handle}
             </span>
           </div>
-          <div className="tw-text-primary-400 tw-font-bold">
+          <div className="tw-text-primary-400 tw-whitespace-nowrap tw-truncate tw-font-semibold">
             {selectedGroup.name}
           </div>
         </div>

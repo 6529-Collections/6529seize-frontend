@@ -24,11 +24,11 @@ export default function CreateWaveVoting({
   readonly setProfileId: (profileId: string | null) => void;
   readonly onNextStep: () => void;
 }) {
-  const nextStepLabel = waveType === WaveType.Approve ? "Next Step" : "Finish";
+  const nextStepLabel = waveType === WaveType.Approve ? "Next" : "Finish";
   return (
     <div className="tw-flex tw-flex-col">
       <div className="tw-max-w-xl tw-mx-auto tw-w-full">
-        <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
           How Drops are Rated
         </p>
         <div className="tw-mt-4 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
