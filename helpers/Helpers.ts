@@ -81,9 +81,13 @@ export function fromGWEI(from: number) {
   return from / 1e18;
 }
 
+export function isNumeric(str: string) {
+  return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(str);
+}
+
 export function numberWithCommasFromString(x: any) {
   x = x.toString();
-  if (!x || isNaN(parseFloat(x))) return x;
+  if (!x || !isNumeric(x) || isNaN(parseFloat(x))) return x;
   if (x.includes(" ") || x.includes(",")) return x;
   const cleanedInput = x.replace(/[^\d.-]/g, "");
   if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
