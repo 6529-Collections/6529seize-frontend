@@ -1,7 +1,7 @@
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useRouter } from "next/router";
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -288,6 +288,13 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <Link href="/groups">
                       <h3>Groups</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href="/waves">
+                      <h3>Waves</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -772,6 +779,12 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Groups",
                                   path: "/groups",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Waves",
+                                  path: "/waves",
                                 }}
                               />
                               <HeaderDesktopLink
