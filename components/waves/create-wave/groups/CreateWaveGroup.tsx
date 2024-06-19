@@ -14,6 +14,7 @@ import SelectGroupModal from "../../../utils/select-group/SelectGroupModal";
 import { createPortal } from "react-dom";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { WaveType } from "../../../../generated/models/WaveType";
+import CreateWaveGroupItem from "./CreateWaveGroupItem";
 
 export default function CreateWaveGroup({
   waveType,
@@ -53,22 +54,11 @@ export default function CreateWaveGroup({
           label={CREATE_WAVE_NONE_GROUP_LABELS[groupType]}
           onChange={switchSelected}
         />
-        <CommonBorderedRadioButton
-          type={CreateWaveGroupStatus.GROUP}
-          selected={selected}
-          label="A Group"
-          onChange={switchSelected}
+        <CreateWaveGroupItem
+          selectedGroup={selectedGroup}
+          switchSelected={switchSelected}
         />
-        {selectedGroup && (
-          <div className="tw-inline-flex">
-            <div>
-              {selectedGroup.created_by?.handle} - {selectedGroup.name}
-            </div>
-            <button onClick={() => switchSelected(CreateWaveGroupStatus.NONE)}>
-              Remove
-            </button>
-          </div>
-        )}
+
         {createPortal(
           <CommonAnimationWrapper mode="sync" initial={true}>
             {selected === CreateWaveGroupStatus.GROUP && !selectedGroup && (
