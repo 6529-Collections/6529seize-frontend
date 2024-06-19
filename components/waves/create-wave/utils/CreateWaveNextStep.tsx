@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { WaveType } from "../../../../generated/models/WaveType";
+import { CreateWaveStep } from "../../../../types/waves.types";
+
 export enum CreateWaveNextStepType {
   NEXT = "NEXT",
   SAVE = "SAVE",
@@ -5,13 +9,31 @@ export enum CreateWaveNextStepType {
 
 export default function CreateWaveNextStep({
   disabled,
-  stepType = CreateWaveNextStepType.NEXT,
+  step,
+  waveType,
   onClick,
 }: {
   readonly disabled: boolean;
-  readonly stepType?: CreateWaveNextStepType;
+  readonly step: CreateWaveStep;
+  readonly waveType: WaveType;
   readonly onClick: () => void;
 }) {
+  const getStepType = () => {
+    if (waveType === WaveType.Approve && step === CreateWaveStep.APPROVAL) {
+      return CreateWaveNextStepType.SAVE;
+    }
+    if (waveType !== WaveType.Approve && step === CreateWaveStep.VOTING) {
+      return CreateWaveNextStepType.SAVE;
+    }
+    return CreateWaveNextStepType.NEXT;
+  };
+
+  const [stepType, setStepType] = useState<CreateWaveNextStepType>(
+    getStepType()
+  );
+
+  useEffect(() => setStepType(getStepType()), [step, waveType]);
+
   const components: Record<CreateWaveNextStepType, React.ReactNode> = {
     [CreateWaveNextStepType.NEXT]: (
       <button
@@ -34,6 +56,20 @@ export default function CreateWaveNextStep({
           disabled ? "" : ""
         } tw-relative tw-inline-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-6 tw-py-3 tw-border-0 tw-text-base tw-font-semibold tw-rounded-lg tw-text-white tw-bg-gradient-to-r tw-from-blue-500 tw-via-blue-600 tw-to-blue-700 hover:tw-bg-gradient-to-br tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg`}
       >
+        {" "}
+        <svg
+          className="tw-h-5 tw-w-5 -tw-ml-1 tw-text-white tw-animate-bounce"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-11.293a1 1 0 00-1.414-1.414L9 8.586 7.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+            clipRule="evenodd"
+          />
+        </svg>
         <span>Complete</span>
       </button>
     ),
