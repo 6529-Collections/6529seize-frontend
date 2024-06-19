@@ -12,6 +12,8 @@ import {
 import { SortDirection } from "../../../entities/ISort";
 import { useEffect, useState } from "react";
 import { GroupFull } from "../../../generated/models/GroupFull";
+import { useDispatch } from "react-redux";
+import { setActiveGroupId } from "../../../store/groupSlice";
 
 export default function GroupsSelectActiveGroup({
   activeGroupId,
@@ -64,6 +66,12 @@ export default function GroupsSelectActiveGroup({
     }
   }, [members]);
 
+  const dispatch = useDispatch();
+
+  const onActiveGroupId = (groupId: string | null) => {
+    dispatch(setActiveGroupId(groupId));
+  };
+
   if (!data) {
     return (
       <div className="tw-px-4 tw-text-md tw-text-iron-400 tw-font-normal">
@@ -98,7 +106,12 @@ export default function GroupsSelectActiveGroup({
         </div>
       )}
 
-      <GroupItem key={data.id} group={data} />
+      <GroupItem
+        key={data.id}
+        group={data}
+        activeGroupId={activeGroupId}
+        onActiveGroupId={onActiveGroupId}
+      />
     </div>
   );
 }

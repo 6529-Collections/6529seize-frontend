@@ -71,11 +71,11 @@ export default function CreateWave({
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
-      type: WaveType.Rank,
+      type: WaveType.Chat,
     })
   );
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DATES);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.VOTING);
 
   const getIsVotingSignatureRequired = (): boolean => {
     return (
@@ -382,7 +382,7 @@ export default function CreateWave({
               {stepComponent[step]}
               {/* <WavesOutcome /> */}
             </div>
-           {/*  <div className="tw-absolute tw-inset-0">
+            {/*  <div className="tw-absolute tw-inset-0">
               <CreateWaveSvg />
             </div> */}
           </div>
