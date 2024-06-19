@@ -2,7 +2,9 @@ import { WaveCreditType } from "../../../../generated/models/WaveCreditType";
 import { WaveType } from "../../../../generated/models/WaveType";
 import { WAVE_VOTING_LABELS } from "../../../../helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
-import CreateWaveNextStep from "../utils/CreateWaveNextStep";
+import CreateWaveNextStep, {
+  CreateWaveNextStepType,
+} from "../utils/CreateWaveNextStep";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 
 export default function CreateWaveVoting({
@@ -24,7 +26,10 @@ export default function CreateWaveVoting({
   readonly setProfileId: (profileId: string | null) => void;
   readonly onNextStep: () => void;
 }) {
-  const nextStepLabel = waveType === WaveType.Approve ? "Next" : "Finish";
+  const nextStepType =
+    waveType === WaveType.Approve
+      ? CreateWaveNextStepType.NEXT
+      : CreateWaveNextStepType.SAVE;
   return (
     <div className="tw-flex tw-flex-col">
       <div className="tw-max-w-xl tw-mx-auto tw-w-full">
@@ -56,7 +61,7 @@ export default function CreateWaveVoting({
           <CreateWaveNextStep
             disabled={false}
             onClick={onNextStep}
-            label={nextStepLabel}
+            stepType={nextStepType}
           />
         </div>
       </div>

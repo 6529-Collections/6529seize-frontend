@@ -42,6 +42,10 @@ export default function CreateWaveGroup({
     setSelectedGroup(group);
     setSelected(CreateWaveGroupStatus.GROUP);
   };
+
+  const onSelectedClick = () => {
+    setSelectedGroup(null);
+  };
   return (
     <div>
       <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
@@ -57,6 +61,7 @@ export default function CreateWaveGroup({
         <CreateWaveGroupItem
           selectedGroup={selectedGroup}
           switchSelected={switchSelected}
+          onSelectedClick={onSelectedClick}
         />
         {createPortal(
           <CommonAnimationWrapper mode="sync" initial={true}>

@@ -60,6 +60,7 @@ export default function CreateWaveDropsMetadata({
               key={`create-wave-drops-metadata-row-${i}`}
               item={item}
               index={i}
+              itemsCount={requiredMetadata.length}
               onItemChange={onItemChange}
               onItemRemove={onRemoveRow}
             />
