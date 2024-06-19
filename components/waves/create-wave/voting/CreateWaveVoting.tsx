@@ -27,11 +27,11 @@ export default function CreateWaveVoting({
   const nextStepLabel = waveType === WaveType.Approve ? "Next" : "Finish";
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-max-w-xl tw-mx-auto tw-w-full">
+      <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
         <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
           How Drops are Rated
         </p>
-        <div className="tw-mt-4 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
+        <div className="tw-mt-3 tw-grid lg:tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
           {Object.values(WaveCreditType).map((votingType) => (
             <CommonBorderedRadioButton
               key={votingType}

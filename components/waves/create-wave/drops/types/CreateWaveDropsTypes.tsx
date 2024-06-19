@@ -13,7 +13,7 @@ export default function CreateWaveDropsTypes({
       <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
         Required Types
       </p>
-      <div className="tw-mt-4 tw-flex tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-4">
         {Object.values(WaveRequiredType).map((type) => (
           <CreateWaveDropsType
             key={type}
