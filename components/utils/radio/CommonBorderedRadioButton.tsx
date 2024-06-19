@@ -24,12 +24,12 @@ export default function CommonBorderedRadioButton<T extends string>({
     : "tw-text-primary-400 focus:tw-ring-primary-400";
 
   const labelClasses = isSelected
-    ? "tw-font-bold tw-text-primary-400"
-    : "tw-font-semibold tw-text-iron-300";
+    ? "tw-text-primary-400"
+    : "tw-text-iron-200";
   return (
     <div
       onClick={() => onChange(type)}
-      className={`${wrapperClasses} tw-min-w-[180px] tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 tw-shadow-xl focus:tw-outline-none tw-flex tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${wrapperClasses} tw-min-w-[213px] tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 tw-shadow-xl focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       <input
         id={type}
@@ -39,7 +39,7 @@ export default function CommonBorderedRadioButton<T extends string>({
         className={`${inputClasses} tw-form-radio tw-h-5 tw-w-5 tw-bg-iron-800 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-cursor-pointer`}
       />
       <div className="tw-flex tw-items-center">
-        <span className="tw-flex tw-flex-col tw-text-base">
+        <span className="tw-flex tw-flex-col tw-text-base tw-font-semibold tw-whitespace-nowrap">
           {label ? <span className={labelClasses}>{label}</span> : children}
         </span>
       </div>

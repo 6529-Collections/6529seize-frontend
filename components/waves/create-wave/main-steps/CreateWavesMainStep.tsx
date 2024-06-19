@@ -45,10 +45,8 @@ export default function CreateWavesMainStep({
         <span className="tw-mr-6 tw-flex tw-min-w-0 tw-flex-col">
           <span
             className={`${
-              isActive
-                ? "tw-text-primary-400 tw-font-bold"
-                : "tw-text-iron-600 tw-font-semibold"
-            } tw-text-base`}
+              isActive ? "tw-text-primary-400 " : "tw-text-iron-600"
+            } tw-text-base tw-font-semibold`}
           >
             {label}
           </span>
