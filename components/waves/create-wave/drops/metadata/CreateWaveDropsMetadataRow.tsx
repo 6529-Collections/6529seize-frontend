@@ -10,6 +10,7 @@ import CreateWaveDropsMetadataRowType from "./CreateWaveDropsMetadataRowType";
 export default function CreateWaveDropsMetadataRow({
   item,
   index,
+  itemsCount,
   onItemChange,
   onItemRemove,
 }: {
@@ -20,6 +21,7 @@ export default function CreateWaveDropsMetadataRow({
     readonly key: string;
     readonly type: WaveRequiredMetadataType;
   }) => void;
+  readonly itemsCount: number;
   readonly onItemRemove: (index: number) => void;
 }) {
   const onKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,21 +57,23 @@ export default function CreateWaveDropsMetadataRow({
      tw-py-3 tw-pl-4 tw-pr-4 tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
           placeholder=" "
         />
-        <svg
-          onClick={() => onItemRemove(index)}
-          className="tw-top-4 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M17 7L7 17M7 7L17 17"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        {itemsCount > 1 && (
+          <svg
+            onClick={() => onItemRemove(index)}
+            className="tw-top-4 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17 7L7 17M7 7L17 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
         <label
           htmlFor={`required_metadata_key_${index}`}
           className="tw-absolute tw-cursor-text tw-text-base tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-hover:tw-bg-iron-800 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 

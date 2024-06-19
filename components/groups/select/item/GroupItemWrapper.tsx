@@ -1,5 +1,3 @@
-import { useDispatch } from "react-redux";
-import { setActiveGroupId } from "../../../../store/groupSlice";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { getRandomColorWithSeed } from "../../../../helpers/Helpers";
 
@@ -8,13 +6,14 @@ export default function GroupItemWrapper({
   isActive,
   children,
   deactivateHover,
+  onActiveGroupId,
 }: {
   readonly group: GroupFull;
   readonly isActive: boolean;
   readonly deactivateHover: boolean;
   readonly children: React.ReactNode;
+  readonly onActiveGroupId?: (groupId: string | null) => void;
 }) {
-  const dispatch = useDispatch();
 
   const banner1 =
     group.created_by.banner1_color ??
@@ -24,8 +23,8 @@ export default function GroupItemWrapper({
     getRandomColorWithSeed(group.created_by.handle);
 
   const onFilterClick = () => {
-    if (isActive) return;
-    dispatch(setActiveGroupId(group.id));
+    if (isActive || !onActiveGroupId) return;
+    onActiveGroupId(group.id);
   };
 
   const getClasses = () => {
