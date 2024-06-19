@@ -1,6 +1,7 @@
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { WaveType } from "../../../../generated/models/WaveType";
 import { CreateWaveGroupConfigType } from "../../../../types/waves.types";
+import CreateWaveBackStep from "../utils/CreateWaveBackStep";
 import CreateWaveNextStep from "../utils/CreateWaveNextStep";
 import CreateWaveGroup from "./CreateWaveGroup";
 
@@ -28,7 +29,8 @@ export default function CreateWaveGroups({
           />
         ))}
       </div>
-      <div className="tw-mt-8 tw-text-right">
+      <div className="tw-flex tw-gap-x-4 tw-items-center tw-justify-end">
+        <CreateWaveBackStep />
         <CreateWaveNextStep onClick={onNextStep} disabled={false} />
       </div>
     </div>
