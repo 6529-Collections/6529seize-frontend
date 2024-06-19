@@ -35,22 +35,7 @@ export default function CommonBorderedRadioButton<T extends string>({
       />
       <div className="tw-flex tw-items-center">
         <span className="tw-flex tw-flex-col tw-text-base">
-          {/*   <span className={labelClasses}>{label}</span> */}
-          <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-2">
-            <div className="tw-text-primary-400 tw-font-bold">
-              my awesome stuff
-            </div>
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
-                src=""
-                alt="Profile Picture"
-              />
-              <span className="tw-text-primary-400 tw-font-bold tw-text-sm">
-                simo
-              </span>
-            </div>
-          </div>
+          <span className={labelClasses}>{label}</span>
         </span>
       </div>
     </div>
