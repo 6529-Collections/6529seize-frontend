@@ -48,7 +48,7 @@ export default function CreateWaveOverview({
   useEffect(() => setIsNextStepDisabled(getIsNextStepDisabled()), [overview]);
 
   return (
-    <div className="tw-max-w-xl tw-mx-auto tw-w-full">
+    <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
       <div className="tw-flex tw-flex-col tw-space-y-8">
         <CreateWaveOverviewInputs onChange={onChange} />
         <CreateWaveType
@@ -65,7 +65,7 @@ export default function CreateWaveOverview({
           selectedSignatureType={overview.signatureType}
           onChange={(type) => onChange({ key: "signatureType", value: type })}
         />
-        <div className="tw-flex tw-gap-x-6 tw-items-center tw-justify-end">
+        <div className="tw-flex tw-gap-x-4 tw-items-center tw-justify-end">
           <CreateWaveBackStep />
           <CreateWaveNextStep
             disabled={isNextStepDisabled}

@@ -371,20 +371,20 @@ export default function CreateWave({
           </svg>
           <span>Back</span>
         </button>
-        <div className="tw-max-w-4xl tw-mx-auto lg:tw-flex tw-gap-x-24 tw-justify-center tw-h-full tw-w-full">
+        <div className="tw-max-w-5xl tw-mx-auto lg:tw-flex tw-gap-x-24 tw-justify-center tw-h-full tw-w-full">
           <CreateWavesMainSteps
             activeStep={step}
             waveType={config.overview.type}
             onStep={setStep}
           />
-          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-px-8 tw-pt-12 tw-pb-12">
+          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-pt-12 tw-pb-12">
             <div className="tw-relative tw-z-[1]">
               {stepComponent[step]}
               {/* <WavesOutcome /> */}
             </div>
-            <div className="tw-absolute tw-inset-0">
+           {/*  <div className="tw-absolute tw-inset-0">
               <CreateWaveSvg />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

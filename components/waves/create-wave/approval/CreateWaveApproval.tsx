@@ -36,7 +36,7 @@ export default function CreateWaveApproval({
 
   return (
     <div className="tw-max-w-xl tw-mx-auto tw-w-full">
-      <p className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
         Approval
       </p>
       <div className="tw-mt-4">

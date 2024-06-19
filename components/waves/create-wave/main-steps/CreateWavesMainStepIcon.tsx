@@ -9,7 +9,7 @@ export default function CreateWavesMainStepIcon({
   switch (stepStatus) {
     case CreateWaveStepStatus.DONE:
       return (
-        <span className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-primary-500 tw-bg-primary-600">
+        <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-primary-500 tw-bg-primary-600">
           <svg
             width="13"
             height="11"
@@ -29,7 +29,7 @@ export default function CreateWavesMainStepIcon({
       );
     case CreateWaveStepStatus.ACTIVE:
       return (
-        <span className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-primary-500 tw-bg-primary-600 tw-shadow-[0_0_0_6px_rgba(41,112,255,0.24)]">
+        <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-primary-500 tw-bg-primary-600 tw-shadow-[0_0_0_6px_rgba(41,112,255,0.24)]">
           <svg
             width="8"
             height="8"
@@ -43,7 +43,7 @@ export default function CreateWavesMainStepIcon({
       );
     case CreateWaveStepStatus.PENDING:
       return (
-        <span className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-iron-700 tw-bg-iron-900">
+        <span className="tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-ring-iron-700 tw-bg-iron-900">
           <svg
             width="8"
             height="8"
