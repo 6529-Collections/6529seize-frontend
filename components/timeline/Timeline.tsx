@@ -56,168 +56,188 @@ export default function Timeline(props: Readonly<Props>) {
     return ["animation_url", "image_url"].includes(key);
   };
 
+  function printAttribute(label: string, value: any) {
+    return (
+      <Col xs={12}>
+        <b>{label}:</b>{" "}
+        <span
+          dangerouslySetInnerHTML={{
+            __html: numberWithCommasFromString(value).replaceAll("\n", "<br>"),
+          }}></span>
+      </Col>
+    );
+  }
+
+  function printFromToFields(from: any, to: any) {
+    if (from && to) {
+      return (
+        <>
+          {printAttribute("From", from)}
+          {printAttribute("To", to)}
+        </>
+      );
+    }
+
+    const label = from ? "Removed Value" : "Added Value";
+    const nonUndefined = from || to;
+    return printAttribute(label, nonUndefined);
+  }
+
+  function printLink(label: string, value: any) {
+    return (
+      <Col xs={12}>
+        <b>{label}:</b>{" "}
+        <a href={value} target="_blank" rel="noreferrer">
+          {value}
+        </a>
+      </Col>
+    );
+  }
+
+  function printFromToUrls(from: any, to: any) {
+    if (from && to) {
+      return (
+        <>
+          {printLink("From", from)}
+          {printLink("To", to)}
+        </>
+      );
+    }
+
+    const label = from ? "Removed URL" : "Added URL";
+    const nonUndefined = from || to;
+    return printLink(label, nonUndefined);
+  }
+
+  function printImage(label: string, value: any) {
+    return (
+      <Col className="d-flex align-items-start flex-column gap-1">
+        <b>{label}:</b>
+        <TimelineMediaComponent type={MediaType.IMAGE} url={value} />
+      </Col>
+    );
+  }
+
+  function printFromToImages(from: any, to: any) {
+    if (from && to) {
+      return (
+        <>
+          {printImage("From", from)}
+          {printImage("To", to)}
+        </>
+      );
+    }
+
+    const label = from ? "Removed Image" : "Added Image";
+    const nonUndefined = from || to;
+    return printImage(label, nonUndefined);
+  }
+
+  function printAnimation(label: string, value: any) {
+    return (
+      <Col className="d-flex align-items-start flex-column gap-1">
+        <b>{label}:</b>
+        <TimelineMediaComponent type={getType()} url={value} />
+      </Col>
+    );
+  }
+
+  function printFromToAnimation(from: any, to: any) {
+    if (from && to) {
+      return (
+        <>
+          {printAnimation("From", from)}
+          {printAnimation("To", to)}
+        </>
+      );
+    }
+
+    const label = from ? "Removed Animation" : "Added Animation";
+    const nonUndefined = from || to;
+    return printAnimation(label, nonUndefined);
+  }
+
+  function printContent(change: { key: string; from: any; to: any }) {
+    let content;
+    if (isImage(change.key)) {
+      content = printFromToImages(change.from, change.to);
+    } else if (isAnimation(change.key)) {
+      content = printFromToAnimation(change.from, change.to);
+    } else if (isUrl(change.key)) {
+      content = printFromToUrls(change.from, change.to);
+    } else if (change.key.endsWith("(Added)")) {
+      content = printAttribute("Value", change.to);
+    } else if (change.key.endsWith("(Removed)")) {
+      content = printAttribute("Value", change.from);
+    } else {
+      content = printFromToFields(change.from, change.to);
+    }
+
+    return content;
+  }
+
   return (
-    <>
-      <div className={styles.timeline}>
-        {props.steps.map((step, index) => {
-          return (
-            <div
-              key={`timeline-${index}`}
-              className={`${styles.timelineContainer} ${
-                index % 2 === 0 ? styles.right : styles.left
-              }`}>
-              <div className={styles.content}>
-                <h5 className="float-none m-0 mb-3">
-                  {`${getDateDisplay(step.transaction_date)} UTC`}
-                </h5>
-                <Container className="no-padding">
-                  <Row className="pb-1">
-                    <Col className="d-flex justify-content-between align-items-center gap-4">
-                      <b>{step.description.event}</b>
-                      <span className="d-flex gap-4">
-                        <a
-                          href={step.uri}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="d-flex align-items-center justify-content-center gap-2 decoration-none">
-                          URI
-                          <FontAwesomeIcon
-                            icon="external-link-square"
-                            className={styles.linkIcon}
-                          />
-                        </a>
-                        <a
-                          href={`https://etherscan.io/tx/${step.transaction_hash}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="d-flex align-items-center justify-content-center gap-2 decoration-none">
-                          TXN
-                          <FontAwesomeIcon
-                            icon="external-link-square"
-                            className={styles.linkIcon}
-                          />
-                        </a>
-                      </span>
-                    </Col>
-                  </Row>
-                  {step.description.changes.length > 0 && (
-                    <ul className={styles.changesUl}>
-                      {step.description.changes.map((change, index) => (
-                        <li key={`timeline-table-${index}`}>
-                          <Row className="pt-3 pb-1">
-                            <Col>
-                              <b>{getKeyDisplay(change.key)}</b>
-                            </Col>
-                          </Row>
-                          <Row className="pt-1 pb-3">
-                            {isImage(change.key) ? (
-                              <>
-                                <Col className="d-flex align-items-start flex-column gap-1">
-                                  <b>From:</b>
-                                  <TimelineMediaComponent
-                                    type={MediaType.IMAGE}
-                                    url={change.from}
-                                  />
-                                </Col>
-                                <Col className="d-flex align-items-start flex-column gap-1">
-                                  <b>To:</b>
-                                  <TimelineMediaComponent
-                                    type={MediaType.IMAGE}
-                                    url={change.to}
-                                  />
-                                </Col>
-                              </>
-                            ) : isAnimation(change.key) ? (
-                              <>
-                                <Col className="d-flex align-items-start flex-column gap-1">
-                                  <b>From:</b>
-                                  <TimelineMediaComponent
-                                    type={getType()}
-                                    url={change.from}
-                                  />
-                                </Col>
-                                <Col className="d-flex align-items-start flex-column gap-1">
-                                  <b>To:</b>
-                                  <TimelineMediaComponent
-                                    type={getType()}
-                                    url={change.to}
-                                  />
-                                </Col>
-                              </>
-                            ) : isUrl(change.key) ? (
-                              <>
-                                <Col xs={12}>
-                                  <b>From:</b>{" "}
-                                  <a
-                                    href={change.from}
-                                    target="_blank"
-                                    rel="noreferrer">
-                                    {change.from}
-                                  </a>
-                                </Col>
-                                <Col xs={12} className="pt-2">
-                                  <b>To:</b>{" "}
-                                  <a
-                                    href={change.to}
-                                    target="_blank"
-                                    rel="noreferrer">
-                                    {change.to}
-                                  </a>
-                                </Col>
-                              </>
-                            ) : change.key.endsWith("(Added)") ? (
-                              <Col xs={12}>
-                                <b>Value:</b>{" "}
-                                <span
-                                  dangerouslySetInnerHTML={{
-                                    __html: numberWithCommasFromString(
-                                      change.to
-                                    ).replaceAll("\n", "<br>"),
-                                  }}></span>
-                              </Col>
-                            ) : change.key.endsWith("(Removed)") ? (
-                              <Col xs={12}>
-                                <b>Value:</b>{" "}
-                                <span
-                                  dangerouslySetInnerHTML={{
-                                    __html: numberWithCommasFromString(
-                                      change.from
-                                    ).replaceAll("\n", "<br>"),
-                                  }}></span>
-                              </Col>
-                            ) : (
-                              <>
-                                <Col xs={12}>
-                                  <b>From:</b>{" "}
-                                  <span
-                                    dangerouslySetInnerHTML={{
-                                      __html: numberWithCommasFromString(
-                                        change.from
-                                      ).replaceAll("\n", "<br>"),
-                                    }}></span>
-                                </Col>
-                                <Col xs={12} className="pt-2">
-                                  <b>To:</b>{" "}
-                                  <span
-                                    dangerouslySetInnerHTML={{
-                                      __html: numberWithCommasFromString(
-                                        change.to
-                                      ).replaceAll("\n", "<br>"),
-                                    }}></span>
-                                </Col>
-                              </>
-                            )}
-                          </Row>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </Container>
-              </div>
+    <div className={styles.timeline}>
+      {props.steps.map((step, index) => {
+        return (
+          <div
+            key={`timeline-${step.block}`}
+            className={`${styles.timelineContainer} ${
+              index % 2 === 0 ? styles.right : styles.left
+            }`}>
+            <div className={styles.content}>
+              <h5 className="float-none m-0 mb-3">
+                {`${getDateDisplay(step.transaction_date)} UTC`}
+              </h5>
+              <Container className="no-padding">
+                <Row className="pb-1">
+                  <Col className="d-flex justify-content-between align-items-center gap-4">
+                    <b>{step.description.event}</b>
+                    <span className="d-flex gap-4">
+                      <a
+                        href={step.uri}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="d-flex align-items-center justify-content-center gap-2 decoration-none">
+                        URI
+                        <FontAwesomeIcon
+                          icon="external-link-square"
+                          className={styles.linkIcon}
+                        />
+                      </a>
+                      <a
+                        href={`https://etherscan.io/tx/${step.transaction_hash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="d-flex align-items-center justify-content-center gap-2 decoration-none">
+                        TXN
+                        <FontAwesomeIcon
+                          icon="external-link-square"
+                          className={styles.linkIcon}
+                        />
+                      </a>
+                    </span>
+                  </Col>
+                </Row>
+                {step.description.changes.length > 0 && (
+                  <ul className={styles.changesUl}>
+                    {step.description.changes.map((change) => (
+                      <li key={`timeline-table-${change.key}`}>
+                        <Row className="pt-3 pb-1">
+                          <Col>
+                            <b>{getKeyDisplay(change.key)}</b>
+                          </Col>
+                        </Row>
+                        <Row className="pt-1 pb-3">{printContent(change)}</Row>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Container>
             </div>
-          );
-        })}
-      </div>
-    </>
+          </div>
+        );
+      })}
+    </div>
   );
 }
