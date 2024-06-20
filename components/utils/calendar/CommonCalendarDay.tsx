@@ -21,12 +21,12 @@ export default function CommonCalendarDay({
   readonly setSelectedTimestamp: (timestamp: number) => void;
 }) {
   const BUTTON_CLASSES: Record<CalendarDaySate, string> = {
-    [CalendarDaySate.NOT_ACTIVE_MONTH]: "tw-opacity-50",
-    [CalendarDaySate.MANUALLY_DISABLED]: "",
+    [CalendarDaySate.NOT_ACTIVE_MONTH]: "tw-bg-transparent tw-text-iron-400",
+    [CalendarDaySate.MANUALLY_DISABLED]: "tw-bg-iron-600 tw-text-iron-300",
     [CalendarDaySate.AVAILABLE]:
-      "tw-font-medium tw-bg-iron-800 tw-text-iron-300 hover:tw-border-primary-500",
+      "tw-font-normal tw-bg-iron-800 tw-text-white hover:tw-border-primary-500",
     [CalendarDaySate.ACTIVE]:
-      "tw-bg-primary-500 tw-text-iron-50 tw-font-semibold hover:tw-border-primary-500",
+      "tw-bg-primary-500 tw-text-white tw-font-semibold hover:tw-border-primary-500",
   };
 
   const getDayState = (): CalendarDaySate => {
@@ -54,7 +54,7 @@ export default function CommonCalendarDay({
       type="button"
       onClick={() => setSelectedTimestamp(day.startTimestamp)}
       disabled={!canSelect}
-      className={`${BUTTON_CLASSES[dayState]} tw-relative tw-border tw-border-transparent tw-border-solid tw-h-8 tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 `}
+      className={`${BUTTON_CLASSES[dayState]} tw-mx-auto tw-relative tw-border tw-border-transparent tw-border-solid tw-h-8 tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 `}
     >
       <span className="tw-text-sm tw-mx-auto tw-flex tw-items-center tw-justify-center tw-rounded-full">
         {day.date}
