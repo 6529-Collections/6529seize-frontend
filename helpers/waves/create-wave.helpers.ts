@@ -12,6 +12,24 @@ import {
 } from "../../types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 
+export enum CREATE_WAVE_VALIDATION_ERROR {
+  NAME_REQUIRED = "NAME_REQUIRED",
+  DESCRIPTION_REQUIRED = "DESCRIPTION_REQUIRED",
+  SUBMISSION_START_DATE_REQUIRED = "SUBMISSION_START_DATE_REQUIRED",
+  VOTING_START_DATE_REQUIRED = "VOTING_START_DATE_REQUIRED",
+  SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE = "SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE",
+  SUBMISSION_START_DATE_MUST_BE_BEFORE_VOTING_START_DATE = "SUBMISSION_START_DATE_MUST_BE_BEFORE_VOTING_START_DATE",
+  END_DATE_REQUIRED = "END_DATE_REQUIRED",
+  END_DATE_MUST_BE_AFTER_VOTING_START_DATE = "END_DATE_MUST_BE_AFTER_VOTING_START_DATE",
+  DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
+  VOTING_PROFILE_ID_REQUIRED = "VOTING_PROFILE_ID_REQUIRED",
+  VOTING_PROFILE_ID_MUST_BE_EMPTY = "VOTING_PROFILE_ID_MUST_BE_EMPTY",
+  VOTING_CATEGORY_REQUIRED = "VOTING_CATEGORY_REQUIRED",
+  VOTING_CATEGORY_MUST_BE_EMPTY = "VOTING_CATEGORY_MUST_BE_EMPTY",
+  APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
+  APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
+}
+
 export const getCreateWaveNextStep = ({
   step,
   waveType,
@@ -65,47 +83,56 @@ export const getCreateWavePreviousStep = ({
   }
 };
 
-const getIsOverViewNextStepDisabled = ({
+const getOverviewValidationErrors = ({
   overview,
 }: {
   readonly overview: WaveOverviewConfig;
-}): boolean => {
-  if (!overview.name || !overview.description) {
-    return true;
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  if (!overview.name) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   }
-
-  if (!overview.type || !overview.signatureType) {
-    return true;
+  if (!overview.description) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.DESCRIPTION_REQUIRED);
   }
-  return false;
+  return errors;
 };
 
-const getIsDatesNextStepDisabled = ({
+const getDatesValidationErrors = ({
   waveType,
   dates,
 }: {
   readonly waveType: WaveType;
   readonly dates: CreateWaveDatesConfig;
-}): boolean => {
-  switch (waveType) {
-    case WaveType.Chat:
-    case WaveType.Approve:
-      return (
-        !dates.submissionStartDate ||
-        dates.submissionStartDate !== dates.votingStartDate
-      );
-    case WaveType.Rank:
-      return (
-        !dates.submissionStartDate ||
-        !dates.votingStartDate ||
-        dates.votingStartDate < dates.submissionStartDate ||
-        !dates.endDate ||
-        dates.endDate < dates.votingStartDate
-      );
-    default:
-      assertUnreachable(waveType);
-      return true;
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  if (!dates.submissionStartDate) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_REQUIRED);
   }
+  if (!dates.votingStartDate) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_REQUIRED);
+  }
+  if (waveType !== WaveType.Rank) {
+    if (dates.submissionStartDate !== dates.votingStartDate) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE
+      );
+    }
+  } else {
+    if (dates.submissionStartDate > dates.votingStartDate) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_MUST_BE_BEFORE_VOTING_START_DATE
+      );
+    }
+    if (!dates.endDate) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+    } else if (dates.endDate < dates.votingStartDate) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+      );
+    }
+  }
+  return errors;
 };
 
 const isRequiredMetadataRowsNonUnique = ({
@@ -117,71 +144,118 @@ const isRequiredMetadataRowsNonUnique = ({
   return new Set(keys).size !== keys.length;
 };
 
-const getIsDropsNextStepDisabled = ({
+const getDropsValidationErrors = ({
   drops,
 }: {
   readonly drops: CreateWaveDropsConfig;
-}): boolean => {
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (!drops.requiredMetadata.length) {
-    return false;
+    return errors;
   }
-  return isRequiredMetadataRowsNonUnique({
-    requiredMetadata: drops.requiredMetadata,
-  });
+  if (
+    isRequiredMetadataRowsNonUnique({
+      requiredMetadata: drops.requiredMetadata,
+    })
+  ) {
+    errors.push(
+      CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
+    );
+  }
+  return errors;
 };
 
-const getIsVotingNextStepDisabled = ({
+const getVotingValidationErrors = ({
   voting,
 }: {
   readonly voting: CreateWaveVotingConfig;
-}): boolean => {
-  switch (voting.type) {
-    case WaveCreditType.Tdh:
-      return !!voting.profileId || !!voting.category;
-    case WaveCreditType.Rep:
-      // TODO make sure this is correct validation
-      return !voting.profileId?.length && !voting.category?.length;
-    case WaveCreditType.Unique:
-      return !!voting.profileId || !!voting.category;
-    default:
-      assertUnreachable(voting.type);
-      return true;
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  if (
+    voting.type === WaveCreditType.Tdh ||
+    voting.type === WaveCreditType.Unique
+  ) {
+    if (!!voting.profileId) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_MUST_BE_EMPTY);
+    }
+    if (!!voting.category) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_CATEGORY_MUST_BE_EMPTY);
+    }
+  } else {
+    if (!voting.profileId) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_REQUIRED);
+    }
+    if (!voting.category) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_CATEGORY_REQUIRED);
+    }
   }
+  return errors;
 };
 
-const getIsApprovalNextStepDisabled = ({
+const getApprovalValidationErrors = ({
+  waveType,
   approval,
 }: {
+  readonly waveType: WaveType;
   readonly approval: CreateWaveApprovalConfig;
-}): boolean => {
-  return !approval.threshold || !approval.thresholdTimeMs;
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  if (waveType !== WaveType.Approve) {
+    return errors;
+  }
+  if (!approval.threshold) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
+  }
+  if (!approval.thresholdTimeMs) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED);
+  }
+  return errors;
 };
 
-export const getIsNextStepDisabled = ({
+export const getCreateWaveValidationErrors = ({
   step,
   config,
 }: {
   readonly step: CreateWaveStep;
   readonly config: CreateWaveConfig;
-}): boolean => {
-  switch (step) {
-    case CreateWaveStep.OVERVIEW:
-      return getIsOverViewNextStepDisabled({ overview: config.overview });
-    case CreateWaveStep.GROUPS:
-      return false;
-    case CreateWaveStep.DATES:
-      return getIsDatesNextStepDisabled({
-        waveType: config.overview.type,
-        dates: config.dates,
-      });
-    case CreateWaveStep.DROPS:
-      return getIsDropsNextStepDisabled({ drops: config.drops });
-    case CreateWaveStep.VOTING:
-      return getIsVotingNextStepDisabled({ voting: config.voting });
-    case CreateWaveStep.APPROVAL:
-      return getIsApprovalNextStepDisabled({ approval: config.approval });
-    default:
-      assertUnreachable(step);
-      return true;
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  errors.push(...getOverviewValidationErrors({ overview: config.overview }));
+  if (step === CreateWaveStep.OVERVIEW) {
+    return errors;
   }
+  if (step === CreateWaveStep.GROUPS) {
+    return errors;
+  }
+  errors.push(
+    ...getDatesValidationErrors({
+      waveType: config.overview.type,
+      dates: config.dates,
+    })
+  );
+  if (step === CreateWaveStep.DATES) {
+    return errors;
+  }
+  errors.push(
+    ...getDropsValidationErrors({
+      drops: config.drops,
+    })
+  );
+  if (step === CreateWaveStep.DROPS) {
+    return errors;
+  }
+  errors.push(...getVotingValidationErrors({ voting: config.voting }));
+  if (step === CreateWaveStep.VOTING) {
+    return errors;
+  }
+  errors.push(
+    ...getApprovalValidationErrors({
+      approval: config.approval,
+      waveType: config.overview.type,
+    })
+  );
+  if (step === CreateWaveStep.APPROVAL) {
+    return errors;
+  }
+  return errors;
 };

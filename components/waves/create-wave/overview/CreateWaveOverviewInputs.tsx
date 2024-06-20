@@ -23,7 +23,7 @@ export default function CreateWaveOverviewInputs({
           />
         </div>
         <div className="tw-text-error tw-text-xs tw-font-medium">
-          Error message
+          Name is required
         </div>
       </div>
       <div className="tw-space-y-1.5">
@@ -35,7 +35,7 @@ export default function CreateWaveOverviewInputs({
           />
         </div>
         <div className="tw-text-error tw-text-xs tw-font-medium">
-          Error message
+          Description is required
         </div>
       </div>
     </div>
