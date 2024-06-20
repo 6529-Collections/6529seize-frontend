@@ -1,8 +1,8 @@
 import {
   useAccount,
-  useContractRead,
-  useContractReads,
-  useContractWrite,
+  useReadContract,
+  useReadContracts,
+  useWriteContract,
 } from "wagmi";
 import {
   NEXTGEN_ADMIN,
@@ -23,14 +23,13 @@ import {
   Status,
   TokensPerAddress,
 } from "./nextgen_entities";
-import { NEVER_DATE } from "../../constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Crumb } from "../breadcrumb/Breadcrumb";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import { NextGenCollection } from "../../entities/INextgen";
 
 export function useGlobalAdmin(address: string) {
-  return useContractRead({
+  return useReadContract({
     address: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_ADMIN.abi,
     chainId: NEXTGEN_CHAIN_ID,
@@ -40,7 +39,7 @@ export function useGlobalAdmin(address: string) {
 }
 
 export function useFunctionAdmin(address: string, functionSelector: string) {
-  return useContractRead({
+  return useReadContract({
     address: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_ADMIN.abi,
     chainId: NEXTGEN_CHAIN_ID,
@@ -50,7 +49,7 @@ export function useFunctionAdmin(address: string, functionSelector: string) {
 }
 
 export function useCollectionIndex() {
-  return useContractRead({
+  return useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
@@ -81,7 +80,7 @@ function getCollectionAdminReadParams(
 }
 
 export function useCollectionAdmin(address: string, collectionIndex: number) {
-  return useContractReads({
+  return useReadContracts({
     contracts: getCollectionAdminReadParams(collectionIndex, address),
   });
 }
@@ -105,7 +104,7 @@ function getCollectionArtistReadParams(collectionIndex: number) {
 }
 
 export function useCollectionArtist(collectionIndex: number) {
-  return useContractReads({
+  return useReadContracts({
     contracts: getCollectionArtistReadParams(collectionIndex),
   });
 }
@@ -143,29 +142,24 @@ export function useCollectionPhases(
   callback: (data: any) => void,
   watch: boolean = false
 ) {
-  return useContractRead({
+  const { data, error, isLoading } = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    watch: watch,
+    query: {
+      refetchInterval: watch ? 10000 : false,
+    },
     functionName: "retrieveCollectionPhases",
     args: [collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        callback(extractPhases(d));
-      }
-    },
   });
-}
 
-export function useCollectionPhasesHook(
-  collection: number,
-  setPhaseTimes: (data: PhaseTimes) => void
-) {
-  useCollectionPhases(collection, (data: PhaseTimes) => {
-    setPhaseTimes(data);
-  });
+  useEffect(() => {
+    if (data) {
+      callback(extractPhases(data as any[]));
+    }
+  }, [data, callback]);
+
+  return { data, error, isLoading };
 }
 
 export function useCollectionAdditionalData(
@@ -173,28 +167,33 @@ export function useCollectionAdditionalData(
   callback: (data: any) => void,
   watch: boolean = false
 ) {
-  return useContractRead({
+  const { data, error, isLoading } = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    watch: watch,
+    query: {
+      refetchInterval: watch ? 10000 : false,
+    },
     functionName: "retrieveCollectionAdditionalData",
     args: [collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        const ad: AdditionalData = {
-          artist_address: d[0],
-          max_purchases: parseInt(d[1]),
-          circulation_supply: parseInt(d[2]),
-          total_supply: parseInt(d[3]),
-          final_supply_after_mint: parseInt(d[4]),
-          randomizer: d[5],
-        };
-        callback(ad);
-      }
-    },
   });
+
+  useEffect(() => {
+    if (data) {
+      const d = data as any[];
+      const ad: AdditionalData = {
+        artist_address: d[0],
+        max_purchases: parseInt(d[1]),
+        circulation_supply: parseInt(d[2]),
+        total_supply: parseInt(d[3]),
+        final_supply_after_mint: parseInt(d[4]),
+        randomizer: d[5],
+      };
+      callback(ad);
+    }
+  }, [data, callback]);
+
+  return { data, error, isLoading };
 }
 
 export function useCollectionAdditionalHook(
@@ -216,30 +215,35 @@ export function useCollectionInfo(
   callback: (data: any) => void,
   watch: boolean = false
 ) {
-  return useContractRead({
+  const { data, error, isLoading } = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    watch: watch,
+    query: {
+      refetchInterval: watch ? 10000 : false,
+    },
     functionName: "retrieveCollectionInfo",
     args: [collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        if (d.some((e) => e)) {
-          const i1: Info = {
-            name: d[0],
-            artist: d[1],
-            description: d[2],
-            website: d[3],
-            licence: d[4],
-            base_uri: d[5],
-          };
-          callback(i1);
-        }
-      }
-    },
   });
+
+  useEffect(() => {
+    if (data) {
+      const d = data as any[];
+      if (d.some((e) => e)) {
+        const i1: Info = {
+          name: d[0],
+          artist: d[1],
+          description: d[2],
+          website: d[3],
+          licence: d[4],
+          base_uri: d[5],
+        };
+        callback(i1);
+      }
+    }
+  }, [data, callback]);
+
+  return { data, error, isLoading };
 }
 
 export function useCollectionInfoHook(
@@ -261,25 +265,30 @@ export function useCollectionLibraryAndScript(
   callback: (data: any) => void,
   watch: boolean = false
 ) {
-  return useContractRead({
+  const { data, error, isLoading } = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    watch: watch,
+    query: {
+      refetchInterval: watch ? 10000 : false,
+    },
     functionName: "retrieveCollectionLibraryAndScript",
     args: [collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        const ls: LibraryScript = {
-          library: d[0],
-          dependency_script: d[1],
-          script: d[2],
-        };
-        callback(ls);
-      }
-    },
   });
+
+  useEffect(() => {
+    if (data) {
+      const d = data as any[];
+      const ls: LibraryScript = {
+        library: d[0],
+        dependency_script: d[1],
+        script: d[2],
+      };
+      callback(ls);
+    }
+  }, [data, callback]);
+
+  return { data, error, isLoading };
 }
 
 export function useCollectionCosts(
@@ -287,29 +296,34 @@ export function useCollectionCosts(
   callback: (data: any) => void,
   watch: boolean = false
 ) {
-  useContractRead({
+  const { data, error, isLoading } = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveCollectionMintingDetails",
     args: [collection],
-    watch: watch,
-    enabled: !!collection,
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as any[];
-        const md: MintingDetails = {
-          mint_cost: parseInt(d[1]),
-          end_mint_cost: parseInt(d[1]),
-          rate: parseInt(d[2]),
-          time_period: parseInt(d[3]),
-          sales_option: parseInt(d[4]),
-          del_address: d[5],
-        };
-        callback(md);
-      }
+    query: {
+      refetchInterval: watch ? 10000 : false,
+      enabled: !!collection,
     },
   });
+
+  useEffect(() => {
+    if (data) {
+      const d = data as any[];
+      const md: MintingDetails = {
+        mint_cost: parseInt(d[1]),
+        end_mint_cost: parseInt(d[1]),
+        rate: parseInt(d[2]),
+        time_period: parseInt(d[3]),
+        sales_option: parseInt(d[4]),
+        del_address: d[5],
+      };
+      callback(md);
+    }
+  }, [data, callback]);
+
+  return { data, error, isLoading };
 }
 
 export function useCollectionCostsHook(
@@ -407,56 +421,83 @@ export function useTokensIndex(
   collection: number | string,
   callback: (data: any) => void
 ) {
-  return useContractRead({
+  const { data, error, isLoading } = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: type === "min" ? "viewTokensIndexMin" : "viewTokensIndexMax",
     args: [collection],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = parseInt(data);
-        callback(d);
-      }
-    },
   });
+
+  useEffect(() => {
+    if (typeof data === "string" || typeof data === "number") {
+      const d = parseInt(data.toString(), 10);
+      callback(d);
+    }
+  }, [data, callback]);
+
+  return { data, error, isLoading };
 }
 
 export function useCoreContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return useContractWriteForFunction(NEXTGEN_CORE, functionName, onError);
+  return useWriteContractForFunction(NEXTGEN_CORE, functionName, onError);
 }
 
 export function useMinterContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return useContractWriteForFunction(NEXTGEN_MINTER, functionName, onError);
+  return useWriteContractForFunction(NEXTGEN_MINTER, functionName, onError);
 }
 
 export function useAdminContractWrite(
   functionName: string,
   onError: () => void
 ) {
-  return useContractWriteForFunction(NEXTGEN_ADMIN, functionName, onError);
+  return useWriteContractForFunction(NEXTGEN_ADMIN, functionName, onError);
 }
 
-function useContractWriteForFunction(
+function useWriteContractForFunction(
   contract: NextGenContract,
   functionName: string,
   onError: () => void
 ) {
-  return useContractWrite({
+  const {
+    data,
+    error,
+    writeContract,
+    reset,
+    isPending: isLoading,
+    isSuccess,
+    isError,
+  } = useWriteContract();
+
+  const params = {
     address: contract[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: contract.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: functionName,
-    onError() {
+  };
+
+  useEffect(() => {
+    if (error) {
       onError();
-    },
-  });
+    }
+  }, [error, onError]);
+
+  return {
+    data,
+    params,
+    error,
+    writeContract,
+    reset,
+    isLoading,
+    isSuccess,
+    isError,
+  };
 }
 
 export function useSharedState() {
@@ -570,14 +611,18 @@ export function useCollectionMintCount(
   collectionId: number,
   enableRefresh: boolean
 ) {
-  return useContractRead({
+  const { data, error, isLoading, isFetching, refetch } = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
-    watch: enableRefresh,
+    query: {
+      refetchInterval: enableRefresh ? 10000 : false,
+    },
     functionName: "viewCirSupply",
     args: [collectionId],
   });
+
+  return { data, error, isLoading, isFetching, refetch };
 }
 
 export enum NextGenListFilters {

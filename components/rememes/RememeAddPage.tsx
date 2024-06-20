@@ -303,10 +303,10 @@ export default function RememeAddPage() {
                 )}
               </Col>
             </Row>
-            {(submitting || signMessage.isLoading) && (
+            {(submitting || signMessage.isPending) && (
               <Row className="pt-3">
                 <Col xs={12}>
-                  {signMessage.isLoading && "Signing Message"}
+                  {signMessage.isPending && "Signing Message"}
                   {submitting && "Adding Rememe"}
                   <div className="d-inline">
                     <div

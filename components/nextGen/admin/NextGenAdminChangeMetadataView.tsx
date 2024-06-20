@@ -1,5 +1,5 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount, useContractRead } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -49,23 +49,26 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
   );
 
   const [collectionID, setCollectionID] = useState("");
-  const [status, setStatus] = useState<boolean>();
+  const [status, setStatus] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useContractRead({
+  const metadataRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "onchainMetadata",
     args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      setStatus(data);
+    query: {
+      enabled: !!collectionID,
     },
   });
+
+  useEffect(() => {
+    setStatus(metadataRead.data as any);
+  }, [metadataRead.data]);
 
   const contractWrite = useCoreContractWrite("updateBaseURI", () => {
     setSubmitting(false);
@@ -95,7 +98,8 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [collectionID, status],
       });
     }
@@ -158,7 +162,7 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

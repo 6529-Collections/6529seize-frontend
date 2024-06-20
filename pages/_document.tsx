@@ -1,5 +1,4 @@
 import { Html, Head, Main, NextScript } from "next/document";
-import Image from "next/image";
 import { AboutSection } from "./about/[section]";
 
 export default function Document() {
@@ -23,7 +22,7 @@ export default function Document() {
               href="https://twitter.com/punk6529"
               target="_blank"
               rel="noreferrer">
-              <Image
+              <img
                 width="0"
                 height="0"
                 style={{ height: "18px", width: "auto" }}
@@ -37,7 +36,7 @@ export default function Document() {
               href="https://twitter.com/6529Collections"
               target="_blank"
               rel="noreferrer">
-              <Image
+              <img
                 width="0"
                 height="0"
                 style={{ height: "18px", width: "auto" }}
@@ -51,7 +50,7 @@ export default function Document() {
               href="https://discord.gg/join-om"
               target="_blank"
               rel="noreferrer">
-              <Image
+              <img
                 width="0"
                 height="0"
                 style={{ height: "18px", width: "auto" }}
@@ -62,7 +61,7 @@ export default function Document() {
             </a>
             |
             <a href="https://6529.io" target="_blank" rel="noreferrer">
-              <Image
+              <img
                 width="0"
                 height="0"
                 style={{ height: "18px", width: "auto" }}
@@ -76,7 +75,7 @@ export default function Document() {
               href="https://github.com/6529-Collections"
               target="_blank"
               rel="noreferrer">
-              <Image
+              <img
                 width="0"
                 height="0"
                 style={{ height: "18px", width: "auto" }}

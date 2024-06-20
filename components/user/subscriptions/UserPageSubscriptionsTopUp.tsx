@@ -2,13 +2,14 @@ import styles from "./UserPageSubscriptions.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { parseEther } from "viem";
-import { mainnet, useSendTransaction, useWaitForTransaction } from "wagmi";
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { formatAddress, getTransactionLink } from "../../../helpers/Helpers";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_ADDRESS_ENS,
+  SUBSCRIPTIONS_CHAIN,
 } from "../../../constants";
 import Tippy from "@tippyjs/react";
 import DotLoader from "../../dotLoader/DotLoader";
@@ -16,8 +17,6 @@ import {
   numberOfCardsForCalendarEnd,
   numberOfCardsForSeasonEnd,
 } from "../../../helpers/meme_calendar.helplers";
-
-const CHAIN_ID = mainnet.id;
 
 export default function UserPageSubscriptionsTopUp(
   props: Readonly<{
@@ -30,10 +29,10 @@ export default function UserPageSubscriptionsTopUp(
   const remainingMintsForSeason = numberOfCardsForSeasonEnd();
   const remainingMintsForYear = numberOfCardsForCalendarEnd();
 
-  const waitSendTransaction = useWaitForTransaction({
-    chainId: CHAIN_ID,
+  const waitSendTransaction = useWaitForTransactionReceipt({
+    chainId: SUBSCRIPTIONS_CHAIN.id,
     confirmations: 1,
-    hash: sendTransaction.data?.hash,
+    hash: sendTransaction.data,
   });
 
   const [error, setError] = useState<string>("");
@@ -46,7 +45,7 @@ export default function UserPageSubscriptionsTopUp(
     }
     sendTransaction.reset();
     sendTransaction.sendTransaction({
-      chainId: CHAIN_ID,
+      chainId: SUBSCRIPTIONS_CHAIN.id,
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther(value.toString()),
     });
@@ -74,7 +73,7 @@ export default function UserPageSubscriptionsTopUp(
     if (error) {
       return error;
     }
-    if (sendTransaction.isLoading) {
+    if (sendTransaction.isPending) {
       return "Confirming Transaction...";
     }
     if (sendTransaction.data) {
@@ -82,7 +81,10 @@ export default function UserPageSubscriptionsTopUp(
         <>
           {getStatusMessage()}{" "}
           <a
-            href={getTransactionLink(CHAIN_ID, sendTransaction.data.hash)}
+            href={getTransactionLink(
+              SUBSCRIPTIONS_CHAIN.id,
+              sendTransaction.data
+            )}
             target="_blank"
             rel="noreferrer">
             view
@@ -117,7 +119,7 @@ export default function UserPageSubscriptionsTopUp(
           <CardCountTopup
             count={1}
             disabled={
-              sendTransaction.isLoading || waitSendTransaction.isLoading
+              sendTransaction.isPending || waitSendTransaction.isLoading
             }
             submit={(value: number) => {
               submit(value);
@@ -130,7 +132,7 @@ export default function UserPageSubscriptionsTopUp(
           <CardCountTopup
             count={10}
             disabled={
-              sendTransaction.isLoading || waitSendTransaction.isLoading
+              sendTransaction.isPending || waitSendTransaction.isLoading
             }
             submit={(value: number) => {
               submit(value);
@@ -145,7 +147,7 @@ export default function UserPageSubscriptionsTopUp(
               count={remainingMintsForSeason.count ?? 0}
               display={`Remaining SZN${remainingMintsForSeason.szn}`}
               disabled={
-                sendTransaction.isLoading || waitSendTransaction.isLoading
+                sendTransaction.isPending || waitSendTransaction.isLoading
               }
               submit={(value: number) => {
                 submit(value);
@@ -161,7 +163,7 @@ export default function UserPageSubscriptionsTopUp(
               count={remainingMintsForYear.count ?? 0}
               display={`Remaining ${remainingMintsForYear.year}`}
               disabled={
-                sendTransaction.isLoading || waitSendTransaction.isLoading
+                sendTransaction.isPending || waitSendTransaction.isLoading
               }
               submit={(value: number) => {
                 submit(value);
@@ -216,7 +218,7 @@ export default function UserPageSubscriptionsTopUp(
                     size="lg"
                     type="submit"
                     disabled={
-                      sendTransaction.isLoading || waitSendTransaction.isLoading
+                      sendTransaction.isPending || waitSendTransaction.isLoading
                     }>
                     Send
                   </Button>

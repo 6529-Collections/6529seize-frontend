@@ -1,4 +1,4 @@
-import { useWaitForTransaction } from "wagmi";
+import { useWaitForTransactionReceipt } from "wagmi";
 import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";
 import DotLoader from "../dotLoader/DotLoader";
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export default function NextGenContractWriteStatus(props: Readonly<Props>) {
-  const waitContractWrite = useWaitForTransaction({
+  const waitContractWrite = useWaitForTransactionReceipt({
     confirmations: 1,
     hash: props.hash,
   });
