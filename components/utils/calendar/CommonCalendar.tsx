@@ -20,11 +20,15 @@ const MONTHS = [
 export default function CommonCalendar({
   initialMonth,
   initialYear,
+  minTimestamp,
+  maxTimestamp,
   selectedTimestamp,
   setSelectedTimestamp,
 }: {
   readonly initialMonth: number;
   readonly initialYear: number;
+  readonly minTimestamp: number | null;
+  readonly maxTimestamp: number | null;
   readonly selectedTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
 }) {
@@ -117,6 +121,8 @@ export default function CommonCalendar({
             <CommonCalendarDay
               key={`calendar-${day}`}
               day={day}
+              minTimestamp={minTimestamp}
+              maxTimestamp={maxTimestamp}
               selectedTimestamp={selectedTimestamp}
               setSelectedTimestamp={setSelectedTimestamp}
             />
