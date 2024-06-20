@@ -50,13 +50,12 @@ export default function UserPageRepModifyModal({
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.profile?.handle}/rep/ratings/received`,
+        endpoint: `profiles/${profile.input_identity}/rep/ratings/received`,
         params: activeProfileProxy?.created_by.handle
           ? { rater: activeProfileProxy.created_by.handle }
           : {},
       }),
-    enabled:
-      !!activeProfileProxy?.created_by.handle && !!profile.profile?.handle,
+    enabled: !!activeProfileProxy?.created_by.handle,
   });
 
   const { data: connectedProfileRepRates } = useQuery<ApiProfileRepRatesState>({
@@ -69,12 +68,12 @@ export default function UserPageRepModifyModal({
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.profile?.handle}/rep/ratings/received`,
+        endpoint: `profiles/${profile.input_identity}/rep/ratings/received`,
         params: connectedProfile?.profile?.handle
           ? { rater: connectedProfile?.profile?.handle }
           : {},
       }),
-    enabled: !!connectedProfile?.profile?.handle && !!profile.profile?.handle,
+    enabled: !!connectedProfile?.profile?.handle,
   });
 
   const getProxyAvailableCredit = (): number | null => {
@@ -317,7 +316,7 @@ export default function UserPageRepModifyModal({
       category: string;
     }) =>
       await commonApiPost<ApiAddRepRatingToProfileRequest, void>({
-        endpoint: `profiles/${profile.profile?.handle}/rep/rating`,
+        endpoint: `profiles/${profile.input_identity}/rep/rating`,
         body: {
           amount,
           category,
@@ -381,7 +380,10 @@ export default function UserPageRepModifyModal({
             ref={modalRef}
             className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
           >
-            <UserPageRepModifyModalHeader profile={profile} onClose={onClose} />
+            <UserPageRepModifyModalHeader
+              handleOrWallet={profile.input_identity}
+              onClose={onClose}
+            />
             {repState && (
               <UserPageRepModifyModalRaterStats
                 repState={repState}

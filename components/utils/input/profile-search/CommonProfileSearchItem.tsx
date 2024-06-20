@@ -23,10 +23,10 @@ export default function CommonProfileSearchItem({
     <li className="tw-h-full">
       <button
         type="button"
-        className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
         onClick={onProfileClick}
       >
-        <div className="tw-w-[15rem] tw-inline-flex tw-justify-between tw-items-center">
+        <div className="tw-w-[15rem] tw-truncate tw-inline-flex tw-justify-between tw-items-center">
           <div className="tw-inline-flex tw-space-x-2 tw-items-center">
             {profile.pfp && (
               <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
@@ -45,12 +45,12 @@ export default function CommonProfileSearchItem({
               </div>
             )}
             <div>
-              <div className="tw-text-sm tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
                 {title}
-              </div>
-              <div className="tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
+              </p>
+              <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
                 {profile.display}
-              </div>
+              </p>
             </div>
           </div>
           {isSelected && (

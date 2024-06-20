@@ -5,8 +5,8 @@ import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRaters
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../services/api/common-api";
-import UserPageNoProfile from "../utils/no-profile/UserPageNoProfile";
 import UserPageRep from "./UserPageRep";
+import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 
 export default function UserPageRepWrapper({
   profile: initialProfile,
@@ -32,17 +32,14 @@ export default function UserPageRepWrapper({
     initialData: initialProfile,
   });
 
-
-  if (!profile.profile) {
-    return <UserPageNoProfile profile={profile} />;
-  }
-
   return (
-    <UserPageRep
-      profile={profile}
-      initialRepReceivedParams={initialRepReceivedParams}
-      initialRepGivenParams={initialRepGivenParams}
-      initialActivityLogParams={initialActivityLogParams}
-    />
+    <UserPageSetUpProfileWrapper profile={profile}>
+      <UserPageRep
+        profile={profile}
+        initialRepReceivedParams={initialRepReceivedParams}
+        initialRepGivenParams={initialRepGivenParams}
+        initialActivityLogParams={initialActivityLogParams}
+      />
+    </UserPageSetUpProfileWrapper>
   );
 }

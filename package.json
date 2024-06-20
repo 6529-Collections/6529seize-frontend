@@ -13,6 +13,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@google/model-viewer": "^3.5.0",
     "@headlessui/react": "^2.0.4",
     "@openapitools/openapi-generator-cli": "^2.13.4",
     "@reduxjs/toolkit": "^2.2.5",
@@ -46,6 +47,7 @@
     "react-use-downloader": "^1.2.8",
     "sass": "^1.77.6",
     "swiper": "^11.1.4",
+    "three": "^0.163.0",
     "uuid": "^10.0.0",
     "viem": "^2.15.1",
     "wagmi": "^2.10.3"
