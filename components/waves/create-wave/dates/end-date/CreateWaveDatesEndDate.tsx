@@ -68,7 +68,7 @@ export default function CreateWaveDatesEndDate({
   }, [time, period, startTimestamp]);
   return (
     <div className="tw-col-span-full">
-      <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
         Period{" "}
         {endDateIsOptional && (
           <span className="tw-text-base tw-font-medium tw-text-iron-400">
@@ -76,7 +76,7 @@ export default function CreateWaveDatesEndDate({
           </span>
         )}
       </p>
-      <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
         <div className="tw-relative">
           <input
             type="number"
