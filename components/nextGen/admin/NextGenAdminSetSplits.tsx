@@ -1,5 +1,5 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount, useContractRead } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -50,37 +50,45 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   const [artistSecondary, setArtistSecondary] = useState("");
   const [teamSecondary, setTeamSecondary] = useState("");
 
-  useContractRead({
+  const primarySplitsRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrievePrimarySplits",
     args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as string[];
-        setArtistPrimary(d[0]);
-        setTeamPrimary(d[1]);
-      }
+    query: {
+      enabled: !!collectionID,
     },
   });
 
-  useContractRead({
+  useEffect(() => {
+    const data = primarySplitsRead.data;
+    if (data) {
+      const d = data as string[];
+      setArtistPrimary(d[0]);
+      setTeamPrimary(d[1]);
+    }
+  }, [primarySplitsRead.data]);
+
+  const secondarySplitsRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveSecondarySplits",
     args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      if (data) {
-        const d = data as string[];
-        setArtistSecondary(d[0]);
-        setTeamSecondary(d[1]);
-      }
+    query: {
+      enabled: !!collectionID,
     },
   });
+
+  useEffect(() => {
+    const data = secondarySplitsRead.data;
+    if (data) {
+      const d = data as string[];
+      setArtistSecondary(d[0]);
+      setTeamSecondary(d[1]);
+    }
+  }, [secondarySplitsRead.data]);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -126,7 +134,8 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [
           collectionID,
           artistPrimary,
@@ -191,7 +200,7 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

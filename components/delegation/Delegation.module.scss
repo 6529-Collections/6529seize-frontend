@@ -173,6 +173,7 @@
 }
 
 .lockDelegationBtn {
+  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -322,14 +323,21 @@
 }
 
 .backBtn {
+  border: none;
+  background-color: transparent !important;
   cursor: pointer;
   text-decoration: none;
   font-size: 20px;
+
   svg {
     width: 20px;
     height: 20px;
     margin-right: 8px;
     margin-top: -2px;
+  }
+
+  &:hover {
+    color: $font-color-h;
   }
 }
 

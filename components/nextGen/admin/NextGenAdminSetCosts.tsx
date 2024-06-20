@@ -115,7 +115,8 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [
           collectionID,
           collectionStartCost,
@@ -220,7 +221,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>
