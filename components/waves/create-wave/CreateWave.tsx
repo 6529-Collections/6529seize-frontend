@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -13,7 +13,6 @@ import {
   WaveSignatureType,
 } from "../../../types/waves.types";
 import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
-import dynamic from "next/dynamic";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
@@ -23,10 +22,6 @@ import { WaveCreditType } from "../../../generated/models/WaveCreditType";
 import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
-
-const CreateWaveSvg = dynamic(() => import("./utils/CreateWaveSvg"), {
-  ssr: false,
-});
 
 export default function CreateWave({
   onBack,
