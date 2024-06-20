@@ -16,8 +16,8 @@ export default function CommonBorderedRadioButton<T extends string>({
 }: CommonBorderedRadioButtonProps<T>) {
   const isSelected = selected === type;
   const wrapperClasses = isSelected
-    ? "tw-ring-primary-400 tw-bg-[#202B45]"
-    : "tw-ring-iron-700 tw-bg-iron-800 hover:tw-ring-iron-600";
+    ? "tw-ring-primary-400 tw-bg-[#202B45] tw-shadow-xl"
+    : "tw-ring-iron-700 tw-bg-iron-800 hover:tw-ring-iron-600 tw-shadow";
 
   const inputClasses = isSelected
     ? "tw-text-primary-500 focus:tw-ring-primary-500"
@@ -29,7 +29,7 @@ export default function CommonBorderedRadioButton<T extends string>({
   return (
     <div
       onClick={() => onChange(type)}
-      className={`${wrapperClasses} tw-min-w-[213px] tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 tw-shadow-xl focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${wrapperClasses} tw-flex-1 tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       <input
         id={type}
