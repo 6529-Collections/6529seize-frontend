@@ -329,9 +329,9 @@ export default function CreateWave({
             </svg>
             <span>Back</span>
           </button>
-          <h1>Create new Wave</h1>
+          <h1 className="tw-mb-0">Create new Wave</h1>
         </div>
-        <div className="tw-max-w-5xl tw-mx-auto lg:tw-flex tw-justify-between tw-h-full tw-w-full">
+        <div className="tw-mt-8 tw-mb-12 tw-max-w-5xl tw-mx-auto lg:tw-flex tw-gap-x-24 tw-justify-between tw-h-full tw-w-full">
           <div className="tw-1/4">
             <CreateWavesMainSteps
               activeStep={step}
@@ -339,8 +339,8 @@ export default function CreateWave({
               onStep={setStep}
             />
           </div>
-          <div className="tw-w-3/4">
-            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-10 tw-my-12 tw-rounded-xl">
+          <div className="tw-flex-1">
+            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-10 tw-rounded-xl">
               <div className="tw-relative tw-z-[1] tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1">{stepComponent[step]}</div>
