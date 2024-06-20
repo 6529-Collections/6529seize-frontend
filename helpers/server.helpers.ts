@@ -11,7 +11,7 @@ import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { ActivityLogParamsConverted } from "../components/profile-activity/ProfileActivityLogs";
 import {
   ProfileRatersParams,
