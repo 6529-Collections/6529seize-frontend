@@ -50,16 +50,20 @@ export default function CreateWaveActions({
   useEffect(() => setPreviousStep(getCreateWavePreviousStep({ step })), [step]);
 
   return (
-    <div className="tw-mt-8 tw-flex tw-gap-x-4 tw-items-center tw-justify-end">
-      {previousStep && (
-        <CreateWaveBackStep onPreviousStep={() => setStep(previousStep)} />
-      )}
-      <CreateWaveNextStep
-        onClick={onNextStep}
-        disabled={isNextStepDisabled}
-        step={step}
-        waveType={config.overview.type}
-      />
+    <div className="tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
+      <div className="-tw-ml-6">
+        {previousStep && (
+          <CreateWaveBackStep onPreviousStep={() => setStep(previousStep)} />
+        )}
+      </div>
+      <div className="tw-ml-auto">
+        <CreateWaveNextStep
+          onClick={onNextStep}
+          disabled={isNextStepDisabled}
+          step={step}
+          waveType={config.overview.type}
+        />
+      </div>
     </div>
   );
 }

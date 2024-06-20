@@ -20,11 +20,15 @@ const MONTHS = [
 export default function CommonCalendar({
   initialMonth,
   initialYear,
+  minTimestamp,
+  maxTimestamp,
   selectedTimestamp,
   setSelectedTimestamp,
 }: {
   readonly initialMonth: number;
   readonly initialYear: number;
+  readonly minTimestamp: number | null;
+  readonly maxTimestamp: number | null;
   readonly selectedTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
 }) {
@@ -53,7 +57,7 @@ export default function CommonCalendar({
   };
 
   return (
-    <div className="tw-mt-3 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
+    <div className="tw-mt-2 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
       <button
         onClick={setPreviousMonth}
         type="button"
@@ -117,6 +121,8 @@ export default function CommonCalendar({
             <CommonCalendarDay
               key={`calendar-${day}`}
               day={day}
+              minTimestamp={minTimestamp}
+              maxTimestamp={maxTimestamp}
               selectedTimestamp={selectedTimestamp}
               setSelectedTimestamp={setSelectedTimestamp}
             />

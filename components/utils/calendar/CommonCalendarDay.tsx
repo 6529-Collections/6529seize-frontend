@@ -1,34 +1,60 @@
 import { CalendarDay } from "../../../helpers/calendar/calendar.helpers";
 
+enum CalendarDaySate {
+  NOT_ACTIVE_MONTH = "NOT_ACTIVE_MONTH",
+  MANUALLY_DISABLED = "MANUALLY_DISABLED",
+  AVAILABLE = "AVAILABLE",
+  ACTIVE = "ACTIVE",
+}
+
 export default function CommonCalendarDay({
   day,
   selectedTimestamp,
+  minTimestamp,
+  maxTimestamp,
   setSelectedTimestamp,
 }: {
   readonly day: CalendarDay;
   readonly selectedTimestamp: number | null;
+  readonly minTimestamp: number | null;
+  readonly maxTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
 }) {
-  const isSelected = day.startTimestamp === selectedTimestamp;
-
-  const getButtonClasses = () => {
-    if (!day.isActiveMonth) {
-      return "";
-    }
-    if (isSelected) {
-      return "tw-bg-primary-500 tw-text-iron-50 tw-font-semibold hover:tw-border-primary-500";
-    }
-    return "tw-font-medium tw-bg-iron-800 tw-text-iron-300 hover:tw-border-primary-500";
+  const BUTTON_CLASSES: Record<CalendarDaySate, string> = {
+    [CalendarDaySate.NOT_ACTIVE_MONTH]: "tw-opacity-50",
+    [CalendarDaySate.MANUALLY_DISABLED]: "",
+    [CalendarDaySate.AVAILABLE]:
+      "tw-font-medium tw-bg-iron-800 tw-text-iron-300 hover:tw-border-primary-500",
+    [CalendarDaySate.ACTIVE]:
+      "tw-bg-primary-500 tw-text-iron-50 tw-font-semibold hover:tw-border-primary-500",
   };
 
-  const buttonClasses = getButtonClasses();
+  const getDayState = (): CalendarDaySate => {
+    if (!day.isActiveMonth) {
+      return CalendarDaySate.NOT_ACTIVE_MONTH;
+    }
+    if (minTimestamp && day.startTimestamp < minTimestamp) {
+      return CalendarDaySate.MANUALLY_DISABLED;
+    }
+    if (maxTimestamp && day.startTimestamp > maxTimestamp) {
+      return CalendarDaySate.MANUALLY_DISABLED;
+    }
+    if (day.startTimestamp === selectedTimestamp) {
+      return CalendarDaySate.ACTIVE;
+    }
+    return CalendarDaySate.AVAILABLE;
+  };
+
+  const dayState = getDayState();
+
+  const canSelect = dayState === CalendarDaySate.AVAILABLE;
 
   return (
     <button
       type="button"
       onClick={() => setSelectedTimestamp(day.startTimestamp)}
-      disabled={!day.isActiveMonth}
-      className={`${buttonClasses} tw-relative tw-border tw-border-transparent tw-border-solid tw-h-8 tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 `}
+      disabled={!canSelect}
+      className={`${BUTTON_CLASSES[dayState]} tw-relative tw-border tw-border-transparent tw-border-solid tw-h-8 tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 `}
     >
       <span className="tw-text-sm tw-mx-auto tw-flex tw-items-center tw-justify-center tw-rounded-full">
         {day.date}

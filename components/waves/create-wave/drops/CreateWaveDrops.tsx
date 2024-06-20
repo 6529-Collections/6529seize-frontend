@@ -40,7 +40,7 @@ export default function CreateWaveDrops({
 
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-8">
+    <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveDropsTypes
         requiredTypes={drops.requiredTypes}
         onRequiredTypeChange={onRequiredTypeChange}

@@ -72,11 +72,11 @@ export default function CreateWave({
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
-      type: WaveType.Chat,
+      type: WaveType.Rank,
     })
   );
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.OVERVIEW);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DATES);
 
   const getIsVotingSignatureRequired = (): boolean => {
     return (
@@ -337,16 +337,14 @@ export default function CreateWave({
             waveType={config.overview.type}
             onStep={setStep}
           />
-          <div className="tw-relative tw-bg-iron-950 tw-w-full tw-min-h-screen tw-pt-12 tw-pb-12">
+          <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-10 tw-my-12 tw-rounded-xl">
             <div className="tw-relative tw-z-[1]">
-              <div className="tw-max-w-2xl tw-mx-auto tw-w-full">
-                {stepComponent[step]}
-                <CreateWaveActions
-                  setStep={setStep}
-                  step={step}
-                  config={config}
-                />
-              </div>
+              {stepComponent[step]}
+              <CreateWaveActions
+                setStep={setStep}
+                step={step}
+                config={config}
+              />
             </div>
             <div className="tw-absolute tw-inset-0">
               <CreateWaveSvg />
