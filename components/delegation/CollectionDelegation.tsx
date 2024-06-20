@@ -698,7 +698,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   useEffect(() => {
     if (!showToast && outgoingDelegationsLoaded && incomingDelegationsLoaded) {
-      reset();
+      setToast(undefined);
     }
   }, [showToast]);
 
