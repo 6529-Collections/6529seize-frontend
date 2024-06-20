@@ -1,5 +1,5 @@
 import styles from "../../NextGen.module.scss";
-import { useContractRead, useAccount, useContractReads } from "wagmi";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -91,7 +91,7 @@ export default function NextGenMint(props: Readonly<Props>) {
     return "";
   }
 
-  useContractReads({
+  const delegationsRead = useReadContracts({
     contracts: [
       {
         address: DELEGATION_CONTRACT.contract,
@@ -138,22 +138,26 @@ export default function NextGenMint(props: Readonly<Props>) {
         ],
       },
     ],
-    watch: true,
-    enabled:
-      account.isConnected &&
-      mintingDetails !== undefined &&
-      collection !== undefined,
-    onSettled(data: any, error: any) {
-      if (data) {
-        const del: string[] = [];
-        const d = data as any[];
-        d.forEach((r) => {
-          r.result.forEach((a: string) => del.push(a));
-        });
-        setDelegators(del);
-      }
+    query: {
+      refetchInterval: 10000,
+      enabled:
+        account.isConnected &&
+        mintingDetails !== undefined &&
+        collection !== undefined,
     },
   });
+
+  useEffect(() => {
+    const data = delegationsRead.data as any;
+    if (data) {
+      const del: string[] = [];
+      const d = data as any[];
+      d.forEach((r) => {
+        r.result.forEach((a: string) => del.push(a));
+      });
+      setDelegators(del);
+    }
+  }, [delegationsRead.data]);
 
   function retrievePerAddressParams() {
     return {
@@ -166,50 +170,56 @@ export default function NextGenMint(props: Readonly<Props>) {
     };
   }
 
-  const addressMintCountAirdropRead = useContractRead({
+  const addressMintCountAirdropRead = useReadContract({
     functionName: "retrieveTokensAirdroppedPerAddress",
     ...retrievePerAddressParams(),
-    onSettled(data: any, error: any) {
-      if (data) {
-        const air = parseInt(data);
-        setAddressMintCounts((amc) => {
-          amc.airdrop = air;
-          amc.total = amc.airdrop + amc.allowlist + amc.public;
-          return amc;
-        });
-      }
-    },
   });
 
-  const addressMintCountMintedALRead = useContractRead({
+  useEffect(() => {
+    const data = addressMintCountAirdropRead.data as any;
+    if (data) {
+      const air = parseInt(data);
+      setAddressMintCounts((amc) => {
+        amc.airdrop = air;
+        amc.total = amc.airdrop + amc.allowlist + amc.public;
+        return amc;
+      });
+    }
+  }, [addressMintCountAirdropRead.data]);
+
+  const addressMintCountMintedALRead = useReadContract({
     functionName: "retrieveTokensMintedALPerAddress",
     ...retrievePerAddressParams(),
-    onSettled(data: any, error: any) {
-      if (data) {
-        const allow = parseInt(data);
-        setAddressMintCounts((amc) => {
-          amc.allowlist = allow;
-          amc.total = amc.airdrop + amc.allowlist + amc.public;
-          return amc;
-        });
-      }
-    },
   });
 
-  const addressMintCountMintedPublicRead = useContractRead({
+  useEffect(() => {
+    const data = addressMintCountMintedALRead.data as any;
+    if (data) {
+      const allow = parseInt(data);
+      setAddressMintCounts((amc) => {
+        amc.allowlist = allow;
+        amc.total = amc.airdrop + amc.allowlist + amc.public;
+        return amc;
+      });
+    }
+  }, [addressMintCountMintedALRead.data]);
+
+  const addressMintCountMintedPublicRead = useReadContract({
     functionName: "retrieveTokensMintedPublicPerAddress",
     ...retrievePerAddressParams(),
-    onSettled(data: any, error: any) {
-      if (data) {
-        const pub = parseInt(data);
-        setAddressMintCounts((amc) => {
-          amc.public = pub;
-          amc.total = amc.airdrop + amc.allowlist + amc.public;
-          return amc;
-        });
-      }
-    },
   });
+
+  useEffect(() => {
+    const data = addressMintCountMintedPublicRead.data as any;
+    if (data) {
+      const pub = parseInt(data);
+      setAddressMintCounts((amc) => {
+        amc.public = pub;
+        amc.total = amc.airdrop + amc.allowlist + amc.public;
+        return amc;
+      });
+    }
+  }, [addressMintCountMintedPublicRead.data]);
 
   useEffect(() => {
     if (props.collection.merkle_root) {

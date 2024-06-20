@@ -16,7 +16,7 @@ import Tippy from "@tippyjs/react";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 
-export default function Royalties() {
+export default function RoyaltiesComponent() {
   const router = useRouter();
 
   const [royalties, setRoyalties] = useState<Royalty[]>([]);

@@ -206,7 +206,8 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   useEffect(() => {
     if (submitting) {
       const params = getParams();
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: params,
       });
     }
@@ -325,7 +326,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

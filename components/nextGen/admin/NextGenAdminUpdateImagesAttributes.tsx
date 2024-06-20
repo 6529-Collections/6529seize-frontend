@@ -62,7 +62,8 @@ export default function NextGenAdminUpdateImagesAttributes(
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [tokenIds.map((tId) => parseInt(tId)), images, attributes],
       });
     }
@@ -151,7 +152,7 @@ export default function NextGenAdminUpdateImagesAttributes(
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

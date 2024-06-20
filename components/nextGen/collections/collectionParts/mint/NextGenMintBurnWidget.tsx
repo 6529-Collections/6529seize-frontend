@@ -18,7 +18,7 @@ import {
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
-import { useAccount, useChainId, useContractWrite } from "wagmi";
+import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../../../../services/6529api";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
@@ -141,16 +141,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     }
   }, [tokenId]);
 
-  const mintWrite = useContractWrite({
-    address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
-    abi: NEXTGEN_MINTER.abi,
-    chainId: NEXTGEN_CHAIN_ID,
-    value: BigInt(props.mint_price ? props.mint_price : 0),
-    functionName: "burnOrSwapExternalToMint",
-    onError() {
-      setIsMinting(false);
-    },
-  });
+  const mintWrite = useWriteContract();
 
   useEffect(() => {
     setIsMinting(false);
@@ -205,7 +196,12 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     if (isMinting) {
-      mintWrite.write({
+      mintWrite.writeContract({
+        address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
+        abi: NEXTGEN_MINTER.abi,
+        chainId: NEXTGEN_CHAIN_ID,
+        value: BigInt(props.mint_price ? props.mint_price : 0),
+        functionName: "burnOrSwapExternalToMint",
         args: [
           props.collection_merkle.burn_collection,
           props.collection_merkle.burn_collection_id,
@@ -369,8 +365,8 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
               </Form.Group>
             )}
             <NextGenContractWriteStatus
-              isLoading={mintWrite.isLoading}
-              hash={mintWrite.data?.hash}
+              isLoading={mintWrite.isPending}
+              hash={mintWrite.data}
               error={mintWrite.error}
               onSuccess={() => {
                 props.refreshMintCounts();
