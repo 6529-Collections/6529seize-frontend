@@ -13,7 +13,7 @@ export default function CreateWaveSignatureInputs({
   readonly onChange: (type: WaveSignatureType) => void;
 }) {
   return (
-    <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-4">
+    <div className="tw-mt-2 tw-flex tw-gap-x-4 tw-gap-y-4">
       {Object.values(WaveSignatureType).map((signatureType) => (
         <CommonBorderedRadioButton
           key={signatureType}
