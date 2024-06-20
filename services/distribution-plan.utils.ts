@@ -1,7 +1,7 @@
 import { Slide, toast } from "react-toastify";
 export const makeErrorToast = (message: string) =>
   toast(message, {
-    position: toast.POSITION.TOP_RIGHT,
+    position: "top-right",
     autoClose: 3000,
     hideProgressBar: false,
     draggable: false,

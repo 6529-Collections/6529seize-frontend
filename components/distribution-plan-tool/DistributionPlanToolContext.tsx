@@ -60,7 +60,7 @@ const setToast = ({
   type: TypeOptions;
 }) => {
   toast(message, {
-    position: toast.POSITION.TOP_RIGHT,
+    position: "top-right",
     autoClose: 3000,
     hideProgressBar: false,
     draggable: false,
@@ -241,8 +241,7 @@ export default function DistributionPlanToolContextWrapper({
           phases,
           setPhases,
           setToasts,
-        }}
-      >
+        }}>
         <div>{children}</div>
         <RunOperations />
       </DistributionPlanToolContext.Provider>

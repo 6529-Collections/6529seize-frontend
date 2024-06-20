@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Action, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import type { AppState } from "./store";
 
@@ -9,6 +9,12 @@ export interface CounterState {
 const initialState: CounterState = {
   value: 0,
 };
+
+interface HydrateAction extends Action<typeof HYDRATE> {
+  payload: {
+    counter: CounterState;
+  };
+}
 
 export const counterSlice = createSlice({
   name: "counter",
@@ -22,21 +28,19 @@ export const counterSlice = createSlice({
     },
   },
 
-  extraReducers: {
-    [HYDRATE]: (state, action) => {
+  extraReducers: (builder) => {
+    builder.addCase(HYDRATE, (state, action: HydrateAction) => {
       return {
         ...state,
         ...action.payload.counter,
       };
-    },
+    });
   },
 });
-
 
 export const { incrementCounter, decrementCounter } = counterSlice.actions;
 export const selectCounter = (state: AppState) => state.counter.value;
 export default counterSlice.reducer;
-
 
 // import { useDispatch, useSelector } from "react-redux";
 // import {

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Action, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import type { AppState } from "./store";
 
@@ -10,24 +10,27 @@ const initialState: GroupState = {
   activeGroupId: null,
 };
 
+interface HydrateAction extends Action<typeof HYDRATE> {
+  payload: {
+    counter: GroupState;
+  };
+}
+
 export const groupSlice = createSlice({
   name: "group",
   initialState,
   reducers: {
-    setActiveGroupId: (
-      state,
-      action: PayloadAction<string | null>
-    ) => {
+    setActiveGroupId: (state, action: PayloadAction<string | null>) => {
       state.activeGroupId = action.payload;
     },
   },
-  extraReducers: {
-    [HYDRATE]: (state, action) => {
+  extraReducers: (builder) => {
+    builder.addCase(HYDRATE, (state, action: HydrateAction) => {
       return {
         ...state,
-        ...action.payload.activeGroupId,
+        ...action.payload.counter,
       };
-    },
+    });
   },
 });
 
