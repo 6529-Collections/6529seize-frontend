@@ -35,7 +35,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
   const [collectionID, setCollectionID] = useState("");
   const [address, setAddress] = useState("");
   const [selectors, setSelectors] = useState<string[]>([]);
-  const [status, setStatus] = useState<boolean>();
+  const [status, setStatus] = useState<boolean>(true);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -111,7 +111,8 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: getParams(),
       });
     }
@@ -209,8 +210,8 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
-            error={contractWrite.error}
+            hash={contractWrite.data}
+            error={contractWrite}
           />
         </Col>
       </Row>

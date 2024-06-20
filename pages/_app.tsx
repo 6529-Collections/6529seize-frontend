@@ -9,7 +9,7 @@ import { wrapper } from "../store/store";
 import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { WagmiConfig } from "wagmi";
+import { WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -100,8 +100,9 @@ import { ReactElement, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
+import { createWeb3Modal } from "@web3modal/wagmi/react";
+import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import "../components/drops/create/lexical/lexical.styles.scss";
-import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 
@@ -187,33 +188,41 @@ library.add(
   faAnglesUp
 );
 
-const CONTRACT_CHAINS: Chain[] = [mainnet];
-if (
-  DELEGATION_CONTRACT.chain_id === sepolia.id ||
-  (NEXTGEN_CHAIN_ID as number) === sepolia.id
-) {
-  CONTRACT_CHAINS.push(sepolia);
+export function getChains() {
+  const chains: Chain[] = [mainnet];
+  if (
+    DELEGATION_CONTRACT.chain_id === sepolia.id ||
+    (NEXTGEN_CHAIN_ID as number) === sepolia.id
+  ) {
+    chains.push(sepolia);
+  }
+  if (
+    DELEGATION_CONTRACT.chain_id === goerli.id ||
+    (NEXTGEN_CHAIN_ID as number) === goerli.id
+  ) {
+    chains.push(goerli);
+  }
+  return chains;
 }
-if (
-  DELEGATION_CONTRACT.chain_id === goerli.id ||
-  (NEXTGEN_CHAIN_ID as number) === goerli.id
-) {
-  CONTRACT_CHAINS.push(goerli);
-}
+
+const CONTRACT_CHAINS = getChains();
 
 const metadata = {
   name: "Seize",
   description: "6529 Seize",
-  url: process.env.BASE_ENDPOINT,
+  url: process.env.BASE_ENDPOINT!,
   icons: [
     "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
   ],
 };
 
+const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
+
 export const wagmiConfig = defaultWagmiConfig({
-  chains: CONTRACT_CHAINS,
+  chains,
   projectId: CW_PROJECT_ID,
   metadata,
+  coinbasePreference: "all",
 });
 
 createWeb3Modal({
@@ -252,7 +261,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
             content="width=device-width, initial-scale=1.0, maximum-scale=1"
           />
         </Head>
-        <WagmiConfig config={wagmiConfig}>
+        <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <Auth>
               <CookieConsentProvider>
@@ -261,7 +270,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
               </CookieConsentProvider>
             </Auth>
           </ReactQueryWrapper>
-        </WagmiConfig>
+        </WagmiProvider>
       </Provider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

@@ -58,7 +58,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
   const [tokenMin, setTokenMin] = useState("");
   const [tokenMax, setTokenMax] = useState("");
   const [burnSwapAddress, setBurnSwapAddress] = useState("");
-  const [status, setStatus] = useState<boolean>();
+  const [status, setStatus] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -167,7 +167,8 @@ export default function NextGenAdminInitializeExternalBurnSwap(
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [
           erc721Collection,
           burnCollectionID,
@@ -213,7 +214,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
                 className={`${styles.formInput}`}
                 value={mintCollectionID}
                 onChange={(e) => {
-                  setStatus(undefined);
+                  setStatus(false);
                   setMintCollectionID(e.target.value);
                 }}>
                 <option value="" disabled>
@@ -266,7 +267,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
           {loading && contractWrite.isLoading && <div>Synced with DB.</div>}
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

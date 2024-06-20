@@ -1,7 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { Container, Row, Col } from "react-bootstrap";
 import { AboutSection } from "./about/[section]";
@@ -11,7 +10,7 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function Seize404() {
+export default function DisputeResolution() {
   return (
     <>
       <Head>
@@ -48,7 +47,6 @@ export default function Seize404() {
                 noted below, which shall be considered part of the Terms.
               </p>
               <br />
-
               <ol>
                 <li>
                   Any dispute, claim or controversy arising out of or relating

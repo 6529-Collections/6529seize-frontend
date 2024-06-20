@@ -91,7 +91,8 @@ export default function NextGenAdminPayArtist(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [collectionID, address1, address2, percentage1, percentage2],
       });
     }
@@ -147,7 +148,7 @@ export default function NextGenAdminPayArtist(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>
