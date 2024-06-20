@@ -209,7 +209,7 @@ const CONTRACT_CHAINS = getChains();
 const metadata = {
   name: "Seize",
   description: "6529 Seize",
-  url: process.env.BASE_ENDPOINT!,
+  url: process.env.BASE_ENDPOINT ?? "https://seize.io",
   icons: [
     "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
   ],
