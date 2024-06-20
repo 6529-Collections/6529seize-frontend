@@ -33,6 +33,8 @@ export default function CreateWave({
 }: {
   readonly onBack: () => void;
 }) {
+  const initialType = WaveType.Rank;
+  const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
     type,
   }: {
@@ -72,11 +74,11 @@ export default function CreateWave({
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
-      type: WaveType.Rank,
+      type: initialType,
     })
   );
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DATES);
+  const [step, setStep] = useState<CreateWaveStep>(initialStep);
 
   const getIsVotingSignatureRequired = (): boolean => {
     return (
