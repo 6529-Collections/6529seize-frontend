@@ -4,6 +4,7 @@ import {
   CreateWaveStepStatus,
 } from "../../../../types/waves.types";
 import CreateWavesMainStepIcon from "./CreateWavesMainStepIcon";
+import CreateWavesMainStepConnectionLine from "./CreateWavesMainStepConnectionLine";
 
 export default function CreateWavesMainStep({
   isLast,
@@ -25,17 +26,18 @@ export default function CreateWavesMainStep({
     activeStepIndex,
   });
   const isDone = stepStatus === CreateWaveStepStatus.DONE;
-  const isActive = stepStatus === CreateWaveStepStatus.ACTIVE;
+
+  const LABEL_CLASSES: Record<CreateWaveStepStatus, string> = {
+    [CreateWaveStepStatus.DONE]: "tw-text-iron-600 tw-font-semibold tw-delay-0",
+    [CreateWaveStepStatus.ACTIVE]:
+      "tw-text-primary-400 tw-font-bold tw-delay-500",
+    [CreateWaveStepStatus.PENDING]:
+      "tw-text-iron-600 tw-font-semibold tw-delay-0",
+  };
+
   return (
     <div className="tw-relative tw-mb-11">
-      {!isLast && (
-        <div
-          className={`${
-            isDone ? "tw-bg-primary-500" : "tw-bg-iron-700"
-          } tw-absolute tw-right-3 tw-top-10 tw-h-full tw-rounded-sm tw-w-0.5`}
-          aria-hidden="true"
-        ></div>
-      )}
+      {!isLast && <CreateWavesMainStepConnectionLine done={isDone} />}
       <button
         type="button"
         disabled={!isDone}
@@ -44,11 +46,7 @@ export default function CreateWavesMainStep({
       >
         <span className="tw-mr-6 tw-flex tw-min-w-0 tw-flex-col">
           <span
-            className={`${
-              isActive
-                ? "tw-text-primary-400 tw-font-bold"
-                : "tw-text-iron-600 tw-font-semibold"
-            } tw-text-base`}
+            className={`${LABEL_CLASSES[stepStatus]} tw-text-base tw-transform tw-transition tw-ease-out tw-duration-300`}
           >
             {label}
           </span>

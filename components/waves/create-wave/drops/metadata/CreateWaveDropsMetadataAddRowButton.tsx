@@ -8,7 +8,8 @@ export default function CreateWaveDropsMetadataAddRowButton({
       <button
         onClick={onAddNewRow}
         type="button"
-        className="tw-py-1 tw-px-2 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-text-sm tw-text-primary-400 hover:tw-text-primary-500 tw-font-semibold tw-transition tw-duration-300 tw-ease-out"
+        className="tw-py-1 tw-px-2 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-text-sm tw-text-primary-400 hover:tw-text-primary-300 
+        tw-font-semibold tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
           className="tw-h-5 tw-w-5 tw-mr-2 tw-flex-shrink-0"
