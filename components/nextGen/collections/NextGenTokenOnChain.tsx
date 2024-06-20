@@ -1,5 +1,5 @@
 import styles from "./NextGen.module.scss";
-import { useAccount, useContractRead, useEnsName } from "wagmi";
+import { useAccount, useReadContract, useEnsName } from "wagmi";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -36,52 +36,62 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const normalisedTokenId = props.token_id - props.collection.id * 10000000000;
   const tokenName = `${props.collection.name} #${normalisedTokenId}`;
 
-  useContractRead({
+  const tokenUriRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "tokenURI",
-    watch: true,
-    args: [props.token_id],
-    onSettled(data: any, error: any) {
-      if (data) {
-        const tokenUri = data;
-        setTokenMetadataUrl(tokenUri);
-        fetch(tokenUri).then((meta) => {
-          meta.json().then((metaJson) => {
-            setTokenImage(metaJson.image);
-          });
-        });
-      } else {
-        setTokenNotFound(true);
-      }
-      setFetchingMetadata(false);
+    query: {
+      refetchInterval: 10000,
     },
+    args: [props.token_id],
   });
 
-  useContractRead({
+  useEffect(() => {
+    const data = tokenUriRead.data;
+    if (data) {
+      const tokenUri = data as string;
+      setTokenMetadataUrl(tokenUri);
+      fetch(tokenUri).then((meta) => {
+        meta.json().then((metaJson) => {
+          setTokenImage(metaJson.image);
+        });
+      });
+    } else {
+      setTokenNotFound(true);
+    }
+    setFetchingMetadata(false);
+  }, [tokenUriRead.data]);
+
+  const ownerRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "ownerOf",
-    watch: true,
-    args: [props.token_id],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setOwner(data);
-      }
+    query: {
+      refetchInterval: 10000,
     },
+    args: [props.token_id],
   });
 
-  useEnsName({
+  useEffect(() => {
+    const data = ownerRead.data as any;
+    if (data) {
+      setOwner(data);
+    }
+  }, [ownerRead.data]);
+
+  const ownerENSRead = useEnsName({
     address: owner,
     chainId: mainnet.id,
-    onSettled(data: any, error: any) {
-      if (data) {
-        setOwnerENS(data);
-      }
-    },
   });
+
+  useEffect(() => {
+    const data = ownerENSRead.data;
+    if (data) {
+      setOwnerENS(data);
+    }
+  }, [ownerENSRead.data]);
 
   useEffect(() => {
     if (owner) {

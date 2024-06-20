@@ -13,7 +13,7 @@ import {
   getDateDisplay,
   getTransactionLink,
 } from "../../../helpers/Helpers";
-import { mainnet } from "wagmi";
+import { mainnet } from "wagmi/chains";
 import { MEMES_CONTRACT } from "../../../constants";
 
 export default function UserPageSubscriptionsHistory(

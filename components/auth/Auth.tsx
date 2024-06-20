@@ -8,7 +8,7 @@ import {
   setAuthJwt,
 } from "../../services/auth/auth.utils";
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
 import {
   IProfileAndConsolidations,
@@ -154,7 +154,7 @@ export default function Auth({
     type: TypeOptions;
   }) => {
     toast(message, {
-      position: toast.POSITION.TOP_RIGHT,
+      position: "top-right",
       autoClose: 3000,
       hideProgressBar: false,
       draggable: false,
@@ -359,8 +359,7 @@ export default function Auth({
         activeProfileProxy,
         connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
         setActiveProfileProxy: onActiveProfileProxy,
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
     </AuthContext.Provider>

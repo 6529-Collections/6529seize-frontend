@@ -1,7 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
-import { useState } from "react";
-import { useContractRead } from "wagmi";
+import { useEffect, useState } from "react";
+import { useReadContract } from "wagmi";
 import {
   NEXTGEN_CORE,
   NEXTGEN_CHAIN_ID,
@@ -30,33 +30,41 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
 
-  const burnAmountRead = useContractRead({
+  const burnAmountRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnAmount",
-    watch: true,
-    args: [props.collection.id],
-    onSettled(data: any, error: any) {
-      if (data) {
-        setBurnAmount(parseInt(data));
-      }
+    query: {
+      refetchInterval: 10000,
     },
+    args: [props.collection.id],
   });
 
-  const mintPriceRead = useContractRead({
+  useEffect(() => {
+    const data = burnAmountRead.data as any;
+    if (data) {
+      setBurnAmount(parseInt(data));
+    }
+  }, [burnAmountRead.data]);
+
+  const mintPriceRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "getPrice",
-    watch: true,
-    args: [props.collection.id],
-    onSettled(data: any, error: any) {
-      if (!isNaN(parseInt(data))) {
-        setMintPrice(parseInt(data));
-      }
+    query: {
+      refetchInterval: 10000,
     },
+    args: [props.collection.id],
   });
+
+  useEffect(() => {
+    const data = mintPriceRead.data as any;
+    if (!isNaN(parseInt(data))) {
+      setMintPrice(parseInt(data));
+    }
+  }, [mintPriceRead.data]);
 
   return (
     <>
