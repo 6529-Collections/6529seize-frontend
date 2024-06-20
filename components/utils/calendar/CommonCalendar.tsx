@@ -57,7 +57,7 @@ export default function CommonCalendar({
   };
 
   return (
-    <div className="tw-mt-2 tw-py-3 tw-px-2 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
+    <div className="tw-mt-3 tw-py-3 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
       <button
         onClick={setPreviousMonth}
         type="button"
@@ -107,7 +107,7 @@ export default function CommonCalendar({
         <p className="tw-text-base tw-font-medium tw-text-iron-50">
           {MONTHS[month]}
         </p>
-        <div className="tw-mt-4 tw-grid tw-grid-cols-7 tw-text-sm tw-leading-6 tw-font-medium tw-text-iron-500">
+        <div className="tw-mt-4 tw-px-3 tw-grid tw-grid-cols-7 tw-text-sm tw-leading-6 tw-font-medium tw-text-iron-500">
           <div>Mo</div>
           <div>Tu</div>
           <div>We</div>
@@ -116,7 +116,7 @@ export default function CommonCalendar({
           <div>Sa</div>
           <div>Su</div>
         </div>
-        <div className="tw-p-1 tw-isolate tw-mt-2 tw-grid tw-grid-cols-7 tw-gap-1.5">
+        <div className="tw-isolate tw-mt-2 tw-grid tw-grid-cols-7 tw-gap-1.5 tw-px-4">
           {days.map((day) => (
             <CommonCalendarDay
               key={`calendar-${day}`}

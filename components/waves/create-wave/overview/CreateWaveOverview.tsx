@@ -23,7 +23,7 @@ export default function CreateWaveOverview({
     });
 
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-8">
+    <div className="tw-flex tw-flex-col tw-space-y-6">
       <CreateWaveOverviewInputs
         onChange={onChange}
         name={overview.name}
