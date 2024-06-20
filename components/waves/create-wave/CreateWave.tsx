@@ -72,11 +72,11 @@ export default function CreateWave({
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
-      type: WaveType.Rank,
+      type: WaveType.Chat,
     })
   );
 
-  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.DATES);
+  const [step, setStep] = useState<CreateWaveStep>(CreateWaveStep.OVERVIEW);
 
   const getIsVotingSignatureRequired = (): boolean => {
     return (

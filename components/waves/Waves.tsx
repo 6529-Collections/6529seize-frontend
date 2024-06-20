@@ -16,7 +16,7 @@ export default function Waves() {
   const { connectedProfile, requestAuth, activeProfileProxy } =
     useContext(AuthContext);
 
-  const [viewMode, setViewMode] = useState(WavesViewMode.CREATE);
+  const [viewMode, setViewMode] = useState(WavesViewMode.VIEW);
 
   const getShowCreateNewWaveButton = () =>
     !!connectedProfile?.profile?.handle && !activeProfileProxy;
@@ -37,11 +37,11 @@ export default function Waves() {
     setViewMode(mode);
   };
 
-  // useEffect(() => {
-  //   if (!connectedProfile?.profile?.handle || activeProfileProxy) {
-  //     onViewModeChange(WavesViewMode.VIEW);
-  //   }
-  // }, [connectedProfile, activeProfileProxy]);
+  useEffect(() => {
+    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
+      onViewModeChange(WavesViewMode.VIEW);
+    }
+  }, [connectedProfile, activeProfileProxy]);
 
   const components: Record<WavesViewMode, JSX.Element> = {
     [WavesViewMode.VIEW]: (
