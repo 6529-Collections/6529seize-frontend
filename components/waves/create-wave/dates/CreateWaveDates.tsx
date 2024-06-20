@@ -3,6 +3,7 @@ import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 import { WaveType } from "../../../../generated/models/WaveType";
+import { useEffect, useState } from "react";
 
 export default function CreateWaveDates({
   waveType,
@@ -16,7 +17,21 @@ export default function CreateWaveDates({
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const haveVotingStartDate = waveType === WaveType.Rank;
+  const getHaveMultipleTimestamps = (): boolean => waveType === WaveType.Rank;
+
+  // Submission start date is always the minimum timestamp
+  const getMinTimestamp = (): number | null => {
+    if (!getHaveMultipleTimestamps()) return null;
+    return dates.submissionStartDate;
+  };
+
+  // Voting start date is always the maximum timestamp
+  const getMaxTimestamp = (): number | null => {
+    if (!getHaveMultipleTimestamps()) return null;
+    return dates.votingStartDate;
+  };
+
+  const haveVotingStartDate = getHaveMultipleTimestamps();
 
   const onStartTimestampChange = (timestamp: number) => {
     setDates({
@@ -40,6 +55,17 @@ export default function CreateWaveDates({
     });
   };
 
+  const [minTimestamp, setMinTimestamp] = useState<number | null>(
+    getMinTimestamp()
+  );
+  const [maxTimestamp, setMaxTimestamp] = useState<number | null>(
+    getMaxTimestamp()
+  );
+
+  useEffect(() => {
+    setMinTimestamp(getMinTimestamp());
+    setMaxTimestamp(getMaxTimestamp());
+  }, [waveType, dates]);
 
   return (
     <div className="tw-relative tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2">
@@ -51,6 +77,8 @@ export default function CreateWaveDates({
           initialMonth={currentMonth}
           initialYear={currentYear}
           selectedTimestamp={dates.submissionStartDate}
+          minTimestamp={null}
+          maxTimestamp={maxTimestamp}
           setSelectedTimestamp={onStartTimestampChange}
         />
       </div>
@@ -62,6 +90,8 @@ export default function CreateWaveDates({
           <CommonCalendar
             initialMonth={currentMonth}
             initialYear={currentYear}
+            minTimestamp={minTimestamp}
+            maxTimestamp={null}
             selectedTimestamp={dates.votingStartDate}
             setSelectedTimestamp={onVotingStartTimestampChange}
           />
