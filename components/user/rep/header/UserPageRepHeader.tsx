@@ -6,7 +6,6 @@ export default function UserPageRepHeader({
 }: {
   readonly repRates: ApiProfileRepRatesState | null;
 }) {
-  console.log(repRates);
   return (
     <div>
       <div className="tw-mt-6 lg:tw-mt-8 tw-mb-4 lg:tw-flex lg:tw-items-center tw-lg:justify-between">
