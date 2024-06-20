@@ -1,5 +1,5 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount, useContractRead } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -55,8 +55,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   );
 
   const [collectionID, setCollectionID] = useState("");
-  const [primaryStatus, setPrimaryStatus] = useState<boolean>();
-  const [secondaryStatus, setSecondaryStatus] = useState<boolean>();
+  const [primaryStatus, setPrimaryStatus] = useState<boolean>(false);
+  const [secondaryStatus, setSecondaryStatus] = useState<boolean>(false);
 
   const [primary1, setPrimary1] = useState<AddressPercentage>();
   const [primary2, setPrimary2] = useState<AddressPercentage>();
@@ -70,55 +70,61 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useContractRead({
+  const primaryRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrievePrimaryAddressesAndPercentages",
     args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      const d = data as any[];
-      setPrimary1({
-        address: d[0],
-        percentage: `${d[3]} %`,
-      });
-      setPrimary2({
-        address: d[1],
-        percentage: `${d[4]} %`,
-      });
-      setPrimary3({
-        address: d[2],
-        percentage: `${d[5]} %`,
-      });
-      setPrimaryStatus(d[6]);
+    query: {
+      enabled: !!collectionID,
     },
   });
 
-  useContractRead({
+  useEffect(() => {
+    const d = primaryRead.data as any[];
+    setPrimary1({
+      address: d[0],
+      percentage: `${d[3]} %`,
+    });
+    setPrimary2({
+      address: d[1],
+      percentage: `${d[4]} %`,
+    });
+    setPrimary3({
+      address: d[2],
+      percentage: `${d[5]} %`,
+    });
+    setPrimaryStatus(d[6]);
+  }, [primaryRead.data]);
+
+  const secondaryRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "retrieveSecondaryAddressesAndPercentages",
     args: [collectionID],
-    enabled: !!collectionID,
-    onSettled(data: any, error: any) {
-      const d = data as any[];
-      setSecondary1({
-        address: d[0],
-        percentage: `${d[3]} %`,
-      });
-      setSecondary2({
-        address: d[1],
-        percentage: `${d[4]} %`,
-      });
-      setSecondary3({
-        address: d[2],
-        percentage: `${d[5]} %`,
-      });
-      setSecondaryStatus(d[6]);
+    query: {
+      enabled: !!collectionID,
     },
   });
+
+  useEffect(() => {
+    const d = secondaryRead.data as any[];
+    setSecondary1({
+      address: d[0],
+      percentage: `${d[3]} %`,
+    });
+    setSecondary2({
+      address: d[1],
+      percentage: `${d[4]} %`,
+    });
+    setSecondary3({
+      address: d[2],
+      percentage: `${d[5]} %`,
+    });
+    setSecondaryStatus(d[6]);
+  }, [secondaryRead.data]);
 
   const contractWrite = useMinterContractWrite(
     "acceptAddressesAndPercentages",
@@ -152,7 +158,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [collectionID, primaryStatus, secondaryStatus],
       });
     }
@@ -184,8 +191,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                 setSecondary1(undefined);
                 setSecondary2(undefined);
                 setSecondary3(undefined);
-                setPrimaryStatus(undefined);
-                setSecondaryStatus(undefined);
+                setPrimaryStatus(false);
+                setSecondaryStatus(false);
                 setCollectionID(id);
               }}
             />
@@ -383,7 +390,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

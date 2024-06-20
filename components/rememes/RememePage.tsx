@@ -78,13 +78,13 @@ export default function RememePage(props: Readonly<Props>) {
 
   const ensResolutionDeployer = useEnsName({
     address: rememe ? (rememe.deployer as `0x${string}`) : undefined,
-    enabled: rememe != undefined,
+    query: { enabled: rememe != undefined },
     chainId: 1,
   });
 
   const ensResolutionAddedBy = useEnsName({
     address: rememe ? (rememe.added_by as `0x${string}`) : undefined,
-    enabled: rememe != undefined,
+    query: { enabled: rememe != undefined },
     chainId: 1,
   });
 

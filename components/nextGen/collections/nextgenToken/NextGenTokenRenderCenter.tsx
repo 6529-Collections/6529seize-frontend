@@ -3,7 +3,7 @@ import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 import { NextGenToken } from "../../../../entities/INextgen";
 import { useState } from "react";
-import { mainnet } from "wagmi";
+import { mainnet } from "wagmi/chains";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import { numberWithCommas } from "../../../../helpers/Helpers";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
