@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import {
+  CREATE_WAVE_VALIDATION_ERROR,
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
-  getIsNextStepDisabled,
+  getCreateWaveValidationErrors,
 } from "../../../../helpers/waves/create-wave.helpers";
 import {
   CreateWaveConfig,
@@ -34,23 +35,26 @@ export default function CreateWaveActions({
     await onComplete();
   };
 
-  const [isNextStepDisabled, setIsNextStepDisabled] = useState(
-    getIsNextStepDisabled({ step, config })
-  );
-
-  useEffect(
-    () => setIsNextStepDisabled(getIsNextStepDisabled({ step, config })),
-    [step, config]
-  );
-
   const [previousStep, setPreviousStep] = useState<CreateWaveStep | null>(
     getCreateWavePreviousStep({ step })
   );
 
   useEffect(() => setPreviousStep(getCreateWavePreviousStep({ step })), [step]);
 
+  const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>(
+    getCreateWaveValidationErrors({ config, step })
+  );
+
+  useEffect(
+    () => setErrors(getCreateWaveValidationErrors({ config, step })),
+    [config, step]
+  );
+
   return (
     <div className="tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
+      {errors.map((error) => (
+        <div key={error}>{error}</div>
+      ))}
       <div className="-tw-ml-6">
         {previousStep && (
           <CreateWaveBackStep onPreviousStep={() => setStep(previousStep)} />
@@ -59,7 +63,7 @@ export default function CreateWaveActions({
       <div className="tw-ml-auto">
         <CreateWaveNextStep
           onClick={onNextStep}
-          disabled={isNextStepDisabled}
+          disabled={!!errors.length}
           step={step}
           waveType={config.overview.type}
         />
