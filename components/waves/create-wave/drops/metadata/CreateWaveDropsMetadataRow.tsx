@@ -58,21 +58,28 @@ export default function CreateWaveDropsMetadataRow({
           placeholder=" "
         />
         {itemsCount > 1 && (
-          <svg
+          <div
+            role="button"
+            aria-label="Remove item"
+            className="tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
             onClick={() => onItemRemove(index)}
-            className="tw-top-[1.2rem] tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
           >
-            <path
-              d="M17 7L7 17M7 7L17 17"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            <svg
+              className="tw-top-[1.2rem] tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 7L7 17M7 7L17 17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         )}
         <label
           htmlFor={`required_metadata_key_${index}`}

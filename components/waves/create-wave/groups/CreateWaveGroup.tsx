@@ -48,10 +48,10 @@ export default function CreateWaveGroup({
   };
   return (
     <div>
-      <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
         {CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType]}
       </p>
-      <div className="tw-mt-3 tw-grid md:tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-mt-2 tw-grid md:tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
         <CommonBorderedRadioButton
           type={CreateWaveGroupStatus.NONE}
           selected={selected}
