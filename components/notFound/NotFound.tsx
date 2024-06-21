@@ -14,7 +14,7 @@ export default function NotFound(props: Readonly<Props>) {
     <Container className="pt-5 text-center">
       <Row>
         <Col>
-          <h4 className="mb-0 float-none">{props.title}</h4>
+          <h4 className="mb-0">{props.title}</h4>
         </Col>
       </Row>
       <Row>

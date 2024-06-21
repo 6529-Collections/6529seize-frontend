@@ -52,7 +52,7 @@ export default function NextGenNavigationHeader(
     }
     return (
       <button
-        className="btn-link"
+        className="btn-link decoration-none"
         onClick={() => {
           if (props.setView) {
             props.setView(v);

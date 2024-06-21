@@ -10,7 +10,7 @@ export default function AboutGDRC1(props: Readonly<Props>) {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">
+          <h1>
             <span className="font-lightest">Global</span> Digital Rights Charter
           </h1>
         </Col>

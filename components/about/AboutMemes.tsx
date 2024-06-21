@@ -7,7 +7,7 @@ export default function AboutMemes() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">
+          <h1>
             <span className="font-lightest">Memes</span> Are The Most Important
             Thing In The World
           </h1>
