@@ -301,6 +301,7 @@ export default function CreateWave({
         setThresholdTimeMs={onThresholdTimeChange}
       />
     ),
+    [CreateWaveStep.DESCRIPTION]: <div />,
   };
 
   return (
