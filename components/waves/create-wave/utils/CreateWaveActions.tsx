@@ -67,11 +67,7 @@ export default function CreateWaveActions({
         )}
       </div>
       <div className="tw-ml-auto">
-        <CreateWaveNextStep
-          onClick={onNextStep}
-          disabled={!!errors.length}
-          step={step}
-        />
+        <CreateWaveNextStep onClick={onNextStep} disabled={false} step={step} />
       </div>
     </div>
   );

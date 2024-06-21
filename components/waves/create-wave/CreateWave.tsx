@@ -23,14 +23,17 @@ import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
 import CreateWaveDescription from "./description/CreateWaveDescription";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
 
 export default function CreateWave({
+  profile,
   onBack,
 }: {
+  readonly profile: IProfileAndConsolidations;
   readonly onBack: () => void;
 }) {
   const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.OVERVIEW;
+  const initialStep = CreateWaveStep.OUTCOMES;
   const getInitialConfig = ({
     type,
   }: {
@@ -302,7 +305,8 @@ export default function CreateWave({
         setThresholdTimeMs={onThresholdTimeChange}
       />
     ),
-    [CreateWaveStep.DESCRIPTION]: <CreateWaveDescription />,
+    [CreateWaveStep.OUTCOMES]: <WavesOutcome />,
+    [CreateWaveStep.DESCRIPTION]: <CreateWaveDescription profile={profile} />,
   };
 
   return (

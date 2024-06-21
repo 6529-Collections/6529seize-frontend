@@ -55,15 +55,19 @@ const CREATE_WAVE_DEFAULT_MAIN_STEPS: CreateWaveStep[] = [
 export const CREATE_WAVE_MAIN_STEPS: Record<WaveType, CreateWaveStep[]> = {
   [WaveType.Chat]: [
     ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
+    // TODO chat wont have outcomes
+    CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
   ],
   [WaveType.Rank]: [
     ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
+    CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
   ],
   [WaveType.Approve]: [
     ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
     CreateWaveStep.APPROVAL,
+    CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
   ],
 };
@@ -79,6 +83,8 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Rating",
     [CreateWaveStep.APPROVAL]: "Approval",
+    // TODO chat wont have outcomes
+    [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },
   [WaveType.Rank]: {
@@ -88,6 +94,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Voting",
     [CreateWaveStep.APPROVAL]: "Approval",
+    [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },
   [WaveType.Approve]: {
@@ -97,6 +104,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Voting",
     [CreateWaveStep.APPROVAL]: "Approval",
+    [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },
 };

@@ -1,4 +1,11 @@
-export default function CreateWaveDescription({}) {
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import CreateDrop, { CreateDropType } from "../../../drops/create/CreateDrop";
+
+export default function CreateWaveDescription({
+  profile,
+}: {
+  readonly profile: IProfileAndConsolidations;
+}) {
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -9,7 +16,13 @@ export default function CreateWaveDescription({}) {
         expect in this wave. More information, including any content moderation
         parameters, is better than less.
       </p>
-      <div className="tw-mt-6">content</div>
+      <div className="tw-mt-6">
+        <CreateDrop
+          profile={profile}
+          quotedDrop={null}
+          type={CreateDropType.DROP}
+        />
+      </div>
     </div>
   );
 }
