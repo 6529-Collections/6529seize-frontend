@@ -15,6 +15,8 @@ import { createPortal } from "react-dom";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { WaveType } from "../../../../generated/models/WaveType";
 import CreateWaveGroupItem from "./CreateWaveGroupItem";
+import SelectGroupModalWrapper from "../../../utils/select-group/SelectGroupModalWrapper";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateWaveGroup({
   waveType,
@@ -46,6 +48,8 @@ export default function CreateWaveGroup({
   const onSelectedClick = () => {
     setSelectedGroup(null);
   };
+
+  const randomUUID = getRandomObjectId();
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
@@ -63,11 +67,16 @@ export default function CreateWaveGroup({
           switchSelected={switchSelected}
           onSelectedClick={onSelectedClick}
         />
-        {createPortal(
+        <SelectGroupModalWrapper
+          isOpen={selected === CreateWaveGroupStatus.GROUP && !selectedGroup}
+          onClose={() => switchSelected(CreateWaveGroupStatus.NONE)}
+          onGroupSelect={setGroup}
+        />
+        {/* {createPortal(
           <CommonAnimationWrapper mode="sync" initial={true}>
             {selected === CreateWaveGroupStatus.GROUP && !selectedGroup && (
               <CommonAnimationOpacity
-                key="modal"
+                key={randomUUID}
                 elementClasses="tw-absolute tw-z-10"
                 elementRole="dialog"
                 onClicked={(e) => e.stopPropagation()}
@@ -80,7 +89,7 @@ export default function CreateWaveGroup({
             )}
           </CommonAnimationWrapper>,
           document.body
-        )}
+        )} */}
       </div>
     </div>
   );
