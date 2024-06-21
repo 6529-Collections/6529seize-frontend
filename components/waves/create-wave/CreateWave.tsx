@@ -347,7 +347,7 @@ export default function CreateWave({
           </div>
           <div className="tw-flex-1">
             <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-10 tw-rounded-xl">
-              <div className="tw-relative tw-z-[1] tw-h-full">
+              <div className="tw-relative tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-w-full">
                     {/* <AnimatePresence mode="wait">
