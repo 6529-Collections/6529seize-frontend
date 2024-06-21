@@ -104,66 +104,56 @@ b:not(.tailwind-scope b) {
 h1:not(.tailwind-scope h1) {
   font-size: 48px;
   font-weight: 700;
-  float: left;
   color: $font-color;
 }
 
 h2:not(.tailwind-scope h2) {
   font-size: 36px;
   font-weight: 700;
-  float: left;
   color: $font-color;
 }
 
 h3:not(.tailwind-scope h3) {
   font-size: 28px;
   font-weight: 700;
-  float: left;
   color: $font-color;
 }
 
 h4:not(.tailwind-scope h4) {
   font-size: 24px;
   font-weight: 700;
-  float: left;
   color: $font-color;
 }
 
 h5:not(.tailwind-scope h5) {
   font-size: 20px;
   font-weight: 700;
-  float: left;
   color: $font-color;
 }
 
 @media only screen and (max-width: 800px) {
   h1:not(.tailwind-scope h1) {
     font-size: 26px;
-    float: left;
   }
 
   h2:not(.tailwind-scope h2) {
     font-size: 22px;
     font-weight: bold;
-    float: left;
   }
 
   h3:not(.tailwind-scope h3) {
     font-size: 18px;
     font-weight: bold;
-    float: left;
   }
 
   h4:not(.tailwind-scope h4) {
     font-size: 18px;
     font-weight: bold;
-    float: left;
   }
 
   h5:not(.tailwind-scope h5) {
     font-size: 16px;
     font-weight: bold;
-    float: left;
   }
 }
 
@@ -452,7 +442,7 @@ h5:not(.tailwind-scope h5) {
   box-shadow: none;
 }
 
-@media(hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) {
   .icon:hover {
     color: #ffffff;
   }
@@ -473,4 +463,8 @@ pre code {
   .firefox-svg {
     opacity: 0.3 !important;
   }
+}
+
+.float-left {
+  float: left;
 }
