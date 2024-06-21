@@ -53,11 +53,18 @@ const CREATE_WAVE_DEFAULT_MAIN_STEPS: CreateWaveStep[] = [
 ];
 
 export const CREATE_WAVE_MAIN_STEPS: Record<WaveType, CreateWaveStep[]> = {
-  [WaveType.Chat]: CREATE_WAVE_DEFAULT_MAIN_STEPS,
-  [WaveType.Rank]: CREATE_WAVE_DEFAULT_MAIN_STEPS,
+  [WaveType.Chat]: [
+    ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
+    CreateWaveStep.DESCRIPTION,
+  ],
+  [WaveType.Rank]: [
+    ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
+    CreateWaveStep.DESCRIPTION,
+  ],
   [WaveType.Approve]: [
     ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
     CreateWaveStep.APPROVAL,
+    CreateWaveStep.DESCRIPTION,
   ],
 };
 
@@ -72,6 +79,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Rating",
     [CreateWaveStep.APPROVAL]: "Approval",
+    [CreateWaveStep.DESCRIPTION]: "Description",
   },
   [WaveType.Rank]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
@@ -80,6 +88,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Voting",
     [CreateWaveStep.APPROVAL]: "Approval",
+    [CreateWaveStep.DESCRIPTION]: "Description",
   },
   [WaveType.Approve]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
@@ -88,6 +97,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Voting",
     [CreateWaveStep.APPROVAL]: "Approval",
+    [CreateWaveStep.DESCRIPTION]: "Description",
   },
 };
 

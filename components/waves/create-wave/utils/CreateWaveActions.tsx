@@ -36,10 +36,16 @@ export default function CreateWaveActions({
   };
 
   const [previousStep, setPreviousStep] = useState<CreateWaveStep | null>(
-    getCreateWavePreviousStep({ step })
+    getCreateWavePreviousStep({ step, waveType: config.overview.type })
   );
 
-  useEffect(() => setPreviousStep(getCreateWavePreviousStep({ step })), [step]);
+  useEffect(
+    () =>
+      setPreviousStep(
+        getCreateWavePreviousStep({ step, waveType: config.overview.type })
+      ),
+    [step, config.overview.type]
+  );
 
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>(
     getCreateWaveValidationErrors({ config, step })
@@ -65,7 +71,6 @@ export default function CreateWaveActions({
           onClick={onNextStep}
           disabled={!!errors.length}
           step={step}
-          waveType={config.overview.type}
         />
       </div>
     </div>

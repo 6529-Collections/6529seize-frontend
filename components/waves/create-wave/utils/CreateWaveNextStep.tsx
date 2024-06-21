@@ -10,21 +10,14 @@ export enum CreateWaveNextStepType {
 export default function CreateWaveNextStep({
   disabled,
   step,
-  waveType,
   onClick,
 }: {
   readonly disabled: boolean;
   readonly step: CreateWaveStep;
-  readonly waveType: WaveType;
   readonly onClick: () => void;
 }) {
   const getStepType = () => {
-    if (waveType === WaveType.Approve && step === CreateWaveStep.APPROVAL) {
-      return CreateWaveNextStepType.SAVE;
-    }
-    if (waveType !== WaveType.Approve && step === CreateWaveStep.VOTING) {
-      return CreateWaveNextStepType.SAVE;
-    }
+    if (step === CreateWaveStep.DESCRIPTION) return CreateWaveNextStepType.SAVE;
     return CreateWaveNextStepType.NEXT;
   };
 
@@ -32,7 +25,7 @@ export default function CreateWaveNextStep({
     getStepType()
   );
 
-  useEffect(() => setStepType(getStepType()), [step, waveType]);
+  useEffect(() => setStepType(getStepType()), [step]);
 
   const components: Record<CreateWaveNextStepType, React.ReactNode> = {
     [CreateWaveNextStepType.NEXT]: (
