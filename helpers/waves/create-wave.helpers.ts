@@ -50,8 +50,10 @@ export const getCreateWaveNextStep = ({
       if (waveType === WaveType.Approve) {
         return CreateWaveStep.APPROVAL;
       }
-      return null;
+      return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.APPROVAL:
+      return CreateWaveStep.DESCRIPTION;
+    case CreateWaveStep.DESCRIPTION:
       return null;
     default:
       assertUnreachable(step);
@@ -61,8 +63,10 @@ export const getCreateWaveNextStep = ({
 
 export const getCreateWavePreviousStep = ({
   step,
+  waveType,
 }: {
   readonly step: CreateWaveStep;
+  readonly waveType: WaveType;
 }): CreateWaveStep | null => {
   switch (step) {
     case CreateWaveStep.OVERVIEW:
@@ -76,6 +80,11 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
     case CreateWaveStep.APPROVAL:
+      return CreateWaveStep.VOTING;
+    case CreateWaveStep.DESCRIPTION:
+      if (waveType === WaveType.Approve) {
+        return CreateWaveStep.APPROVAL;
+      }
       return CreateWaveStep.VOTING;
     default:
       assertUnreachable(step);
