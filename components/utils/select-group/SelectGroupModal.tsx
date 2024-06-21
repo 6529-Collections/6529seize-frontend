@@ -41,7 +41,7 @@ export default function SelectGroupModal({
     }));
   };
 
-  const { data } = useQuery<GroupFull[]>({
+  const { data, isFetching } = useQuery<GroupFull[]>({
     queryKey: [QueryKey.GROUPS, filters],
     queryFn: async () => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
@@ -91,6 +91,7 @@ export default function SelectGroupModal({
             <div className="tw-h-64 tw-overflow-y-auto tw-mt-4 tw-px-4">
               <SelectGroupModalItems
                 groups={groups}
+                loading={isFetching}
                 onGroupSelect={onGroupSelect}
               />
             </div>
