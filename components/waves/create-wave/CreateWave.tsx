@@ -33,7 +33,7 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.OUTCOMES;
+  const initialStep = CreateWaveStep.GROUPS;
   const getInitialConfig = ({
     type,
   }: {
@@ -349,7 +349,22 @@ export default function CreateWave({
             <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-10 tw-rounded-xl">
               <div className="tw-relative tw-z-[1] tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
-                  <div className="tw-flex-1">{stepComponent[step]}</div>
+                  <div className="tw-flex-1 tw-w-full">
+                    {/* <AnimatePresence mode="wait">
+                      <CommonAnimationHeight>
+                        <motion.div
+                          key={step}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {stepComponent[step]}
+                        </motion.div>
+                      </CommonAnimationHeight>
+                    </AnimatePresence> */}
+                    {stepComponent[step]}
+                  </div>
                   <div className="tw-mt-auto">
                     <CreateWaveActions
                       setStep={setStep}

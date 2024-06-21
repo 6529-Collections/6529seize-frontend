@@ -4,7 +4,10 @@ import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
 import Waves from "../../components/waves/Waves";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-
+import UserPageIdentityDeleteStatementButton from "../../components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton";
+import Tippy from "@tippyjs/react";
+import CommonAnimationWrapper from "../../components/utils/animation/CommonAnimationWrapper";
+import CommonAnimationOpacity from "../../components/utils/animation/CommonAnimationOpacity";
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -38,7 +41,9 @@ export default function WavesPage() {
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
-        <Waves />
+        <div className="tw-overflow-hidden tw-h-full tw-w-full">
+          <Waves />
+        </div>
       </div>
     </>
   );
