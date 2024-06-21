@@ -50,8 +50,11 @@ export const getCreateWaveNextStep = ({
       if (waveType === WaveType.Approve) {
         return CreateWaveStep.APPROVAL;
       }
-      return CreateWaveStep.DESCRIPTION;
+      // TODO chat wont have outcomes
+      return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.APPROVAL:
+      return CreateWaveStep.OUTCOMES;
+    case CreateWaveStep.OUTCOMES:
       return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.DESCRIPTION:
       return null;
@@ -81,11 +84,14 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.DROPS;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
-    case CreateWaveStep.DESCRIPTION:
+    case CreateWaveStep.OUTCOMES:
       if (waveType === WaveType.Approve) {
         return CreateWaveStep.APPROVAL;
       }
       return CreateWaveStep.VOTING;
+    case CreateWaveStep.DESCRIPTION:
+      // TODO chat wont have outcomes
+      return CreateWaveStep.OUTCOMES;
     default:
       assertUnreachable(step);
       return null;
