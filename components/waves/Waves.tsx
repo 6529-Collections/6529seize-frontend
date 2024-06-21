@@ -50,8 +50,13 @@ export default function Waves() {
         showCreateNewWaveButton={showCreateNewWaveButton}
       />
     ),
-    [WavesViewMode.CREATE]: (
-      <CreateWave onBack={() => setViewMode(WavesViewMode.VIEW)} />
+    [WavesViewMode.CREATE]: connectedProfile ? (
+      <CreateWave
+        onBack={() => setViewMode(WavesViewMode.VIEW)}
+        profile={connectedProfile}
+      />
+    ) : (
+      <div></div>
     ),
   };
   return <div className="tailwind-scope">{components[viewMode]}</div>;

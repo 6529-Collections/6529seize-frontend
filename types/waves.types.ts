@@ -63,6 +63,7 @@ export enum CreateWaveStep {
   DROPS = "DROPS",
   VOTING = "VOTING",
   APPROVAL = "APPROVAL",
+  OUTCOMES = "OUTCOMES",
   DESCRIPTION = "DESCRIPTION",
 }
 
