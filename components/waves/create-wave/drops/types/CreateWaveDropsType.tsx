@@ -30,7 +30,7 @@ export default function CreateWaveDropsType({
         />
       </div>
       <span className="tw-flex tw-items-center">
-        <span className="tw-flex tw-flex-col tw-text-md tw-font-semibold">
+        <span className="tw-flex tw-flex-col tw-text-sm tw-font-semibold">
           <span className={labelClasses}>
             {CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS[type]}
           </span>
