@@ -39,7 +39,7 @@ export default function CommonBorderedRadioButton<T extends string>({
         className={`${inputClasses} tw-form-radio tw-h-5 tw-w-5 tw-bg-iron-800 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-cursor-pointer`}
       />
       <div className="tw-flex tw-items-center">
-        <span className="tw-flex tw-flex-col tw-text-md tw-font-semibold tw-whitespace-nowrap">
+        <span className="tw-flex tw-flex-col tw-text-sm tw-font-semibold tw-whitespace-nowrap">
           {label ? <span className={labelClasses}>{label}</span> : children}
         </span>
       </div>

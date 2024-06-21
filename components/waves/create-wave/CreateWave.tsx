@@ -22,6 +22,7 @@ import { WaveCreditType } from "../../../generated/models/WaveCreditType";
 import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
+import CreateWaveDescription from "./description/CreateWaveDescription";
 
 export default function CreateWave({
   onBack,
@@ -301,7 +302,7 @@ export default function CreateWave({
         setThresholdTimeMs={onThresholdTimeChange}
       />
     ),
-    [CreateWaveStep.DESCRIPTION]: <div />,
+    [CreateWaveStep.DESCRIPTION]: <CreateWaveDescription />,
   };
 
   return (
