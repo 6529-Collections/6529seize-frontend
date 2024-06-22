@@ -32,6 +32,7 @@ const CreateDropFull = forwardRef<
     readonly canSubmit: boolean;
     readonly canAddPart: boolean;
     readonly loading: boolean;
+    readonly showSubmit: boolean;
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
     readonly onTitle: (newV: string | null) => void;
@@ -59,6 +60,7 @@ const CreateDropFull = forwardRef<
       canSubmit,
       canAddPart,
       loading,
+      showSubmit,
       type,
       drop,
       onTitle,
@@ -98,6 +100,7 @@ const CreateDropFull = forwardRef<
           canAddPart={canAddPart}
           type={type}
           loading={loading}
+          showSubmit={showSubmit}
           drop={drop}
           onTitle={onTitle}
           onMetadataEdit={onMetadataEdit}
@@ -124,6 +127,7 @@ const CreateDropFull = forwardRef<
           type={type}
           loading={loading}
           drop={drop}
+          showSubmit={showSubmit}
           onEditorState={onEditorState}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}

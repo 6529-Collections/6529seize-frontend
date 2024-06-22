@@ -41,6 +41,7 @@ const CreateDropFullDesktop = forwardRef<
     readonly type: CreateDropType;
     readonly loading: boolean;
     readonly drop: CreateDropConfig | null;
+    readonly showSubmit: boolean;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (data_key: string) => void;
@@ -67,6 +68,7 @@ const CreateDropFullDesktop = forwardRef<
       type,
       loading,
       drop,
+      showSubmit,
       onViewChange,
       onMetadataEdit,
       onMetadataRemove,
@@ -183,7 +185,7 @@ const CreateDropFullDesktop = forwardRef<
               onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
               onFileChange={onFileChange}
             />
-         {/*  <div className="tw-flex tw-justify-end">
+            {/*  <div className="tw-flex tw-justify-end">
               <button
                 type="button"
                 onClick={onDropPart}
@@ -219,12 +221,14 @@ const CreateDropFullDesktop = forwardRef<
               onMetadataEdit={onMetadataEdit}
               onMetadataRemove={onMetadataRemove}
             />
-            <CreateDropDesktopFooter
-              disabled={!canSubmit}
-              type={type}
-              loading={loading}
-              onDrop={onDrop}
-            />
+            {showSubmit && (
+              <CreateDropDesktopFooter
+                disabled={!canSubmit}
+                type={type}
+                loading={loading}
+                onDrop={onDrop}
+              />
+            )}
           </div>
         </div>
       </div>
