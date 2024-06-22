@@ -119,7 +119,7 @@ export default function CommonCalendar({
         <div className="tw-isolate tw-mt-2 tw-grid tw-grid-cols-7 tw-gap-1.5 tw-px-4">
           {days.map((day) => (
             <CommonCalendarDay
-              key={`calendar-${day}`}
+              key={`calendar-${day.startTimestamp}`}
               day={day}
               minTimestamp={minTimestamp}
               maxTimestamp={maxTimestamp}

@@ -18,7 +18,7 @@ import { CreateDropType, CreateDropViewType } from "./CreateDrop";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 
 export interface DropEditorHandles {
-  requestDrop: () => void;
+  requestDrop: () => CreateDropConfig | null;
 }
 
 const DropEditor = forwardRef<
@@ -65,9 +65,8 @@ const DropEditor = forwardRef<
     );
 
     const createDropWrapperRef = useRef<CreateDropWrapperHandles | null>(null);
-    const requestDrop = () => {
-      createDropWrapperRef.current?.onDrop();
-    };
+    const requestDrop = (): CreateDropConfig | null =>
+      createDropWrapperRef.current?.requestDrop() ?? null;
 
     useImperativeHandle(ref, () => ({
       requestDrop,

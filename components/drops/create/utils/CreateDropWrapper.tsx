@@ -32,7 +32,7 @@ export enum CreateDropScreenType {
 }
 
 export interface CreateDropWrapperHandles {
-  onDrop: () => void;
+  requestDrop: () => CreateDropConfig;
 }
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
@@ -227,8 +227,10 @@ const CreateDropWrapper = forwardRef<
       onSubmitDrop(currentDrop);
     };
 
+    const requestDrop = (): CreateDropConfig => onDropPart();
+
     useImperativeHandle(ref, () => ({
-      onDrop,
+      requestDrop,
     }));
 
     const components: Record<CreateDropViewType, JSX.Element> = {
