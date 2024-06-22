@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -22,7 +22,9 @@ import { WaveCreditType } from "../../../generated/models/WaveCreditType";
 import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
-import CreateWaveDescription, { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
+import CreateWaveDescription, {
+  CreateWaveDescriptionHandles,
+} from "./description/CreateWaveDescription";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropConfig } from "../../../entities/IDrop";
 
@@ -265,13 +267,15 @@ export default function CreateWave({
     }));
   };
 
-  const onRequestDrop = (dropRequest: CreateDropConfig) => {
-    console.log("here 2");
-    console.log(dropRequest);
-  };
+  const createWaveDescriptionRef = useRef<CreateWaveDescriptionHandles | null>(
+    null
+  );
 
-  const CreateWaveDescriptionRef = React.createRef<CreateWaveDescriptionHandles>();
-  CreateWaveDescriptionRef.current?.requestDrop();
+  const onComplete = async () => {
+    console.log("onComplete");
+    const drop = createWaveDescriptionRef.current?.requestDrop() ?? null;
+    console.log("drop", drop);
+  };
 
   const stepComponent: Record<CreateWaveStep, JSX.Element> = {
     [CreateWaveStep.OVERVIEW]: (
@@ -316,7 +320,7 @@ export default function CreateWave({
     ),
     [CreateWaveStep.OUTCOMES]: <WavesOutcome />,
     [CreateWaveStep.DESCRIPTION]: (
-      <CreateWaveDescription profile={profile} onRequestDrop={onRequestDrop} />
+      <CreateWaveDescription ref={createWaveDescriptionRef} profile={profile} />
     ),
   };
 
@@ -381,6 +385,7 @@ export default function CreateWave({
                       setStep={setStep}
                       step={step}
                       config={config}
+                      onComplete={onComplete}
                     />
                   </div>
                 </div>

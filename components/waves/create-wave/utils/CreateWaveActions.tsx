@@ -16,13 +16,13 @@ export default function CreateWaveActions({
   config,
   step,
   setStep,
+  onComplete,
 }: {
   readonly config: CreateWaveConfig;
   readonly step: CreateWaveStep;
   readonly setStep: (step: CreateWaveStep) => void;
+  readonly onComplete: () => Promise<void>;
 }) {
-  const onComplete = async (): Promise<void> => {};
-
   const onNextStep = async (): Promise<void> => {
     const nextStep = getCreateWaveNextStep({
       step,
