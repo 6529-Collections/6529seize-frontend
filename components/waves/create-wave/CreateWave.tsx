@@ -22,8 +22,9 @@ import { WaveCreditType } from "../../../generated/models/WaveCreditType";
 import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
-import CreateWaveDescription from "./description/CreateWaveDescription";
+import CreateWaveDescription, { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { CreateDropConfig } from "../../../entities/IDrop";
 
 export default function CreateWave({
   profile,
@@ -33,7 +34,7 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.GROUPS;
+  const initialStep = CreateWaveStep.DESCRIPTION;
   const getInitialConfig = ({
     type,
   }: {
@@ -264,6 +265,14 @@ export default function CreateWave({
     }));
   };
 
+  const onRequestDrop = (dropRequest: CreateDropConfig) => {
+    console.log("here 2");
+    console.log(dropRequest);
+  };
+
+  const CreateWaveDescriptionRef = React.createRef<CreateWaveDescriptionHandles>();
+  CreateWaveDescriptionRef.current?.requestDrop();
+
   const stepComponent: Record<CreateWaveStep, JSX.Element> = {
     [CreateWaveStep.OVERVIEW]: (
       <CreateWaveOverview
@@ -306,7 +315,9 @@ export default function CreateWave({
       />
     ),
     [CreateWaveStep.OUTCOMES]: <WavesOutcome />,
-    [CreateWaveStep.DESCRIPTION]: <CreateWaveDescription profile={profile} />,
+    [CreateWaveStep.DESCRIPTION]: (
+      <CreateWaveDescription profile={profile} onRequestDrop={onRequestDrop} />
+    ),
   };
 
   return (

@@ -72,24 +72,7 @@ export default function CreateWaveGroup({
           onClose={() => switchSelected(CreateWaveGroupStatus.NONE)}
           onGroupSelect={setGroup}
         />
-        {/* {createPortal(
-          <CommonAnimationWrapper mode="sync" initial={true}>
-            {selected === CreateWaveGroupStatus.GROUP && !selectedGroup && (
-              <CommonAnimationOpacity
-                key={randomUUID}
-                elementClasses="tw-absolute tw-z-10"
-                elementRole="dialog"
-                onClicked={(e) => e.stopPropagation()}
-              >
-                <SelectGroupModal
-                  onClose={() => switchSelected(CreateWaveGroupStatus.NONE)}
-                  onGroupSelect={setGroup}
-                />
-              </CommonAnimationOpacity>
-            )}
-          </CommonAnimationWrapper>,
-          document.body
-        )} */}
+
       </div>
     </div>
   );
