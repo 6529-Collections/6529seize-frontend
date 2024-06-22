@@ -39,6 +39,7 @@ const CreateDropCompact = forwardRef<
     readonly loading: boolean;
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
+    readonly showSubmit: boolean;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataRemove: (key: string) => void;
     readonly onEditorState: (editorState: EditorState | null) => void;
@@ -47,7 +48,7 @@ const CreateDropCompact = forwardRef<
     ) => void;
     readonly onReferencedNft: (newNft: ReferencedNft) => void;
     readonly onFileChange: (file: File | null) => void;
-    readonly onDrop: () => void;
+    readonly onDrop?: () => void;
     readonly onDropPart: () => void;
   }
 >(
@@ -62,6 +63,7 @@ const CreateDropCompact = forwardRef<
       canSubmit,
       canAddPart,
       loading,
+      showSubmit,
       type,
       drop,
       onViewChange,
@@ -127,20 +129,22 @@ const CreateDropCompact = forwardRef<
                 onFileChange={onFileChange}
               />
             </div>
-            <div>
-              <PrimaryButton
-                onClick={onDrop}
-                disabled={!canSubmit}
-                loading={loading}
-                size={
-                  screenType === CreateDropScreenType.MOBILE
-                    ? PrimaryButtonSize.SMALL
-                    : PrimaryButtonSize.MEDIUM
-                }
-              >
-                {getSubmitText()}
-              </PrimaryButton>
-            </div>
+            {showSubmit && (
+              <div>
+                <PrimaryButton
+                  onClick={onDrop}
+                  disabled={!canSubmit}
+                  loading={loading}
+                  size={
+                    screenType === CreateDropScreenType.MOBILE
+                      ? PrimaryButtonSize.SMALL
+                      : PrimaryButtonSize.MEDIUM
+                  }
+                >
+                  {getSubmitText()}
+                </PrimaryButton>
+              </div>
+            )}
           </div>
         </div>
 

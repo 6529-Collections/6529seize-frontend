@@ -1,11 +1,32 @@
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { CreateDropConfig } from "../../../../entities/IDrop";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import CreateDrop, { CreateDropType } from "../../../drops/create/CreateDrop";
+import { CreateDropType } from "../../../drops/create/CreateDrop";
+import DropEditor, {
+  DropEditorHandles,
+} from "../../../drops/create/DropEditor";
 
-export default function CreateWaveDescription({
-  profile,
-}: {
-  readonly profile: IProfileAndConsolidations;
-}) {
+export interface CreateWaveDescriptionHandles {
+  requestDrop: () => void;
+}
+
+const CreateWaveDescription = forwardRef<
+  CreateWaveDescriptionHandles,
+  {
+    readonly profile: IProfileAndConsolidations;
+    readonly onRequestDrop: (dropRequest: CreateDropConfig) => void;
+  }
+>(({ profile, onRequestDrop }, ref) => {
+  const dropEditorRef = useRef<DropEditorHandles | null>(null);
+
+  const requestDrop = () => {
+    dropEditorRef.current?.requestDrop();
+  };
+
+  useImperativeHandle(ref, () => ({
+    requestDrop,
+  }));
+
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -17,12 +38,20 @@ export default function CreateWaveDescription({
         parameters, is better than less.
       </p>
       <div className="tw-mt-6">
-        <CreateDrop
+        <DropEditor
+          ref={dropEditorRef}
           profile={profile}
           quotedDrop={null}
           type={CreateDropType.DROP}
+          loading={false}
+          showSubmit={false}
+          dropEditorRefreshKey={1}
+          onSubmitDrop={onRequestDrop}
         />
       </div>
     </div>
   );
-}
+});
+
+CreateWaveDescription.displayName = "CreateWaveDescription";
+export default CreateWaveDescription;

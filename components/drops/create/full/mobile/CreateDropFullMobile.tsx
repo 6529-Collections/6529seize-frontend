@@ -40,6 +40,7 @@ const CreateDropFullMobile = forwardRef<
     readonly canAddPart: boolean;
     readonly type: CreateDropType;
     readonly loading: boolean;
+    readonly showSubmit: boolean;
     readonly drop: CreateDropConfig | null;
     readonly onEditorState: (editorState: EditorState | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
@@ -66,6 +67,7 @@ const CreateDropFullMobile = forwardRef<
       canAddPart,
       type,
       loading,
+      showSubmit,
       drop,
       onEditorState,
       onMetadataEdit,
@@ -165,7 +167,8 @@ const CreateDropFullMobile = forwardRef<
               onReferencedNft={onReferencedNft}
               onViewClick={onViewClick}
               onFileChange={onFileChange}
-            />{/* 
+            />
+            {/* 
             <button type="button" onClick={onDropPart} disabled={!canAddPart} className={`${canAddPart? "tw-bg-iron-800" : ""} tw-font-medium tw-text-sm tw-rounded-lg tw-inline-flex tw-items-center tw-justify-center tw-gap-x-2 tailwind-scope`}>
               <svg
                 enable-background="new 0 0 57.691 55.692"
@@ -207,29 +210,31 @@ const CreateDropFullMobile = forwardRef<
               onMetadataRemove={onMetadataRemove}
             />
           </div>
-          <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
-            <div className="tw-flex tw-gap-x-3">
-              <button
-                type="button"
-                disabled={!canSubmit || loading}
-                onClick={onDrop}
-                className={`${
-                  !canSubmit
-                    ? "tw-opacity-50 tw-text-iron-200"
-                    : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
-                } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
-              >
-                <div className={loading ? "tw-opacity-0" : ""}>
-                  {getSubmitText()}
-                </div>
-                {loading && (
-                  <div className="tw-absolute">
-                    <CircleLoader />
+          {showSubmit && (
+            <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
+              <div className="tw-flex tw-gap-x-3">
+                <button
+                  type="button"
+                  disabled={!canSubmit || loading}
+                  onClick={onDrop}
+                  className={`${
+                    !canSubmit
+                      ? "tw-opacity-50 tw-text-iron-200"
+                      : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
+                  } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
+                >
+                  <div className={loading ? "tw-opacity-0" : ""}>
+                    {getSubmitText()}
                   </div>
-                )}
-              </button>
+                  {loading && (
+                    <div className="tw-absolute">
+                      <CircleLoader />
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </CreateDropFullMobileWrapper>
     );
