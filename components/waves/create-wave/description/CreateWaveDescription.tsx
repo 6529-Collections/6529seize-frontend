@@ -7,21 +7,19 @@ import DropEditor, {
 } from "../../../drops/create/DropEditor";
 
 export interface CreateWaveDescriptionHandles {
-  requestDrop: () => void;
+  requestDrop: () => CreateDropConfig | null;
 }
 
 const CreateWaveDescription = forwardRef<
   CreateWaveDescriptionHandles,
   {
     readonly profile: IProfileAndConsolidations;
-    readonly onRequestDrop: (dropRequest: CreateDropConfig) => void;
   }
->(({ profile, onRequestDrop }, ref) => {
+>(({ profile }, ref) => {
   const dropEditorRef = useRef<DropEditorHandles | null>(null);
 
-  const requestDrop = () => {
-    dropEditorRef.current?.requestDrop();
-  };
+  const requestDrop = (): CreateDropConfig | null =>
+    dropEditorRef.current?.requestDrop() ?? null;
 
   useImperativeHandle(ref, () => ({
     requestDrop,
@@ -46,7 +44,7 @@ const CreateWaveDescription = forwardRef<
           loading={false}
           showSubmit={false}
           dropEditorRefreshKey={1}
-          onSubmitDrop={onRequestDrop}
+          onSubmitDrop={() => {}}
         />
       </div>
     </div>
