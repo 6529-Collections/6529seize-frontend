@@ -77,12 +77,40 @@ export interface CreateWaveApprovalConfig {
   readonly thresholdTimeMs: number | null;
 }
 
+export enum CreateWaveOutcomeType {
+  MANUAL = "MANUAL",
+  REP = "REP",
+  CIC = "CIC",
+}
+
+export enum CreateWaveOutcomeConfigWinnersCreditValueType {
+  ABSOLUTE_VALUE = "ABSOLUTE_VALUE",
+  PERCENTAGE = "PERCENTAGE",
+}
+
+export interface CreateWaveOutcomeConfigWinner {
+  readonly value: number;
+}
+
+export interface CreateWaveOutcomeConfigWinnersConfig {
+  readonly creditValueType: CreateWaveOutcomeConfigWinnersCreditValueType;
+  readonly winners: CreateWaveOutcomeConfigWinner[];
+}
+export interface CreateWaveOutcomeConfig {
+  readonly type: CreateWaveOutcomeType;
+  readonly title: string | null;
+  readonly credit: number | null;
+  readonly category: string | null;
+  readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig | null;
+}
+
 export interface CreateWaveConfig {
   readonly overview: WaveOverviewConfig;
   readonly groups: WaveGroupsConfig;
   readonly dates: CreateWaveDatesConfig;
   readonly drops: CreateWaveDropsConfig;
   readonly voting: CreateWaveVotingConfig;
+  readonly outcomes: CreateWaveOutcomeConfig[];
   readonly approval: CreateWaveApprovalConfig;
 }
 
