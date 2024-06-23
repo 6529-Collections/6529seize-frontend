@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -26,7 +26,10 @@ import CreateWaveDescription, {
   CreateWaveDescriptionHandles,
 } from "./description/CreateWaveDescription";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { CreateDropConfig } from "../../../entities/IDrop";
+import {
+  CREATE_WAVE_VALIDATION_ERROR,
+  getCreateWaveValidationErrors,
+} from "../../../helpers/waves/create-wave.helpers";
 
 export default function CreateWave({
   profile,
@@ -36,7 +39,7 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.DESCRIPTION;
+  const initialStep = CreateWaveStep.DATES;
   const getInitialConfig = ({
     type,
   }: {
@@ -46,7 +49,6 @@ export default function CreateWave({
       type,
       signatureType: WaveSignatureType.NONE,
       name: "",
-      description: "",
     },
     groups: {
       canView: null,
@@ -81,70 +83,88 @@ export default function CreateWave({
   );
 
   const [step, setStep] = useState<CreateWaveStep>(initialStep);
+  const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
+  const [haveClickedNextAtLeastOnce, setHaveClickedNextAtLeastOnce] =
+    useState(false);
 
-  const getIsVotingSignatureRequired = (): boolean => {
-    return (
-      config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
-      config.overview.signatureType === WaveSignatureType.VOTING
-    );
+  useEffect(() => {
+    if (!haveClickedNextAtLeastOnce) return;
+    setErrors(getCreateWaveValidationErrors({ config, step }));
+  }, [config, haveClickedNextAtLeastOnce]);
+
+  const onStep = (newStep: CreateWaveStep) => {
+    setHaveClickedNextAtLeastOnce(true);
+    const newErrors = getCreateWaveValidationErrors({ config, step });
+    console.log(newErrors);
+    if (!!newErrors.length) {
+      setErrors(newErrors);
+      return;
+    }
+    setStep(newStep);
   };
 
-  const getIsParticipationSignatureRequired = (): boolean => {
-    return (
-      config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
-      config.overview.signatureType === WaveSignatureType.DROPS
-    );
-  };
+  // const getIsVotingSignatureRequired = (): boolean => {
+  //   return (
+  //     config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+  //     config.overview.signatureType === WaveSignatureType.VOTING
+  //   );
+  // };
 
-  const getCreateNewWaveBody = (): CreateNewWave => {
-    return {
-      name: config.overview.name,
-      description: config.overview.description,
-      voting: {
-        scope: {
-          group_id: config.groups.canVote,
-        },
-        credit_type: WaveCreditType.Rep,
-        // TODO: whats this???
-        credit_scope: WaveCreditScope.Wave,
-        credit_category: config.voting.category,
-        creditor_id: config.voting.profileId,
-        signature_required: getIsVotingSignatureRequired(),
-      },
-      visibility: {
-        scope: {
-          group_id: config.groups.canView,
-        },
-      },
-      participation: {
-        scope: {
-          group_id: config.groups.canDrop,
-        },
-        // TODO: whats this???
-        no_of_applications_allowed_per_participant: null,
-        // TODO: needs also type and make sure to filter out empty strings
-        required_metadata: config.drops.requiredMetadata.map((metadata) => ({
-          name: metadata.key,
-        })),
-        signature_required: getIsParticipationSignatureRequired(),
-        // TODO: whats this???
-        period: undefined,
-      },
-      wave: {
-        type: config.overview.type,
-        // TODO: whats this???
-        winning_thresholds: null,
-        // TODO: whats this???
-        max_winners: null,
-        // TODO: needs new name
-        time_lock_ms: config.approval.thresholdTimeMs,
-        admin_group_id: config.groups.admin,
-        // TODO: whats this???
-        period: null,
-      },
-      outcomes: [],
-    };
-  };
+  // const getIsParticipationSignatureRequired = (): boolean => {
+  //   return (
+  //     config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+  //     config.overview.signatureType === WaveSignatureType.DROPS
+  //   );
+  // };
+
+  // const getCreateNewWaveBody = (): CreateNewWave => {
+  //   return {
+  //     name: config.overview.name,
+  //     voting: {
+  //       scope: {
+  //         group_id: config.groups.canVote,
+  //       },
+  //       credit_type: WaveCreditType.Rep,
+  //       // TODO: whats this???
+  //       credit_scope: WaveCreditScope.Wave,
+  //       credit_category: config.voting.category,
+  //       creditor_id: config.voting.profileId,
+  //       signature_required: getIsVotingSignatureRequired(),
+  //     },
+  //     visibility: {
+  //       scope: {
+  //         group_id: config.groups.canView,
+  //       },
+  //     },
+  //     participation: {
+  //       scope: {
+  //         group_id: config.groups.canDrop,
+  //       },
+  //       // TODO: whats this???
+  //       no_of_applications_allowed_per_participant: null,
+  //       // TODO: needs also type and make sure to filter out empty strings
+  //       required_metadata: config.drops.requiredMetadata.map((metadata) => ({
+  //         name: metadata.key,
+  //       })),
+  //       signature_required: getIsParticipationSignatureRequired(),
+  //       // TODO: whats this???
+  //       period: undefined,
+  //     },
+  //     wave: {
+  //       type: config.overview.type,
+  //       // TODO: whats this???
+  //       winning_thresholds: null,
+  //       // TODO: whats this???
+  //       max_winners: null,
+  //       // TODO: needs new name
+  //       time_lock_ms: config.approval.thresholdTimeMs,
+  //       admin_group_id: config.groups.admin,
+  //       // TODO: whats this???
+  //       period: null,
+  //     },
+  //     outcomes: [],
+  //   };
+  // };
 
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
     setConfig((prev) => ({
@@ -281,6 +301,7 @@ export default function CreateWave({
     [CreateWaveStep.OVERVIEW]: (
       <CreateWaveOverview
         overview={config.overview}
+        errors={errors}
         setOverview={setOverview}
       />
     ),
@@ -357,7 +378,7 @@ export default function CreateWave({
             <CreateWavesMainSteps
               activeStep={step}
               waveType={config.overview.type}
-              onStep={setStep}
+              onStep={onStep}
             />
           </div>
           <div className="tw-flex-1">
@@ -382,7 +403,7 @@ export default function CreateWave({
                   </div>
                   <div className="tw-mt-auto">
                     <CreateWaveActions
-                      setStep={setStep}
+                      setStep={onStep}
                       step={step}
                       config={config}
                       onComplete={onComplete}
