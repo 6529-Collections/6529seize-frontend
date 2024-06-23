@@ -30,7 +30,6 @@ export interface WaveOverviewConfig {
   readonly type: WaveType;
   readonly signatureType: WaveSignatureType;
   readonly name: string;
-  readonly description: string;
 }
 
 export interface WaveGroupsConfig {

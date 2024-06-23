@@ -1,17 +1,23 @@
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
+import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import CreateWaveOverviewInput from "./CreateWaveOverviewInput";
 
 export default function CreateWaveOverviewInputs({
   name,
-  description,
+  errors,
   onChange,
 }: {
   readonly name: string;
-  readonly description: string;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onChange: (param: {
-    readonly key: "name" | "description";
+    readonly key: "name";
     readonly value: string;
   }) => void;
 }) {
+  const isNameError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED
+  );
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <div className="tw-space-y-1.5">
@@ -19,24 +25,17 @@ export default function CreateWaveOverviewInputs({
           <CreateWaveOverviewInput
             valueKey="name"
             onValueChange={onChange}
+            isError={isNameError}
             value={name}
           />
         </div>
-        <div className="tw-text-error tw-text-xs tw-font-medium">
-          Name is required
-        </div>
-      </div>
-      <div className="tw-space-y-1.5">
-        <div className="tw-group tw-w-full tw-relative">
-          <CreateWaveOverviewInput
-            valueKey="description"
-            value={description}
-            onValueChange={onChange}
-          />
-        </div>
-        <div className="tw-text-error tw-text-xs tw-font-medium">
-          Description is required
-        </div>
+        <CommonAnimationHeight>
+          {isNameError && (
+            <div className="tw-text-error tw-text-xs tw-font-medium">
+              Name is required
+            </div>
+          )}
+        </CommonAnimationHeight>
       </div>
     </div>
   );
