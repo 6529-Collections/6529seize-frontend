@@ -1,4 +1,18 @@
-export default function WavesOutcomeManual() {
+import { useState } from "react";
+import {
+  CreateWaveOutcomeConfig,
+  CreateWaveOutcomeType,
+} from "../../../../types/waves.types";
+
+export default function CreateWaveOutcomesManual({
+  onOutcome,
+}: {
+  readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
+}) {
+  const [value, setValue] = useState<string>("");
+  const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  };
   return (
     <div className="tw-col-span-full tw-flex tw-flex-col tw-gap-y-2">
       <div className="tw-flex tw-flex-col tw-gap-y-4">
@@ -42,6 +56,8 @@ export default function WavesOutcomeManual() {
           <div className="tw-relative tw-w-full">
             <input
               type="text"
+              value={value}
+              onChange={onValueChange}
               autoComplete="off"
               className="tw-form-input tw-block tw-px-4 tw-pb-3 tw-pt-4 tw-w-full tw-text-base tw-rounded-r-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-600 focus:tw-border-blue-500 tw-peer
 tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
@@ -79,7 +95,20 @@ tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shado
           </div>
         </div>
       </div>
- 
+      <button
+        disabled={!value}
+        onClick={() =>
+          onOutcome({
+            title: value,
+            type: CreateWaveOutcomeType.MANUAL,
+            credit: null,
+            category: null,
+            winnersConfig: null,
+          })
+        }
+      >
+        Add
+      </button>
     </div>
   );
 }

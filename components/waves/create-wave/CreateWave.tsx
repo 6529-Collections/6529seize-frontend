@@ -4,7 +4,7 @@ import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
-import WavesOutcome from "../WavesOutcome";
+import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import {
   CreateWaveConfig,
   CreateWaveGroupConfigType,
@@ -39,7 +39,7 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.DATES;
+  const initialStep = CreateWaveStep.OUTCOMES;
   const getInitialConfig = ({
     type,
   }: {
@@ -70,6 +70,7 @@ export default function CreateWave({
       category: null,
       profileId: null,
     },
+    outcomes: [],
     approval: {
       threshold: null,
       thresholdTimeMs: null,
@@ -95,7 +96,6 @@ export default function CreateWave({
   const onStep = (newStep: CreateWaveStep) => {
     setHaveClickedNextAtLeastOnce(true);
     const newErrors = getCreateWaveValidationErrors({ config, step });
-    console.log(newErrors);
     if (!!newErrors.length) {
       setErrors(newErrors);
       return;
@@ -184,6 +184,13 @@ export default function CreateWave({
     setConfig((prev) => ({
       ...prev,
       drops,
+    }));
+  };
+
+  const setOutcomes = (outcomes: CreateWaveConfig["outcomes"]) => {
+    setConfig((prev) => ({
+      ...prev,
+      outcomes,
     }));
   };
 
@@ -339,7 +346,12 @@ export default function CreateWave({
         setThresholdTimeMs={onThresholdTimeChange}
       />
     ),
-    [CreateWaveStep.OUTCOMES]: <WavesOutcome />,
+    [CreateWaveStep.OUTCOMES]: (
+      <CreateWaveOutcomes
+        outcomes={config.outcomes}
+        setOutcomes={setOutcomes}
+      />
+    ),
     [CreateWaveStep.DESCRIPTION]: (
       <CreateWaveDescription ref={createWaveDescriptionRef} profile={profile} />
     ),
