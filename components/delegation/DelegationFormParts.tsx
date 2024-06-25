@@ -6,9 +6,8 @@ import { Form, Row, Col, Container } from "react-bootstrap";
 import {
   useEnsName,
   useEnsAddress,
-  usePrepareContractWrite,
-  useContractWrite,
-  useWaitForTransaction,
+  useWriteContract,
+  useWaitForTransactionReceipt,
 } from "wagmi";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "../../constants";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
@@ -296,11 +295,10 @@ export function DelegationSubmitGroups(
     submitBtnLabel?: string;
   }>
 ) {
-  const writeConfig = usePrepareContractWrite(props.writeParams);
-  const writeDelegation = useContractWrite(writeConfig.config);
-  const waitWriteDelegation = useWaitForTransaction({
+  const writeDelegation = useWriteContract();
+  const waitWriteDelegation = useWaitForTransactionReceipt({
     confirmations: 1,
-    hash: writeDelegation.data?.hash,
+    hash: writeDelegation.data,
   });
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -310,7 +308,7 @@ export function DelegationSubmitGroups(
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
-      writeDelegation.write?.();
+      writeDelegation.writeContract(props.writeParams);
       props.onSetToast({
         title: props.title,
         message: "Confirm in your wallet...",
@@ -339,14 +337,14 @@ export function DelegationSubmitGroups(
         props.onSetToast({
           title: props.title,
           message: `Transaction submitted...
-                    ${getTransactionAnchor(writeDelegation.data.hash)}
+                    ${getTransactionAnchor(writeDelegation.data)}
                     <br />Waiting for confirmation...`,
         });
       } else {
         props.onSetToast({
           title: props.title,
           message: `Transaction Successful!
-                    ${getTransactionAnchor(writeDelegation.data.hash)}`,
+                    ${getTransactionAnchor(writeDelegation.data)}`,
         });
       }
     }
@@ -357,7 +355,7 @@ export function DelegationSubmitGroups(
   ]);
 
   function isLoading() {
-    return writeDelegation.isLoading || waitWriteDelegation.isLoading;
+    return writeDelegation.isPending || waitWriteDelegation.isLoading;
   }
 
   return (

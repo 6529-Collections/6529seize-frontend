@@ -16,7 +16,7 @@ import {
   NEVER_DATE,
 } from "../../../../../constants";
 import { PRIMARY_ADDRESS_USE_CASE } from "../../../../../pages/delegation/[...section]";
-import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
 import { AuthContext } from "../../../../auth/Auth";
 import { getTransactionLink } from "../../../../../helpers/Helpers";
@@ -70,24 +70,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   const [assigningPrimary, setAssigningPrimary] = useState(false);
   const [statusMessage, setStatusMessage] = useState<any>();
 
-  const writeDelegation = useContractWrite({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: "registerDelegationAddress",
-    onError(e: any) {
-      setToast({
-        type: "error",
-        message: getError(e),
-      });
-      setAssigningPrimary(false);
-      writeDelegation.reset();
-    },
-  });
+  const writeDelegation = useWriteContract();
 
-  const waitWriteDelegation = useWaitForTransaction({
+  const waitWriteDelegation = useWaitForTransactionReceipt({
     confirmations: 1,
-    hash: writeDelegation.data?.hash,
+    hash: writeDelegation.data,
   });
 
   function getError(e: any) {
@@ -95,16 +82,16 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   }
 
   useEffect(() => {
-    if (writeDelegation.isLoading) {
+    if (writeDelegation.isPending) {
       setStatusMessage("Confirm in your wallet...");
     } else if (writeDelegation.data) {
       let trxLink = (
         <>
-          {writeDelegation.data.hash && (
+          {writeDelegation.data && (
             <a
               href={getTransactionLink(
                 DELEGATION_CONTRACT.chain_id,
-                writeDelegation.data.hash
+                writeDelegation.data
               )}
               target="_blank"
               rel="noreferrer"
@@ -146,7 +133,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   const assignPrimary = async () => {
     setAssigningPrimary(true);
-    writeDelegation.write({
+    writeDelegation.writeContract({
+      address: DELEGATION_CONTRACT.contract,
+      abi: DELEGATION_ABI,
+      chainId: DELEGATION_CONTRACT.chain_id,
+      functionName: "registerDelegationAddress",
       args: [
         DELEGATION_ALL_ADDRESS,
         address.wallet.address,

@@ -123,7 +123,8 @@ export default function NextGenAdminProposeAddressesAndPercentages(
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [
           collectionID,
           address1,
@@ -200,7 +201,7 @@ export default function NextGenAdminProposeAddressesAndPercentages(
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

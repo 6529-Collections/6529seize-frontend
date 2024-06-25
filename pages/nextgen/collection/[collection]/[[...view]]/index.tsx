@@ -30,7 +30,7 @@ const NextGenCollectionComponent = dynamic(
   }
 );
 
-export default function NextGenCollection(props: any) {
+export default function NextGenCollectionPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   const view: ContentView = props.pageProps.view;
   useShallowRedirect(collection.name);

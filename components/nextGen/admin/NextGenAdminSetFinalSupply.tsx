@@ -74,7 +74,8 @@ export default function NextGenAdminSetFinalSupply(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [collectionID],
       });
     }
@@ -110,7 +111,7 @@ export default function NextGenAdminSetFinalSupply(props: Readonly<Props>) {
           </Form>
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

@@ -11,7 +11,7 @@ import { Season } from "../entities/ISeason";
 import { ConsolidatedTDHMetrics } from "../entities/ITDH";
 import { Page } from "./Types";
 import { commonApiFetch } from "../services/api/common-api";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { ActivityLogParamsConverted } from "../components/profile-activity/ProfileActivityLogs";
 import {
   ProfileRatersParams,
@@ -177,7 +177,7 @@ export const getProfileRatings = async ({
       })
     : null;
 
-  const rater = raterProfile?.profile?.handle.toLowerCase() ?? null;
+  const rater = raterProfile?.input_identity.toLowerCase() ?? null;
 
   const params: Record<string, string> = {};
   if (rater) {

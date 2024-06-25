@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useContractRead, useSignMessage } from "wagmi";
+import { useAccount, useReadContract, useSignMessage } from "wagmi";
 import { useEffect, useRef, useState } from "react";
 import {
   FunctionSelectors,
@@ -57,7 +57,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
 
   const [burnCollectionID, setBurnCollectionID] = useState("");
   const [mintCollectionID, setMintCollectionID] = useState("");
-  const [status, setStatus] = useState<boolean>();
+  const [status, setStatus] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,17 +65,20 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
 
   const [uploadError, setUploadError] = useState<string>();
 
-  useContractRead({
+  const burnRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "burnToMintCollections",
     args: [burnCollectionID, mintCollectionID],
-    enabled: !!burnCollectionID && !!mintCollectionID,
-    onSettled(data: any, error: any) {
-      setStatus(data);
+    query: {
+      enabled: !!burnCollectionID && !!mintCollectionID,
     },
   });
+
+  useEffect(() => {
+    setStatus(burnRead.data as any);
+  }, [burnRead.data]);
 
   useEffect(() => {
     if (signMessage.isError) {
@@ -163,7 +166,8 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
 
   useEffect(() => {
     if (submitting) {
-      contractWrite.write({
+      contractWrite.writeContract({
+        ...contractWrite.params,
         args: [burnCollectionID, mintCollectionID, status],
       });
     }
@@ -188,7 +192,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
                 className={`${styles.formInput}`}
                 value={burnCollectionID}
                 onChange={(e) => {
-                  setStatus(undefined);
+                  setStatus(false);
                   setBurnCollectionID(e.target.value);
                 }}>
                 <option value="" disabled>
@@ -207,7 +211,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
                 className={`${styles.formInput}`}
                 value={mintCollectionID}
                 onChange={(e) => {
-                  setStatus(undefined);
+                  setStatus(false);
                   setMintCollectionID(e.target.value);
                 }}>
                 <option value="" disabled>
@@ -243,7 +247,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
           {loading && contractWrite.isLoading && <div>Synced with DB.</div>}
           <NextGenContractWriteStatus
             isLoading={contractWrite.isLoading}
-            hash={contractWrite.data?.hash}
+            hash={contractWrite.data}
             error={contractWrite.error}
           />
         </Col>

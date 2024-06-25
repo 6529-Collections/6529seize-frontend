@@ -56,7 +56,7 @@ export function printViewButton(
   );
 }
 
-export default function NextGenCollection(props: Readonly<Props>) {
+export default function NextGenCollectionComponent(props: Readonly<Props>) {
   const crumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "NextGen", href: "/nextgen" },

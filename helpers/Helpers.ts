@@ -80,9 +80,13 @@ export function fromGWEI(from: number) {
   return from / 1e18;
 }
 
+export function isNumeric(str: string) {
+  return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(str);
+}
+
 export function numberWithCommasFromString(x: any) {
   x = x.toString();
-  if (!x || isNaN(parseFloat(x))) return x;
+  if (!x || !isNumeric(x) || isNaN(parseFloat(x))) return x;
   if (x.includes(" ") || x.includes(",")) return x;
   const cleanedInput = x.replace(/[^\d.-]/g, "");
   if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
@@ -717,3 +721,45 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
 
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
+
+const hashSeed = (seed: string): number => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+const seededRandom = (seed: number) => {
+  return () => {
+    const a = 1664525;
+    const c = 1013904223;
+    const m = 2 ** 32;
+    seed = (a * seed + c) % m;
+    return seed / m;
+  };
+};
+
+export const getRandomColorWithSeed = (seedString: string) => {
+  let seed = hashSeed(seedString);
+  const random = seededRandom(seed);
+  const r = Math.floor(random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+  const g = Math.floor(random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+  const b = Math.floor(random() * 256)
+    .toString(16)
+    .padStart(2, "0");
+
+  return `#${r}${g}${b}`;
+};
+
+export const waitForMilliseconds = async (
+  milliseconds: number
+): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+};

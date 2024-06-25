@@ -35,6 +35,8 @@ export const DELEGATION_ALL_ADDRESS =
 
 export const API_AUTH_COOKIE = "x-6529-auth";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
+export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
+export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const PROFILE_PROXY_ACCEPTANCE_COOKIE = "profile-proxy-acceptance";
 export const NEVER_DATE = 64060588800;
 
@@ -53,6 +55,8 @@ export const ETHEREUM_ICON_TEXT = "Ξ";
 export const MEMES_MINTING_HREF = "https://thememes.seize.io";
 
 export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
+
+export const SUBSCRIPTIONS_CHAIN = mainnet;
 
 export const SUBSCRIPTIONS_ADDRESS =
   "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";
