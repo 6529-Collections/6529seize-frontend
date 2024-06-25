@@ -22,7 +22,7 @@ export default function Groups() {
 
   const edit = searchParams.get(GROUP_EDIT_SEARCH_PARAM);
 
-  const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
+  const [viewMode, setViewMode] = useState(GroupsViewMode.CREATE);
 
   const onViewModeChange = async (mode: GroupsViewMode): Promise<void> => {
     if (mode === GroupsViewMode.CREATE) {
@@ -43,11 +43,11 @@ export default function Groups() {
     }
   }, [edit]);
 
-  useEffect(() => {
-    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.VIEW);
-    }
-  }, [connectedProfile, activeProfileProxy]);
+  // useEffect(() => {
+  //   if (!connectedProfile?.profile?.handle || activeProfileProxy) {
+  //     onViewModeChange(GroupsViewMode.VIEW);
+  //   }
+  // }, [connectedProfile, activeProfileProxy]);
 
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (
