@@ -10,7 +10,7 @@ export default function CreateWaveDropsMetadataRowType({
   const activeClasses =
     "tw-ring-primary-400 tw-bg-[#202B45] tw-text-primary-400 tw-z-10";
   const inactiveClasses =
-    "tw-ring-iron-600 tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-300";
+    "tw-ring-iron-650 tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-300";
 
   const STRING_CLASSES =
     activeType === WaveRequiredMetadataType.STRING

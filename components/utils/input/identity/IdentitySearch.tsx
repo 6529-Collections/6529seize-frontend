@@ -119,7 +119,7 @@ export default function IdentitySearch({
       {!!identity?.length && (
         <svg
           onClick={() => onValueChange(null)}
-          className={`${ICON_CLASSES[size]} tw-top-3.5 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+          className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

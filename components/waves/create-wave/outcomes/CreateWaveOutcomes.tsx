@@ -42,7 +42,7 @@ export default function WavesOutcome({
 
   return (
     <div className="tw-mx-auto tw-w-full">
-      <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
         Choose outcome type
       </p>
       <div className="tw-mt-3 tw-space-y-6">
@@ -50,10 +50,12 @@ export default function WavesOutcome({
           outcomeType={outcomeType}
           setOutcomeType={setOutcomeType}
         />
-
-        <CommonAnimationHeight>
-          {outcomeType ? components[outcomeType] : <WavesOutcomeCards />}
-        </CommonAnimationHeight>
+        <div>
+          {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
+          <CommonAnimationHeight>
+            {outcomeType ? components[outcomeType] : <WavesOutcomeCards />}
+          </CommonAnimationHeight>
+        </div>
       </div>
     </div>
   );
