@@ -4,7 +4,6 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { formatAddress, getTransactionLink } from "../../../helpers/Helpers";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
@@ -18,11 +17,7 @@ import {
   numberOfCardsForSeasonEnd,
 } from "../../../helpers/meme_calendar.helplers";
 
-export default function UserPageSubscriptionsTopUp(
-  props: Readonly<{
-    profile: IProfileAndConsolidations;
-  }>
-) {
+export default function UserPageSubscriptionsTopUp() {
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
 

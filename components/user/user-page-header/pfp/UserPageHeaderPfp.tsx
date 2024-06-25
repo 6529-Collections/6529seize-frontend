@@ -1,6 +1,9 @@
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import Image from "next/image";
-import {getScaledImageUri, ImageScale} from "../../../../helpers/image.helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../helpers/image.helpers";
 
 export default function UserPageHeaderPfp({
   profile,
@@ -29,7 +32,6 @@ export default function UserPageHeaderPfp({
       className="tw-flex-shrink-0 tw-h-36 sm:tw-h-44 tw-w-36 sm:tw-w-44 tw-rounded-lg tw-ring-[3px] tw-ring-white/30"
       style={{
         background: `linear-gradient(45deg, ${defaultBanner1} 0%, ${defaultBanner2} 100%)`,
-      }}
-    ></div>
+      }}></div>
   );
 }

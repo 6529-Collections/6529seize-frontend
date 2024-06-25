@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import Toggle from "react-toggle";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiPost } from "../../../services/api/common-api";
@@ -9,7 +8,7 @@ import { Spinner } from "../../dotLoader/DotLoader";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{
-    profile: IProfileAndConsolidations;
+    profileKey: string;
     details: SubscriptionDetails | undefined;
     readonly: boolean;
     refresh: () => void;
@@ -43,7 +42,7 @@ export default function UserPageSubscriptionsMode(
         SubscribeModeBody,
         SubscribeModeBody
       >({
-        endpoint: `subscriptions/${props.profile.consolidation.consolidation_key}/subscription-mode`,
+        endpoint: `subscriptions/${props.profileKey}/subscription-mode`,
         body: {
           automatic: auto,
         },
