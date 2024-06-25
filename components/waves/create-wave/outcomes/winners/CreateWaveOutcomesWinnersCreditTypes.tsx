@@ -18,7 +18,7 @@ export default function CreateWaveOutcomesWinnersCreditTypes({
 
   return (
     <div className="tw-flex">
-      <span className="tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
+      <span className="tw-p-1 tw-relative tw-ring-1 tw-ring-inset tw-bg-iron-900 tw-ring-iron-700 tw-inline-flex tw-rounded-lg tw-w-full sm:tw-w-auto tw-gap-x-1">
         {Object.values(CreateWaveOutcomeConfigWinnersCreditValueType).map(
           (type, i) => (
             <CreateWaveOutcomesWinnersCreditType

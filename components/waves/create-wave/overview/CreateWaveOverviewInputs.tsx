@@ -20,7 +20,7 @@ export default function CreateWaveOverviewInputs({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      <div className="tw-space-y-1.5">
+      <div>
         <div className="tw-group tw-w-full tw-relative">
           <CreateWaveOverviewInput
             valueKey="name"
@@ -31,7 +31,7 @@ export default function CreateWaveOverviewInputs({
         </div>
         <CommonAnimationHeight>
           {isNameError && (
-            <div className="tw-text-error tw-text-xs tw-font-medium">
+            <div className="tw-relative tw-mt-1.5 tw-z-10 tw-text-error tw-text-xs tw-font-medium">
               Name is required
             </div>
           )}
