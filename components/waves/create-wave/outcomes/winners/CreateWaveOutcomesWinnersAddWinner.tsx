@@ -4,11 +4,11 @@ export default function CreateWaveOutcomesWinnersAddWinner({
   readonly addWinner: () => void;
 }) {
   return (
-    <div className="tw-flex">
+    <div className="tw-flex -tw-ml-2">
       <button
         onClick={addWinner}
         type="button"
-        className="tw-py-1 tw-px-2 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-text-sm tw-text-primary-400 hover:tw-text-primary-300 
+        className="tw-py-1 tw-px-2 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-text-sm tw-text-primary-400 hover:tw-text-primary-500 
  tw-font-semibold tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
