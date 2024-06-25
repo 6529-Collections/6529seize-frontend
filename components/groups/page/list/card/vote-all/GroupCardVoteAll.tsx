@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { CommunityMemberOverview } from "../../../../../../entities/IProfile";
 import { GroupFull } from "../../../../../../generated/models/GroupFull";
 import { AuthContext } from "../../../../../auth/Auth";
@@ -25,6 +25,7 @@ import { RateMatter } from "../../../../../../generated/models/RateMatter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
 import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
 
+
 export default function GroupCardVoteAll({
   matter,
   group,
@@ -38,6 +39,18 @@ export default function GroupCardVoteAll({
     [RateMatter.Cic]: "CIC distributed.",
     [RateMatter.Rep]: "Rep distributed.",
   };
+
+  // Ref to track if the component is mounted
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    // Component did mount logic
+
+    return () => {
+      // Component will unmount logic
+      isMounted.current = false;
+    };
+  }, []);
 
   const [category, setCategory] = useState<string | null>(null);
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -167,7 +180,7 @@ export default function GroupCardVoteAll({
     let page = 1;
 
     let haveNextPage = true;
-    while (haveNextPage) {
+    while (haveNextPage && isMounted.current) {
       const membersPage = await getMembersPage(page);
       haveNextPage = membersPage.next !== null;
       page++;
@@ -194,6 +207,7 @@ export default function GroupCardVoteAll({
         return;
       }
     }
+    if (!isMounted.current) return;
     setToast({
       message: SUCCESS_LABEL[matter],
       type: "success",

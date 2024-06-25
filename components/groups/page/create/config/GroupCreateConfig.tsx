@@ -3,6 +3,7 @@ import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
 import GroupCreateRep from "./GroupCreateRep";
 import GroupCreateTDH from "./GroupCreateTDH";
+import GroupCreateWallets from "./wallets/GroupCreateWallets";
 
 export default function GroupCreateConfig({
   level,
@@ -35,7 +36,7 @@ export default function GroupCreateConfig({
         <GroupCreateCIC cic={cic} setCIC={setCIC} />
         <GroupCreateRep rep={rep} setRep={setRep} />
       </div>
-      {/* <GroupCreateWallets wallets={wallets} setWallets={setWallets} /> */}
+      <GroupCreateWallets wallets={wallets} setWallets={setWallets} />
     </div>
   );
 }

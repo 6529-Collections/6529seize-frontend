@@ -83,6 +83,8 @@ export default function GroupCardActionStats({
     enabled: !!rater,
   });
 
+  useEffect(() => console.log(creditLeft), [creditLeft]);
+
   const getCreditLeft = () => {
     switch (matter) {
       case RateMatter.Rep:

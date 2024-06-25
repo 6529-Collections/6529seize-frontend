@@ -21,15 +21,41 @@ export default function GroupCreate({
 }) {
   const isEditMode = !!edit && edit !== "new";
 
-  const { data: originalGroup, isFetching } = useQuery<GroupFull>({
-    queryKey: [QueryKey.GROUP, edit],
+  const { data: originalGroup, isFetching: loadingOriginalGroup } =
+    useQuery<GroupFull>({
+      queryKey: [QueryKey.GROUP, edit],
+      queryFn: async () =>
+        await commonApiFetch<GroupFull>({
+          endpoint: `groups/${edit}`,
+        }),
+      placeholderData: keepPreviousData,
+      enabled: !!edit && isEditMode,
+    });
+
+  const {
+    data: originalGroupWallets,
+    isFetching: loadingOriginalGroupWallets,
+  } = useQuery<string[]>({
+    queryKey: [
+      QueryKey.GROUP_WALLET_GROUP_WALLETS,
+      {
+        group_id: originalGroup?.id,
+        wallet_group_id: originalGroup?.group.wallet_group_id,
+      },
+    ],
     queryFn: async () =>
-      await commonApiFetch<GroupFull>({
-        endpoint: `groups/${edit}`,
+      await commonApiFetch<string[]>({
+        endpoint: `groups/${originalGroup?.id}/wallet_groups/${originalGroup?.group.wallet_group_id}`,
       }),
-    placeholderData: keepPreviousData,
-    enabled: !!edit && isEditMode,
+    enabled: !!originalGroup?.id && !!originalGroup?.group.wallet_group_id,
   });
+
+  const [isFetching, setIsFetching] = useState(
+    loadingOriginalGroup || loadingOriginalGroupWallets
+  );
+  useEffect(() => {
+    setIsFetching(loadingOriginalGroup || loadingOriginalGroupWallets);
+  }, [loadingOriginalGroup, loadingOriginalGroupWallets]);
 
   const [groupConfig, setGroupConfig] = useState<CreateGroup>({
     name: "",
@@ -83,10 +109,10 @@ export default function GroupCreate({
           max: originalGroup.group.level?.max,
         },
         owns_nfts: originalGroup.group.owns_nfts,
-        wallets: [],
+        wallets: originalGroupWallets ?? [],
       },
     });
-  }, [originalGroup]);
+  }, [originalGroup, originalGroupWallets]);
 
   if (isFetching) {
     return <div>Loading...</div>;
