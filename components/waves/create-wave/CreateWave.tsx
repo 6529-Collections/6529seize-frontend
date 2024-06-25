@@ -360,7 +360,7 @@ export default function CreateWave({
   return (
     <div className="tailwind-scope tw-bg-iron-950">
       <div className="tw-overflow-hidden tw-h-full tw-w-full">
-        <div className="tw-max-w-5xl tw-mx-auto tw-mt-8">
+        <div className="tw-max-w-5xl tw-mx-auto tw-mt-8 tw-px-6">
           <button
             onClick={onBack}
             type="button"
@@ -394,7 +394,7 @@ export default function CreateWave({
             />
           </div>
           <div className="tw-flex-1">
-            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-10 tw-rounded-xl">
+            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-6 md:tw-p-10 tw-rounded-xl">
               <div className="tw-relative tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-w-full">

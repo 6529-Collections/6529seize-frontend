@@ -37,7 +37,7 @@ export default function CreateWaveGroupItem({
               {selectedGroup.created_by.handle}
             </span>
           </div>
-          <div className="tw-text-primary-400 tw-whitespace-nowrap tw-font-semibold tw-text-sm">
+          <div className="tw-text-primary-400 tw-whitespace-nowrap tw-font-semibold tw-text-sm tw-truncate">
             {selectedGroup.name}
           </div>
         </div>
