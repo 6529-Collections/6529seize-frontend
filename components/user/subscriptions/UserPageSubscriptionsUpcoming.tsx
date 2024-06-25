@@ -134,7 +134,7 @@ function SubscriptionRow(
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [subscribed, setSubscribed] = useState<boolean>(
-    props.subscription.subscribed
+    !!props.subscription.subscribed
   );
 
   const { data: final } = useQuery<NFTFinalSubscription>({
@@ -150,7 +150,7 @@ function SubscriptionRow(
   });
 
   useEffect(() => {
-    setSubscribed(props.subscription.subscribed);
+    setSubscribed(!!props.subscription.subscribed);
   }, [props.subscription.subscribed]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -181,7 +181,7 @@ function SubscriptionRow(
         },
       });
       const responseSubscribed = response.subscribed;
-      setSubscribed(responseSubscribed);
+      setSubscribed(!!responseSubscribed);
       const detail = responseSubscribed
         ? `Subscribed for`
         : `Unsubscribed from`;
