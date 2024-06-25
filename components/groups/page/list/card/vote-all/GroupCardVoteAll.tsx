@@ -24,7 +24,7 @@ import GroupCardActionWrapper from "../GroupCardActionWrapper";
 import { RateMatter } from "../../../../../../generated/models/RateMatter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
 import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
-import { waitForMilliseconds } from "../../../../../../helpers/Helpers";
+
 
 export default function GroupCardVoteAll({
   matter,
@@ -189,19 +189,15 @@ export default function GroupCardVoteAll({
       }
       const members = membersPage.data;
       try {
-        console.log(members.map((m) => m.wallet.toLowerCase()));
-  
-        await waitForMilliseconds(1000);
-
-        // await bulkRateMutation.mutateAsync({
-        //   matter,
-        //   category,
-        //   amount_to_add:
-        //     creditDirection === CreditDirection.ADD
-        //       ? amountToAdd
-        //       : -amountToAdd,
-        //   target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
-        // });
+        await bulkRateMutation.mutateAsync({
+          matter,
+          category,
+          amount_to_add:
+            creditDirection === CreditDirection.ADD
+              ? amountToAdd
+              : -amountToAdd,
+          target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
+        });
         setDoneMembersCount((prev) => prev + members.length);
       } catch {
         setDoingRates(false);
