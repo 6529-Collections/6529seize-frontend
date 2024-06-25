@@ -15,13 +15,13 @@ export default function CreateWaveOutcomeTypesItem({
   const activeClasses =
     "tw-text-primary-400 tw-ring-primary-400 tw-bg-[#202B45] tw-shadow-xl";
   const inactiveClasses =
-    "tw-text-iron-300 tw-ring-iron-700 tw-bg-iron-800 hover:tw-ring-iron-600 tw-shadow-sm";
+    "tw-text-iron-300 hover:tw-text-iron-200 tw-ring-iron-700 tw-bg-iron-800 hover:tw-ring-iron-650 tw-shadow-sm";
   const classes = isActive ? activeClasses : inactiveClasses;
   return (
     <button
       onClick={() => setOutcomeType(outcomeType)}
       type="button"
-      className={`${classes} tw-font-semibold tw-border-0 tw-flex-1 tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${classes} tw-text-base tw-font-semibold tw-border-0 tw-flex-1 tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       {label}
     </button>

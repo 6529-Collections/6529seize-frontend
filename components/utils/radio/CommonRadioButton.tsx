@@ -26,7 +26,7 @@ export default function CommonRadioButton<T>({
       />
       <label
         htmlFor={id}
-        className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 tw-cursor-pointer"
+        className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 hover:tw-text-iron-200 tw-cursor-pointer"
       >
         {label}
       </label>

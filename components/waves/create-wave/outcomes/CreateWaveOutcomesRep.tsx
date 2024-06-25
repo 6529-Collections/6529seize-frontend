@@ -78,7 +78,7 @@ tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-400 tw-shado
         <div className="tw-mt-6 tw-flex tw-justify-end tw-gap-x-3">
           <button
             type="button"
-            className="tw-bg-iron-800 tw-border-iron-700 tw-text-white hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+            className="tw-bg-iron-800 tw-border-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
           >
             Cancel
           </button>

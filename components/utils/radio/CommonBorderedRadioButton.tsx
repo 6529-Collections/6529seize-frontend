@@ -25,7 +25,7 @@ export default function CommonBorderedRadioButton<T extends string>({
 
   const labelClasses = isSelected
     ? "tw-text-primary-400"
-    : "tw-text-iron-200";
+    : "tw-text-iron-300 hover:tw-text-iron-200";
   return (
     <div
       onClick={() => onChange(type)}

@@ -12,7 +12,7 @@ export default function CreateWaveOutcomesWinnersRows({
   };
 
   return (
-    <div className="tw-space-y-2">
+    <div className="tw-space-y-3">
       {winners.map((winner, i) => (
         <div key={i} className="tw-flex">
           <div className="tw-relative">
