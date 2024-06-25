@@ -115,10 +115,13 @@ export default function UserPageSubscriptions(
     setFetchingDetails(true);
     commonApiFetch<SubscriptionDetails>({
       endpoint: `subscriptions/consolidation/details/${profileKey}`,
-    }).then((data) => {
-      setDetails(data);
-      setFetchingDetails(false);
-    });
+    })
+      .then((data) => {
+        setDetails(data);
+      })
+      .finally(() => {
+        setFetchingDetails(false);
+      });
   }
 
   function fetchAirdropAddress() {
@@ -128,10 +131,13 @@ export default function UserPageSubscriptions(
     setFetchingAirdropAddress(true);
     commonApiFetch<AirdropAddressResult>({
       endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
-    }).then((data) => {
-      setAirdropResult(data);
-      setFetchingAirdropAddress(false);
-    });
+    })
+      .then((data) => {
+        setAirdropResult(data);
+      })
+      .finally(() => {
+        setFetchingAirdropAddress(false);
+      });
   }
 
   function fetchTopUpHistory() {
@@ -146,10 +152,13 @@ export default function UserPageSubscriptions(
       data: SubscriptionTopUp[];
     }>({
       endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
-    }).then((data) => {
-      setTopUpHistory(data.data);
-      setFetchingTopUpHistory(false);
-    });
+    })
+      .then((data) => {
+        setTopUpHistory(data.data);
+      })
+      .finally(() => {
+        setFetchingTopUpHistory(false);
+      });
   }
 
   function fetchRedeemHistory() {
@@ -164,10 +173,13 @@ export default function UserPageSubscriptions(
       data: RedeemedSubscription[];
     }>({
       endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
-    }).then((data) => {
-      setRedeemedHistory(data.data);
-      setFetchingRedeemedHistory(false);
-    });
+    })
+      .then((data) => {
+        setRedeemedHistory(data.data);
+      })
+      .finally(() => {
+        setFetchingRedeemedHistory(false);
+      });
   }
 
   function fetchMemeSubscriptions() {
@@ -181,10 +193,13 @@ export default function UserPageSubscriptions(
     }
     commonApiFetch<NFTSubscription[]>({
       endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
-    }).then((data) => {
-      setMemeSubscriptions(data);
-      setFetchingMemeSubscriptions(false);
-    });
+    })
+      .then((data) => {
+        setMemeSubscriptions(data);
+      })
+      .finally(() => {
+        setFetchingMemeSubscriptions(false);
+      });
   }
 
   function fetchLogs() {
@@ -199,10 +214,13 @@ export default function UserPageSubscriptions(
       data: SubscriptionLog[];
     }>({
       endpoint: `subscriptions/consolidation/logs/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
-    }).then((data) => {
-      setSubscriptionLogs(data.data);
-      setFetchingSubscriptionLogs(false);
-    });
+    })
+      .then((data) => {
+        setSubscriptionLogs(data.data);
+      })
+      .finally(() => {
+        setFetchingSubscriptionLogs(false);
+      });
   }
 
   const refresh = (): void => {
