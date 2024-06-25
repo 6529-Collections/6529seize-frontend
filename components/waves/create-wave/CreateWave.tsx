@@ -8,6 +8,7 @@ import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import {
   CreateWaveConfig,
   CreateWaveGroupConfigType,
+  CreateWaveOutcomeType,
   CreateWaveStep,
   WaveRequiredMetadataType,
   WaveSignatureType,
@@ -84,6 +85,9 @@ export default function CreateWave({
   );
 
   const [step, setStep] = useState<CreateWaveStep>(initialStep);
+  const [selectedOutcomeType, setSelectedOutcomeType] =
+    useState<CreateWaveOutcomeType | null>(null);
+
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
   const [haveClickedNextAtLeastOnce, setHaveClickedNextAtLeastOnce] =
     useState(false);
@@ -100,6 +104,7 @@ export default function CreateWave({
       setErrors(newErrors);
       return;
     }
+    setSelectedOutcomeType(null);
     setStep(newStep);
   };
 
@@ -349,6 +354,8 @@ export default function CreateWave({
     [CreateWaveStep.OUTCOMES]: (
       <CreateWaveOutcomes
         outcomes={config.outcomes}
+        outcomeType={selectedOutcomeType}
+        setOutcomeType={setSelectedOutcomeType}
         setOutcomes={setOutcomes}
       />
     ),
@@ -413,14 +420,16 @@ export default function CreateWave({
                     </AnimatePresence> */}
                     {stepComponent[step]}
                   </div>
-                  <div className="tw-mt-auto">
-                    <CreateWaveActions
-                      setStep={onStep}
-                      step={step}
-                      config={config}
-                      onComplete={onComplete}
-                    />
-                  </div>
+                  {!selectedOutcomeType && (
+                    <div className="tw-mt-auto">
+                      <CreateWaveActions
+                        setStep={onStep}
+                        step={step}
+                        config={config}
+                        onComplete={onComplete}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               {/* <div className="tw-absolute tw-inset-0">

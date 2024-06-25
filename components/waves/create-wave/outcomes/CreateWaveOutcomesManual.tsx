@@ -6,8 +6,10 @@ import {
 
 export default function CreateWaveOutcomesManual({
   onOutcome,
+  onCancel,
 }: {
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
+  readonly onCancel: () => void;
 }) {
   const [value, setValue] = useState<string>("");
   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +39,7 @@ export default function CreateWaveOutcomesManual({
         </div>
         <div className="tw-mt-6 tw-flex tw-justify-end tw-gap-x-3">
           <button
+            onClick={onCancel}
             type="button"
             className="tw-bg-iron-800 tw-border-iron-700 tw-text-white hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
           >

@@ -12,23 +12,27 @@ import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeigh
 
 export default function WavesOutcome({
   outcomes,
+  outcomeType,
+  setOutcomeType,
   setOutcomes,
 }: {
   readonly outcomes: CreateWaveOutcomeConfig[];
+  readonly outcomeType: CreateWaveOutcomeType | null;
+  readonly setOutcomeType: (outcomeType: CreateWaveOutcomeType | null) => void;
   readonly setOutcomes: (outcomes: CreateWaveOutcomeConfig[]) => void;
 }) {
-  const [outcomeType, setOutcomeType] = useState<CreateWaveOutcomeType | null>(
-    CreateWaveOutcomeType.REP
-  );
-
   const onOutcome = (outcome: CreateWaveOutcomeConfig) => {
     setOutcomes([...outcomes, outcome]);
     setOutcomeType(null);
   };
 
+  const onCancel = () => {
+    setOutcomeType(null);
+  };
+
   const components: Record<CreateWaveOutcomeType, JSX.Element> = {
     [CreateWaveOutcomeType.MANUAL]: (
-      <CreateWaveOutcomesManual onOutcome={onOutcome} />
+      <CreateWaveOutcomesManual onOutcome={onOutcome} onCancel={onCancel} />
     ),
     [CreateWaveOutcomeType.REP]: (
       <CreateWaveOutcomesRep onOutcome={onOutcome} />
