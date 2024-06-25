@@ -19,8 +19,9 @@ export default function CreateWaveOutcomesWinnersCreditType({
 }) {
   const isActive = activeCreditType === creditType;
 
-  const activeClasses = "tw-bg-primary-500";
-  const inActiveClasses = "tw-bg-iron-800";
+  const activeClasses = "tw-bg-primary-500 tw-text-white";
+  const inActiveClasses =
+    "hover:tw-bg-iron-800 tw-text-iron-500 hover:tw-text-iron-100";
   const classes = `${isActive ? activeClasses : inActiveClasses} ${
     isFirst && !isLast ? "tw-rounded-l-lg" : ""
   } ${isLast && !isFirst ? "tw-rounded-r-lg" : ""} ${
@@ -31,7 +32,7 @@ export default function CreateWaveOutcomesWinnersCreditType({
     <button
       onClick={() => setActiveCreditType(creditType)}
       type="button"
-      className={`${classes} tw-border-0 tw-relative tw-inline-flex tw-items-center  tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-z-10`}
+      className={`${classes} tw-bg-iron-900 tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}
     >
       {label}
     </button>
