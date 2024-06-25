@@ -14,7 +14,7 @@ export default function CreateWaveOutcomeTypes({
     [CreateWaveOutcomeType.CIC]: "CIC",
   };
   return (
-    <div className="tw-grid sm:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
+    <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
       {Object.values(CreateWaveOutcomeType).map((type) => (
         <CreateWaveOutcomeTypesItem
           key={type}

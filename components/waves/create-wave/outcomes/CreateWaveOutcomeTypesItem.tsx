@@ -21,7 +21,7 @@ export default function CreateWaveOutcomeTypesItem({
     <button
       onClick={() => setOutcomeType(outcomeType)}
       type="button"
-      className={`${classes} tw-font-semibold  tw-border-0  tw-flex-1 tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4  focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${classes} tw-font-semibold tw-border-0 tw-flex-1 tw-relative tw-block tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-5 tw-py-4 focus:tw-outline-none sm:tw-flex sm:tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       {label}
     </button>
