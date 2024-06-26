@@ -38,7 +38,7 @@ export default function Groups() {
   };
 
   useEffect(() => {
-    if (edit) {
+    if (edit && !!connectedProfile?.profile?.handle && !activeProfileProxy) {
       onViewModeChange(GroupsViewMode.CREATE);
     }
   }, [edit]);
