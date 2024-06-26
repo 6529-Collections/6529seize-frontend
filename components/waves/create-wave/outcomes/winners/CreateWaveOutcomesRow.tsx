@@ -1,14 +1,33 @@
-export default function WavesOutcomeCards() {
+import {
+  CreateWaveOutcomeConfig,
+  CreateWaveOutcomeType,
+} from "../../../../../types/waves.types";
+
+export default function CreateWaveOutcomesRow({
+  outcome,
+  removeOutcome,
+}: {
+  readonly outcome: CreateWaveOutcomeConfig;
+  readonly removeOutcome: () => void;
+}) {
+  const isCreditType = outcome.type !== CreateWaveOutcomeType.MANUAL;
+  const LABELS: Record<CreateWaveOutcomeType, string> = {
+    [CreateWaveOutcomeType.MANUAL]: "Manual",
+    [CreateWaveOutcomeType.REP]: "Rep",
+    [CreateWaveOutcomeType.CIC]: "CIC",
+  };
   return (
-    <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-4">
-      <div className="tw-bg-gradient-to-r tw-from-primary-400/10 tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2">
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-6">
-          <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
-            Rep
-          </h3>
+    <div className="tw-bg-gradient-to-r tw-from-primary-400/10 tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-6">
+        <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
+          {LABELS[outcome.type]}
+        </h3>
+        {outcome.title && (
           <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-medium">
-            Winner of Wave
+            {outcome.title}
           </p>
+        )}
+        {isCreditType && (
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <svg
               className="tw-size-5 tw-text-primary-400"
@@ -26,34 +45,37 @@ export default function WavesOutcomeCards() {
               />
             </svg>
             <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
-              100 winners
+              {outcome.winnersConfig?.winners.length} winners
             </p>
           </div>
+        )}
+        {isCreditType && (
           <p className="tw-mb-0 tw-text-sm tw-text-success tw-font-medium">
-            420 rep
+            {outcome.winnersConfig?.totalAmount} {LABELS[outcome.type]}
           </p>
-          <button
-            role="button"
-            aria-label="Remove"
-            className="tw-h-8 tw-w-8 tw-text-error tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800 focus:tw-scale-90 tw-transform tw-transition tw-duration-300 tw-ease-out"
+        )}
+        <button
+          onClick={removeOutcome}
+          role="button"
+          aria-label="Remove"
+          className="tw-h-8 tw-w-8 tw-text-error tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800 focus:tw-scale-90 tw-transform tw-transition tw-duration-300 tw-ease-out"
+        >
+          <svg
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M17 7L7 17M7 7L17 17"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
+            <path
+              d="M17 7L7 17M7 7L17 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );

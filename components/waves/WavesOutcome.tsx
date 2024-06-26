@@ -1,8 +1,8 @@
 import WavesOutcomeTypes from "./WavesOutcomeTypes";
 import WavesOutcomeManual from "./create-wave/overview/WavesOutcomeManual";
 import WavesOutcomeRep from "./create-wave/overview/WavesOutcomeRep";
-import WavesOutcomeCIC from "./create-wave/overview/WavesOutcomeCIC";
-import WavesOutcomeCards from "./create-wave/overview/WavesOutcomeCards";
+import WavesOutcomeCIC from "./create-wave/outcomes/CreateWaveOutcomesCIC";
+import WavesOutcomeCards from "./create-wave/outcomes/winners/CreateWaveOutcomesRows";
 
 export default function WavesOutcome() {
   return (
@@ -11,7 +11,6 @@ export default function WavesOutcome() {
         Choose outcome type
       </p>
       <div className="tw-mt-3 tw-space-y-6">
-        
         <WavesOutcomeTypes />
 
         {/*   <WavesOutcomeManual /> */}
@@ -21,7 +20,6 @@ export default function WavesOutcome() {
         {/*   <WavesOutcomeCIC /> */}
 
         <WavesOutcomeCards />
-        
       </div>
     </div>
   );

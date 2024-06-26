@@ -17,11 +17,13 @@ export default function RepCategorySearch({
   category,
   size = RepCategorySearchSize.MD,
   disableInputCategoryAsValue = false,
+  error = false,
   setCategory,
 }: {
   readonly category: string | null;
   readonly size?: RepCategorySearchSize;
   readonly disableInputCategoryAsValue?: boolean;
+  readonly error?: boolean;
   readonly setCategory: (category: string | null) => void;
 }) {
   const randomId = getRandomObjectId();
@@ -122,11 +124,17 @@ export default function RepCategorySearch({
         onFocus={() => onFocusChange(true)}
         onBlur={() => onFocusChange(false)}
         id={randomId}
-        className={`${INPUT_CLASSES[size]} tw-form-input tw-block tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650 focus:tw-border-blue-500 tw-peer tw-pl-10 tw-py-3 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+        className={`${INPUT_CLASSES[size]} ${
+          error
+            ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error"
+            : "tw-ring-iron-650 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400"
+        } tw-form-input tw-block tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650  tw-peer tw-pl-10 tw-py-3 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900  tw-shadow-sm tw-ring-1 tw-ring-inset  placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset  tw-transition tw-duration-300 tw-ease-out`}
         placeholder=" "
       />
       <svg
-        className={`tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300 ${ICON_CLASSES[size]}`}
+        className={`${ICON_CLASSES[size]} ${
+          error ? "tw-text-error" : "tw-text-iron-300"
+        } tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 `}
         viewBox="0 0 20 20"
         fill="currentColor"
         aria-hidden="true"
@@ -140,7 +148,7 @@ export default function RepCategorySearch({
       {!!category?.length && (
         <svg
           onClick={() => onValueChange(null)}
-          className={`${ICON_CLASSES[size]}  tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
+          className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +164,11 @@ export default function RepCategorySearch({
       )}
       <label
         htmlFor={randomId}
-        className={`${LABEL_CLASSES[size]} tw-absolute tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
+        className={`${LABEL_CLASSES[size]} ${
+          error
+            ? "peer-focus:tw-text-error tw-text-error"
+            : "peer-focus:tw-text-primary-400 tw-text-iron-500"
+        } tw-absolute tw-cursor-text tw-font-medium  tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2  peer-placeholder-shown:tw-scale-100 
         peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
       >
         Rep Category
