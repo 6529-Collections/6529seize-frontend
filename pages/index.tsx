@@ -3,7 +3,11 @@ import styles from "../styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
-import { MEMES_CONTRACT, MEMES_MINTING_HREF } from "../constants";
+import {
+  MEMES_CONTRACT,
+  MEMES_MANIFOLD_PROXY_CONTRACT,
+  MEMES_MINTING_HREF,
+} from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFT, MemesExtendedData } from "../entities/INFT";
 
@@ -46,6 +50,7 @@ import {
   getDimensionsFromMetadata,
 } from "../helpers/nft.helplers";
 import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
+import { MEMES_MANIFOLD_PROXY_ABI } from "../abis";
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -103,23 +108,12 @@ export default function Home({
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 
-  const [disableClaim, setDisableClaim] = useState(false);
   const manifoldClaim = useManifoldClaim(
     MEMES_CONTRACT,
-    pageProps.nft.id,
-    disableClaim
+    MEMES_MANIFOLD_PROXY_CONTRACT,
+    MEMES_MANIFOLD_PROXY_ABI,
+    pageProps.nft.id
   );
-
-  useEffect(() => {
-    if (
-      manifoldClaim &&
-      (manifoldClaim.total === manifoldClaim.totalMax ||
-        (manifoldClaim.phase == ManifoldPhase.PUBLIC &&
-          manifoldClaim.status === ManifoldClaimStatus.EXPIRED))
-    ) {
-      setDisableClaim(true);
-    }
-  }, [manifoldClaim]);
 
   useEffect(() => {
     if (connectedProfile?.consolidation.consolidation_key && pageProps.nft) {
@@ -136,13 +130,19 @@ export default function Home({
 
   const renderManifoldClaimEditionSize = () => {
     if (manifoldClaim) {
-      if (disableClaim) {
+      if (manifoldClaim.isFinalized) {
         return <>{numberWithCommas(manifoldClaim.total)}</>;
       } else {
         return (
           <>
             {numberWithCommas(manifoldClaim.total)} /{" "}
             {numberWithCommas(manifoldClaim.totalMax)}
+            {manifoldClaim.isFetching && (
+              <>
+                {" "}
+                <DotLoader />
+              </>
+            )}
           </>
         );
       }
@@ -312,7 +312,7 @@ export default function Home({
                     </Row>
                     {manifoldClaim &&
                       manifoldClaim.status !== ManifoldClaimStatus.EXPIRED &&
-                      !disableClaim && (
+                      !manifoldClaim.isFinalized && (
                         <Row className="pb-3">
                           <Col sm={12} md={11}>
                             <MintCountdown
