@@ -195,8 +195,7 @@ export function getChains() {
   const chains: Chain[] = [mainnet];
   if (
     DELEGATION_CONTRACT.chain_id === sepolia.id ||
-    (NEXTGEN_CHAIN_ID as number) === sepolia.id ||
-    SUBSCRIPTIONS_CHAIN.id === sepolia.id
+    (NEXTGEN_CHAIN_ID as number) === sepolia.id
   ) {
     chains.push(sepolia);
   }
