@@ -362,7 +362,7 @@ export default function GradientPage() {
                       {nftId && (
                         <>
                           <span>
-                            <h2>
+                            <h2 className="float-left">
                               <a
                                 href={`/6529-gradient/${parseInt(nftId) - 1}`}
                                 className={`${styles.nextPreviousNft} ${
@@ -373,7 +373,7 @@ export default function GradientPage() {
                                 <FontAwesomeIcon icon="chevron-circle-left" />
                               </a>
                             </h2>
-                            <h2>
+                            <h2 className="float-left">
                               &nbsp;
                               <a
                                 href={`/6529-gradient/${parseInt(nftId) + 1}`}

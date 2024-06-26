@@ -10,9 +10,13 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { jwtDecode } from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import {
+  IProfileAndConsolidations,
+  ProfileConnectedStatus,
+} from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
 import { NonceResponse } from "../../generated/models/NonceResponse";
 import { LoginRequest } from "../../generated/models/LoginRequest";
 import { LoginResponse } from "../../generated/models/LoginResponse";
@@ -21,6 +25,7 @@ import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
+  readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ProfileProxy[];
   readonly activeProfileProxy: ProfileProxy | null;
   readonly requestAuth: () => Promise<{ success: boolean }>;
@@ -40,6 +45,7 @@ export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
   receivedProfileProxies: [],
   activeProfileProxy: null,
+  connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
   setActiveProfileProxy: async () => {},
@@ -52,6 +58,7 @@ export default function Auth({
 }) {
   const { address } = useAccount();
   const signMessage = useSignMessage();
+
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
     queryFn: async () =>
@@ -114,7 +121,11 @@ export default function Auth({
         wallet: address,
         role: activeProfileProxy?.created_by.id ?? null,
       });
-      if (!isAuth) removeAuthJwt();
+      if (!isAuth) {
+        removeAuthJwt();
+        setActiveProfileProxy(null);
+        requestAuth();
+      }
     }
   }, [address, activeProfileProxy]);
 
@@ -346,6 +357,7 @@ export default function Auth({
         connectedProfile: connectedProfile ?? null,
         receivedProfileProxies,
         activeProfileProxy,
+        connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
         setActiveProfileProxy: onActiveProfileProxy,
       }}>
       {children}

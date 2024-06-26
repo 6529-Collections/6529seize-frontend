@@ -54,12 +54,14 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   );
 
   return (
-    <UserPageIdentityWrapper
-      profile={pageProps.profile}
-      initialCICReceivedParams={initialCICReceivedParams}
-      initialCICGivenParams={initialCICGivenParams}
-      initialActivityLogParams={initialActivityLogParams}
-    />
+    <div className="tailwind-scope">
+      <UserPageIdentityWrapper
+        profile={pageProps.profile}
+        initialCICReceivedParams={initialCICReceivedParams}
+        initialCICGivenParams={initialCICGivenParams}
+        initialActivityLogParams={initialActivityLogParams}
+      />
+    </div>
   );
 };
 

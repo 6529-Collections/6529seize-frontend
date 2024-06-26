@@ -60,6 +60,7 @@ export default function ProfileRatersTableWrapper({
           ? ProfileRatersTableType.CIC_GIVEN
           : ProfileRatersTableType.CIC_RECEIVED;
       case RateMatter.REP:
+      case RateMatter.DROP_REP:
         return given
           ? ProfileRatersTableType.REP_GIVEN
           : ProfileRatersTableType.REP_RECEIVED;

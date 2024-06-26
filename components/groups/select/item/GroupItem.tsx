@@ -4,19 +4,19 @@ import {
   getScaledImageUri,
 } from "../../../../helpers/image.helpers";
 import Link from "next/link";
-
 import GroupItemWrapper from "./GroupItemWrapper";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectActiveGroupId,
-  setActiveGroupId,
-} from "../../../../store/groupSlice";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { getTimeAgo } from "../../../../helpers/Helpers";
 
-export default function GroupItem({ group }: { readonly group: GroupFull }) {
-  const activeGroupId = useSelector(selectActiveGroupId);
-  const dispatch = useDispatch();
+export default function GroupItem({
+  group,
+  activeGroupId,
+  onActiveGroupId,
+}: {
+  readonly group: GroupFull;
+  readonly activeGroupId: string | null;
+  readonly onActiveGroupId?: (groupId: string | null) => void;
+}) {
   const getIsActive = (): boolean =>
     !!activeGroupId && activeGroupId === group.id;
 
@@ -27,8 +27,8 @@ export default function GroupItem({ group }: { readonly group: GroupFull }) {
   }, [activeGroupId]);
 
   const deActivate = () => {
-    if (!isActive) return;
-    dispatch(setActiveGroupId(null));
+    if (!isActive || !onActiveGroupId) return;
+    onActiveGroupId(null);
   };
 
   const [deactivateHover, setDeactivateHover] = useState(false);
@@ -39,9 +39,10 @@ export default function GroupItem({ group }: { readonly group: GroupFull }) {
       group={group}
       isActive={isActive}
       deactivateHover={deactivateHover}
+      onActiveGroupId={onActiveGroupId}
     >
       <div className="-tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-xl tw-relative ">
-        {isActive && (
+        {isActive && onActiveGroupId && (
           <div className="tw-absolute -tw-right-2 -tw-top-10">
             <button
               onClick={(e) => {

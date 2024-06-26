@@ -389,7 +389,7 @@ export default function WalletCheckerComponent(
               <>
                 <Form.Group as={Row} className="pt-4">
                   <Col sm={12}>
-                    <h5 className="pt-2 pb-2 float-none">
+                    <h5 className="pt-2 pb-2">
                       Delegations ({delegations.length})
                     </h5>
                     {delegations.length > 0 ? (
@@ -474,7 +474,7 @@ export default function WalletCheckerComponent(
                 </Form.Group>
                 {activeDelegation && (
                   <div className="pt-2">
-                    <h5 className="pt-2 pb-2 float-none">
+                    <h5 className="pt-2 pb-2">
                       Active Minting Delegation for The Memes
                     </h5>
                     <div className="d-flex align-items-center gap-4">
@@ -516,7 +516,7 @@ export default function WalletCheckerComponent(
                 )}
                 <Form.Group as={Row} className="pt-4">
                   <Col sm={12}>
-                    <h5 className="pt-2 pb-2 float-none">
+                    <h5 className="pt-2 pb-2">
                       Delegation Managers ({subDelegations.length})
                     </h5>
                     {subDelegations.length > 0 ? (
@@ -592,7 +592,7 @@ export default function WalletCheckerComponent(
             {consolidationsLoaded && (
               <Form.Group as={Row} className="pt-4">
                 <Col sm={12}>
-                  <h5 className="pt-2 pb-2 float-none">
+                  <h5 className="pt-2 pb-2">
                     Consolidations ({consolidations.length})
                   </h5>
                   {consolidations.length > 0 ? (
@@ -654,9 +654,7 @@ export default function WalletCheckerComponent(
                   {consolidations.length > 1 &&
                     consolidatedWallets.length > 1 && (
                       <div className="pt-2">
-                        <h5 className="pt-2 pb-2 float-none">
-                          Active Consolidation
-                        </h5>
+                        <h5 className="pt-2 pb-2">Active Consolidation</h5>
                         <div className="d-flex align-items-center">
                           {consolidatedWallets.map((wallet, index) => (
                             <Fragment key={`consolidated-wallets-${index}`}>

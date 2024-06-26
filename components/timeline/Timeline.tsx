@@ -186,7 +186,7 @@ export default function Timeline(props: Readonly<Props>) {
               index % 2 === 0 ? styles.right : styles.left
             }`}>
             <div className={styles.content}>
-              <h5 className="float-none m-0 mb-3">
+              <h5 className="m-0 mb-3">
                 {`${getDateDisplay(step.transaction_date)} UTC`}
               </h5>
               <Container className="no-padding">
