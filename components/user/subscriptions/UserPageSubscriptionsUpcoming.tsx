@@ -1,7 +1,6 @@
 import styles from "./UserPageSubscriptions.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
 import {
   NFTFinalSubscription,
@@ -25,7 +24,7 @@ import { Time } from "../../../helpers/time";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
-    profile: IProfileAndConsolidations;
+    profileKey: string;
     details: SubscriptionDetails | undefined;
     memes_subscriptions: NFTSubscription[];
     readonly: boolean;
@@ -62,7 +61,7 @@ export default function UserPageSubscriptionsUpcoming(
                 <tr key={subscription.token_id}>
                   <td>
                     <SubscriptionRow
-                      profile={props.profile}
+                      profileKey={props.profileKey}
                       title="The Memes"
                       subscription={subscription}
                       readonly={props.readonly}
@@ -120,7 +119,7 @@ function SubscriptionExpandButton(
 
 function SubscriptionRow(
   props: Readonly<{
-    profile: IProfileAndConsolidations;
+    profileKey: string;
     title: string;
     subscription: NFTSubscription;
     readonly: boolean;
@@ -135,23 +134,23 @@ function SubscriptionRow(
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [subscribed, setSubscribed] = useState<boolean>(
-    props.subscription.subscribed
+    !!props.subscription.subscribed
   );
 
   const { data: final } = useQuery<NFTFinalSubscription>({
     queryKey: [
       "consolidation-final-subscription",
-      `${props.profile.consolidation.consolidation_key}-${props.subscription.contract}-${props.subscription.token_id}`,
+      `${props.profileKey}-${props.subscription.contract}-${props.subscription.token_id}`,
     ],
     queryFn: async () =>
       await commonApiFetch<NFTFinalSubscription>({
-        endpoint: `subscriptions/consolidation/final/${props.profile.consolidation.consolidation_key}/${props.subscription.contract}/${props.subscription.token_id}`,
+        endpoint: `subscriptions/consolidation/final/${props.profileKey}/${props.subscription.contract}/${props.subscription.token_id}`,
       }),
     enabled: props.first,
   });
 
   useEffect(() => {
-    setSubscribed(props.subscription.subscribed);
+    setSubscribed(!!props.subscription.subscribed);
   }, [props.subscription.subscribed]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,7 +173,7 @@ function SubscriptionRow(
     }
     try {
       const response = await commonApiPost<SubscribeBody, SubscribeBody>({
-        endpoint: `subscriptions/${props.profile.consolidation.consolidation_key}/subscription`,
+        endpoint: `subscriptions/${props.profileKey}/subscription`,
         body: {
           contract: props.subscription.contract,
           token_id: props.subscription.token_id,
@@ -182,7 +181,7 @@ function SubscriptionRow(
         },
       });
       const responseSubscribed = response.subscribed;
-      setSubscribed(responseSubscribed);
+      setSubscribed(!!responseSubscribed);
       const detail = responseSubscribed
         ? `Subscribed for`
         : `Unsubscribed from`;
