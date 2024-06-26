@@ -94,6 +94,7 @@ export interface CreateWaveOutcomeConfigWinner {
 
 export interface CreateWaveOutcomeConfigWinnersConfig {
   readonly creditValueType: CreateWaveOutcomeConfigWinnersCreditValueType;
+  readonly totalAmount: number;
   readonly winners: CreateWaveOutcomeConfigWinner[];
 }
 export interface CreateWaveOutcomeConfig {

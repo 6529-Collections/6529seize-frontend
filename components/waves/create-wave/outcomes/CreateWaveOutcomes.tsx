@@ -1,9 +1,8 @@
 import CreateWaveOutcomeTypes from "./CreateWaveOutcomeTypes";
 import CreateWaveOutcomesManual from "./CreateWaveOutcomesManual";
 import CreateWaveOutcomesRep from "./CreateWaveOutcomesRep";
-import WavesOutcomeCIC from "../overview/WavesOutcomeCIC";
-import WavesOutcomeCards from "../overview/WavesOutcomeCards";
-import { useState } from "react";
+import CreateWaveOutcomesCIC from "./CreateWaveOutcomesCIC";
+import CreateWaveOutcomesRows from "./winners/CreateWaveOutcomesRows";
 import {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
@@ -35,9 +34,11 @@ export default function WavesOutcome({
       <CreateWaveOutcomesManual onOutcome={onOutcome} onCancel={onCancel} />
     ),
     [CreateWaveOutcomeType.REP]: (
-      <CreateWaveOutcomesRep onOutcome={onOutcome} />
+      <CreateWaveOutcomesRep onOutcome={onOutcome} onCancel={onCancel} />
     ),
-    [CreateWaveOutcomeType.CIC]: <WavesOutcomeCIC />,
+    [CreateWaveOutcomeType.CIC]: (
+      <CreateWaveOutcomesCIC onOutcome={onOutcome} onCancel={onCancel} />
+    ),
   };
 
   return (
@@ -53,7 +54,14 @@ export default function WavesOutcome({
         <div>
           {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
           <CommonAnimationHeight>
-            {outcomeType ? components[outcomeType] : <WavesOutcomeCards />}
+            {outcomeType ? (
+              components[outcomeType]
+            ) : (
+              <CreateWaveOutcomesRows
+                outcomes={outcomes}
+                setOutcomes={setOutcomes}
+              />
+            )}
           </CommonAnimationHeight>
         </div>
       </div>
