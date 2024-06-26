@@ -49,14 +49,14 @@ const SEARCH_PARAMS_FIELDS = {
   sortDirection: "sort-direction",
 } as const;
 
-const SNZ_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
+const SZN_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
   [MEMES_SEASON.SZN1]: "1",
   [MEMES_SEASON.SZN2]: "2",
   [MEMES_SEASON.SZN3]: "3",
   [MEMES_SEASON.SZN4]: "4",
   [MEMES_SEASON.SZN5]: "5",
   [MEMES_SEASON.SZN6]: "6",
-  [MEMES_SEASON.SNZ7]: "7",
+  [MEMES_SEASON.SZN7]: "7",
 };
 
 export default function UserPageCollected({
@@ -101,7 +101,7 @@ export default function UserPageCollected({
     if (!collection) return null;
     if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
     if (!szn) return null;
-    const entry = Object.entries(SNZ_TO_SEARCH_PARAMS).find(
+    const entry = Object.entries(SZN_TO_SEARCH_PARAMS).find(
       ([k, v]) => v === szn
     );
     return entry ? (entry[0] as MEMES_SEASON) : null;
@@ -298,7 +298,7 @@ export default function UserPageCollected({
     const items: QueryUpdateInput[] = [
       {
         name: "szn",
-        value: szn ? SNZ_TO_SEARCH_PARAMS[szn] : null,
+        value: szn ? SZN_TO_SEARCH_PARAMS[szn] : null,
       },
       {
         name: "page",
@@ -347,7 +347,7 @@ export default function UserPageCollected({
       }
 
       if (filters.szn) {
-        params.szn = SNZ_TO_SEARCH_PARAMS[filters.szn];
+        params.szn = SZN_TO_SEARCH_PARAMS[filters.szn];
       }
       return await commonApiFetch<Page<CollectedCard>>({
         endpoint: `profiles/${filters.handleOrWallet}/collected`,

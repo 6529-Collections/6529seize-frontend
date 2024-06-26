@@ -17,5 +17,5 @@ export enum MEMES_SEASON {
   SZN4 = "SZN4",
   SZN5 = "SZN5",
   SZN6 = "SZN6",
-  SNZ7 = "SZN7",
+  SZN7 = "SZN7",
 }
