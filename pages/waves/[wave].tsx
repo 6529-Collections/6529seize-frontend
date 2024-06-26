@@ -41,7 +41,7 @@ export default function WavePage() {
           <div className="tw-flex tw-justify-center tw-gap-x-10">
             <div>
               <div className="tw-group tw-w-[372px]">
-                <div className="tw-relative tw-w-full tw-h-20">
+                <div className="tw-relative tw-w-full tw-h-[88px]">
                   <img
                     className="tw-w-full tw-h-full tw-object-cover tw-rounded-t-2xl"
                     src="https://images.unsplash.com/photo-1554147090-e1221a04a025?q=80&w=2896&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -49,24 +49,24 @@ export default function WavePage() {
                   />
                   <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-2 tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
                 </div>
-                <div className="tw-bg-iron-900 tw-relative tw-border tw-border-solid tw-border-t-0 tw-border-iron-700">
+                <div className="tw-bg-iron-900 tw-relative tw-border tw-border-solid tw-border-t-0 tw-border-iron-700 tw-rounded-b-2xl">
                   <div className="tw-px-4 sm:tw-px-6 tw-flex tw-items-end tw-justify-between">
                     <img
-                      className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+                      className="-tw-mt-10 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
                       src="https://images.unsplash.com/photo-1604079681864-c6fbd7eb109c?q=80&w=2731&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                       alt=""
                     />
                   </div>
-                  <div className="tw-pt-2 tw-pb-4 tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
+                  <div className="tw-pt-2 tw-pb-5 tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
                     <div className="tw-px-4 sm:tw-px-6 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
                       <div>
                         <p className="tw-mb-0 tw-text-2xl tw-text-white tw-font-semibold">
                           Memes-Chat
                         </p>
-                        <p className="tw-mt-2 tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">
+                        <p className="tw-mt-1 tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">
                           The main chat for 6529. Open to all. Please join!
                         </p>
-                        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-2">
+                        <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-2">
                           <div className="tw-flex -tw-space-x-0.5">
                             <div>
                               <img
@@ -103,7 +103,7 @@ export default function WavePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="tw-pt-3 tw-px-4 sm:tw-px-6 tw-flex tw-flex-col tw-gap-y-4">
+                    <div className="tw-pt-4 tw-px-4 sm:tw-px-6 tw-flex tw-flex-col tw-gap-y-6">
                       <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                         <span className="tw-font-medium tw-text-iron-400">
                           Created by
@@ -140,7 +140,7 @@ export default function WavePage() {
                 </div>
               </div>
             </div>
-            <div className="tw-w-[672px] tw-bg-red">drop</div>
+            <div className="tw-w-[672px]">drops component</div>
           </div>
         </div>
       </main>
