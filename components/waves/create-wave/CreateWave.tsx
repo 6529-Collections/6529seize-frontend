@@ -306,6 +306,7 @@ export default function CreateWave({
   const onComplete = async () => {
     console.log("onComplete");
     const drop = createWaveDescriptionRef.current?.requestDrop() ?? null;
+    console.log(JSON.stringify(drop, null, 2));
     console.log("drop", drop);
   };
 

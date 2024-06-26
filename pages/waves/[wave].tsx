@@ -2,6 +2,8 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import DropsListItem from "../../components/drops/view/item/DropsListItem";
+import { Drop } from "../../generated/models/Drop";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -140,7 +142,36 @@ export default function WavePage() {
                 </div>
               </div>
             </div>
-            <div className="tw-w-[672px]">drops component</div>
+            <div className="tw-w-[672px]">
+              <DropsListItem
+                drop={
+                  {
+                    mentioned_users: [],
+                    referenced_nfts: [],
+                    metadata: [],
+                    author: {
+                      id: "1",
+                      handle: "punk6529",
+                      pfp: null,
+                      banner1_color: null,
+                      banner2_color: null,
+                      cic: 0,
+                      rep: 0,
+                      tdh: 0,
+                      level: 0,
+                      archived: false,
+                    },
+                    parts: [
+                      {
+                        content: "my awesome drop",
+                        quoted_drop: null,
+                        media: [],
+                      },
+                    ],
+                  } as Drop
+                }
+              />
+            </div>
           </div>
         </div>
       </main>

@@ -78,7 +78,7 @@ export default function DropsListItem({
                     </svg>
                   </button>
                   {/*  <AnimatePresence mode="wait" initial={false}> */}
-                  <div
+                  {/* <div
                     className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-md tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/5 tw-focus:tw-outline-none"
                     role="menu"
                     aria-orientation="vertical"
@@ -95,7 +95,7 @@ export default function DropsListItem({
                         Copy
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   {/*    </AnimatePresence> */}
                 </div>
 
