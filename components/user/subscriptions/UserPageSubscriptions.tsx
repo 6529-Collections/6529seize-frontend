@@ -32,6 +32,8 @@ export default function UserPageSubscriptions(
 ) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
+  const [profileKey, setProfileKey] = useState<string>();
+
   const [isFetching, setIsFetching] = useState<boolean>(true);
 
   const [details, setDetails] = useState<SubscriptionDetails>();
@@ -67,15 +69,26 @@ export default function UserPageSubscriptions(
   const [isConnectedAccount, setIsConnectedAccount] = useState<boolean>(false);
 
   useEffect(() => {
-    if (connectedProfile && props.profile && !activeProfileProxy) {
-      setIsConnectedAccount(
-        connectedProfile.consolidation.consolidation_key ===
-          props.profile.consolidation.consolidation_key
-      );
-    } else {
+    if (activeProfileProxy) {
       setIsConnectedAccount(false);
+      setProfileKey(undefined);
+      return;
     }
-  }, [connectedProfile, props.profile, activeProfileProxy]);
+
+    const connectedKey =
+      connectedProfile?.consolidation?.consolidation_key ??
+      connectedProfile?.consolidation.wallets
+        .map((w) => w.wallet.address)
+        .join("-");
+    const pKey =
+      props.profile.consolidation.consolidation_key ??
+      props.profile?.consolidation.wallets
+        .map((w) => w.wallet.address)
+        .join("-");
+
+    setIsConnectedAccount(connectedKey === pKey);
+    setProfileKey(pKey);
+  }, [connectedProfile, activeProfileProxy, props.profile]);
 
   useEffect(() => {
     setIsFetching(
@@ -96,33 +109,39 @@ export default function UserPageSubscriptions(
   ]);
 
   function fetchDetails() {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     setFetchingDetails(true);
     commonApiFetch<SubscriptionDetails>({
-      endpoint: `subscriptions/consolidation/details/${props.profile.consolidation.consolidation_key}`,
-    }).then((data) => {
-      setDetails(data);
-      setFetchingDetails(false);
-    });
+      endpoint: `subscriptions/consolidation/details/${profileKey}`,
+    })
+      .then((data) => {
+        setDetails(data);
+      })
+      .finally(() => {
+        setFetchingDetails(false);
+      });
   }
 
   function fetchAirdropAddress() {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     setFetchingAirdropAddress(true);
     commonApiFetch<AirdropAddressResult>({
-      endpoint: `subscriptions/consolidation/${props.profile.consolidation.consolidation_key}/airdrop-address`,
-    }).then((data) => {
-      setAirdropResult(data);
-      setFetchingAirdropAddress(false);
-    });
+      endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
+    })
+      .then((data) => {
+        setAirdropResult(data);
+      })
+      .finally(() => {
+        setFetchingAirdropAddress(false);
+      });
   }
 
   function fetchTopUpHistory() {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     setFetchingTopUpHistory(true);
@@ -132,15 +151,18 @@ export default function UserPageSubscriptions(
       next: boolean;
       data: SubscriptionTopUp[];
     }>({
-      endpoint: `subscriptions/consolidation/top-up/${props.profile.consolidation.consolidation_key}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
-    }).then((data) => {
-      setTopUpHistory(data.data);
-      setFetchingTopUpHistory(false);
-    });
+      endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+    })
+      .then((data) => {
+        setTopUpHistory(data.data);
+      })
+      .finally(() => {
+        setFetchingTopUpHistory(false);
+      });
   }
 
   function fetchRedeemHistory() {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     setFetchingRedeemedHistory(true);
@@ -150,15 +172,18 @@ export default function UserPageSubscriptions(
       next: boolean;
       data: RedeemedSubscription[];
     }>({
-      endpoint: `subscriptions/consolidation/redeemed/${props.profile.consolidation.consolidation_key}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
-    }).then((data) => {
-      setRedeemedHistory(data.data);
-      setFetchingRedeemedHistory(false);
-    });
+      endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+    })
+      .then((data) => {
+        setRedeemedHistory(data.data);
+      })
+      .finally(() => {
+        setFetchingRedeemedHistory(false);
+      });
   }
 
   function fetchMemeSubscriptions() {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     setFetchingMemeSubscriptions(true);
@@ -167,15 +192,18 @@ export default function UserPageSubscriptions(
       upcomingLimit += 1;
     }
     commonApiFetch<NFTSubscription[]>({
-      endpoint: `subscriptions/consolidation/upcoming-memes/${props.profile.consolidation.consolidation_key}?card_count=${upcomingLimit}`,
-    }).then((data) => {
-      setMemeSubscriptions(data);
-      setFetchingMemeSubscriptions(false);
-    });
+      endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
+    })
+      .then((data) => {
+        setMemeSubscriptions(data);
+      })
+      .finally(() => {
+        setFetchingMemeSubscriptions(false);
+      });
   }
 
   function fetchLogs() {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     setFetchingSubscriptionLogs(true);
@@ -185,15 +213,18 @@ export default function UserPageSubscriptions(
       next: boolean;
       data: SubscriptionLog[];
     }>({
-      endpoint: `subscriptions/consolidation/logs/${props.profile.consolidation.consolidation_key}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
-    }).then((data) => {
-      setSubscriptionLogs(data.data);
-      setFetchingSubscriptionLogs(false);
-    });
+      endpoint: `subscriptions/consolidation/logs/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+    })
+      .then((data) => {
+        setSubscriptionLogs(data.data);
+      })
+      .finally(() => {
+        setFetchingSubscriptionLogs(false);
+      });
   }
 
   const refresh = (): void => {
-    if (!props.profile.consolidation.consolidation_key) {
+    if (!profileKey) {
       return;
     }
     fetchDetails();
@@ -206,30 +237,10 @@ export default function UserPageSubscriptions(
 
   useEffect(() => {
     refresh();
-  }, [props.profile.consolidation.consolidation_key]);
+  }, [profileKey]);
 
-  if (!props.profile.consolidation.consolidation_key) {
-    return (
-      <Container className="no-padding pb-5">
-        <Row>
-          <Col className="d-flex align-items-center gap-2">
-            <h4 className="mb-0">Subscribe</h4>
-            <span>
-              <a
-                href="/about/subscriptions"
-                className="font-smaller font-color-silver decoration-hover-underline">
-                Learn More
-              </a>
-            </span>
-          </Col>
-        </Row>
-        <Row>
-          <Col className="font-color-silver">
-            This user is not eligible to Subscribe at this time.
-          </Col>
-        </Row>
-      </Container>
-    );
+  if (!profileKey) {
+    return <></>;
   }
 
   return (
@@ -258,7 +269,7 @@ export default function UserPageSubscriptions(
                   show_refresh={isConnectedAccount}
                 />
                 <UserPageSubscriptionsMode
-                  profile={props.profile}
+                  profileKey={profileKey}
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
@@ -273,14 +284,14 @@ export default function UserPageSubscriptions(
         </Col>
         {isConnectedAccount && (
           <Col className="pt-2 pb-2" sm={12} md={6}>
-            <UserPageSubscriptionsTopUp profile={props.profile} />
+            <UserPageSubscriptionsTopUp />
           </Col>
         )}
       </Row>
       <Row className="pt-4 pb-2">
         <Col>
           <UserPageSubscriptionsUpcoming
-            profile={props.profile}
+            profileKey={profileKey}
             details={details}
             memes_subscriptions={memeSubscriptions}
             readonly={!isConnectedAccount}
