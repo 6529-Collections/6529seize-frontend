@@ -4,14 +4,17 @@ import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.c
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 import { WaveType } from "../../../../generated/models/WaveType";
 import { useEffect, useState } from "react";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 
 export default function CreateWaveDates({
   waveType,
   dates,
+  errors,
   setDates,
 }: {
   readonly waveType: WaveType;
   readonly dates: CreateWaveDatesConfig;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
 }) {
   const currentMonth = new Date().getMonth();
