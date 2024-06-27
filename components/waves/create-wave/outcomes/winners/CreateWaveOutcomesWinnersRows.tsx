@@ -1,18 +1,21 @@
 import {
   CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersCreditValueType,
+  CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import CreateWaveOutcomesWinnersRow from "./CreateWaveOutcomesWinnersRow";
 
 export default function CreateWaveOutcomesWinnersRows({
   creditValueType,
   winners,
-  totalValueError,
+  isError,
+  outcomeType,
   setWinners,
 }: {
   readonly creditValueType: CreateWaveOutcomeConfigWinnersCreditValueType;
   readonly winners: CreateWaveOutcomeConfigWinner[];
-  readonly totalValueError: boolean;
+  readonly isError: boolean;
+  readonly outcomeType: CreateWaveOutcomeType;
   readonly setWinners: (winners: CreateWaveOutcomeConfigWinner[]) => void;
 }) {
   const removeWinner = (index: number) => {
@@ -40,7 +43,8 @@ export default function CreateWaveOutcomesWinnersRows({
           winnersCount={winners.length}
           creditValueType={creditValueType}
           winner={winner}
-          totalValueError={totalValueError}
+          isError={isError}
+          outcomeType={outcomeType}
           removeWinner={removeWinner}
           onWinnerValueChange={onWinnerValueChange}
         />
