@@ -14,9 +14,10 @@ export default function CreateWaveOutcomesRep({
 }: {
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
-}) {
+  }) {
+  const outcomeType = CreateWaveOutcomeType.REP;
   const [outcome, setOutcome] = useState<CreateWaveOutcomeConfig>({
-    type: CreateWaveOutcomeType.REP,
+    type: outcomeType,
     title: null,
     credit: null,
     category: null,
@@ -30,6 +31,7 @@ export default function CreateWaveOutcomesRep({
 
   const [categoryError, setCategoryError] = useState<boolean>(false);
   const [totalValueError, setTotalValueError] = useState<boolean>(false);
+  const [percentageError, setPercentageError] = useState<boolean>(false);
 
   const setCategory = (category: string | null) => {
     setCategoryError(false);
@@ -40,30 +42,54 @@ export default function CreateWaveOutcomesRep({
     winnersConfig: CreateWaveOutcomeConfigWinnersConfig
   ) => {
     setTotalValueError(false);
+    setPercentageError(false);
     setOutcome({ ...outcome, winnersConfig });
   };
 
-  const getTotalValueError = (): boolean => {
-    const totalValue = outcome.winnersConfig?.winners.reduce(
+  const getWinnersTotal = (): number | null =>
+    outcome.winnersConfig?.winners.reduce(
       (acc, winner) => acc + winner.value,
       0
-    );
+    ) ?? null;
 
-    if (!totalValue) {
-      return true;
+  const getTotalValueError = (): boolean => {
+    if (
+      outcome.winnersConfig?.creditValueType ===
+      CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE
+    ) {
+      const totalValue = getWinnersTotal();
+
+      if (!totalValue) {
+        return true;
+      }
+      if (totalValue !== outcome.winnersConfig?.totalAmount) {
+        return true;
+      }
+    } else {
+      return !outcome.winnersConfig?.totalAmount;
     }
-    if (totalValue !== outcome.winnersConfig?.totalAmount) {
-      return true;
-    }
+
     return false;
+  };
+
+  const getPercentageError = (): boolean => {
+    if (
+      outcome.winnersConfig?.creditValueType !==
+      CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
+    ) {
+      return false;
+    }
+    return getWinnersTotal() !== 100;
   };
 
   const onSubmit = () => {
     const dontHaveCategorySet = !outcome.category;
     const totalValueError = getTotalValueError();
+    const percentageError = getPercentageError();
     setCategoryError(dontHaveCategorySet);
     setTotalValueError(totalValueError);
-    if (dontHaveCategorySet || totalValueError) {
+    setPercentageError(percentageError);
+    if (dontHaveCategorySet || totalValueError || percentageError) {
       return;
     }
     onOutcome(outcome);
@@ -84,6 +110,8 @@ export default function CreateWaveOutcomesRep({
           <CreateWaveOutcomesWinners
             winnersConfig={outcome.winnersConfig}
             totalValueError={totalValueError}
+            percentageError={percentageError}
+            outcomeType={outcomeType}
             setWinnersConfig={setWinnersConfig}
           />
         )}
