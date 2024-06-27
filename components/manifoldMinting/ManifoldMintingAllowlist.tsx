@@ -15,6 +15,7 @@ export default function ManifoldMintingAllowlist(
     instanceId: number;
     cost: number;
     merkleTreeId: number;
+    setFee: (fee: number) => void;
   }>
 ) {
   const [connectedAddress, setConnectedAddress] = useState<string>("");
@@ -48,7 +49,7 @@ export default function ManifoldMintingAllowlist(
 
   function getReadContractsParams() {
     const params: any = [];
-    merkleProofs.map((mp) => {
+    merkleProofs.map((mp, i) => {
       params.push({
         address: props.proxy as `0x${string}`,
         abi: props.abi,
@@ -62,6 +63,9 @@ export default function ManifoldMintingAllowlist(
 
   const readContracts = useReadContracts({
     contracts: getReadContractsParams(),
+    query: {
+      refetchInterval: 15000,
+    },
   });
 
   const getFee = useReadContract({
@@ -72,7 +76,9 @@ export default function ManifoldMintingAllowlist(
   });
 
   useEffect(() => {
-    setFee(Number(getFee.data ?? 0));
+    const f = Number(getFee.data ?? 0);
+    setFee(f);
+    props.setFee(f);
   }, [getFee.data]);
 
   useEffect(() => {
@@ -83,12 +89,22 @@ export default function ManifoldMintingAllowlist(
     setMintCount(hasAvailableMints ? 1 : 0);
   }, [readContracts.data]);
 
+  function mint(value: number, count: number) {
+    const availableProofs = merkleProofsMints.filter((m) => !m).slice(0, count);
+
+    if (availableProofs.length === 0) {
+      return;
+    }
+  }
+
   function printMint(available: number) {
     const optionsArray = Array.from({ length: available }, (_, i) => i);
+    const value = (props.cost + fee) * mintCount;
     return (
       <Container className="no-padding pt-3">
         <Row>
-          <Col className="d-flex gap-2 align-items-center">
+          <Col className="d-flex gap-3 align-items-center">
+            Select Mint Count:
             <Form.Select
               style={{
                 width: "fit-content",
@@ -108,16 +124,19 @@ export default function ManifoldMintingAllowlist(
                 );
               })}
             </Form.Select>
+            {mintCount > 0 && <b>{fromGWEI(value)} ETH</b>}
+          </Col>
+        </Row>
+        <Row className="pt-3">
+          <Col>
             <button
-              className="btn btn-primary"
+              className="btn btn-primary btn-block"
               style={{
-                padding: "0.5rem 2rem",
-              }}>
+                padding: "0.6rem",
+              }}
+              onClick={() => mint(value, mintCount)}>
               <b>SEIZE x{mintCount}</b>
             </button>
-            {mintCount > 0 && (
-              <b>{fromGWEI(props.cost + fee) * mintCount} ETH</b>
-            )}
           </Col>
         </Row>
       </Container>
@@ -136,7 +155,7 @@ export default function ManifoldMintingAllowlist(
       <>
         <Row>
           <Col>
-            {readContracts.isFetching ? (
+            {merkleProofsMints.length == 0 ? (
               <>
                 Fetching Mints <DotLoader />
               </>
@@ -148,28 +167,8 @@ export default function ManifoldMintingAllowlist(
             )}
           </Col>
         </Row>
-        <Row>
+        <Row className="pt-3">
           <Col>{printMint(unminted)}</Col>
-        </Row>
-        <Row className="pt-5 font-color-h">
-          <Col>
-            <Table className={styles.feesTable}>
-              <tbody>
-                <tr className="font-color-h">
-                  <td>- Mint Price</td>
-                  <td>{fromGWEI(props.cost)}</td>
-                </tr>
-                <tr>
-                  <td>- Manifold Fee</td>
-                  <td>{fromGWEI(fee)}</td>
-                </tr>
-                <tr>
-                  <td className="pt-2">Total Price Per Token</td>
-                  <td className="pt-2">{fromGWEI(props.cost + fee)}</td>
-                </tr>
-              </tbody>
-            </Table>
-          </Col>
         </Row>
       </>
     );
@@ -230,7 +229,7 @@ export default function ManifoldMintingAllowlist(
           <ManifoldMintingConnect onConnect={setConnectedAddress} />
         </Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="pt-4">
         <Col>{printContent()}</Col>
       </Row>
     </Container>

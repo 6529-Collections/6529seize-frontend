@@ -62,12 +62,11 @@ export default function useManifoldClaim(
 
   useEffect(() => {
     const data = readContract.data as any;
-    console.log("i am data", data);
     if (data) {
       const instanceId = Number(data[0]);
       const claim = data[1];
-      // claim.startDate = 1719319078;
-      // claim.endDate = 1719419078;
+      claim.startDate = 1719480934;
+      claim.endDate = 1719580934;
       const status = getStatus(claim.startDate, claim.endDate);
       const publicMerkle = areEqualAddresses(NULL_MERKLE, claim.merkleRoot);
       const phase = publicMerkle
