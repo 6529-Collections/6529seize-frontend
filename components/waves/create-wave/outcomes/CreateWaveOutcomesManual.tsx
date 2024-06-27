@@ -42,6 +42,7 @@ export default function CreateWaveOutcomesManual({
               type="text"
               value={value}
               onChange={onValueChange}
+              id="outcome-manual"
               autoComplete="off"
               className={`${
                 isInputEmptyError
@@ -54,13 +55,13 @@ export default function CreateWaveOutcomesManual({
             {isInputEmptyError && (
               <div className="tw-absolute tw-right-3 tw-top-3.5 tw-text-error">
                 <svg
-                  className="tw-size-5"
+                  className="tw-size-5 tw-flex-shrink-0"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -70,6 +71,7 @@ export default function CreateWaveOutcomesManual({
               </div>
             )}
             <label
+              htmlFor="outcome-manual"
               className={`${
                 isInputEmptyError ? "" : "peer-focus:tw-text-primary-400"
               }  tw-text-iron-500 tw-absolute tw-cursor-text tw-text-base tw-font-normal tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2  peer-placeholder-shown:tw-scale-100 
