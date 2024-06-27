@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
+  CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import CreateWaveOutcomesWinnersAddWinner from "./CreateWaveOutcomesWinnersAddWinner";
 import CreateWaveOutcomesWinnersCreditTypes from "./CreateWaveOutcomesWinnersCreditTypes";
@@ -11,14 +12,23 @@ import CreateWaveOutcomesWinnersRows from "./CreateWaveOutcomesWinnersRows";
 export default function CreateWaveOutcomesWinners({
   winnersConfig,
   totalValueError,
+  percentageError,
+  outcomeType,
   setWinnersConfig,
 }: {
   readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig;
   readonly totalValueError: boolean;
+  readonly percentageError: boolean;
+  readonly outcomeType: CreateWaveOutcomeType;
   readonly setWinnersConfig: (
     winnersConfig: CreateWaveOutcomeConfigWinnersConfig
   ) => void;
 }) {
+  const OUTCOME_TYPE_LABELS: Record<CreateWaveOutcomeType, string> = {
+    [CreateWaveOutcomeType.MANUAL]: "Manual",
+    [CreateWaveOutcomeType.REP]: "Rep",
+    [CreateWaveOutcomeType.CIC]: "CIC",
+  };
   const onCreditType = (
     creditType: CreateWaveOutcomeConfigWinnersCreditValueType
   ) => {
@@ -66,22 +76,9 @@ export default function CreateWaveOutcomesWinners({
     winnersConfig.creditValueType ===
     CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE;
 
-  const getTotalWinnersValue = (): number =>
-    winnersConfig.winners.reduce((acc, winner) => acc + winner.value, 0);
-
-  const getPercentageError = (): string | null => {
-    if (!isPercentageCredit) return null;
-    const total = getTotalWinnersValue();
-    if (total !== 100)
-      return `Total percentage must be 100% (currently ${total}%)`;
-    return null;
-  };
-  const [percentageError, setPercentageError] = useState<string | null>(
-    getPercentageError()
-  );
-  useEffect(() => {
-    setPercentageError(getPercentageError());
-  }, [winnersConfig.winners, winnersConfig.creditValueType]);
+  const isWinnersRowsError = isPercentageCredit
+    ? percentageError
+    : totalValueError;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
@@ -90,36 +87,23 @@ export default function CreateWaveOutcomesWinners({
           activeCreditType={winnersConfig.creditValueType}
           setActiveCreditType={onCreditType}
         />
-        {percentageError && (
-          <div className="tw-flex tw-items-center">
-            <svg
-              className="tw-size-5 tw-mr-2 tw-flex-shrink-0 tw-text-error"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="tw-text-xs tw-font-medium tw-text-error">
-              {percentageError}
-            </span>
-          </div>
-        )}
       </div>
-
+      {totalValueError && (
+        <span className="tw-mt-1.5 tw-text-xs tw-font-medium tw-text-error">
+          Total amount must be higher than 0
+        </span>
+      )}
+      {percentageError && (
+        <span className="tw-text-xs tw-font-medium tw-text-error">
+          Total percentage must be 100%
+        </span>
+      )}
       <div className="tw-flex tw-items-start tw-gap-x-3">
         {isPercentageCredit && (
           <div>
             <div className="tw-relative">
               <input
-                type="number"
+                type="text"
                 value={winnersConfig.totalAmount}
                 onChange={onTotalAmountChange}
                 autoComplete="off"
@@ -141,17 +125,21 @@ tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-rin
               >
                 Total Amount
               </label>
+              <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+                <span className="tw-text-iron-500 tw-text-sm tw-font-normal">
+                  {OUTCOME_TYPE_LABELS[outcomeType]}
+                </span>
+              </div>
             </div>
-            <span className="tw-mt-1.5 tw-text-xs tw-font-medium tw-text-error">
-              Error text
-            </span>
           </div>
         )}
+
         <div className="tw-flex tw-flex-col tw-gap-y-2">
           <CreateWaveOutcomesWinnersRows
             creditValueType={winnersConfig.creditValueType}
             winners={winnersConfig.winners}
-            totalValueError={totalValueError}
+            isError={isWinnersRowsError}
+            outcomeType={outcomeType}
             setWinners={setWinners}
           />
           <CreateWaveOutcomesWinnersAddWinner addWinner={addWinner} />
