@@ -29,12 +29,12 @@ export default function RepCategorySearch({
   const randomId = getRandomObjectId();
   const INPUT_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-py-3 tw-text-sm",
-    [RepCategorySearchSize.MD]: "tw-pb-3 tw-pt-3 tw-text-md",
+    [RepCategorySearchSize.MD]: "tw-pb-3 tw-pt-4 tw-text-base",
   };
 
   const LABEL_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-text-sm",
-    [RepCategorySearchSize.MD]: "tw-text-md",
+    [RepCategorySearchSize.MD]: "tw-text-base",
   };
 
   const ICON_CLASSES: Record<RepCategorySearchSize, string> = {
@@ -133,7 +133,7 @@ export default function RepCategorySearch({
           placeholder=" "
         />
         <svg
-          className="tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5"
+          className="tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-top-4 tw-h-5 tw-w-5"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -147,7 +147,7 @@ export default function RepCategorySearch({
         {!!category?.length && (
           <svg
             onClick={() => onValueChange(null)}
-            className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
+            className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-top-4 tw-h-5 tw-w-5 tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -183,15 +183,15 @@ export default function RepCategorySearch({
         </div>
       )}
       {error && (
-        <div className="tw-absolute tw-right-3 tw-top-2.5 tw-text-error">
+        <div className="tw-absolute tw-right-3 tw-top-3 tw-text-error">
           <svg
-            className="tw-size-5"
+            className="tw-size-5 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
