@@ -1,6 +1,7 @@
 import {
   CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersCreditValueType,
+  CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesWinnersRow({
@@ -8,7 +9,8 @@ export default function CreateWaveOutcomesWinnersRow({
   winnersCount,
   creditValueType,
   i,
-  totalValueError,
+  outcomeType,
+  isError,
   removeWinner,
   onWinnerValueChange,
 }: {
@@ -16,13 +18,20 @@ export default function CreateWaveOutcomesWinnersRow({
   readonly winnersCount: number;
   readonly i: number;
   readonly creditValueType: CreateWaveOutcomeConfigWinnersCreditValueType;
-  readonly totalValueError: boolean;
+  readonly outcomeType: CreateWaveOutcomeType;
+  readonly isError: boolean;
   readonly removeWinner: (index: number) => void;
   readonly onWinnerValueChange: (param: {
     value: number;
     index: number;
   }) => void;
 }) {
+  const OUTCOME_TYPE_LABELS: Record<CreateWaveOutcomeType, string> = {
+    [CreateWaveOutcomeType.MANUAL]: "Manual",
+    [CreateWaveOutcomeType.REP]: "Rep",
+    [CreateWaveOutcomeType.CIC]: "CIC",
+  };
+
   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value)) {
@@ -33,6 +42,11 @@ export default function CreateWaveOutcomesWinnersRow({
   };
 
   const showRemove = winnersCount > 1;
+
+  const inputEndLabel =
+    creditValueType === CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
+      ? "%"
+      : OUTCOME_TYPE_LABELS[outcomeType];
   return (
     <div>
       <div className="tw-flex">
@@ -43,7 +57,7 @@ export default function CreateWaveOutcomesWinnersRow({
             onChange={onValueChange}
             autoComplete="off"
             className={`${
-              totalValueError
+              isError
                 ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error tw-text-error"
                 : "tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400 tw-caret-primary-400 tw-text-white"
             } tw-form-input tw-block tw-px-4 tw-pb-3 tw-pt-4 tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-border-iron-600 tw-peer
@@ -52,24 +66,17 @@ tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-rin
           />
           <label
             className={`${
-              totalValueError
+              isError
                 ? "peer-focus:tw-text-error tw-text-error"
                 : "peer-focus:tw-text-primary-400 tw-text-iron-500"
             } tw-absolute tw-cursor-text tw-text-base tw-font-normal tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2  peer-placeholder-shown:tw-scale-100 
               peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
           >
-            #{i + 1}{" "}
-            {creditValueType ===
-            CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
-              ? "%"
-              : ""}
+            #{i + 1}
           </label>
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
             <span className="tw-text-iron-500 tw-text-sm tw-font-normal">
-              {creditValueType ===
-              CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
-                ? "%"
-                : "Rep"}
+              {inputEndLabel}
             </span>
           </div>
         </div>
@@ -100,9 +107,6 @@ tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-rin
           </div>
         )}
       </div>
-      <span className="tw-mt-1.5 tw-text-xs tw-font-medium tw-text-error">
-        Error text
-      </span>
     </div>
   );
 }

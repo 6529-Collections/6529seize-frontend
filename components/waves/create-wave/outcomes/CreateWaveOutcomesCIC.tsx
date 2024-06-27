@@ -14,8 +14,9 @@ export default function CreateWaveOutcomesCIC({
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
 }) {
+  const outcomeType = CreateWaveOutcomeType.CIC;
   const [outcome, setOutcome] = useState<CreateWaveOutcomeConfig>({
-    type: CreateWaveOutcomeType.CIC,
+    type: outcomeType,
     title: null,
     credit: null,
     category: null,
@@ -27,10 +28,62 @@ export default function CreateWaveOutcomesCIC({
     },
   });
 
+  const [totalValueError, setTotalValueError] = useState<boolean>(false);
+  const [percentageError, setPercentageError] = useState<boolean>(false);
+
   const setWinnersConfig = (
     winnersConfig: CreateWaveOutcomeConfigWinnersConfig
   ) => {
+    setTotalValueError(false);
+    setPercentageError(false);
     setOutcome({ ...outcome, winnersConfig });
+  };
+
+  const getWinnersTotal = (): number | null =>
+    outcome.winnersConfig?.winners.reduce(
+      (acc, winner) => acc + winner.value,
+      0
+    ) ?? null;
+
+  const getTotalValueError = (): boolean => {
+    if (
+      outcome.winnersConfig?.creditValueType ===
+      CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE
+    ) {
+      const totalValue = getWinnersTotal();
+
+      if (!totalValue) {
+        return true;
+      }
+      if (totalValue !== outcome.winnersConfig?.totalAmount) {
+        return true;
+      }
+    } else {
+      return !outcome.winnersConfig?.totalAmount;
+    }
+
+    return false;
+  };
+
+  const getPercentageError = (): boolean => {
+    if (
+      outcome.winnersConfig?.creditValueType !==
+      CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
+    ) {
+      return false;
+    }
+    return getWinnersTotal() !== 100;
+  };
+
+  const onSubmit = () => {
+    const totalValueError = getTotalValueError();
+    const percentageError = getPercentageError();
+    setTotalValueError(totalValueError);
+    setPercentageError(percentageError);
+    if (totalValueError || percentageError) {
+      return;
+    }
+    onOutcome(outcome);
   };
   return (
     <div className="tw-col-span-full tw-flex tw-flex-col tw-gap-y-2">
@@ -38,6 +91,9 @@ export default function CreateWaveOutcomesCIC({
         {outcome.winnersConfig && (
           <CreateWaveOutcomesWinners
             winnersConfig={outcome.winnersConfig}
+            outcomeType={outcomeType}
+            totalValueError={totalValueError}
+            percentageError={percentageError}
             setWinnersConfig={setWinnersConfig}
           />
         )}
@@ -50,7 +106,7 @@ export default function CreateWaveOutcomesCIC({
             Cancel
           </button>
           <button
-            onClick={() => onOutcome(outcome)}
+            onClick={onSubmit}
             type="button"
             className="tw-bg-primary-500 tw-border-primary-500 tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
           >
