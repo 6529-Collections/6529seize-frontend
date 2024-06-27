@@ -40,7 +40,7 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.OUTCOMES;
+  const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
     type,
   }: {
@@ -89,21 +89,18 @@ export default function CreateWave({
     useState<CreateWaveOutcomeType | null>(null);
 
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
-  const [haveClickedNextAtLeastOnce, setHaveClickedNextAtLeastOnce] =
-    useState(false);
 
   useEffect(() => {
-    if (!haveClickedNextAtLeastOnce) return;
-    setErrors(getCreateWaveValidationErrors({ config, step }));
-  }, [config, haveClickedNextAtLeastOnce]);
+    setErrors([]);
+  }, [config]);
 
   const onStep = (newStep: CreateWaveStep) => {
-    setHaveClickedNextAtLeastOnce(true);
     const newErrors = getCreateWaveValidationErrors({ config, step });
     if (!!newErrors.length) {
       setErrors(newErrors);
       return;
     }
+    setErrors([]);
     setSelectedOutcomeType(null);
     setStep(newStep);
   };
@@ -328,6 +325,7 @@ export default function CreateWave({
       <CreateWaveDates
         waveType={config.overview.type}
         dates={config.dates}
+        errors={errors}
         setDates={setDates}
       />
     ),

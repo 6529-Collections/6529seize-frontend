@@ -231,7 +231,6 @@ export const getCreateWaveValidationErrors = ({
   readonly config: CreateWaveConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  return errors;
   errors.push(...getOverviewValidationErrors({ overview: config.overview }));
   if (step === CreateWaveStep.OVERVIEW) {
     return errors;
