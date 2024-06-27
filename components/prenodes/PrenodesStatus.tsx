@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 import { Time } from "../../helpers/time";
 import {
   faCheckCircle,
+  faLocationDot,
   faWarning,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
@@ -16,6 +17,8 @@ import { getDateDisplay } from "../../helpers/Helpers";
 interface Prenode {
   ip: string;
   domain: string;
+  city: string;
+  country: string;
   tdh_sync: boolean;
   block_sync: boolean;
   created_at: string;
@@ -34,6 +37,7 @@ export default function PrenodesStatus() {
 
   function fetchResults() {
     const url = `https://api.seize.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
+
     fetch(url).then((response) => {
       response.json().then((response: { data: Prenode[]; count: number }) => {
         setPrenodes(response.data);
@@ -45,6 +49,31 @@ export default function PrenodesStatus() {
   useEffect(() => {
     fetchResults();
   }, [page]);
+
+  function printLocation(prenode: Prenode) {
+    let location = "";
+    if (prenode.city) {
+      location += prenode.city;
+    }
+    if (prenode.city && prenode.country) {
+      location += ", ";
+    }
+    if (prenode.country) {
+      location += prenode.country;
+    }
+
+    if (!location) {
+      location = "Unknown";
+    }
+    return (
+      <Row className="pt-1">
+        <Col className="d-flex align-items-center gap-2">
+          <FontAwesomeIcon icon={faLocationDot} height={20} color="" />
+          {location}
+        </Col>
+      </Row>
+    );
+  }
 
   function printStatusIcon(icon: IconProp, status: string) {
     return <FontAwesomeIcon icon={icon} className={status} height={22} />;
@@ -91,6 +120,7 @@ export default function PrenodesStatus() {
                 <i>{prenode.ip}</i>
               </Col>
             </Row>
+            {printLocation(prenode)}
             <Row className="pt-3">
               <Col>
                 <Table>
@@ -155,7 +185,9 @@ export default function PrenodesStatus() {
     }
 
     return (
-      <Row>{prenodes.map((prenode: Prenode) => printPrenode(prenode))}</Row>
+      <Row className="pt-2">
+        {prenodes.map((prenode: Prenode) => printPrenode(prenode))}
+      </Row>
     );
   }
 
@@ -167,6 +199,9 @@ export default function PrenodesStatus() {
             <span className="font-lightest">Prenodes</span> Status{" "}
           </h1>
         </Col>
+      </Row>
+      <Row>
+        <Col className="font-color-h">* All times are in UTC</Col>
       </Row>
       {printPrenodes()}
       {totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
