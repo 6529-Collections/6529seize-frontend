@@ -46,6 +46,7 @@ export default function TheMemesMint(props: any) {
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <ManifoldMinting
+          title={`The Memes #${pageProps.id}`}
           contract={MEMES_CONTRACT}
           proxy={MEMES_MANIFOLD_PROXY_CONTRACT}
           abi={MEMES_MANIFOLD_PROXY_ABI}

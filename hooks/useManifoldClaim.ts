@@ -32,7 +32,8 @@ export default function useManifoldClaim(
   contract: string,
   proxy: string,
   abi: any,
-  tokenId: number
+  tokenId: number,
+  onError?: () => void
 ) {
   const [claim, setClaim] = useState<ManifoldClaim>();
 
@@ -61,6 +62,7 @@ export default function useManifoldClaim(
 
   useEffect(() => {
     const data = readContract.data as any;
+    console.log("i am data", data);
     if (data) {
       const instanceId = Number(data[0]);
       const claim = data[1];
@@ -90,6 +92,12 @@ export default function useManifoldClaim(
       });
     }
   }, [readContract.data]);
+
+  useEffect(() => {
+    if (readContract.error && onError) {
+      onError();
+    }
+  }, [readContract.error]);
 
   useEffect(() => {
     if (claim) {

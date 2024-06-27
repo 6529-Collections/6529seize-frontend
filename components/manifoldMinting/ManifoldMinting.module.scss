@@ -3,3 +3,17 @@
 .claimed {
   color: $green;
 }
+
+.feesTable {
+  tr td {
+    color: $font-color-h !important;
+    width: 50%;
+  }
+}
+
+.spotsTable {
+  tr td {
+    width: 50%;
+  }
+  margin-bottom: 0;
+}

@@ -1,27 +1,22 @@
 import { Col, Container, Row, Table } from "react-bootstrap";
-import styles from "./ManifoldMinting.module.scss";
 import useManifoldClaim, {
   ManifoldClaimStatus,
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
-import {
-  ManifoldInstance,
-  ManifoldMerkleProof,
-  getTraitValue,
-} from "./manifold-types";
+import { ManifoldInstance, getTraitValue } from "./manifold-types";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import NFTImage from "../nft-image/NFTImage";
 import Link from "next/link";
 import { capitalizeEveryWord, numberWithCommas } from "../../helpers/Helpers";
 import MintCountdownBox from "../mintCountdownBox/MintCountdownBox";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import { Time } from "../../helpers/time";
-import ManifoldMintingSpot from "./ManifoldMintingSpot";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
+import ManifoldMintingPublic from "./ManifoldMintingPublic";
+import ManifoldMintingAllowlist from "./ManifoldMintingAllowlist";
 
 interface Props {
+  title: string;
   contract: string;
   proxy: string;
   abi: any;
@@ -29,22 +24,19 @@ interface Props {
 }
 
 export default function ManifoldMinting(props: Readonly<Props>) {
-  // const account = useAccount();
-  const account = {
-    address: "0x5eeeb64d0e697a60e6dacd7ad9a16a6bdd5560e2",
-    isConnected: true,
-  };
+  const [isError, setIsError] = useState<boolean>(false);
 
   const manifoldClaim = useManifoldClaim(
     props.contract,
     props.proxy,
     props.abi,
-    props.token_id
+    props.token_id,
+    () => {
+      setIsError(true);
+    }
   );
-  console.log(manifoldClaim);
 
   const [fetching, setFetching] = useState<boolean>(true);
-  const [fetchingMerkle, setFetchingMerkle] = useState<boolean>(false);
 
   const [instance, setInstance] = useState<ManifoldInstance>();
   const [nftImage, setNftImage] = useState<any>();
@@ -52,8 +44,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     name: string | undefined;
     handle: string | undefined;
   }>();
-
-  const [merkleProofs, setMerkleProofs] = useState<ManifoldMerkleProof[]>([]);
 
   useEffect(() => {
     if (manifoldClaim?.instanceId) {
@@ -90,135 +80,48 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
   }, [manifoldClaim?.instanceId]);
 
-  useEffect(() => {
-    if (
-      account.isConnected &&
-      instance?.publicData.instanceAllowlist.merkleTreeId
-    ) {
-      setFetchingMerkle(true);
-      const merkle = instance.publicData.instanceAllowlist.merkleTreeId;
-      const url = `https://apps.api.manifoldxyz.dev/public/merkleTree/${merkle}/merkleInfo?address=${account.address}`;
-      fetch(url)
-        .then((response) => {
-          response.json().then((data: ManifoldMerkleProof[]) => {
-            setMerkleProofs(data);
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching merkle data", error);
-        })
-        .finally(() => {
-          setFetchingMerkle(false);
-        });
-    }
-  }, [
-    account.isConnected,
-    instance?.publicData.instanceAllowlist.merkleTreeId,
-  ]);
-
   if (fetching) {
     return (
       <Container className="pt-4 pb-4">
         <Row>
           <Col>
-            <h2>Mint</h2>
+            <h2>
+              <span className="font-lightest">Mint</span> {props.title}
+            </h2>
           </Col>
         </Row>
         <Row className="pt-2">
           <Col className="d-flex align-items-center gap-3">
-            <span>Retrieving Mint information</span>
-            <Spinner />
+            {isError ? (
+              <>
+                <span>Error fetching mint information</span>
+              </>
+            ) : (
+              <>
+                <span>Retrieving Mint information</span>
+                <Spinner />
+              </>
+            )}
           </Col>
         </Row>
       </Container>
     );
   }
 
-  function printMintRows() {
-    if (!account.isConnected) {
-      return (
-        <tr>
-          <td colSpan={2}>
-            <HeaderUserConnect /> to mint
-          </td>
-        </tr>
-      );
-    }
-
-    return (
-      <>
-        <tr>
-          <td>Connected with</td>
-          <td>{account.address}</td>
-        </tr>
-        {fetchingMerkle ? (
-          <tr>
-            <td colSpan={2}>
-              <span className="d-flex align-items-center gap-3">
-                <span>Retrieving Allowlist information</span>
-                <Spinner />
-              </span>
-            </td>
-          </tr>
-        ) : (
-          printSpots()
-        )}
-      </>
-    );
-  }
-
-  function printSpots() {
-    if (manifoldClaim?.phase === ManifoldPhase.ALLOWLIST) {
-      const spotsContent = (
-        <tr>
-          <td className="pb-4">Phase Spots</td>
-          <td className="pb-4">{merkleProofs.length}</td>
-        </tr>
-      );
-
-      if (!merkleProofs || merkleProofs.length === 0) {
-        return (
-          <>
-            {spotsContent}
-            <tr>
-              <td colSpan={2}>
-                No claims for connected wallet in current phase
-              </td>
-            </tr>
-          </>
-        );
-      }
-
-      return (
-        <>
-          {spotsContent}
-          {merkleProofs.map((proof, index) => (
-            <ManifoldMintingSpot
-              key={getRandomObjectId()}
-              index={index + 1}
-              contract={props.contract}
-              proxy={props.proxy}
-              abi={props.abi}
-              claim={manifoldClaim}
-              proof={proof}
-            />
-          ))}
-        </>
-      );
-    }
-
+  function printMint() {
     if (manifoldClaim?.phase === ManifoldPhase.PUBLIC) {
-      return printPublicMint();
+      return <ManifoldMintingPublic />;
     }
-  }
 
-  function printPublicMint() {
     return (
-      <tr>
-        <td colSpan={2}>
-          <button className="btn btn-primary">Mint Now</button>
-        </td>
-      </tr>
+      <ManifoldMintingAllowlist
+        contract={props.contract}
+        proxy={props.proxy}
+        abi={props.abi}
+        instanceId={manifoldClaim!.instanceId}
+        cost={manifoldClaim!.cost}
+        merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
+      />
     );
   }
 
@@ -228,7 +131,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         <Row>
           <Col>
             <h2>
-              <span className="font-lightest">Mint</span>
+              <span className="font-lightest">Mint</span> {props.title}
             </h2>
           </Col>
         </Row>
@@ -381,16 +284,21 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                         <b>{capitalizeEveryWord(manifoldClaim.status)}</b>
                       </td>
                     </tr>
-                    {printMintRows()}
                   </tbody>
                 </Table>
               </Col>
+            </Row>
+            <Row>
+              <Col>{printMint()}</Col>
             </Row>
           </Container>
         </Col>
       </Row>
       <Row className="pt-5">
-        <Col>
+        <Col xs={12}>
+          <h4>Attributes</h4>
+        </Col>
+        <Col xs={12}>
           <NFTAttributes attributes={instance.publicData.asset.attributes} />
         </Col>
       </Row>
