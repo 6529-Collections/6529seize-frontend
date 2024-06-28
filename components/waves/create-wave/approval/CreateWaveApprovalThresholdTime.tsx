@@ -91,6 +91,7 @@ export default function CreateWaveApprovalThresholdTime({
         </div>
         <CreateWaveDatesEndDateSelectPeriod
           activePeriod={period}
+          errors={[]}
           onPeriodSelect={onPeriodSelect}
         />
       </div>

@@ -11,6 +11,7 @@
  */
 
 import { IntRange } from '../models/IntRange';
+import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
 import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
 import { HttpFile } from '../http/http';
@@ -25,6 +26,7 @@ export class WaveParticipationConfig {
     * The metadata that must be provided by the participant.  Empty array if nothing is required. 
     */
     'required_metadata': Array<WaveRequiredMetadata>;
+    'required_media': WaveParticipationRequirement | null;
     /**
     * If true then the votes must be signed by voters.
     */
@@ -53,6 +55,12 @@ export class WaveParticipationConfig {
             "format": ""
         },
         {
+            "name": "required_media",
+            "baseName": "required_media",
+            "type": "WaveParticipationRequirement",
+            "format": ""
+        },
+        {
             "name": "signature_required",
             "baseName": "signature_required",
             "type": "boolean",
@@ -72,4 +80,6 @@ export class WaveParticipationConfig {
     public constructor() {
     }
 }
+
+
 

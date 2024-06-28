@@ -1332,6 +1332,8 @@ components:
         - owns_nfts
         - wallet_group_id
         - wallet_group_wallets_count
+        - excluded_wallet_group_id
+        - excluded_wallet_group_wallets_count
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1352,6 +1354,13 @@ components:
           type: number
           format: int64
           nullable: false
+        excluded_wallet_group_id:
+          type: string
+          nullable: true
+        excluded_wallet_group_wallets_count:
+          type: number
+          format: int64
+          nullable: false
 
     CreateGroupDescription:
       type: object
@@ -1362,6 +1371,7 @@ components:
         - level
         - owns_nfts
         - wallets
+        - excluded_wallets
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1376,6 +1386,12 @@ components:
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
         wallets:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
+        excluded_wallets:
           anyOf:
             - type: "null"
             - type: array
@@ -1859,17 +1875,14 @@ components:
           items:
             $ref: "#/components/schemas/DropMedia"
 
-    CreateDropRequest:
+    CreateWaveDropRequest:
       type: object
       required:
-        - wave_id
         - referenced_nfts
         - mentioned_users
         - metadata
         - parts
       properties:
-        wave_id:
-          type: string
         title:
           type: string
           maxLength: 250
@@ -1891,6 +1904,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DropMetadata"
+
+    CreateDropRequest:
+      type: object
+      required:
+        - wave_id
+      allOf:
+        - $ref: "#/components/schemas/CreateWaveDropRequest"
+      properties:
+        wave_id:
+          type: string
 
     DropMedia:
       type: object
@@ -2041,14 +2064,24 @@ components:
         - DROP
         - PARTICIPANT
 
+    WaveMetadataType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+
     WaveRequiredMetadata:
       type: object
       required:
         - name
+        - type
       properties:
         name:
           description: Metadata key
           type: string
+        type:
+          $ref: "#/components/schemas/WaveMetadataType"
+
 
     CreateNewWaveVotingConfig:
       type: object
@@ -2138,6 +2171,7 @@ components:
         - required_metadata
         - signature_required
         - no_of_applications_allowed_per_participant
+        - required_media
       properties:
         scope:
           $ref: "#/components/schemas/WaveScope"
@@ -2154,6 +2188,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveRequiredMetadata"
+        required_media:
+          oneOf:
+            - $ref: "#/components/schemas/WaveParticipationRequirement"
+            - type: "null"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
@@ -2167,6 +2205,7 @@ components:
         - required_metadata
         - signature_required
         - no_of_applications_allowed_per_participant
+        - required_media
       properties:
         scope:
           $ref: "#/components/schemas/CreateNewWaveScope"
@@ -2176,6 +2215,10 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        required_media:
+          oneOf:
+            - $ref: "#/components/schemas/WaveParticipationRequirement"
+            - type: "null"
         required_metadata:
           description: |
             The metadata that must be provided by the participant. 
@@ -2241,6 +2284,13 @@ components:
           additionalProperties:
             type: string
 
+    WaveParticipationRequirement:
+      type: string
+      enum:
+        - IMAGE
+        - AUDIO
+        - VIDEO
+
     Wave:
       type: object
       required:
@@ -2248,7 +2298,7 @@ components:
         - serial_no
         - author
         - name
-        - description
+        - description_drop
         - voting
         - visibility
         - participation
@@ -2267,9 +2317,8 @@ components:
         name:
           description: The name of the wave
           type: string
-        description:
-          description: The description of the wave
-          type: string
+        description_drop:
+          $ref: "#/components/schemas/Drop"
         voting:
           $ref: "#/components/schemas/WaveVotingConfig"
         visibility:
@@ -2287,7 +2336,7 @@ components:
       type: object
       required:
         - name
-        - description
+        - description_drop
         - voting
         - visibility
         - participation
@@ -2298,9 +2347,8 @@ components:
           description: The name of the wave
           type: string
           maxLength: 250
-        description:
-          description: The description of the wave
-          type: string
+        description_drop:
+          $ref: "#/components/schemas/CreateWaveDropRequest"
         voting:
           $ref: "#/components/schemas/CreateNewWaveVotingConfig"
         visibility:
