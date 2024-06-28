@@ -103,6 +103,7 @@ export default function CreateWaveDates({
       <CreateWaveDatesEndDate
         waveType={waveType}
         startTimestamp={dates.votingStartDate}
+        errors={errors}
         onEndTimestampChange={onEndTimestampChange}
       />
     </div>

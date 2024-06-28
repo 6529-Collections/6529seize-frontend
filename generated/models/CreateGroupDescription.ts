@@ -24,6 +24,7 @@ export class CreateGroupDescription {
     'level': GroupLevelFilter;
     'owns_nfts': Array<GroupOwnsNft>;
     'wallets': Array<string> | null;
+    'excluded_wallets': Array<string> | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -61,6 +62,12 @@ export class CreateGroupDescription {
         {
             "name": "wallets",
             "baseName": "wallets",
+            "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "excluded_wallets",
+            "baseName": "excluded_wallets",
             "type": "Array<string>",
             "format": ""
         }    ];

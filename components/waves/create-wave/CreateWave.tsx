@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -18,9 +18,7 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import { GroupFull } from "../../../generated/models/GroupFull";
-import { CreateNewWave } from "../../../generated/models/CreateNewWave";
 import { WaveCreditType } from "../../../generated/models/WaveCreditType";
-import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { WaveType } from "../../../generated/models/WaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
 import CreateWaveDescription, {
@@ -31,6 +29,16 @@ import {
   CREATE_WAVE_VALIDATION_ERROR,
   getCreateWaveValidationErrors,
 } from "../../../helpers/waves/create-wave.helpers";
+import { CreateNewWave } from "../../../generated/models/CreateNewWave";
+import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
+import { AuthContext } from "../../auth/Auth";
+import {
+  CreateDropPart,
+  CreateDropRequest,
+  CreateDropRequestPart,
+  DropMedia,
+} from "../../../entities/IDrop";
+import { commonApiPost } from "../../../services/api/common-api";
 
 export default function CreateWave({
   profile,
@@ -39,8 +47,9 @@ export default function CreateWave({
   readonly profile: IProfileAndConsolidations;
   readonly onBack: () => void;
 }) {
-  const initialType = WaveType.Rank;
-  const initialStep = CreateWaveStep.OVERVIEW;
+  const { requestAuth } = useContext(AuthContext);
+  const initialType = WaveType.Approve;
+  const initialStep = CreateWaveStep.APPROVAL;
   const getInitialConfig = ({
     type,
   }: {
@@ -84,6 +93,8 @@ export default function CreateWave({
     })
   );
 
+  const [submitting, setSubmitting] = useState(false);
+
   const [step, setStep] = useState<CreateWaveStep>(initialStep);
   const [selectedOutcomeType, setSelectedOutcomeType] =
     useState<CreateWaveOutcomeType | null>(null);
@@ -94,44 +105,54 @@ export default function CreateWave({
     setErrors([]);
   }, [config]);
 
-  const onStep = (newStep: CreateWaveStep) => {
-    const newErrors = getCreateWaveValidationErrors({ config, step });
-    if (!!newErrors.length) {
-      setErrors(newErrors);
-      return;
+  const onStep = ({
+    step: newStep,
+    direction,
+  }: {
+    readonly step: CreateWaveStep;
+    readonly direction: "forward" | "backward";
+  }) => {
+    if (direction === "forward") {
+      const newErrors = getCreateWaveValidationErrors({ config, step });
+      if (!!newErrors.length) {
+        setErrors(newErrors);
+        return;
+      }
     }
     setErrors([]);
     setSelectedOutcomeType(null);
     setStep(newStep);
   };
 
-  // const getIsVotingSignatureRequired = (): boolean => {
-  //   return (
-  //     config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
-  //     config.overview.signatureType === WaveSignatureType.VOTING
-  //   );
-  // };
+  const getIsVotingSignatureRequired = (): boolean => {
+    return (
+      config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+      config.overview.signatureType === WaveSignatureType.VOTING
+    );
+  };
 
-  // const getIsParticipationSignatureRequired = (): boolean => {
-  //   return (
-  //     config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
-  //     config.overview.signatureType === WaveSignatureType.DROPS
-  //   );
-  // };
+  const getIsParticipationSignatureRequired = (): boolean => {
+    return (
+      config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+      config.overview.signatureType === WaveSignatureType.DROPS
+    );
+  };
 
   // const getCreateNewWaveBody = (): CreateNewWave => {
   //   return {
   //     name: config.overview.name,
+  //     description_drop: null,
   //     voting: {
   //       scope: {
   //         group_id: config.groups.canVote,
   //       },
-  //       credit_type: WaveCreditType.Rep,
-  //       // TODO: whats this???
+  //       credit_type: config.voting.type,
   //       credit_scope: WaveCreditScope.Wave,
   //       credit_category: config.voting.category,
   //       creditor_id: config.voting.profileId,
   //       signature_required: getIsVotingSignatureRequired(),
+  //       // TODO
+  //       period: undefined
   //     },
   //     visibility: {
   //       scope: {
@@ -142,26 +163,27 @@ export default function CreateWave({
   //       scope: {
   //         group_id: config.groups.canDrop,
   //       },
-  //       // TODO: whats this???
+  //       // TODO
   //       no_of_applications_allowed_per_participant: null,
+  //       // TODO
+  //       required_media: null,
   //       // TODO: needs also type and make sure to filter out empty strings
   //       required_metadata: config.drops.requiredMetadata.map((metadata) => ({
   //         name: metadata.key,
   //       })),
   //       signature_required: getIsParticipationSignatureRequired(),
-  //       // TODO: whats this???
+  //       // TODO
   //       period: undefined,
   //     },
   //     wave: {
   //       type: config.overview.type,
-  //       // TODO: whats this???
+  //       // TODO
   //       winning_thresholds: null,
-  //       // TODO: whats this???
+  //       // TODO
   //       max_winners: null,
-  //       // TODO: needs new name
   //       time_lock_ms: config.approval.thresholdTimeMs,
   //       admin_group_id: config.groups.admin,
-  //       // TODO: whats this???
+  //       // TODO
   //       period: null,
   //     },
   //     outcomes: [],
@@ -300,11 +322,78 @@ export default function CreateWave({
     null
   );
 
+  const generateMediaForPart = async (
+    part: CreateDropPart
+  ): Promise<Array<DropMedia>> => {
+    if (!part.media.length) {
+      return [];
+    }
+
+    const media = part.media[0];
+    const prep = await commonApiPost<
+      {
+        content_type: string;
+        file_name: string;
+        file_size: number;
+      },
+      {
+        upload_url: string;
+        content_type: string;
+        media_url: string;
+      }
+    >({
+      endpoint: "drop-media/prep",
+      body: {
+        content_type: media.type,
+        file_name: media.name,
+        file_size: media.size,
+      },
+    });
+    const myHeaders = new Headers({ "Content-Type": prep.content_type });
+    await fetch(prep.upload_url, {
+      method: "PUT",
+      headers: myHeaders,
+      body: media,
+    });
+    return [
+      {
+        url: prep.media_url,
+        mime_type: prep.content_type,
+      },
+    ];
+  };
+
+  const generateDropPart = async (
+    part: CreateDropPart
+  ): Promise<CreateDropRequestPart> => {
+    return {
+      ...part,
+      media: await generateMediaForPart(part),
+    };
+  };
+
   const onComplete = async () => {
-    console.log("onComplete");
+    setSubmitting(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      setSubmitting(false);
+      return;
+    }
     const drop = createWaveDescriptionRef.current?.requestDrop() ?? null;
-    console.log(JSON.stringify(drop, null, 2));
-    console.log("drop", drop);
+    if (!drop?.parts.length) {
+      setSubmitting(false);
+      return;
+    }
+    const dropParts = await Promise.all(
+      drop.parts.map((part) => generateDropPart(part))
+    );
+
+    const dropRequest: CreateDropRequest = {
+      ...drop,
+      parts: dropParts,
+    };
+
+    console.log(JSON.stringify(dropRequest, null, 2));
   };
 
   const stepComponent: Record<CreateWaveStep, JSX.Element> = {
@@ -330,13 +419,18 @@ export default function CreateWave({
       />
     ),
     [CreateWaveStep.DROPS]: (
-      <CreateWaveDrops drops={config.drops} setDrops={setDrops} />
+      <CreateWaveDrops
+        drops={config.drops}
+        errors={errors}
+        setDrops={setDrops}
+      />
     ),
     [CreateWaveStep.VOTING]: (
       <CreateWaveVoting
         selectedType={config.voting.type}
         category={config.voting.category}
         profileId={config.voting.profileId}
+        errors={errors}
         onTypeChange={onVotingTypeChange}
         setCategory={onCategoryChange}
         setProfileId={onProfileIdChange}
@@ -346,6 +440,7 @@ export default function CreateWave({
       <CreateWaveApproval
         threshold={config.approval.threshold}
         thresholdTimeMs={config.approval.thresholdTimeMs}
+        errors={errors}
         setThreshold={onThresholdChange}
         setThresholdTimeMs={onThresholdTimeChange}
       />
@@ -396,7 +491,7 @@ export default function CreateWave({
             <CreateWavesMainSteps
               activeStep={step}
               waveType={config.overview.type}
-              onStep={onStep}
+              onStep={(step) => onStep({ step, direction: "backward" })}
             />
           </div>
           <div className="tw-flex-1">
@@ -422,7 +517,9 @@ export default function CreateWave({
                   {!selectedOutcomeType && (
                     <div className="tw-mt-auto">
                       <CreateWaveActions
-                        setStep={onStep}
+                        setStep={(step) =>
+                          onStep({ step, direction: "forward" })
+                        }
                         step={step}
                         config={config}
                         onComplete={onComplete}

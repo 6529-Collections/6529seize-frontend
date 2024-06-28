@@ -25,6 +25,8 @@ export class GroupDescription {
     'owns_nfts': Array<GroupOwnsNft>;
     'wallet_group_id': string | null;
     'wallet_group_wallets_count': number;
+    'excluded_wallet_group_id': string | null;
+    'excluded_wallet_group_wallets_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -68,6 +70,18 @@ export class GroupDescription {
         {
             "name": "wallet_group_wallets_count",
             "baseName": "wallet_group_wallets_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "excluded_wallet_group_id",
+            "baseName": "excluded_wallet_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "excluded_wallet_group_wallets_count",
+            "baseName": "excluded_wallet_group_wallets_count",
             "type": "number",
             "format": "int64"
         }    ];

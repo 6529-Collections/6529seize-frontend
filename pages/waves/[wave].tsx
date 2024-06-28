@@ -168,7 +168,7 @@ export default function WavePage() {
                         media: [],
                       },
                     ],
-                  } as Drop
+                  } as any
                 }
               />
             </div>

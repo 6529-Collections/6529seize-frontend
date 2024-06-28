@@ -5,12 +5,15 @@ import {
 } from "../../../../../types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
 
 export default function CreateWaveDropsMetadata({
   requiredMetadata,
+  errors,
   onRequiredMetadataChange,
 }: {
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onRequiredMetadataChange: (
     requiredMetadata: CreateWaveDropsRequiredMetadata[]
   ) => void;
@@ -48,6 +51,41 @@ export default function CreateWaveDropsMetadata({
     onRequiredMetadataChange(newItems);
   };
 
+  const haveNonUniqueMetadata = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
+  );
+
+  const getNonUniqueMetadataIdxs = () => {
+    const keys = requiredMetadata.map((item) => item.key);
+    const keyOccurrences = keys.reduce((acc, key, index) => {
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(index);
+      return acc;
+    }, {} as Record<string, number[]>);
+
+    const nonUniqueIndices: number[] = [];
+    Object.values(keyOccurrences).forEach((indices) => {
+      if (indices.length > 1) {
+        nonUniqueIndices.push(...indices);
+      }
+    });
+
+    return nonUniqueIndices;
+  };
+
+  const [nonUniqueMetadataIdxs, setNonUniqueMetadataIdxs] = useState<number[]>(
+    getNonUniqueMetadataIdxs()
+  );
+
+  useEffect(
+    () => setNonUniqueMetadataIdxs(getNonUniqueMetadataIdxs()),
+    [requiredMetadata]
+  );
+
+  console.log(errors);
+
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -62,6 +100,9 @@ export default function CreateWaveDropsMetadata({
                 item={item}
                 index={i}
                 itemsCount={requiredMetadata.length}
+                isNotUnique={
+                  nonUniqueMetadataIdxs.includes(i) && haveNonUniqueMetadata
+                }
                 onItemChange={onItemChange}
                 onItemRemove={onRemoveRow}
               />

@@ -1,3 +1,4 @@
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import {
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
@@ -8,9 +9,11 @@ import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
 
 export default function CreateWaveDrops({
   drops,
+  errors,
   setDrops,
 }: {
   readonly drops: CreateWaveDropsConfig;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
 }) {
   const onRequiredTypeChange = (type: WaveRequiredType) => {
@@ -33,12 +36,6 @@ export default function CreateWaveDrops({
     });
   };
 
-
-
-
-
-
-
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveDropsTypes
@@ -47,6 +44,7 @@ export default function CreateWaveDrops({
       />
       <CreateWaveDropsMetadata
         requiredMetadata={drops.requiredMetadata}
+        errors={errors}
         onRequiredMetadataChange={onRequiredMetadataChange}
       />
     </div>
