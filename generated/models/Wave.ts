@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { Drop } from '../models/Drop';
 import { ProfileMin } from '../models/ProfileMin';
 import { WaveConfig } from '../models/WaveConfig';
 import { WaveOutcome } from '../models/WaveOutcome';
@@ -32,10 +33,7 @@ export class Wave {
     * The name of the wave
     */
     'name': string;
-    /**
-    * The description of the wave
-    */
-    'description': string;
+    'description_drop': Drop;
     'voting': WaveVotingConfig;
     'visibility': WaveVisibilityConfig;
     'participation': WaveParticipationConfig;
@@ -70,9 +68,9 @@ export class Wave {
             "format": ""
         },
         {
-            "name": "description",
-            "baseName": "description",
-            "type": "string",
+            "name": "description_drop",
+            "baseName": "description_drop",
+            "type": "Drop",
             "format": ""
         },
         {

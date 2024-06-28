@@ -13,6 +13,7 @@
 import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
 import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
 import { CreateNewWaveVotingConfig } from '../models/CreateNewWaveVotingConfig';
+import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { WaveConfig } from '../models/WaveConfig';
 import { WaveOutcome } from '../models/WaveOutcome';
 import { HttpFile } from '../http/http';
@@ -22,10 +23,7 @@ export class CreateNewWave {
     * The name of the wave
     */
     'name': string;
-    /**
-    * The description of the wave
-    */
-    'description': string;
+    'description_drop': CreateWaveDropRequest;
     'voting': CreateNewWaveVotingConfig;
     'visibility': CreateNewWaveVisibilityConfig;
     'participation': CreateNewWaveParticipationConfig;
@@ -42,9 +40,9 @@ export class CreateNewWave {
             "format": ""
         },
         {
-            "name": "description",
-            "baseName": "description",
-            "type": "string",
+            "name": "description_drop",
+            "baseName": "description_drop",
+            "type": "CreateWaveDropRequest",
             "format": ""
         },
         {

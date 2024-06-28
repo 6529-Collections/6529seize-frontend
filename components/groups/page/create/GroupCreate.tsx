@@ -77,6 +77,7 @@ export default function GroupCreate({
       level: { min: null, max: null },
       owns_nfts: [],
       wallets: null,
+      excluded_wallets: null,
     },
   });
 
@@ -110,6 +111,7 @@ export default function GroupCreate({
         },
         owns_nfts: originalGroup.group.owns_nfts,
         wallets: originalGroupWallets ?? [],
+        excluded_wallets: null
       },
     });
   }, [originalGroup, originalGroupWallets]);

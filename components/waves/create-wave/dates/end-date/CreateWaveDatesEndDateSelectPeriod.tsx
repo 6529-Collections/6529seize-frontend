@@ -4,12 +4,15 @@ import { Period } from "../../../../../helpers/Types";
 import CreateWaveDatesEndDateSelectPeriodItem from "./CreateWaveDatesEndDateSelectPeriodItem";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
 
 export default function CreateWaveDatesEndDateSelectPeriod({
   activePeriod,
+  errors,
   onPeriodSelect,
 }: {
   readonly activePeriod: Period | null;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onPeriodSelect: (period: Period) => void;
 }) {
   const label = activePeriod ? PERIOD_LABELS[activePeriod] : "";
@@ -28,6 +31,10 @@ export default function CreateWaveDatesEndDateSelectPeriod({
     onPeriodSelect(period);
   };
 
+  const periodNotSetError =
+    activePeriod === null &&
+    errors.includes(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+
   return (
     <div className="tw-relative tw-z-50">
       <div className="tw-relative">
@@ -37,7 +44,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
           id="dates-period"
           type="button"
           className={`${
-            true
+            periodNotSetError
               ? "tw-ring-error focus:tw-border-error focus:tw-ring-error"
               : "tw-border-iron-650 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
           } tw-w-full tw-flex tw-items-center tw-text-left tw-font-medium tw-relative tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-h-[3.25rem] tw-pl-10 tw-pr-10 tw-bg-iron-800 lg:tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-text-base tw-transition tw-duration-300 tw-ease-out tw-justify-between tw-peer`}
@@ -56,14 +63,20 @@ export default function CreateWaveDatesEndDateSelectPeriod({
             label
               ? "-tw-translate-y-4 tw-scale-75 tw-top-2"
               : "tw-translate-y-0 tw-scale-100 tw-top-3.5"
-          } tw-text-base peer-focus:tw-text-primary-400 tw-text-iron-500 tw-absolute tw-cursor-text tw-font-medium tw-duration-300 tw-transform  tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 
+          } ${
+            periodNotSetError
+              ? "peer-focus:tw-text-error"
+              : "peer-focus:tw-text-primary-400"
+          } tw-text-base tw-text-iron-500 tw-absolute tw-cursor-text tw-font-medium tw-duration-300 tw-transform  tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 
           peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
         >
           Choose period
         </label>
         <div className="tw-pointer-events-none tw-absolute tw-flex tw-items-center tw-inset-y-0 tw-pl-3">
           <svg
-            className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-300"
+            className={`${
+              periodNotSetError ? "tw-text-error" : "tw-text-iron-300"
+            } tw-w-5 tw-h-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -80,9 +93,9 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         </div>
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
           <svg
-            className={`${
-              isOpen ? "-tw-rotate-180" : "tw-rotate-0"
-            } tw-h-5 tw-w-5 tw-text-white tw-flex-shrink-0`}
+            className={`${isOpen ? "-tw-rotate-180" : "tw-rotate-0"} ${
+              periodNotSetError ? "tw-text-error" : "tw-text-white"
+            } tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -127,9 +140,11 @@ export default function CreateWaveDatesEndDateSelectPeriod({
           )}
         </AnimatePresence>
       </div>
-      <div className="tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
-        Please choose period
-      </div>
+      {periodNotSetError && (
+        <div className="tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
+          Please choose period
+        </div>
+      )}
     </div>
   );
 }
