@@ -74,9 +74,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         </label>
         <div className="tw-pointer-events-none tw-absolute tw-flex tw-items-center tw-inset-y-0 tw-pl-3">
           <svg
-            className={`${
-              periodNotSetError ? "tw-text-error" : "tw-text-iron-300"
-            } tw-w-5 tw-h-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
+            className="tw-text-iron-300 tw-w-5 tw-h-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -93,9 +91,8 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         </div>
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
           <svg
-            className={`${isOpen ? "-tw-rotate-180" : "tw-rotate-0"} ${
-              periodNotSetError ? "tw-text-error" : "tw-text-white"
-            } tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
+            className={`${isOpen ? "-tw-rotate-180" : "tw-rotate-0"} 
+             tw-text-iron-300 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -141,8 +138,24 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         </AnimatePresence>
       </div>
       {periodNotSetError && (
-        <div className="tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
-          Please choose period
+        <div className="tw-relative tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <svg
+              className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Please choose period</span>
+          </div>
         </div>
       )}
     </div>
