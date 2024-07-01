@@ -52,24 +52,6 @@ export default function CreateWaveOutcomesManual({
               tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
               placeholder=" "
             />
-            {isInputEmptyError && (
-              <div className="tw-absolute tw-right-3 tw-top-3.5 tw-text-error">
-                <svg
-                  className="tw-size-5 tw-flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            )}
             <label
               htmlFor="outcome-manual"
               className={`${
@@ -81,8 +63,25 @@ export default function CreateWaveOutcomesManual({
             </label>
           </div>
           {isInputEmptyError && (
-            <div className="tw-relative tw-mt-1.5 tw-z-10 tw-text-error tw-text-xs tw-font-medium">
-              Please enter your manual action
+            <div className="tw-pt-1.5 tw-flex tw-items-center tw-gap-x-2">
+              <svg
+                className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="tw-text-error tw-text-xs tw-font-medium">
+                Please enter your manual action
+              </div>
             </div>
           )}
         </div>

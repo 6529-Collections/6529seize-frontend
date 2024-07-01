@@ -105,7 +105,7 @@ export default function CreateWaveOutcomesWinners({
               strokeLinejoin="round"
             />
           </svg>
-          <div className="tw-relative tw-z-10 tw-text-error tw-text-xs tw-font-medium">
+          <div className="tw-text-error tw-text-xs tw-font-medium">
             Total amount must be higher than 0
           </div>
         </div>
