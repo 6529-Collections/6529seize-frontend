@@ -25,7 +25,6 @@ const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({
 Page.getLayout = function getLayout(
   page: ReactElement<{ pageProps: UserPageStatsProps }>
 ) {
-  console.log(page.props);
   return (
     <UserPageLayout profile={page.props.pageProps.profile}>
       {page}
