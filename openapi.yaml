@@ -2189,9 +2189,9 @@ components:
           items:
             $ref: "#/components/schemas/WaveRequiredMetadata"
         required_media:
-          oneOf:
-            - $ref: "#/components/schemas/WaveParticipationRequirement"
-            - type: "null"
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
@@ -2216,9 +2216,9 @@ components:
           nullable: true
           minimum: 1
         required_media:
-          oneOf:
-            - $ref: "#/components/schemas/WaveParticipationRequirement"
-            - type: "null"
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
         required_metadata:
           description: |
             The metadata that must be provided by the participant. 

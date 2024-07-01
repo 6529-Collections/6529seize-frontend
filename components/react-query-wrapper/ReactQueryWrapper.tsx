@@ -56,6 +56,7 @@ export enum QueryKey {
   PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
   EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
+  WAVES = "WAVES",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -166,6 +167,7 @@ type ReactQueryWrapperContextType = {
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
   onGroupCreate: () => void;
   onIdentityBulkRate: () => void;
+  onWaveCreated: () => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -189,6 +191,7 @@ export const ReactQueryWrapperContext =
     onGroupChanged: () => {},
     onGroupCreate: () => {},
     onIdentityBulkRate: () => {},
+    onWaveCreated: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -889,6 +892,12 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onWaveCreated = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES],
+    });
+  };
+
   const value = useMemo(
     () => ({
       setProfile,
@@ -910,6 +919,7 @@ export default function ReactQueryWrapper({
       onDropDiscussionChange,
       onIdentityBulkRate,
       onGroupCreate,
+      onWaveCreated,
     }),
     [
       setProfile,
@@ -931,6 +941,7 @@ export default function ReactQueryWrapper({
       onDropDiscussionChange,
       onIdentityBulkRate,
       onGroupCreate,
+      onWaveCreated,
     ]
   );
 

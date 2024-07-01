@@ -1,4 +1,6 @@
-export default function WavesCard() {
+import { Wave } from "../../generated/models/Wave";
+
+export default function WavesCard({ wave }: { readonly wave: Wave }) {
   return (
     <div className="tw-group tw-cursor-pointer">
       <div className="tw-relative tw-w-full tw-h-20 tw-rounded-t-2xl tw-translate-y-4 group-hover:tw-translate-y-3 tw-transiton tw-duration-500 tw-ease">
@@ -119,7 +121,7 @@ export default function WavesCard() {
                   alt="Profile Picture"
                 />
                 <span className="tw-font-semibold tw-text-iron-50">
-                  punk6529
+                  {wave.author.handle}
                 </span>
               </div>
             </div>
