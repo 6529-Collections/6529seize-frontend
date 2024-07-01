@@ -21,6 +21,7 @@ export interface WaveOverviewConfig {
   readonly type: WaveType;
   readonly signatureType: WaveSignatureType;
   readonly name: string;
+  readonly image: string | null;
 }
 
 export interface WaveGroupsConfig {

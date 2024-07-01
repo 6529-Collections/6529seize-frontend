@@ -9,9 +9,15 @@ export default function CreateWaveTypeInputs({
   readonly selected: WaveType;
   readonly onChange: (type: WaveType) => void;
 }) {
+  const waveTypes: WaveType[] = [
+    WaveType.Chat,
+    WaveType.Rank,
+    WaveType.Approve,
+  ];
+
   return (
     <div className="tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-4">
-      {Object.values(WaveType).map((waveType) => (
+      {waveTypes.map((waveType) => (
         <CommonBorderedRadioButton
           key={waveType}
           type={waveType}

@@ -55,8 +55,6 @@ const CREATE_WAVE_DEFAULT_MAIN_STEPS: CreateWaveStep[] = [
 export const CREATE_WAVE_MAIN_STEPS: Record<WaveType, CreateWaveStep[]> = {
   [WaveType.Chat]: [
     ...CREATE_WAVE_DEFAULT_MAIN_STEPS,
-    // TODO chat wont have outcomes
-    CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
   ],
   [WaveType.Rank]: [
