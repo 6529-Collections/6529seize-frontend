@@ -2858,7 +2858,7 @@ export const NEXTGEN_ADMIN_ABI = [
   },
 ];
 
-export const MANIFOLD_PROXY_ABI = [
+export const MEMES_MANIFOLD_PROXY_ABI = [
   {
     inputs: [
       { internalType: "address", name: "initialOwner", type: "address" },

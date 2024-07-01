@@ -1,0 +1,12 @@
+@import "../../styles/variables.scss";
+
+.claimed {
+  color: $green;
+}
+
+.spotsTable {
+  tr td {
+    width: 50%;
+  }
+  margin-bottom: 0;
+}
