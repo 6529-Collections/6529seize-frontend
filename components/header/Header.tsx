@@ -97,8 +97,7 @@ export default function Header(props: Readonly<Props>) {
       <div
         className={`${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
-        }`}
-      >
+        }`}>
         <Container className="pt-2 pb-2">
           <Row>
             <Col className="d-flex justify-content-end">
@@ -111,8 +110,7 @@ export default function Header(props: Readonly<Props>) {
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
-                }}
-              ></FontAwesomeIcon>
+                }}></FontAwesomeIcon>
             </Col>
           </Row>
         </Container>
@@ -133,8 +131,7 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-4 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
                 <HeaderUser />
               </h3>
             </Col>
@@ -168,8 +165,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuCollections
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Collections
               </h3>
             </Col>
@@ -258,8 +254,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Community
               </h3>
             </Col>
@@ -302,6 +297,18 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <Link href="/nft-activity">
                       <h3>NFT Activity</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
+                    <Link href="/community/prenodes">
+                      <h3>Prenodes</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -361,8 +368,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Tools
               </h3>
             </Col>
@@ -447,8 +453,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 About
               </h3>
             </Col>
@@ -654,8 +659,7 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 3 }}
                   xl={{ span: 2 }}
                   xxl={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}
-                >
+                  className={`d-flex align-items-center justify-content-start ${styles.headerLeft}`}>
                   <Link href="/">
                     <Image
                       loading="eager"
@@ -676,16 +680,13 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 9 }}
                   xl={{ span: 10 }}
                   xxl={{ span: 9 }}
-                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}
-                >
+                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}
-                      >
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div
-                          className={`${styles.dMdNone} d-flex align-items-center`}
-                        >
+                          className={`${styles.dMdNone} d-flex align-items-center`}>
                           <div className="tw-mr-6 xl:tw-mr-2">
                             <HeaderSearchButton />
                           </div>
@@ -707,23 +708,20 @@ export default function Header(props: Readonly<Props>) {
                         </div>
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`justify-content-end d-none ${styles.dMdBlock}`}
-                        >
+                          className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
                             <Nav.Link
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/brain" ? "active" : ""
                               }`}
-                              onClick={() => goTo("/")}
-                            >
+                              onClick={() => goTo("/")}>
                               Home
                             </Nav.Link>
 
                             <NavDropdown
                               title="Collections"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
                                   name: "The Memes",
@@ -761,8 +759,7 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Community"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
                                   name: "Community",
@@ -796,6 +793,13 @@ export default function Header(props: Readonly<Props>) {
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
+                                  name: "Prenodes",
+                                  path: "/community/prenodes",
+                                }}
+                              />
+                              <NavDropdown.Divider />
+                              <HeaderDesktopLink
+                                link={{
                                   name: "Community Metrics",
                                   path: "/community-metrics",
                                 }}
@@ -816,8 +820,7 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Tools"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
                                   name: "Subscriptions Report",
@@ -873,8 +876,7 @@ export default function Header(props: Readonly<Props>) {
                                   ? "active"
                                   : ""
                               }`}
-                              align={"start"}
-                            >
+                              align={"start"}>
                               <HeaderDesktopLink
                                 link={{
                                   name: "The Memes",
