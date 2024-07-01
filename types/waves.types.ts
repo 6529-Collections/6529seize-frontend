@@ -1,4 +1,6 @@
 import { WaveCreditType } from "../generated/models/WaveCreditType";
+import { WaveMetadataType } from "../generated/models/WaveMetadataType";
+import { WaveParticipationRequirement } from "../generated/models/WaveParticipationRequirement";
 import { WaveType } from "../generated/models/WaveType";
 
 export enum WaveSignatureType {
@@ -6,17 +8,6 @@ export enum WaveSignatureType {
   DROPS = "DROPS",
   VOTING = "VOTING",
   DROPS_AND_VOTING = "DROPS_AND_VOTING",
-}
-
-export enum WaveRequiredType {
-  IMAGE = "IMAGE",
-  AUDIO = "AUDIO",
-  VIDEO = "VIDEO",
-}
-
-export enum WaveRequiredMetadataType {
-  STRING = "STRING",
-  NUMBER = "NUMBER",
 }
 
 export enum CreateWaveGroupConfigType {
@@ -41,11 +32,11 @@ export interface WaveGroupsConfig {
 
 export interface CreateWaveDropsRequiredMetadata {
   readonly key: string;
-  readonly type: WaveRequiredMetadataType;
+  readonly type: WaveMetadataType;
 }
 
 export interface CreateWaveDropsConfig {
-  readonly requiredTypes: WaveRequiredType[];
+  readonly requiredTypes: WaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }
 
@@ -124,4 +115,10 @@ export enum CreateWaveStepStatus {
 export enum CreateWaveGroupStatus {
   NONE = "NONE",
   GROUP = "GROUP",
+}
+
+export interface SearchWavesParams {
+  readonly limit: number;
+  readonly serial_no_less_than?: number;
+  readonly group_id?: string;
 }

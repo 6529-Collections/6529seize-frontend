@@ -1,10 +1,5 @@
-import { useState } from "react";
-import {
-  CreateWaveDropsRequiredMetadata,
-  WaveRequiredMetadataType,
-} from "../../../../../types/waves.types";
-import CommonBorderedRadioButton from "../../../../utils/radio/CommonBorderedRadioButton";
-import { CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS } from "../../../../../helpers/waves/waves.constants";
+import { WaveMetadataType } from "../../../../../generated/models/WaveMetadataType";
+import { CreateWaveDropsRequiredMetadata } from "../../../../../types/waves.types";
 import CreateWaveDropsMetadataRowType from "./CreateWaveDropsMetadataRowType";
 
 export default function CreateWaveDropsMetadataRow({
@@ -21,7 +16,7 @@ export default function CreateWaveDropsMetadataRow({
   readonly onItemChange: (args: {
     readonly index: number;
     readonly key: string;
-    readonly type: WaveRequiredMetadataType;
+    readonly type: WaveMetadataType;
   }) => void;
   readonly itemsCount: number;
   readonly onItemRemove: (index: number) => void;
@@ -34,7 +29,7 @@ export default function CreateWaveDropsMetadataRow({
     });
   };
 
-  const onTypeChange = (type: WaveRequiredMetadataType) => {
+  const onTypeChange = (type: WaveMetadataType) => {
     onItemChange({
       index,
       key: item.key,

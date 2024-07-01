@@ -109,7 +109,7 @@ import { CreateNewProfileProxyCreateWaveParticipationDropAction   } from '../mod
 import { CreateNewProfileProxyRateWaveDropAction   } from '../models/CreateNewProfileProxyRateWaveDropAction';
 import { CreateNewProfileProxyReadWaveAction   } from '../models/CreateNewProfileProxyReadWaveAction';
 import { CreateNewWave } from '../models/CreateNewWave';
-import { CreateNewWaveParticipationConfig       } from '../models/CreateNewWaveParticipationConfig';
+import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
 import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
 import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
 import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
@@ -162,7 +162,7 @@ import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveMetadataType } from '../models/WaveMetadataType';
 import { WaveOutcome } from '../models/WaveOutcome';
-import { WaveParticipationConfig       } from '../models/WaveParticipationConfig';
+import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
 import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
