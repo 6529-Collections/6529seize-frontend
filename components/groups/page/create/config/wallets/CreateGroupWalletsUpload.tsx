@@ -1,5 +1,6 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useContext, useState, useEffect } from "react";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
+import { AuthContext } from "../../../../../auth/Auth";
 
 export default function CreateGroupWalletsUpload({
   wallets,
@@ -8,6 +9,50 @@ export default function CreateGroupWalletsUpload({
   readonly wallets: string[] | null;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
+  const { connectedProfile } = useContext(AuthContext);
+
+  const getMyPrimaryWallet = (): string | null =>
+    connectedProfile?.profile?.primary_wallet?.toLowerCase() ?? null;
+
+  const getIsMyPrimaryWalletAdded = (): boolean => {
+    const myPrimaryWallet = getMyPrimaryWallet();
+    if (!myPrimaryWallet) {
+      return false;
+    }
+    if (
+      wallets?.map((wallet) => wallet.toLowerCase()).includes(myPrimaryWallet)
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  const [isMyPrimaryWalletAdded, setIsMyPrimaryWalletAdded] = useState(
+    getIsMyPrimaryWalletAdded()
+  );
+
+  useEffect(() => {
+    setIsMyPrimaryWalletAdded(getIsMyPrimaryWalletAdded());
+  }, [connectedProfile, wallets]);
+
+  const includePrimaryWalletChange = () => {
+    const primaryWallet = getMyPrimaryWallet();
+    if (!primaryWallet) {
+      return;
+    }
+    if (isMyPrimaryWalletAdded) {
+      const myPrimaryWalletRemoved =
+        wallets?.filter((wallet) => wallet.toLowerCase() !== primaryWallet) ??
+        null;
+      setWallets(myPrimaryWalletRemoved);
+    } else {
+      const myPrimaryWalletAdded = wallets
+        ? [primaryWallet, ...wallets]
+        : [primaryWallet];
+      setWallets(myPrimaryWalletAdded);
+    }
+  };
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getAddresses = (lines: string[]): string[] => {
@@ -117,11 +162,34 @@ export default function CreateGroupWalletsUpload({
             }}
           />
         </label>
-        <GroupCreateWalletsCount
-          walletsCount={wallets?.length ?? null}
-          loading={false}
-          removeWallets={() => setWallets(null)}
-        />
+        <div className="tw-w-full tw-inline-flex tw-justify-between">
+          <GroupCreateWalletsCount
+            walletsCount={wallets?.length ?? null}
+            loading={false}
+            removeWallets={() => setWallets(null)}
+          />
+          <div className="tw-mt-4">
+            <div className="tw-relative tw-flex tw-items-start">
+              <div className="tw-flex tw-h-6 tw-items-center">
+                <input
+                  type="checkbox"
+                  checked={isMyPrimaryWalletAdded}
+                  onChange={includePrimaryWalletChange}
+                  id="include_my_primary_wallet"
+                  className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
+                />
+              </div>
+              <div className="tw-ml-3 tw-text-sm tw-leading-6">
+                <label
+                  htmlFor="include_my_primary_wallet"
+                  className="tw-cursor-pointer tw-font-medium tw-text-iron-300"
+                >
+                  Include my primary wallet
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
