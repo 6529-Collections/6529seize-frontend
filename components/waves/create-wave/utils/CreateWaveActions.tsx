@@ -13,11 +13,13 @@ import CreateWaveNextStep from "./CreateWaveNextStep";
 export default function CreateWaveActions({
   config,
   step,
+  submitting,
   setStep,
   onComplete,
 }: {
   readonly config: CreateWaveConfig;
   readonly step: CreateWaveStep;
+  readonly submitting: boolean;
   readonly setStep: (step: CreateWaveStep) => void;
   readonly onComplete: () => Promise<void>;
 }) {
@@ -53,7 +55,12 @@ export default function CreateWaveActions({
         )}
       </div>
       <div className="tw-ml-auto">
-        <CreateWaveNextStep onClick={onNextStep} disabled={false} step={step} />
+        <CreateWaveNextStep
+          onClick={onNextStep}
+          disabled={false}
+          step={step}
+          submitting={submitting}
+        />
       </div>
     </div>
   );

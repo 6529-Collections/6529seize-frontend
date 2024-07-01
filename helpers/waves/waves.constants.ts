@@ -1,10 +1,10 @@
 import { WaveCreditType } from "../../generated/models/WaveCreditType";
+import { WaveMetadataType } from "../../generated/models/WaveMetadataType";
+import { WaveParticipationRequirement } from "../../generated/models/WaveParticipationRequirement";
 import { WaveType } from "../../generated/models/WaveType";
 import {
   CreateWaveGroupConfigType,
   CreateWaveStep,
-  WaveRequiredMetadataType,
-  WaveRequiredType,
   WaveSignatureType,
 } from "../../types/waves.types";
 
@@ -150,18 +150,18 @@ export const CREATE_WAVE_START_DATE_LABELS: Record<WaveType, string> = {
 };
 
 export const CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS: Record<
-  WaveRequiredType,
+  WaveParticipationRequirement,
   string
 > = {
-  [WaveRequiredType.IMAGE]: "Image",
-  [WaveRequiredType.AUDIO]: "Audio",
-  [WaveRequiredType.VIDEO]: "Video",
+  [WaveParticipationRequirement.Image]: "Image",
+  [WaveParticipationRequirement.Audio]: "Audio",
+  [WaveParticipationRequirement.Video]: "Video",
 };
 
 export const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
-  WaveRequiredMetadataType,
+  WaveMetadataType,
   string
 > = {
-  [WaveRequiredMetadataType.STRING]: "Text",
-  [WaveRequiredMetadataType.NUMBER]: "Number",
+  [WaveMetadataType.String]: "Text",
+  [WaveMetadataType.Number]: "Number",
 };

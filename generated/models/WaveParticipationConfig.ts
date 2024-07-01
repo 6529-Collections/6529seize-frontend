@@ -26,7 +26,7 @@ export class WaveParticipationConfig {
     * The metadata that must be provided by the participant.  Empty array if nothing is required. 
     */
     'required_metadata': Array<WaveRequiredMetadata>;
-    'required_media': WaveParticipationRequirement | null;
+    'required_media': Array<WaveParticipationRequirement>;
     /**
     * If true then the votes must be signed by voters.
     */
@@ -57,7 +57,7 @@ export class WaveParticipationConfig {
         {
             "name": "required_media",
             "baseName": "required_media",
-            "type": "WaveParticipationRequirement",
+            "type": "Array<WaveParticipationRequirement>",
             "format": ""
         },
         {
@@ -80,6 +80,4 @@ export class WaveParticipationConfig {
     public constructor() {
     }
 }
-
-
 

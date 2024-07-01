@@ -1,3 +1,8 @@
+import { CreateDropRequest } from "../../generated/models/CreateDropRequest";
+import { CreateNewWave } from "../../generated/models/CreateNewWave";
+import { CreateWaveDropRequest } from "../../generated/models/CreateWaveDropRequest";
+import { IntRange } from "../../generated/models/IntRange";
+import { WaveCreditScope } from "../../generated/models/WaveCreditScope";
 import { WaveCreditType } from "../../generated/models/WaveCreditType";
 import { WaveType } from "../../generated/models/WaveType";
 import {
@@ -9,6 +14,7 @@ import {
   CreateWaveStep,
   CreateWaveVotingConfig,
   WaveOverviewConfig,
+  WaveSignatureType,
 } from "../../types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 
@@ -269,4 +275,111 @@ export const getCreateWaveValidationErrors = ({
     return errors;
   }
   return errors;
+};
+
+const getIsVotingSignatureRequired = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): boolean => {
+  return (
+    config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+    config.overview.signatureType === WaveSignatureType.VOTING
+  );
+};
+
+const getIsParticipationSignatureRequired = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): boolean => {
+  return (
+    config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
+    config.overview.signatureType === WaveSignatureType.DROPS
+  );
+};
+
+const getWinningThreshold = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): IntRange | null => {
+  const waveType = config.overview.type;
+  switch (waveType) {
+    case WaveType.Approve:
+      return {
+        min: config.approval.threshold,
+        max: config.approval.threshold,
+      };
+    case WaveType.Rank:
+    case WaveType.Chat:
+      return null;
+    default:
+      assertUnreachable(waveType);
+      return null;
+  }
+};
+
+export const getCreateNewWaveBody = ({
+  drop,
+  config,
+}: {
+  readonly drop: CreateWaveDropRequest;
+  readonly config: CreateWaveConfig;
+}): CreateNewWave => {
+  return {
+    name: config.overview.name,
+    description_drop: drop,
+    voting: {
+      scope: {
+        group_id: config.groups.canVote,
+      },
+      credit_type: config.voting.type,
+      credit_scope: WaveCreditScope.Wave,
+      credit_category: config.voting.category,
+      creditor_id: config.voting.profileId,
+      signature_required: getIsVotingSignatureRequired({ config }),
+      period: {
+        min: config.dates.votingStartDate,
+        max: config.dates.endDate,
+      },
+    },
+    visibility: {
+      scope: {
+        group_id: config.groups.canView,
+      },
+    },
+    participation: {
+      scope: {
+        group_id: config.groups.canDrop,
+      },
+      // TODO
+      no_of_applications_allowed_per_participant: null,
+      required_media: config.drops.requiredTypes,
+      required_metadata: config.drops.requiredMetadata
+        .map((metadata) => ({
+          name: metadata.key,
+          type: metadata.type,
+        }))
+        .filter((metadata) => !!metadata.name),
+      signature_required: getIsParticipationSignatureRequired({ config }),
+      period: {
+        min: config.dates.submissionStartDate,
+        max: config.dates.endDate,
+      },
+    },
+    wave: {
+      type: config.overview.type,
+      winning_thresholds: getWinningThreshold({ config }),
+      // TODO
+      max_winners: null,
+      time_lock_ms: config.approval.thresholdTimeMs,
+      admin_group_id: config.groups.admin,
+      period: {
+        min: config.dates.submissionStartDate,
+        max: config.dates.endDate,
+      },
+    },
+    outcomes: [],
+  };
 };
