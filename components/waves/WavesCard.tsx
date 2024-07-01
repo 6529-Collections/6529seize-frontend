@@ -1,23 +1,34 @@
+import { useRouter } from "next/router";
 import { Wave } from "../../generated/models/Wave";
+import { getTimeAgo, getTimeUntil } from "../../helpers/Helpers";
 
 export default function WavesCard({ wave }: { readonly wave: Wave }) {
+  const router = useRouter();
+  const goToWave = () => {
+    router.push(`/waves/${wave.id}`);
+  };
   return (
-    <div className="tw-group tw-cursor-pointer">
+    <div className="tw-group tw-cursor-pointer" onClick={goToWave}>
       <div className="tw-relative tw-w-full tw-h-20 tw-rounded-t-2xl tw-translate-y-4 group-hover:tw-translate-y-3 tw-transiton tw-duration-500 tw-ease">
-        <img
+        <div
           className="tw-w-full tw-h-full tw-object-cover tw-rounded-t-2xl"
-          src="https://images.unsplash.com/photo-1554147090-e1221a04a025?q=80&w=2896&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt=""
+          style={{
+            background: `linear-gradient(45deg, ${wave.author.banner1_color} 0%, ${wave.author.banner2_color} 100%)`,
+          }}
         />
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-2 tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
       </div>
       <div className="tw-bg-iron-900 tw-rounded-2xl tw-relative -tw-mt-4 tw-border tw-border-solid tw-border-t-0 tw-border-iron-700 ">
         <div className="tw-px-4 sm:tw-px-6 tw-flex tw-items-end tw-justify-between">
-          <img
-            className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900 "
-            src="https://images.unsplash.com/photo-1604079681864-c6fbd7eb109c?q=80&w=2731&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt=""
-          />
+          {wave.author.pfp ? (
+            <img
+              className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900 "
+              src={wave.author.pfp}
+              alt=""
+            />
+          ) : (
+            <div className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900 " />
+          )}
           <div className="tw-pt-4 tw-flex tw-items-center tw-gap-x-3">
             <button
               type="button"
@@ -67,10 +78,7 @@ export default function WavesCard({ wave }: { readonly wave: Wave }) {
           <div className="tw-px-4 sm:tw-px-6 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
             <div>
               <p className="tw-mb-0 tw-text-2xl tw-text-white tw-font-semibold">
-                Memes-Chat
-              </p>
-              <p className="tw-mt-2 tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">
-                The main chat for 6529. Open to all. Please join!
+                {wave.name}
               </p>
               <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-2">
                 <div className="tw-flex -tw-space-x-0.5">
@@ -115,11 +123,15 @@ export default function WavesCard({ wave }: { readonly wave: Wave }) {
                 Created by
               </span>
               <div className="tw-flex tw-items-center tw-gap-x-2">
-                <img
-                  className="tw-h-6 tw-w-6 tw-rounded-lg"
-                  src="https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80"
-                  alt="Profile Picture"
-                />
+                {wave.author.pfp ? (
+                  <img
+                    className="tw-h-6 tw-w-6 tw-rounded-lg"
+                    src={wave.author.pfp}
+                    alt="Profile Picture"
+                  />
+                ) : (
+                  <div className="tw-h-6 tw-w-6 tw-rounded-lg" />
+                )}
                 <span className="tw-font-semibold tw-text-iron-50">
                   {wave.author.handle}
                 </span>
@@ -142,7 +154,9 @@ export default function WavesCard({ wave }: { readonly wave: Wave }) {
                 />
               </svg>
               <span className="tw-font-medium tw-text-iron-400">Created</span>
-              <span className="tw-font-medium tw-text-iron-50">2 days ago</span>
+              <span className="tw-font-medium tw-text-iron-50">
+                {getTimeAgo(wave.created_at)}
+              </span>
             </div>
             <div className="tw-text-sm tw-inline-flex tw-items-center tw-gap-x-1.5">
               <svg
@@ -160,7 +174,11 @@ export default function WavesCard({ wave }: { readonly wave: Wave }) {
                 />
               </svg>
               <span className="tw-font-medium tw-text-iron-400">Ending in</span>
-              <span className="tw-font-medium tw-text-iron-50">7 days</span>
+              <span className="tw-font-medium tw-text-iron-50">
+                {wave.wave.period?.max
+                  ? getTimeUntil(wave.wave.period.max)
+                  : "Never"}
+              </span>
             </div>
           </div>
         </div>

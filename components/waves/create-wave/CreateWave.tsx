@@ -392,7 +392,6 @@ export default function CreateWave({
         drop: dropRequest,
       })
     );
-    console.log(wave);
   };
 
   const stepComponent: Record<CreateWaveStep, JSX.Element> = {
