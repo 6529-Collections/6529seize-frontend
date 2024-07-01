@@ -5,8 +5,8 @@ import { Container, Row, Col, Form } from "react-bootstrap";
 import { useVerifyMessage } from "wagmi";
 import {
   faCheckCircle,
-  faMagnifyingGlass,
   faRotate,
+  faShieldAlt,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -111,7 +111,7 @@ export default function SignMessage() {
           className="d-flex align-items-end gap-2 pt-1 pb-1">
           <button
             onClick={onVerify}
-            className="btn btn-block btn-lg btn-primary"
+            className="btn btn-block btn-lg btn-primary d-flex align-items-center justify-content-center"
             disabled={
               verify.isFetching ||
               verifyEnabled ||
@@ -120,11 +120,7 @@ export default function SignMessage() {
               !signature
             }>
             {verify.isFetching ? "Verifying..." : "Verify"}
-            <FontAwesomeIcon
-              icon={faMagnifyingGlass}
-              height={14}
-              className="ms-2"
-            />
+            <FontAwesomeIcon icon={faShieldAlt} height={16} className="ms-2" />
           </button>
         </Col>
       </Row>
