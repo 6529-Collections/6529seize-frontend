@@ -1,12 +1,12 @@
-import { WaveRequiredType } from "../../../../../types/waves.types";
+import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
 import CreateWaveDropsType from "./CreateWaveDropsType";
 
 export default function CreateWaveDropsTypes({
   requiredTypes,
   onRequiredTypeChange,
 }: {
-  readonly requiredTypes: WaveRequiredType[];
-  readonly onRequiredTypeChange: (type: WaveRequiredType) => void;
+  readonly requiredTypes: WaveParticipationRequirement[];
+  readonly onRequiredTypeChange: (type: WaveParticipationRequirement) => void;
 }) {
   return (
     <div>
@@ -14,7 +14,7 @@ export default function CreateWaveDropsTypes({
         Required Types
       </p>
       <div className="tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-4">
-        {Object.values(WaveRequiredType).map((type) => (
+        {Object.values(WaveParticipationRequirement).map((type) => (
           <CreateWaveDropsType
             key={type}
             requiredTypes={requiredTypes}

@@ -1,11 +1,11 @@
-import { WaveRequiredMetadataType } from "../../../../../types/waves.types";
+import { WaveMetadataType } from "../../../../../generated/models/WaveMetadataType";
 
 export default function CreateWaveDropsMetadataRowType({
   activeType,
   onTypeChange,
 }: {
-  readonly activeType: WaveRequiredMetadataType;
-  readonly onTypeChange: (type: WaveRequiredMetadataType) => void;
+  readonly activeType: WaveMetadataType;
+  readonly onTypeChange: (type: WaveMetadataType) => void;
 }) {
   const activeClasses =
     "tw-ring-primary-400 tw-bg-[#202B45] tw-text-primary-400 tw-z-10";
@@ -13,17 +13,13 @@ export default function CreateWaveDropsMetadataRowType({
     "tw-ring-iron-650 tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-300";
 
   const STRING_CLASSES =
-    activeType === WaveRequiredMetadataType.STRING
-      ? activeClasses
-      : inactiveClasses;
+    activeType === WaveMetadataType.String ? activeClasses : inactiveClasses;
   const NUMBER_CLASSES =
-    activeType === WaveRequiredMetadataType.NUMBER
-      ? activeClasses
-      : inactiveClasses;
+    activeType === WaveMetadataType.Number ? activeClasses : inactiveClasses;
   return (
     <span className="tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
       <button
-        onClick={() => onTypeChange(WaveRequiredMetadataType.STRING)}
+        onClick={() => onTypeChange(WaveMetadataType.String)}
         title="Text"
         className={`${STRING_CLASSES} tw-flex-shrink-0 tw-ring-1 tw-ring-inset focus:tw-z-10 tw-rounded-l-lg tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
         type="button"
@@ -45,7 +41,7 @@ export default function CreateWaveDropsMetadataRowType({
         </svg>
       </button>
       <button
-        onClick={() => onTypeChange(WaveRequiredMetadataType.NUMBER)}
+        onClick={() => onTypeChange(WaveMetadataType.Number)}
         title="Number"
         className={`${NUMBER_CLASSES} tw-flex-shrink-0 -tw-ml-px focus:tw-z-10 tw-ring-1 tw-ring-inset tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
         type="button"
