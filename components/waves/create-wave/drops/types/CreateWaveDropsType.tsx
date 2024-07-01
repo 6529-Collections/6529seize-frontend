@@ -1,14 +1,14 @@
+import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
 import { CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS } from "../../../../../helpers/waves/waves.constants";
-import { WaveRequiredType } from "../../../../../types/waves.types";
 
 export default function CreateWaveDropsType({
   requiredTypes,
   type,
   onRequiredTypeChange,
 }: {
-  readonly requiredTypes: WaveRequiredType[];
-  readonly type: WaveRequiredType;
-  readonly onRequiredTypeChange: (type: WaveRequiredType) => void;
+  readonly requiredTypes: WaveParticipationRequirement[];
+  readonly type: WaveParticipationRequirement;
+  readonly onRequiredTypeChange: (type: WaveParticipationRequirement) => void;
 }) {
   const isChecked = requiredTypes.includes(type);
   const buttonClasses = isChecked

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   CreateWaveDropsRequiredMetadata,
-  WaveRequiredMetadataType,
 } from "../../../../../types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
+import { WaveMetadataType } from "../../../../../generated/models/WaveMetadataType";
 
 export default function CreateWaveDropsMetadata({
   requiredMetadata,
@@ -31,7 +31,7 @@ export default function CreateWaveDropsMetadata({
   }: {
     readonly index: number;
     readonly key: string;
-    readonly type: WaveRequiredMetadataType;
+    readonly type: WaveMetadataType;
   }) => {
     const newItems = [...requiredMetadata];
     newItems[index] = { key, type };
@@ -41,7 +41,7 @@ export default function CreateWaveDropsMetadata({
   const onAddNewRow = () => {
     onRequiredMetadataChange([
       ...requiredMetadata,
-      { key: "", type: WaveRequiredMetadataType.STRING },
+      { key: "", type: WaveMetadataType.String },
     ]);
   };
 

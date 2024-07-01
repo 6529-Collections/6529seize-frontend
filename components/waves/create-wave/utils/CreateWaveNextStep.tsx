@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { WaveType } from "../../../../generated/models/WaveType";
 import { CreateWaveStep } from "../../../../types/waves.types";
+import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 
 export enum CreateWaveNextStepType {
   NEXT = "NEXT",
@@ -10,10 +11,12 @@ export enum CreateWaveNextStepType {
 export default function CreateWaveNextStep({
   disabled,
   step,
+  submitting,
   onClick,
 }: {
   readonly disabled: boolean;
   readonly step: CreateWaveStep;
+  readonly submitting: boolean;
   readonly onClick: () => void;
 }) {
   const getStepType = () => {
@@ -45,11 +48,14 @@ export default function CreateWaveNextStep({
     [CreateWaveNextStepType.SAVE]: (
       <button
         onClick={onClick}
+        disabled={submitting}
         className={`${
-          disabled ? "" : ""
-        } tw-relative tw-inline-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-6 tw-py-3 tw-border-0 tw-text-base tw-font-semibold tw-rounded-lg tw-text-white tw-bg-gradient-to-r tw-from-blue-500 tw-via-blue-600 tw-to-blue-700 hover:tw-bg-gradient-to-br tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg`}
+          disabled
+            ? "tw-bg-iron-800 tw-text-iron-600 tw-border-iron-800"
+            : "tw-text-white tw-bg-gradient-to-r tw-from-blue-500 tw-via-blue-600 tw-to-blue-700 hover:tw-bg-gradient-to-b"
+        } tw-relative tw-inline-flex tw-items-center tw-gap-x-2 tw-justify-center tw-px-6 tw-py-3 tw-border-0 tw-text-base tw-font-semibold tw-rounded-lg r tw-transform hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg`}
       >
-        <span>Complete</span>
+        {submitting ? <CircleLoader /> : <span>Complete</span>}
       </button>
     ),
   };

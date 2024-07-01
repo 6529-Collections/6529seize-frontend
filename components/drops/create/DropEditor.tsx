@@ -34,7 +34,9 @@ const DropEditor = forwardRef<
     readonly loading: boolean;
     readonly dropEditorRefreshKey: number;
     readonly showSubmit?: boolean;
+    readonly showDropError?: boolean;
     readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
+    readonly onCanSubmitChange?: (canSubmit: boolean) => void;
   }
 >(
   (
@@ -46,7 +48,9 @@ const DropEditor = forwardRef<
       loading,
       dropEditorRefreshKey,
       showSubmit = true,
+      showDropError = false,
       onSubmitDrop,
+      onCanSubmitChange,
     },
     ref
   ) => {
@@ -97,6 +101,7 @@ const DropEditor = forwardRef<
           setTitle={setTitle}
           setMetadata={setMetadata}
           onSubmitDrop={onSubmitDrop}
+          onCanSubmitChange={onCanSubmitChange}
           key={dropEditorRefreshKey}
         />
       </div>
