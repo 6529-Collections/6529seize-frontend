@@ -423,6 +423,13 @@ export default function Header(props: Readonly<Props>) {
                     <hr />
                   </Col>
                 </Row>
+                {printMobileRow("Sign Message", "/tools/sign-message")}
+                {printMobileRow("Verify Signature", "/tools/verify-signature")}
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
                 {printMobileRow("Meme Accounting", "/meme-accounting")}
                 {printMobileRow("Meme Gas", "/meme-gas")}
                 <Row>
@@ -839,6 +846,19 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Open Data",
                                   path: "/open-data",
+                                }}
+                              />
+                              <NavDropdown.Divider />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Sign Message",
+                                  path: "/tools/sign-message",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Verify Signature",
+                                  path: "/tools/verify-signature",
                                 }}
                               />
                               <NavDropdown.Divider />
