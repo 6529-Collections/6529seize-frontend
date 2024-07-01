@@ -71,7 +71,7 @@ export default function CreateWaveDatesEndDate({
   return (
     <div className="tw-col-span-full">
       <CreateWaveDatesEndDateHeader endDateIsOptional={endDateIsOptional} />
-      <div className="tw-mt-3 tw-grid md:tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-mt-3 tw-grid md:tw-grid-cols-2 tw-gap-x-5 tw-gap-y-4">
         <CreateWaveDatesEndDateSetTime
           time={time}
           setTime={setTime}
