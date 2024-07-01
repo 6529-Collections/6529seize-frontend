@@ -70,8 +70,8 @@ export default function DelegationMappingToolPage() {
                               wallet.
                             </li>
                             <li>
-                              Enter any message you want, and click 'Sign' to
-                              generate a unique signature.
+                              Enter any message you want, and click
+                              &quot;Sign&quot; to generate a unique signature.
                             </li>
                             <li>
                               This signature proves that the message was created
