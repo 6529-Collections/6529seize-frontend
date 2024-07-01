@@ -1,10 +1,10 @@
 import { Wave } from "../../../generated/models/Wave";
 import DropsListItem from "../../drops/view/item/DropsListItem";
+import WaveCreateDrop from "./drop/WaveCreateDrop";
 import WaveHeader from "./header/WaveHeader";
 import WaveSpecs from "./specs/WaveSpecs";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
-  console.log(wave);
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">
       <WaveHeader wave={wave} />
@@ -52,7 +52,8 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
               </div>
             </div>
           </div>
-          <div className="tw-w-[672px]">
+          <div className="tw-w-[672px] tw-space-y-6">
+            <WaveCreateDrop />
             <DropsListItem drop={wave.description_drop} />
           </div>
         </div>
