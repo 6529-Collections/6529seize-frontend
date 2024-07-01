@@ -1,3 +1,4 @@
+import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import useManifoldClaim, {
   ManifoldClaimStatus,
@@ -18,6 +19,7 @@ import { Time } from "../../helpers/time";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 import ManifoldMintingPublic from "./ManifoldMintingPublic";
 import ManifoldMintingAllowlist from "./ManifoldMintingAllowlist";
+import { ETHEREUM_ICON_TEXT } from "../../constants";
 
 interface Props {
   title: string;
@@ -122,8 +124,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         contract={props.contract}
         proxy={props.proxy}
         abi={props.abi}
-        instanceId={manifoldClaim!.instanceId}
-        cost={manifoldClaim!.cost}
+        claim={manifoldClaim!}
         merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
         setFee={(f: number) => {
           setFee(f);
@@ -205,7 +206,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       )}
       <Row className="pt-3">
         <Col sm={12} md={6} className="pt-2 pb-2">
-          <Table bordered={false}>
+          <Table className={styles.spotsTable}>
             <tbody>
               <tr>
                 <td>Name</td>
@@ -278,19 +279,25 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               <tr>
                 <td>Mint Price</td>
                 <td>
-                  <b>{fromGWEI(manifoldClaim.cost)}</b>
+                  <b>
+                    {fromGWEI(manifoldClaim.cost)} {ETHEREUM_ICON_TEXT}
+                  </b>
                 </td>
               </tr>
               <tr>
                 <td className="pb-1">Manifold Fee</td>
                 <td className="pb-1">
-                  <b>{fromGWEI(fee)}</b>
+                  <b>
+                    {fromGWEI(fee)} {ETHEREUM_ICON_TEXT}
+                  </b>
                 </td>
               </tr>
               <tr>
                 <td>Total Price Per Token</td>
                 <td>
-                  <b>{fromGWEI(manifoldClaim.cost + fee)}</b>
+                  <b>
+                    {fromGWEI(manifoldClaim.cost + fee)} {ETHEREUM_ICON_TEXT}
+                  </b>
                 </td>
               </tr>
             </tbody>

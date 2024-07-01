@@ -36,6 +36,7 @@ export default function useManifoldClaim(
   onError?: () => void
 ) {
   const [claim, setClaim] = useState<ManifoldClaim>();
+  const [refetchInterval, setRefetchInterval] = useState<number>(5000);
 
   function getStatus(start: number, end: number) {
     const now = Date.now() / 1000;
@@ -53,7 +54,7 @@ export default function useManifoldClaim(
     query: {
       enabled:
         !!contract && !!proxy && !!abi && tokenId >= 0 && !claim?.isFinalized,
-      refetchInterval: 5000,
+      refetchInterval: refetchInterval,
     },
     chainId: 1,
     functionName: "getClaimForToken",
@@ -65,8 +66,6 @@ export default function useManifoldClaim(
     if (data) {
       const instanceId = Number(data[0]);
       const claim = data[1];
-      claim.startDate = 1719480934;
-      claim.endDate = 1719580934;
       const status = getStatus(claim.startDate, claim.endDate);
       const publicMerkle = areEqualAddresses(NULL_MERKLE, claim.merkleRoot);
       const phase = publicMerkle
@@ -89,6 +88,7 @@ export default function useManifoldClaim(
         isFetching: false,
         isFinalized: remaining === 0,
       });
+      setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 2500 : 10000);
     }
   }, [readContract.data]);
 

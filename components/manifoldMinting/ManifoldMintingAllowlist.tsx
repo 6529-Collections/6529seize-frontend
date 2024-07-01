@@ -6,14 +6,18 @@ import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import { useReadContract, useReadContracts } from "wagmi";
 import { fromGWEI } from "../../helpers/Helpers";
+import {
+  ManifoldClaim,
+  ManifoldClaimStatus,
+} from "../../hooks/useManifoldClaim";
+import { Time } from "../../helpers/time";
 
 export default function ManifoldMintingAllowlist(
   props: Readonly<{
     contract: string;
     proxy: string;
     abi: any;
-    instanceId: number;
-    cost: number;
+    claim: ManifoldClaim;
     merkleTreeId: number;
     setFee: (fee: number) => void;
   }>
@@ -55,7 +59,7 @@ export default function ManifoldMintingAllowlist(
         abi: props.abi,
         chainId: 1,
         functionName: "checkMintIndex",
-        args: [props.contract, props.instanceId, mp.value],
+        args: [props.contract, props.claim.instanceId, mp.value],
       });
     });
     return params;
@@ -64,7 +68,7 @@ export default function ManifoldMintingAllowlist(
   const readContracts = useReadContracts({
     contracts: getReadContractsParams(),
     query: {
-      refetchInterval: 15000,
+      refetchInterval: 10000,
     },
   });
 
@@ -97,9 +101,25 @@ export default function ManifoldMintingAllowlist(
     }
   }
 
+  function getButtonText() {
+    if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
+      return `SEIZE x${mintCount}`;
+    }
+    if (props.claim.status === ManifoldClaimStatus.EXPIRED) {
+      return "EXPIRED";
+    }
+
+    const startDate = Time.seconds(props.claim.startDate);
+    const date = startDate.toIsoDateString();
+    const time = startDate.toIsoTimeString();
+    const today = Time.now().toIsoDateString();
+    const dateDisplay = date === today ? "TODAY" : date;
+    return `DROPS ${dateDisplay} ${time} UTC`;
+  }
+
   function printMint(available: number) {
     const optionsArray = Array.from({ length: available }, (_, i) => i);
-    const value = (props.cost + fee) * mintCount;
+    const value = (props.claim.cost + fee) * mintCount;
     return (
       <Container className="no-padding pt-3">
         <Row>
@@ -130,12 +150,13 @@ export default function ManifoldMintingAllowlist(
         <Row className="pt-3">
           <Col>
             <button
+              disabled={props.claim.status !== ManifoldClaimStatus.ACTIVE}
               className="btn btn-primary btn-block"
               style={{
                 padding: "0.6rem",
               }}
               onClick={() => mint(value, mintCount)}>
-              <b>SEIZE x{mintCount}</b>
+              <b>{getButtonText()}</b>
             </button>
           </Col>
         </Row>
