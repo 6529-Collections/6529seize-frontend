@@ -84,8 +84,6 @@ export default function CreateWaveDropsMetadata({
     [requiredMetadata]
   );
 
-  console.log(errors);
-
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">

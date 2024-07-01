@@ -33,6 +33,7 @@ export class Wave {
     * The name of the wave
     */
     'name': string;
+    'created_at': number;
     'description_drop': Drop;
     'voting': WaveVotingConfig;
     'visibility': WaveVisibilityConfig;
@@ -66,6 +67,12 @@ export class Wave {
             "baseName": "name",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "description_drop",
