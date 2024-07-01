@@ -68,6 +68,7 @@ export default function CreateWave({
       type,
       signatureType: WaveSignatureType.NONE,
       name: "",
+      image: null,
     },
     groups: {
       canView: null,

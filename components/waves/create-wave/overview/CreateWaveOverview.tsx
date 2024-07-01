@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import { WaveOverviewConfig } from "../../../../types/waves.types";
-import CreateWaveOverviewInputs from "./CreateWaveOverviewInputs";
+import CreateWaveImageInput from "./CreateWaveImageInput";
+import CreateWaveNameInput from "./CreateWaveNameInput";
+
 import CreateWaveSignature from "./signature/CreateWaveSignature";
 import CreateWaveType from "./type/CreateWaveType";
 
@@ -24,12 +27,21 @@ export default function CreateWaveOverview({
       ...overview,
       [key]: value,
     });
-  
-  
+
+  const [file, setFile] = useState<File | null>();
+
+  useEffect(() => {
+    onChange({ key: "image", value: file ? URL.createObjectURL(file) : null });
+  }, [file]);
 
   return (
     <div className="tw-flex tw-flex-col tw-space-y-6">
-      <CreateWaveOverviewInputs onChange={onChange} name={overview.name} errors={errors}/>
+      <CreateWaveImageInput imageToShow={overview.image} setFile={setFile} />
+      <CreateWaveNameInput
+        onChange={onChange}
+        name={overview.name}
+        errors={errors}
+      />
       <CreateWaveType
         selected={overview.type}
         onChange={(type) =>

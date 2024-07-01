@@ -55,7 +55,9 @@ export const getCreateWaveNextStep = ({
       if (waveType === WaveType.Approve) {
         return CreateWaveStep.APPROVAL;
       }
-      // TODO chat wont have outcomes
+      if (waveType === WaveType.Chat) {
+        return CreateWaveStep.DESCRIPTION;
+      }
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.OUTCOMES;
@@ -95,7 +97,9 @@ export const getCreateWavePreviousStep = ({
       }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
-      // TODO chat wont have outcomes
+      if (waveType === WaveType.Chat) {
+        return CreateWaveStep.VOTING;
+      }
       return CreateWaveStep.OUTCOMES;
     default:
       assertUnreachable(step);
@@ -229,6 +233,7 @@ const getApprovalValidationErrors = ({
   return errors;
 };
 
+// TODO outcomes errors
 export const getCreateWaveValidationErrors = ({
   step,
   config,
