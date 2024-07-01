@@ -57,6 +57,7 @@ export enum QueryKey {
   EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
   WAVES = "WAVES",
+  WAVE = "WAVE",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
