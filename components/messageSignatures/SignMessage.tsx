@@ -55,7 +55,7 @@ export default function SignMessage() {
   }
 
   return (
-    <Container className="no-padding pt-4 pb-4">
+    <Container className="no-padding pt-2 pb-4">
       <Row>
         <Col
           xs={{ span: 12 }}
@@ -91,7 +91,7 @@ export default function SignMessage() {
             className="btn btn-block btn-lg btn-primary"
             disabled={!!signedMessage}>
             Sign
-            <FontAwesomeIcon icon={faSignature} height={14} className="ms-2" />
+            <FontAwesomeIcon icon={faSignature} height={16} className="ms-2" />
           </button>
         </Col>
       </Row>
@@ -126,14 +126,14 @@ export default function SignMessage() {
                 className="btn btn-lg btn-white"
                 disabled={!signedMessage}>
                 Copy
-                <FontAwesomeIcon icon={faCopy} height={14} className="ms-2" />
+                <FontAwesomeIcon icon={faCopy} height={16} className="ms-2" />
               </button>
               <button
                 onClick={onReset}
                 className="btn btn-lg btn-white"
                 disabled={!signedMessage}>
                 Reset
-                <FontAwesomeIcon icon={faRotate} height={14} className="ms-2" />
+                <FontAwesomeIcon icon={faRotate} height={16} className="ms-2" />
               </button>
             </Col>
           </Row>
