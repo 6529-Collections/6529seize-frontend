@@ -89,14 +89,48 @@ export default function CreateWaveOutcomesWinners({
         />
       </div>
       {totalValueError && (
-        <span className="tw-mt-1.5 tw-text-xs tw-font-medium tw-text-error">
-          Total amount must be higher than 0
-        </span>
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <svg
+            className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="tw-relative tw-z-10 tw-text-error tw-text-xs tw-font-medium">
+            Total amount must be higher than 0
+          </div>
+        </div>
       )}
       {percentageError && (
-        <span className="tw-text-xs tw-font-medium tw-text-error">
-          Total percentage must be 100%
-        </span>
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <svg
+            className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="tw-relative tw-z-10 tw-text-error tw-text-xs tw-font-medium">
+            Total percentage must be 100%
+          </div>
+        </div>
       )}
       <div className="tw-flex tw-items-start tw-gap-x-3">
         {isPercentageCredit && (

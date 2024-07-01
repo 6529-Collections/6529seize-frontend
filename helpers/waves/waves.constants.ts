@@ -28,19 +28,19 @@ export const WAVE_SIGNATURE_LABELS: Record<
     [WaveSignatureType.NONE]: "None",
     [WaveSignatureType.DROPS]: "Drops",
     [WaveSignatureType.VOTING]: "Rating",
-    [WaveSignatureType.DROPS_AND_VOTING]: "Drops & Rating",
+    [WaveSignatureType.DROPS_AND_VOTING]: "All",
   },
   [WaveType.Rank]: {
     [WaveSignatureType.NONE]: "None",
     [WaveSignatureType.DROPS]: "Drops",
     [WaveSignatureType.VOTING]: "Voting",
-    [WaveSignatureType.DROPS_AND_VOTING]: "Drops & Voting",
+    [WaveSignatureType.DROPS_AND_VOTING]: "All",
   },
   [WaveType.Approve]: {
     [WaveSignatureType.NONE]: "None",
     [WaveSignatureType.DROPS]: "Drops",
     [WaveSignatureType.VOTING]: "Voting",
-    [WaveSignatureType.DROPS_AND_VOTING]: "Drops & Voting",
+    [WaveSignatureType.DROPS_AND_VOTING]: "All",
   },
 };
 
