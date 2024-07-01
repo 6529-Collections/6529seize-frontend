@@ -49,10 +49,38 @@ export default function DelegationMappingToolPage() {
             <Col>
               <Container>
                 <Row className="pt-4">
-                  <Col>
-                    <h1 className="float-none text-center mb-0">
-                      <span className="font-lightest">Sign</span> Message
-                    </h1>
+                  <Col
+                    xs={{ span: 12 }}
+                    sm={{ span: 12 }}
+                    md={{ span: 10, offset: 1 }}
+                    lg={{ span: 8, offset: 2 }}>
+                    <Container className="no-padding">
+                      <Row>
+                        <Col>
+                          <h1 className="float-none text-center mb-0">
+                            <span className="font-lightest">Sign</span> Message
+                          </h1>
+                        </Col>
+                      </Row>
+                      <Row className="pt-3">
+                        <Col>
+                          <ul>
+                            <li>
+                              Use this tool to sign a message with your crypto
+                              wallet.
+                            </li>
+                            <li>
+                              Enter any message you want, and click 'Sign' to
+                              generate a unique signature.
+                            </li>
+                            <li>
+                              This signature proves that the message was created
+                              by you, without revealing your private key.
+                            </li>
+                          </ul>
+                        </Col>
+                      </Row>
+                    </Container>
                   </Col>
                 </Row>
                 <Row>

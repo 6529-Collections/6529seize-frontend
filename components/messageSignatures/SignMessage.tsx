@@ -55,7 +55,7 @@ export default function SignMessage() {
   }
 
   return (
-    <Container className="no-padding pt-4 pb-4">
+    <Container className="no-padding pt-2 pb-4">
       <Row>
         <Col
           xs={{ span: 12 }}
