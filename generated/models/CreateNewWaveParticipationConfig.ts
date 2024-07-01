@@ -22,7 +22,7 @@ export class CreateNewWaveParticipationConfig {
     * The number of applications allowed per participant. Infinite if omitted.
     */
     'no_of_applications_allowed_per_participant': number | null;
-    'required_media': WaveParticipationRequirement | null;
+    'required_media': Array<WaveParticipationRequirement>;
     /**
     * The metadata that must be provided by the participant.  Empty array if nothing is required. 
     */
@@ -51,7 +51,7 @@ export class CreateNewWaveParticipationConfig {
         {
             "name": "required_media",
             "baseName": "required_media",
-            "type": "WaveParticipationRequirement",
+            "type": "Array<WaveParticipationRequirement>",
             "format": ""
         },
         {
@@ -80,6 +80,4 @@ export class CreateNewWaveParticipationConfig {
     public constructor() {
     }
 }
-
-
 
