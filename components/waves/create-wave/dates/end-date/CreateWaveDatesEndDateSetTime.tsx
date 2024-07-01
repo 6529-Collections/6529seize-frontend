@@ -65,7 +65,7 @@ export default function CreateWaveDatesEndDateSetTime({
       </div>
 
       {timeNotSetError && (
-        <div className="tw-relative tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
+        <div className="tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
               className="tw-size-5 tw-flex-shrink-0 tw-text-error"
