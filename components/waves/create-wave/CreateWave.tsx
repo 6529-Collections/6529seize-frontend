@@ -30,11 +30,9 @@ import {
   getCreateWaveValidationErrors,
 } from "../../../helpers/waves/create-wave.helpers";
 import { CreateNewWave } from "../../../generated/models/CreateNewWave";
-import { WaveCreditScope } from "../../../generated/models/WaveCreditScope";
 import { AuthContext } from "../../auth/Auth";
 import {
   CreateDropPart,
-  CreateDropRequest,
   CreateDropRequestPart,
   DropMedia,
 } from "../../../entities/IDrop";
@@ -57,8 +55,8 @@ export default function CreateWave({
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
-  const initialType = WaveType.Chat;
-  const initialStep = CreateWaveStep.OVERVIEW;
+  const initialType = WaveType.Approve;
+  const initialStep = CreateWaveStep.DESCRIPTION;
   const getInitialConfig = ({
     type,
   }: {

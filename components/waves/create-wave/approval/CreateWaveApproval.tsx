@@ -22,6 +22,9 @@ export default function CreateWaveApproval({
   const thresholdTimeError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED
   );
+  const thresholdDurationError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
+  );
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -35,6 +38,8 @@ export default function CreateWaveApproval({
         />
         <CreateWaveApprovalThresholdTime
           thresholdTimeMs={thresholdTimeMs}
+          thresholdTimeError={thresholdTimeError}
+          thresholdDurationError={thresholdDurationError}
           setThresholdTimeMs={setThresholdTimeMs}
         />
       </div>
