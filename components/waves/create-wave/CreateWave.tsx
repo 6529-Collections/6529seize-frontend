@@ -40,7 +40,6 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { Drop } from "../../../generated/models/Drop";
 import { CreateWaveDropRequest } from "../../../generated/models/CreateWaveDropRequest";
 import { Wave } from "../../../generated/models/Wave";
 import { useRouter } from "next/router";
@@ -55,7 +54,7 @@ export default function CreateWave({
   const router = useRouter();
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
-  const initialType = WaveType.Approve;
+  const initialType = WaveType.Rank;
   const initialStep = CreateWaveStep.OUTCOMES;
   const getInitialConfig = ({
     type,
@@ -80,6 +79,8 @@ export default function CreateWave({
       endDate: null,
     },
     drops: {
+      allowDiscussionDrops: true,
+      noOfApplicationsAllowedPerParticipant: null,
       requiredTypes: [],
       requiredMetadata: [{ key: "", type: WaveMetadataType.String }],
     },
@@ -108,6 +109,11 @@ export default function CreateWave({
     useState<CreateWaveOutcomeType | null>(null);
 
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
+
+  const onOutcomeTypeChange = (outcomeType: CreateWaveOutcomeType | null) => {
+    setSelectedOutcomeType(outcomeType);
+    setErrors([]);
+  };
 
   useEffect(() => {
     setErrors([]);
@@ -417,6 +423,7 @@ export default function CreateWave({
     ),
     [CreateWaveStep.DROPS]: (
       <CreateWaveDrops
+        waveType={config.overview.type}
         drops={config.drops}
         errors={errors}
         setDrops={setDrops}
@@ -446,7 +453,9 @@ export default function CreateWave({
       <CreateWaveOutcomes
         outcomes={config.outcomes}
         outcomeType={selectedOutcomeType}
-        setOutcomeType={setSelectedOutcomeType}
+        waveType={config.overview.type}
+        errors={errors}
+        setOutcomeType={onOutcomeTypeChange}
         setOutcomes={setOutcomes}
       />
     ),

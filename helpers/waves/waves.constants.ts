@@ -81,7 +81,6 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Rating",
     [CreateWaveStep.APPROVAL]: "Approval",
-    // TODO chat wont have outcomes
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },

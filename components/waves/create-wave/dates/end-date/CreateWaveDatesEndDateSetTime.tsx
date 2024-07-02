@@ -21,7 +21,7 @@ export default function CreateWaveDatesEndDateSetTime({
     <div className="tw-flex tw-flex-col">
       <div className="tw-relative">
         <input
-          type="string"
+          type="text"
           value={time !== null ? time.toString() : ""}
           onChange={onTimeChange}
           id="dates-end-time"

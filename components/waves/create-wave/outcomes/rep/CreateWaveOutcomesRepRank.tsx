@@ -1,14 +1,14 @@
 import { useState } from "react";
-import RepCategorySearch from "../../../utils/input/rep-category/RepCategorySearch";
 import {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
-} from "../../../../types/waves.types";
-import CreateWaveOutcomesWinners from "./winners/CreateWaveOutcomesWinners";
+} from "../../../../../types/waves.types";
+import RepCategorySearch from "../../../../utils/input/rep-category/RepCategorySearch";
+import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
 
-export default function CreateWaveOutcomesRep({
+export default function CreateWaveOutcomesRepRank({
   onOutcome,
   onCancel,
 }: {

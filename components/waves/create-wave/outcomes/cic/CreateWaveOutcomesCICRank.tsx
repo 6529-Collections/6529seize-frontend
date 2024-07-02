@@ -4,10 +4,10 @@ import {
   CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
-} from "../../../../types/waves.types";
-import CreateWaveOutcomesWinners from "./winners/CreateWaveOutcomesWinners";
+} from "../../../../../types/waves.types";
+import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
 
-export default function CreateWaveOutcomesCIC({
+export default function CreateWaveOutcomesCICRank({
   onOutcome,
   onCancel,
 }: {
