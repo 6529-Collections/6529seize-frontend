@@ -116,7 +116,7 @@ export default function CreateWaveDropsMetadataRow({
                   strokeLinejoin="round"
                 />
               </svg>
-              <span> Metadata name must be unique</span>
+              <span>Metadata name must be unique</span>
             </div>
           </div>
         </div>

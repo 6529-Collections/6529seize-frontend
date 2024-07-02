@@ -16,7 +16,7 @@ export default function CreateWaveTypeInputs({
   ];
 
   return (
-    <div className="tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-4">
+    <div className="tw-mt-3 tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
       {waveTypes.map((waveType) => (
         <CommonBorderedRadioButton
           key={waveType}

@@ -237,7 +237,7 @@ const CreateDropContent = forwardRef<
                   type="button"
                   title="add storm"
                   aria-label="Add storm"
-                  className="tw-absolute tw-group tw-top-1 tw-right-3 tw-p-2 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-text-iron-400 hover:tw-text-primary-400 tw-ease-out tw-transition tw-duration-300"
+                  className="tw-absolute tw-group tw-top-1 tw-right-11 tw-p-2 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-text-iron-400 hover:tw-text-primary-400 tw-ease-out tw-transition tw-duration-300"
                 >
                   <svg
                     className="tw-h-5 tw-w-5"
