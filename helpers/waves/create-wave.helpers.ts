@@ -4,6 +4,10 @@ import { CreateWaveDropRequest } from "../../generated/models/CreateWaveDropRequ
 import { IntRange } from "../../generated/models/IntRange";
 import { WaveCreditScope } from "../../generated/models/WaveCreditScope";
 import { WaveCreditType } from "../../generated/models/WaveCreditType";
+import { WaveOutcome } from "../../generated/models/WaveOutcome";
+import { WaveOutcomeCredit } from "../../generated/models/WaveOutcomeCredit";
+import { WaveOutcomeSubType } from "../../generated/models/WaveOutcomeSubType";
+import { WaveOutcomeType } from "../../generated/models/WaveOutcomeType";
 import { WaveType } from "../../generated/models/WaveType";
 import {
   CreateWaveApprovalConfig,
@@ -11,6 +15,8 @@ import {
   CreateWaveDatesConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
+  CreateWaveOutcomeConfigWinnersCreditValueType,
+  CreateWaveOutcomeType,
   CreateWaveStep,
   CreateWaveVotingConfig,
   WaveOverviewConfig,
@@ -334,6 +340,39 @@ const getWinningThreshold = ({
       assertUnreachable(waveType);
       return null;
   }
+};
+
+const getOutcomes = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): WaveOutcome[] => {
+  const outcomes: WaveOutcome[] = [];
+  for (const outcome of config.outcomes) {
+    if (outcome.type === CreateWaveOutcomeType.MANUAL && outcome.title) {
+      outcomes.push({
+        type: WaveOutcomeType.Manual,
+        description: outcome.title,
+      });
+    } else if (
+      outcome.type === CreateWaveOutcomeType.REP &&
+      outcome.category &&
+      outcome.winnersConfig?.totalAmount
+    ) {
+      outcomes.push({
+        type: WaveOutcomeType.Automatic,
+        subtype: WaveOutcomeSubType.CreditDistribution,
+        description: "",
+        credit: WaveOutcomeCredit.Rep,
+        rep_category: outcome.category,
+        amount: outcome.winnersConfig.totalAmount,
+        distribution: outcome.winnersConfig.winners.map(
+          (winner) => outcome.winnersConfig?.creditValueType === CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE ? winner.value : winner.value
+        ),
+      });
+    }
+  }
+  return outcomes;
 };
 
 export const getCreateNewWaveBody = ({
