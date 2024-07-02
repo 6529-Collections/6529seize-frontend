@@ -76,6 +76,9 @@ export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
 export * from '../models/WaveMetadataType';
 export * from '../models/WaveOutcome';
+export * from '../models/WaveOutcomeCredit';
+export * from '../models/WaveOutcomeSubType';
+export * from '../models/WaveOutcomeType';
 export * from '../models/WaveParticipationConfig';
 export * from '../models/WaveParticipationRequirement';
 export * from '../models/WaveRequiredMetadata';
@@ -161,7 +164,10 @@ import { WaveConfig       } from '../models/WaveConfig';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveMetadataType } from '../models/WaveMetadataType';
-import { WaveOutcome } from '../models/WaveOutcome';
+import { WaveOutcome        } from '../models/WaveOutcome';
+import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
+import { WaveOutcomeSubType } from '../models/WaveOutcomeSubType';
+import { WaveOutcomeType } from '../models/WaveOutcomeType';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
 import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
@@ -193,6 +199,9 @@ let enumsMap: Set<string> = new Set<string>([
     "WaveCreditScope",
     "WaveCreditType",
     "WaveMetadataType",
+    "WaveOutcomeCredit",
+    "WaveOutcomeSubType",
+    "WaveOutcomeType",
     "WaveParticipationRequirement",
     "WaveType",
 ]);

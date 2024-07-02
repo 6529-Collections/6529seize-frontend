@@ -42,6 +42,7 @@ const CreateDropFullDesktop = forwardRef<
     readonly loading: boolean;
     readonly drop: CreateDropConfig | null;
     readonly showSubmit: boolean;
+    readonly showDropError?: boolean;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (data_key: string) => void;
@@ -69,6 +70,7 @@ const CreateDropFullDesktop = forwardRef<
       loading,
       drop,
       showSubmit,
+      showDropError = false,
       onViewChange,
       onMetadataEdit,
       onMetadataRemove,
@@ -89,7 +91,9 @@ const CreateDropFullDesktop = forwardRef<
     const getWrapperClasses = () => {
       switch (type) {
         case CreateDropType.DROP:
-          return "tw-px-4 sm:tw-p-5 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl";
+          return `${
+            showDropError ? "tw-border-error" : "tw-border-iron-700"
+          } tw-px-4 sm:tw-p-5 tw-border tw-border-solid tw-rounded-xl`;
         case CreateDropType.QUOTE:
           return "";
         default:
