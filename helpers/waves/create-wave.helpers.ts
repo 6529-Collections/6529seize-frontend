@@ -33,6 +33,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   VOTING_CATEGORY_MUST_BE_EMPTY = "VOTING_CATEGORY_MUST_BE_EMPTY",
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
   APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
+  APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION",
 }
 
 export const getCreateWaveNextStep = ({
@@ -216,9 +217,11 @@ const getVotingValidationErrors = ({
 const getApprovalValidationErrors = ({
   waveType,
   approval,
+  dates,
 }: {
   readonly waveType: WaveType;
   readonly approval: CreateWaveApprovalConfig;
+  readonly dates: CreateWaveDatesConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (waveType !== WaveType.Approve) {
@@ -229,6 +232,13 @@ const getApprovalValidationErrors = ({
   }
   if (!approval.thresholdTimeMs) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED);
+  }
+  if (approval.thresholdTimeMs && dates.endDate) {
+    if (approval.thresholdTimeMs > dates.endDate - dates.submissionStartDate) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
+      );
+    }
   }
   return errors;
 };
@@ -273,6 +283,7 @@ export const getCreateWaveValidationErrors = ({
   errors.push(
     ...getApprovalValidationErrors({
       approval: config.approval,
+      dates: config.dates,
       waveType: config.overview.type,
     })
   );
