@@ -427,7 +427,6 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
-
   /drops:
     get:
       tags:
@@ -1391,12 +1390,14 @@ components:
             - type: array
               items:
                 type: string
+          example: ["0x1234567890123456789012345678901234567890"]
         excluded_wallets:
           anyOf:
             - type: "null"
             - type: array
               items:
                 type: string
+          example: ["0x1234567890123456789012345678901234567890"]
 
     GroupOwnsNft:
       type: object
@@ -1813,10 +1814,12 @@ components:
           credit_amount:
             type: number
             format: int64
+            example: 1000
           end_time:
             type: number
             format: int64
             nullable: true
+            example: 1719850339996
 
     DropRatingCategory:
       type: object
@@ -2268,21 +2271,50 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
+          example: {"min": 1719850339996, "max": 1719850339996}
+
+
+    WaveOutcomeType:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+
+    WaveOutcomeSubType:
+      type: string
+      enum:
+        - CREDIT_DISTRIBUTION
+
+    WaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
 
     WaveOutcome:
       type: object
       required:
         - type
-        - properties
+        - description
       properties:
         type:
+          $ref: "#/components/schemas/WaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/WaveOutcomeSubType"
+        description:
           type: string
-          description: |
-            Type of the outcome. (Promise, EVM Mint, Crypto Prize etc.)
-        properties:
-          type: object
-          additionalProperties:
-            type: string
+        credit:
+          $ref: "#/components/schemas/WaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            type: number
+
 
     WaveParticipationRequirement:
       type: string
@@ -2410,9 +2442,11 @@ components:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         credit_amount:
           type: number
           format: int64
+          example: 1000
 
     CreateNewProfileProxyAllocateCicAction:
       type: object
@@ -2431,6 +2465,7 @@ components:
         credit_amount:
           type: number
           format: int64
+          example: 1000
 
     CreateNewProfileProxyCreateWaveAction:
       type: object
@@ -2523,37 +2558,45 @@ components:
             - type: "null"
             - type: number
               format: int64
+          example: 1000
         credit_spent:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1000
         start_time:
           type: number
           format: int64
+          example: 1719850339996
         end_time:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         created_at:
           type: number
           format: int64
+          example: 1719850339996
         accepted_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         rejected_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         revoked_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         is_active:
           type: boolean
 

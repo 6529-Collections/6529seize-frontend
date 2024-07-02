@@ -40,6 +40,7 @@ const CreateDropCompact = forwardRef<
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
     readonly showSubmit: boolean;
+    readonly showDropError?: boolean;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataRemove: (key: string) => void;
     readonly onEditorState: (editorState: EditorState | null) => void;
@@ -66,6 +67,7 @@ const CreateDropCompact = forwardRef<
       showSubmit,
       type,
       drop,
+      showDropError = false,
       onViewChange,
       onMetadataRemove,
       onEditorState,
@@ -80,7 +82,9 @@ const CreateDropCompact = forwardRef<
     const getWrapperClasses = () => {
       switch (type) {
         case CreateDropType.DROP:
-          return "tw-p-4 sm:tw-p-5 tw-border tw-border-iron-700 tw-border-solid tw-rounded-xl";
+          return `${
+            showDropError ? "tw-border-error" : "tw-border-iron-700"
+          } tw-p-4 sm:tw-p-5 tw-border tw-border-solid tw-rounded-xl`;
         case CreateDropType.QUOTE:
           return "";
         default:
@@ -108,7 +112,7 @@ const CreateDropCompact = forwardRef<
     }));
 
     return (
-      <div className={`${getWrapperClasses()}  tw-bg-iron-900 `}>
+      <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
         {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-hidden sm:tw-block">

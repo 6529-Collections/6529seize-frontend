@@ -54,6 +54,7 @@ const CreateDropWrapper = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly viewType: CreateDropViewType;
     readonly showSubmit: boolean;
+    readonly showDropError?: boolean;
     readonly setViewType: (newV: CreateDropViewType) => void;
     readonly setDrop: (newV: CreateDropConfig) => void;
     readonly setMentionedUsers: (
@@ -79,6 +80,7 @@ const CreateDropWrapper = forwardRef<
       drop,
       viewType,
       showSubmit,
+      showDropError = false,
       setViewType,
       setDrop,
       setMentionedUsers,
@@ -261,6 +263,7 @@ const CreateDropWrapper = forwardRef<
           loading={loading}
           type={type}
           showSubmit={showSubmit}
+          showDropError={showDropError}
           onViewChange={setViewType}
           onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
@@ -286,6 +289,7 @@ const CreateDropWrapper = forwardRef<
           type={type}
           drop={drop}
           showSubmit={showSubmit}
+          showDropError={showDropError}
           onTitle={setTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
