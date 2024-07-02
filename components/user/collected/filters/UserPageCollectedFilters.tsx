@@ -109,7 +109,7 @@ export default function UserPageCollectedFilters({
     collection ? COLLECTED_COLLECTIONS_META[collection].filters.szn : false;
 
   return (
-    <div>
+    <div className="tailwind-scope">
       <div className="tw-w-full tw-flex tw-justify-between tw-gap-3 tw-items-center">
         {!isMostLeftFilterVisible && (
           <button
@@ -157,7 +157,7 @@ export default function UserPageCollectedFilters({
             </svg>
           </button>
         )}
-        <div className="tw-gap-x-3 lg:tw-gap-x-4 tw-gap-y-3 tw-flex tw-items-center">
+        <div className="tailwind-scope tw-gap-x-3 lg:tw-gap-x-4 tw-gap-y-3 tw-flex tw-items-center">
           <div ref={mostLeftFilterRef}>
             <UserPageCollectedFiltersCollection
               selected={filters.collection}

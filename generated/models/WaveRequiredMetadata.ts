@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { WaveMetadataType } from '../models/WaveMetadataType';
 import { HttpFile } from '../http/http';
 
 export class WaveRequiredMetadata {
@@ -17,6 +18,7 @@ export class WaveRequiredMetadata {
     * Metadata key
     */
     'name': string;
+    'type': WaveMetadataType;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,6 +27,12 @@ export class WaveRequiredMetadata {
             "name": "name",
             "baseName": "name",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "type",
+            "baseName": "type",
+            "type": "WaveMetadataType",
             "format": ""
         }    ];
 
@@ -35,4 +43,6 @@ export class WaveRequiredMetadata {
     public constructor() {
     }
 }
+
+
 

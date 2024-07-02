@@ -30,7 +30,7 @@ export default function AboutCookiePolicy() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">
+          <h1>
             <span className="font-lightest">Cookie</span> Policy
           </h1>
         </Col>

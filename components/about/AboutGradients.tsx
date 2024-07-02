@@ -6,7 +6,7 @@ export default function AboutGradients() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">
+          <h1>
             <span className="font-lightest">6529</span> Gradient Collection
           </h1>
         </Col>

@@ -229,7 +229,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       <Container className="pt-5">
         <Row>
           <Col className="text-center">
-            <h4 className="mb-0 float-none">
+            <h4 className="mb-0">
               {tokenNotFound ? (
                 <>Token Not Found</>
               ) : (

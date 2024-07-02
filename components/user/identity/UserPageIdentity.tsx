@@ -1,11 +1,11 @@
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
-import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import ProfileRatersTableWrapper, {
   ProfileRatersParams,
 } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import UserPageIdentityActivityLog from "./activity/UserPageIdentityActivityLog";
 
 export default function UserPageIdentity({
   profile,

@@ -27,6 +27,7 @@ export * from '../models/CreateNewWaveParticipationConfig';
 export * from '../models/CreateNewWaveScope';
 export * from '../models/CreateNewWaveVisibilityConfig';
 export * from '../models/CreateNewWaveVotingConfig';
+export * from '../models/CreateWaveDropRequest';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
 export * from '../models/DropComment';
@@ -73,8 +74,13 @@ export * from '../models/Wave';
 export * from '../models/WaveConfig';
 export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
+export * from '../models/WaveMetadataType';
 export * from '../models/WaveOutcome';
+export * from '../models/WaveOutcomeCredit';
+export * from '../models/WaveOutcomeSubType';
+export * from '../models/WaveOutcomeType';
 export * from '../models/WaveParticipationConfig';
+export * from '../models/WaveParticipationRequirement';
 export * from '../models/WaveRequiredMetadata';
 export * from '../models/WaveScope';
 export * from '../models/WaveType';
@@ -110,6 +116,7 @@ import { CreateNewWaveParticipationConfig } from '../models/CreateNewWavePartici
 import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
 import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
 import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
+import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
 import { DropComment } from '../models/DropComment';
@@ -156,9 +163,14 @@ import { Wave } from '../models/Wave';
 import { WaveConfig       } from '../models/WaveConfig';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
-import { WaveOutcome } from '../models/WaveOutcome';
+import { WaveMetadataType } from '../models/WaveMetadataType';
+import { WaveOutcome        } from '../models/WaveOutcome';
+import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
+import { WaveOutcomeSubType } from '../models/WaveOutcomeSubType';
+import { WaveOutcomeType } from '../models/WaveOutcomeType';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
-import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
+import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
+import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
@@ -186,6 +198,11 @@ let enumsMap: Set<string> = new Set<string>([
     "RateMatter",
     "WaveCreditScope",
     "WaveCreditType",
+    "WaveMetadataType",
+    "WaveOutcomeCredit",
+    "WaveOutcomeSubType",
+    "WaveOutcomeType",
+    "WaveParticipationRequirement",
     "WaveType",
 ]);
 
@@ -219,6 +236,7 @@ let typeMap: {[index: string]: any} = {
     "CreateNewWaveScope": CreateNewWaveScope,
     "CreateNewWaveVisibilityConfig": CreateNewWaveVisibilityConfig,
     "CreateNewWaveVotingConfig": CreateNewWaveVotingConfig,
+    "CreateWaveDropRequest": CreateWaveDropRequest,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
     "DropComment": DropComment,

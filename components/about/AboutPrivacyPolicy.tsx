@@ -7,7 +7,7 @@ export default function AboutPrivacyPolicy() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">
+          <h1>
             <span className="font-lightest">Privacy</span> Policy
           </h1>
         </Col>

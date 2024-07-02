@@ -23,6 +23,7 @@ export default function GroupHeaderSelect() {
           className="tw-w-5 tw-h-5"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

@@ -1331,6 +1331,8 @@ components:
         - owns_nfts
         - wallet_group_id
         - wallet_group_wallets_count
+        - excluded_wallet_group_id
+        - excluded_wallet_group_wallets_count
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1351,6 +1353,13 @@ components:
           type: number
           format: int64
           nullable: false
+        excluded_wallet_group_id:
+          type: string
+          nullable: true
+        excluded_wallet_group_wallets_count:
+          type: number
+          format: int64
+          nullable: false
 
     CreateGroupDescription:
       type: object
@@ -1361,6 +1370,7 @@ components:
         - level
         - owns_nfts
         - wallets
+        - excluded_wallets
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1380,6 +1390,14 @@ components:
             - type: array
               items:
                 type: string
+          example: ["0x1234567890123456789012345678901234567890"]
+        excluded_wallets:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
+          example: ["0x1234567890123456789012345678901234567890"]
 
     GroupOwnsNft:
       type: object
@@ -1796,10 +1814,12 @@ components:
           credit_amount:
             type: number
             format: int64
+            example: 1000
           end_time:
             type: number
             format: int64
             nullable: true
+            example: 1719850339996
 
     DropRatingCategory:
       type: object
@@ -1858,17 +1878,14 @@ components:
           items:
             $ref: "#/components/schemas/DropMedia"
 
-    CreateDropRequest:
+    CreateWaveDropRequest:
       type: object
       required:
-        - wave_id
         - referenced_nfts
         - mentioned_users
         - metadata
         - parts
       properties:
-        wave_id:
-          type: string
         title:
           type: string
           maxLength: 250
@@ -1890,6 +1907,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DropMetadata"
+
+    CreateDropRequest:
+      type: object
+      required:
+        - wave_id
+      allOf:
+        - $ref: "#/components/schemas/CreateWaveDropRequest"
+      properties:
+        wave_id:
+          type: string
 
     DropMedia:
       type: object
@@ -2040,14 +2067,24 @@ components:
         - DROP
         - PARTICIPANT
 
+    WaveMetadataType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+
     WaveRequiredMetadata:
       type: object
       required:
         - name
+        - type
       properties:
         name:
           description: Metadata key
           type: string
+        type:
+          $ref: "#/components/schemas/WaveMetadataType"
+
 
     CreateNewWaveVotingConfig:
       type: object
@@ -2137,6 +2174,7 @@ components:
         - required_metadata
         - signature_required
         - no_of_applications_allowed_per_participant
+        - required_media
       properties:
         scope:
           $ref: "#/components/schemas/WaveScope"
@@ -2153,6 +2191,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveRequiredMetadata"
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
@@ -2166,6 +2208,7 @@ components:
         - required_metadata
         - signature_required
         - no_of_applications_allowed_per_participant
+        - required_media
       properties:
         scope:
           $ref: "#/components/schemas/CreateNewWaveScope"
@@ -2175,6 +2218,10 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
         required_metadata:
           description: |
             The metadata that must be provided by the participant. 
@@ -2224,21 +2271,57 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
+          example: {"min": 1719850339996, "max": 1719850339996}
+
+
+    WaveOutcomeType:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+
+    WaveOutcomeSubType:
+      type: string
+      enum:
+        - CREDIT_DISTRIBUTION
+
+    WaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
 
     WaveOutcome:
       type: object
       required:
         - type
-        - properties
+        - description
       properties:
         type:
+          $ref: "#/components/schemas/WaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/WaveOutcomeSubType"
+        description:
           type: string
-          description: |
-            Type of the outcome. (Promise, EVM Mint, Crypto Prize etc.)
-        properties:
-          type: object
-          additionalProperties:
-            type: string
+        credit:
+          $ref: "#/components/schemas/WaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            type: number
+
+
+    WaveParticipationRequirement:
+      type: string
+      enum:
+        - IMAGE
+        - AUDIO
+        - VIDEO
 
     Wave:
       type: object
@@ -2247,12 +2330,13 @@ components:
         - serial_no
         - author
         - name
-        - description
+        - description_drop
         - voting
         - visibility
         - participation
         - wave
         - outcomes
+        - created_at
       properties:
         id:
           description: The ID of the wave
@@ -2266,9 +2350,11 @@ components:
         name:
           description: The name of the wave
           type: string
-        description:
-          description: The description of the wave
-          type: string
+        created_at:
+          type: number
+          format: int64
+        description_drop:
+          $ref: "#/components/schemas/Drop"
         voting:
           $ref: "#/components/schemas/WaveVotingConfig"
         visibility:
@@ -2286,7 +2372,7 @@ components:
       type: object
       required:
         - name
-        - description
+        - description_drop
         - voting
         - visibility
         - participation
@@ -2297,9 +2383,8 @@ components:
           description: The name of the wave
           type: string
           maxLength: 250
-        description:
-          description: The description of the wave
-          type: string
+        description_drop:
+          $ref: "#/components/schemas/CreateWaveDropRequest"
         voting:
           $ref: "#/components/schemas/CreateNewWaveVotingConfig"
         visibility:
@@ -2357,9 +2442,11 @@ components:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         credit_amount:
           type: number
           format: int64
+          example: 1000
 
     CreateNewProfileProxyAllocateCicAction:
       type: object
@@ -2378,6 +2465,7 @@ components:
         credit_amount:
           type: number
           format: int64
+          example: 1000
 
     CreateNewProfileProxyCreateWaveAction:
       type: object
@@ -2470,37 +2558,45 @@ components:
             - type: "null"
             - type: number
               format: int64
+          example: 1000
         credit_spent:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1000
         start_time:
           type: number
           format: int64
+          example: 1719850339996
         end_time:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         created_at:
           type: number
           format: int64
+          example: 1719850339996
         accepted_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         rejected_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         revoked_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         is_active:
           type: boolean
 

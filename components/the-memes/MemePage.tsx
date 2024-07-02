@@ -350,14 +350,16 @@ export default function MemePage() {
                   </Row>
                   <Row className="pt-2">
                     <Col>
-                      <h2>
+                      <h2 className="float-left">
                         <a
                           href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
                           SZN{nftMeta.season}
                         </a>
                       </h2>
-                      <h2>&nbsp;| Card {nft.id} -&nbsp;</h2>
-                      <h2>{nft.name}</h2>
+                      <h2 className="float-left">
+                        &nbsp;| Card {nft.id} -&nbsp;
+                      </h2>
+                      <h2 className="float-left">{nft.name}</h2>
                     </Col>
                   </Row>
                   <Row className="pt-3 pb-3">

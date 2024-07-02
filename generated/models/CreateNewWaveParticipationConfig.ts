@@ -12,6 +12,7 @@
 
 import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
 import { IntRange } from '../models/IntRange';
+import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
 import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
 import { HttpFile } from '../http/http';
 
@@ -21,6 +22,7 @@ export class CreateNewWaveParticipationConfig {
     * The number of applications allowed per participant. Infinite if omitted.
     */
     'no_of_applications_allowed_per_participant': number | null;
+    'required_media': Array<WaveParticipationRequirement>;
     /**
     * The metadata that must be provided by the participant.  Empty array if nothing is required. 
     */
@@ -45,6 +47,12 @@ export class CreateNewWaveParticipationConfig {
             "baseName": "no_of_applications_allowed_per_participant",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "required_media",
+            "baseName": "required_media",
+            "type": "Array<WaveParticipationRequirement>",
+            "format": ""
         },
         {
             "name": "required_metadata",

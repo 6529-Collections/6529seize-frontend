@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 
 export enum UserPageTabType {
+  BRAIN = "BRAIN",
   REP = "REP",
   IDENTITY = "IDENTITY",
   COLLECTED = "COLLECTED",
@@ -16,11 +17,17 @@ export const USER_PAGE_TAB_META: Record<
   UserPageTabType,
   { tab: UserPageTabType; title: string; route: string }
 > = {
+  [UserPageTabType.BRAIN]: {
+    tab: UserPageTabType.BRAIN,
+    title: "Brain",
+    route: "",
+  },
   [UserPageTabType.REP]: {
     tab: UserPageTabType.REP,
     title: "Rep",
-    route: "",
+    route: "rep",
   },
+
   [UserPageTabType.IDENTITY]: {
     tab: UserPageTabType.IDENTITY,
     title: "Identity",
@@ -76,15 +83,27 @@ export default function UserPageTabs() {
     setTab(pathnameToTab(router.pathname));
   }, [router.query]);
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0 tw-overflow-hidden">
+    <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div
         className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
         aria-label="Tabs"
       >
-        {Object.values(UserPageTabType).map((tabType) => (
-          <UserPageTab key={tabType} tab={tabType} activeTab={tab} />
-        ))}
+        <div
+          className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
+          aria-label="Tabs"
+        >
+          {Object.values(UserPageTabType).map((tabType) => (
+            <UserPageTab
+              key={tabType}
+              tab={tabType}
+              activeTab={tab}
+              parentRef={wrapperRef}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
