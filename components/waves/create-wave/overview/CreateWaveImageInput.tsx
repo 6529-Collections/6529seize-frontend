@@ -70,7 +70,7 @@ export default function CreateWaveImageInput({
             <img
               src={imageToShow}
               alt="Profile image"
-              className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+              className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-800"
             />
           ) : (
             <div className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900" />
