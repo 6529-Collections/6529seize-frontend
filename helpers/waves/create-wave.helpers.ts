@@ -15,6 +15,8 @@ import {
   CreateWaveDatesConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
+  CreateWaveOutcomeConfig,
+  CreateWaveOutcomeConfigWinnersConfig,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
   CreateWaveStep,
@@ -342,7 +344,49 @@ const getWinningThreshold = ({
   }
 };
 
-const getOutcomes = ({
+const calculatePercentages = ({
+  values,
+  totalAmount,
+}: {
+  values: number[];
+  totalAmount: number;
+}): number[] => {
+  // Step 1: Verify the sum of values matches the total amount
+  const sum = values.reduce((acc, value) => acc + value, 0);
+  if (sum !== totalAmount) {
+    throw new Error("Total amount does not match the sum of the values.");
+  }
+
+  // Step 2: Calculate raw percentages
+  let percentages = values.map((value) => (value / totalAmount) * 100);
+
+  // Step 3: Round percentages to two decimal places and calculate the rounding error
+  percentages = percentages.map((p) => Math.round(p * 100) / 100);
+  const roundingError = 100 - percentages.reduce((acc, p) => acc + p, 0);
+
+  // Step 4: Distribute the rounding error
+  // Note: This simple approach adds the error to the first element. For more complex scenarios, distribute it more evenly.
+  if (roundingError !== 0) {
+    percentages[0] = Math.round((percentages[0] + roundingError) * 100) / 100;
+  }
+
+  return percentages;
+};
+
+const getOutcomesDistribution = ({
+  winnersConfig,
+}: {
+  readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig;
+}): number[] =>
+  winnersConfig.creditValueType ===
+  CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
+    ? winnersConfig.winners.map((winner) => winner.value)
+    : calculatePercentages({
+        values: winnersConfig.winners.map((winner) => winner.value),
+        totalAmount: winnersConfig.totalAmount,
+      });
+
+const getRankOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
@@ -366,13 +410,44 @@ const getOutcomes = ({
         credit: WaveOutcomeCredit.Rep,
         rep_category: outcome.category,
         amount: outcome.winnersConfig.totalAmount,
-        distribution: outcome.winnersConfig.winners.map(
-          (winner) => outcome.winnersConfig?.creditValueType === CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE ? winner.value : winner.value
-        ),
+        distribution: getOutcomesDistribution({
+          winnersConfig: outcome.winnersConfig,
+        }),
+      });
+    } else if (
+      outcome.type === CreateWaveOutcomeType.CIC &&
+      outcome.winnersConfig?.totalAmount
+    ) {
+      outcomes.push({
+        type: WaveOutcomeType.Automatic,
+        subtype: WaveOutcomeSubType.CreditDistribution,
+        description: "",
+        credit: WaveOutcomeCredit.Cic,
+        amount: outcome.winnersConfig.totalAmount,
+        distribution: getOutcomesDistribution({
+          winnersConfig: outcome.winnersConfig,
+        }),
       });
     }
   }
   return outcomes;
+};
+
+const getOutcomes = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): WaveOutcome[] => {
+  const waveType = config.overview.type;
+  switch (waveType) {
+    case WaveType.Approve:
+    case WaveType.Chat:
+    case WaveType.Rank:
+      return [];
+    default:
+      assertUnreachable(waveType);
+      return [];
+  }
 };
 
 export const getCreateNewWaveBody = ({
@@ -435,6 +510,6 @@ export const getCreateNewWaveBody = ({
         max: config.dates.endDate,
       },
     },
-    outcomes: [],
+    outcomes: getOutcomes({ config }),
   };
 };
