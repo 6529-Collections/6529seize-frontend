@@ -42,6 +42,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
   APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
   APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION",
+  OUTCOMES_REQUIRED = "OUTCOMES_REQUIRED",
 }
 
 export const getCreateWaveNextStep = ({
@@ -251,7 +252,24 @@ const getApprovalValidationErrors = ({
   return errors;
 };
 
-// TODO outcomes errors
+const getOutcomesValidationErrors = ({
+  waveType,
+  outcomes,
+}: {
+  readonly waveType: WaveType;
+  readonly outcomes: CreateWaveOutcomeConfig[];
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  if (waveType === WaveType.Chat) {
+    return errors;
+  }
+  if (!outcomes.length) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
+  }
+  // TODO validate outcomes against rules
+  return errors;
+};
+
 export const getCreateWaveValidationErrors = ({
   step,
   config,
@@ -296,6 +314,15 @@ export const getCreateWaveValidationErrors = ({
     })
   );
   if (step === CreateWaveStep.APPROVAL) {
+    return errors;
+  }
+  errors.push(
+    ...getOutcomesValidationErrors({
+      outcomes: config.outcomes,
+      waveType: config.overview.type,
+    })
+  );
+  if (step === CreateWaveStep.OUTCOMES) {
     return errors;
   }
   return errors;
@@ -433,6 +460,51 @@ const getRankOutcomes = ({
   return outcomes;
 };
 
+const getApproveOutcomes = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): WaveOutcome[] => {
+  const outcomes: WaveOutcome[] = [];
+  for (const outcome of config.outcomes) {
+    if (
+      outcome.type === CreateWaveOutcomeType.MANUAL &&
+      outcome.title &&
+      outcome.maxWinners
+    ) {
+      outcomes.push({
+        type: WaveOutcomeType.Manual,
+        description: outcome.title,
+      });
+    } else if (
+      outcome.type === CreateWaveOutcomeType.REP &&
+      outcome.category &&
+      outcome.credit 
+    ) {
+      outcomes.push({
+        type: WaveOutcomeType.Automatic,
+        subtype: WaveOutcomeSubType.CreditDistribution,
+        description: "",
+        credit: WaveOutcomeCredit.Rep,
+        rep_category: outcome.category,
+        amount: outcome.credit,
+      });
+    } else if (
+      outcome.type === CreateWaveOutcomeType.CIC &&
+      outcome.credit
+    ) {
+      outcomes.push({
+        type: WaveOutcomeType.Automatic,
+        subtype: WaveOutcomeSubType.CreditDistribution,
+        description: "",
+        credit: WaveOutcomeCredit.Cic,
+        amount: outcome.credit,
+      });
+    }
+  }
+  return outcomes;
+};
+
 const getOutcomes = ({
   config,
 }: {
@@ -443,8 +515,10 @@ const getOutcomes = ({
     case WaveType.Chat:
       return [];
     case WaveType.Approve:
-      return [];
+      // TODO add max winners
+      return getApproveOutcomes({ config });
     case WaveType.Rank:
+      // TODO add max winners
       return getRankOutcomes({ config });
     default:
       assertUnreachable(waveType);
@@ -485,8 +559,8 @@ export const getCreateNewWaveBody = ({
       scope: {
         group_id: config.groups.canDrop,
       },
-      // TODO
-      no_of_applications_allowed_per_participant: null,
+      no_of_applications_allowed_per_participant:
+        config.drops.noOfApplicationsAllowedPerParticipant,
       required_media: config.drops.requiredTypes,
       required_metadata: config.drops.requiredMetadata
         .map((metadata) => ({
@@ -503,7 +577,7 @@ export const getCreateNewWaveBody = ({
     wave: {
       type: config.overview.type,
       winning_thresholds: getWinningThreshold({ config }),
-      // TODO
+      // TODO - should be in outcomes
       max_winners: null,
       time_lock_ms: config.approval.thresholdTimeMs,
       admin_group_id: config.groups.admin,

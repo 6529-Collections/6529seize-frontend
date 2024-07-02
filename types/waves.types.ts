@@ -37,6 +37,9 @@ export interface CreateWaveDropsRequiredMetadata {
 }
 
 export interface CreateWaveDropsConfig {
+  // TODO add to API, make sure that in CHAT its always true
+  readonly allowDiscussionDrops: boolean;
+  readonly noOfApplicationsAllowedPerParticipant: number | null;
   readonly requiredTypes: WaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }

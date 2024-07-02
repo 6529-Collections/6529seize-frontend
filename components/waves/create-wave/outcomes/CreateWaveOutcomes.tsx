@@ -1,22 +1,28 @@
 import CreateWaveOutcomeTypes from "./CreateWaveOutcomeTypes";
-import CreateWaveOutcomesManual from "./CreateWaveOutcomesManual";
-import CreateWaveOutcomesRep from "./CreateWaveOutcomesRep";
-import CreateWaveOutcomesCIC from "./CreateWaveOutcomesCIC";
-import CreateWaveOutcomesRows from "./winners/CreateWaveOutcomesRows";
+import CreateWaveOutcomesManual from "./manual/CreateWaveOutcomesManual";
+import CreateWaveOutcomesRep from "./rep/CreateWaveOutcomesRep";
+import CreateWaveOutcomesCIC from "./cic/CreateWaveOutcomesCIC";
+import CreateWaveOutcomesRows from "./winners/rows/CreateWaveOutcomesRows";
 import {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
 } from "../../../../types/waves.types";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
+import { WaveType } from "../../../../generated/models/WaveType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 
 export default function WavesOutcome({
   outcomes,
   outcomeType,
+  waveType,
+  errors,
   setOutcomeType,
   setOutcomes,
 }: {
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly outcomeType: CreateWaveOutcomeType | null;
+  readonly waveType: WaveType;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setOutcomeType: (outcomeType: CreateWaveOutcomeType | null) => void;
   readonly setOutcomes: (outcomes: CreateWaveOutcomeConfig[]) => void;
 }) {
@@ -31,13 +37,25 @@ export default function WavesOutcome({
 
   const components: Record<CreateWaveOutcomeType, JSX.Element> = {
     [CreateWaveOutcomeType.MANUAL]: (
-      <CreateWaveOutcomesManual onOutcome={onOutcome} onCancel={onCancel} />
+      <CreateWaveOutcomesManual
+        onOutcome={onOutcome}
+        onCancel={onCancel}
+        waveType={waveType}
+      />
     ),
     [CreateWaveOutcomeType.REP]: (
-      <CreateWaveOutcomesRep onOutcome={onOutcome} onCancel={onCancel} />
+      <CreateWaveOutcomesRep
+        onOutcome={onOutcome}
+        onCancel={onCancel}
+        waveType={waveType}
+      />
     ),
     [CreateWaveOutcomeType.CIC]: (
-      <CreateWaveOutcomesCIC onOutcome={onOutcome} onCancel={onCancel} />
+      <CreateWaveOutcomesCIC
+        onOutcome={onOutcome}
+        onCancel={onCancel}
+        waveType={waveType}
+      />
     ),
   };
 
@@ -58,6 +76,8 @@ export default function WavesOutcome({
               components[outcomeType]
             ) : (
               <CreateWaveOutcomesRows
+                waveType={waveType}
+                errors={errors}
                 outcomes={outcomes}
                 setOutcomes={setOutcomes}
               />
