@@ -15,7 +15,7 @@ export default function CommonRadioButton<T>({
   return (
     <button
       onClick={() => setSelected(value)}
-      className="tw-p-0 tw-flex tw-items-center tw-bg-iron-900 tw-border-none"
+      className="tw-group tw-p-0 tw-flex tw-items-center tw-bg-iron-900 tw-border-none"
     >
       <input
         id={id}
@@ -26,7 +26,7 @@ export default function CommonRadioButton<T>({
       />
       <label
         htmlFor={id}
-        className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 hover:tw-text-iron-200 tw-cursor-pointer"
+        className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 group-hover:tw-text-iron-200 tw-cursor-pointer"
       >
         {label}
       </label>

@@ -63,15 +63,32 @@ export default function CreateWaveImageInput({
   };
 
   return (
-    <div
-      onDrop={handleDrop}
-      onDragEnter={handleDrag}
-      onDragLeave={handleDrag}
-      onDragOver={handleDrag}
-      className="tw-group tw-flex tw-items-center tw-justify-center tw-w-full"
-    >
-      <label
-        className={`
+    <div className="tw-flex tw-gap-x-5">
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
+        <div className="tw-flex-shrink-0">
+          <img
+            src={imageToShow}
+            alt="Profile image"
+            className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+          />
+        </div>
+        <button
+          type="button"
+          aria-label="Remove file"
+          className="tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent tw-text-red tw-text-sm tw-font-semibold hover:tw-bg-red/10 tw-transition tw-duration-200 tw-ease-out"
+        >
+          Delete
+        </button>
+      </div>
+      <div
+        onDrop={handleDrop}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        className="tw-relative tw-group tw-flex tw-items-center tw-justify-center tw-w-full"
+      >
+        <label
+          className={`
         ${
           dragging
             ? "tw-border-iron-600 tw-bg-iron-800"
@@ -79,18 +96,18 @@ export default function CreateWaveImageInput({
         }
       tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-40 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out
       `}
-      >
-        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
-          {imageToShow && (
-            <div className="tw-h-40 tw-w-40">
-              <img
-                src={imageToShow}
-                alt="Profile image"
-                className="tw-h-full tw-w-full tw-object-contain tw-rounded-sm"
-              />
-            </div>
-          )}
-          {!imageToShow && (
+        >
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
+            {/*   {imageToShow && (
+              <div className="tw-h-36 tw-w-36">
+                <img
+                  src={imageToShow}
+                  alt="Profile image"
+                  className="tw-h-full tw-w-full tw-object-contain tw-rounded-sm"
+                />
+              </div>
+            )} */}
+
             <>
               <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 group-hover:tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out">
                 <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
@@ -98,6 +115,7 @@ export default function CreateWaveImageInput({
                     className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50"
                     viewBox="0 0 24 24"
                     fill="none"
+                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -116,26 +134,26 @@ export default function CreateWaveImageInput({
                 </span>{" "}
                 or drag and drop
               </p>
-              <p className="tw-text-xs tw-font-normal tw-text-iron-400">
+              <p className="tw-mb-0 tw-text-xs tw-font-normal tw-text-iron-400">
                 JPEG, JPG, PNG, GIF, WEBP
               </p>
             </>
-          )}
-        </div>
-        <input
-          id="pfp-upload-input"
-          ref={inputRef}
-          type="file"
-          className="tw-hidden"
-          accept={ACCEPTED_FORMATS_DISPLAY}
-          onChange={(e: any) => {
-            if (e.target.files) {
-              const f = e.target.files[0];
-              onFileChange(f);
-            }
-          }}
-        />
-      </label>
+          </div>
+          <input
+            id="pfp-upload-input"
+            ref={inputRef}
+            type="file"
+            className="tw-hidden"
+            accept={ACCEPTED_FORMATS_DISPLAY}
+            onChange={(e: any) => {
+              if (e.target.files) {
+                const f = e.target.files[0];
+                onFileChange(f);
+              }
+            }}
+          />
+        </label>
+      </div>
     </div>
   );
 }
