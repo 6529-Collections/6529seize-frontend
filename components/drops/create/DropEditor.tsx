@@ -94,6 +94,7 @@ const DropEditor = forwardRef<
           drop={drop}
           viewType={viewType}
           showSubmit={showSubmit}
+          showDropError={showDropError}
           setViewType={setViewType}
           setDrop={setDrop}
           setMentionedUsers={setMentionedUsers}
