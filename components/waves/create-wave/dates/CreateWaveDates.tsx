@@ -28,19 +28,16 @@ export default function CreateWaveDates({
     return dates.submissionStartDate;
   };
 
-  // Voting start date is always the maximum timestamp
-  const getMaxTimestamp = (): number | null => {
-    if (!getHaveMultipleTimestamps()) return null;
-    return dates.votingStartDate;
-  };
-
   const haveVotingStartDate = getHaveMultipleTimestamps();
 
   const onStartTimestampChange = (timestamp: number) => {
     setDates({
       ...dates,
       submissionStartDate: timestamp,
-      votingStartDate: haveVotingStartDate ? dates.votingStartDate : timestamp,
+      votingStartDate:
+        haveVotingStartDate && dates.votingStartDate > timestamp
+          ? dates.votingStartDate
+          : timestamp,
     });
   };
 
@@ -61,13 +58,8 @@ export default function CreateWaveDates({
   const [minTimestamp, setMinTimestamp] = useState<number | null>(
     getMinTimestamp()
   );
-  const [maxTimestamp, setMaxTimestamp] = useState<number | null>(
-    getMaxTimestamp()
-  );
-
   useEffect(() => {
     setMinTimestamp(getMinTimestamp());
-    setMaxTimestamp(getMaxTimestamp());
   }, [waveType, dates]);
 
   return (
@@ -81,7 +73,7 @@ export default function CreateWaveDates({
           initialYear={currentYear}
           selectedTimestamp={dates.submissionStartDate}
           minTimestamp={null}
-          maxTimestamp={maxTimestamp}
+          maxTimestamp={null}
           setSelectedTimestamp={onStartTimestampChange}
         />
       </div>
