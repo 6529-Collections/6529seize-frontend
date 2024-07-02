@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { Wave } from "../../generated/models/Wave";
 import { getTimeAgo, getTimeUntil } from "../../helpers/Helpers";
 
-export default function WavesCard({ wave }: { readonly wave: Wave }) {
+export default function zWavesCard({ wave }: { readonly wave: Wave }) {
   const router = useRouter();
   const goToWave = () => {
     router.push(`/waves/${wave.id}`);
@@ -18,16 +18,16 @@ export default function WavesCard({ wave }: { readonly wave: Wave }) {
         />
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-2 tw-ring-white/20 tw-ring-inset tw-pointer-events-none"></div>
       </div>
-      <div className="tw-bg-iron-900 tw-rounded-2xl tw-relative -tw-mt-4 tw-border tw-border-solid tw-border-t-0 tw-border-iron-700 ">
+      <div className="tw-bg-iron-900 tw-rounded-2xl tw-relative -tw-mt-4 tw-border tw-border-solid tw-border-t-0 tw-border-iron-700">
         <div className="tw-px-4 sm:tw-px-6 tw-flex tw-items-end tw-justify-between">
           {wave.author.pfp ? (
             <img
-              className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900 "
+              className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900 group-hover:tw-scale-105 tw-transform tw-transiton tw-duration-300 tw-ease"
               src={wave.author.pfp}
-              alt=""
+              alt="Profile Picture"
             />
           ) : (
-            <div className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900 " />
+            <div className="-tw-mt-6 tw-h-14 tw-w-14 tw-rounded-full sm:tw-h-16 sm:tw-w-16 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900" />
           )}
           <div className="tw-pt-4 tw-flex tw-items-center tw-gap-x-3">
             <button
@@ -146,7 +146,7 @@ export default function WavesCard({ wave }: { readonly wave: Wave }) {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M21 10H3M16 2V6M8 2V6M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
+                  d="M21 10H3M16 2V6M8 2V6M9 16L11 18L15.5 13.5M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
