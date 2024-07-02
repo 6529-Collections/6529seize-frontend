@@ -440,10 +440,12 @@ const getOutcomes = ({
 }): WaveOutcome[] => {
   const waveType = config.overview.type;
   switch (waveType) {
-    case WaveType.Approve:
     case WaveType.Chat:
-    case WaveType.Rank:
       return [];
+    case WaveType.Approve:
+      return [];
+    case WaveType.Rank:
+      return getRankOutcomes({ config });
     default:
       assertUnreachable(waveType);
       return [];

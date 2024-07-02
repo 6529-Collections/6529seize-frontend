@@ -26,6 +26,7 @@ export default function CreateWaveOutcomesCIC({
       totalAmount: 0,
       winners: [{ value: 0 }],
     },
+    maxWinners: 1,
   });
 
   const [totalValueError, setTotalValueError] = useState<boolean>(false);
@@ -36,7 +37,11 @@ export default function CreateWaveOutcomesCIC({
   ) => {
     setTotalValueError(false);
     setPercentageError(false);
-    setOutcome({ ...outcome, winnersConfig });
+    setOutcome({
+      ...outcome,
+      maxWinners: winnersConfig.winners.length,
+      winnersConfig,
+    });
   };
 
   const getWinnersTotal = (): number | null =>
