@@ -14,7 +14,7 @@ export default function CreateWaveOutcomesRep({
 }: {
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
-  }) {
+}) {
   const outcomeType = CreateWaveOutcomeType.REP;
   const [outcome, setOutcome] = useState<CreateWaveOutcomeConfig>({
     type: outcomeType,
@@ -27,6 +27,7 @@ export default function CreateWaveOutcomesRep({
       totalAmount: 0,
       winners: [{ value: 0 }],
     },
+    maxWinners: 1,
   });
 
   const [categoryError, setCategoryError] = useState<boolean>(false);
@@ -43,7 +44,11 @@ export default function CreateWaveOutcomesRep({
   ) => {
     setTotalValueError(false);
     setPercentageError(false);
-    setOutcome({ ...outcome, winnersConfig });
+    setOutcome({
+      ...outcome,
+      maxWinners: winnersConfig.winners.length,
+      winnersConfig,
+    });
   };
 
   const getWinnersTotal = (): number | null =>

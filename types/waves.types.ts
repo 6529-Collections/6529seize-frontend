@@ -94,6 +94,7 @@ export interface CreateWaveOutcomeConfig {
   readonly title: string | null;
   readonly credit: number | null;
   readonly category: string | null;
+  readonly maxWinners: number | null;
   readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig | null;
 }
 
