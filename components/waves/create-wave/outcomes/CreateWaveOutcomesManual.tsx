@@ -31,6 +31,7 @@ export default function CreateWaveOutcomesManual({
       credit: null,
       category: null,
       winnersConfig: null,
+      maxWinners: null,
     });
   };
   return (
