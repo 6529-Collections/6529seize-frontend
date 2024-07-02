@@ -36,12 +36,17 @@ export default function CreateWaveOverview({
 
   return (
     <div className="tw-flex tw-flex-col tw-space-y-6">
-      <CreateWaveImageInput imageToShow={overview.image} setFile={setFile} />
       <CreateWaveNameInput
         onChange={onChange}
         name={overview.name}
         errors={errors}
       />
+      <div className="tw-space-y-2">
+        <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+          Wave Profile Picture
+        </p>
+        <CreateWaveImageInput imageToShow={overview.image} setFile={setFile} />
+      </div>
       <CreateWaveType
         selected={overview.type}
         onChange={(type) =>
