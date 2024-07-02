@@ -499,7 +499,7 @@ export default function CreateWave({
             />
           </div>
           <div className="tw-flex-1">
-            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-6 lg:tw-p-8 tw-rounded-xl">
+            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
               <div className="tw-relative tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-w-full">

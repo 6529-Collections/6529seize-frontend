@@ -52,7 +52,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
               </div>
             </div>
           </div>
-          <div className="tw-w-[672px] tw-space-y-6">
+          <div className="tw-w-[672px] tw-space-y-4">
             <WaveCreateDrop />
             <DropsListItem drop={wave.description_drop} />
           </div>
