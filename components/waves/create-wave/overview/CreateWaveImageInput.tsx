@@ -20,7 +20,7 @@ export default function CreateWaveImageInput({
   setFile,
 }: {
   readonly imageToShow: string | null;
-  readonly setFile: (file: File) => void;
+  readonly setFile: (file: File | null) => void;
 }) {
   const { setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,19 +66,26 @@ export default function CreateWaveImageInput({
     <div className="tw-flex tw-gap-x-5">
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
         <div className="tw-flex-shrink-0">
-          <img
-            src={imageToShow}
-            alt="Profile image"
-            className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
-          />
+          {imageToShow ? (
+            <img
+              src={imageToShow}
+              alt="Profile image"
+              className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900"
+            />
+          ) : (
+            <div className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-900" />
+          )}
         </div>
-        <button
-          type="button"
-          aria-label="Remove file"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent tw-text-red tw-text-sm tw-font-semibold hover:tw-bg-red/10 tw-transition tw-duration-200 tw-ease-out"
-        >
-          Delete
-        </button>
+        {imageToShow && (
+          <button
+            onClick={() => setFile(null)}
+            type="button"
+            aria-label="Remove file"
+            className="tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent tw-text-red tw-text-sm tw-font-semibold hover:tw-bg-red/10 tw-transition tw-duration-200 tw-ease-out"
+          >
+            Delete
+          </button>
+        )}
       </div>
       <div
         onDrop={handleDrop}
@@ -98,16 +105,6 @@ export default function CreateWaveImageInput({
       `}
         >
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
-            {/*   {imageToShow && (
-              <div className="tw-h-36 tw-w-36">
-                <img
-                  src={imageToShow}
-                  alt="Profile image"
-                  className="tw-h-full tw-w-full tw-object-contain tw-rounded-sm"
-                />
-              </div>
-            )} */}
-
             <>
               <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 group-hover:tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out">
                 <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">

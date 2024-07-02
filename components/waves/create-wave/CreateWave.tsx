@@ -56,7 +56,7 @@ export default function CreateWave({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
   const initialType = WaveType.Approve;
-  const initialStep = CreateWaveStep.DESCRIPTION;
+  const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
     type,
   }: {
