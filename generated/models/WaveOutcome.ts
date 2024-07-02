@@ -10,14 +10,19 @@
  * Do not edit the class manually.
  */
 
+import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
+import { WaveOutcomeSubType } from '../models/WaveOutcomeSubType';
+import { WaveOutcomeType } from '../models/WaveOutcomeType';
 import { HttpFile } from '../http/http';
 
 export class WaveOutcome {
-    /**
-    * Type of the outcome. (Promise, EVM Mint, Crypto Prize etc.) 
-    */
-    'type': string;
-    'properties': { [key: string]: string; };
+    'type': WaveOutcomeType;
+    'subtype'?: WaveOutcomeSubType;
+    'description': string;
+    'credit'?: WaveOutcomeCredit;
+    'rep_category'?: string;
+    'amount'?: number;
+    'distribution'?: Array<number>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,13 +30,43 @@ export class WaveOutcome {
         {
             "name": "type",
             "baseName": "type",
+            "type": "WaveOutcomeType",
+            "format": ""
+        },
+        {
+            "name": "subtype",
+            "baseName": "subtype",
+            "type": "WaveOutcomeSubType",
+            "format": ""
+        },
+        {
+            "name": "description",
+            "baseName": "description",
             "type": "string",
             "format": ""
         },
         {
-            "name": "properties",
-            "baseName": "properties",
-            "type": "{ [key: string]: string; }",
+            "name": "credit",
+            "baseName": "credit",
+            "type": "WaveOutcomeCredit",
+            "format": ""
+        },
+        {
+            "name": "rep_category",
+            "baseName": "rep_category",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "amount",
+            "baseName": "amount",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "distribution",
+            "baseName": "distribution",
+            "type": "Array<number>",
             "format": ""
         }    ];
 
@@ -42,4 +77,6 @@ export class WaveOutcome {
     public constructor() {
     }
 }
+
+
 
