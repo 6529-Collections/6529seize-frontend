@@ -62,6 +62,7 @@ const CreateDropContent = forwardRef<
     readonly editorState: EditorState | null;
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
+    readonly canAddPart: boolean;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -69,6 +70,7 @@ const CreateDropContent = forwardRef<
     ) => void;
     readonly onFileChange: (file: File) => void;
     readonly onViewClick: () => void;
+    readonly onDropPart: () => void;
   }
 >(
   (
@@ -77,11 +79,13 @@ const CreateDropContent = forwardRef<
       editorState,
       type,
       drop,
+      canAddPart,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
       onFileChange,
       onViewClick,
+      onDropPart,
     },
     ref
   ) => {
@@ -207,6 +211,8 @@ const CreateDropContent = forwardRef<
               )}
               {viewType === CreateDropViewType.FULL && (
                 <button
+                  onClick={onDropPart}
+                  disabled={!canAddPart}
                   type="button"
                   title="add storm"
                   aria-label="Add storm"
@@ -232,8 +238,9 @@ const CreateDropContent = forwardRef<
                 </button>
               )}
               {viewType === CreateDropViewType.COMPACT && (
-                /* TODO: DISABLED state */
                 <button
+                  onClick={onDropPart}
+                  disabled={!canAddPart}
                   type="button"
                   title="add storm"
                   aria-label="Add storm"

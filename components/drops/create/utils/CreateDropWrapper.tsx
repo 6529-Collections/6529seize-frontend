@@ -222,7 +222,7 @@ const CreateDropWrapper = forwardRef<
         metadata,
       };
       currentDrop.parts.push({
-        content: markdown,
+        content: markdown?.length ? markdown : null,
         quoted_drop:
           quotedDrop && !currentDrop.parts.length
             ? {
