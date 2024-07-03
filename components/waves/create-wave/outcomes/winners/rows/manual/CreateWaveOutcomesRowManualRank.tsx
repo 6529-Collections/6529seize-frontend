@@ -9,19 +9,21 @@ export default function CreateWaveOutcomesRowManualRank({
 }) {
   return (
     <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2">
-      <div className="tw-grid tw-grid-cols-5 tw-gap-x-6 tw-justify-between tw-items-center tw-w-full">
-        <div className="tw-col-span-1">
+      <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full">
+        <div className="tw-col-span-2">
           <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
             Manual
           </h3>
         </div>
-        <div className="tw-col-span-1">
+        <div className="tw-col-span-2">
           {outcome.title && (
             <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
               {outcome.title}
             </p>
           )}
         </div>
+        <div className="tw-col-span-1"></div>
+        <div className="tw-col-span-4"></div>
         <div className="tw-col-span-1 tw-flex tw-justify-end">
           <button
             onClick={removeOutcome}

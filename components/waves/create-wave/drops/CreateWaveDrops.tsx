@@ -75,7 +75,7 @@ export default function CreateWaveDrops({
               onChange={onAllowDiscussionDropsChange}
               type="checkbox"
               id="allow-discussion-drops"
-              className="tw-form-checkbox tw-w-5 tw-h-5 tw-rounded tw-bg-iron-800 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 tw-cursor-pointer"
+              className="tw-form-checkbox tw-w-5 tw-h-5 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid"
             />
           </div>
           <label
