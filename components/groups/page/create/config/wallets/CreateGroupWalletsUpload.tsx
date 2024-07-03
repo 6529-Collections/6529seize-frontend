@@ -176,13 +176,13 @@ export default function CreateGroupWalletsUpload({
                   checked={isMyPrimaryWalletAdded}
                   onChange={includePrimaryWalletChange}
                   id="include_my_primary_wallet"
-                  className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
+                  className="tw-cursor-pointer tw-form-checkbox tw-w-4 tw-h-4 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
                 />
               </div>
               <div className="tw-ml-3 tw-text-sm tw-leading-6">
                 <label
                   htmlFor="include_my_primary_wallet"
-                  className="tw-cursor-pointer tw-font-medium tw-text-iron-300"
+                  className="tw-cursor-pointer tw-font-medium tw-text-iron-50"
                 >
                   Include my primary wallet
                 </label>
