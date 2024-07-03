@@ -1,3 +1,4 @@
+import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowCICRank({
@@ -12,12 +13,16 @@ export default function CreateWaveOutcomesRowCICRank({
       <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full">
         <div className="tw-col-span-2">
           <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
-            CIC Rank
+            CIC
           </h3>
         </div>
         <div className="tw-col-span-2"></div>
         <div className="tw-col-span-1">
-          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">324</p>
+          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-text-nowrap">
+            Total:{" "}
+            {formatNumberWithCommas(outcome.winnersConfig?.totalAmount ?? 0)}{" "}
+            Cic
+          </p>
         </div>
         <div className="tw-col-span-4">
           <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -37,7 +42,10 @@ export default function CreateWaveOutcomesRowCICRank({
               />
             </svg>
             <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
-              Maximum winners: 2324
+              Winners:{" "}
+              {formatNumberWithCommas(
+                outcome.winnersConfig?.winners.length ?? 0
+              )}
             </p>
           </div>
         </div>
