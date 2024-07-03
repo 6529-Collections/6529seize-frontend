@@ -13,27 +13,21 @@ export enum DropPFPSize {
 export default function DropPfp({
   pfpUrl,
   size = DropPFPSize.MEDIUM,
+  isWaveDescriptionDrop = false,
 }: {
   readonly pfpUrl: string | null | undefined;
   readonly size?: DropPFPSize;
+  readonly isWaveDescriptionDrop?: boolean;
 }) {
-  const getSizeClasses = (): string => {
-    switch (size) {
-      case DropPFPSize.SMALL:
-        return "tw-h-7 tw-w-7";
-      case DropPFPSize.MEDIUM:
-        return "tw-h-10 tw-w-10";
-      case DropPFPSize.LARGE:
-        return "tw-h-12 tw-w-12";
-      default:
-        assertUnreachable(size);
-        return "";
-    }
+  const SIZE_CLASSES: Record<DropPFPSize, string> = {
+    [DropPFPSize.SMALL]: "tw-h-7 tw-w-7",
+    [DropPFPSize.MEDIUM]: "tw-h-10 tw-w-10",
+    [DropPFPSize.LARGE]: "tw-h-12 tw-w-12",
   };
 
   return (
     <div
-      className={`${getSizeClasses()} tw-flex-shrink-0 tw-rounded-lg tw-overflow-hidden tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-p-[1px]`}
+      className={`${SIZE_CLASSES[size]} tw-flex-shrink-0 tw-rounded-lg tw-overflow-hidden tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-p-[1px] `}
     >
       <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden">
         <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
