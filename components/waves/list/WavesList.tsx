@@ -1,13 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import WavesCard from "../WavesCard";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
 import WavesListWrapper from "./WavesListWrapper";
 import { useEffect, useState } from "react";
-import { SearchWavesParams } from "../../../types/waves.types";
-import { useSearchParams } from "next/navigation";
-import { Mutable } from "viem/_types/types/utils";
 
 const REQUEST_SIZE = 10;
 export default function WavesList({

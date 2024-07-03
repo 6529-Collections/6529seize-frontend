@@ -1,4 +1,8 @@
-import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
+import Tippy from "@tippyjs/react";
+import {
+  formatLargeNumber,
+  formatNumberWithCommas,
+} from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowManualApprove({
@@ -9,20 +13,22 @@ export default function CreateWaveOutcomesRowManualApprove({
   readonly removeOutcome: () => void;
 }) {
   const winnersText = outcome.maxWinners
-    ? `${formatNumberWithCommas(outcome.maxWinners)}`
-    : "Not limited";
+    ? `${formatLargeNumber(outcome.maxWinners)}`
+    : "-";
 
   return (
-    <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2 tw-grid tw-grid-cols-8 tw-gap-x-6 tw-justify-between tw-items-center tw-w-full">
-      <div className="tw-col-span-2">
+    <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2 tw-grid tw-grid-cols-10 tw-gap-x-6 tw-justify-between tw-items-center tw-w-full">
+      <div className="tw-col-span-1">
         <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
           Manual
         </h3>
       </div>
-      <div className="tw-col-span-2">
-        <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
-          {outcome.title}
-        </p>
+      <div className="tw-col-span-5">
+        <Tippy content={outcome.title}>
+          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate">
+            {outcome.title}
+          </p>
+        </Tippy>
       </div>
       <div className="tw-col-span-3">
         <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -42,7 +48,7 @@ export default function CreateWaveOutcomesRowManualApprove({
             />
           </svg>
           <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
-            Maximum winners: {winnersText}
+            Max winners: {winnersText}
           </p>
         </div>
       </div>

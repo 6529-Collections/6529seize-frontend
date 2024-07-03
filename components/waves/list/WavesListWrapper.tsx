@@ -2,8 +2,9 @@ import { Wave } from "../../../generated/models/Wave";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
+import DropsListItem from "../../drops/view/item/DropsListItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import WavesCard from "../WavesCard";
+
 
 export default function WavesListWrapper({
   waves,
@@ -18,7 +19,7 @@ export default function WavesListWrapper({
     <div className="tw-overflow-hidden">
       <div className="tw-flex tw-flex-col tw-gap-y-3">
         {waves.map((wave) => (
-          <WavesCard key={wave.id} wave={wave} />
+          <DropsListItem key={wave.id} drop={wave.description_drop} />
         ))}
       </div>
       {loading && (
