@@ -126,11 +126,13 @@ const CreateDropCompact = forwardRef<
                 editorState={editorState}
                 type={type}
                 drop={drop}
+                canAddPart={canAddPart}
                 onEditorState={onEditorState}
                 onMentionedUser={onMentionedUser}
                 onReferencedNft={onReferencedNft}
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}
                 onFileChange={onFileChange}
+                onDropPart={onDropPart}
               />
             </div>
             {showSubmit && (

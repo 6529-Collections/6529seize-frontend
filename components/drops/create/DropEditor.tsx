@@ -68,6 +68,15 @@ const DropEditor = forwardRef<
       CreateDropViewType.COMPACT
     );
 
+    useEffect(() => {
+      setTitle(null);
+      setMetadata([]);
+      setMentionedUsers([]);
+      setReferencedNfts([]);
+      setDrop(null);
+      setViewType(CreateDropViewType.COMPACT);
+    }, [dropEditorRefreshKey]);
+
     const createDropWrapperRef = useRef<CreateDropWrapperHandles | null>(null);
     const requestDrop = (): CreateDropConfig | null =>
       createDropWrapperRef.current?.requestDrop() ?? null;

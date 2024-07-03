@@ -50,18 +50,6 @@ export default function CreateDrop({
   const { onDropCreate } = useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
-
-  const [title, setTitle] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<DropMetadata[]>([]);
-  const [mentionedUsers, setMentionedUsers] = useState<
-    Omit<MentionedUser, "current_handle">[]
-  >([]);
-  const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
-  const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-  const [viewType, setViewType] = useState<CreateDropViewType>(
-    CreateDropViewType.COMPACT
-  );
-
   const [submitting, setSubmitting] = useState(false);
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
@@ -74,12 +62,7 @@ export default function CreateDrop({
       }),
     onSuccess: (response) => {
       setDropEditorRefreshKey((prev) => prev + 1);
-      setTitle(null);
-      setMetadata([]);
-      setMentionedUsers([]);
-      setReferencedNfts([]);
-      setDrop(null);
-      setViewType(CreateDropViewType.COMPACT);
+
       onDropCreate({ profile });
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
@@ -150,7 +133,7 @@ export default function CreateDrop({
     };
   };
 
-  // TODO: add required metadata & media validations
+  // TODO: add required metadata & media validations for wave participation
   const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
@@ -176,6 +159,7 @@ export default function CreateDrop({
       wave_id: wave.id,
       parts,
     };
+    console.log(requestBody);
     await addDropMutation.mutateAsync(requestBody);
   };
 
