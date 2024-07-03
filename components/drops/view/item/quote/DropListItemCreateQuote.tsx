@@ -4,6 +4,7 @@ import DropListItemQuote from "./DropListItemQuote";
 import { useEffect, useRef, useState } from "react";
 import { Drop } from "../../../../../generated/models/Drop";
 import { useRouter } from "next/router";
+import { Wave } from "../../../../../generated/models/Wave";
 
 export default function DropListItemCreateQuote({
   drop,
@@ -78,6 +79,8 @@ export default function DropListItemCreateQuote({
                 }}
               >
                 <DropListItemQuote
+                  // TODO: Add wave
+                  wave={{} as Wave}
                   quotedDropId={drop.id}
                   quotedPartId={quotedPartId}
                   init={init}

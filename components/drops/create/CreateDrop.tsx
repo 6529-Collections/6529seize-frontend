@@ -4,7 +4,6 @@ import CreateDropWrapper from "./utils/CreateDropWrapper";
 import {
   CreateDropConfig,
   CreateDropPart,
-  CreateDropRequest,
   CreateDropRequestPart,
   DropMetadata,
   MentionedUser,
@@ -16,6 +15,8 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { DropMedia } from "../../../generated/models/DropMedia";
 import DropEditor from "./DropEditor";
+import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
+import { Wave } from "../../../generated/models/Wave";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -32,6 +33,7 @@ export default function CreateDrop({
   quotedDrop,
   isClient = false,
   type,
+  wave,
   onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
@@ -41,6 +43,7 @@ export default function CreateDrop({
   } | null;
   readonly isClient?: boolean;
   readonly type: CreateDropType;
+  readonly wave: Wave;
   readonly onSuccessfulDrop?: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -147,6 +150,7 @@ export default function CreateDrop({
     };
   };
 
+  // TODO: add required metadata & media validations
   const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
@@ -169,6 +173,7 @@ export default function CreateDrop({
 
     const requestBody: CreateDropRequest = {
       ...dropRequest,
+      wave_id: wave.id,
       parts,
     };
     await addDropMutation.mutateAsync(requestBody);

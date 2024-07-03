@@ -4,6 +4,7 @@ import CreateDrop, { CreateDropType } from "../drops/create/CreateDrop";
 import CommonInfoBox from "../user/utils/connected-states/CommonInfoBox";
 import { ProfileConnectedStatus } from "../../entities/IProfile";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
+import { Wave } from "../../generated/models/Wave";
 
 export default function BrainCreateADrop() {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);
@@ -36,6 +37,8 @@ export default function BrainCreateADrop() {
       <CreateDrop
         profile={connectedProfile}
         quotedDrop={null}
+        // TODO: Add wave
+        wave={{} as Wave}
         type={CreateDropType.DROP}
       />
     );

@@ -3,13 +3,16 @@ import { AuthContext } from "../../../../auth/Auth";
 import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
+import { Wave } from "../../../../../generated/models/Wave";
 
 export default function DropListItemQuote({
+  wave,
   quotedDropId,
   quotedPartId,
   init,
   onSuccessfulDrop,
 }: {
+  readonly wave: Wave;
   readonly quotedDropId: string;
   readonly quotedPartId: number;
   readonly init: boolean;
@@ -29,6 +32,7 @@ export default function DropListItemQuote({
         {connectedProfile && (
           <CreateDrop
             profile={connectedProfile}
+            wave={wave}
             quotedDrop={{
               dropId: quotedDropId,
               partId: quotedPartId,

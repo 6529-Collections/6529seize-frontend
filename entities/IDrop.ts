@@ -1,3 +1,4 @@
+import { CreateDropRequest } from "../generated/models/CreateDropRequest";
 import { ProfileMin } from "../generated/models/ProfileMin";
 import { FullPageRequest } from "../helpers/Types";
 import {
@@ -58,7 +59,8 @@ export interface DropActivityLogDiscussion
   readonly author: ProfileMin | null;
 }
 
-export interface DropActivityLogRepEdit extends ProfileActivityLogDropRatingEdit {
+export interface DropActivityLogRepEdit
+  extends ProfileActivityLogDropRatingEdit {
   readonly author: ProfileMin | null;
 }
 
@@ -77,19 +79,20 @@ export interface CreateDropRequestPart {
   readonly media: Array<DropMedia>;
 }
 
-export interface CreateDropRequest {
-  readonly title: string | null;
-  readonly parts: Array<CreateDropRequestPart>;
-  readonly referenced_nfts: Array<ReferencedNft>;
-  readonly mentioned_users: Array<Omit<MentionedUser, "current_handle">>;
-  readonly metadata: Array<DropMetadata>;
-}
+// export interface CreateDropRequest {
+//   readonly title: string | null;
+//   readonly parts: Array<CreateDropRequestPart>;
+//   readonly referenced_nfts: Array<ReferencedNft>;
+//   readonly mentioned_users: Array<Omit<MentionedUser, "current_handle">>;
+//   readonly metadata: Array<DropMetadata>;
+// }
 
 export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
   readonly media: Array<File>;
 }
 
-export interface CreateDropConfig extends Omit<CreateDropRequest, "parts"> {
+export interface CreateDropConfig
+  extends Omit<CreateDropRequest, "parts" | "wave_id"> {
   readonly parts: Array<CreateDropPart>;
 }
 
