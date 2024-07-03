@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { Wave } from "../../generated/models/Wave";
 import { getTimeAgo, getTimeUntil } from "../../helpers/Helpers";
 
-export default function zWavesCard({ wave }: { readonly wave: Wave }) {
+export default function WavesCard({ wave }: { readonly wave: Wave }) {
   const router = useRouter();
   const goToWave = () => {
     router.push(`/waves/${wave.id}`);

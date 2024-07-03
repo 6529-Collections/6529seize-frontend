@@ -1,4 +1,8 @@
-import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
+import Tippy from "@tippyjs/react";
+import {
+  formatLargeNumber,
+  formatNumberWithCommas,
+} from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowRepRank({
@@ -11,24 +15,25 @@ export default function CreateWaveOutcomesRowRepRank({
   return (
     <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2">
       <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full">
-        <div className="tw-col-span-2">
+        <div className="tw-col-span-1">
           <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
             Rep
           </h3>
         </div>
-        <div className="tw-col-span-2">
-          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
-            {outcome.category}
-          </p>
+        <div className="tw-col-span-3">
+          <Tippy content={outcome.category}>
+            <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate">
+              {outcome.category}
+            </p>
+          </Tippy>
         </div>
-        <div className="tw-col-span-1">
+        <div className="tw-col-span-2">
           <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-text-nowrap">
-            Total{" "}
-            {formatNumberWithCommas(outcome.winnersConfig?.totalAmount ?? 0)}{" "}
+            Total {formatLargeNumber(outcome.winnersConfig?.totalAmount ?? 0)}{" "}
             Rep
           </p>
         </div>
-        <div className="tw-col-span-4">
+        <div className="tw-col-span-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
               className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -47,9 +52,7 @@ export default function CreateWaveOutcomesRowRepRank({
             </svg>
             <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
               Winners:{" "}
-              {formatNumberWithCommas(
-                outcome.winnersConfig?.winners.length ?? 0
-              )}
+              {formatLargeNumber(outcome.winnersConfig?.winners.length ?? 0)}
             </p>
           </div>
         </div>

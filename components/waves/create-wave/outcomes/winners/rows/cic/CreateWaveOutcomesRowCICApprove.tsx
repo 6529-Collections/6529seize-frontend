@@ -1,4 +1,7 @@
-import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
+import {
+  formatLargeNumber,
+  formatNumberWithCommas,
+} from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowCICApprove({
@@ -8,6 +11,9 @@ export default function CreateWaveOutcomesRowCICApprove({
   readonly outcome: CreateWaveOutcomeConfig;
   readonly removeOutcome: () => void;
 }) {
+  const winnersText = outcome.maxWinners
+    ? `${formatLargeNumber(outcome.maxWinners)}`
+    : "-";
   return (
     <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2 tw-grid tw-grid-cols-10 tw-gap-x-6 tw-justify-between tw-items-center tw-w-full">
       <div className="tw-col-span-2">
@@ -16,12 +22,12 @@ export default function CreateWaveOutcomesRowCICApprove({
         </h3>
       </div>
       <div className="tw-col-span-2"></div>
-      <div className="tw-col-span-1">
+      <div className="tw-col-span-2">
         <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-text-nowrap">
-          {formatNumberWithCommas(outcome.credit ?? 0)} CIC
+          {formatLargeNumber(outcome.credit ?? 0)} CIC
         </p>
       </div>
-      <div className="tw-col-span-4">
+      <div className="tw-col-span-3">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <svg
             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -39,7 +45,7 @@ export default function CreateWaveOutcomesRowCICApprove({
             />
           </svg>
           <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
-            Maximum winners: {formatNumberWithCommas(outcome.maxWinners ?? 0)}
+            Max winners: {winnersText}
           </p>
         </div>
       </div>
