@@ -3,7 +3,9 @@ import {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
 } from "../../../../../../types/waves.types";
+import CreateWaveOutcomesRowCIC from "./cic/CreateWaveOutcomesRowCIC";
 import CreateWaveOutcomesRowManual from "./manual/CreateWaveOutcomesRowManual";
+import CreateWaveOutcomesRowRep from "./rep/CreateWaveOutcomesRowRep";
 
 export default function CreateWaveOutcomesRow({
   waveType,
@@ -22,8 +24,20 @@ export default function CreateWaveOutcomesRow({
         removeOutcome={removeOutcome}
       />
     ),
-    [CreateWaveOutcomeType.REP]: <div />,
-    [CreateWaveOutcomeType.CIC]: <div />,
+    [CreateWaveOutcomeType.REP]: (
+      <CreateWaveOutcomesRowRep
+        waveType={waveType}
+        outcome={outcome}
+        removeOutcome={removeOutcome}
+      />
+    ),
+    [CreateWaveOutcomeType.CIC]: (
+      <CreateWaveOutcomesRowCIC
+        waveType={waveType}
+        outcome={outcome}
+        removeOutcome={removeOutcome}
+      />
+    ),
   };
   return components[outcome.type];
 }

@@ -303,19 +303,8 @@ const CreateDropWrapper = forwardRef<
         />
       ),
     };
-    const getClasses = () => {
-      switch (type) {
-        case CreateDropType.DROP:
-          return "tw-mt-2 lg:tw-mt-4";
-        case CreateDropType.QUOTE:
-          return "";
-        default:
-          assertUnreachable(type);
-          return "";
-      }
-    };
     return (
-      <div className={getClasses()}>
+      <div>
         <CommonAnimationHeight>{components[viewType]}</CommonAnimationHeight>
       </div>
     );

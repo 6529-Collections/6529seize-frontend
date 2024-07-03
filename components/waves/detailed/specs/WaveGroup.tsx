@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { WaveScope } from "../../../../generated/models/WaveScope";
 
 export default function WaveGroup({
@@ -12,7 +13,10 @@ export default function WaveGroup({
       <span className="tw-font-medium tw-text-iron-400">{label}</span>
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
         {scope.group ? (
-          <div className="tw-flex tw-items-center tw-gap-x-2">
+          <Link
+            href={`/community?page=1&group=${scope.group.id}`}
+            className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
+          >
             {scope.group.author.pfp ? (
               <img
                 className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800"
@@ -22,10 +26,10 @@ export default function WaveGroup({
             ) : (
               <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800" />
             )}
-            <span className="tw-font-medium tw-text-white tw-text-base">
+            <span className="tw-font-medium  tw-text-base">
               {scope.group.name}
             </span>
-          </div>
+          </Link>
         ) : (
           <span className="tw-font-medium tw-text-white tw-text-base">
             Anyone

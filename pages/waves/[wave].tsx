@@ -2,8 +2,6 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import DropsListItem from "../../components/drops/view/item/DropsListItem";
-import { Drop } from "../../generated/models/Drop";
 import WaveDetailed from "../../components/waves/detailed/WaveDetailed";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
