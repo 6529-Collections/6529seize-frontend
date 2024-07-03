@@ -96,11 +96,13 @@ export default function WavesList({
             </button>
           )}
         </div>
-        <WavesListWrapper
-          waves={waves}
-          loading={isFetching}
-          onBottomIntersection={onBottomIntersection}
-        />
+        <div className="tw-mt-6">
+          <WavesListWrapper
+            waves={waves}
+            loading={isFetching}
+            onBottomIntersection={onBottomIntersection}
+          />
+        </div>
       </div>
     </div>
   );
