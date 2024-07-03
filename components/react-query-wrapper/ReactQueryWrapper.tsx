@@ -44,8 +44,8 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
-  COMMUNITY_DROPS = "COMMUNITY_DROPS",
   RESERVOIR_NFT = "RESERVOIR_NFT",
+  DROPS = "DROPS",
   DROP = "DROP",
   DROP_DISCUSSION = "DROP_DISCUSSION",
   GROUPS = "GROUPS",
@@ -756,7 +756,7 @@ export default function ReactQueryWrapper({
       values: handles.map((handle) => ({ handleOrWallet: handle })),
     });
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.COMMUNITY_DROPS],
+      queryKey: [QueryKey.DROPS],
     });
   };
 
@@ -812,7 +812,7 @@ export default function ReactQueryWrapper({
     );
     queryClient.setQueriesData(
       {
-        queryKey: [QueryKey.COMMUNITY_DROPS],
+        queryKey: [QueryKey.DROPS],
       },
       (
         oldData:
@@ -845,7 +845,7 @@ export default function ReactQueryWrapper({
       values: [{ drop_id: dropId }],
     });
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.COMMUNITY_DROPS],
+      queryKey: [QueryKey.DROPS],
     });
     queryClient.invalidateQueries({
       queryKey: [

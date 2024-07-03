@@ -109,7 +109,7 @@ export default function Brain() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.COMMUNITY_DROPS, debouncedParams],
+    queryKey: [QueryKey.DROPS, debouncedParams],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         ...debouncedParams,

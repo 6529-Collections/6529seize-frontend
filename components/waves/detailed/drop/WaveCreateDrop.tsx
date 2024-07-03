@@ -4,8 +4,9 @@ import { ProfileConnectedStatus } from "../../../../entities/IProfile";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDrop, { CreateDropType } from "../../../drops/create/CreateDrop";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
+import { Wave } from "../../../../generated/models/Wave";
 
-export default function WaveCreateDrop() {
+export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);
 
   const getInfoText = (): string => {
@@ -34,6 +35,7 @@ export default function WaveCreateDrop() {
   ) {
     return (
       <CreateDrop
+        wave={wave}
         profile={connectedProfile}
         quotedDrop={null}
         type={CreateDropType.DROP}

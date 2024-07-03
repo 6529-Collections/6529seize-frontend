@@ -4,6 +4,7 @@ import CreateDrop, { CreateDropType } from "../../drops/create/CreateDrop";
 import { useEffect, useState } from "react";
 import { amIUser, createPossessionStr } from "../../../helpers/Helpers";
 import Drops from "../../drops/view/Drops";
+import { Wave } from "../../../generated/models/Wave";
 
 export default function UserPageDrops({
   profile,
@@ -27,6 +28,8 @@ export default function UserPageDrops({
           <div>
             {canCreateDrop && (
               <CreateDrop
+                // TODO: Add wave
+                wave={{} as Wave}
                 profile={profile}
                 quotedDrop={null}
                 type={CreateDropType.DROP}
