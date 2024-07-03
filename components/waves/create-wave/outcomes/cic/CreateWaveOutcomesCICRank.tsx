@@ -102,7 +102,7 @@ export default function CreateWaveOutcomesCICRank({
             setWinnersConfig={setWinnersConfig}
           />
         )}
-        <div className="tw-mt-6 tw-flex tw-justify-end tw-gap-x-3">
+        <div className="tw-flex tw-justify-end tw-gap-x-3">
           <button
             onClick={onCancel}
             type="button"
