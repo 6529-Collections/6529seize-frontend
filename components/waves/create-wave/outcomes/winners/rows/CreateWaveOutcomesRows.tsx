@@ -33,15 +33,13 @@ export default function CreateWaveOutcomesRows({
           />
         ))
       ) : (
-        <div className="tw-py-4">
-          <span
-            className={`${
-              showNoOutcomesError ? "tw-text-error" : "tw-text-iron-500"
-            } tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-md tw-italic  tw-transition tw-duration-300 tw-ease-out`}
-          >
-            No outcomes added
-          </span>
-        </div>
+        <span
+          className={`${
+            showNoOutcomesError ? "tw-text-error" : "tw-text-iron-500"
+          } tw-text-sm sm:tw-text-md tw-italic tw-transition tw-duration-300 tw-ease-out`}
+        >
+          No outcomes added
+        </span>
       )}
     </div>
   );
