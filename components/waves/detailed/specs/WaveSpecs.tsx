@@ -21,9 +21,11 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
               <WaveAuthor wave={wave} />
               <WaveCreated wave={wave} />
               <WaveEnding wave={wave} />
-              <WaveGroup scope={wave.visibility.scope} label="View" />
-              <WaveGroup scope={wave.participation.scope} label="Drop" />
-              <WaveGroup scope={wave.voting.scope} label="Vote" />
+              <div className="tw-pt-6 tw-flex tw-flex-col tw-gap-y-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
+                <WaveGroup scope={wave.visibility.scope} label="View" />
+                <WaveGroup scope={wave.participation.scope} label="Drop" />
+                <WaveGroup scope={wave.voting.scope} label="Vote" />
+              </div>
             </div>
           </div>
         </div>
