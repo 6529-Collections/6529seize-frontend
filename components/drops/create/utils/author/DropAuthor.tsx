@@ -27,7 +27,7 @@ export default function DropAuthor({
       case DropAuthorSize.SMALL:
         return "tw-text-sm";
       case DropAuthorSize.MEDIUM:
-        return "tw-text-md";
+        return "tw-text-base";
       default:
         assertUnreachable(size);
         return "";
@@ -36,14 +36,15 @@ export default function DropAuthor({
 
   const textClasses = getTextClasses();
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
-      <DropAuthorHandle profile={profile} size={size} />
-      <UserCICAndLevel
-        level={profile.level}
-        cicType={cicType}
-        size={UserCICAndLevelSize.SMALL}
-      />
-      <span className="tw-text-iron-500">&bull;</span>
+    <div className="tw-flex tw-items-center tw-gap-x-4">
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
+        <DropAuthorHandle profile={profile} size={size} />
+        <UserCICAndLevel
+          level={profile.level}
+          cicType={cicType}
+          size={UserCICAndLevelSize.SMALL}
+        />
+      </div>
       <p
         className={`${textClasses} tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500`}
       >
