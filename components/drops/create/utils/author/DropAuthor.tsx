@@ -1,7 +1,9 @@
 import { cicToType, getTimeAgo } from "../../../../../helpers/Helpers";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
-import UserCICAndLevel from "../../../../user/utils/UserCICAndLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "../../../../user/utils/UserCICAndLevel";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 export enum DropAuthorSize {
@@ -36,7 +38,11 @@ export default function DropAuthor({
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
       <DropAuthorHandle profile={profile} size={size} />
-      <UserCICAndLevel level={profile.level} cicType={cicType} />
+      <UserCICAndLevel
+        level={profile.level}
+        cicType={cicType}
+        size={UserCICAndLevelSize.SMALL}
+      />
       <span className="tw-text-iron-500">&bull;</span>
       <p
         className={`${textClasses} tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500`}

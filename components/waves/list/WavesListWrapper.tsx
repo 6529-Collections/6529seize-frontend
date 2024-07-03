@@ -5,7 +5,6 @@ import CircleLoader, {
 import DropsListItem from "../../drops/view/item/DropsListItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 
-
 export default function WavesListWrapper({
   waves,
   loading,
@@ -19,7 +18,11 @@ export default function WavesListWrapper({
     <div className="tw-overflow-hidden">
       <div className="tw-flex tw-flex-col tw-gap-y-3">
         {waves.map((wave) => (
-          <DropsListItem key={wave.id} drop={wave.description_drop} />
+          <DropsListItem
+            key={wave.id}
+            drop={wave.description_drop}
+            isWaveDescriptionDrop={true}
+          />
         ))}
       </div>
       {loading && (
