@@ -16,11 +16,9 @@ export default function CreateWaveOutcomesRowManualRank({
           </h3>
         </div>
         <div className="tw-col-span-2">
-          {outcome.title && (
-            <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
-              {outcome.title}
-            </p>
-          )}
+          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
+            {outcome.title}
+          </p>
         </div>
         <div className="tw-col-span-1"></div>
         <div className="tw-col-span-4"></div>

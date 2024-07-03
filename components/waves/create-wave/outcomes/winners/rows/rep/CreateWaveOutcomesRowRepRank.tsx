@@ -1,3 +1,4 @@
+import { formatNumberWithCommas } from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowRepRank({
@@ -12,17 +13,19 @@ export default function CreateWaveOutcomesRowRepRank({
       <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full">
         <div className="tw-col-span-2">
           <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
-            Rep Rank
+            Rep
           </h3>
         </div>
         <div className="tw-col-span-2">
           <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
-            Rep category
+            {outcome.category}
           </p>
         </div>
         <div className="tw-col-span-1">
-          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal">
-            324
+          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-text-nowrap">
+            Total{" "}
+            {formatNumberWithCommas(outcome.winnersConfig?.totalAmount ?? 0)}{" "}
+            Rep
           </p>
         </div>
         <div className="tw-col-span-4">
@@ -43,7 +46,10 @@ export default function CreateWaveOutcomesRowRepRank({
               />
             </svg>
             <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
-              Maximum winners: 2324
+              Winners:{" "}
+              {formatNumberWithCommas(
+                outcome.winnersConfig?.winners.length ?? 0
+              )}
             </p>
           </div>
         </div>
