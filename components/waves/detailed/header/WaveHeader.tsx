@@ -58,7 +58,26 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               </div>
             </div>
           </div>
-          <div className="tw-mt-12 tw-flex tw-items-center tw-gap-x-3">
+          <div className="tw-mt-16 tw-flex tw-flex-col tw-items-end tw-gap-y-2">
+            <div className="tw-flex tw-items-center tw-gap-x-2">
+              <div className="tw-text-xs">
+                <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+                  Created
+                </span>
+                <span className="tw-font-normal tw-text-iron-300">
+                  1 hour ago
+                </span>
+              </div>
+              <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
+              <div className="tw-text-xs">
+                <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+                  Ending
+                </span>
+                <span className="tw-font-normal tw-text-iron-300">
+                  In 4 days
+                </span>
+              </div>
+            </div>
             <button
               type="button"
               className="tw-inline-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-rounded-lg tw-font-semibold tw-text-white hover:tw-text-white tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 hover:tw-ring-primary-600 placeholder:tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-shadow-sm hover:tw-bg-primary-600 tw-transition tw-duration-300 tw-ease-out"
