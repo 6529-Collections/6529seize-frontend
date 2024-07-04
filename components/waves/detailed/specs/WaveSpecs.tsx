@@ -2,7 +2,7 @@ import { Wave } from "../../../../generated/models/Wave";
 import WaveAuthor from "./WaveAuthor";
 import WaveCreated from "./WaveCreated";
 import WaveEnding from "./WaveEnding";
-import WaveGroup from "./WaveGroup";
+import WaveGroup from "./groups/WaveGroup";
 import WaveTypeIcon from "./WaveTypeIcon";
 
 export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
