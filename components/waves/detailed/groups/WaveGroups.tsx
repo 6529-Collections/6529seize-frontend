@@ -1,11 +1,8 @@
 import { Wave } from "../../../../generated/models/Wave";
-import WaveAuthor from "./WaveAuthor";
-import WaveCreated from "./WaveCreated";
-import WaveEnding from "./WaveEnding";
 import WaveGroup from "../specs/WaveGroup";
-import WaveTypeIcon from "./WaveTypeIcon";
 
-export default function WaveGroups() {
+
+export default function WaveGroups({ wave }: { readonly wave: Wave }) {
   return (
     <div className="tw-w-full">
       <div className="tw-group">
@@ -17,9 +14,9 @@ export default function WaveGroups() {
               </p>
             </div>
             <div className="tw-px-6 tw-py-6 tw-flex tw-flex-col tw-gap-y-6">
-           {/*  <WaveGroup scope={wave.visibility.scope} label="View" />
+              <WaveGroup scope={wave.visibility.scope} label="View" />
               <WaveGroup scope={wave.participation.scope} label="Drop" />
-              <WaveGroup scope={wave.voting.scope} label="Vote" />  */}
+              <WaveGroup scope={wave.voting.scope} label="Vote" />
             </div>
           </div>
         </div>
