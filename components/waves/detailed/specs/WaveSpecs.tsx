@@ -17,10 +17,12 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
               </p>
             </div>
             <div className="tw-px-6 tw-py-6 tw-flex tw-flex-col tw-gap-y-6">
+              <div className="tw-flex tw-flex-col tw-gap-y-2">
+                <WaveCreated wave={wave} />
+                <WaveEnding wave={wave} />
+              </div>
               <WaveTypeIcon waveType={wave.wave.type} />
               <WaveAuthor wave={wave} />
-              <WaveCreated wave={wave} />
-              <WaveEnding wave={wave} />
             </div>
           </div>
         </div>
