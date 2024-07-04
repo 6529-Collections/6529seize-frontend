@@ -17,7 +17,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
         <div className="tw-flex tw-justify-center tw-gap-x-6">
           <div className="tw-flex-1 tw-flex tw-flex-col tw-gap-y-6">
             <WaveSpecs wave={wave} />
-            <WaveGroups />
+            <WaveGroups wave={wave} />
             <WaveLeaderboard wave={wave} />
             <WaveOutcome />
           </div>
