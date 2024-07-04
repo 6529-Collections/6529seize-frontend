@@ -16,7 +16,7 @@ export default function WavesListWrapper({
 }) {
   return (
     <div className="tw-overflow-hidden">
-      <div className="tw-flex tw-flex-col tw-gap-y-3">
+      <div className="tw-flex tw-flex-col tw-gap-y-4">
         {waves.map((wave) => (
           <DropsListItem
             key={wave.id}
