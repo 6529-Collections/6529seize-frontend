@@ -7,6 +7,7 @@ import WaveHeader from "./header/WaveHeader";
 import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
 import WaveOutcome from "./outcome/WaveOutcome";
 import WaveSpecs from "./specs/WaveSpecs";
+import WaveGroups from "./groups/WaveGroups";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   return (
@@ -16,6 +17,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
         <div className="tw-flex tw-justify-center tw-gap-x-6">
           <div className="tw-flex-1 tw-flex tw-flex-col tw-gap-y-6">
             <WaveSpecs wave={wave} />
+            <WaveGroups />
             <WaveLeaderboard wave={wave} />
             <WaveOutcome />
           </div>
