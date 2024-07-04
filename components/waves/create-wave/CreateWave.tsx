@@ -432,6 +432,7 @@ export default function CreateWave({
     ),
     [CreateWaveStep.VOTING]: (
       <CreateWaveVoting
+        waveType={config.overview.type}
         selectedType={config.voting.type}
         category={config.voting.category}
         profileId={config.voting.profileId}

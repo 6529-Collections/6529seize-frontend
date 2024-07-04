@@ -1,11 +1,10 @@
 import { Wave } from "../../../generated/models/Wave";
-import DropsListItem from "../../drops/view/item/DropsListItem";
 import WaveCreateDrop from "./drop/WaveCreateDrop";
 import WaveDescriptionDrop from "./drops/WaveDescriptionDrop";
 import WaveDrops from "./drops/WaveDrops";
 import WaveHeader from "./header/WaveHeader";
 import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
-import WaveOutcome from "./outcome/WaveOutcome";
+import WaveOutcomes from "./outcome/WaveOutcomes";
 import WaveSpecs from "./specs/WaveSpecs";
 import WaveGroups from "./groups/WaveGroups";
 
@@ -19,7 +18,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
             <WaveSpecs wave={wave} />
             <WaveGroups wave={wave} />
             <WaveLeaderboard wave={wave} />
-            <WaveOutcome />
+            <WaveOutcomes wave={wave} />
           </div>
           <div className="tw-w-[672px] tw-space-y-4">
             <WaveCreateDrop wave={wave} />
