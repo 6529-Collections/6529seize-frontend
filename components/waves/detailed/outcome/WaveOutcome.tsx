@@ -24,12 +24,6 @@ export default function WaveOutcome() {
                   2 weeks
                 </span>
               </div>
-              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
-                <span className="tw-font-medium tw-text-iron-400">Winners</span>
-                <span className="tw-font-medium tw-text-white tw-text-base">
-                  2 weeks
-                </span>
-              </div>
 
               <div className="tw-flex tw-flex-col tw-gap-y-3">
                 {/* RANK */}
@@ -125,7 +119,7 @@ export default function WaveOutcome() {
                           Some long manual stuff
                         </p>
                       </div>
-                      <div className="tw-w-[25%]  tw-max-w-[58px]">
+                      <div className="tw-w-[25%] tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -154,17 +148,17 @@ export default function WaveOutcome() {
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <div className="tw-w-1/2 ">
+                      <div className="tw-w-1/2">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
                           Rep category
                         </p>
                       </div>
-                      <div className="tw-w-[25%] ">
+                      <div className="tw-w-[25%]">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
                           2M Rep
                         </p>
                       </div>
-                      <div className="tw-w-[25%]  tw-max-w-[58px]">
+                      <div className="tw-w-[25%] tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -194,12 +188,12 @@ export default function WaveOutcome() {
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
                       <div className="tw-w-1/2"></div>
-                      <div className="tw-w-[25%] ">
+                      <div className="tw-w-[25%]">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
                           100k CIC
                         </p>
                       </div>
-                      <div className="tw-w-[25%]  tw-max-w-[58px]">
+                      <div className="tw-w-[25%] tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
