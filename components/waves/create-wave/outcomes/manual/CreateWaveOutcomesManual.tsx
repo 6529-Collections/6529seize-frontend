@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
 import {
+  CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import { WaveType } from "../../../../../generated/models/WaveType";
+import CreateWaveWarning from "../../utils/CreateWaveWarning";
+import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
 
 export default function CreateWaveOutcomesManual({
   waveType,
+  dates,
   onOutcome,
   onCancel,
 }: {
   readonly waveType: WaveType;
+  readonly dates: CreateWaveDatesConfig;
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
 }) {
@@ -30,7 +35,7 @@ export default function CreateWaveOutcomesManual({
 
   useEffect(() => setIsInputEmptyError(false), [value]);
 
-  const showMaxWinners = waveType === WaveType.Approve;
+  const isApproveWave = waveType === WaveType.Approve;
 
   const onSubmit = () => {
     if (!value) {
@@ -49,10 +54,10 @@ export default function CreateWaveOutcomesManual({
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-flex tw-flex-col tw-pt-[0.5px]">
+      <div className="tw-flex tw-flex-col tw-pt-[0.5px] tw-gap-y-5">
         <div
           className={`${
-            showMaxWinners ? "md:tw-grid-cols-2" : ""
+            isApproveWave ? "md:tw-grid-cols-2" : ""
           } tw-grid tw-gap-x-5`}
         >
           <div>
@@ -107,7 +112,7 @@ export default function CreateWaveOutcomesManual({
               </div>
             )}
           </div>
-          {showMaxWinners && (
+          {isApproveWave && (
             <div>
               <div className="tw-group tw-w-full tw-relative">
                 <input
@@ -133,31 +138,11 @@ export default function CreateWaveOutcomesManual({
             </div>
           )}
         </div>
-        <div className="tw-mt-5">
-          <div className="tw-text-[#fef08a] tw-text-xs tw-font-medium">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-text-[#fef08a]"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M11.9998 8.99999V13M11.9998 17H12.0098M10.6151 3.89171L2.39019 18.0983C1.93398 18.8863 1.70588 19.2803 1.73959 19.6037C1.769 19.8857 1.91677 20.142 2.14613 20.3088C2.40908 20.5 2.86435 20.5 3.77487 20.5H20.2246C21.1352 20.5 21.5904 20.5 21.8534 20.3088C22.0827 20.142 22.2305 19.8857 22.2599 19.6037C22.2936 19.2803 22.0655 18.8863 21.6093 18.0983L13.3844 3.89171C12.9299 3.10654 12.7026 2.71396 12.4061 2.58211C12.1474 2.4671 11.8521 2.4671 11.5935 2.58211C11.2969 2.71396 11.0696 3.10655 10.6151 3.89171Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>
-                Without max winners or an end date, this wave runs indefinitely,
-                awarding all who meet the threshold.
-              </span>
-            </div>
-          </div>
-        </div>
+        <CreateWaveOutcomeWarning
+          waveType={waveType}
+          dates={dates}
+          maxWinners={maxWinners}
+        />
         <div className="tw-mt-6 tw-flex tw-justify-end tw-gap-x-3 tw-relative tw-z-50">
           <button
             onClick={onCancel}

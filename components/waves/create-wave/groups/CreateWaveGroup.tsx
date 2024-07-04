@@ -8,10 +8,6 @@ import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
 } from "../../../../helpers/waves/waves.constants";
-import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
-import SelectGroupModal from "../../../utils/select-group/SelectGroupModal";
-import { createPortal } from "react-dom";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { WaveType } from "../../../../generated/models/WaveType";
 import CreateWaveGroupItem from "./CreateWaveGroupItem";
