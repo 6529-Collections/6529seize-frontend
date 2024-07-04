@@ -1,6 +1,5 @@
 import { Wave } from "../../../../generated/models/Wave";
-import WaveGroup from "../specs/WaveGroup";
-
+import WaveGroup, { WaveGroupType } from "../specs/groups/WaveGroup";
 
 export default function WaveGroups({ wave }: { readonly wave: Wave }) {
   return (
@@ -14,9 +13,17 @@ export default function WaveGroups({ wave }: { readonly wave: Wave }) {
               </p>
             </div>
             <div className="tw-px-6 tw-py-6 tw-flex tw-flex-col tw-gap-y-6">
-              <WaveGroup scope={wave.visibility.scope} label="View" />
-              <WaveGroup scope={wave.participation.scope} label="Drop" />
-              <WaveGroup scope={wave.voting.scope} label="Vote" />
+              <WaveGroup
+                scope={wave.visibility.scope}
+                type={WaveGroupType.VIEW}
+              />
+              <WaveGroup
+                scope={wave.participation.scope}
+                type={WaveGroupType.DROP}
+              />
+              <WaveGroup scope={wave.voting.scope} type={WaveGroupType.VOTE} />
+              {/* TODO */}
+              <WaveGroup scope={{ group: null }} type={WaveGroupType.ADMIN} />
             </div>
           </div>
         </div>
