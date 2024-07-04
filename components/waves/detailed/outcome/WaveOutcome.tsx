@@ -35,36 +35,27 @@ export default function WaveOutcome() {
                 {/* RANK */}
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
-                    <div className="tw-grid tw-grid-cols-4 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-medium tw-truncate">
-                        Manual
-                      </p>
+                    <div className="tw-w-full tw-h-full tw-flex tw-items-center">
                       <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
                         Manual stuff
                       </p>
                     </div>
                   </div>
                 </div>
-
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
-                    <div className="tw-grid tw-grid-cols-6 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <div className="tw-col-span-1">
-                        <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-medium tw-truncate">
-                          Rep
-                        </p>
-                      </div>
-                      <div className="tw-col-span-3">
+                    <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
+                      <div className="tw-w-1/2 ">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
                           Rep category
                         </p>
                       </div>
-                      <div className="tw-col-span-1">
+                      <div className="tw-w-[25%] ">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
-                          2M
+                          2M Rep
                         </p>
                       </div>
-                      <div className="tw-col-span-1 tw-flex tw-justify-end">
+                      <div className="tw-w-[25%]  tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -92,18 +83,14 @@ export default function WaveOutcome() {
 
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
-                    <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <div className="tw-col-span-1">
-                        <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-medium tw-truncate">
-                          CIC
-                        </p>
-                      </div>
-                      <div className="tw-col-span-1">
+                    <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
+                      <div className="tw-w-1/2"></div>
+                      <div className="tw-w-[25%] ">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
-                          100k
+                          100k CIC
                         </p>
                       </div>
-                      <div className="tw-col-span-1 tw-flex tw-justify-end">
+                      <div className="tw-w-[25%]  tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -132,18 +119,13 @@ export default function WaveOutcome() {
                 {/* APPROVE */}
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
-                    <div className="tw-grid tw-grid-cols-7 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <div className="tw-col-span-2">
-                        <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-medium tw-truncate">
-                          Manual
-                        </p>
-                      </div>
-                      <div className="tw-col-span-3">
+                    <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
+                      <div className="tw-w-[75%]">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
                           Some long manual stuff
                         </p>
                       </div>
-                      <div className="tw-col-span-2 tw-flex tw-justify-end">
+                      <div className="tw-w-[25%]  tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -161,7 +143,7 @@ export default function WaveOutcome() {
                             ></path>
                           </svg>
                           <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
-                            500k
+                            999k
                           </p>
                         </div>
                       </div>
@@ -171,23 +153,18 @@ export default function WaveOutcome() {
 
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
-                    <div className="tw-grid tw-grid-cols-4 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <div className="tw-col-span-1">
-                        <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-medium tw-truncate">
-                          Rep
-                        </p>
-                      </div>
-                      <div className="tw-col-span-1">
+                    <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
+                      <div className="tw-w-1/2 ">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
-                          Rep
+                          Rep category
                         </p>
                       </div>
-                      <div className="tw-col-span-1">
+                      <div className="tw-w-[25%] ">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
-                          2M
+                          2M Rep
                         </p>
                       </div>
-                      <div className="tw-col-span-1 tw-flex tw-justify-end">
+                      <div className="tw-w-[25%]  tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
@@ -215,18 +192,14 @@ export default function WaveOutcome() {
 
                 <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
-                    <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
-                      <div className="tw-col-span-1">
-                        <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-medium tw-truncate">
-                          CIC
-                        </p>
-                      </div>
-                      <div className="tw-col-span-1">
+                    <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
+                      <div className="tw-w-1/2"></div>
+                      <div className="tw-w-[25%] ">
                         <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
-                          100k
+                          100k CIC
                         </p>
                       </div>
-                      <div className="tw-col-span-1 tw-flex tw-justify-end">
+                      <div className="tw-w-[25%]  tw-max-w-[58px]">
                         <div className="tw-flex tw-items-center tw-gap-x-2">
                           <svg
                             className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
