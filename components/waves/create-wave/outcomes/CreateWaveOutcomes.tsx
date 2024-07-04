@@ -4,6 +4,7 @@ import CreateWaveOutcomesRep from "./rep/CreateWaveOutcomesRep";
 import CreateWaveOutcomesCIC from "./cic/CreateWaveOutcomesCIC";
 import CreateWaveOutcomesRows from "./winners/rows/CreateWaveOutcomesRows";
 import {
+  CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
 } from "../../../../types/waves.types";
@@ -16,6 +17,7 @@ export default function WavesOutcome({
   outcomeType,
   waveType,
   errors,
+  dates,
   setOutcomeType,
   setOutcomes,
 }: {
@@ -23,6 +25,7 @@ export default function WavesOutcome({
   readonly outcomeType: CreateWaveOutcomeType | null;
   readonly waveType: WaveType;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
+  readonly dates: CreateWaveDatesConfig;
   readonly setOutcomeType: (outcomeType: CreateWaveOutcomeType | null) => void;
   readonly setOutcomes: (outcomes: CreateWaveOutcomeConfig[]) => void;
 }) {
@@ -40,6 +43,7 @@ export default function WavesOutcome({
       <CreateWaveOutcomesManual
         onOutcome={onOutcome}
         onCancel={onCancel}
+        dates={dates}
         waveType={waveType}
       />
     ),
@@ -47,6 +51,7 @@ export default function WavesOutcome({
       <CreateWaveOutcomesRep
         onOutcome={onOutcome}
         onCancel={onCancel}
+        dates={dates}
         waveType={waveType}
       />
     ),
@@ -54,6 +59,7 @@ export default function WavesOutcome({
       <CreateWaveOutcomesCIC
         onOutcome={onOutcome}
         onCancel={onCancel}
+        dates={dates}
         waveType={waveType}
       />
     ),
