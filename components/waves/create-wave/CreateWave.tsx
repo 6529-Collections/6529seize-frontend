@@ -55,7 +55,7 @@ export default function CreateWave({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
   const initialType = WaveType.Approve;
-  const initialStep = CreateWaveStep.DATES;
+  const initialStep = CreateWaveStep.OUTCOMES;
   const getInitialConfig = ({
     type,
   }: {
@@ -410,6 +410,7 @@ export default function CreateWave({
     [CreateWaveStep.GROUPS]: (
       <CreateWaveGroups
         waveType={config.overview.type}
+        groups={config.groups}
         onGroupSelect={onGroupSelect}
       />
     ),
@@ -455,6 +456,7 @@ export default function CreateWave({
         outcomeType={selectedOutcomeType}
         waveType={config.overview.type}
         errors={errors}
+        dates={config.dates}
         setOutcomeType={onOutcomeTypeChange}
         setOutcomes={setOutcomes}
       />

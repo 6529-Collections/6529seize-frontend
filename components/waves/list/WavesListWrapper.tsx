@@ -22,6 +22,7 @@ export default function WavesListWrapper({
             key={wave.id}
             drop={wave.description_drop}
             isWaveDescriptionDrop={true}
+            showExternalLink={true}
           />
         ))}
       </div>
