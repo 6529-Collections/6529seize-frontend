@@ -20,7 +20,7 @@ export default function WaveDescriptionDrop({ wave }: { readonly wave: Wave }) {
             strokeLinejoin="round"
           />
         </svg>
-        <span>Description</span>
+        <span>Description Drop</span>
       </div>
       <DropsListItem drop={wave.description_drop} />
     </div>

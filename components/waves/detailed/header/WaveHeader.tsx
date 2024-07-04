@@ -12,11 +12,11 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
         ></div>
       </div>
       <div className="tw-max-w-5xl tw-mx-auto">
-        <div className="-tw-mt-12 sm:tw-flex sm:tw-items-end sm:tw-space-x-5">
+        <div className="-tw-mt-12 sm:tw-flex sm:tw-space-x-5">
           <div className="tw-flex">
             {wave.author.pfp ? (
               <img
-                className="tw-h-24 tw-w-24 tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900"
+                className="tw-h-24 tw-w-24 tw-object-contain tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900"
                 src={wave.author.pfp}
                 alt=""
               />
@@ -24,7 +24,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               <div className="tw-h-24 tw-w-24 tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900" />
             )}
           </div>
-          <div className="tw-mt-6 sm:tw-flex sm:tw-min-w-0 sm:tw-flex-1 sm:tw-items-center sm:tw-justify-end sm:tw-space-x-6 sm:tw-pb-1">
+          <div className="tw-mt-8 sm:tw-flex sm:tw-min-w-0 sm:tw-flex-1 sm:tw-items-center sm:tw-justify-end sm:tw-space-x-6 sm:tw-pb-1">
             <div className="tw-mt-6 tw-min-w-0 tw-flex-1 sm:tw-hidden md:tw-block">
               <h1 className="tw-truncate tw-text-2xl tw-font-semibold tw-text-white">
                 {wave.name}
@@ -58,7 +58,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               </div>
             </div>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-x-3">
+          <div className="tw-mt-12 tw-flex tw-items-center tw-gap-x-3">
             <button
               type="button"
               className="tw-inline-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-rounded-lg tw-font-semibold tw-text-white hover:tw-text-white tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 hover:tw-ring-primary-600 placeholder:tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-shadow-sm hover:tw-bg-primary-600 tw-transition tw-duration-300 tw-ease-out"

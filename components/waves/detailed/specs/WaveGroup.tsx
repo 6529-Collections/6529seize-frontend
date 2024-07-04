@@ -75,7 +75,7 @@ export default function WaveGroup({
             ) : (
               <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800" />
             )}
-            <span className="tw-font-medium  tw-text-base">
+            <span className="tw-font-medium tw-text-base tw-text-primary-300">
               {scope.group.name}
             </span>
           </Link>

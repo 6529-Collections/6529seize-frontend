@@ -285,6 +285,7 @@ export default function DropListItemRateGiveClap({
               className={`${textClasses} tw-size-5 -tw-mt-1 tw-transition tw-duration-300 tw-ease-out`}
               viewBox="0 0 346 360"
               fill="none"
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
