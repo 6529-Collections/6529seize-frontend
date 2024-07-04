@@ -1,6 +1,11 @@
 import { Wave } from "../../../../generated/models/Wave";
+import { getTimeUntil } from "../../../../helpers/Helpers";
 
 export default function WaveHeader({ wave }: { readonly wave: Wave }) {
+  const created = getTimeUntil(wave.created_at);
+  const ending = wave.wave.period?.max
+    ?  getTimeUntil(wave.wave.period.max)
+    : "Infinite";
   return (
     <div>
       <div>
@@ -65,7 +70,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                   Created
                 </span>
                 <span className="tw-font-normal tw-text-iron-300">
-                  1 hour ago
+                  {created}
                 </span>
               </div>
               <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
@@ -74,7 +79,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                   Ending
                 </span>
                 <span className="tw-font-normal tw-text-iron-300">
-                  In 4 days
+                  {ending}
                 </span>
               </div>
             </div>
