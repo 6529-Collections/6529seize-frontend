@@ -92,8 +92,8 @@ const CreateDropFullDesktop = forwardRef<
       switch (type) {
         case CreateDropType.DROP:
           return `${
-            showDropError ? "tw-border-error" : "tw-border-iron-700"
-          } tw-px-4 sm:tw-p-5 tw-border tw-border-solid tw-rounded-xl`;
+            showDropError ? "tw-border-error tw-border tw-border-solid" : ""
+          } tw-px-4 sm:tw-px-5 tw-rounded-xl`;
         case CreateDropType.QUOTE:
           return "";
         default:
@@ -109,11 +109,11 @@ const CreateDropFullDesktop = forwardRef<
     }));
 
     return (
-      <div className={`${getWrapperClasses()} tw-relative tw-bg-iron-900`}>
+      <div className={`${getWrapperClasses()} tw-relative tw-bg-iron-950`}>
         <button
           onClick={() => onViewChange(CreateDropViewType.COMPACT)}
           type="button"
-          className="tw-relative tw-ml-auto tw-p-2.5 -tw-m-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+          className="tw-relative tw-ml-auto tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent hover:tw-bg-iron-900 tw-border-0 tw-text-iron-300 hover:tw-text-iron-400 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-sr-only tw-text-sm">Cancel</span>
           <svg
@@ -132,7 +132,7 @@ const CreateDropFullDesktop = forwardRef<
           </svg>
         </button>
         {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
-        <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-4">
+        <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-2.5">
           {titleState === TITLE_STATE.BUTTON && (
             <button
               onClick={() => setTitleState(TITLE_STATE.INPUT)}
@@ -163,7 +163,7 @@ const CreateDropFullDesktop = forwardRef<
           <div className="tw-mt-0.5">
             <DropPfp pfpUrl={profile.profile?.pfp_url} />
           </div>
-          <div className="tw-space-y-5 tw-w-full">
+          <div className="tw-space-y-4 tw-w-full">
             {titleState === TITLE_STATE.INPUT && (
               <div>
                 <input
@@ -173,7 +173,7 @@ const CreateDropFullDesktop = forwardRef<
                   value={title ?? ""}
                   onChange={(e) => onTitle(e.target.value)}
                   maxLength={250}
-                  className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-text-md tw-leading-6 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-text-md tw-leading-6 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
                 />
               </div>
             )}

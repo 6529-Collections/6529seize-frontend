@@ -83,8 +83,8 @@ const CreateDropCompact = forwardRef<
       switch (type) {
         case CreateDropType.DROP:
           return `${
-            showDropError ? "tw-border-error" : "tw-border-iron-700"
-          } tw-p-4 sm:tw-p-5 tw-border tw-border-solid tw-rounded-xl`;
+            showDropError ? "tw-border-error tw-border tw-border-solid" : ""
+          } tw-px-4 sm:tw-px-5 tw-rounded-xl`;
         case CreateDropType.QUOTE:
           return "";
         default:
@@ -112,7 +112,7 @@ const CreateDropCompact = forwardRef<
     }));
 
     return (
-      <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
+      <div className={`${getWrapperClasses()}  tw-bg-iron-950`}>
         {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-hidden sm:tw-block">

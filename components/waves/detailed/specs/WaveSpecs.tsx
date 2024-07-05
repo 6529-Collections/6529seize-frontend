@@ -12,7 +12,7 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
         <div className="tw-bg-iron-900 tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl">
           <div className="tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700">
             <div className="tw-px-6 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
-              <p className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold">
+              <p className="tw-mb-0 tw-text-lg tw-text-iron-50 tw-font-semibold">
                 General
               </p>
             </div>
@@ -34,7 +34,7 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
                     </span>
                     <div className="tw-flex tw-items-center tw-gap-x-2">
                       <img
-                        className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800"
+                        className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
                         src="#"
                         alt="Profile Picture"
                       />

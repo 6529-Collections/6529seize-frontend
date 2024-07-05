@@ -6,7 +6,7 @@ import CreateDropStormViewPart from "./CreateDropStormViewPart";
 const CreateDropStormView = memo(
   ({ drop }: { readonly drop: CreateDropConfig }) => {
     return (
-      <div>
+      <div className="tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0 tw-mb-4">
         {!!drop?.parts.length &&
           drop.parts.map((part) => (
             <CreateDropStormViewPart

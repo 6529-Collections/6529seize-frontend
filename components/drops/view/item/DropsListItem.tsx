@@ -29,7 +29,7 @@ export default function DropsListItem({
     drop.author.banner2_color ?? getRandomColorWithSeed(drop.author.handle);
 
   return (
-    <div className="tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-xl tw-bg-iron-900">
+    <div className="tw-relative tw-bg-iron-950">
       {isWaveDescriptionDrop ? (
         <div
           className="tw-relative tw-w-full tw-h-7 tw-rounded-t-xl"

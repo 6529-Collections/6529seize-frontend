@@ -4,7 +4,7 @@ import DropsListItem from "./item/DropsListItem";
 
 export default function DropsList({ drops }: { readonly drops: Drop[] }) {
   return (
-    <div className="tw-space-y-4">
+    <div className="tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
       {drops.map((drop) => (
         <DropsListItem drop={drop} key={drop.id} />
       ))}
