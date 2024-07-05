@@ -475,7 +475,7 @@ export default function CreateWave({
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-4 xl:tw-px-0 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen">
       <div className="tw-h-full tw-w-full">
-        <div className="xl:tw-max-w-5xl tw-mx-auto">
+        <div className="xl:tw-max-w-[60rem] tw-mx-auto">
           <button
             onClick={onBack}
             type="button"
@@ -500,7 +500,7 @@ export default function CreateWave({
           </button>
           <h1 className="tw-mb-0">Create new Wave</h1>
         </div>
-        <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-5xl tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
+        <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
           <div className="tw-1/4">
             <CreateWavesMainSteps
               activeStep={step}
