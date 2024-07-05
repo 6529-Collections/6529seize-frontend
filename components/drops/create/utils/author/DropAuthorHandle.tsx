@@ -20,7 +20,7 @@ export default function DropAuthorHandle({
       case DropAuthorSize.SMALL:
         return "tw-text-sm";
       case DropAuthorSize.MEDIUM:
-        return "tw-text-base";
+        return "tw-text-md";
       default:
         assertUnreachable(size);
         return "";

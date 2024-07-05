@@ -48,12 +48,12 @@ export default function WaveGroup({
           >
             {scope.group.author.pfp ? (
               <img
-                className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800"
+                className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
                 src={scope.group.author.pfp}
                 alt="Profile Picture"
               />
             ) : (
-              <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800" />
+              <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
             )}
             <span className="tw-font-medium tw-text-base tw-text-primary-300">
               {scope.group.name}

@@ -11,12 +11,12 @@ export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
       >
         {wave.author.pfp ? (
           <img
-            className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800"
+            className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
             src={wave.author.pfp}
             alt="Profile Picture"
           />
         ) : (
-          <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-bg-iron-800" />
+          <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
         )}
         <span className="tw-font-medium t tw-text-base">
           {wave.author.handle}

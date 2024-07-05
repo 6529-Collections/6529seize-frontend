@@ -10,7 +10,7 @@ export default function CreateDropSelectFileImage({
   const randomId = getRandomObjectId();
   return (
     <div
-      className="tw-cursor-pointer tw-flex-shrink-0 tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+      className="tw-cursor-pointer tw-flex-shrink-0 tw-group tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       role="button"
       aria-label="Select image file"
     >
