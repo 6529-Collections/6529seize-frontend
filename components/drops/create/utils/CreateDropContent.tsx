@@ -186,7 +186,7 @@ const CreateDropContent = forwardRef<
                       viewType === CreateDropViewType.COMPACT
                         ? "editor-input-one-liner tw-pr-[7.5rem]"
                         : "editor-input-multi-liner tw-pr-10"
-                    } tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                    } tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
                   tw-pl-3.5 tw-py-2.5`}
                   />
                 }
@@ -323,13 +323,13 @@ const CreateDropContent = forwardRef<
               </>
             )}
           </p>
-          <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+         {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
             <div>/</div>
             <div>{formatNumberWithCommas(24000)}</div>
-          </div>
+          </div> */}
         </div>
       </div>
     );

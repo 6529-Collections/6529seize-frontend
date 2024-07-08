@@ -36,7 +36,7 @@ export default function DropsListItem({
   };
 
   return (
-    <div className="tw-relative tw-bg-iron-950">
+    <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
       {/* {isWaveDescriptionDrop ? (
         <div
           className="tw-relative tw-w-full tw-h-7 tw-rounded-t-xl"
