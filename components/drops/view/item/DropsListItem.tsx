@@ -37,7 +37,7 @@ export default function DropsListItem({
 
   return (
     <div className="tw-relative tw-bg-iron-950">
-      {isWaveDescriptionDrop ? (
+      {/* {isWaveDescriptionDrop ? (
         <div
           className="tw-relative tw-w-full tw-h-7 tw-rounded-t-xl"
           style={{
@@ -50,6 +50,14 @@ export default function DropsListItem({
           current={drop.rating}
           myRate={drop.context_profile_context?.rating ?? null}
         />
+      )} */}
+      {isWaveDescriptionDrop && (
+        <div
+          className="tw-relative tw-w-full tw-h-7 tw-rounded-t-xl"
+          style={{
+            background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
+          }}
+        ></div>
       )}
 
       <DropListItemCreateQuote
