@@ -1579,7 +1579,7 @@ components:
       required:
         - id
         - serial_no
-        - wave_id
+        - wave
         - author
         - created_at
         - referenced_nfts
@@ -1602,8 +1602,8 @@ components:
           description: Sequence number of the drop in Seize
           type: number
           format: int64
-        wave_id:
-          type: string
+        wave:
+          $ref: "#/components/schemas/WaveMin"
         author:
           $ref: "#/components/schemas/ProfileMin"
         created_at:
@@ -2913,5 +2913,21 @@ components:
         media_url:
           type: string
           example: "https://example.com/final/image.png"
+
+    WaveMin:
+      required:
+        - id
+        - name
+        - picture
+        - description_drop_id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+        description_drop_id:
+          type: string
 security:
   - bearerAuth: []
