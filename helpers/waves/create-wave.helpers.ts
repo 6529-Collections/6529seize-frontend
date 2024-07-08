@@ -479,7 +479,7 @@ const getApproveOutcomes = ({
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
       outcome.category &&
-      outcome.credit 
+      outcome.credit
     ) {
       outcomes.push({
         type: WaveOutcomeType.Automatic,
@@ -489,10 +489,7 @@ const getApproveOutcomes = ({
         rep_category: outcome.category,
         amount: outcome.credit,
       });
-    } else if (
-      outcome.type === CreateWaveOutcomeType.CIC &&
-      outcome.credit
-    ) {
+    } else if (outcome.type === CreateWaveOutcomeType.CIC && outcome.credit) {
       outcomes.push({
         type: WaveOutcomeType.Automatic,
         subtype: WaveOutcomeSubType.CreditDistribution,
@@ -536,6 +533,8 @@ export const getCreateNewWaveBody = ({
   return {
     name: config.overview.name,
     description_drop: drop,
+    // TODO
+    picture: null,
     voting: {
       scope: {
         group_id: config.groups.canVote,
@@ -580,7 +579,9 @@ export const getCreateNewWaveBody = ({
       // TODO - should be in outcomes
       max_winners: null,
       time_lock_ms: config.approval.thresholdTimeMs,
-      admin_group_id: config.groups.admin,
+      admin_group: {
+        group_id: config.groups.admin,
+      },
       period: {
         min: config.dates.submissionStartDate,
         max: config.dates.endDate,

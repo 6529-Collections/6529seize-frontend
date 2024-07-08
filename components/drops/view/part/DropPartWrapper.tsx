@@ -3,10 +3,10 @@ import DropPartDiscussion from "./actions/discussion/DropPartDiscussion";
 
 import DropPartActionTriggers from "./actions/DropPartActionTriggers";
 import { useState } from "react";
-import DropPartDiscussionWrapper from "./actions/discussion/DropPartDiscussionWrapper";
 import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
+import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 
 export default function DropPartWrapper({
   drop,
@@ -33,12 +33,9 @@ export default function DropPartWrapper({
         setIsDiscussionOpen={setIsDiscussionOpen}
         onQuote={onQuote}
       />
-      <DropPartDiscussionWrapper
-        dropPart={dropPart}
-        isDiscussionOpen={isDiscussionOpen}
-      >
+      {isDiscussionOpen && (
         <DropPartDiscussion dropPart={dropPart} drop={drop} />
-      </DropPartDiscussionWrapper>
+      )}
     </div>
   );
 }

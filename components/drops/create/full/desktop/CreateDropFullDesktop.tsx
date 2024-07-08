@@ -43,6 +43,7 @@ const CreateDropFullDesktop = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly showSubmit: boolean;
     readonly showDropError?: boolean;
+    readonly isStormMode: boolean;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (data_key: string) => void;
@@ -71,6 +72,7 @@ const CreateDropFullDesktop = forwardRef<
       drop,
       showSubmit,
       showDropError = false,
+      isStormMode,
       onViewChange,
       onMetadataEdit,
       onMetadataRemove,
@@ -131,7 +133,9 @@ const CreateDropFullDesktop = forwardRef<
             />
           </svg>
         </button>
-        {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
+        {!!drop?.parts.length && isStormMode && (
+          <CreateDropStormView drop={drop} />
+        )}
         <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-2.5">
           {titleState === TITLE_STATE.BUTTON && (
             <button

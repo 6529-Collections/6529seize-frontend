@@ -12,7 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export class CreateDropMediaUrl201Response {
+export class CreateMediaUrlResponse {
     'upload_url': string;
     'content_type': string;
     'media_url': string;
@@ -40,7 +40,7 @@ export class CreateDropMediaUrl201Response {
         }    ];
 
     static getAttributeTypeMap() {
-        return CreateDropMediaUrl201Response.attributeTypeMap;
+        return CreateMediaUrlResponse.attributeTypeMap;
     }
 
     public constructor() {

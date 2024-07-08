@@ -36,6 +36,7 @@ const CreateDropFull = forwardRef<
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
     readonly showDropError?: boolean;
+    readonly isStormMode: boolean;
     readonly onTitle: (newV: string | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (key: string) => void;
@@ -65,6 +66,7 @@ const CreateDropFull = forwardRef<
       type,
       drop,
       showDropError = false,
+      isStormMode,
       onTitle,
       onMetadataEdit,
       onMetadataRemove,
@@ -105,6 +107,7 @@ const CreateDropFull = forwardRef<
           showSubmit={showSubmit}
           drop={drop}
           showDropError={showDropError}
+          isStormMode={isStormMode}
           onTitle={onTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
@@ -131,6 +134,7 @@ const CreateDropFull = forwardRef<
           loading={loading}
           drop={drop}
           showSubmit={showSubmit}
+          isStormMode={isStormMode}
           onEditorState={onEditorState}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}

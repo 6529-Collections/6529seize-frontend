@@ -79,8 +79,7 @@ export default function DropListItemCreateQuote({
                 }}
               >
                 <DropListItemQuote
-                  // TODO: Add wave
-                  wave={{} as Wave}
+                  waveId={drop.wave_id}
                   quotedDropId={drop.id}
                   quotedPartId={quotedPartId}
                   init={init}

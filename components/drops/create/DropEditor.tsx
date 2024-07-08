@@ -26,8 +26,8 @@ const DropEditor = forwardRef<
   {
     readonly profile: IProfileAndConsolidations;
     readonly quotedDrop: {
-      dropId: string;
-      partId: number;
+      readonly dropId: string;
+      readonly partId: number;
     } | null;
     readonly isClient?: boolean;
     readonly type: CreateDropType;

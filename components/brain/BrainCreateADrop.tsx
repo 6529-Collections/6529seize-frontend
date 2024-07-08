@@ -37,8 +37,8 @@ export default function BrainCreateADrop() {
       <CreateDrop
         profile={connectedProfile}
         quotedDrop={null}
-        // TODO: Add wave
-        wave={{} as Wave}
+        // TODO: Add wave id
+        waveId=""
         type={CreateDropType.DROP}
       />
     );
