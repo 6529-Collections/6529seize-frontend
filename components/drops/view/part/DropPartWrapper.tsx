@@ -22,7 +22,7 @@ export default function DropPartWrapper({
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
   return (
     <div className="tw-flex tw-flex-col tw-justify-between tw-h-full">
-      <div>
+      <div className="tw-flex-1">
         {children}
         <div className="tw-ml-12">
           {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}

@@ -57,7 +57,7 @@ export default function DropsListItem({
         quotedPartId={quoteModePartId}
         onSuccessfulQuote={() => setQuoteModePartId(null)}
       />
-      <div className="tw-p-4 sm:tw-p-5">
+      <div className="tw-px-4 sm:tw-px-5 tw-pb-4 sm:tw-pb-5 tw-pt-2 sm:tw-pt-3">
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent

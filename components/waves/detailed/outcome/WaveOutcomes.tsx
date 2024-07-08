@@ -12,24 +12,24 @@ export default function WaveOutcomes({ wave }: { readonly wave: Wave }) {
               </p>
             </div>
             <div className="tw-px-4 tw-py-6 tw-flex tw-flex-col tw-gap-y-6">
-              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                 <span className="tw-font-medium tw-text-iron-400">
                   Threshold
                 </span>
-                <span className="tw-font-medium tw-text-white tw-text-base">
+                <span className="tw-font-medium tw-text-white tw-text-md">
                   200
                 </span>
               </div>
-              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                 <span className="tw-font-medium tw-text-iron-400">Time</span>
-                <span className="tw-font-medium tw-text-white tw-text-base">
+                <span className="tw-font-medium tw-text-white tw-text-md">
                   2 weeks
                 </span>
               </div>
 
               <div className="tw-flex tw-flex-col tw-gap-y-3">
                 {/* RANK */}
-                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-w-full tw-h-full tw-flex tw-items-center">
                       <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
@@ -38,7 +38,7 @@ export default function WaveOutcomes({ wave }: { readonly wave: Wave }) {
                     </div>
                   </div>
                 </div>
-                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
                       <div className="tw-w-1/2 ">
@@ -77,7 +77,7 @@ export default function WaveOutcomes({ wave }: { readonly wave: Wave }) {
                   </div>
                 </div>
 
-                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
                       <div className="tw-w-1/2"></div>
@@ -113,7 +113,7 @@ export default function WaveOutcomes({ wave }: { readonly wave: Wave }) {
                 </div>
 
                 {/* APPROVE */}
-                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
                       <div className="tw-w-[75%]">
@@ -147,7 +147,7 @@ export default function WaveOutcomes({ wave }: { readonly wave: Wave }) {
                   </div>
                 </div>
 
-                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
                       <div className="tw-w-1/2 ">
@@ -186,7 +186,7 @@ export default function WaveOutcomes({ wave }: { readonly wave: Wave }) {
                   </div>
                 </div>
 
-                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                   <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-4 tw-h-9">
                     <div className="tw-flex tw-gap-x-4 tw-justify-between tw-items-center tw-w-full tw-h-full">
                       <div className="tw-w-1/2"></div>
