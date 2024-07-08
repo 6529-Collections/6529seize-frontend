@@ -83,7 +83,7 @@ export default function DropPartDiscussionItems({
   return (
     <div className="tw-mt-2">
       <div className="tw-max-h-72 tw-overflow-y-auto">
-        <div className="tw-space-y-4">
+        <div className="tw-space-y-4 tw-pt-2">
           {comments.map((item) => (
             <DropPartDiscussionItem key={item.id} item={item} />
           ))}
