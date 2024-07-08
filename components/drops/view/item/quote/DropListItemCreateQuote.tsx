@@ -22,16 +22,16 @@ export default function DropListItemCreateQuote({
   const elemRef = useRef<HTMLDivElement | null>(null);
 
   const scrollIntoView = () => {
-    if (!quotedPartId) {
-      return;
-    }
-    if (!elemRef.current) {
-      return;
-    }
-    elemRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
+    // if (!quotedPartId) {
+    //   return;
+    // }
+    // if (!elemRef.current) {
+    //   return;
+    // }
+    // elemRef.current.scrollIntoView({
+    //   behavior: "smooth",
+    //   block: "center",
+    // });
   };
 
   // useEffect(() => scrollIntoView(), [quotedPartId]);

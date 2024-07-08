@@ -15,6 +15,7 @@ import {
 } from "../../../../entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { ProfileMin } from "../../../../generated/models/ProfileMin";
 
 export interface CreateDropFullHandles {
   clearEditorState: () => void;
@@ -24,7 +25,7 @@ const CreateDropFull = forwardRef<
   CreateDropFullHandles,
   {
     readonly screenType: CreateDropScreenType;
-    readonly profile: IProfileAndConsolidations;
+    readonly profile: ProfileMin;
     readonly title: string | null;
     readonly metadata: DropMetadata[];
     readonly editorState: EditorState | null;

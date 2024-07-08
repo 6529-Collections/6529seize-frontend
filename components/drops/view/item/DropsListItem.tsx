@@ -28,6 +28,14 @@ export default function DropsListItem({
   const banner2 =
     drop.author.banner2_color ?? getRandomColorWithSeed(drop.author.handle);
 
+  const onQuote = (dropPartId: number) => {
+    if (dropPartId === quoteModePartId) {
+      setQuoteModePartId(null);
+    } else {
+      setQuoteModePartId(dropPartId);
+    }
+  };
+
   return (
     <div className="tw-relative tw-bg-iron-950">
       {isWaveDescriptionDrop ? (
@@ -61,7 +69,7 @@ export default function DropsListItem({
                 <DropListItemContent
                   drop={drop}
                   showFull={showFull}
-                  onQuote={setQuoteModePartId}
+                  onQuote={onQuote}
                 />
               </div>
             </DropWrapper>

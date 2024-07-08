@@ -8,16 +8,20 @@ import { DropPart as IDropPart } from "../../../../../generated/models/DropPart"
 import DropPart from "../../../view/part/DropPart";
 import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 interface PartConfig {
   readonly part: IDropPart;
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;
+  readonly createdAt: number;
 }
 
 export default function CreateDropStormViewPartQuote({
+  profile,
   quotedDrop,
 }: {
+  readonly profile: ProfileMin;
   readonly quotedDrop: QuotedDrop;
 }) {
   const { data: drop } = useQuery<Drop>({
@@ -43,6 +47,7 @@ export default function CreateDropStormViewPartQuote({
       part,
       mentionedUsers: drop.mentioned_users,
       referencedNfts: drop.referenced_nfts,
+      createdAt: drop.created_at,
     };
   };
 
@@ -54,6 +59,7 @@ export default function CreateDropStormViewPartQuote({
     <div>
       {!!partConfig && (
         <DropPart
+          profile={profile}
           mentionedUsers={partConfig.mentionedUsers}
           referencedNfts={partConfig.referencedNfts}
           partContent={partConfig.part.content ?? null}
@@ -65,7 +71,9 @@ export default function CreateDropStormViewPartQuote({
                 }
               : null
           }
+          createdAt={partConfig.createdAt}
           showFull={false}
+          showAuthor={true}
         />
       )}
     </div>

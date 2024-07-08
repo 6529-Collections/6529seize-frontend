@@ -56,6 +56,7 @@ export default function DropPartQuote({
       <DropWrapper drop={drop}>
         <div className="tw-w-full">
           <DropPart
+            profile={drop.author}
             mentionedUsers={drop.mentioned_users}
             referencedNfts={drop.referenced_nfts}
             partContent={quotedPart.content ?? null}
@@ -68,6 +69,8 @@ export default function DropPartQuote({
                 : null
             }
             showFull={false}
+            createdAt={drop.created_at}
+            showAuthor={false}
           />
         </div>
       </DropWrapper>

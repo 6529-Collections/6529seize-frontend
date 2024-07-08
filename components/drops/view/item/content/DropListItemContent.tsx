@@ -3,6 +3,8 @@ import DropPart from "../../part/DropPart";
 import { useEffect, useState } from "react";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
+import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -62,6 +64,7 @@ export default function DropListItemContent({
             onQuote={onQuote}
           >
             <DropPart
+              profile={drop.author}
               mentionedUsers={drop.mentioned_users}
               referencedNfts={drop.referenced_nfts}
               partContent={part.content ?? null}
@@ -74,6 +77,8 @@ export default function DropListItemContent({
                   : null
               }
               showFull={isFullMode}
+              createdAt={drop.created_at}
+              showAuthor={index !== 0}
             />
             {showStormExpandButton && index === 0 && (
               <button
