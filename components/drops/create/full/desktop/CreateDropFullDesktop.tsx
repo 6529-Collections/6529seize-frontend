@@ -47,6 +47,8 @@ const CreateDropFullDesktop = forwardRef<
     readonly isStormMode: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (data_key: string) => void;
@@ -78,6 +80,8 @@ const CreateDropFullDesktop = forwardRef<
       isStormMode,
       isDescriptionDrop,
       waveName,
+      waveImage,
+      waveId,
       onViewChange,
       onMetadataEdit,
       onMetadataRemove,
@@ -144,6 +148,8 @@ const CreateDropFullDesktop = forwardRef<
             profile={profile}
             isDescriptionDrop={isDescriptionDrop}
             waveName={waveName}
+            waveImage={waveImage}
+            waveId={waveId}
           />
         )}
         <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-2.5">

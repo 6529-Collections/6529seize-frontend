@@ -16,14 +16,24 @@ export default function WaveGroups({ wave }: { readonly wave: Wave }) {
               <WaveGroup
                 scope={wave.visibility.scope}
                 type={WaveGroupType.VIEW}
+                isEligible={true}
               />
               <WaveGroup
                 scope={wave.participation.scope}
                 type={WaveGroupType.DROP}
+                isEligible={wave.participation.authenticated_user_eligible}
               />
-              <WaveGroup scope={wave.voting.scope} type={WaveGroupType.VOTE} />
-              {/* TODO */}
-              <WaveGroup scope={{ group: null }} type={WaveGroupType.ADMIN} />
+              <WaveGroup
+                scope={wave.voting.scope}
+                type={WaveGroupType.VOTE}
+                isEligible={wave.voting.authenticated_user_eligible}
+              />
+              <WaveGroup
+                scope={wave.wave.admin_group}
+                type={WaveGroupType.ADMIN}
+                // TODO
+                isEligible={true}
+              />
             </div>
           </div>
         </div>

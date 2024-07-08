@@ -69,12 +69,12 @@ export default function DropsListItem({
           </div>
 
           <div className="tw-flex tw-flex-col tw-items-center tw-min-h-full">
-            {showExternalLink && (
+            {/* {showExternalLink && (
               <DropListItemExternalLink
                 drop={drop}
                 isWaveDescriptionDrop={isWaveDescriptionDrop}
               />
-            )}
+            )} */}
             <div className="tw-flex-grow tw-flex tw-flex-col tw-justify-center tw-items-center">
               <DropListItemRateWrapper drop={drop} />
             </div>

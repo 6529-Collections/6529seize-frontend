@@ -73,6 +73,7 @@ export * from '../models/RepRating';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
+export * from '../models/WaveContributorOverview';
 export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
 export * from '../models/WaveMetadataType';
@@ -164,6 +165,7 @@ import { RepRating } from '../models/RepRating';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
 import { WaveConfig       } from '../models/WaveConfig';
+import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveMetadataType } from '../models/WaveMetadataType';
@@ -178,7 +180,7 @@ import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
-import { WaveVotingConfig        } from '../models/WaveVotingConfig';
+import { WaveVotingConfig         } from '../models/WaveVotingConfig';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -283,6 +285,7 @@ let typeMap: {[index: string]: any} = {
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
+    "WaveContributorOverview": WaveContributorOverview,
     "WaveMin": WaveMin,
     "WaveOutcome": WaveOutcome,
     "WaveParticipationConfig": WaveParticipationConfig,

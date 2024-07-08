@@ -26,9 +26,9 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
                 <span className="tw-font-medium tw-text-iron-400">Voting</span>
                 <div className="tw-flex tw-flex-col tw-gap-y-1.5">
                   <span className="tw-font-medium tw-text-iron-50 tw-text-md">
-                    By Rep
+                    By TDH
                   </span>
-                  <div className="tw-bg-iron-800 tw-rounded-xl tw-flex tw-flex-col tw-gap-y-1 tw-px-4 tw-py-2">
+                  {/* <div className="tw-bg-iron-800 tw-rounded-xl tw-flex tw-flex-col tw-gap-y-1 tw-px-4 tw-py-2">
                     <span className="tw-font-medium tw-text-sm tw-text-iron-300">
                       test rep no problem
                     </span>
@@ -42,7 +42,7 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
                         Handle
                       </span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <WaveAuthor wave={wave} />

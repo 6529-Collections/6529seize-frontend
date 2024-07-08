@@ -46,6 +46,8 @@ const CreateDropFullMobile = forwardRef<
     readonly isStormMode: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
     readonly onEditorState: (editorState: EditorState | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (key: string) => void;
@@ -76,6 +78,8 @@ const CreateDropFullMobile = forwardRef<
       isStormMode,
       isDescriptionDrop,
       waveName,
+      waveImage,
+      waveId,
       onEditorState,
       onMetadataEdit,
       onMetadataRemove,
@@ -130,6 +134,8 @@ const CreateDropFullMobile = forwardRef<
               profile={profile}
               isDescriptionDrop={isDescriptionDrop}
               waveName={waveName}
+              waveImage={waveImage}
+              waveId={waveId}
             />
           )}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
