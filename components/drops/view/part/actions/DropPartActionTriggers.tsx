@@ -29,11 +29,11 @@ export default function DropPartActionTriggers({
       >
         <>
           {userHaveDiscussed ? <DiscussSolidIcon /> : <DiscussOutlineIcon />}
-          <span className="tw-text-iron-500 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
+          {/*  <span className="tw-text-iron-500 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
             Discuss
-          </span>
+          </span> */}
           {!!discussionCount && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-400 tw-text-xs tw-font-medium">
+            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-text-xs tw-font-medium">
               {discussionCount}
             </div>
           )}
@@ -62,11 +62,11 @@ export default function DropPartActionTriggers({
               d="m388.81 374.68-33.81-33.85c-9.51-9.51-25.31-9.74-34.64-.05a24 24 0 0 0 .32 33.61l74.72 74.78a24.67 24.67 0 0 0 34.9 0l74.7-74.76a24 24 0 0 0 -34-33.94l-34.21 34.21v-230a89.16 89.16 0 0 0 -89.06-89.08h-127.73a24 24 0 0 0 0 48h127.73a41.11 41.11 0 0 1 41.06 41.06z"
             ></path>
           </svg>
-          <span className="tw-text-iron-500 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
+          {/*    <span className="tw-text-iron-500 tw-hidden sm:tw-block tw-transition tw-ease-out tw-duration-300">
             Redrop
-          </span>
+          </span> */}
           {!!quotesCount && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-5 tw-px-1 tw-min-w-[1.25rem] tw-text-iron-400 tw-text-xs tw-font-medium">
+            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-text-xs tw-font-medium">
               {quotesCount}
             </div>
           )}

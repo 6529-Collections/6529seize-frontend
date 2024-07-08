@@ -44,7 +44,7 @@ const CreateDropStormViewPart = memo(
     const quotedDrop = part.quoted_drop;
 
     return (
-      <div className="tw-py-3">
+      <div className="tw-py-2">
         <div className="tw-flex tw-w-full tw-justify-between">
           <DropPart
             profile={profile}
@@ -69,7 +69,7 @@ const CreateDropStormViewPart = memo(
           <div
             role="button"
             aria-label="Remove part"
-            className="tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full hover:tw-bg-iron-800 tw-text-iron-300 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full hover:tw-bg-iron-900 tw-text-iron-300 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
           >
             <svg
               className="tw-flex-shrink-0 tw-top-4 tw-cursor-pointer tw-h-5 tw-w-5"

@@ -240,9 +240,9 @@ const DropPart = memo(
                                 />
                               </div>
                             )}
-                            <div className="tw-text-xs tw-font-normal tw-text-primary-300">
+                          {/*   <div className="tw-text-xs tw-font-normal tw-text-primary-300">
                               {waveName}
-                            </div>
+                            </div> */}
                           </Link>
                         ) : (
                           <div className="tw-no-underline tw-flex tw-gap-x-1 tw-items-center">

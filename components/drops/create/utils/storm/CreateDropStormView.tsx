@@ -23,7 +23,7 @@ const CreateDropStormView = memo(
   }) => {
     const now = Time.currentMillis();
     return (
-      <div className="tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0 tw-mb-4">
+      <div className="tw-flex tw-flex-col tw-mb-4">
         {!!drop?.parts.length &&
           drop.parts.map((part, index) => (
             <CreateDropStormViewPart
