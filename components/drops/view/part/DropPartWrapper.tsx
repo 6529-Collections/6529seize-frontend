@@ -24,17 +24,21 @@ export default function DropPartWrapper({
     <div className="tw-flex tw-flex-col tw-justify-between tw-h-full">
       <div>
         {children}
-        {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
+        <div className="tw-ml-12">
+          {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
+        </div>
       </div>
-      <DropPartActionTriggers
-        dropPart={dropPart}
-        isDiscussionOpen={isDiscussionOpen}
-        setIsDiscussionOpen={setIsDiscussionOpen}
-        onQuote={onQuote}
-      />
-      {isDiscussionOpen && (
-        <DropPartDiscussion dropPart={dropPart} drop={drop} />
-      )}
+      <div className="tw-ml-12">
+        <DropPartActionTriggers
+          dropPart={dropPart}
+          isDiscussionOpen={isDiscussionOpen}
+          setIsDiscussionOpen={setIsDiscussionOpen}
+          onQuote={onQuote}
+        />
+        {isDiscussionOpen && (
+          <DropPartDiscussion dropPart={dropPart} drop={drop} />
+        )}
+      </div>
     </div>
   );
 }
