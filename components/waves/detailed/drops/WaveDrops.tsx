@@ -15,6 +15,7 @@ interface Query {
   readonly limit: string;
   readonly context_profile?: string;
   readonly wave_id: string;
+  readonly serial_no_less_than?: string;
 }
 
 export default function WaveDrops({ wave }: { readonly wave: Wave }) {

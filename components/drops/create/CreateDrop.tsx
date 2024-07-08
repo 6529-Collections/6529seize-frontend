@@ -16,7 +16,6 @@ import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWr
 import { DropMedia } from "../../../generated/models/DropMedia";
 import DropEditor from "./DropEditor";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
-import { Wave } from "../../../generated/models/Wave";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -30,20 +29,20 @@ export enum CreateDropViewType {
 
 export default function CreateDrop({
   profile,
+  waveId,
   quotedDrop,
   isClient = false,
   type,
-  wave,
   onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
+  readonly waveId: string;
   readonly quotedDrop: {
     dropId: string;
     partId: number;
   } | null;
   readonly isClient?: boolean;
   readonly type: CreateDropType;
-  readonly wave: Wave;
   readonly onSuccessfulDrop?: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -156,7 +155,7 @@ export default function CreateDrop({
 
     const requestBody: CreateDropRequest = {
       ...dropRequest,
-      wave_id: wave.id,
+      wave_id: waveId,
       parts,
     };
     console.log(requestBody);

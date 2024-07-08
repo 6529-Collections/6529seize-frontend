@@ -103,6 +103,7 @@ const CreateDropWrapper = forwardRef<
         setScreenType(CreateDropScreenType.MOBILE);
       }
     }, [breakpoint]);
+    const [isStormMode, setIsStormMode] = useState(false);
     const [editorState, setEditorState] = useState<EditorState | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const onMetadataEdit = ({ data_key, data_value }: DropMetadata) => {
@@ -241,6 +242,11 @@ const CreateDropWrapper = forwardRef<
       onSubmitDrop(currentDrop);
     };
 
+    const onStormDropPart = () => {
+      setIsStormMode(true);
+      return onDropPart();
+    };
+
     const requestDrop = (): CreateDropConfig => onDropPart();
 
     useImperativeHandle(ref, () => ({
@@ -264,6 +270,7 @@ const CreateDropWrapper = forwardRef<
           type={type}
           showSubmit={showSubmit}
           showDropError={showDropError}
+          isStormMode={isStormMode}
           onViewChange={setViewType}
           onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
@@ -271,7 +278,7 @@ const CreateDropWrapper = forwardRef<
           onReferencedNft={onReferencedNft}
           onFileChange={setFile}
           onDrop={onDrop}
-          onDropPart={onDropPart}
+          onDropPart={onStormDropPart}
         />
       ),
       [CreateDropViewType.FULL]: (
@@ -290,6 +297,7 @@ const CreateDropWrapper = forwardRef<
           drop={drop}
           showSubmit={showSubmit}
           showDropError={showDropError}
+          isStormMode={isStormMode}
           onTitle={setTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
@@ -299,7 +307,7 @@ const CreateDropWrapper = forwardRef<
           onReferencedNft={onReferencedNft}
           onFileChange={setFile}
           onDrop={onDrop}
-          onDropPart={onDropPart}
+          onDropPart={onStormDropPart}
         />
       ),
     };

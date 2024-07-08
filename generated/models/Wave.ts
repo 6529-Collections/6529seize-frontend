@@ -33,6 +33,10 @@ export class Wave {
     * The name of the wave
     */
     'name': string;
+    /**
+    * The picture of the wave
+    */
+    'picture': string | null;
     'created_at': number;
     'description_drop': Drop;
     'voting': WaveVotingConfig;
@@ -65,6 +69,12 @@ export class Wave {
         {
             "name": "name",
             "baseName": "name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "picture",
+            "baseName": "picture",
             "type": "string",
             "format": ""
         },

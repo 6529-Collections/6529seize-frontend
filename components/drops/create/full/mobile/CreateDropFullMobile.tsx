@@ -42,6 +42,7 @@ const CreateDropFullMobile = forwardRef<
     readonly loading: boolean;
     readonly showSubmit: boolean;
     readonly drop: CreateDropConfig | null;
+    readonly isStormMode: boolean;
     readonly onEditorState: (editorState: EditorState | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (key: string) => void;
@@ -69,6 +70,7 @@ const CreateDropFullMobile = forwardRef<
       loading,
       showSubmit,
       drop,
+      isStormMode,
       onEditorState,
       onMetadataEdit,
       onMetadataRemove,
@@ -117,7 +119,9 @@ const CreateDropFullMobile = forwardRef<
         onViewClick={onViewClick}
       >
         <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
-          {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
+          {!!drop?.parts.length && isStormMode && (
+            <CreateDropStormView drop={drop} />
+          )}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
             <div className="tw-flex tw-justify-end -tw-mb-2">
               {titleState === TITLE_STATE.BUTTON && (

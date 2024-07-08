@@ -41,6 +41,7 @@ const CreateDropCompact = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly showSubmit: boolean;
     readonly showDropError?: boolean;
+    readonly isStormMode: boolean;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataRemove: (key: string) => void;
     readonly onEditorState: (editorState: EditorState | null) => void;
@@ -68,6 +69,7 @@ const CreateDropCompact = forwardRef<
       type,
       drop,
       showDropError = false,
+      isStormMode,
       onViewChange,
       onMetadataRemove,
       onEditorState,
@@ -113,7 +115,9 @@ const CreateDropCompact = forwardRef<
 
     return (
       <div className={`${getWrapperClasses()}  tw-bg-iron-950`}>
-        {!!drop?.parts.length && <CreateDropStormView drop={drop} />}
+        {!!drop?.parts.length && isStormMode && (
+          <CreateDropStormView drop={drop} />
+        )}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-hidden sm:tw-block">
             <DropPfp pfpUrl={profile.profile?.pfp_url} />

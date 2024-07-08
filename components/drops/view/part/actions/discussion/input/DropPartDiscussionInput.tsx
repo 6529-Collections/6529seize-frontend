@@ -9,6 +9,8 @@ import { createBreakpoint } from "react-use";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../../auth/Auth";
+import { NewDropComment } from "../../../../../../../generated/models/NewDropComment";
+import { DropComment } from "../../../../../../../generated/models/DropComment";
 
 enum ScreenType {
   DESKTOP = "DESKTOP",
@@ -45,12 +47,10 @@ export default function DropPartDiscussionInput({
   };
 
   const addCommentMutation = useMutation({
-    mutationFn: async ({ comment }: { comment: string }) => {
-      await commonApiPost<{ comment: string }, void>({
+    mutationFn: async (body: NewDropComment) => {
+      await commonApiPost<NewDropComment, DropComment>({
         endpoint: `drops/${drop.id}/parts/${dropPart.part_id}/comments`,
-        body: {
-          comment,
-        },
+        body,
       });
     },
     onSuccess: () => {

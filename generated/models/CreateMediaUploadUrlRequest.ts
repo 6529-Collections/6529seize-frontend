@@ -12,23 +12,23 @@
 
 import { HttpFile } from '../http/http';
 
-export class CreateDropMediaUrlRequest {
-    'file_name': string;
+export class CreateMediaUploadUrlRequest {
     'content_type': string;
+    'file_name': string;
     'file_size': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "file_name",
-            "baseName": "file_name",
+            "name": "content_type",
+            "baseName": "content_type",
             "type": "string",
             "format": ""
         },
         {
-            "name": "content_type",
-            "baseName": "content_type",
+            "name": "file_name",
+            "baseName": "file_name",
             "type": "string",
             "format": ""
         },
@@ -40,7 +40,7 @@ export class CreateDropMediaUrlRequest {
         }    ];
 
     static getAttributeTypeMap() {
-        return CreateDropMediaUrlRequest.attributeTypeMap;
+        return CreateMediaUploadUrlRequest.attributeTypeMap;
     }
 
     public constructor() {

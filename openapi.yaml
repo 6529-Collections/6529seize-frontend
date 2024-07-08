@@ -427,6 +427,7 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
+
   /drops:
     get:
       tags:
@@ -765,37 +766,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - content_type
-                - file_name
-                - file_size
-              properties:
-                file_name:
-                  type: string
-                content_type:
-                  type: string
-                file_size:
-                  type: number
-                  format: int64
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - upload_url
-                  - content_type
-                  - media_url
-                properties:
-                  upload_url:
-                    type: string
-                  content_type:
-                    type: string
-                  media_url:
-                    type: string
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
         "400":
           description: "Invalid request"
   /proxies:
@@ -948,6 +926,29 @@ paths:
           description: Proxy or action not found
         "400":
           description: Invalid request
+
+  /wave-media/prep:
+    post:
+      tags:
+        - Waves
+      summary: Create S3 URL for wave PFP
+      description: "Requires the user to be authenticated"
+      operationId: createWaveMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
+        "400":
+          description: "Invalid request"
 
   /waves:
     get:
@@ -2243,7 +2244,7 @@ components:
         - winning_thresholds
         - period
         - max_winners
-        - admin_group_id
+        - admin_group
       properties:
         type:
           $ref: "#/components/schemas/WaveType"
@@ -2264,14 +2265,52 @@ components:
           type: integer
           format: int64
           minimum: 1
-        admin_group_id:
-          type: string
-          nullable: true
+        admin_group:
+          $ref: "#/components/schemas/WaveScope"
         period:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
           example: {"min": 1719850339996, "max": 1719850339996}
+
+    CreateWaveConfig:
+      type: object
+      required:
+        - type
+        - time_lock_ms
+        - winning_thresholds
+        - period
+        - max_winners
+        - admin_group
+      properties:
+        type:
+          $ref: "#/components/schemas/WaveType"
+        winning_thresholds:
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is APPROVE
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+        max_winners:
+          description: This amount of top rated drops will win. Must be set if and only if type is RANK
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        time_lock_ms:
+          nullable: true
+          description: Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
+          type: integer
+          format: int64
+          minimum: 1
+        admin_group:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CreateNewWaveScope"
+        period:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+          example: { "min": 1719850339996, "max": 1719850339996 }
 
 
     WaveOutcomeType:
@@ -2330,6 +2369,7 @@ components:
         - serial_no
         - author
         - name
+        - picture
         - description_drop
         - voting
         - visibility
@@ -2350,6 +2390,11 @@ components:
         name:
           description: The name of the wave
           type: string
+        picture:
+          description: The picture of the wave
+          type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
         created_at:
           type: number
           format: int64
@@ -2372,6 +2417,7 @@ components:
       type: object
       required:
         - name
+        - picture
         - description_drop
         - voting
         - visibility
@@ -2383,6 +2429,11 @@ components:
           description: The name of the wave
           type: string
           maxLength: 250
+        picture:
+          description: The picture of the wave
+          type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
         description_drop:
           $ref: "#/components/schemas/CreateWaveDropRequest"
         voting:
@@ -2392,7 +2443,7 @@ components:
         participation:
           $ref: "#/components/schemas/CreateNewWaveParticipationConfig"
         wave:
-          $ref: "#/components/schemas/WaveConfig"
+          $ref: "#/components/schemas/CreateWaveConfig"
         outcomes:
           type: array
           items:
@@ -2830,5 +2881,37 @@ components:
           type: number
           format: int64
 
+    CreateMediaUploadUrlRequest:
+      required:
+        - content_type
+        - file_name
+        - file_size
+      properties:
+        content_type:
+          type: string
+          example: "image/png"
+        file_name:
+          type: string
+          example: "image.png"
+        file_size:
+          type: number
+          format: int64
+          example: 1000
+
+    CreateMediaUrlResponse:
+      required:
+        - upload_url
+        - content_type
+        - media_url
+      properties:
+        upload_url:
+          type: string
+          example: "https://example.com/upload/image.png"
+        content_type:
+          type: string
+          example: "image/png"
+        media_url:
+          type: string
+          example: "https://example.com/final/image.png"
 security:
   - bearerAuth: []

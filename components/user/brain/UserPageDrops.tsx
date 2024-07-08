@@ -28,8 +28,8 @@ export default function UserPageDrops({
           <div>
             {canCreateDrop && (
               <CreateDrop
-                // TODO: Add wave
-                wave={{} as Wave}
+                // TODO: Add waveId
+                waveId=""
                 profile={profile}
                 quotedDrop={null}
                 type={CreateDropType.DROP}

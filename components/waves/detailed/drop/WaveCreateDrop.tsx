@@ -35,7 +35,7 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
   ) {
     return (
       <CreateDrop
-        wave={wave}
+        waveId={wave.id}
         profile={connectedProfile}
         quotedDrop={null}
         type={CreateDropType.DROP}
