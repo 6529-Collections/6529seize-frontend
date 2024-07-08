@@ -28,12 +28,6 @@ export default function CreateWaveOverview({
       [key]: value,
     });
 
-  const [file, setFile] = useState<File | null>();
-
-  useEffect(() => {
-    onChange({ key: "image", value: file ? URL.createObjectURL(file) : null });
-  }, [file]);
-
   return (
     <div className="tw-flex tw-flex-col tw-space-y-6">
       <CreateWaveNameInput
@@ -45,7 +39,15 @@ export default function CreateWaveOverview({
         <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
           Wave Profile Picture
         </p>
-        <CreateWaveImageInput imageToShow={overview.image} setFile={setFile} />
+        <CreateWaveImageInput
+          imageToShow={overview.image}
+          setFile={(file) =>
+            onChange({
+              key: "image",
+              value: file,
+            })
+          }
+        />
       </div>
       <CreateWaveType
         selected={overview.type}

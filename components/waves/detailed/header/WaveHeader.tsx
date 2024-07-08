@@ -20,10 +20,10 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
       <div className="tw-max-w-5xl tw-mx-auto tw-px-6 md:px-0">
         <div className="-tw-mt-12 tw-flex tw-space-x-5">
           <div className="tw-flex">
-            {wave.author.pfp ? (
+            {wave.picture ? (
               <img
                 className="tw-h-24 tw-w-24 tw-object-contain tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900"
-                src={wave.author.pfp}
+                src={wave.picture}
                 alt=""
               />
             ) : (
@@ -115,7 +115,6 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
             {wave.name}
           </h1>
         </div>
-
       </div>
     </div>
   );

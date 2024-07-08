@@ -19,7 +19,7 @@ export default function CreateWaveImageInput({
   imageToShow,
   setFile,
 }: {
-  readonly imageToShow: string | null;
+  readonly imageToShow: File | null;
   readonly setFile: (file: File | null) => void;
 }) {
   const { setToast } = useContext(AuthContext);
@@ -68,7 +68,7 @@ export default function CreateWaveImageInput({
         <div className="tw-flex-shrink-0">
           {imageToShow ? (
             <img
-              src={imageToShow}
+              src={URL.createObjectURL(imageToShow)}
               alt="Profile image"
               className="w-flex-shrink-0 tw-h-16 tw-w-16 tw-object-cover tw-rounded-full sm:tw-h-20 sm:tw-w-20 tw-bg-iron-700 tw-ring-2 tw-ring-iron-800"
             />

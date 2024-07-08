@@ -525,16 +525,17 @@ const getOutcomes = ({
 
 export const getCreateNewWaveBody = ({
   drop,
+  picture,
   config,
 }: {
   readonly drop: CreateWaveDropRequest;
+  readonly picture: string | null;
   readonly config: CreateWaveConfig;
 }): CreateNewWave => {
   return {
     name: config.overview.name,
     description_drop: drop,
-    // TODO
-    picture: null,
+    picture,
     voting: {
       scope: {
         group_id: config.groups.canVote,
