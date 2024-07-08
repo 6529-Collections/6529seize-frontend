@@ -311,6 +311,44 @@ export default function CreateWave({
     ];
   };
 
+  const generateMediaForOverview = async (
+    file: File | null
+  ): Promise<{
+    readonly url: string;
+    readonly mime_type: string;
+  } | null> => {
+    if (!file) return null;
+    const prep = await commonApiPost<
+      {
+        content_type: string;
+        file_name: string;
+        file_size: number;
+      },
+      {
+        upload_url: string;
+        content_type: string;
+        media_url: string;
+      }
+    >({
+      endpoint: "wave-media/prep",
+      body: {
+        content_type: file.type,
+        file_name: file.name,
+        file_size: file.size,
+      },
+    });
+    const myHeaders = new Headers({ "Content-Type": prep.content_type });
+    await fetch(prep.upload_url, {
+      method: "PUT",
+      headers: myHeaders,
+      body: file,
+    });
+    return {
+      url: prep.media_url,
+      mime_type: prep.content_type,
+    };
+  };
+
   const generateDropPart = async (
     part: CreateDropPart
   ): Promise<CreateDropRequestPart> => {
@@ -391,9 +429,12 @@ export default function CreateWave({
       })),
     };
 
-    const wave = await addWaveMutation.mutateAsync(
+    const picture = await generateMediaForOverview(config.overview.image);
+
+    await addWaveMutation.mutateAsync(
       getCreateNewWaveBody({
         config,
+        picture: picture?.url ?? null,
         drop: dropRequest,
       })
     );

@@ -30,6 +30,11 @@ export default function CreateWaveVoting({
     [WaveType.Approve]: "How Drops are Voted",
   };
 
+  const DISABLED_CREDIT_TYPES: WaveCreditType[] = [
+    WaveCreditType.Rep,
+    WaveCreditType.Unique,
+  ];
+
   return (
     <div>
       <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -41,6 +46,7 @@ export default function CreateWaveVoting({
             key={votingType}
             type={votingType}
             selected={selectedType}
+            disabled={DISABLED_CREDIT_TYPES.includes(votingType)}
             label={WAVE_VOTING_LABELS[votingType]}
             onChange={onTypeChange}
           />

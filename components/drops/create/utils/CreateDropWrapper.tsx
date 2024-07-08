@@ -155,7 +155,14 @@ const CreateDropWrapper = forwardRef<
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
-    const getCanAddPart = () => !!getMarkdown() || !!file;
+    const getHaveMarkdownOrFile = () => !!getMarkdown() || !!file;
+    const getIsDropLimit = () =>
+      (drop?.parts.reduce(
+        (acc, part) => acc + (part.content?.length ?? 0),
+        getMarkdown()?.length ?? 0
+      ) ?? 0) >= 24000;
+
+    const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
     useEffect(() => {
       setCanSubmit(getCanSubmit());
