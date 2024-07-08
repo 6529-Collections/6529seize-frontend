@@ -29,7 +29,9 @@ export default function CommonBorderedRadioButton<T extends string>({
   return (
     <div
       onClick={() => onChange(type)}
-      className={`${wrapperClasses} tw-flex-1 tw-group tw-relative tw-cursor-pointer tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-4 tw-py-4 focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${wrapperClasses} tw-flex-1 tw-group tw-relative tw-rounded-lg tw-ring-1 tw-ring-inset tw-px-4 tw-py-4 focus:tw-outline-none tw-flex tw-items-center tw-gap-x-3 tw-transition tw-duration-300 tw-ease-out ${
+        true ? "tw-opacity-50 tw-cursor-not-allowed" : "tw-cursor-pointer"
+      }`}
     >
       <input
         id={type}
@@ -40,7 +42,15 @@ export default function CommonBorderedRadioButton<T extends string>({
       />
       <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-truncate tw-transition tw-duration-300 tw-ease-out">
         <div className="tw-flex tw-flex-col tw-text-base tw-font-semibold tw-truncate tw-transition tw-duration-300 tw-ease-out">
-          {label ? <span className={labelClasses}>{label}</span> : children}
+          {label ? (
+            <span
+              className={`${labelClasses} ${true ? "tw-text-iron-600" : ""}`}
+            >
+              {label}
+            </span>
+          ) : (
+            children
+          )}
         </div>
       </div>
     </div>
