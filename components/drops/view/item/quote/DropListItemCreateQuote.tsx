@@ -79,7 +79,7 @@ export default function DropListItemCreateQuote({
                 }}
               >
                 <DropListItemQuote
-                  waveId={drop.wave_id}
+                  waveId={drop.wave.id}
                   quotedDropId={drop.id}
                   quotedPartId={quotedPartId}
                   init={init}

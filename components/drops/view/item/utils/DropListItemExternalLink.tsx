@@ -67,7 +67,7 @@ export default function DropListItemExternalLink({
         disabled={isTouchScreen}
       >
         <a
-          href={`/waves/${drop.wave_id}`}
+          href={`/waves/${drop.wave.id}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`tw-block tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-600 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}

@@ -76,6 +76,7 @@ export * from '../models/WaveConfig';
 export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
 export * from '../models/WaveMetadataType';
+export * from '../models/WaveMin';
 export * from '../models/WaveOutcome';
 export * from '../models/WaveOutcomeCredit';
 export * from '../models/WaveOutcomeSubType';
@@ -166,6 +167,7 @@ import { WaveConfig       } from '../models/WaveConfig';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveMetadataType } from '../models/WaveMetadataType';
+import { WaveMin } from '../models/WaveMin';
 import { WaveOutcome        } from '../models/WaveOutcome';
 import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
 import { WaveOutcomeSubType } from '../models/WaveOutcomeSubType';
@@ -281,6 +283,7 @@ let typeMap: {[index: string]: any} = {
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
+    "WaveMin": WaveMin,
     "WaveOutcome": WaveOutcome,
     "WaveParticipationConfig": WaveParticipationConfig,
     "WaveRequiredMetadata": WaveRequiredMetadata,
