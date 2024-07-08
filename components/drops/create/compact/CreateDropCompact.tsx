@@ -20,6 +20,7 @@ import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import CreateDropStormView from "../utils/storm/CreateDropStormView";
+import { ProfileMin } from "../../../../generated/models/ProfileMin";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;
@@ -28,7 +29,7 @@ export interface CreateDropCompactHandles {
 const CreateDropCompact = forwardRef<
   CreateDropCompactHandles,
   {
-    readonly profile: IProfileAndConsolidations;
+    readonly profile: ProfileMin;
     readonly screenType: CreateDropScreenType;
     readonly editorState: EditorState | null;
     readonly title: string | null;
@@ -116,11 +117,11 @@ const CreateDropCompact = forwardRef<
     return (
       <div className={`${getWrapperClasses()}  tw-bg-iron-950`}>
         {!!drop?.parts.length && isStormMode && (
-          <CreateDropStormView drop={drop} />
+          <CreateDropStormView drop={drop} profile={profile} />
         )}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-hidden sm:tw-block">
-            <DropPfp pfpUrl={profile.profile?.pfp_url} />
+            <DropPfp pfpUrl={profile?.pfp} />
           </div>
           <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
             <div className="tw-w-full">

@@ -21,6 +21,12 @@ import DropListItemContentPart, {
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
+import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ProfileMin } from "../../../../generated/models/ProfileMin";
+import DropPfp, { DropPFPSize } from "../../create/utils/DropPfp";
+import DropAuthor, {
+  DropAuthorSize,
+} from "../../create/utils/author/DropAuthor";
 
 const customRenderer = ({
   content,
@@ -113,12 +119,16 @@ const aHrefRenderer = ({
 
 const DropPart = memo(
   ({
+    profile,
     mentionedUsers,
     referencedNfts,
     partContent,
     partMedia,
     showFull = false,
+    showAuthor,
+    createdAt,
   }: {
+    readonly profile: ProfileMin;
     readonly mentionedUsers: Array<DropMentionedUser>;
     readonly referencedNfts: Array<DropReferencedNFT>;
     readonly partContent: string | null;
@@ -127,6 +137,8 @@ const DropPart = memo(
       readonly mediaSrc: string;
     } | null;
     readonly showFull?: boolean;
+    readonly showAuthor: boolean;
+    readonly createdAt: number;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -185,6 +197,20 @@ const DropPart = memo(
             ref={containerRef}
             className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
           >
+            {showAuthor && (
+              <div className="tw-inline-flex">
+                <DropPfp
+                  pfpUrl={profile.pfp}
+                  isWaveDescriptionDrop={false}
+                  size={DropPFPSize.SMALL}
+                />
+                <DropAuthor
+                  profile={profile}
+                  timestamp={createdAt}
+                  size={DropAuthorSize.SMALL}
+                />
+              </div>
+            )}
             <Markdown
               rehypePlugins={[
                 [

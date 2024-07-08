@@ -5,6 +5,7 @@ import { CreateDropType } from "../../../drops/create/CreateDrop";
 import DropEditor, {
   DropEditorHandles,
 } from "../../../drops/create/DropEditor";
+import { profileAndConsolidationsToProfileMin } from "../../../../helpers/ProfileHelpers";
 
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
@@ -19,6 +20,7 @@ const CreateWaveDescription = forwardRef<
   }
 >(({ profile, showDropError, onHaveDropToSubmitChange }, ref) => {
   const dropEditorRef = useRef<DropEditorHandles | null>(null);
+  const profileMin = profileAndConsolidationsToProfileMin({ profile });
 
   const requestDrop = (): CreateDropConfig | null =>
     dropEditorRef.current?.requestDrop() ?? null;
@@ -26,6 +28,10 @@ const CreateWaveDescription = forwardRef<
   useImperativeHandle(ref, () => ({
     requestDrop,
   }));
+
+  if (!profileMin) {
+    return null;
+  }
 
   return (
     <div>
@@ -40,7 +46,7 @@ const CreateWaveDescription = forwardRef<
       <div className="tw-mt-6">
         <DropEditor
           ref={dropEditorRef}
-          profile={profile}
+          profile={profileMin}
           quotedDrop={null}
           type={CreateDropType.DROP}
           loading={false}

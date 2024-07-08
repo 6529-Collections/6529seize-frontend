@@ -18,6 +18,7 @@ import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 import CreateDropStormView from "../../utils/storm/CreateDropStormView";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -31,7 +32,7 @@ export interface CreateDropFullMobileHandles {
 const CreateDropFullMobile = forwardRef<
   CreateDropFullMobileHandles,
   {
-    readonly profile: IProfileAndConsolidations;
+    readonly profile: ProfileMin;
     readonly title: string | null;
     readonly editorState: EditorState | null;
     readonly metadata: DropMetadata[];
@@ -120,7 +121,7 @@ const CreateDropFullMobile = forwardRef<
       >
         <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
           {!!drop?.parts.length && isStormMode && (
-            <CreateDropStormView drop={drop} />
+            <CreateDropStormView drop={drop} profile={profile} />
           )}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
             <div className="tw-flex tw-justify-end -tw-mb-2">

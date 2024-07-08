@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
-import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 
 export default function DropPartWrapper({
   drop,

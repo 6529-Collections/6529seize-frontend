@@ -25,6 +25,7 @@ import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer"
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
+import { ProfileMin } from "../../../../generated/models/ProfileMin";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -40,7 +41,7 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 const CreateDropWrapper = forwardRef<
   CreateDropWrapperHandles,
   {
-    readonly profile: IProfileAndConsolidations;
+    readonly profile: ProfileMin;
     readonly quotedDrop: {
       dropId: string;
       partId: number;

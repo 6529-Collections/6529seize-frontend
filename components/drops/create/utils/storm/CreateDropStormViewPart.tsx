@@ -6,16 +6,23 @@ import {
 } from "../../../../../entities/IDrop";
 import DropPart from "../../../view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 const CreateDropStormViewPart = memo(
   ({
+    profile,
     part,
     mentionedUsers,
     referencedNfts,
+    createdAt,
+    showAuthor,
   }: {
+    readonly profile: ProfileMin;
     readonly part: CreateDropPart;
     readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
     readonly referencedNfts: Array<ReferencedNft>;
+    readonly createdAt: number;
+    readonly showAuthor: boolean;
   }) => {
     const partMedia = part.media.length
       ? {
@@ -30,13 +37,19 @@ const CreateDropStormViewPart = memo(
       <div className="tw-py-3">
         <div className="tw-flex tw-w-full tw-justify-between">
           <DropPart
+            profile={profile}
             mentionedUsers={mentionedUsers}
             referencedNfts={referencedNfts}
             partContent={part.content}
             partMedia={partMedia}
+            createdAt={createdAt}
+            showAuthor={showAuthor}
           />
           {quotedDrop && (
-            <CreateDropStormViewPartQuote quotedDrop={quotedDrop} />
+            <CreateDropStormViewPartQuote
+              quotedDrop={quotedDrop}
+              profile={profile}
+            />
           )}
           <div
             role="button"

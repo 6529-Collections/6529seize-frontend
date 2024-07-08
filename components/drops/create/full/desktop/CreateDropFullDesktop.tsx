@@ -18,6 +18,7 @@ import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateDropStormView from "../../utils/storm/CreateDropStormView";
 import CreateDropSelectFile from "../../utils/file/CreateDropSelectFile";
+import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -31,7 +32,7 @@ export interface CreateDropFullDesktopHandles {
 const CreateDropFullDesktop = forwardRef<
   CreateDropFullDesktopHandles,
   {
-    readonly profile: IProfileAndConsolidations;
+    readonly profile: ProfileMin;
     readonly title: string | null;
     readonly editorState: EditorState | null;
     readonly metadata: DropMetadata[];
@@ -134,7 +135,7 @@ const CreateDropFullDesktop = forwardRef<
           </svg>
         </button>
         {!!drop?.parts.length && isStormMode && (
-          <CreateDropStormView drop={drop} />
+          <CreateDropStormView drop={drop} profile={profile} />
         )}
         <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-2.5">
           {titleState === TITLE_STATE.BUTTON && (
@@ -165,7 +166,7 @@ const CreateDropFullDesktop = forwardRef<
         </div>
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <div className="tw-mt-0.5">
-            <DropPfp pfpUrl={profile.profile?.pfp_url} />
+            <DropPfp pfpUrl={profile?.pfp} />
           </div>
           <div className="tw-space-y-4 tw-w-full">
             {titleState === TITLE_STATE.INPUT && (

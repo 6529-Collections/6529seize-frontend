@@ -16,6 +16,8 @@ import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWr
 import { DropMedia } from "../../../generated/models/DropMedia";
 import DropEditor from "./DropEditor";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
+import { ProfileMin } from "../../../generated/models/ProfileMin";
+import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -50,6 +52,9 @@ export default function CreateDrop({
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
+  const profileMin: ProfileMin | null = profileAndConsolidationsToProfileMin({
+    profile,
+  });
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
@@ -158,13 +163,16 @@ export default function CreateDrop({
       wave_id: waveId,
       parts,
     };
-    console.log(requestBody);
     await addDropMutation.mutateAsync(requestBody);
   };
 
+  if (!profileMin) {
+    return;
+  }
+
   return (
     <DropEditor
-      profile={profile}
+      profile={profileMin}
       isClient={isClient}
       quotedDrop={quotedDrop}
       type={type}

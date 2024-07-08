@@ -16,6 +16,7 @@ import {
 } from "../../../entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "./CreateDrop";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ProfileMin } from "../../../generated/models/ProfileMin";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;
@@ -24,7 +25,7 @@ export interface DropEditorHandles {
 const DropEditor = forwardRef<
   DropEditorHandles,
   {
-    readonly profile: IProfileAndConsolidations;
+    readonly profile: ProfileMin;
     readonly quotedDrop: {
       readonly dropId: string;
       readonly partId: number;
