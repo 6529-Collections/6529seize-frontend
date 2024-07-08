@@ -276,13 +276,13 @@ export default function DropListItemRateGiveClap({
         <button
           disabled={!rate || !canRate}
           id={`clap-${randomID}`}
-          className={`${clapClasses} tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-600 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+          className={`${clapClasses} tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={handleClick}
         >
           <span>
             <svg
               id={`clap--icon-${randomID}`}
-              className={`${textClasses} tw-size-5 -tw-mt-1 tw-transition tw-duration-300 tw-ease-out`}
+              className={`${textClasses} tw-size-[18px] -tw-mt-1 tw-transition tw-duration-300 tw-ease-out`}
               viewBox="0 0 346 360"
               fill="none"
               aria-hidden="true"
