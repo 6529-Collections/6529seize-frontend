@@ -66,7 +66,8 @@ export default function DropsListItem({
         onSuccessfulQuote={() => setQuoteModePartId(null)}
       />
       <div className="tw-px-4 sm:tw-px-5 tw-pb-4 sm:tw-pb-5 tw-pt-2 sm:tw-pt-3">
-        <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
+        <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
+          <div className="tw-absolute tw-text-xs tw-right-0 tw-top-2 tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">wave name</div>
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
               drop={drop}
@@ -75,7 +76,6 @@ export default function DropsListItem({
             />
             {haveData && <DropListItemData drop={drop} />}
           </div>
-
           <div className="tw-flex tw-flex-col tw-items-center tw-min-h-full">
             {/* {showExternalLink && (
               <DropListItemExternalLink
