@@ -15,6 +15,9 @@ interface PartConfig {
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;
   readonly createdAt: number;
+  readonly isDescriptionDrop: boolean;
+  readonly waveName: string;
+  readonly dropTitle: string | null;
 }
 
 export default function CreateDropStormViewPartQuote({
@@ -48,6 +51,9 @@ export default function CreateDropStormViewPartQuote({
       mentionedUsers: drop.mentioned_users,
       referencedNfts: drop.referenced_nfts,
       createdAt: drop.created_at,
+      isDescriptionDrop: drop.wave.description_drop_id === drop.id,
+      waveName: drop.wave.name,
+      dropTitle: drop.title,
     };
   };
 
@@ -72,8 +78,11 @@ export default function CreateDropStormViewPartQuote({
               : null
           }
           createdAt={partConfig.createdAt}
+          isDescriptionDrop={partConfig.isDescriptionDrop}
+          waveName={partConfig.waveName}
+          isFirstPart={true}
           showFull={false}
-          showAuthor={true}
+          dropTitle={partConfig.dropTitle}
         />
       )}
     </div>

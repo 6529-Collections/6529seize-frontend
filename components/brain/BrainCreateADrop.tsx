@@ -39,6 +39,10 @@ export default function BrainCreateADrop() {
         quotedDrop={null}
         // TODO: Add wave id
         waveId=""
+        // TODO: Add isDescriptionDrop
+        isDescriptionDrop={false}
+        // TODO: Add wave name
+        waveName=""
         type={CreateDropType.DROP}
       />
     );

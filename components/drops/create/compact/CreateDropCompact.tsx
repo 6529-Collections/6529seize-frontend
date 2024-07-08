@@ -43,6 +43,8 @@ const CreateDropCompact = forwardRef<
     readonly showSubmit: boolean;
     readonly showDropError?: boolean;
     readonly isStormMode: boolean;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataRemove: (key: string) => void;
     readonly onEditorState: (editorState: EditorState | null) => void;
@@ -71,6 +73,8 @@ const CreateDropCompact = forwardRef<
       drop,
       showDropError = false,
       isStormMode,
+      isDescriptionDrop,
+      waveName,
       onViewChange,
       onMetadataRemove,
       onEditorState,
@@ -117,7 +121,12 @@ const CreateDropCompact = forwardRef<
     return (
       <div className={`${getWrapperClasses()}  tw-bg-iron-950`}>
         {!!drop?.parts.length && isStormMode && (
-          <CreateDropStormView drop={drop} profile={profile} />
+          <CreateDropStormView
+            drop={drop}
+            profile={profile}
+            isDescriptionDrop={isDescriptionDrop}
+            waveName={waveName}
+          />
         )}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-hidden sm:tw-block">

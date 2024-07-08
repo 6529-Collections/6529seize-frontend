@@ -15,14 +15,20 @@ const CreateDropStormViewPart = memo(
     mentionedUsers,
     referencedNfts,
     createdAt,
-    showAuthor,
+    isFirstPart,
+    isDescriptionDrop,
+    waveName,
+    dropTitle,
   }: {
     readonly profile: ProfileMin;
     readonly part: CreateDropPart;
     readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
     readonly referencedNfts: Array<ReferencedNft>;
     readonly createdAt: number;
-    readonly showAuthor: boolean;
+    readonly isFirstPart: boolean;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
+    readonly dropTitle: string | null;
   }) => {
     const partMedia = part.media.length
       ? {
@@ -43,7 +49,10 @@ const CreateDropStormViewPart = memo(
             partContent={part.content}
             partMedia={partMedia}
             createdAt={createdAt}
-            showAuthor={showAuthor}
+            isFirstPart={isFirstPart}
+            isDescriptionDrop={isDescriptionDrop}
+            waveName={waveName}
+            dropTitle={dropTitle}
           />
           {quotedDrop && (
             <CreateDropStormViewPartQuote

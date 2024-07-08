@@ -23,7 +23,7 @@ export default function UserPageDrops({
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-max-w-2xl mx-auto">
+      {/* <div className="tw-max-w-2xl mx-auto">
         {haveProfile && (
           <div>
             {canCreateDrop && (
@@ -38,7 +38,7 @@ export default function UserPageDrops({
             <Drops />
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
