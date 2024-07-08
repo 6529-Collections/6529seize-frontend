@@ -82,6 +82,8 @@ export default function DropListItemCreateQuote({
                   waveId={drop.wave.id}
                   quotedDropId={drop.id}
                   quotedPartId={quotedPartId}
+                  isDescriptionDrop={drop.wave.description_drop_id === drop.id}
+                  waveName={drop.wave.name}
                   init={init}
                   onSuccessfulDrop={onSuccessfulQuote}
                 />

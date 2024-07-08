@@ -38,6 +38,8 @@ const CreateDropFull = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly showDropError?: boolean;
     readonly isStormMode: boolean;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
     readonly onTitle: (newV: string | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (key: string) => void;
@@ -68,6 +70,8 @@ const CreateDropFull = forwardRef<
       drop,
       showDropError = false,
       isStormMode,
+      isDescriptionDrop,
+      waveName,
       onTitle,
       onMetadataEdit,
       onMetadataRemove,
@@ -109,6 +113,8 @@ const CreateDropFull = forwardRef<
           drop={drop}
           showDropError={showDropError}
           isStormMode={isStormMode}
+          isDescriptionDrop={isDescriptionDrop}
+          waveName={waveName}
           onTitle={onTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
@@ -136,6 +142,8 @@ const CreateDropFull = forwardRef<
           drop={drop}
           showSubmit={showSubmit}
           isStormMode={isStormMode}
+          isDescriptionDrop={isDescriptionDrop}
+          waveName={waveName}
           onEditorState={onEditorState}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
