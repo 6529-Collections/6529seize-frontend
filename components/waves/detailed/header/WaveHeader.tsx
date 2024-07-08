@@ -4,7 +4,7 @@ import { getTimeUntil } from "../../../../helpers/Helpers";
 export default function WaveHeader({ wave }: { readonly wave: Wave }) {
   const created = getTimeUntil(wave.created_at);
   const ending = wave.wave.period?.max
-    ?  getTimeUntil(wave.wave.period.max)
+    ? getTimeUntil(wave.wave.period.max)
     : "Infinite";
   return (
     <div>
@@ -16,7 +16,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
           }}
         ></div>
       </div>
-      <div className="tw-max-w-5xl tw-mx-auto">
+      <div className="tw-max-w-5xl tw-mx-auto tw-px-6 md:px-0">
         <div className="-tw-mt-12 sm:tw-flex sm:tw-space-x-5">
           <div className="tw-flex">
             {wave.author.pfp ? (
@@ -29,9 +29,9 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               <div className="tw-h-24 tw-w-24 tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900" />
             )}
           </div>
-          <div className="tw-mt-8 sm:tw-flex sm:tw-min-w-0 sm:tw-flex-1 sm:tw-items-center sm:tw-justify-end sm:tw-space-x-6 sm:tw-pb-1">
-            <div className="tw-mt-6 tw-min-w-0 tw-flex-1 sm:tw-hidden md:tw-block">
-              <h1 className="tw-truncate tw-text-2xl tw-font-semibold tw-text-white">
+          <div className="tw-mt-4 md:tw-mt-8 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-space-x-6 tw-pb-1">
+            <div className="md:tw-mt-6 tw-min-w-0 tw-flex-1 sm:tw-hidden md:tw-block">
+              <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white">
                 {wave.name}
               </h1>
               <div className="tw-flex tw-items-center">
@@ -69,7 +69,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                 <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
                   Created
                 </span>
-                <span className="tw-font-normal tw-text-iron-300">
+                <span className="tw-font-normal tw-text-iron-400">
                   {created}
                 </span>
               </div>
@@ -78,7 +78,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                 <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
                   Ending
                 </span>
-                <span className="tw-font-normal tw-text-iron-300">
+                <span className="tw-font-normal tw-text-iron-400">
                   {ending}
                 </span>
               </div>
