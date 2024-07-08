@@ -16,8 +16,9 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
           }}
         ></div>
       </div>
+
       <div className="tw-max-w-5xl tw-mx-auto tw-px-6 md:px-0">
-        <div className="-tw-mt-12 sm:tw-flex sm:tw-space-x-5">
+        <div className="-tw-mt-12 tw-flex tw-space-x-5">
           <div className="tw-flex">
             {wave.author.pfp ? (
               <img
@@ -29,8 +30,9 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               <div className="tw-h-24 tw-w-24 tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900" />
             )}
           </div>
+
           <div className="tw-mt-4 md:tw-mt-8 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-space-x-6 tw-pb-1">
-            <div className="md:tw-mt-6 tw-min-w-0 tw-flex-1 sm:tw-hidden md:tw-block">
+            <div className="md:tw-mt-6 tw-min-w-0 tw-flex-1 tw-hidden md:tw-block">
               <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white">
                 {wave.name}
               </h1>
@@ -63,8 +65,9 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               </div>
             </div>
           </div>
+
           <div className="tw-mt-16 tw-flex tw-flex-col tw-items-end tw-gap-y-2">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
+            <div className="tw-hidden md:tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-text-xs">
                 <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
                   Created
@@ -106,11 +109,13 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
             </button>
           </div>
         </div>
-        <div className="tw-mt-6 tw-hidden tw-min-w-0 tw-flex-1 sm:tw-block md:tw-hidden">
-          <h1 className="tw-truncate tw-text-2xl tw-font-semibold tw-text-white">
+
+        <div className="tw-mt-2 sm:tw-mt-4 md:tw-hidden tw-min-w-0 tw-flex-1">
+          <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white">
             {wave.name}
           </h1>
         </div>
+
       </div>
     </div>
   );
