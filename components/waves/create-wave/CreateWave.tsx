@@ -467,6 +467,7 @@ export default function CreateWave({
         ref={createWaveDescriptionRef}
         profile={profile}
         showDropError={showDropError}
+        waveName={config.overview.name}
         onHaveDropToSubmitChange={onHaveDropToSubmitChange}
       />
     ),

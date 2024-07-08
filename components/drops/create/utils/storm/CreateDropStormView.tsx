@@ -9,15 +9,19 @@ const CreateDropStormView = memo(
   ({
     drop,
     profile,
+    isDescriptionDrop,
+    waveName,
   }: {
     readonly drop: CreateDropConfig;
     readonly profile: ProfileMin;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
   }) => {
     const now = Time.currentMillis();
     return (
       <div className="tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0 tw-mb-4">
         {!!drop?.parts.length &&
-          drop.parts.map((part) => (
+          drop.parts.map((part, index) => (
             <CreateDropStormViewPart
               key={getRandomObjectId()}
               profile={profile}
@@ -25,7 +29,10 @@ const CreateDropStormView = memo(
               referencedNfts={drop.referenced_nfts}
               mentionedUsers={drop.mentioned_users}
               createdAt={now}
-              showAuthor={true}
+              isFirstPart={index === 0}
+              isDescriptionDrop={isDescriptionDrop}
+              waveName={waveName}
+              dropTitle={drop.title ?? null}
             />
           ))}
       </div>

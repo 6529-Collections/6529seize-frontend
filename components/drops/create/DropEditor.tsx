@@ -15,7 +15,6 @@ import {
   ReferencedNft,
 } from "../../../entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "./CreateDrop";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ProfileMin } from "../../../generated/models/ProfileMin";
 
 export interface DropEditorHandles {
@@ -36,6 +35,8 @@ const DropEditor = forwardRef<
     readonly dropEditorRefreshKey: number;
     readonly showSubmit?: boolean;
     readonly showDropError?: boolean;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
     readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
     readonly onCanSubmitChange?: (canSubmit: boolean) => void;
   }
@@ -50,6 +51,8 @@ const DropEditor = forwardRef<
       dropEditorRefreshKey,
       showSubmit = true,
       showDropError = false,
+      isDescriptionDrop,
+      waveName,
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -105,6 +108,8 @@ const DropEditor = forwardRef<
           viewType={viewType}
           showSubmit={showSubmit}
           showDropError={showDropError}
+          isDescriptionDrop={isDescriptionDrop}
+          waveName={waveName}
           setViewType={setViewType}
           setDrop={setDrop}
           setMentionedUsers={setMentionedUsers}

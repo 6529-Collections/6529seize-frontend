@@ -1,13 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import CreateDropWrapper from "./utils/CreateDropWrapper";
 import {
   CreateDropConfig,
   CreateDropPart,
   CreateDropRequestPart,
-  DropMetadata,
-  MentionedUser,
-  ReferencedNft,
 } from "../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
@@ -35,6 +31,8 @@ export default function CreateDrop({
   quotedDrop,
   isClient = false,
   type,
+  isDescriptionDrop,
+  waveName,
   onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
@@ -45,6 +43,8 @@ export default function CreateDrop({
   } | null;
   readonly isClient?: boolean;
   readonly type: CreateDropType;
+  readonly isDescriptionDrop: boolean;
+  readonly waveName: string;
   readonly onSuccessfulDrop?: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -178,6 +178,8 @@ export default function CreateDrop({
       type={type}
       loading={submitting}
       dropEditorRefreshKey={dropEditorRefreshKey}
+      isDescriptionDrop={isDescriptionDrop}
+      waveName={waveName}
       onSubmitDrop={submitDrop}
     />
   );

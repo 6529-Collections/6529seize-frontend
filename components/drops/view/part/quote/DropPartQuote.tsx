@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../../generated/models/Drop";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
-import DropWrapper from "../../../create/utils/DropWrapper";
+
 import { DropPart as IDropPart } from "../../../../../generated/models/DropPart";
 import DropPart from "../DropPart";
 
@@ -53,27 +53,26 @@ export default function DropPartQuote({
 
   return (
     <div className="tw-mt-4 tw-p-4 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid">
-      <DropWrapper drop={drop}>
-        <div className="tw-w-full">
-          <DropPart
-            profile={drop.author}
-            mentionedUsers={drop.mentioned_users}
-            referencedNfts={drop.referenced_nfts}
-            partContent={quotedPart.content ?? null}
-            partMedia={
-              quotedPart.media.length
-                ? {
-                    mimeType: quotedPart.media[0].mime_type,
-                    mediaSrc: quotedPart.media[0].url,
-                  }
-                : null
-            }
-            showFull={false}
-            createdAt={drop.created_at}
-            showAuthor={false}
-          />
-        </div>
-      </DropWrapper>
+      <DropPart
+        profile={drop.author}
+        mentionedUsers={drop.mentioned_users}
+        referencedNfts={drop.referenced_nfts}
+        partContent={quotedPart.content ?? null}
+        partMedia={
+          quotedPart.media.length
+            ? {
+                mimeType: quotedPart.media[0].mime_type,
+                mediaSrc: quotedPart.media[0].url,
+              }
+            : null
+        }
+        showFull={false}
+        createdAt={drop.created_at}
+        isFirstPart={true}
+        isDescriptionDrop={drop.wave.description_drop_id === drop.id}
+        waveName={drop.wave.name}
+        dropTitle={drop.title}
+      />
     </div>
   );
 }
