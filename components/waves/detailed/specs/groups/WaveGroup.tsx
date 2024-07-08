@@ -34,7 +34,7 @@ export default function WaveGroup({
   };
 
   return (
-    <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+    <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
       <div className="tw-flex tw-items-center">
         {ICONS[type]}
 
@@ -55,12 +55,12 @@ export default function WaveGroup({
             ) : (
               <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
             )}
-            <span className="tw-font-medium tw-text-base tw-text-primary-300">
+            <span className="tw-font-medium tw-text-md tw-text-primary-300">
               {scope.group.name}
             </span>
           </Link>
         ) : (
-          <span className="tw-font-medium tw-text-white tw-text-base">
+          <span className="tw-font-medium tw-text-white tw-text-md">
             Anyone
           </span>
         )}

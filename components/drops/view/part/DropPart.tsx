@@ -200,7 +200,7 @@ const DropPart = memo(
             ref={containerRef}
             className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
           >
-            <div className="tw-flex tw-gap-x-3 tw-h-full">
+            <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
               <div className="tw-hidden sm:tw-block">
                 <DropPfp
                   pfpUrl={profile.pfp}

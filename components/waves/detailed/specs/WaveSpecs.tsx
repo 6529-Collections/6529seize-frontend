@@ -22,10 +22,10 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
                 <WaveEnding wave={wave} />
               </div> */}
               <WaveTypeIcon waveType={wave.wave.type} />
-              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+              <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
                 <span className="tw-font-medium tw-text-iron-400">Voting</span>
-                <div className="tw-flex tw-flex-col tw-gap-y-2">
-                  <span className="tw-font-medium tw-text-iron-50 tw-text-base">
+                <div className="tw-flex tw-flex-col tw-gap-y-1.5">
+                  <span className="tw-font-medium tw-text-iron-50 tw-text-md">
                     By Rep
                   </span>
                   <div className="tw-bg-iron-800 tw-rounded-xl tw-flex tw-flex-col tw-gap-y-1 tw-px-4 tw-py-2">

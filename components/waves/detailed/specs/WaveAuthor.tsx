@@ -3,7 +3,7 @@ import { Wave } from "../../../../generated/models/Wave";
 
 export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
   return (
-    <div className="tw-text-sm tw-flex tw-flex-col tw-gap-2">
+    <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
       <span className="tw-font-medium tw-text-iron-400">Created by</span>
       <Link
         href={`/${wave.author.handle}`}
@@ -18,7 +18,7 @@ export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
         ) : (
           <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
         )}
-        <span className="tw-font-medium t tw-text-base">
+        <span className="tw-font-medium tw-text-md">
           {wave.author.handle}
         </span>
       </Link>
