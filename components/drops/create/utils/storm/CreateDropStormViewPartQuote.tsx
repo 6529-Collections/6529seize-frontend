@@ -17,6 +17,8 @@ interface PartConfig {
   readonly createdAt: number;
   readonly isDescriptionDrop: boolean;
   readonly waveName: string;
+  readonly waveImage: string | null;
+  readonly waveId: string | null;
   readonly dropTitle: string | null;
 }
 
@@ -54,6 +56,8 @@ export default function CreateDropStormViewPartQuote({
       isDescriptionDrop: drop.wave.description_drop_id === drop.id,
       waveName: drop.wave.name,
       dropTitle: drop.title,
+      waveImage: drop.wave.picture,
+      waveId: drop.wave.id,
     };
   };
 
@@ -83,6 +87,8 @@ export default function CreateDropStormViewPartQuote({
           isFirstPart={true}
           showFull={false}
           dropTitle={partConfig.dropTitle}
+          waveImage={partConfig.waveImage}
+          waveId={partConfig.waveId}
         />
       )}
     </div>

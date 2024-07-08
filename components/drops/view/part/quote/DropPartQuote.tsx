@@ -72,6 +72,8 @@ export default function DropPartQuote({
         isDescriptionDrop={drop.wave.description_drop_id === drop.id}
         waveName={drop.wave.name}
         dropTitle={drop.title}
+        waveImage={drop.wave.picture}
+        waveId={drop.wave.id}
       />
     </div>
   );

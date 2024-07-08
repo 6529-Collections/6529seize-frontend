@@ -58,6 +58,8 @@ const CreateDropWrapper = forwardRef<
     readonly showDropError?: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
     readonly setViewType: (newV: CreateDropViewType) => void;
     readonly setDrop: (newV: CreateDropConfig) => void;
     readonly setMentionedUsers: (
@@ -86,6 +88,8 @@ const CreateDropWrapper = forwardRef<
       showDropError = false,
       isDescriptionDrop,
       waveName,
+      waveImage,
+      waveId,
       setViewType,
       setDrop,
       setMentionedUsers,
@@ -285,6 +289,8 @@ const CreateDropWrapper = forwardRef<
           isStormMode={isStormMode}
           isDescriptionDrop={isDescriptionDrop}
           waveName={waveName}
+          waveImage={waveImage}
+          waveId={waveId}
           onViewChange={setViewType}
           onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
@@ -314,6 +320,8 @@ const CreateDropWrapper = forwardRef<
           isStormMode={isStormMode}
           isDescriptionDrop={isDescriptionDrop}
           waveName={waveName}
+          waveImage={waveImage}
+          waveId={waveId}
           onTitle={setTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}

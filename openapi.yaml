@@ -444,6 +444,12 @@ paths:
             format: int64
             minimum: 1
             maximum: 20
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
         - name: group_id
           in: query
           description: Drops by authors that fall into supplied group
@@ -2128,6 +2134,7 @@ components:
         - credit_category
         - signature_required
         - creditor
+        - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/WaveScope"
@@ -2151,6 +2158,8 @@ components:
           type: boolean
         period:
           $ref: "#/components/schemas/IntRange"
+        authenticated_user_eligible:
+          type: boolean
 
     WaveVisibilityConfig:
       type: object
@@ -2176,6 +2185,7 @@ components:
         - signature_required
         - no_of_applications_allowed_per_participant
         - required_media
+        - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/WaveScope"
@@ -2201,6 +2211,8 @@ components:
           type: boolean
         period:
           $ref: "#/components/schemas/IntRange"
+        authenticated_user_eligible:
+          type: boolean
 
     CreateNewWaveParticipationConfig:
       type: object
@@ -2377,6 +2389,7 @@ components:
         - wave
         - outcomes
         - created_at
+        - contributors_overview
       properties:
         id:
           description: The ID of the wave
@@ -2412,6 +2425,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveOutcome"
+        contributors_overview:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveContributorOverview"
+
+    WaveContributorOverview:
+      required:
+        - contributor_identity
+        - contributor_pfp
+      properties:
+        contributor_identity:
+          type: string
+        contributor_pfp:
+          type: string
 
     CreateNewWave:
       type: object

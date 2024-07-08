@@ -37,6 +37,8 @@ const DropEditor = forwardRef<
     readonly showDropError?: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
     readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
     readonly onCanSubmitChange?: (canSubmit: boolean) => void;
   }
@@ -53,6 +55,8 @@ const DropEditor = forwardRef<
       showDropError = false,
       isDescriptionDrop,
       waveName,
+      waveImage,
+      waveId,
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -110,6 +114,8 @@ const DropEditor = forwardRef<
           showDropError={showDropError}
           isDescriptionDrop={isDescriptionDrop}
           waveName={waveName}
+          waveImage={waveImage}
+          waveId={waveId}
           setViewType={setViewType}
           setDrop={setDrop}
           setMentionedUsers={setMentionedUsers}

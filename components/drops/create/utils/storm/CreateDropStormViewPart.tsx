@@ -18,7 +18,9 @@ const CreateDropStormViewPart = memo(
     isFirstPart,
     isDescriptionDrop,
     waveName,
+    waveImage,
     dropTitle,
+    waveId,
   }: {
     readonly profile: ProfileMin;
     readonly part: CreateDropPart;
@@ -28,7 +30,9 @@ const CreateDropStormViewPart = memo(
     readonly isFirstPart: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
     readonly dropTitle: string | null;
+    readonly waveId: string | null;
   }) => {
     const partMedia = part.media.length
       ? {
@@ -53,6 +57,8 @@ const CreateDropStormViewPart = memo(
             isDescriptionDrop={isDescriptionDrop}
             waveName={waveName}
             dropTitle={dropTitle}
+            waveImage={waveImage}
+            waveId={waveId}
           />
           {quotedDrop && (
             <CreateDropStormViewPartQuote

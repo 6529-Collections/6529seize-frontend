@@ -38,30 +38,24 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               </h1>
               <div className="tw-flex tw-items-center">
                 <div className="tw-flex -tw-space-x-2">
-                  <img
-                    className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                    src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt=""
-                  />
-                  <img
-                    className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                    src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt=""
-                  />
-                  <img
-                    className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80"
-                    alt=""
-                  />
-                  <img
-                    className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt=""
-                  />
+                  {wave.contributors_overview.map((item) => (
+                    <img
+                      key={item.contributor_identity}
+                      className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
+                      src={item.contributor_pfp}
+                      alt=""
+                    />
+                  ))}
                 </div>
-                <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                  <span>+1,235</span> people dropped
-                </span>
+                {wave.contributors_overview.length < 5 ? (
+                  <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                    dropped
+                  </span>
+                ) : (
+                  <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                    and others dropped
+                  </span>
+                )}
               </div>
             </div>
           </div>

@@ -509,6 +509,12 @@ export default function CreateWave({
         profile={profile}
         showDropError={showDropError}
         waveName={config.overview.name}
+        waveImage={
+          config.overview.image
+            ? URL.createObjectURL(config.overview.image)
+            : null
+        }
+        waveId={null}
         onHaveDropToSubmitChange={onHaveDropToSubmitChange}
       />
     ),

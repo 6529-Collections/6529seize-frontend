@@ -11,11 +11,15 @@ const CreateDropStormView = memo(
     profile,
     isDescriptionDrop,
     waveName,
+    waveImage,
+    waveId,
   }: {
     readonly drop: CreateDropConfig;
     readonly profile: ProfileMin;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
   }) => {
     const now = Time.currentMillis();
     return (
@@ -33,6 +37,8 @@ const CreateDropStormView = memo(
               isDescriptionDrop={isDescriptionDrop}
               waveName={waveName}
               dropTitle={drop.title ?? null}
+              waveImage={waveImage}
+              waveId={waveId}
             />
           ))}
       </div>

@@ -13,6 +13,7 @@
 import { Drop } from '../models/Drop';
 import { ProfileMin } from '../models/ProfileMin';
 import { WaveConfig } from '../models/WaveConfig';
+import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveOutcome } from '../models/WaveOutcome';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
@@ -44,6 +45,7 @@ export class Wave {
     'participation': WaveParticipationConfig;
     'wave': WaveConfig;
     'outcomes': Array<WaveOutcome>;
+    'contributors_overview': Array<WaveContributorOverview>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -118,6 +120,12 @@ export class Wave {
             "name": "outcomes",
             "baseName": "outcomes",
             "type": "Array<WaveOutcome>",
+            "format": ""
+        },
+        {
+            "name": "contributors_overview",
+            "baseName": "contributors_overview",
+            "type": "Array<WaveContributorOverview>",
             "format": ""
         }    ];
 

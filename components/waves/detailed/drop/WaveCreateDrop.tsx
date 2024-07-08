@@ -41,6 +41,7 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
         type={CreateDropType.DROP}
         isDescriptionDrop={false}
         waveName={wave.name}
+        waveImage={wave.picture}
       />
     );
   }

@@ -11,6 +11,7 @@ export default function DropListItemQuote({
   init,
   isDescriptionDrop,
   waveName,
+  waveImage,
   onSuccessfulDrop,
 }: {
   readonly waveId: string;
@@ -19,6 +20,8 @@ export default function DropListItemQuote({
   readonly init: boolean;
   readonly isDescriptionDrop: boolean;
   readonly waveName: string;
+  readonly waveImage: string | null;
+
   readonly onSuccessfulDrop: () => void;
 }) {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);
@@ -43,6 +46,7 @@ export default function DropListItemQuote({
             isClient={init}
             isDescriptionDrop={isDescriptionDrop}
             waveName={waveName}
+            waveImage={waveImage}
             type={CreateDropType.QUOTE}
             onSuccessfulDrop={onSuccessfulDrop}
           />

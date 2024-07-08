@@ -24,6 +24,7 @@ import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNF
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
+import Link from "next/link";
 
 const customRenderer = ({
   content,
@@ -127,6 +128,8 @@ const DropPart = memo(
     isFirstPart,
     isDescriptionDrop,
     waveName,
+    waveImage,
+    waveId,
   }: {
     readonly profile: ProfileMin;
     readonly dropTitle: string | null;
@@ -142,6 +145,8 @@ const DropPart = memo(
     readonly isFirstPart: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -220,17 +225,42 @@ const DropPart = memo(
                       <DropAuthor profile={profile} timestamp={createdAt} />
                     </div>
                     {isFirstPart && (
-                      <div className="tw-flex tw-gap-x-1 tw-items-center">
-                        <div className="tw-h-6 tw-w-6">
-                          <img
-                            alt="#"
-                            className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain tw-rounded-lg"
-                          />
-                        </div>
-                        <div className="tw-text-xs tw-font-normal tw-text-primary-300">
-                          {waveName}
-                        </div>
-                      </div>
+                      <>
+                        {waveId ? (
+                          <Link
+                            href={`waves/${waveId}`}
+                            className="tw-no-underline tw-flex tw-gap-x-1 tw-items-center"
+                          >
+                            {waveImage && (
+                              <div className="tw-h-6 tw-w-6">
+                                <img
+                                  src={waveImage}
+                                  alt="#"
+                                  className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain tw-rounded-lg"
+                                />
+                              </div>
+                            )}
+                            <div className="tw-text-xs tw-font-normal tw-text-primary-300">
+                              {waveName}
+                            </div>
+                          </Link>
+                        ) : (
+                          <div className="tw-no-underline tw-flex tw-gap-x-1 tw-items-center">
+                            {waveImage && (
+                              <div className="tw-h-6 tw-w-6">
+                                <img
+                                  src={waveImage}
+                                  alt="#"
+                                  className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain tw-rounded-lg"
+                                />
+                              </div>
+                            )}
+                            <div className="tw-text-xs tw-font-normal tw-text-primary-300">
+                              {waveName}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

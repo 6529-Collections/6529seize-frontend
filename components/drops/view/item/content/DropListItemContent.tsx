@@ -80,8 +80,10 @@ export default function DropListItemContent({
               createdAt={drop.created_at}
               isDescriptionDrop={drop.wave.description_drop_id === drop.id}
               waveName={drop.wave.name}
+              waveImage={drop.wave.picture}
               isFirstPart={index === 0}
               dropTitle={drop.title}
+              waveId={drop.wave.id}
             />
             {showStormExpandButton && index === 0 && (
               <button

@@ -45,6 +45,8 @@ const CreateDropCompact = forwardRef<
     readonly isStormMode: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
+    readonly waveImage: string | null;
+    readonly waveId: string | null;
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataRemove: (key: string) => void;
     readonly onEditorState: (editorState: EditorState | null) => void;
@@ -75,6 +77,8 @@ const CreateDropCompact = forwardRef<
       isStormMode,
       isDescriptionDrop,
       waveName,
+      waveImage,
+      waveId,
       onViewChange,
       onMetadataRemove,
       onEditorState,
@@ -126,6 +130,8 @@ const CreateDropCompact = forwardRef<
             profile={profile}
             isDescriptionDrop={isDescriptionDrop}
             waveName={waveName}
+            waveImage={waveImage}
+            waveId={waveId}
           />
         )}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">

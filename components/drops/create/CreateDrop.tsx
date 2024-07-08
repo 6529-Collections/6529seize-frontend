@@ -33,6 +33,7 @@ export default function CreateDrop({
   type,
   isDescriptionDrop,
   waveName,
+  waveImage,
   onSuccessfulDrop,
 }: {
   readonly profile: IProfileAndConsolidations;
@@ -45,6 +46,7 @@ export default function CreateDrop({
   readonly type: CreateDropType;
   readonly isDescriptionDrop: boolean;
   readonly waveName: string;
+  readonly waveImage: string | null;
   readonly onSuccessfulDrop?: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -180,6 +182,8 @@ export default function CreateDrop({
       dropEditorRefreshKey={dropEditorRefreshKey}
       isDescriptionDrop={isDescriptionDrop}
       waveName={waveName}
+      waveImage={waveImage}
+      waveId={waveId}
       onSubmitDrop={submitDrop}
     />
   );
