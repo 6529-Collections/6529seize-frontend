@@ -159,11 +159,11 @@ export default function Brain() {
 
         <div className="tw-mt-4 lg:tw-mt-6">
           <BrainCreateADrop />
-          <DropListWrapper
+          {/* <DropListWrapper
             drops={drops}
             loading={isFetching}
             onBottomIntersection={onBottomIntersection}
-          />
+          /> */}
         </div>
       </div>
     </div>

@@ -90,6 +90,7 @@ export default function WaveDrops({ wave }: { readonly wave: Wave }) {
     <DropListWrapper
       drops={drops}
       loading={isFetching}
+      showWaveName={false}
       onBottomIntersection={onBottomIntersection}
     />
   );
