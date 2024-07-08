@@ -120,7 +120,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
                 ref={listRef}
                 className="tw-absolute tw-z-10 tw-mt-1.5 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10"
               >
-                <div className="tw-py-1 tw-max-h-72 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto scrollbar-width">
+                <div className="tw-py-1 tw-max-h-48 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto scrollbar-width">
                   <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                     {Object.values(Period).map((period) => (
                       <CreateWaveDatesEndDateSelectPeriodItem
