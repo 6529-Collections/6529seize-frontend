@@ -21,14 +21,14 @@ export default function DropPfp({
 }) {
   const SIZE_CLASSES: Record<DropPFPSize, string> = {
     [DropPFPSize.SMALL]: "tw-h-7 tw-w-7",
-    [DropPFPSize.MEDIUM]: "tw-h-[2.625rem] tw-w-[2.625rem]",
+    [DropPFPSize.MEDIUM]: "tw-h-10 tw-w-10",
     [DropPFPSize.LARGE]: "tw-h-12 tw-w-12",
   };
 
   return (
     <div
       className={`${SIZE_CLASSES[size]} ${
-        !isWaveDescriptionDrop && "tw-ring-1 tw-ring-iron-700"
+        !isWaveDescriptionDrop && "tw-ring-1 tw-ring-iron-800 tw-bg-iron-900"
       }  tw-relative tw-flex-shrink-0 tw-rounded-lg`}
     >
       {isWaveDescriptionDrop && (
