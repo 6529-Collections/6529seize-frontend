@@ -61,7 +61,7 @@ export default function DropsListItem({
       <div className="tw-p-4 sm:tw-p-5">
         <div className="tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
-            <DropWrapper
+            {/* <DropWrapper
               drop={drop}
               isWaveDescriptionDrop={isWaveDescriptionDrop}
             >
@@ -72,7 +72,12 @@ export default function DropsListItem({
                   onQuote={onQuote}
                 />
               </div>
-            </DropWrapper>
+            </DropWrapper> */}
+            <DropListItemContent
+              drop={drop}
+              showFull={showFull}
+              onQuote={onQuote}
+            />
             {haveData && <DropListItemData drop={drop} />}
           </div>
 

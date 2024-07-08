@@ -78,7 +78,6 @@ export default function DropListItemContent({
               }
               showFull={isFullMode}
               createdAt={drop.created_at}
-              showAuthor={index !== 0}
             />
             {showStormExpandButton && index === 0 && (
               <button

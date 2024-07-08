@@ -125,7 +125,6 @@ const DropPart = memo(
     partContent,
     partMedia,
     showFull = false,
-    showAuthor,
     createdAt,
   }: {
     readonly profile: ProfileMin;
@@ -137,7 +136,6 @@ const DropPart = memo(
       readonly mediaSrc: string;
     } | null;
     readonly showFull?: boolean;
-    readonly showAuthor: boolean;
     readonly createdAt: number;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -197,20 +195,18 @@ const DropPart = memo(
             ref={containerRef}
             className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
           >
-            {showAuthor && (
-              <div className="tw-inline-flex">
-                <DropPfp
-                  pfpUrl={profile.pfp}
-                  isWaveDescriptionDrop={false}
-                  size={DropPFPSize.SMALL}
-                />
-                <DropAuthor
-                  profile={profile}
-                  timestamp={createdAt}
-                  size={DropAuthorSize.SMALL}
-                />
-              </div>
-            )}
+            <div className="tw-inline-flex">
+              <DropPfp
+                pfpUrl={profile.pfp}
+                isWaveDescriptionDrop={false}
+                size={DropPFPSize.SMALL}
+              />
+              <DropAuthor
+                profile={profile}
+                timestamp={createdAt}
+                size={DropAuthorSize.SMALL}
+              />
+            </div>
             <Markdown
               rehypePlugins={[
                 [
