@@ -44,6 +44,8 @@ const CreateDropFullMobile = forwardRef<
     readonly showSubmit: boolean;
     readonly drop: CreateDropConfig | null;
     readonly isStormMode: boolean;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
     readonly onEditorState: (editorState: EditorState | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (key: string) => void;
@@ -72,6 +74,8 @@ const CreateDropFullMobile = forwardRef<
       showSubmit,
       drop,
       isStormMode,
+      isDescriptionDrop,
+      waveName,
       onEditorState,
       onMetadataEdit,
       onMetadataRemove,
@@ -121,7 +125,12 @@ const CreateDropFullMobile = forwardRef<
       >
         <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
           {!!drop?.parts.length && isStormMode && (
-            <CreateDropStormView drop={drop} profile={profile} />
+            <CreateDropStormView
+              drop={drop}
+              profile={profile}
+              isDescriptionDrop={isDescriptionDrop}
+              waveName={waveName}
+            />
           )}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
             <div className="tw-flex tw-justify-end -tw-mb-2">

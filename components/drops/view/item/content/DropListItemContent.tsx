@@ -78,6 +78,10 @@ export default function DropListItemContent({
               }
               showFull={isFullMode}
               createdAt={drop.created_at}
+              isDescriptionDrop={drop.wave.description_drop_id === drop.id}
+              waveName={drop.wave.name}
+              isFirstPart={index === 0}
+              dropTitle={drop.title}
             />
             {showStormExpandButton && index === 0 && (
               <button

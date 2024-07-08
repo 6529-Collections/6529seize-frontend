@@ -15,10 +15,11 @@ const CreateWaveDescription = forwardRef<
   CreateWaveDescriptionHandles,
   {
     readonly profile: IProfileAndConsolidations;
+    readonly waveName: string;
     readonly showDropError: boolean;
     readonly onHaveDropToSubmitChange: (canSubmit: boolean) => void;
   }
->(({ profile, showDropError, onHaveDropToSubmitChange }, ref) => {
+>(({ profile, showDropError, waveName, onHaveDropToSubmitChange }, ref) => {
   const dropEditorRef = useRef<DropEditorHandles | null>(null);
   const profileMin = profileAndConsolidationsToProfileMin({ profile });
 
@@ -53,6 +54,8 @@ const CreateWaveDescription = forwardRef<
           showSubmit={false}
           dropEditorRefreshKey={1}
           showDropError={showDropError}
+          isDescriptionDrop={true}
+          waveName={waveName}
           onSubmitDrop={() => {}}
           onCanSubmitChange={onHaveDropToSubmitChange}
         />

@@ -39,6 +39,8 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
         profile={connectedProfile}
         quotedDrop={null}
         type={CreateDropType.DROP}
+        isDescriptionDrop={false}
+        waveName={wave.name}
       />
     );
   }

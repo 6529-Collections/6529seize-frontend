@@ -9,12 +9,16 @@ export default function DropListItemQuote({
   quotedDropId,
   quotedPartId,
   init,
+  isDescriptionDrop,
+  waveName,
   onSuccessfulDrop,
 }: {
   readonly waveId: string;
   readonly quotedDropId: string;
   readonly quotedPartId: number;
   readonly init: boolean;
+  readonly isDescriptionDrop: boolean;
+  readonly waveName: string;
   readonly onSuccessfulDrop: () => void;
 }) {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);
@@ -37,6 +41,8 @@ export default function DropListItemQuote({
               partId: quotedPartId,
             }}
             isClient={init}
+            isDescriptionDrop={isDescriptionDrop}
+            waveName={waveName}
             type={CreateDropType.QUOTE}
             onSuccessfulDrop={onSuccessfulDrop}
           />

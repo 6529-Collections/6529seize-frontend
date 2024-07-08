@@ -21,12 +21,9 @@ import DropListItemContentPart, {
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
-import DropPfp, { DropPFPSize } from "../../create/utils/DropPfp";
-import DropAuthor, {
-  DropAuthorSize,
-} from "../../create/utils/author/DropAuthor";
+import DropPfp from "../../create/utils/DropPfp";
+import DropAuthor from "../../create/utils/author/DropAuthor";
 
 const customRenderer = ({
   content,
@@ -125,9 +122,14 @@ const DropPart = memo(
     partContent,
     partMedia,
     showFull = false,
+    dropTitle,
     createdAt,
+    isFirstPart,
+    isDescriptionDrop,
+    waveName,
   }: {
     readonly profile: ProfileMin;
+    readonly dropTitle: string | null;
     readonly mentionedUsers: Array<DropMentionedUser>;
     readonly referencedNfts: Array<DropReferencedNFT>;
     readonly partContent: string | null;
@@ -137,6 +139,9 @@ const DropPart = memo(
     } | null;
     readonly showFull?: boolean;
     readonly createdAt: number;
+    readonly isFirstPart: boolean;
+    readonly isDescriptionDrop: boolean;
+    readonly waveName: string;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -195,121 +200,155 @@ const DropPart = memo(
             ref={containerRef}
             className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
           >
-            <div className="tw-inline-flex">
-              <DropPfp
-                pfpUrl={profile.pfp}
-                isWaveDescriptionDrop={false}
-                size={DropPFPSize.SMALL}
-              />
-              <DropAuthor
-                profile={profile}
-                timestamp={createdAt}
-                size={DropAuthorSize.SMALL}
-              />
+            <div className="tw-flex tw-gap-x-3 tw-h-full">
+              <div className="tw-hidden sm:tw-block">
+                <DropPfp
+                  pfpUrl={profile.pfp}
+                  isWaveDescriptionDrop={isDescriptionDrop}
+                />
+              </div>
+              <div className="tw-flex tw-flex-col tw-w-full tw-h-full">
+                <div className="tw-flex tw-gap-x-3">
+                  <div className="sm:tw-hidden">
+                    <DropPfp
+                      pfpUrl={profile.pfp}
+                      isWaveDescriptionDrop={isDescriptionDrop}
+                    />
+                  </div>
+                  <div className="tw-flex tw-flex-col tw-gap-y-2">
+                    <div className="tw-w-full tw-inline-flex tw-justify-between">
+                      <DropAuthor profile={profile} timestamp={createdAt} />
+                    </div>
+                    {isFirstPart && (
+                      <div className="tw-flex tw-gap-x-1 tw-items-center">
+                        <div className="tw-h-6 tw-w-6">
+                          <img
+                            alt="#"
+                            className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain tw-rounded-lg"
+                          />
+                        </div>
+                        <div className="tw-text-xs tw-font-normal tw-text-primary-300">
+                          {waveName}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="tw-mt-2 lg:tw-mt-1 tw-h-full">
+                  {dropTitle && isFirstPart && (
+                    <p className="tw-font-semibold tw-text-indigo-400 tw-text-md tw-mb-1">
+                      {dropTitle}
+                    </p>
+                  )}
+                  <div className="tw-h-full">
+                    <Markdown
+                      rehypePlugins={[
+                        [
+                          rehypeExternalLinks,
+                          {
+                            target: "_blank",
+                            rel: ["noopener", "noreferrer", "nofollow'"],
+                            protocols: ["http", "https"],
+                          },
+                        ],
+                        [rehypeSanitize],
+                      ]}
+                      remarkPlugins={[remarkGfm]}
+                      className="tw-w-full"
+                      components={{
+                        h5: (params) => (
+                          <h5 className="tw-text-iron-50 tw-break-words word-break">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </h5>
+                        ),
+                        h4: (params) => (
+                          <h4 className="tw-text-iron-50 tw-break-words word-break">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </h4>
+                        ),
+                        h3: (params) => (
+                          <h3 className="tw-text-iron-50 tw-break-words word-break">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </h3>
+                        ),
+                        h2: (params) => (
+                          <h2 className="tw-text-iron-50 tw-break-words word-break">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </h2>
+                        ),
+                        h1: (params) => (
+                          <h1 className="tw-text-iron-50 tw-break-words word-break">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </h1>
+                        ),
+                        p: (params) => (
+                          <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-text-balance">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </p>
+                        ),
+                        li: (params) => (
+                          <li className="tw-text-iron-50 tw-break-words word-break">
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </li>
+                        ),
+                        code: (params) => (
+                          <code
+                            style={{ textOverflow: "unset" }}
+                            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
+                          >
+                            {customRenderer({
+                              content: params.children,
+                              mentionedUsers,
+                              referencedNfts,
+                              onImageLoaded,
+                            })}
+                          </code>
+                        ),
+                        a: (params) => aHrefRenderer(params),
+                      }}
+                    >
+                      {partContent}
+                    </Markdown>
+                  </div>
+                </div>
+              </div>
             </div>
-            <Markdown
-              rehypePlugins={[
-                [
-                  rehypeExternalLinks,
-                  {
-                    target: "_blank",
-                    rel: ["noopener", "noreferrer", "nofollow'"],
-                    protocols: ["http", "https"],
-                  },
-                ],
-                [rehypeSanitize],
-              ]}
-              remarkPlugins={[remarkGfm]}
-              className="tw-w-full"
-              components={{
-                h5: (params) => (
-                  <h5 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </h5>
-                ),
-                h4: (params) => (
-                  <h4 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </h4>
-                ),
-                h3: (params) => (
-                  <h3 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </h3>
-                ),
-                h2: (params) => (
-                  <h2 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </h2>
-                ),
-                h1: (params) => (
-                  <h1 className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </h1>
-                ),
-                p: (params) => (
-                  <p className="last:tw-mb-0 tw-text-md tw-leading-6 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-text-balance">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </p>
-                ),
-                li: (params) => (
-                  <li className="tw-text-iron-50 tw-break-words word-break">
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </li>
-                ),
-                code: (params) => (
-                  <code
-                    style={{ textOverflow: "unset" }}
-                    className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
-                  >
-                    {customRenderer({
-                      content: params.children,
-                      mentionedUsers,
-                      referencedNfts,
-                      onImageLoaded,
-                    })}
-                  </code>
-                ),
-                a: (params) => aHrefRenderer(params),
-              }}
-            >
-              {partContent}
-            </Markdown>
 
             {isOverflowing && !showMore && (
               <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
