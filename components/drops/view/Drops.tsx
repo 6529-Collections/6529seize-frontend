@@ -80,7 +80,7 @@ export default function Drops() {
     <DropListWrapper
       drops={drops}
       loading={isFetching}
-      showWaveName={true}
+      showWaveInfo={true}
       onBottomIntersection={onBottomIntersection}
     />
   );

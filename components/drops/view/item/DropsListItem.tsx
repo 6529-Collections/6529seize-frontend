@@ -14,13 +14,13 @@ export default function DropsListItem({
   showFull = false,
   showExternalLink = true,
   isWaveDescriptionDrop = false,
-  showWaveName = true,
+  showWaveInfo = true,
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
   readonly showExternalLink?: boolean;
   readonly isWaveDescriptionDrop?: boolean;
-  readonly showWaveName?: boolean;
+  readonly showWaveInfo?: boolean;
 }) {
   const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
@@ -70,7 +70,7 @@ export default function DropsListItem({
       />
       <div className="tw-px-4 sm:tw-px-5 tw-pb-4 sm:tw-pb-5 tw-pt-2 sm:tw-pt-3">
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
-          {showWaveName && (
+          {showWaveInfo && (
             <Link
               href={`waves/${drop.wave.id}`}
               className="tw-no-underline tw-absolute tw-text-xs tw-right-0 tw-top-2 tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
