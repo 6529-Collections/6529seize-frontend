@@ -352,7 +352,7 @@ export default function Home({
                         <h3>Minting Approach</h3>
                       </Col>
                     </Row>
-                    <Row>
+                    <Row className="pb-3">
                       <Col>
                         <a
                           href={
@@ -368,7 +368,12 @@ export default function Home({
                         </a>
                       </Col>
                     </Row>
-                    <Row className="pt-3">
+                    {manifoldClaim?.isFinalized && (
+                      <Row>
+                        <Col>Status: Completed</Col>
+                      </Row>
+                    )}
+                    <Row>
                       <Col>Mint price: {renderManifoldClaimCost()}</Col>
                     </Row>
                     <Row>

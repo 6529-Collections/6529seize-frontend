@@ -4,11 +4,12 @@ import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import { ManifoldMerkleProof } from "./manifold-types";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
-import { useReadContract, useReadContracts } from "wagmi";
+import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import { fromGWEI } from "../../helpers/Helpers";
 import {
   ManifoldClaim,
   ManifoldClaimStatus,
+  ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { Time } from "../../helpers/time";
 
@@ -32,7 +33,13 @@ export default function ManifoldMintingAllowlist(
   const [mintCount, setMintCount] = useState<number>(0);
   const [fee, setFee] = useState<number>(0);
 
+  const [mintError, setMintError] = useState<string>("");
+
   useEffect(() => {
+    if (props.claim.phase === ManifoldPhase.PUBLIC) {
+      return;
+    }
+
     if (connectedAddress && props.merkleTreeId) {
       setFetchingMerkle(true);
       const url = `https://apps.api.manifoldxyz.dev/public/merkleTree/${props.merkleTreeId}/merkleInfo?address=${connectedAddress}`;
@@ -76,8 +83,13 @@ export default function ManifoldMintingAllowlist(
     address: props.proxy as `0x${string}`,
     abi: props.abi,
     chainId: 1,
-    functionName: "MINT_FEE_MERKLE",
+    functionName:
+      props.claim.phase === ManifoldPhase.ALLOWLIST
+        ? "MINT_FEE_MERKLE"
+        : "MINT_FEE",
   });
+
+  const mintWrite = useWriteContract();
 
   useEffect(() => {
     const f = Number(getFee.data ?? 0);
@@ -90,23 +102,67 @@ export default function ManifoldMintingAllowlist(
       readContracts.data?.map((d) => d.result as boolean) ?? []
     );
     const hasAvailableMints = readContracts.data?.some((d) => !d.result);
-    setMintCount(hasAvailableMints ? 1 : 0);
+    setMintCount(
+      hasAvailableMints || props.claim.phase === ManifoldPhase.PUBLIC ? 1 : 0
+    );
   }, [readContracts.data]);
 
-  function mint(value: number, count: number) {
-    const availableProofs = merkleProofsMints.filter((m) => !m).slice(0, count);
-
-    if (availableProofs.length === 0) {
-      return;
+  const getMintArgs = () => {
+    const args: any = [props.contract, props.claim.instanceId];
+    if (mintCount > 1) {
+      args.push(mintCount);
     }
-  }
+    const selectedMerkleProofs: ManifoldMerkleProof[] = [];
+    Array.from({ length: mintCount }, (_, i) => {
+      if (!merkleProofsMints[i]) {
+        selectedMerkleProofs.push(merkleProofs[i]);
+      }
+    });
+    if (mintCount > 1) {
+      if (props.claim.phase === ManifoldPhase.PUBLIC) {
+        args.push([]);
+        args.push([]);
+      } else {
+        args.push(selectedMerkleProofs.map((mp) => mp.value) ?? []);
+        args.push(selectedMerkleProofs.map((mp) => mp.merkleProof) ?? []);
+      }
+    } else {
+      args.push(selectedMerkleProofs[0]?.value ?? 0);
+      args.push(selectedMerkleProofs[0]?.merkleProof ?? []);
+    }
+    args.push(connectedAddress);
+
+    return {
+      functionName: mintCount > 1 ? "mintBatch" : "mint",
+      args,
+    };
+  };
+
+  const mint = () => {
+    setMintError("");
+    const value = getValue();
+    const args = getMintArgs();
+    mintWrite.writeContract({
+      address: props.proxy as `0x${string}`,
+      abi: props.abi,
+      chainId: 1,
+      value: BigInt(value),
+      functionName: args.functionName,
+      args: args.args,
+    });
+  };
+
+  useEffect(() => {
+    if (mintWrite.error) {
+      setMintError(
+        mintWrite.error.message.split("Request Arguments")[0].split(".")[0]
+      );
+    }
+  }, [mintWrite.error]);
 
   function getButtonText() {
     if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
-      return `SEIZE x${mintCount}`;
-    }
-    if (props.claim.status === ManifoldClaimStatus.EXPIRED) {
-      return "EXPIRED";
+      return `SEIZE ${mintCount ? `x${mintCount}` : "-"}`;
     }
 
     const startDate = Time.seconds(props.claim.startDate);
@@ -117,49 +173,80 @@ export default function ManifoldMintingAllowlist(
     return `DROPS ${dateDisplay} ${time} UTC`;
   }
 
-  function printMint(available: number) {
+  function printMintCountDropdown(available: number) {
     const optionsArray = Array.from({ length: available }, (_, i) => i);
-    const value = (props.claim.cost + fee) * mintCount;
+    return (
+      <Form.Select
+        style={{
+          width: "fit-content",
+          height: "100%",
+        }}
+        value={mintCount}
+        onChange={(e) => setMintCount(parseInt(e.target.value))}>
+        <option value="" disabled>
+          Select
+        </option>
+        {optionsArray.map((i) => {
+          const count = i + 1;
+          return (
+            <option key={count} value={count}>
+              {count}
+            </option>
+          );
+        })}
+      </Form.Select>
+    );
+  }
+
+  function printMintCountInput() {
+    return (
+      <Form.Control
+        style={{
+          width: "100px",
+        }}
+        type="number"
+        value={mintCount}
+        onChange={(e) => setMintCount(parseInt(e.target.value))}
+      />
+    );
+  }
+
+  const getValue = () => {
+    return (props.claim.cost + fee) * mintCount;
+  };
+
+  function printMint(available?: number) {
     return (
       <Container className="no-padding pt-3">
         <Row>
           <Col className="d-flex gap-3 align-items-center">
             Select Mint Count:
-            <Form.Select
-              style={{
-                width: "fit-content",
-                height: "100%",
-              }}
-              value={mintCount}
-              onChange={(e) => setMintCount(parseInt(e.target.value))}>
-              <option value="" disabled>
-                Select
-              </option>
-              {optionsArray.map((i) => {
-                const count = i + 1;
-                return (
-                  <option key={count} value={count}>
-                    {count}
-                  </option>
-                );
-              })}
-            </Form.Select>
-            {mintCount > 0 && <b>{fromGWEI(value)} ETH</b>}
+            {available !== undefined
+              ? printMintCountDropdown(available)
+              : printMintCountInput()}
+            {mintCount > 0 && <b>{fromGWEI(getValue())} ETH</b>}
           </Col>
         </Row>
         <Row className="pt-3">
           <Col>
             <button
-              disabled={props.claim.status !== ManifoldClaimStatus.ACTIVE}
+              disabled={
+                props.claim.status !== ManifoldClaimStatus.ACTIVE || !mintCount
+              }
               className="btn btn-primary btn-block"
               style={{
                 padding: "0.6rem",
               }}
-              onClick={() => mint(value, mintCount)}>
+              onClick={mint}>
               <b>{getButtonText()}</b>
             </button>
           </Col>
         </Row>
+        {mintError && (
+          <Row className="pt-3">
+            <Col className="text-danger">{mintError}</Col>
+          </Row>
+        )}
       </Container>
     );
   }
@@ -211,6 +298,18 @@ export default function ManifoldMintingAllowlist(
   }
 
   function printContent() {
+    if (props.claim.status === ManifoldClaimStatus.EXPIRED) {
+      return (
+        <button
+          disabled
+          className="btn btn-primary btn-block"
+          style={{
+            padding: "0.6rem",
+          }}>
+          <b>EXPIRED</b>
+        </button>
+      );
+    }
     if (!connectedAddress) {
       return <>Connect your wallet to continue</>;
     }
@@ -229,16 +328,24 @@ export default function ManifoldMintingAllowlist(
 
     return (
       <Container className="no-padding">
-        <Row>
-          <Col>
-            {merkleProofs.length > 0 ? (
-              printTable("Allowlist Spots", merkleProofs.length)
-            ) : (
-              <>No spots in current phase for connected address</>
-            )}
-          </Col>
-        </Row>
-        {printProofs()}
+        {props.claim.phase === ManifoldPhase.PUBLIC ? (
+          <Row>
+            <Col>{printMint()}</Col>
+          </Row>
+        ) : (
+          <>
+            <Row>
+              <Col>
+                {merkleProofs.length > 0 ? (
+                  printTable("Allowlist Spots", merkleProofs.length)
+                ) : (
+                  <>No spots in current phase for connected address</>
+                )}
+              </Col>
+            </Row>
+            {printProofs()}
+          </>
+        )}
       </Container>
     );
   }
@@ -250,7 +357,7 @@ export default function ManifoldMintingAllowlist(
           <ManifoldMintingConnect onConnect={setConnectedAddress} />
         </Col>
       </Row>
-      <Row className="pt-4">
+      <Row className="pt-3">
         <Col>{printContent()}</Col>
       </Row>
     </Container>

@@ -116,7 +116,18 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printMint() {
     if (manifoldClaim?.phase === ManifoldPhase.PUBLIC) {
-      return <ManifoldMintingPublic />;
+      return (
+        <ManifoldMintingAllowlist
+          contract={props.contract}
+          proxy={props.proxy}
+          abi={props.abi}
+          claim={manifoldClaim!}
+          merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
+          setFee={(f: number) => {
+            setFee(f);
+          }}
+        />
+      );
     }
 
     return (
@@ -258,7 +269,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                   <b>
                     {Time.seconds(
                       manifoldClaim.startDate
-                    ).toIsoDateTimeString()}
+                    ).toIsoDateTimeString()}{" "}
+                    UTC
                   </b>
                 </td>
               </tr>
@@ -266,7 +278,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td>Phase End</td>
                 <td>
                   <b>
-                    {Time.seconds(manifoldClaim.endDate).toIsoDateTimeString()}
+                    {Time.seconds(manifoldClaim.endDate).toIsoDateTimeString()}{" "}
+                    UTC
                   </b>
                 </td>
               </tr>
@@ -288,7 +301,13 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td className="pb-1">Manifold Fee</td>
                 <td className="pb-1">
                   <b>
-                    {fromGWEI(fee)} {ETHEREUM_ICON_TEXT}
+                    {fee ? (
+                      <>
+                        {fromGWEI(fee).toFixed(5)} {ETHEREUM_ICON_TEXT}
+                      </>
+                    ) : (
+                      <>-</>
+                    )}
                   </b>
                 </td>
               </tr>

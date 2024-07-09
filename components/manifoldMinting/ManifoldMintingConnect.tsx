@@ -10,7 +10,8 @@ export default function ManifoldMintingConnect(
 ) {
   // const account = useAccount();
   const account = {
-    address: "0xc8116ed903092918098d77cdd846a7d2d57e1fd8",
+    address: "0xfbbfd2233b0eb59ecbd28126bb19bcca80beaeb9",
+    // address: "0xc8116ed903092918098d77cdd846a7d2d57e1fd8",
     // address: "0x5eeeb64d0e697a60e6dacd7ad9a16a6bdd5560e2",
     // address: "0xef26d046370c703a8f954a7ef5834b80efc9d5ad",
     isConnected: true,

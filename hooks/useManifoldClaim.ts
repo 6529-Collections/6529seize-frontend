@@ -88,7 +88,7 @@ export default function useManifoldClaim(
         isFetching: false,
         isFinalized: remaining === 0,
       });
-      setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 2500 : 10000);
+      setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
     }
   }, [readContract.data]);
 
