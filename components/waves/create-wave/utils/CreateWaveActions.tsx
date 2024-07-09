@@ -48,7 +48,7 @@ export default function CreateWaveActions({
   );
 
   return (
-    <div className="tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
+    <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
       <div className="-tw-ml-6">
         {previousStep && (
           <CreateWaveBackStep onPreviousStep={() => setStep(previousStep)} />

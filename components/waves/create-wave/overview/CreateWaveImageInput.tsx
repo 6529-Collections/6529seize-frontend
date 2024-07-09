@@ -125,7 +125,7 @@ export default function CreateWaveImageInput({
                   </svg>
                 </div>
               </div>
-              <p className="tw-mt-4 tw-mb-2 tw-text-sm tw-font-normal tw-text-iron-400">
+              <p className="tw-mt-4 tw-mb-2 tw-text-xs sm:tw-text-sm tw-font-normal tw-text-iron-400">
                 <span className="tw-font-medium tw-text-white">
                   Click to upload
                 </span>{" "}

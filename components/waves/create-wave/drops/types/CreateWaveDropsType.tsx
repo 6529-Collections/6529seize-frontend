@@ -26,7 +26,7 @@ export default function CreateWaveDropsType({
           checked={isChecked}
           onChange={() => onRequiredTypeChange(type)}
           type="checkbox"
-          className="tw-form-checkbox tw-w-5 tw-h-5 tw-rounded tw-bg-iron-800 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 tw-cursor-pointer"
+          className="tw-form-checkbox tw-w-4 tw-h-4 sm:tw-w-5 sm:tw-h-5 tw-rounded tw-bg-iron-800 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 tw-cursor-pointer"
         />
       </div>
       <span className="tw-flex tw-items-center">
