@@ -3,15 +3,15 @@ import DropsListItem from "./item/DropsListItem";
 
 export default function DropsList({
   drops,
-  showWaveName,
+  showWaveInfo,
 }: {
   readonly drops: Drop[];
-  readonly showWaveName: boolean;
+  readonly showWaveInfo: boolean;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4">
       {drops.map((drop) => (
-        <DropsListItem drop={drop} key={drop.id} showWaveName={showWaveName} />
+        <DropsListItem drop={drop} key={drop.id} showWaveInfo={showWaveInfo} />
       ))}
     </div>
   );
