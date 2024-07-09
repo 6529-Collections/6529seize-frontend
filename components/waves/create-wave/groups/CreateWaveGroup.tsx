@@ -48,7 +48,7 @@ export default function CreateWaveGroup({
   const randomUUID = getRandomObjectId();
   return (
     <div>
-      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+      <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
         {CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType]}
       </p>
       <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
