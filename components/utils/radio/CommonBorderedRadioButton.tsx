@@ -49,7 +49,7 @@ export default function CommonBorderedRadioButton<T extends string>({
         disabled={disabled}
         checked={isSelected}
         onChange={onSelectedChange}
-        className={`${inputClasses} tw-form-radio tw-h-5 tw-w-5 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out`}
+        className={`${inputClasses} tw-form-radio tw-h-4 tw-w-4 sm:tw-h-5 sm:tw-w-5 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out`}
       />
       <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-truncate tw-transition tw-duration-300 tw-ease-out">
         <div className="tw-flex tw-flex-col tw-text-base tw-font-semibold tw-truncate tw-transition tw-duration-300 tw-ease-out">
