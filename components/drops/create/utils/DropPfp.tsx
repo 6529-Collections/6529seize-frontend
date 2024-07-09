@@ -28,7 +28,8 @@ export default function DropPfp({
   return (
     <div
       className={`${SIZE_CLASSES[size]} ${
-        !isWaveDescriptionDrop && "tw-ring-1 tw-ring-iron-800 tw-bg-iron-900"
+        !isWaveDescriptionDrop &&
+        "tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900"
       }  tw-relative tw-flex-shrink-0 tw-rounded-lg`}
     >
       {isWaveDescriptionDrop && (
@@ -47,28 +48,26 @@ export default function DropPfp({
           />
         </svg>
       )}
-      <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden">
-        <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
-          {pfpUrl && (
-            <div
-              className={`tw-rounded-lg ${
-                isWaveDescriptionDrop &&
-                "tw-p-0.5 tw-bg-gradient-to-tr tw-from-primary-600 tw-to-primary-300"
-              } `}
-            >
-              <div
-                className={`tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-justify-center ${
-                  isWaveDescriptionDrop ? "tw-p-[0.0625rem]" : ""
-                }`}
-              >
-                <img
-                  src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
-                  alt="Create Drop Profile"
-                  className="tw-bg-transparent tw-max-w-full tw-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain tw-rounded-lg"
-                />
-              </div>
-            </div>
-          )}
+      <div
+        className={`tw-rounded-lg tw-h-full tw-w-full ${
+          isWaveDescriptionDrop &&
+          "tw-p-[1.5px] tw-bg-gradient-to-tr tw-from-[#1d4ed8] tw-to-[#bfdbfe]"
+        } `}
+      >
+        <div
+          className={`tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800 ${
+            isWaveDescriptionDrop && " tw-p-[1px]"
+          } `}
+        >
+          <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
+            {pfpUrl && (
+              <img
+                src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
+                alt="Create Drop Profile"
+                className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
