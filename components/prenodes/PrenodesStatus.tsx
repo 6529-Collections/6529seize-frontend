@@ -7,6 +7,7 @@ import { Time } from "../../helpers/time";
 import {
   faCheckCircle,
   faLocationDot,
+  faMinusCircle,
   faWarning,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
@@ -20,6 +21,7 @@ interface Prenode {
   city: string;
   country: string;
   tdh_sync: boolean;
+  ping_status: "green" | "orange" | "red";
   block_sync: boolean;
   created_at: string;
   updated_at: string;
@@ -37,7 +39,6 @@ export default function PrenodesStatus() {
 
   function fetchResults() {
     const url = `https://api.seize.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
-
     fetch(url).then((response) => {
       response.json().then((response: { data: Prenode[]; count: number }) => {
         setPrenodes(response.data);
@@ -90,14 +91,20 @@ export default function PrenodesStatus() {
     const createdAt: Time = Time.fromString(prenode.created_at.toString());
     const updatedAt: Time = Time.fromString(prenode.updated_at.toString());
 
-    const now = Time.now();
-
     let updatedAtStatus = styles.error;
     let updatedAtIcon = faXmarkCircle;
-    if (now.minusHours(1).lte(updatedAt)) {
+    let tdhStatus = styles.unknown;
+    let tdhIcon = faMinusCircle;
+    let blockStatus = styles.unknown;
+    let blockIcon = faMinusCircle;
+    if (prenode.ping_status === "green") {
       updatedAtStatus = styles.success;
       updatedAtIcon = faCheckCircle;
-    } else if (now.minusHours(24).lte(updatedAt)) {
+      tdhIcon = prenode.tdh_sync ? faCheckCircle : faXmarkCircle;
+      tdhStatus = prenode.tdh_sync ? styles.success : styles.error;
+      blockIcon = prenode.block_sync ? faCheckCircle : faXmarkCircle;
+      blockStatus = prenode.block_sync ? styles.success : styles.error;
+    } else if (prenode.ping_status === "orange") {
       updatedAtStatus = styles.warning;
       updatedAtIcon = faWarning;
     }
@@ -153,21 +160,11 @@ export default function PrenodesStatus() {
                     </tr>
                     <tr>
                       <td>TDH Status</td>
-                      <td>
-                        {printStatusIcon(
-                          prenode.tdh_sync ? faCheckCircle : faXmarkCircle,
-                          prenode.tdh_sync ? styles.success : styles.error
-                        )}
-                      </td>
+                      <td>{printStatusIcon(tdhIcon, tdhStatus)}</td>
                     </tr>
                     <tr>
                       <td>TDH Block Status</td>
-                      <td>
-                        {printStatusIcon(
-                          prenode.block_sync ? faCheckCircle : faXmarkCircle,
-                          prenode.block_sync ? styles.success : styles.error
-                        )}
-                      </td>
+                      <td>{printStatusIcon(blockIcon, blockStatus)}</td>
                     </tr>
                   </tbody>
                 </Table>
