@@ -31,8 +31,7 @@ export default function WaveGroups({ wave }: { readonly wave: Wave }) {
               <WaveGroup
                 scope={wave.wave.admin_group}
                 type={WaveGroupType.ADMIN}
-                // TODO
-                isEligible={true}
+                isEligible={wave.wave.authenticated_user_eligible_for_admin}
               />
             </div>
           </div>

@@ -61,6 +61,7 @@ const CreateDropFullDesktop = forwardRef<
     readonly onFileChange: (file: File | null) => void;
     readonly onDrop: () => void;
     readonly onDropPart: () => void;
+    readonly removePart: (index: number) => void;
   }
 >(
   (
@@ -92,6 +93,7 @@ const CreateDropFullDesktop = forwardRef<
       onFileChange,
       onDrop,
       onDropPart,
+      removePart,
     },
     ref
   ) => {
@@ -150,6 +152,7 @@ const CreateDropFullDesktop = forwardRef<
             waveName={waveName}
             waveImage={waveImage}
             waveId={waveId}
+            removePart={removePart}
           />
         )}
         <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-2.5">

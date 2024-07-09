@@ -19,10 +19,10 @@ export default function WavesListWrapper({
     <div className="tw-overflow-hidden">
       <div className="tw-flex tw-flex-col tw-gap-y-4">
         {waves.map((wave) => (
-          <DropItem
+          <DropsListItem
             key={wave.id}
             drop={wave.description_drop}
-            showAsWaveDrop={true}
+            isWaveDescriptionDrop={true}
             showWaveInfo={true}
           />
         ))}

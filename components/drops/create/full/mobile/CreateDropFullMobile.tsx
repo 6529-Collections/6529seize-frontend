@@ -60,6 +60,7 @@ const CreateDropFullMobile = forwardRef<
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onDrop: () => void;
     readonly onDropPart: () => void;
+    readonly removePart: (index: number) => void;
   }
 >(
   (
@@ -90,6 +91,7 @@ const CreateDropFullMobile = forwardRef<
       onViewChange,
       onDrop,
       onDropPart,
+      removePart,
     },
     ref
   ) => {
@@ -136,6 +138,7 @@ const CreateDropFullMobile = forwardRef<
               waveName={waveName}
               waveImage={waveImage}
               waveId={waveId}
+              removePart={removePart}
             />
           )}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">

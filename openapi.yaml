@@ -1093,7 +1093,7 @@ paths:
                 $ref: "#/components/schemas/GroupFull"
         "400":
           description: Invalid request
-  /groups/{id}/visibility:
+  /groups/{id}/visible:
     post:
       tags:
         - Groups
@@ -1122,19 +1122,19 @@ paths:
           description: Group not found
         "400":
           description: Invalid request
-  /groups/{id}/wallet_groups/{wallet_group_id}:
+  /groups/{id}/identity_groups/{identity_group_id}:
     get:
       tags:
         - Groups
-      summary: Get groups wallet group wallets
-      operationId: getGroupsWalletGroupWallets
+      summary: Get identity groups identities. Identities are represented as primary wallet addresses
+      operationId: getIdentityGroupIdentities
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-        - name: wallet_group_id
+        - name: identity_group_id
           in: path
           required: true
           schema:
@@ -1336,10 +1336,10 @@ components:
         - cic
         - level
         - owns_nfts
-        - wallet_group_id
-        - wallet_group_wallets_count
-        - excluded_wallet_group_id
-        - excluded_wallet_group_wallets_count
+        - identity_group_id
+        - identity_group_identities_count
+        - excluded_identity_group_id
+        - excluded_identity_group_identities_count
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1353,17 +1353,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
-        wallet_group_id:
+        identity_group_id:
           type: string
           nullable: true
-        wallet_group_wallets_count:
+        identity_group_identities_count:
           type: number
           format: int64
           nullable: false
-        excluded_wallet_group_id:
+        excluded_identity_group_id:
           type: string
           nullable: true
-        excluded_wallet_group_wallets_count:
+        excluded_identity_group_identities_count:
           type: number
           format: int64
           nullable: false
@@ -1376,8 +1376,8 @@ components:
         - cic
         - level
         - owns_nfts
-        - wallets
-        - excluded_wallets
+        - identity_addresses
+        - excluded_identity_addresses
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1391,14 +1391,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
-        wallets:
+        identity_addresses:
           anyOf:
             - type: "null"
             - type: array
               items:
                 type: string
           example: ["0x1234567890123456789012345678901234567890"]
-        excluded_wallets:
+        excluded_identity_addresses:
           anyOf:
             - type: "null"
             - type: array
@@ -2257,6 +2257,7 @@ components:
         - period
         - max_winners
         - admin_group
+        - authenticated_user_eligible_for_admin
       properties:
         type:
           $ref: "#/components/schemas/WaveType"
@@ -2284,6 +2285,8 @@ components:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
           example: {"min": 1719850339996, "max": 1719850339996}
+        authenticated_user_eligible_for_admin:
+          type: boolean
 
     CreateWaveConfig:
       type: object

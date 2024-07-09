@@ -5,6 +5,7 @@ import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 import { WaveType } from "../../../../generated/models/WaveType";
 import { useEffect, useState } from "react";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
+import { Time } from "../../../../helpers/time";
 
 export default function CreateWaveDates({
   waveType,
@@ -31,20 +32,26 @@ export default function CreateWaveDates({
   const haveVotingStartDate = getHaveMultipleTimestamps();
 
   const onStartTimestampChange = (timestamp: number) => {
+    const adjustedTimestamp =
+      Time.currentMillis() > timestamp ? Time.currentMillis() : timestamp;
     setDates({
       ...dates,
-      submissionStartDate: timestamp,
+      submissionStartDate: adjustedTimestamp,
       votingStartDate:
-        haveVotingStartDate && dates.votingStartDate > timestamp
+        haveVotingStartDate && dates.votingStartDate > adjustedTimestamp
           ? dates.votingStartDate
-          : timestamp,
+          : adjustedTimestamp,
     });
   };
 
   const onVotingStartTimestampChange = (timestamp: number) => {
+    const adjustedTimestamp =
+      dates.submissionStartDate > timestamp
+        ? dates.submissionStartDate
+        : timestamp;
     setDates({
       ...dates,
-      votingStartDate: timestamp,
+      votingStartDate: adjustedTimestamp,
     });
   };
 

@@ -5,7 +5,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
   const created = getTimeUntil(wave.created_at);
   const ending = wave.wave.period?.max
     ? getTimeUntil(wave.wave.period.max)
-    : "Infinite";
+    : null;
   return (
     <div>
       <div>
@@ -70,15 +70,19 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                   {created}
                 </span>
               </div>
-              <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
-              <div className="tw-text-xs">
-                <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
-                  Ending
-                </span>
-                <span className="tw-font-normal tw-text-iron-400">
-                  {ending}
-                </span>
-              </div>
+              {ending && (
+                <>
+                  <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
+                  <div className="tw-text-xs">
+                    <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+                      Ending
+                    </span>
+                    <span className="tw-font-normal tw-text-iron-400">
+                      {ending}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
             <button
               type="button"

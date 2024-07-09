@@ -57,6 +57,7 @@ const CreateDropCompact = forwardRef<
     readonly onFileChange: (file: File | null) => void;
     readonly onDrop?: () => void;
     readonly onDropPart: () => void;
+    readonly removePart: (index: number) => void;
   }
 >(
   (
@@ -87,6 +88,7 @@ const CreateDropCompact = forwardRef<
       onFileChange,
       onDrop,
       onDropPart,
+      removePart,
     },
     ref
   ) => {
@@ -132,6 +134,7 @@ const CreateDropCompact = forwardRef<
             waveName={waveName}
             waveImage={waveImage}
             waveId={waveId}
+            removePart={removePart}
           />
         )}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">

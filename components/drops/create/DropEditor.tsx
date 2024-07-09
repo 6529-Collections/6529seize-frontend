@@ -39,6 +39,7 @@ const DropEditor = forwardRef<
     readonly waveName: string;
     readonly waveImage: string | null;
     readonly waveId: string | null;
+
     readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
     readonly onCanSubmitChange?: (canSubmit: boolean) => void;
   }
@@ -57,6 +58,7 @@ const DropEditor = forwardRef<
       waveName,
       waveImage,
       waveId,
+
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -64,6 +66,8 @@ const DropEditor = forwardRef<
   ) => {
     const [init, setInit] = useState(isClient);
     useEffect(() => setInit(true), []);
+
+
 
     const [title, setTitle] = useState<string | null>(null);
     const [metadata, setMetadata] = useState<DropMetadata[]>([]);

@@ -15,6 +15,8 @@ import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { ProfileMin } from "../../../generated/models/ProfileMin";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
 
+import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
+
 export enum CreateDropType {
   DROP = "DROP",
   QUOTE = "QUOTE",

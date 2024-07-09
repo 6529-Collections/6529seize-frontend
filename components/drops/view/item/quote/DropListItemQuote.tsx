@@ -4,6 +4,7 @@ import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
 
+
 export default function DropListItemQuote({
   waveId,
   quotedDropId,
@@ -21,7 +22,6 @@ export default function DropListItemQuote({
   readonly isDescriptionDrop: boolean;
   readonly waveName: string;
   readonly waveImage: string | null;
-
   readonly onSuccessfulDrop: () => void;
 }) {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);

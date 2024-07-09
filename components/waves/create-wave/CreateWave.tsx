@@ -43,6 +43,9 @@ import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWr
 import { CreateWaveDropRequest } from "../../../generated/models/CreateWaveDropRequest";
 import { Wave } from "../../../generated/models/Wave";
 import { useRouter } from "next/router";
+import { GroupFilterDirection } from "../../../generated/models/GroupFilterDirection";
+import { CreateGroup } from "../../../generated/models/CreateGroup";
+import { Time } from "../../../helpers/time";
 
 export default function CreateWave({
   profile,
@@ -52,7 +55,7 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const router = useRouter();
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
   const initialType = WaveType.Chat;
   const initialStep = CreateWaveStep.OVERVIEW;
@@ -74,8 +77,8 @@ export default function CreateWave({
       admin: null,
     },
     dates: {
-      submissionStartDate: getCurrentDayStartTimestamp(),
-      votingStartDate: getCurrentDayStartTimestamp(),
+      submissionStartDate: Time.currentMillis(),
+      votingStartDate: Time.currentMillis(),
       endDate: null,
     },
     drops: {
@@ -387,6 +390,96 @@ export default function CreateWave({
     if (haveDrop) setShowDropError(false);
   };
 
+  const makeGroupVisibleMutation = useMutation({
+    mutationFn: async (param: {
+      id: string;
+      body: { visible: true; old_version_id: string | null };
+    }) =>
+      await commonApiPost<
+        { visible: true; old_version_id: string | null },
+        GroupFull
+      >({
+        endpoint: `groups/${param.id}/visible`,
+        body: param.body,
+      }),
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
+  });
+
+  const createNewGroupMutation = useMutation({
+    mutationFn: async (body: CreateGroup) =>
+      await commonApiPost<CreateGroup, GroupFull>({
+        endpoint: `groups`,
+        body,
+      }),
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
+  });
+
+  const createOnlyMeGroup = async ({
+    primaryWallet,
+  }: {
+    readonly primaryWallet: string;
+  }): Promise<string | null> => {
+    const groupConfig: CreateGroup = {
+      name: `Only ${connectedProfile?.profile?.handle}`,
+      group: {
+        tdh: { min: null, max: null },
+        rep: {
+          min: null,
+          max: null,
+          direction: GroupFilterDirection.Received,
+          user_identity: null,
+          category: null,
+        },
+        cic: {
+          min: null,
+          max: null,
+          direction: GroupFilterDirection.Received,
+          user_identity: null,
+        },
+        level: { min: null, max: null },
+        owns_nfts: [],
+        identity_addresses: [primaryWallet],
+        excluded_identity_addresses: null,
+      },
+    };
+    const group = await createNewGroupMutation.mutateAsync(groupConfig);
+    if (!group) {
+      return null;
+    }
+    await makeGroupVisibleMutation.mutateAsync({
+      id: group.id,
+      body: { visible: true, old_version_id: null },
+    });
+    return group.id;
+  };
+
+  const getAdminGroupId = async (): Promise<string | null> => {
+    if (config.groups.admin) {
+      return config.groups.admin;
+    }
+    const primaryWallet = connectedProfile?.profile?.primary_wallet;
+    if (!primaryWallet) {
+      setSubmitting(false);
+      setToast({
+        message: "You need to have a primary wallet to create a wave",
+        type: "error",
+      });
+      return null;
+    }
+
+    return await createOnlyMeGroup({ primaryWallet });
+  };
+
   const onComplete = async () => {
     setSubmitting(true);
     const { success } = await requestAuth();
@@ -400,6 +493,13 @@ export default function CreateWave({
       setShowDropError(true);
       return;
     }
+
+    const adminGroupId = await getAdminGroupId();
+    if (!adminGroupId) {
+      setSubmitting(false);
+      return;
+    }
+
     const dropParts = await Promise.all(
       drop.parts.map((part) => generateDropPart(part))
     );
@@ -431,13 +531,19 @@ export default function CreateWave({
 
     const picture = await generateMediaForOverview(config.overview.image);
 
-    await addWaveMutation.mutateAsync(
-      getCreateNewWaveBody({
-        config,
-        picture: picture?.url ?? null,
-        drop: dropRequest,
-      })
-    );
+    const waveBody = getCreateNewWaveBody({
+      config: {
+        ...config,
+        groups: {
+          ...config.groups,
+          admin: adminGroupId,
+        },
+      },
+      picture: picture?.url ?? null,
+      drop: dropRequest,
+    });
+
+    await addWaveMutation.mutateAsync(waveBody);
   };
 
   const stepComponent: Record<CreateWaveStep, JSX.Element> = {

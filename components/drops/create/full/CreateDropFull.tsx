@@ -1,5 +1,4 @@
 import { EditorState } from "lexical";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import CreateDropFullDesktop, {
   CreateDropFullDesktopHandles,
@@ -54,6 +53,7 @@ const CreateDropFull = forwardRef<
     readonly onFileChange: (file: File | null) => void;
     readonly onDrop: () => void;
     readonly onDropPart: () => void;
+    readonly removePart: (index: number) => void;
   }
 >(
   (
@@ -86,6 +86,7 @@ const CreateDropFull = forwardRef<
       onFileChange,
       onDrop,
       onDropPart,
+      removePart,
     },
     ref
   ) => {
@@ -131,6 +132,7 @@ const CreateDropFull = forwardRef<
           onViewChange={onViewChange}
           onDrop={onDrop}
           onDropPart={onDropPart}
+          removePart={removePart}
         />
       ),
       [CreateDropScreenType.MOBILE]: (
@@ -162,6 +164,7 @@ const CreateDropFull = forwardRef<
           onViewChange={onViewChange}
           onDrop={onDrop}
           onDropPart={onDropPart}
+          removePart={removePart}
         />
       ),
     };
