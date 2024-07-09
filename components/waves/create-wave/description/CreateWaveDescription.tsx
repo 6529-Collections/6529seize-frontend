@@ -49,7 +49,7 @@ const CreateWaveDescription = forwardRef<
 
     return (
       <div>
-        <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
           Description
         </p>
         <p className="tw-mt-2 tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">

@@ -37,7 +37,7 @@ export default function CreateWaveVoting({
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
         {TITLES[waveType]}
       </p>
       <div className="tw-mt-3 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">

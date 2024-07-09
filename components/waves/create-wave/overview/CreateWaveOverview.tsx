@@ -36,7 +36,7 @@ export default function CreateWaveOverview({
         errors={errors}
       />
       <div className="tw-space-y-2">
-        <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
           Wave Profile Picture
         </p>
         <CreateWaveImageInput

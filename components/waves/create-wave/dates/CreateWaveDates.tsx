@@ -65,7 +65,7 @@ export default function CreateWaveDates({
   return (
     <div className="tw-relative tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-20 md:tw-grid-cols-2">
       <div className="tw-col-span-1">
-        <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
           {CREATE_WAVE_START_DATE_LABELS[waveType]}
         </p>
         <CommonCalendar
@@ -79,7 +79,7 @@ export default function CreateWaveDates({
       </div>
       {haveVotingStartDate && (
         <div className="tw-col-span-1">
-          <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+          <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
             Voting start date
           </p>
           <CommonCalendar

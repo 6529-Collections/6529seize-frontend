@@ -10,7 +10,7 @@ export default function CreateWaveDropsTypes({
 }) {
   return (
     <div>
-      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
         Required Types
       </p>
       <div className="tw-mt-3 tw-flex tw-gap-x-4 tw-gap-y-4">
