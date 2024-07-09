@@ -15,24 +15,26 @@ const CreateDropStormViewPart = memo(
     mentionedUsers,
     referencedNfts,
     createdAt,
-    isFirstPart,
     isDescriptionDrop,
     waveName,
     waveImage,
     dropTitle,
     waveId,
+    partIndex,
+    removePart,
   }: {
     readonly profile: ProfileMin;
     readonly part: CreateDropPart;
     readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
     readonly referencedNfts: Array<ReferencedNft>;
     readonly createdAt: number;
-    readonly isFirstPart: boolean;
     readonly isDescriptionDrop: boolean;
     readonly waveName: string;
     readonly waveImage: string | null;
     readonly dropTitle: string | null;
     readonly waveId: string | null;
+    readonly partIndex: number;
+    readonly removePart: (index: number) => void;
   }) => {
     const partMedia = part.media.length
       ? {
@@ -53,7 +55,7 @@ const CreateDropStormViewPart = memo(
             partContent={part.content}
             partMedia={partMedia}
             createdAt={createdAt}
-            isFirstPart={isFirstPart}
+            isFirstPart={partIndex === 0}
             isDescriptionDrop={isDescriptionDrop}
             waveName={waveName}
             dropTitle={dropTitle}
@@ -67,6 +69,7 @@ const CreateDropStormViewPart = memo(
             />
           )}
           <div
+            onClick={() => removePart(partIndex)}
             role="button"
             aria-label="Remove part"
             className="tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full hover:tw-bg-iron-900 tw-text-iron-300 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"

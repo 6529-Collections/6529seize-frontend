@@ -14,6 +14,7 @@ import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
+  CreateDropPart,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -26,6 +27,13 @@ import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
+import { useQuery } from "@tanstack/react-query";
+import { Wave } from "../../../../generated/models/Wave";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
+import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -112,6 +120,18 @@ const CreateDropWrapper = forwardRef<
         setScreenType(CreateDropScreenType.MOBILE);
       }
     }, [breakpoint]);
+
+    const { data: wave } = useQuery<Wave>({
+      queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+      queryFn: async () =>
+        await commonApiFetch<Wave>({
+          endpoint: `waves/${waveId}`,
+        }),
+      enabled: !!waveId,
+    });
+
+    useEffect(() => console.log(wave), [wave]);
+
     const [isStormMode, setIsStormMode] = useState(false);
     const [editorState, setEditorState] = useState<EditorState | null>(null);
     const [file, setFile] = useState<File | null>(null);
@@ -154,8 +174,97 @@ const CreateDropWrapper = forwardRef<
           HASHTAG_TRANSFORMER,
         ])
       ) ?? null;
+
+    const getMissingRequiredMetadata = (): WaveRequiredMetadata[] => {
+      if (!waveId) {
+        return [];
+      }
+
+      if (!wave) {
+        return [];
+      }
+
+      if (!metadata.length) {
+        return wave.participation.required_metadata;
+      }
+      return wave.participation.required_metadata.filter((i) => {
+        const item = metadata.find((j) => j.data_key === i.name);
+        if (!item) {
+          return true;
+        }
+        if (!item.data_value.length) {
+          return true;
+        }
+        if (
+          i.type === WaveMetadataType.Number &&
+          isNaN(Number(item.data_value))
+        ) {
+          return true;
+        }
+        return false;
+      });
+    };
+
+    const getRequirementFromFileType = (
+      file: File
+    ): WaveParticipationRequirement | null => {
+      if (file.type.startsWith("image/"))
+        return WaveParticipationRequirement.Image;
+      if (file.type.startsWith("audio/"))
+        return WaveParticipationRequirement.Audio;
+      if (file.type.startsWith("video/"))
+        return WaveParticipationRequirement.Video;
+      return null; // Unknown or unsupported file type
+    };
+
+    const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
+      if (!waveId) {
+        return [];
+      }
+
+      if (!wave) {
+        return [];
+      }
+      if (!drop?.parts.length && !file) {
+        return wave.participation.required_media;
+      }
+      const medias = drop?.parts.length
+        ? drop.parts.reduce<File[]>(
+            (acc, part) => [...acc, ...(part.media ?? [])],
+            file ? [file] : []
+          )
+        : file
+        ? [file]
+        : [];
+      return wave.participation.required_media.filter((i) => {
+        const file = medias.find((j) => getRequirementFromFileType(j) === i);
+        if (!file) {
+          return true;
+        }
+        return false;
+      });
+    };
+
+    const [missingMedia, setMissingMedia] = useState<
+      WaveParticipationRequirement[]
+    >(getMissingRequiredMedia());
+
+    const [missingMetadata, setMissingMetadata] = useState<
+      WaveRequiredMetadata[]
+    >(getMissingRequiredMetadata());
+
+    useEffect(() => {
+      setMissingMetadata(getMissingRequiredMetadata());
+    }, [waveId, wave, drop, metadata]);
+
+    useEffect(() => {
+      setMissingMedia(getMissingRequiredMedia());
+    }, [waveId, wave, drop, file]);
+
     const getCanSubmit = () =>
-      !!getMarkdown() || !!file || !!drop?.parts.length;
+      !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
+      // !missingMedia.length;
+      !missingMetadata.length;
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
@@ -171,7 +280,7 @@ const CreateDropWrapper = forwardRef<
     useEffect(() => {
       setCanSubmit(getCanSubmit());
       setCanAddPart(getCanAddPart());
-    }, [editorState, file, drop]);
+    }, [editorState, file, drop, missingMedia]);
 
     useEffect(() => {
       if (!onCanSubmitChange) {
@@ -269,6 +378,19 @@ const CreateDropWrapper = forwardRef<
       requestDrop,
     }));
 
+    const onRemovePart = (index: number) => {
+      if (!drop?.parts.length) {
+        return;
+      }
+      const updatedParts: CreateDropPart[] = [...drop.parts];
+
+      updatedParts.splice(index, 1);
+      setDrop({
+        ...drop,
+        parts: updatedParts,
+      });
+    };
+
     const components: Record<CreateDropViewType, JSX.Element> = {
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
@@ -299,6 +421,7 @@ const CreateDropWrapper = forwardRef<
           onFileChange={setFile}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
+          removePart={onRemovePart}
         />
       ),
       [CreateDropViewType.FULL]: (
@@ -332,6 +455,7 @@ const CreateDropWrapper = forwardRef<
           onFileChange={setFile}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
+          removePart={onRemovePart}
         />
       ),
     };

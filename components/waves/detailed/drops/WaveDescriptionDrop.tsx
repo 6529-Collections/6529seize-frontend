@@ -22,7 +22,10 @@ export default function WaveDescriptionDrop({ wave }: { readonly wave: Wave }) {
         </svg>
         <span>Description Drop</span>
       </div>
-      <DropsListItem drop={wave.description_drop} showWaveInfo={false} />
+      <DropsListItem
+        drop={wave.description_drop}
+        showWaveInfo={false}
+      />
     </div>
   );
 }

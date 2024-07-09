@@ -1,4 +1,5 @@
 import { CalendarDay } from "../../../helpers/calendar/calendar.helpers";
+import { Time } from "../../../helpers/time";
 
 enum CalendarDaySate {
   NOT_ACTIVE_MONTH = "NOT_ACTIVE_MONTH",
@@ -39,7 +40,11 @@ export default function CommonCalendarDay({
     if (maxTimestamp && day.startTimestamp > maxTimestamp) {
       return CalendarDaySate.MANUALLY_DISABLED;
     }
-    if (day.startTimestamp === selectedTimestamp) {
+    if (
+      selectedTimestamp &&
+      day.startTimestamp <= selectedTimestamp &&
+      day.startTimestamp + Time.days(1).toMillis() > selectedTimestamp
+    ) {
       return CalendarDaySate.ACTIVE;
     }
     return CalendarDaySate.AVAILABLE;

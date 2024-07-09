@@ -11,14 +11,14 @@ export default function WaveGroupViewIcon() {
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
-        stroke-Linejoin="round"
+        strokeLinejoin="round"
       />
       <path
         d="M12.0004 15C13.6573 15 15.0004 13.6569 15.0004 12C15.0004 10.3431 13.6573 9 12.0004 9C10.3435 9 9.0004 10.3431 9.0004 12C9.0004 13.6569 10.3435 15 12.0004 15Z"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
-        stroke-Linejoin="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

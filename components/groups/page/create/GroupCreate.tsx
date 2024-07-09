@@ -40,14 +40,14 @@ export default function GroupCreate({
       QueryKey.GROUP_WALLET_GROUP_WALLETS,
       {
         group_id: originalGroup?.id,
-        wallet_group_id: originalGroup?.group.wallet_group_id,
+        wallet_group_id: originalGroup?.group.identity_group_id,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<string[]>({
-        endpoint: `groups/${originalGroup?.id}/wallet_groups/${originalGroup?.group.wallet_group_id}`,
+        endpoint: `groups/${originalGroup?.id}/identity_groups/${originalGroup?.group.identity_group_id}`,
       }),
-    enabled: !!originalGroup?.id && !!originalGroup?.group.wallet_group_id,
+    enabled: !!originalGroup?.id && !!originalGroup?.group.identity_group_id,
   });
 
   const [isFetching, setIsFetching] = useState(
@@ -76,8 +76,8 @@ export default function GroupCreate({
       },
       level: { min: null, max: null },
       owns_nfts: [],
-      wallets: null,
-      excluded_wallets: null,
+      identity_addresses: null,
+      excluded_identity_addresses: null,
     },
   });
 
@@ -110,8 +110,8 @@ export default function GroupCreate({
           max: originalGroup.group.level?.max,
         },
         owns_nfts: originalGroup.group.owns_nfts,
-        wallets: originalGroupWallets ?? [],
-        excluded_wallets: null
+        identity_addresses: originalGroupWallets ?? [],
+        excluded_identity_addresses: null,
       },
     });
   }, [originalGroup, originalGroupWallets]);
@@ -145,7 +145,7 @@ export default function GroupCreate({
               tdh={groupConfig.group.tdh}
               cic={groupConfig.group.cic}
               rep={groupConfig.group.rep}
-              wallets={groupConfig.group.wallets}
+              wallets={groupConfig.group.identity_addresses}
               setLevel={(level) =>
                 setGroupConfig((prev) => ({
                   ...prev,
@@ -176,7 +176,7 @@ export default function GroupCreate({
               setWallets={(wallets) =>
                 setGroupConfig((prev) => ({
                   ...prev,
-                  group: { ...prev.group, wallets },
+                  group: { ...prev.group, identity_addresses: wallets },
                 }))
               }
             />

@@ -164,7 +164,7 @@ import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileIn
 import { RepRating } from '../models/RepRating';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
-import { WaveConfig       } from '../models/WaveConfig';
+import { WaveConfig        } from '../models/WaveConfig';
 import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';

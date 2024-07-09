@@ -45,7 +45,6 @@ export default function CreateWaveGroup({
     setSelectedGroup(null);
   };
 
-  const randomUUID = getRandomObjectId();
   return (
     <div>
       <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">

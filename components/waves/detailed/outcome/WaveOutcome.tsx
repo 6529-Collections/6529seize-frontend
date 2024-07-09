@@ -63,7 +63,7 @@ export default function WaveOutcome() {
                               stroke="currentColor"
                               stroke-width="2"
                               stroke-linecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                             ></path>
                           </svg>
                           <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
@@ -98,7 +98,7 @@ export default function WaveOutcome() {
                               stroke="currentColor"
                               stroke-width="2"
                               stroke-linecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                             ></path>
                           </svg>
                           <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
@@ -133,7 +133,7 @@ export default function WaveOutcome() {
                               stroke="currentColor"
                               stroke-width="2"
                               stroke-linecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                             ></path>
                           </svg>
                           <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
@@ -172,7 +172,7 @@ export default function WaveOutcome() {
                               stroke="currentColor"
                               stroke-width="2"
                               stroke-linecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                             ></path>
                           </svg>
                           <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">
@@ -207,7 +207,7 @@ export default function WaveOutcome() {
                               stroke="currentColor"
                               stroke-width="2"
                               stroke-linecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                             ></path>
                           </svg>
                           <p className="tw-mb-0 tw-text-xs tw-text-white tw-font-normal tw-truncate">

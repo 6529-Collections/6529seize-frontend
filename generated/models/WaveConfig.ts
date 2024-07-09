@@ -28,6 +28,7 @@ export class WaveConfig {
     'time_lock_ms': number | null;
     'admin_group': WaveScope;
     'period': IntRange | null;
+    'authenticated_user_eligible_for_admin': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -66,6 +67,12 @@ export class WaveConfig {
             "name": "period",
             "baseName": "period",
             "type": "IntRange",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_eligible_for_admin",
+            "baseName": "authenticated_user_eligible_for_admin",
+            "type": "boolean",
             "format": ""
         }    ];
 

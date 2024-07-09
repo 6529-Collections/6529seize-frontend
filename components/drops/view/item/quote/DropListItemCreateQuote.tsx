@@ -6,6 +6,7 @@ import { Drop } from "../../../../../generated/models/Drop";
 import { useRouter } from "next/router";
 import { Wave } from "../../../../../generated/models/Wave";
 
+
 export default function DropListItemCreateQuote({
   drop,
   quotedPartId,
@@ -13,6 +14,7 @@ export default function DropListItemCreateQuote({
 }: {
   readonly drop: Drop;
   readonly quotedPartId: number | null;
+
   readonly onSuccessfulQuote: () => void;
 }) {
   const router = useRouter();
@@ -22,19 +24,19 @@ export default function DropListItemCreateQuote({
   const elemRef = useRef<HTMLDivElement | null>(null);
 
   const scrollIntoView = () => {
-    // if (!quotedPartId) {
-    //   return;
-    // }
-    // if (!elemRef.current) {
-    //   return;
-    // }
-    // elemRef.current.scrollIntoView({
-    //   behavior: "smooth",
-    //   block: "center",
-    // });
+    if (!quotedPartId) {
+      return;
+    }
+    if (!elemRef.current) {
+      return;
+    }
+    elemRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   };
 
-  // useEffect(() => scrollIntoView(), [quotedPartId]);
+  useEffect(() => scrollIntoView(), [quotedPartId]);
 
   return (
     <div ref={elemRef}>

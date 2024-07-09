@@ -5,17 +5,41 @@ import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDrop, { CreateDropType } from "../../../drops/create/CreateDrop";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
 import { Wave } from "../../../../generated/models/Wave";
+import { Time } from "../../../../helpers/time";
 
 export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
-  const { connectedProfile, connectionStatus } = useContext(AuthContext);
+  const { connectedProfile, connectionStatus, activeProfileProxy } =
+    useContext(AuthContext);
+
+  const submissionIsStarted = wave.participation.period?.min
+    ? wave.participation.period.min <= Time.currentMillis()
+    : true;
+
+  const submissionIsEnded = wave.participation.period?.max
+    ? wave.participation.period.max <= Time.currentMillis()
+    : false;
 
   const getInfoText = (): string => {
+    if (!submissionIsStarted) {
+      return "Submission has not started yet";
+    }
+
+    if (submissionIsEnded) {
+      return "Submission has ended";
+    }
+
     switch (connectionStatus) {
       case ProfileConnectedStatus.NOT_CONNECTED:
         return "Please connect to create a drop";
       case ProfileConnectedStatus.NO_PROFILE:
         return "Please make a profile to create a drop";
       case ProfileConnectedStatus.HAVE_PROFILE:
+        if (
+          !wave.participation.authenticated_user_eligible ||
+          activeProfileProxy
+        ) {
+          return "You are not eligible to create a drop in this wave";
+        }
         return "";
       default:
         assertUnreachable(connectionStatus);
@@ -31,7 +55,11 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
 
   if (
     connectedProfile &&
-    connectionStatus === ProfileConnectedStatus.HAVE_PROFILE
+    connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
+    wave.participation.authenticated_user_eligible &&
+    !activeProfileProxy &&
+    submissionIsStarted &&
+    !submissionIsEnded
   ) {
     return (
       <CreateDrop
@@ -46,5 +74,9 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
     );
   }
 
-  return <CommonInfoBox message={infoText} />;
+  return (
+    <div className="tw-w-full">
+      <CommonInfoBox message={infoText} widthFull={true} />
+    </div>
+  );
 }

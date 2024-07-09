@@ -9,7 +9,6 @@ import WaveSpecs from "./specs/WaveSpecs";
 import WaveGroups from "./groups/WaveGroups";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
-  console.log(wave);
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">
       <WaveHeader wave={wave} />

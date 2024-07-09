@@ -18,7 +18,8 @@ export default function DropListItemRateGive({
 }: {
   readonly drop: Drop;
   readonly availableRates: number;
-}) {
+  }) {
+  
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [

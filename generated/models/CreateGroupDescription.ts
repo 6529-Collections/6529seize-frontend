@@ -23,8 +23,8 @@ export class CreateGroupDescription {
     'cic': GroupCicFilter;
     'level': GroupLevelFilter;
     'owns_nfts': Array<GroupOwnsNft>;
-    'wallets': Array<string> | null;
-    'excluded_wallets': Array<string> | null;
+    'identity_addresses': Array<string> | null;
+    'excluded_identity_addresses': Array<string> | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -60,14 +60,14 @@ export class CreateGroupDescription {
             "format": ""
         },
         {
-            "name": "wallets",
-            "baseName": "wallets",
+            "name": "identity_addresses",
+            "baseName": "identity_addresses",
             "type": "Array<string>",
             "format": ""
         },
         {
-            "name": "excluded_wallets",
-            "baseName": "excluded_wallets",
+            "name": "excluded_identity_addresses",
+            "baseName": "excluded_identity_addresses",
             "type": "Array<string>",
             "format": ""
         }    ];

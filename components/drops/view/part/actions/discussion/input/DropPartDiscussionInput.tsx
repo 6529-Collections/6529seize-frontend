@@ -11,6 +11,7 @@ import { commonApiPost } from "../../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../../auth/Auth";
 import { NewDropComment } from "../../../../../../../generated/models/NewDropComment";
 import { DropComment } from "../../../../../../../generated/models/DropComment";
+import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 
 enum ScreenType {
   DESKTOP = "DESKTOP",
@@ -27,6 +28,7 @@ export default function DropPartDiscussionInput({
   readonly dropPart: DropPart;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
+  const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
   const author = drop.author;
   const [comment, setComment] = useState<string | null>(null);
   const [addingComment, setAddingComment] = useState<boolean>(false);
@@ -55,6 +57,10 @@ export default function DropPartDiscussionInput({
     },
     onSuccess: () => {
       setComment(null);
+      onDropDiscussionChange({
+        dropAuthorHandle: author?.handle,
+        dropId: drop.id,
+      });
     },
     onError: (error) => {
       setToast({

@@ -9,18 +9,21 @@ import { getRandomColorWithSeed } from "../../../../helpers/Helpers";
 import DropListItemExternalLink from "./utils/DropListItemExternalLink";
 import Link from "next/link";
 
+
 export default function DropsListItem({
   drop,
   showFull = false,
   showExternalLink = true,
   isWaveDescriptionDrop = false,
   showWaveInfo = true,
+
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
   readonly showExternalLink?: boolean;
   readonly isWaveDescriptionDrop?: boolean;
   readonly showWaveInfo?: boolean;
+
 }) {
   const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
