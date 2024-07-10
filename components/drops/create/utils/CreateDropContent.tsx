@@ -313,18 +313,25 @@ const CreateDropContent = forwardRef<
             </div>
           </div>
         </LexicalComposer>
-        <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          <p className="tw-mb-0">
-            {currentPartCount > 1 && (
+        <div className="tw-mt-2 tw-pb-2 tw-flex tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
+          {currentPartCount > 1 && (
+            <p className="tw-mb-0">
               <>
-                <span className="tw-font-semibold tw-text-iron-300">
-                  Part: {currentPartCount},
+                <span className="tw-font-semibold tw-text-iron-500">
+                  Part:{" "}
+                  <span className="tw-text-iron-50">{currentPartCount}</span>,
                 </span>
                 <span className="tw-pl-1">
                   length: {formatNumberWithCommas(charsCount)}
                 </span>
               </>
-            )}
+            </p>
+          )}
+          <p className="tw-mb-0">
+            <span className="tw-font-semibold tw-text-iron-500">Drops:</span>
+            <span className="tw-pl-1 tw-text-iron-50">
+              <span>4</span>/<span>5</span>
+            </span>
           </p>
           {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
@@ -337,7 +344,7 @@ const CreateDropContent = forwardRef<
         <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
           <CreateDropSelectFileAudio onFileChange={onFileChange} />
           <CreateDropSelectFileVideo onFileChange={onFileChange} />
-          <CreateDropSelectFileImage  onFileChange={onFileChange} />
+          <CreateDropSelectFileImage onFileChange={onFileChange} />
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <svg
               className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"

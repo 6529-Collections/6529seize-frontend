@@ -14,14 +14,14 @@ export default function CreateDropSelectFile({
 }) {
   return (
     <div>
-      <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
+      {/* <label className="tw-block tw-font-medium tw-text-iron-300 tw-text-sm">
         Upload Media
       </label>
       <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-1">
         <CreateDropSelectFileImage onFileChange={onFileChange} />
         <CreateDropSelectFileVideo onFileChange={onFileChange} />
         <CreateDropSelectFileAudio onFileChange={onFileChange} />
-      </div>
+      </div> */}
 
       {file && (
         <div className="tw-mt-2 tw-w-full">
