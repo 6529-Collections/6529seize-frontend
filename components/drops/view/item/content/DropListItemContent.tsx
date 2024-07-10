@@ -89,7 +89,7 @@ export default function DropListItemContent({
             {showStormExpandButton && index === 0 && (
               <button
                 type="button"
-                className="tw-ml-12 tw-mt-2 tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-py-1.5 tw-text-iron-300 hover:tw-text-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-primary-400 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+                className="sm:tw-ml-12 tw-mt-2 tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-py-1.5 tw-text-iron-300 hover:tw-text-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-primary-400 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
                 onClick={() => setIsFullMode(true)}
               >
                 <svg

@@ -212,7 +212,7 @@ const DropPart = memo(
                   isWaveDescriptionDrop={isDescriptionDrop}
                 />
               </div>
-              <div className="tw-flex tw-flex-col tw-w-full tw-h-full">
+              <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
                 <div className="tw-flex tw-gap-x-3">
                   <div className="sm:tw-hidden">
                     <DropPfp
@@ -360,7 +360,7 @@ const DropPart = memo(
           </div>
         </CommonAnimationHeight>
         {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
-          <div>
+          <div className="sm:tw-ml-14">
             <DropListItemContentMedia
               media_mime_type={partMedia.mimeType}
               media_url={partMedia.mediaSrc}
