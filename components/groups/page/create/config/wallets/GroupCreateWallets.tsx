@@ -32,6 +32,8 @@ export default function GroupCreateWallets({
     setEmmaWallets(null);
   };
 
+  useEffect(() => console.log(wallets), [wallets]);
+
   return (
     <div className="tw-col-span-full">
       <div className="tw-inline-flex tw-items-center tw-space-x-4">
