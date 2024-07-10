@@ -132,8 +132,7 @@ export default function GroupCardConfigs({
 
   const getConfigs = (): GroupCardConfigProps[] => {
     const configs: GroupCardConfigProps[] = [];
-    const { tdh, rep, cic, level, identity_group_identities_count } =
-      group.group;
+    const { tdh, rep, cic, level, identity_group_identities_count } = group.group;
     const tdhConfig = getTdhConfig(tdh);
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);

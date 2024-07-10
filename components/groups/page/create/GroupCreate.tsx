@@ -111,7 +111,7 @@ export default function GroupCreate({
         },
         owns_nfts: originalGroup.group.owns_nfts,
         identity_addresses: originalGroupWallets ?? [],
-        excluded_identity_addresses: null,
+        excluded_identity_addresses: [],
       },
     });
   }, [originalGroup, originalGroupWallets]);
