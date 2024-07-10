@@ -8,12 +8,14 @@ export default function DropPartActionTriggers({
   drop,
   dropPart,
   isDiscussionOpen,
+  isFirstPart,
   setIsDiscussionOpen,
   onQuote,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly isDiscussionOpen: boolean;
+  readonly isFirstPart: boolean;
   readonly setIsDiscussionOpen: (open: boolean) => void;
   readonly onQuote: (dropPartId: number) => void;
 }) {
@@ -71,7 +73,7 @@ export default function DropPartActionTriggers({
           )}
         </>
       </button>
-      <DropPartActionTriggersVote drop={drop} />
+      {isFirstPart && <DropPartActionTriggersVote drop={drop} />}
     </div>
   );
 }
