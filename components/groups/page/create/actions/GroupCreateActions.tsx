@@ -57,7 +57,7 @@ export default function GroupCreateActions({
     if (groupConfig.group.owns_nfts.length) {
       return false;
     }
-    if (groupConfig.group.wallets?.length) {
+    if (groupConfig.group.identity_addresses?.length) {
       return false;
     }
     return true;

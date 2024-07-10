@@ -10,39 +10,33 @@
  * Do not edit the class manually.
  */
 
-import { WaveMetadataType } from '../models/WaveMetadataType';
 import { HttpFile } from '../http/http';
 
-export class WaveRequiredMetadata {
-    /**
-    * Metadata key
-    */
-    'name': string;
-    'type': WaveMetadataType;
+export class WaveContributorOverview {
+    'contributor_identity': string;
+    'contributor_pfp': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "name",
-            "baseName": "name",
+            "name": "contributor_identity",
+            "baseName": "contributor_identity",
             "type": "string",
             "format": ""
         },
         {
-            "name": "type",
-            "baseName": "type",
-            "type": "WaveMetadataType",
+            "name": "contributor_pfp",
+            "baseName": "contributor_pfp",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WaveRequiredMetadata.attributeTypeMap;
+        return WaveContributorOverview.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-
 
