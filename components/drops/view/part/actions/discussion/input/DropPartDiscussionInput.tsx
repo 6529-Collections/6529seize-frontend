@@ -27,7 +27,7 @@ export default function DropPartDiscussionInput({
   readonly drop: Drop;
   readonly dropPart: DropPart;
 }) {
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
   const author = drop.author;
   const [comment, setComment] = useState<string | null>(null);
@@ -89,7 +89,7 @@ export default function DropPartDiscussionInput({
     <div>
       <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
         <div className="tw-hidden sm:tw-block">
-          <DropPfp pfpUrl={author?.pfp} />
+          <DropPfp pfpUrl={connectedProfile?.profile?.pfp_url} />
         </div>
         <form
           className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3"
