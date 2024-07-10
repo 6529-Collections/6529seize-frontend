@@ -31,11 +31,11 @@ export default function DropPartWrapper({
     >
       <div className="tw-flex-1">
         {children}
-        <div className="tw-ml-12">
+        <div className="sm:tw-ml-12">
           {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
         </div>
       </div>
-      <div className="md:tw-ml-12">
+      <div className="sm:tw-ml-12">
         <DropPartActionTriggers
           drop={drop}
           dropPart={dropPart}
