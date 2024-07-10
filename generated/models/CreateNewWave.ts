@@ -13,7 +13,8 @@
 import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
 import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
 import { CreateNewWaveVotingConfig } from '../models/CreateNewWaveVotingConfig';
-import { WaveConfig } from '../models/WaveConfig';
+import { CreateWaveConfig } from '../models/CreateWaveConfig';
+import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { WaveOutcome } from '../models/WaveOutcome';
 import { HttpFile } from '../http/http';
 
@@ -23,13 +24,14 @@ export class CreateNewWave {
     */
     'name': string;
     /**
-    * The description of the wave
+    * The picture of the wave
     */
-    'description': string;
+    'picture': string | null;
+    'description_drop': CreateWaveDropRequest;
     'voting': CreateNewWaveVotingConfig;
     'visibility': CreateNewWaveVisibilityConfig;
     'participation': CreateNewWaveParticipationConfig;
-    'wave': WaveConfig;
+    'wave': CreateWaveConfig;
     'outcomes': Array<WaveOutcome>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -42,9 +44,15 @@ export class CreateNewWave {
             "format": ""
         },
         {
-            "name": "description",
-            "baseName": "description",
+            "name": "picture",
+            "baseName": "picture",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "description_drop",
+            "baseName": "description_drop",
+            "type": "CreateWaveDropRequest",
             "format": ""
         },
         {
@@ -68,7 +76,7 @@ export class CreateNewWave {
         {
             "name": "wave",
             "baseName": "wave",
-            "type": "WaveConfig",
+            "type": "CreateWaveConfig",
             "format": ""
         },
         {
