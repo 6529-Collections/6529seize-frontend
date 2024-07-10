@@ -1,15 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Clap.module.scss";
 import mojs from "@mojs/core";
 import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
-import {
-  assertUnreachable,
-  getRandomObjectId,
-} from "../../../../../../../helpers/AllowlistToolHelpers";
-import { AuthContext } from "../../../../../../auth/Auth";
-import { ProfileConnectedStatus } from "../../../../../../../entities/IProfile";
+import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
-import { Drop } from "../../../../../../../generated/models/Drop";
+import { DropVoteState, VOTE_STATE_ERRORS } from "../../../DropsListItem";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",
@@ -18,17 +13,18 @@ enum RateStatus {
 }
 
 export default function DropListItemRateGiveClap({
-  drop,
   rate,
-  availableRates,
+  availableCredit,
+  voteState,
+  canVote,
   onSubmit,
 }: {
-  readonly drop: Drop;
   readonly rate: number;
-  readonly availableRates: number;
+  readonly availableCredit: number;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
   readonly onSubmit: () => void;
 }) {
-  const { connectionStatus, connectedProfile } = useContext(AuthContext);
   const positiveRgba = "rgba(39, 174, 96, 1)";
   const negativeRgba = "rgba(192, 57, 43, 1)";
 
@@ -125,7 +121,7 @@ export default function DropListItemRateGiveClap({
   };
 
   const handleClick = () => {
-    if (connectionStatus !== ProfileConnectedStatus.HAVE_PROFILE) return;
+    if (!canVote) return;
     const status = getRateStatus();
     if (status === RateStatus.NEUTRAL) return;
     animationTimeline.replay();
@@ -143,23 +139,8 @@ export default function DropListItemRateGiveClap({
     [RateStatus.NEUTRAL]: `hover:tw-border-iron-500`,
   };
 
-  const getCanRate = () => {
-    return (
-      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
-      connectedProfile?.profile?.handle.toLowerCase() !==
-        drop.author.handle.toLowerCase() &&
-      !!availableRates
-    );
-  };
-
-  const [canRate, setCanRate] = useState(getCanRate());
-
-  useEffect(() => {
-    setCanRate(getCanRate());
-  }, [connectionStatus, connectedProfile, drop, availableRates]);
-
   const getClapClasses = () => {
-    if (!canRate) {
+    if (!canVote) {
       return CLAP_CLASSES[RateStatus.NEUTRAL];
     }
     const rateStatus = getRateStatus();
@@ -173,7 +154,7 @@ export default function DropListItemRateGiveClap({
   };
 
   const getTextClasses = () => {
-    if (!canRate) {
+    if (!canVote) {
       return TEXT_CLASSES[RateStatus.NEUTRAL];
     }
     const rateStatus = getRateStatus();
@@ -187,7 +168,7 @@ export default function DropListItemRateGiveClap({
   };
 
   const getClapCountColorClasses = () => {
-    if (!canRate) {
+    if (!canVote) {
       return CLAP_COUNT_COLOR_CLASSES[RateStatus.NEUTRAL];
     }
     const rateStatus = getRateStatus();
@@ -219,39 +200,11 @@ export default function DropListItemRateGiveClap({
     getClapCountClasses()
   );
 
-  const getTooltipContent = () => {
-    if (
-      connectedProfile?.profile?.handle.toLowerCase() ===
-      drop.author.handle.toLowerCase()
-    ) {
-      return "You can't vote your own drop";
-    }
-    switch (connectionStatus) {
-      case ProfileConnectedStatus.HAVE_PROFILE:
-        if (!availableRates) {
-          return "You don't have any available credits to vote";
-        }
-        return null;
-      case ProfileConnectedStatus.NOT_CONNECTED:
-        return "Connect your profile to vote";
-      case ProfileConnectedStatus.NO_PROFILE:
-        return "Create a profile to vote";
-      default:
-        assertUnreachable(connectionStatus);
-        return "";
-    }
-  };
-
-  const [tooltipContent, setTooltipContent] = useState<string | null>(
-    getTooltipContent()
-  );
-
   useEffect(() => {
     setCountShort(getCountShort());
     setClapClasses(getClapClasses());
     setTextClasses(getTextClasses());
     setClapCountClasses(getClapCountClasses());
-    setTooltipContent(getTooltipContent());
     const burstColor = rate > 0 ? positiveRgba : negativeRgba;
     triangleBurst?.tune({
       children: {
@@ -263,18 +216,18 @@ export default function DropListItemRateGiveClap({
         fill: burstColor,
       },
     });
-  }, [rate, canRate, connectedProfile, availableRates]);
+  }, [rate, availableCredit]);
 
   return (
     <LazyTippy
       placement="top"
       interactive={false}
-      disabled={!tooltipContent}
-      content={<div>{tooltipContent}</div>}
+      disabled={canVote}
+      content={<div>{VOTE_STATE_ERRORS[voteState]}</div>}
     >
       <div className="tailwind-scope">
         <button
-          disabled={!rate || !canRate}
+          disabled={!rate || !canVote}
           id={`clap-${randomID}`}
           className={`${clapClasses} tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={handleClick}

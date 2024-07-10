@@ -5,6 +5,7 @@ import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHe
 import DropPartWrapper from "../../part/DropPartWrapper";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
+import { DropVoteState } from "../DropsListItem";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -14,10 +15,14 @@ export enum DropContentPartType {
 export default function DropListItemContent({
   drop,
   showFull = false,
+  voteState,
+  canVote,
   onQuote,
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
   readonly onQuote: (dropPartId: number) => void;
 }) {
   const [isFullMode, setIsFullMode] = useState(showFull);
@@ -62,6 +67,8 @@ export default function DropListItemContent({
             isFirstPart={index === 0}
             dropPart={part}
             drop={drop}
+            voteState={voteState}
+            canVote={canVote}
             onQuote={onQuote}
           >
             <DropPart

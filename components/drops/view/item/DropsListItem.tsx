@@ -1,18 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import DropListItemData from "./data/DropListItemData";
 import DropListItemContent from "./content/DropListItemContent";
-import DropListItemRateWrapper from "./rate/DropListItemRateWrapper";
-import DropsListItemChallengeBar from "./challenge/DropsListItemChallengeBar";
 import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { getRandomColorWithSeed } from "../../../../helpers/Helpers";
-import DropListItemExternalLink from "./utils/DropListItemExternalLink";
 import Link from "next/link";
 import { AuthContext } from "../../../auth/Auth";
-import { useQuery } from "@tanstack/react-query";
-import { ProfileAvailableDropRateResponse } from "../../../../entities/IProfile";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import DropListItemRateGive from "./rate/give/DropListItemRateGive";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -24,17 +18,25 @@ export enum DropVoteState {
   CAN_VOTE = "CAN_VOTE",
 }
 
+export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
+  [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to vote",
+  [DropVoteState.NO_PROFILE]: "Create a profile to vote",
+  [DropVoteState.PROXY]: "Proxy can't vote",
+  [DropVoteState.AUTHOR]: "You can't vote for your own drop",
+  [DropVoteState.CANT_VOTE]: "You are not eligible to vote",
+  [DropVoteState.NO_CREDIT]: "You don't have enough credit to vote",
+  [DropVoteState.CAN_VOTE]: null,
+};
+
 export default function DropsListItem({
   drop,
   showFull = false,
-  showExternalLink = true,
   isWaveDescriptionDrop = false,
   showWaveInfo = true,
   availableCredit,
 }: {
   readonly drop: Drop;
   readonly showFull?: boolean;
-  readonly showExternalLink?: boolean;
   readonly isWaveDescriptionDrop?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
@@ -57,31 +59,22 @@ export default function DropsListItem({
     if (!drop.wave.authenticated_user_eligible_to_vote) {
       return DropVoteState.CANT_VOTE;
     }
-    if (!!availableCredit && !drop.context_profile_context?.rating) {
+    if (!availableCredit) {
       return DropVoteState.NO_CREDIT;
     }
 
     return DropVoteState.CAN_VOTE;
   };
 
-  const getMaxAbsoluteCredit = (): number => {
-    const voteState = getVoteState();
-    if (voteState !== DropVoteState.CAN_VOTE) {
-      return 0;
-    }
-    const currentRating = Math.abs(drop.context_profile_context?.rating ?? 0);
-    return (availableCredit ?? 0) + currentRating;
-  };
-
   const [voteState, setVoteState] = useState<DropVoteState>(getVoteState());
-  const [maxAbsoluteCredit, setMaxAbsoluteCredit] = useState<number>(
-    getMaxAbsoluteCredit()
-  );
 
   useEffect(() => {
     setVoteState(getVoteState());
-    setMaxAbsoluteCredit(getMaxAbsoluteCredit());
   }, [connectedProfile, activeProfileProxy, drop, availableCredit]);
+
+  const getCanVote = () => voteState === DropVoteState.CAN_VOTE;
+  const [canVote, setCanVote] = useState(getCanVote());
+  useEffect(() => setCanVote(getCanVote()), [voteState]);
 
   const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
@@ -101,20 +94,11 @@ export default function DropsListItem({
 
   return (
     <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
-      {/* {isWaveDescriptionDrop ? (
-        <div
-          className="tw-relative tw-w-full tw-h-7 tw-rounded-t-xl"
-          style={{
-            background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-          }}
-        ></div>
-      ) : (
-        <DropsListItemChallengeBar
-          maxValue={100000}
-          current={drop.rating}
-          myRate={drop.context_profile_context?.rating ?? null}
-        />
-      )} */}
+      {/* <DropsListItemChallengeBar
+        maxValue={100000}
+        current={drop.rating}
+        myRate={drop.context_profile_context?.rating ?? null}
+      /> */}
       {isWaveDescriptionDrop && (
         <div
           className="tw-relative tw-w-full tw-h-7 tw-rounded-t-xl"
@@ -152,22 +136,19 @@ export default function DropsListItem({
             <DropListItemContent
               drop={drop}
               showFull={showFull}
+              voteState={voteState}
+              canVote={canVote}
               onQuote={onQuote}
             />
             {haveData && <DropListItemData drop={drop} />}
           </div>
           <div className="tw-flex tw-flex-col tw-items-center tw-min-h-full">
-            {/* {showExternalLink && (
-              <DropListItemExternalLink
-                drop={drop}
-                isWaveDescriptionDrop={isWaveDescriptionDrop}
-              />
-            )} */}
             <div className="tw-flex-grow tw-flex tw-flex-col tw-justify-center tw-items-center">
-              <DropListItemRateWrapper
+              <DropListItemRateGive
                 drop={drop}
                 voteState={voteState}
-                maxAbsoluteCredit={maxAbsoluteCredit}
+                canVote={canVote}
+                availableCredit={availableCredit ?? 0}
               />
             </div>
           </div>

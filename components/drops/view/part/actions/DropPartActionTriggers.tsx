@@ -2,6 +2,7 @@ import { Drop } from "../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../generated/models/DropPart";
 import DiscussOutlineIcon from "../../../../utils/icons/DiscussOutlineIcon";
 import DiscussSolidIcon from "../../../../utils/icons/DiscussSolidIcon";
+import { DropVoteState } from "../../item/DropsListItem";
 import DropPartActionTriggersVote from "./vote/DropPartActionTriggersVote";
 
 export default function DropPartActionTriggers({
@@ -9,6 +10,8 @@ export default function DropPartActionTriggers({
   dropPart,
   isDiscussionOpen,
   isFirstPart,
+  voteState,
+  canVote,
   setIsDiscussionOpen,
   onQuote,
 }: {
@@ -16,6 +19,8 @@ export default function DropPartActionTriggers({
   readonly dropPart: DropPart;
   readonly isDiscussionOpen: boolean;
   readonly isFirstPart: boolean;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
   readonly setIsDiscussionOpen: (open: boolean) => void;
   readonly onQuote: (dropPartId: number) => void;
 }) {
@@ -73,7 +78,13 @@ export default function DropPartActionTriggers({
           )}
         </>
       </button>
-      {isFirstPart && <DropPartActionTriggersVote drop={drop} />}
+      {isFirstPart && (
+        <DropPartActionTriggersVote
+          drop={drop}
+          voteState={voteState}
+          canVote={canVote}
+        />
+      )}
     </div>
   );
 }

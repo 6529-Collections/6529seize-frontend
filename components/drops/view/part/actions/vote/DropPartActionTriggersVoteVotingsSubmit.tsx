@@ -2,30 +2,23 @@ import Tippy from "@tippyjs/react";
 import RateClapSolidIcon from "../../../../../utils/icons/RateClapSolidIcon";
 import RateClapOutlineIcon from "../../../../../utils/icons/RateClapOutlineIcon";
 import { Drop } from "../../../../../../generated/models/Drop";
+import { DropVoteState, VOTE_STATE_ERRORS } from "../../../item/DropsListItem";
 
 export default function DropPartActionTriggersVoteVotingsSubmit({
   drop,
+  voteState,
+  canVote,
 }: {
   readonly drop: Drop;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
 }) {
+  const tooltipLabel = canVote ? "+1" : VOTE_STATE_ERRORS[voteState];
+  const haveVoted = !!drop.context_profile_context?.rating;
+
   return (
-    <Tippy content="+1">
-      <span>
-        {!!drop.context_profile_context?.rating ? (
-          <RateClapSolidIcon />
-        ) : (
-          <RateClapOutlineIcon />
-        )}
-      </span>
+    <Tippy content={tooltipLabel}>
+      <span>{haveVoted ? <RateClapSolidIcon /> : <RateClapOutlineIcon />}</span>
     </Tippy>
   );
 }
-
-// TODO
-// disabled if not logged in
-// disabled if no profile
-// disabled if logged in as proxy
-// disabled if you are the author
-// disabled if not in "can vote"
-// disabled if no credit left and not voted
-// disabled if no credit left and voted (solid icon)
