@@ -65,7 +65,7 @@ export default function SelectGroupModal({
 
   const [groups, setGroups] = useState<GroupFull[]>([]);
   useEffect(() => {
-    if (data) {
+    if (data?.length) {
       setGroups(data);
     } else {
       setGroups([]);

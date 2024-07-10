@@ -32,6 +32,7 @@ export default function Drops() {
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         limit: `${REQUEST_SIZE}`,
+        author: handleOrWallet,
       };
       if (pageParam) {
         params.serial_no_less_than = `${pageParam}`;
@@ -40,7 +41,7 @@ export default function Drops() {
         params.context_profile = connectedProfile.profile.handle;
       }
       return await commonApiFetch<Drop[]>({
-        endpoint: `profiles/${handleOrWallet}/drops`,
+        endpoint: `/drops`,
         params,
       });
     },
@@ -81,6 +82,7 @@ export default function Drops() {
       drops={drops}
       loading={isFetching}
       showWaveInfo={true}
+      showIsWaveDescriptionDrop={true}
       onBottomIntersection={onBottomIntersection}
     />
   );

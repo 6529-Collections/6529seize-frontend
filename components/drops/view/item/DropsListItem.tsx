@@ -72,11 +72,13 @@ export default function DropsListItem({
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           {showWaveInfo && (
             <div className="tw-absolute tw-z-10 tw-right-0 tw-top-1 tw-flex tw-items-center tw-gap-x-2">
-              <img
-                src=""
-                alt=""
-                className="tw-rounded-full tw-h-6 tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-mx-auto tw-object-cover"
-              />
+              {drop.wave.picture && (
+                <img
+                  src={drop.wave.picture}
+                  alt=""
+                  className="tw-rounded-full tw-h-6 tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-mx-auto tw-object-cover"
+                />
+              )}
               <Link
                 href={`waves/${drop.wave.id}`}
                 className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"

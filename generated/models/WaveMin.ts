@@ -17,6 +17,7 @@ export class WaveMin {
     'name': string;
     'picture': string;
     'description_drop_id': string;
+    'authenticated_user_eligible_to_vote': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -43,6 +44,12 @@ export class WaveMin {
             "name": "description_drop_id",
             "baseName": "description_drop_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_eligible_to_vote",
+            "baseName": "authenticated_user_eligible_to_vote",
+            "type": "boolean",
             "format": ""
         }    ];
 

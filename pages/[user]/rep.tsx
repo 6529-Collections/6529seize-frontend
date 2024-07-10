@@ -101,7 +101,7 @@ export async function getServerSideProps(
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: null,
+      subroute: "rep",
     });
 
     if (needsRedirect) {

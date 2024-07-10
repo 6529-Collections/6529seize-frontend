@@ -9,16 +9,22 @@ export default function DropListWrapper({
   drops,
   loading,
   showWaveInfo,
+  showIsWaveDescriptionDrop = false,
   onBottomIntersection,
 }: {
   readonly drops: Drop[];
   readonly loading: boolean;
   readonly showWaveInfo: boolean;
+  readonly showIsWaveDescriptionDrop?: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
 }) {
   return (
     <div className="tw-overflow-hidden">
-      <DropsList drops={drops} showWaveInfo={showWaveInfo} />
+      <DropsList
+        drops={drops}
+        showWaveInfo={showWaveInfo}
+        showIsWaveDescriptionDrop={showIsWaveDescriptionDrop}
+      />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
