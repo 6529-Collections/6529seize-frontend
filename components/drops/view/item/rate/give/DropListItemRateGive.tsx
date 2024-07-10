@@ -1,10 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
-import { AuthContext } from "../../../../../auth/Auth";
-import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 import { Drop } from "../../../../../../generated/models/Drop";
 import { DropVoteState } from "../../DropsListItem";
 
@@ -15,46 +13,33 @@ export enum RateChangeType {
 
 export default function DropListItemRateGive({
   drop,
-  // availableRates,
   voteState,
-  maxAbsoluteCredit
+  canVote,
+  availableCredit,
 }: {
   readonly drop: Drop;
-  // readonly availableRates: number;
   readonly voteState: DropVoteState;
-  readonly maxAbsoluteCredit: number;
+  readonly canVote: boolean;
+  readonly availableCredit: number;
 }) {
-  const { connectionStatus, connectedProfile } = useContext(AuthContext);
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
   const [onProgressRate, setOnProgressRate] = useState<number>(1);
 
-  const getCanRate = () => {
-    return (
-      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
-      connectedProfile?.profile?.handle.toLowerCase() !==
-        drop.author.handle.toLowerCase() &&
-      !!availableRates
-    );
-  };
-
-  const [canRate, setCanRate] = useState(getCanRate());
-
   useEffect(() => {
-    setCanRate(getCanRate());
-    if (
-      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
-      Math.abs(onProgressRate) > availableRates
-    ) {
-      setOnProgressRate(
-        onProgressRate > 0 ? availableRates : 0 - availableRates
-      );
-    } else if (connectionStatus === ProfileConnectedStatus.HAVE_PROFILE) {
-      setOnProgressRate(1);
+    if (!canVote) {
+      setOnProgressRate(0);
+      return;
     }
-  }, [connectionStatus, connectedProfile, drop, availableRates]);
+    if (Math.abs(onProgressRate) > availableCredit) {
+      setOnProgressRate(
+        onProgressRate > 0 ? availableCredit : 0 - availableCredit
+      );
+      return;
+    }
+  }, [canVote, availableCredit]);
 
   const onSuccessfulRateChange = () => {
     setOnProgressRate(1);
@@ -78,11 +63,11 @@ export default function DropListItemRateGive({
   };
 
   const getCorrectedNewRate = (newValue: number) => {
-    if (newValue > availableRates) {
-      return availableRates;
+    if (newValue > availableCredit) {
+      return availableCredit;
     }
-    if (newValue < 0 - availableRates) {
-      return 0 - availableRates;
+    if (newValue < 0 - availableCredit) {
+      return 0 - availableCredit;
     }
     return newValue;
   };
@@ -214,7 +199,7 @@ export default function DropListItemRateGive({
 
   return (
     <div className="tw-w-[42px] tw-mt-7 tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-      {canRate && (
+      {canVote && (
         <div className="tw-text-center tw-bg-iron-900 tw-rounded-lg">
           <span
             className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
@@ -225,22 +210,22 @@ export default function DropListItemRateGive({
       )}
       <div className="tw-flex tw-flex-col tw-items-center">
         <DropListItemRateGiveChangeButton
-          drop={drop}
+          canVote={canVote}
           type={RateChangeType.INCREASE}
-          availableRates={availableRates}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
         />
         <DropListItemRateGiveSubmit
           rate={onProgressRate}
           drop={drop}
-          availableRates={availableRates}
+          voteState={voteState}
+          canVote={canVote}
+          availableCredit={availableCredit}
           onSuccessfulRateChange={onSuccessfulRateChange}
         />
         <DropListItemRateGiveChangeButton
-          drop={drop}
+          canVote={canVote}
           type={RateChangeType.DECREASE}
-          availableRates={availableRates}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
         />

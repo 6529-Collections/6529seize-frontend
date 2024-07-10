@@ -327,13 +327,13 @@ const CreateDropContent = forwardRef<
               </>
             </p>
           )}
-          <p className="tw-mb-0">
+          {/* <p className="tw-mb-0">
             <span className="tw-font-semibold tw-text-iron-500">Drops:</span>
             <span className="tw-pl-1 tw-text-iron-50">
               <span>4</span>/<span>5</span>
             </span>
-          </p>
-          {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+          </p> */}
+          {/* <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
@@ -345,7 +345,7 @@ const CreateDropContent = forwardRef<
           <CreateDropSelectFileAudio onFileChange={onFileChange} />
           <CreateDropSelectFileVideo onFileChange={onFileChange} />
           <CreateDropSelectFileImage onFileChange={onFileChange} />
-          <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+          {/* <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <svg
               className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
               viewBox="0 0 24 24"
@@ -364,7 +364,7 @@ const CreateDropContent = forwardRef<
             <span className="tw-text-xs tw-text-yellow">
               Audio file is required
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
     );

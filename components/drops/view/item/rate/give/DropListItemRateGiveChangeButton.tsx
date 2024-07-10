@@ -2,34 +2,19 @@ import { RateChangeType } from "./DropListItemRateGive";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
-import { Drop } from "../../../../../../generated/models/Drop";
-
 
 export default function DropListItemRateGiveChangeButton({
-  drop,
   type,
-  availableRates,
+  canVote,
   handleMouseDown,
   handleMouseUp,
 }: {
-  readonly drop: Drop;
   readonly type: RateChangeType;
-  readonly availableRates: number;
+  readonly canVote: boolean;
   readonly handleMouseDown: (changeType: RateChangeType) => void;
   readonly handleMouseUp: () => void;
 }) {
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
-
-  const getCanRate = () => {
-    return (
-      connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
-      connectedProfile?.profile?.handle.toLowerCase() !==
-        drop.author.handle.toLowerCase() &&
-      !!availableRates
-    );
-  };
-
-  const [canRate, setCanRate] = useState(getCanRate());
 
   const svgpaths: Record<RateChangeType, string> = {
     [RateChangeType.INCREASE]: "M18 15L12 9L6 15",
@@ -63,14 +48,12 @@ export default function DropListItemRateGiveChangeButton({
   };
 
   const [buttonClasses, setButtonClasses] = useState<string | null>(
-    getButtonClasses(canRate)
+    getButtonClasses(canVote)
   );
 
   useEffect(() => {
-    const ratingAllowed = getCanRate();
-    setCanRate(ratingAllowed);
-    setButtonClasses(getButtonClasses(ratingAllowed));
-  }, [connectionStatus, connectedProfile, drop, availableRates]);
+    setButtonClasses(getButtonClasses(canVote));
+  }, [canVote]);
 
   return (
     <button
@@ -78,7 +61,7 @@ export default function DropListItemRateGiveChangeButton({
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUpOrLeave}
       onMouseLeave={onMouseUpOrLeave}
-      disabled={!canRate}
+      disabled={!canVote}
       aria-label={ariaLabels[type]}
       className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full  tw-bg-transparent tw-h-7 tw-w-7 tw-transition-all tw-duration-300 tw-ease-out`}
     >

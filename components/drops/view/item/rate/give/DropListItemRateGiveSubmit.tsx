@@ -4,9 +4,9 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 import dynamic from "next/dynamic";
 import { Drop } from "../../../../../../generated/models/Drop";
+import { DropVoteState, VOTE_STATE_ERRORS } from "../../DropsListItem";
 
 const DropListItemRateGiveClap = dynamic(
   () => import("./clap/DropListItemRateGiveClap"),
@@ -18,16 +18,19 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 export default function DropListItemRateGiveSubmit({
   rate,
   drop,
-  availableRates,
+  voteState,
+  availableCredit,
+  canVote,
   onSuccessfulRateChange,
 }: {
   readonly rate: number;
   readonly drop: Drop;
-  readonly availableRates: number;
+  readonly availableCredit: number;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
   readonly onSuccessfulRateChange: () => void;
 }) {
-  const { requestAuth, setToast, connectedProfile, connectionStatus } =
-    useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -63,16 +66,9 @@ export default function DropListItemRateGiveSubmit({
   });
 
   const onRateSubmit = async () => {
-    if (connectionStatus === ProfileConnectedStatus.NOT_CONNECTED) {
+    if (!canVote) {
       setToast({
-        message: "Connect your wallet to vote",
-        type: "warning",
-      });
-      return;
-    }
-    if (connectionStatus === ProfileConnectedStatus.NO_PROFILE) {
-      setToast({
-        message: "Create a profile to vote",
+        message: VOTE_STATE_ERRORS[voteState],
         type: "warning",
       });
       return;
@@ -104,8 +100,9 @@ export default function DropListItemRateGiveSubmit({
       <DropListItemRateGiveClap
         rate={rate}
         onSubmit={onRateSubmit}
-        drop={drop}
-        availableRates={availableRates}
+        voteState={voteState}
+        canVote={canVote}
+        availableCredit={availableCredit}
       />
     </div>
   );

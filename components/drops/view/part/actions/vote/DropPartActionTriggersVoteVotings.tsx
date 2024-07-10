@@ -2,47 +2,30 @@ import { useContext, useState } from "react";
 import { Drop } from "../../../../../../generated/models/Drop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { AuthContext } from "../../../../../auth/Auth";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { useMutation } from "@tanstack/react-query";
+import { commonApiPost } from "../../../../../../services/api/common-api";
 import { DropRateChangeRequest } from "../../../../../../entities/IDrop";
-import {
-  ProfileAvailableDropRateResponse,
-  ProfileConnectedStatus,
-} from "../../../../../../entities/IProfile";
+import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 import Tippy from "@tippyjs/react";
 import DropPartActionTriggersVoteVotingsSubmit from "./DropPartActionTriggersVoteVotingsSubmit";
+import { DropVoteState } from "../../../item/DropsListItem";
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 export default function DropPartActionTriggersVoteVotings({
   drop,
+  voteState,
+  canVote,
 }: {
   readonly drop: Drop;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
 }) {
   const { requestAuth, setToast, connectedProfile, connectionStatus } =
     useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const { data: availableRateResponse } =
-    useQuery<ProfileAvailableDropRateResponse>({
-      queryKey: [
-        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
-        connectedProfile?.profile?.handle,
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ProfileAvailableDropRateResponse>({
-          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
-        }),
-      enabled: !!connectedProfile?.profile?.handle,
-    });
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -113,11 +96,18 @@ export default function DropPartActionTriggersVoteVotings({
     <>
       <button
         type="button"
+        disabled={!canVote || loading}
         onClick={onRateSubmit}
-        className="tw-text-iron-500 icon tw-px-0 tw-group tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
+        className={`${
+          canVote && "icon"
+        } tw-text-iron-500 tw-px-0 tw-group tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300`}
       >
         <>
-          <DropPartActionTriggersVoteVotingsSubmit drop={drop} />
+          <DropPartActionTriggersVoteVotingsSubmit
+            drop={drop}
+            voteState={voteState}
+            canVote={canVote}
+          />
 
           <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
             {!!drop.rating && (

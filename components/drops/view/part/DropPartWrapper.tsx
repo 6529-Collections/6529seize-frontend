@@ -6,17 +6,22 @@ import { useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
+import { DropVoteState } from "../item/DropsListItem";
 
 export default function DropPartWrapper({
   drop,
   dropPart,
   isFirstPart,
+  voteState,
+  canVote,
   onQuote,
   children,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly isFirstPart: boolean;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
   readonly onQuote: (dropPartId: number) => void;
 
   readonly children: React.ReactNode;
@@ -41,6 +46,8 @@ export default function DropPartWrapper({
           dropPart={dropPart}
           isDiscussionOpen={isDiscussionOpen}
           isFirstPart={isFirstPart}
+          voteState={voteState}
+          canVote={canVote}
           setIsDiscussionOpen={setIsDiscussionOpen}
           onQuote={onQuote}
         />
