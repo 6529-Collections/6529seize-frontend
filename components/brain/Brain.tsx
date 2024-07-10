@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 
@@ -12,6 +12,7 @@ import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
 import { Drop } from "../../generated/models/Drop";
+import { ProfileAvailableDropRateResponse } from "../../entities/IProfile";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -36,7 +37,7 @@ export default function Brain() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeGroupId = useSelector(selectActiveGroupId);
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const getParamsFromUrl = (): BrainQuery => {
     const group = searchParams.get(SEARCH_PARAMS_FIELDS.group);
@@ -151,6 +152,19 @@ export default function Brain() {
     fetchNextPage();
   };
 
+  const { data: availableRateResponse } =
+    useQuery<ProfileAvailableDropRateResponse>({
+      queryKey: [
+        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
+        connectedProfile?.profile?.handle,
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ProfileAvailableDropRateResponse>({
+          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
+        }),
+      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
+    });
+
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-2xl tw-mx-auto">
@@ -161,6 +175,9 @@ export default function Brain() {
             loading={isFetching}
             showWaveInfo={true}
             showIsWaveDescriptionDrop={true}
+            availableCredit={
+              availableRateResponse?.available_credit_for_rating ?? null
+            }
             onBottomIntersection={onBottomIntersection}
           />
         </div>

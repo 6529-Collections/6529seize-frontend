@@ -1,7 +1,13 @@
 import { Wave } from "../../../../generated/models/Wave";
 import DropsListItem from "../../../drops/view/item/DropsListItem";
 
-export default function WaveDescriptionDrop({ wave }: { readonly wave: Wave }) {
+export default function WaveDescriptionDrop({
+  wave,
+  availableCredit,
+}: {
+  readonly wave: Wave;
+  readonly availableCredit: number | null;
+}) {
   return (
     <div className="tw-mb-4 tw-mt-4">
       <div className="tw-inline-flex tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-400">
@@ -25,6 +31,7 @@ export default function WaveDescriptionDrop({ wave }: { readonly wave: Wave }) {
       <DropsListItem
         drop={wave.description_drop}
         showWaveInfo={false}
+        availableCredit={availableCredit}
       />
     </div>
   );

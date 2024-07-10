@@ -6,6 +6,7 @@ import { Time } from "../../../../../../helpers/time";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ProfileConnectedStatus } from "../../../../../../entities/IProfile";
 import { Drop } from "../../../../../../generated/models/Drop";
+import { DropVoteState } from "../../DropsListItem";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",
@@ -14,12 +15,15 @@ export enum RateChangeType {
 
 export default function DropListItemRateGive({
   drop,
-  availableRates,
+  // availableRates,
+  voteState,
+  maxAbsoluteCredit
 }: {
   readonly drop: Drop;
-  readonly availableRates: number;
-  }) {
-  
+  // readonly availableRates: number;
+  readonly voteState: DropVoteState;
+  readonly maxAbsoluteCredit: number;
+}) {
   const { connectionStatus, connectedProfile } = useContext(AuthContext);
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [

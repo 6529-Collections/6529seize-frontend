@@ -7,8 +7,29 @@ import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
 import WaveOutcomes from "./outcome/WaveOutcomes";
 import WaveSpecs from "./specs/WaveSpecs";
 import WaveGroups from "./groups/WaveGroups";
+import { useContext } from "react";
+import { AuthContext } from "../../auth/Auth";
+import { useQuery } from "@tanstack/react-query";
+import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+
+  const { data: availableRateResponse } =
+    useQuery<ProfileAvailableDropRateResponse>({
+      queryKey: [
+        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
+        connectedProfile?.profile?.handle,
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ProfileAvailableDropRateResponse>({
+          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
+        }),
+      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
+    });
+
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">
       <WaveHeader wave={wave} />
@@ -26,8 +47,18 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
           </div>
           <div className="tw-w-[672px] tw-rounded-xl tw-overflow-hidden">
             <WaveCreateDrop wave={wave} />
-            <WaveDescriptionDrop wave={wave} />
-            <WaveDrops wave={wave} />
+            <WaveDescriptionDrop
+              wave={wave}
+              availableCredit={
+                availableRateResponse?.available_credit_for_rating ?? null
+              }
+            />
+            <WaveDrops
+              wave={wave}
+              availableCredit={
+                availableRateResponse?.available_credit_for_rating ?? null
+              }
+            />
           </div>
         </div>
       </div>

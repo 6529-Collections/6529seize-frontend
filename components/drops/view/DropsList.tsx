@@ -6,10 +6,12 @@ export default function DropsList({
   drops,
   showWaveInfo,
   showIsWaveDescriptionDrop = false,
+  availableCredit,
 }: {
   readonly drops: Drop[];
   readonly showWaveInfo: boolean;
   readonly showIsWaveDescriptionDrop?: boolean;
+  readonly availableCredit: number | null;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4">
@@ -22,6 +24,7 @@ export default function DropsList({
             showIsWaveDescriptionDrop &&
             drop.id === drop.wave.description_drop_id
           }
+          availableCredit={availableCredit}
         />
       ))}
     </div>

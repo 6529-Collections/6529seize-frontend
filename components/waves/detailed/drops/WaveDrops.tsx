@@ -18,7 +18,13 @@ interface Query {
   readonly serial_no_less_than?: string;
 }
 
-export default function WaveDrops({ wave }: { readonly wave: Wave }) {
+export default function WaveDrops({
+  wave,
+  availableCredit,
+}: {
+  readonly wave: Wave;
+  readonly availableCredit: number | null;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -98,6 +104,7 @@ export default function WaveDrops({ wave }: { readonly wave: Wave }) {
       drops={drops}
       loading={isFetching}
       showWaveInfo={false}
+      availableCredit={availableCredit}
       onBottomIntersection={onBottomIntersection}
     />
   );

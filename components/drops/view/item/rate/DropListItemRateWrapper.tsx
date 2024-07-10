@@ -6,11 +6,16 @@ import { ProfileAvailableDropRateResponse } from "../../../../../entities/IProfi
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { Drop } from "../../../../../generated/models/Drop";
+import { DropVoteState } from "../DropsListItem";
 
 export default function DropListItemRateWrapper({
   drop,
+  voteState,
+  maxAbsoluteCredit,
 }: {
   readonly drop: Drop;
+  readonly voteState: DropVoteState;
+  readonly maxAbsoluteCredit: number;
 }) {
   const { connectedProfile } = useContext(AuthContext);
   const { data: availableRateResponse } =
@@ -29,7 +34,9 @@ export default function DropListItemRateWrapper({
   return (
     <DropListItemRateGive
       drop={drop}
-      availableRates={availableRateResponse?.available_credit_for_rating ?? 0}
+      voteState={voteState}
+      maxAbsoluteCredit={maxAbsoluteCredit}
+      // availableRates={availableRateResponse?.available_credit_for_rating ?? 0}
     />
   );
 }

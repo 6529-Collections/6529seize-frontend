@@ -10,12 +10,14 @@ export default function DropListWrapper({
   loading,
   showWaveInfo,
   showIsWaveDescriptionDrop = false,
+  availableCredit,
   onBottomIntersection,
 }: {
   readonly drops: Drop[];
   readonly loading: boolean;
   readonly showWaveInfo: boolean;
   readonly showIsWaveDescriptionDrop?: boolean;
+  readonly availableCredit: number | null;
   readonly onBottomIntersection: (state: boolean) => void;
 }) {
   return (
@@ -24,6 +26,7 @@ export default function DropListWrapper({
         drops={drops}
         showWaveInfo={showWaveInfo}
         showIsWaveDescriptionDrop={showIsWaveDescriptionDrop}
+        availableCredit={availableCredit}
       />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
