@@ -51,6 +51,9 @@ import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer"
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
+import CreateDropSelectFileVideo from "./file/CreateDropSelectFileVideo";
+import CreateDropSelectFileAudio from "./file/CreateDropSelectFileAudio";
+import CreateDropSelectFileImage from "./file/CreateDropSelectFileImage";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -204,9 +207,9 @@ const CreateDropContent = forwardRef<
               <NewHashtagsPlugin onSelect={onHashtagAdded} />
               {viewType === CreateDropViewType.COMPACT && <OneLinerPlugin />}
               <MaxLengthPlugin maxLength={25000} />
-              {viewType === CreateDropViewType.COMPACT && (
+              {/*   {viewType === CreateDropViewType.COMPACT && (
                 <UploadMediaButtonPlugin onFileChange={onFileChange} />
-              )}
+              )} */}
               {showToggleViewButton && (
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
               )}
@@ -263,7 +266,7 @@ const CreateDropContent = forwardRef<
                     disabled={!canAddPart}
                     type="button"
                     aria-label="Add storm"
-                    className={`tw-absolute tw-group tw-top-1 tw-right-10 tw-p-2 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-ease-out tw-transition tw-duration-300 
+                    className={`tw-absolute tw-group tw-top-1 tw-right-11 tw-p-2 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-ease-out tw-transition tw-duration-300 
                     ${
                       !canAddPart
                         ? "tw-text-iron-600 tw-cursor-default"
@@ -323,13 +326,37 @@ const CreateDropContent = forwardRef<
               </>
             )}
           </p>
-         {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+          {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
             <div>/</div>
             <div>{formatNumberWithCommas(24000)}</div>
           </div> */}
+        </div>
+        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+          <CreateDropSelectFileAudio onFileChange={onFileChange} />
+          <CreateDropSelectFileVideo onFileChange={onFileChange} />
+          <CreateDropSelectFileImage  onFileChange={onFileChange} />
+          <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+            <svg
+              className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="tw-text-xs tw-text-yellow">
+              Audio file is required
+            </span>
+          </div>
         </div>
       </div>
     );

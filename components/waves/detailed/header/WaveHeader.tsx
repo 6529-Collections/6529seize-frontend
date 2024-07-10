@@ -17,7 +17,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
         ></div>
       </div>
 
-      <div className="tw-max-w-5xl tw-mx-auto tw-px-6 md:px-0">
+      <div className="tw-max-w-5xl tw-mx-auto tw-px-6 md:tw-px-0">
         <div className="-tw-mt-12 tw-flex tw-space-x-5">
           <div className="tw-flex">
             {wave.picture ? (
