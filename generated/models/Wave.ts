@@ -10,8 +10,10 @@
  * Do not edit the class manually.
  */
 
+import { Drop } from '../models/Drop';
 import { ProfileMin } from '../models/ProfileMin';
 import { WaveConfig } from '../models/WaveConfig';
+import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveOutcome } from '../models/WaveOutcome';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
@@ -33,14 +35,17 @@ export class Wave {
     */
     'name': string;
     /**
-    * The description of the wave
+    * The picture of the wave
     */
-    'description': string;
+    'picture': string | null;
+    'created_at': number;
+    'description_drop': Drop;
     'voting': WaveVotingConfig;
     'visibility': WaveVisibilityConfig;
     'participation': WaveParticipationConfig;
     'wave': WaveConfig;
     'outcomes': Array<WaveOutcome>;
+    'contributors_overview': Array<WaveContributorOverview>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -70,9 +75,21 @@ export class Wave {
             "format": ""
         },
         {
-            "name": "description",
-            "baseName": "description",
+            "name": "picture",
+            "baseName": "picture",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "description_drop",
+            "baseName": "description_drop",
+            "type": "Drop",
             "format": ""
         },
         {
@@ -103,6 +120,12 @@ export class Wave {
             "name": "outcomes",
             "baseName": "outcomes",
             "type": "Array<WaveOutcome>",
+            "format": ""
+        },
+        {
+            "name": "contributors_overview",
+            "baseName": "contributors_overview",
+            "type": "Array<WaveContributorOverview>",
             "format": ""
         }    ];
 
