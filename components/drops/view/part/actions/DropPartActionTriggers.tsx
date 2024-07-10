@@ -1,14 +1,17 @@
+import { Drop } from "../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../generated/models/DropPart";
 import DiscussOutlineIcon from "../../../../utils/icons/DiscussOutlineIcon";
 import DiscussSolidIcon from "../../../../utils/icons/DiscussSolidIcon";
-import RateClapOutlineIcon from "../../../../utils/icons/RateClapOutlineIcon";
+import DropPartActionTriggersVote from "./vote/DropPartActionTriggersVote";
 
 export default function DropPartActionTriggers({
+  drop,
   dropPart,
   isDiscussionOpen,
   setIsDiscussionOpen,
   onQuote,
 }: {
+  readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly isDiscussionOpen: boolean;
   readonly setIsDiscussionOpen: (open: boolean) => void;
@@ -68,44 +71,7 @@ export default function DropPartActionTriggers({
           )}
         </>
       </button>
-      <div className="tw-flex tw-gap-x-4">
-        <button
-          type="button"
-          className="tw-text-iron-500 icon tw-px-0 tw-group tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
-        >
-          <>
-            <RateClapOutlineIcon />
-            <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
-              <span>100</span>
-              <div className="tw-ml-2 tw-bg-primary-400/10 tw-rounded-full tw-w-auto tw-px-1 tw-py-0.5">
-                <span className="tw-text-primary-400">12</span>
-              </div>
-            </div>
-          </>
-        </button>
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-flex -tw-space-x-2">
-            <img
-              src=""
-              alt=""
-              className="tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-ring-2 tw-ring-black"
-            />
-            <img
-              src=""
-              alt=""
-              className="tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-ring-2 tw-ring-black"
-            />
-            <img
-              src=""
-              alt=""
-              className="tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-ring-2 tw-ring-black"
-            />
-          </div>
-          <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
-            50 raters
-          </span>
-        </div>
-      </div>
+      <DropPartActionTriggersVote drop={drop} />
     </div>
   );
 }

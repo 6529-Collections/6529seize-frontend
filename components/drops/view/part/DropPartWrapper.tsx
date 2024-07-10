@@ -30,6 +30,7 @@ export default function DropPartWrapper({
       </div>
       <div className="tw-ml-12">
         <DropPartActionTriggers
+          drop={drop}
           dropPart={dropPart}
           isDiscussionOpen={isDiscussionOpen}
           setIsDiscussionOpen={setIsDiscussionOpen}
