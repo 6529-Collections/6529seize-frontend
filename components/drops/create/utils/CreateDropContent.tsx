@@ -187,7 +187,7 @@ const CreateDropContent = forwardRef<
                   <ContentEditable
                     className={`${
                       viewType === CreateDropViewType.COMPACT
-                        ? "editor-input-one-liner tw-pr-[7.5rem]"
+                        ? "editor-input-one-liner tw-pr-24"
                         : "editor-input-multi-liner tw-pr-10"
                     } tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
                   tw-pl-3.5 tw-py-2.5`}
@@ -350,6 +350,7 @@ const CreateDropContent = forwardRef<
               className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
               viewBox="0 0 24 24"
               fill="none"
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path

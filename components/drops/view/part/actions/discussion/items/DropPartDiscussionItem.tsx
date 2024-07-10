@@ -10,7 +10,7 @@ export default function DropPartDiscussionItem({
   readonly item: DropComment;
 }) {
   return (
-    <div className="tw-flex tw-items-start tw-gap-x-3">
+    <div className="tw-flex tw-items-start tw-gap-x-3 tw-py-2">
       <DropPfp pfpUrl={item.author?.pfp} size={DropPFPSize.SMALL} />
       <div className="tw-flex tw-flex-col tw-w-full">
         <DropAuthor
