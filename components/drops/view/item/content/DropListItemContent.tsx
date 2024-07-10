@@ -59,6 +59,7 @@ export default function DropListItemContent({
         {parts.map((part, index) => (
           <DropPartWrapper
             key={`drop-${drop.id}-part-${index}`}
+            isFirstPart={index === 0}
             dropPart={part}
             drop={drop}
             onQuote={onQuote}

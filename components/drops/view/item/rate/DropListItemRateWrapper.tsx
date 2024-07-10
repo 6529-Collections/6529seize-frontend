@@ -26,10 +26,6 @@ export default function DropListItemRateWrapper({
       enabled: !!connectedProfile?.profile?.handle,
     });
 
-  if (drop.author.handle === "gelato2") {
-    console.log(drop);
-  }
-
   return (
     <DropListItemRateGive
       drop={drop}

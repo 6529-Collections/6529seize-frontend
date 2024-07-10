@@ -10,18 +10,25 @@ import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 export default function DropPartWrapper({
   drop,
   dropPart,
+  isFirstPart,
   onQuote,
   children,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
+  readonly isFirstPart: boolean;
   readonly onQuote: (dropPartId: number) => void;
+
   readonly children: React.ReactNode;
 }) {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
   return (
-    <div className="tw-flex tw-flex-col tw-justify-between tw-h-full">
+    <div
+      className={`${
+        isFirstPart && "tw-min-h-36"
+      } tw-flex tw-flex-col tw-justify-between tw-h-full`}
+    >
       <div className="tw-flex-1">
         {children}
         <div className="tw-ml-12">
@@ -33,6 +40,7 @@ export default function DropPartWrapper({
           drop={drop}
           dropPart={dropPart}
           isDiscussionOpen={isDiscussionOpen}
+          isFirstPart={isFirstPart}
           setIsDiscussionOpen={setIsDiscussionOpen}
           onQuote={onQuote}
         />
