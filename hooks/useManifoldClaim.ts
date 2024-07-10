@@ -1,7 +1,10 @@
 import { useReadContract } from "wagmi";
 import { NULL_MERKLE } from "../constants";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { areEqualAddresses } from "../helpers/Helpers";
+import { mainnet, sepolia } from "viem/chains";
+
+export const MANIFOLD_NETWORK = sepolia;
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",
@@ -35,10 +38,10 @@ export default function useManifoldClaim(
   tokenId: number,
   onError?: () => void
 ) {
-  const [claim, setClaim] = useState<ManifoldClaim>();
+  const [claim, setClaim] = useState<ManifoldClaim | undefined>();
   const [refetchInterval, setRefetchInterval] = useState<number>(5000);
 
-  function getStatus(start: number, end: number) {
+  const getStatus = useCallback((start: number, end: number) => {
     const now = Date.now() / 1000;
     if (now < start) {
       return ManifoldClaimStatus.UPCOMING;
@@ -46,7 +49,7 @@ export default function useManifoldClaim(
       return ManifoldClaimStatus.ACTIVE;
     }
     return ManifoldClaimStatus.EXPIRED;
-  }
+  }, []);
 
   const readContract = useReadContract({
     address: proxy as `0x${string}`,
@@ -56,55 +59,58 @@ export default function useManifoldClaim(
         !!contract && !!proxy && !!abi && tokenId >= 0 && !claim?.isFinalized,
       refetchInterval: refetchInterval,
     },
-    chainId: 1,
+    chainId: MANIFOLD_NETWORK.id,
     functionName: "getClaimForToken",
     args: [contract, tokenId],
   });
 
   useEffect(() => {
-    const data = readContract.data as any;
-    if (data) {
+    if (readContract.data) {
+      const data = readContract.data as any;
       const instanceId = Number(data[0]);
-      const claim = data[1];
-      const status = getStatus(claim.startDate, claim.endDate);
-      const publicMerkle = areEqualAddresses(NULL_MERKLE, claim.merkleRoot);
+      const claimData = data[1];
+      const status = getStatus(claimData.startDate, claimData.endDate);
+      const publicMerkle = areEqualAddresses(NULL_MERKLE, claimData.merkleRoot);
       const phase = publicMerkle
         ? ManifoldPhase.PUBLIC
         : ManifoldPhase.ALLOWLIST;
       const remaining =
         phase === ManifoldPhase.PUBLIC && status === ManifoldClaimStatus.EXPIRED
           ? 0
-          : Number(claim.totalMax) - Number(claim.total);
-      setClaim({
+          : Number(claimData.totalMax) - Number(claimData.total);
+      const newClaim: ManifoldClaim = {
         instanceId: instanceId,
-        total: Number(claim.total),
-        totalMax: Number(claim.totalMax),
+        total: Number(claimData.total),
+        totalMax: Number(claimData.totalMax),
         remaining: remaining,
-        cost: Number(claim.cost),
-        startDate: Number(claim.startDate),
-        endDate: Number(claim.endDate),
+        cost: Number(claimData.cost),
+        startDate: Number(claimData.startDate),
+        endDate: Number(claimData.endDate),
         status: status,
         phase: phase,
         isFetching: false,
         isFinalized: remaining === 0,
-      });
+      };
+      setClaim(newClaim);
       setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
     }
-  }, [readContract.data]);
+  }, [readContract.data, getStatus]);
 
   useEffect(() => {
     if (readContract.error && onError) {
       onError();
     }
-  }, [readContract.error]);
+  }, [readContract.error, onError]);
 
   useEffect(() => {
-    if (claim) {
-      setClaim({
-        ...claim,
-        isFetching: readContract.isFetching,
-      });
-    }
+    setClaim((prevClaim) => {
+      if (prevClaim) {
+        return {
+          ...prevClaim,
+          isFetching: readContract.isFetching,
+        };
+      }
+    });
   }, [readContract.isFetching]);
 
   return claim;

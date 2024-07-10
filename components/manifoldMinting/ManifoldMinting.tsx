@@ -17,8 +17,7 @@ import {
 import MintCountdownBox from "../mintCountdownBox/MintCountdownBox";
 import { Time } from "../../helpers/time";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
-import ManifoldMintingPublic from "./ManifoldMintingPublic";
-import ManifoldMintingAllowlist from "./ManifoldMintingAllowlist";
+import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import { ETHEREUM_ICON_TEXT } from "../../constants";
 
 interface Props {
@@ -115,23 +114,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   function printMint() {
-    if (manifoldClaim?.phase === ManifoldPhase.PUBLIC) {
-      return (
-        <ManifoldMintingAllowlist
-          contract={props.contract}
-          proxy={props.proxy}
-          abi={props.abi}
-          claim={manifoldClaim!}
-          merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
-          setFee={(f: number) => {
-            setFee(f);
-          }}
-        />
-      );
-    }
-
     return (
-      <ManifoldMintingAllowlist
+      <ManifoldMintingWidget
         contract={props.contract}
         proxy={props.proxy}
         abi={props.abi}
@@ -215,7 +199,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           </Col>
         </Row>
       )}
-      <Row className="pt-3">
+      <Row className="pt-3 pb-4">
         <Col sm={12} md={6} className="pt-2 pb-2">
           <Table className={styles.spotsTable}>
             <tbody>
@@ -293,7 +277,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td>Mint Price</td>
                 <td>
                   <b>
-                    {fromGWEI(manifoldClaim.cost)} {ETHEREUM_ICON_TEXT}
+                    {fromGWEI(manifoldClaim.cost).toFixed(5)}{" "}
+                    {ETHEREUM_ICON_TEXT}
                   </b>
                 </td>
               </tr>
@@ -315,7 +300,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td>Total Price Per Token</td>
                 <td>
                   <b>
-                    {fromGWEI(manifoldClaim.cost + fee)} {ETHEREUM_ICON_TEXT}
+                    {fromGWEI(manifoldClaim.cost + fee).toFixed(5)}{" "}
+                    {ETHEREUM_ICON_TEXT}
                   </b>
                 </td>
               </tr>
@@ -326,7 +312,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           {printMint()}
         </Col>
       </Row>
-      <Row className="pt-3">
+      <hr />
+      <Row className="pt-4">
         <Col xs={12}>
           <h4>Attributes</h4>
         </Col>

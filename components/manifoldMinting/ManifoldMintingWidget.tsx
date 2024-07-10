@@ -4,16 +4,22 @@ import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import { ManifoldMerkleProof } from "./manifold-types";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
-import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
-import { fromGWEI } from "../../helpers/Helpers";
 import {
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { fromGWEI, getTransactionLink } from "../../helpers/Helpers";
+import {
+  MANIFOLD_NETWORK,
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { Time } from "../../helpers/time";
 
-export default function ManifoldMintingAllowlist(
+export default function ManifoldMintingWidget(
   props: Readonly<{
     contract: string;
     proxy: string;
@@ -33,6 +39,7 @@ export default function ManifoldMintingAllowlist(
   const [mintCount, setMintCount] = useState<number>(0);
   const [fee, setFee] = useState<number>(0);
 
+  const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
   const [mintError, setMintError] = useState<string>("");
 
   useEffect(() => {
@@ -64,7 +71,7 @@ export default function ManifoldMintingAllowlist(
       params.push({
         address: props.proxy as `0x${string}`,
         abi: props.abi,
-        chainId: 1,
+        chainId: MANIFOLD_NETWORK.id,
         functionName: "checkMintIndex",
         args: [props.contract, props.claim.instanceId, mp.value],
       });
@@ -75,14 +82,14 @@ export default function ManifoldMintingAllowlist(
   const readContracts = useReadContracts({
     contracts: getReadContractsParams(),
     query: {
-      refetchInterval: 10000,
+      refetchInterval: 5000,
     },
   });
 
   const getFee = useReadContract({
     address: props.proxy as `0x${string}`,
     abi: props.abi,
-    chainId: 1,
+    chainId: MANIFOLD_NETWORK.id,
     functionName:
       props.claim.phase === ManifoldPhase.ALLOWLIST
         ? "MINT_FEE_MERKLE"
@@ -90,6 +97,11 @@ export default function ManifoldMintingAllowlist(
   });
 
   const mintWrite = useWriteContract();
+  const waitMintWrite = useWaitForTransactionReceipt({
+    chainId: MANIFOLD_NETWORK.id,
+    confirmations: 1,
+    hash: mintWrite.data,
+  });
 
   useEffect(() => {
     const f = Number(getFee.data ?? 0);
@@ -107,17 +119,25 @@ export default function ManifoldMintingAllowlist(
     );
   }, [readContracts.data]);
 
+  const getSelectedMerkleProofs = () => {
+    const selectedMerkleProofs: ManifoldMerkleProof[] = [];
+    for (let i = 0; i < merkleProofsMints.length; i++) {
+      if (!merkleProofsMints[i]) {
+        selectedMerkleProofs.push(merkleProofs[i]);
+      }
+      if (selectedMerkleProofs.length === mintCount) {
+        break;
+      }
+    }
+    return selectedMerkleProofs;
+  };
+
   const getMintArgs = () => {
     const args: any = [props.contract, props.claim.instanceId];
     if (mintCount > 1) {
       args.push(mintCount);
     }
-    const selectedMerkleProofs: ManifoldMerkleProof[] = [];
-    Array.from({ length: mintCount }, (_, i) => {
-      if (!merkleProofsMints[i]) {
-        selectedMerkleProofs.push(merkleProofs[i]);
-      }
-    });
+    const selectedMerkleProofs = getSelectedMerkleProofs();
     if (mintCount > 1) {
       if (props.claim.phase === ManifoldPhase.PUBLIC) {
         args.push([]);
@@ -138,14 +158,15 @@ export default function ManifoldMintingAllowlist(
     };
   };
 
-  const mint = () => {
+  const onMint = () => {
     setMintError("");
+    setMintStatus(<></>);
     const value = getValue();
     const args = getMintArgs();
     mintWrite.writeContract({
       address: props.proxy as `0x${string}`,
       abi: props.abi,
-      chainId: 1,
+      chainId: MANIFOLD_NETWORK.id,
       value: BigInt(value),
       functionName: args.functionName,
       args: args.args,
@@ -154,15 +175,70 @@ export default function ManifoldMintingAllowlist(
 
   useEffect(() => {
     if (mintWrite.error) {
+      setMintStatus(<></>);
       setMintError(
-        mintWrite.error.message.split("Request Arguments")[0].split(".")[0]
+        mintWrite.error.message
+          .split("Request Arguments")[0]
+          .split(".")[0]
+          .split("Contract Call")[0]
       );
     }
   }, [mintWrite.error]);
 
+  useEffect(() => {
+    if (waitMintWrite.error) {
+      setMintStatus(<></>);
+      setMintError(
+        waitMintWrite.error.message
+          .split("Request Arguments")[0]
+          .split(".")[0]
+          .split("Contract Call")[0]
+      );
+    }
+  }, [waitMintWrite.error]);
+
+  const getViewLink = (hash: string) => {
+    return (
+      <a
+        href={getTransactionLink(MANIFOLD_NETWORK.id, hash)}
+        target="_blank"
+        rel="noreferrer">
+        view trx
+      </a>
+    );
+  };
+
+  useEffect(() => {
+    let mintWriteStatus = <></>;
+    if (mintWrite.data) {
+      if (waitMintWrite.isPending) {
+        mintWriteStatus = (
+          <>
+            <span className="font-larger font-bolder">
+              Transaction Submitted - SEIZING <DotLoader />
+            </span>
+            <br />
+            <span className="pt-2">{getViewLink(mintWrite.data)}</span>
+          </>
+        );
+      } else if (waitMintWrite.isSuccess) {
+        mintWriteStatus = (
+          <>
+            <span className="text-success font-larger font-bolder">
+              SEIZED!
+            </span>
+            <br />
+            <span className="pt-2">{getViewLink(mintWrite.data)}</span>
+          </>
+        );
+      }
+      setMintStatus(mintWriteStatus);
+    }
+  }, [mintWrite.data, waitMintWrite]);
+
   function getButtonText() {
     if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
-      return `SEIZE ${mintCount ? `x${mintCount}` : "-"}`;
+      return <>SEIZE {mintCount ? `x${mintCount}` : "-"}</>;
     }
 
     const startDate = Time.seconds(props.claim.startDate);
@@ -231,13 +307,15 @@ export default function ManifoldMintingAllowlist(
           <Col>
             <button
               disabled={
-                props.claim.status !== ManifoldClaimStatus.ACTIVE || !mintCount
+                mintWrite.isPending ||
+                props.claim.status !== ManifoldClaimStatus.ACTIVE ||
+                !mintCount
               }
               className="btn btn-primary btn-block"
               style={{
                 padding: "0.6rem",
               }}
-              onClick={mint}>
+              onClick={onMint}>
               <b>{getButtonText()}</b>
             </button>
           </Col>
@@ -245,6 +323,20 @@ export default function ManifoldMintingAllowlist(
         {mintError && (
           <Row className="pt-3">
             <Col className="text-danger">{mintError}</Col>
+          </Row>
+        )}
+        {mintWrite.isPending && (
+          <Row className="pt-3">
+            <Col>
+              <span>
+                Confirm in your wallet <DotLoader />
+              </span>
+            </Col>
+          </Row>
+        )}
+        {mintStatus && (
+          <Row className="pt-3">
+            <Col>{mintStatus}</Col>
           </Row>
         )}
       </Container>
