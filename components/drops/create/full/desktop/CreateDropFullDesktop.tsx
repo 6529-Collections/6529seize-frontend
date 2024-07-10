@@ -187,7 +187,7 @@ const CreateDropFullDesktop = forwardRef<
             <DropPfp pfpUrl={profile?.pfp} />
           </div>
           <div className="tw-w-full">
-            <div className="tw-mb-4">
+            <div className="tw-space-y-4">
               {titleState === TITLE_STATE.INPUT && (
                 <div>
                   <input
@@ -201,21 +201,21 @@ const CreateDropFullDesktop = forwardRef<
                   />
                 </div>
               )}
+              <CreateDropContent
+                ref={editorRef}
+                viewType={CreateDropViewType.FULL}
+                editorState={editorState}
+                type={type}
+                drop={drop}
+                canAddPart={canAddPart}
+                onEditorState={onEditorState}
+                onMentionedUser={onMentionedUser}
+                onReferencedNft={onReferencedNft}
+                onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
+                onFileChange={onFileChange}
+                onDropPart={onDropPart}
+              />
             </div>
-            <CreateDropContent
-              ref={editorRef}
-              viewType={CreateDropViewType.FULL}
-              editorState={editorState}
-              type={type}
-              drop={drop}
-              canAddPart={canAddPart}
-              onEditorState={onEditorState}
-              onMentionedUser={onMentionedUser}
-              onReferencedNft={onReferencedNft}
-              onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
-              onFileChange={onFileChange}
-              onDropPart={onDropPart}
-            />
 
             {/*  <CreateDropSelectFile onFileChange={onFileChange} file={file} /> */}
             <div className="tw-mt-6">
@@ -225,16 +225,14 @@ const CreateDropFullDesktop = forwardRef<
                 onMetadataRemove={onMetadataRemove}
               />
             </div>
-            <div className="tw-mt-4">
-              {showSubmit && (
-                <CreateDropDesktopFooter
-                  disabled={!canSubmit}
-                  type={type}
-                  loading={loading}
-                  onDrop={onDrop}
-                />
-              )}
-            </div>
+            {showSubmit && (
+              <CreateDropDesktopFooter
+                disabled={!canSubmit}
+                type={type}
+                loading={loading}
+                onDrop={onDrop}
+              />
+            )}
           </div>
         </div>
       </div>

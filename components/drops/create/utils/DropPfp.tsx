@@ -29,7 +29,7 @@ export default function DropPfp({
     <div
       className={`${SIZE_CLASSES[size]} ${
         !isWaveDescriptionDrop &&
-        "tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900"
+        "tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900"
       }  tw-relative tw-flex-shrink-0 tw-rounded-lg`}
     >
       {isWaveDescriptionDrop && (

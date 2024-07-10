@@ -28,7 +28,7 @@ export default function DropPartWrapper({
           {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
         </div>
       </div>
-      <div className="tw-ml-12">
+      <div className="md:tw-ml-12">
         <DropPartActionTriggers
           dropPart={dropPart}
           isDiscussionOpen={isDiscussionOpen}
