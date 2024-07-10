@@ -21,7 +21,6 @@ export default function DropPartActionTriggersVoteVotingsSubmit({
   );
 }
 
-
 // TODO
 // disabled if not logged in
 // disabled if no profile

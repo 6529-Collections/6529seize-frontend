@@ -11,7 +11,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
-import BrainCreateADrop from "./BrainCreateADrop";
 import { Drop } from "../../generated/models/Drop";
 
 interface QueryUpdateInput {
@@ -156,14 +155,14 @@ export default function Brain() {
     <div className="tailwind-scope">
       <div className="tw-max-w-2xl tw-mx-auto">
         <h1 className="tw-block tw-float-none">Stream</h1>
-
         <div className="tw-mt-4 lg:tw-mt-6">
-          <BrainCreateADrop />
-          {/* <DropListWrapper
+          <DropListWrapper
             drops={drops}
             loading={isFetching}
+            showWaveInfo={true}
+            showIsWaveDescriptionDrop={true}
             onBottomIntersection={onBottomIntersection}
-          /> */}
+          />
         </div>
       </div>
     </div>

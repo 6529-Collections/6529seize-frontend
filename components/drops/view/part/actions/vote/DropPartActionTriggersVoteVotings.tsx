@@ -1,8 +1,6 @@
 import { useContext, useState } from "react";
 import { Drop } from "../../../../../../generated/models/Drop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
-import RateClapOutlineIcon from "../../../../../utils/icons/RateClapOutlineIcon";
-import RateClapSolidIcon from "../../../../../utils/icons/RateClapSolidIcon";
 import { AuthContext } from "../../../../../auth/Auth";
 import {
   QueryKey,
@@ -128,9 +126,21 @@ export default function DropPartActionTriggersVoteVotings({
               </Tippy>
             )}
             {!!drop.context_profile_context?.rating && (
-              <div className="tw-ml-2 tw-bg-primary-400/10 tw-rounded-full tw-w-auto tw-px-1 tw-py-0.5">
+              <div
+                className={`${
+                  drop.context_profile_context.rating > 0
+                    ? "tw-bg-green/10"
+                    : "tw-bg-red/10"
+                } tw-ml-2 tw-rounded-full tw-w-auto tw-px-1 tw-py-0.5 tw-transition tw-ease-out tw-duration-300`}
+              >
                 <Tippy content="Your given votes">
-                  <span className="tw-text-primary-400">
+                  <span
+                    className={`${
+                      drop.context_profile_context.rating > 0
+                        ? "tw-text-green"
+                        : "tw-text-red"
+                    }`}
+                  >
                     {formatNumberWithCommas(
                       drop.context_profile_context.rating
                     )}

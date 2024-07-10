@@ -2950,6 +2950,7 @@ components:
         - name
         - picture
         - description_drop_id
+        - authenticated_user_eligible_to_vote
       properties:
         id:
           type: string
@@ -2959,5 +2960,7 @@ components:
           type: string
         description_drop_id:
           type: string
+        authenticated_user_eligible_to_vote:
+          type: boolean
 security:
   - bearerAuth: []
