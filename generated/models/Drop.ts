@@ -18,6 +18,7 @@ import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { ProfileMin } from '../models/ProfileMin';
+import { WaveMin } from '../models/WaveMin';
 import { HttpFile } from '../http/http';
 
 export class Drop {
@@ -26,7 +27,7 @@ export class Drop {
     * Sequence number of the drop in Seize
     */
     'serial_no': number;
-    'wave_id': string;
+    'wave': WaveMin;
     'author': ProfileMin;
     /**
     * Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
@@ -65,9 +66,9 @@ export class Drop {
             "format": "int64"
         },
         {
-            "name": "wave_id",
-            "baseName": "wave_id",
-            "type": "string",
+            "name": "wave",
+            "baseName": "wave",
+            "type": "WaveMin",
             "format": ""
         },
         {

@@ -119,7 +119,7 @@ export default function GroupCardConfigs({
   };
 
   const getWalletsConfig = (
-    wallet_group_wallets_count: GroupDescription["wallet_group_wallets_count"]
+    wallet_group_wallets_count: GroupDescription["identity_group_identities_count"]
   ): GroupCardConfigProps | null => {
     if (!wallet_group_wallets_count) {
       return null;
@@ -132,12 +132,12 @@ export default function GroupCardConfigs({
 
   const getConfigs = (): GroupCardConfigProps[] => {
     const configs: GroupCardConfigProps[] = [];
-    const { tdh, rep, cic, level, wallet_group_wallets_count } = group.group;
+    const { tdh, rep, cic, level, identity_group_identities_count } = group.group;
     const tdhConfig = getTdhConfig(tdh);
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);
     const levelConfig = getLevelConfig(level);
-    const walletsConfig = getWalletsConfig(wallet_group_wallets_count);
+    const walletsConfig = getWalletsConfig(identity_group_identities_count);
     if (tdhConfig) {
       configs.push(tdhConfig);
     }

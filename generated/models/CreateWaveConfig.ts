@@ -10,12 +10,12 @@
  * Do not edit the class manually.
  */
 
+import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
 import { IntRange } from '../models/IntRange';
-import { WaveScope } from '../models/WaveScope';
 import { WaveType } from '../models/WaveType';
 import { HttpFile } from '../http/http';
 
-export class WaveConfig {
+export class CreateWaveConfig {
     'type': WaveType;
     'winning_thresholds': IntRange | null;
     /**
@@ -26,9 +26,8 @@ export class WaveConfig {
     * Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
     */
     'time_lock_ms': number | null;
-    'admin_group': WaveScope;
+    'admin_group': CreateNewWaveScope | null;
     'period': IntRange | null;
-    'authenticated_user_eligible_for_admin': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -60,7 +59,7 @@ export class WaveConfig {
         {
             "name": "admin_group",
             "baseName": "admin_group",
-            "type": "WaveScope",
+            "type": "CreateNewWaveScope",
             "format": ""
         },
         {
@@ -68,16 +67,10 @@ export class WaveConfig {
             "baseName": "period",
             "type": "IntRange",
             "format": ""
-        },
-        {
-            "name": "authenticated_user_eligible_for_admin",
-            "baseName": "authenticated_user_eligible_for_admin",
-            "type": "boolean",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WaveConfig.attributeTypeMap;
+        return CreateWaveConfig.attributeTypeMap;
     }
 
     public constructor() {

@@ -9,7 +9,9 @@ export default function GroupCreateWallets({
   readonly wallets: string[] | null;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
-  const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(wallets);
+  const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(
+    wallets
+  );
   const [emmaWallets, setEmmaWallets] = useState<string[] | null>(null);
 
   const onUploadedWalletsChange = (newV: string[] | null) =>
@@ -29,6 +31,8 @@ export default function GroupCreateWallets({
     setUploadedWallets(null);
     setEmmaWallets(null);
   };
+
+  useEffect(() => console.log(wallets), [wallets]);
 
   return (
     <div className="tw-col-span-full">

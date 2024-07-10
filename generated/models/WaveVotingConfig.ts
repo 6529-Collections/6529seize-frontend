@@ -31,6 +31,7 @@ export class WaveVotingConfig {
     */
     'signature_required': boolean;
     'period'?: IntRange;
+    'authenticated_user_eligible': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -75,6 +76,12 @@ export class WaveVotingConfig {
             "name": "period",
             "baseName": "period",
             "type": "IntRange",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_eligible",
+            "baseName": "authenticated_user_eligible",
+            "type": "boolean",
             "format": ""
         }    ];
 
