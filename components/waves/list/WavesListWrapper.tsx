@@ -9,10 +9,12 @@ import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 export default function WavesListWrapper({
   waves,
   loading,
+  availableCredit,
   onBottomIntersection,
 }: {
   readonly waves: Wave[];
   readonly loading: boolean;
+  readonly availableCredit: number | null;
   readonly onBottomIntersection: (state: boolean) => void;
 }) {
   return (
@@ -24,6 +26,7 @@ export default function WavesListWrapper({
             drop={wave.description_drop}
             isWaveDescriptionDrop={true}
             showWaveInfo={true}
+            availableCredit={availableCredit}
           />
         ))}
       </div>

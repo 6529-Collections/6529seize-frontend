@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -6,13 +6,14 @@ import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "./DropListWrapper";
 import { AuthContext } from "../../auth/Auth";
 import { Drop } from "../../../generated/models/Drop";
+import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 
 const REQUEST_SIZE = 10;
 
 export default function Drops() {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string).toLowerCase();
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const {
     data,
@@ -77,12 +78,28 @@ export default function Drops() {
     fetchNextPage();
   };
 
+  const { data: availableRateResponse } =
+    useQuery<ProfileAvailableDropRateResponse>({
+      queryKey: [
+        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
+        connectedProfile?.profile?.handle,
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ProfileAvailableDropRateResponse>({
+          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
+        }),
+      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
+    });
+
   return (
     <DropListWrapper
       drops={drops}
       loading={isFetching}
       showWaveInfo={true}
       showIsWaveDescriptionDrop={true}
+      availableCredit={
+        availableRateResponse?.available_credit_for_rating ?? null
+      }
       onBottomIntersection={onBottomIntersection}
     />
   );

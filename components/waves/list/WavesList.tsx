@@ -1,9 +1,11 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
 import WavesListWrapper from "./WavesListWrapper";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
+import { AuthContext } from "../../auth/Auth";
 
 const REQUEST_SIZE = 10;
 export default function WavesList({
@@ -13,6 +15,7 @@ export default function WavesList({
   readonly showCreateNewWaveButton?: boolean;
   readonly onCreateNewWave: () => void;
 }) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const {
     data,
     fetchNextPage,
@@ -66,6 +69,19 @@ export default function WavesList({
     fetchNextPage();
   };
 
+  const { data: availableRateResponse } =
+    useQuery<ProfileAvailableDropRateResponse>({
+      queryKey: [
+        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
+        connectedProfile?.profile?.handle,
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ProfileAvailableDropRateResponse>({
+          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
+        }),
+      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
+    });
+
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-2xl tw-mx-auto tw-py-8">
@@ -100,6 +116,9 @@ export default function WavesList({
           <WavesListWrapper
             waves={waves}
             loading={isFetching}
+            availableCredit={
+              availableRateResponse?.available_credit_for_rating ?? null
+            }
             onBottomIntersection={onBottomIntersection}
           />
         </div>
