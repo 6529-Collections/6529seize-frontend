@@ -13,7 +13,7 @@ export default function DropPartActionTriggersVote({
   readonly canVote: boolean;
 }) {
   return (
-    <div className="tw-flex tw-gap-x-4">
+    <div className="tw-flex tw-items-center tw-gap-x-4">
       <DropPartActionTriggersVoteVotings
         drop={drop}
         canVote={canVote}
