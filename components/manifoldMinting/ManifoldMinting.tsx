@@ -90,7 +90,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         contract={props.contract}
         proxy={props.proxy}
         abi={props.abi}
-        claim={manifoldClaim!}
+        claim={manifoldClaim}
         merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
         setFee={(f: number) => {
           setFee(f);

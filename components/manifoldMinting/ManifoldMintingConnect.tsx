@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
-import { Col, Container, Form, Nav, Row } from "react-bootstrap";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import { useAccount, useEnsAddress, useEnsName } from "wagmi";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import { isValidEthAddress } from "../../helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose, faDeleteLeft } from "@fortawesome/free-solid-svg-icons";
-import Tippy from "@tippyjs/react";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
