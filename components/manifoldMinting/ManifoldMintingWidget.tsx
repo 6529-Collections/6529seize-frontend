@@ -147,42 +147,52 @@ export default function ManifoldMintingWidget(
       connectedAddress.address,
       mintForAddress
     );
+    const args: any[] = [props.contract, props.claim.instanceId];
+    const mintArgs = getMintArgsList(isProxy);
 
-    const args: any = [props.contract, props.claim.instanceId];
-    if (mintCount > 1 || isProxy) {
-      args.push(mintCount);
-    }
-    const selectedMerkleProofs = getSelectedMerkleProofs();
-    if (mintCount > 1 || isProxy) {
-      if (props.claim.phase === ManifoldPhase.PUBLIC) {
-        args.push([]);
-        args.push([]);
-      } else {
-        args.push(selectedMerkleProofs.map((mp) => mp.value) ?? []);
-        args.push(selectedMerkleProofs.map((mp) => mp.merkleProof) ?? []);
-      }
-    } else {
-      args.push(selectedMerkleProofs[0]?.value ?? 0);
-      args.push(selectedMerkleProofs[0]?.merkleProof ?? []);
-    }
+    args.push(...mintArgs, mintForAddress);
 
-    args.push(mintForAddress);
-
-    let functionName = "";
-    if (isProxy) {
-      functionName = "mintProxy";
-    } else {
-      if (mintCount > 1) {
-        functionName = "mintBatch";
-      } else {
-        functionName = "mint";
-      }
-    }
+    const functionName = getMintFunctionName(isProxy);
 
     return {
       functionName,
       args,
     };
+  };
+
+  const getMintArgsList = (isProxy: boolean) => {
+    const mintArgs = [];
+    const selectedMerkleProofs = getSelectedMerkleProofs();
+
+    if (mintCount > 1 || isProxy) {
+      mintArgs.push(mintCount);
+
+      if (props.claim.phase === ManifoldPhase.PUBLIC) {
+        mintArgs.push([], []);
+      } else {
+        mintArgs.push(
+          selectedMerkleProofs.map((mp) => mp.value) ?? [],
+          selectedMerkleProofs.map((mp) => mp.merkleProof) ?? []
+        );
+      }
+    } else {
+      mintArgs.push(
+        selectedMerkleProofs[0]?.value ?? 0,
+        selectedMerkleProofs[0]?.merkleProof ?? []
+      );
+    }
+
+    return mintArgs;
+  };
+
+  const getMintFunctionName = (isProxy: boolean) => {
+    if (isProxy) {
+      return "mintProxy";
+    } else if (mintCount > 1) {
+      return "mintBatch";
+    } else {
+      return "mint";
+    }
   };
 
   const onMint = () => {

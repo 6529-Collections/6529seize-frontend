@@ -17,14 +17,13 @@ export default function ManifoldMintingConnect(
   const [mintForLock, setMintForLock] = useState<boolean>(false);
 
   const walletAddressEns = useEnsName({
-    address:
-      mintFor && isValidEthAddress(mintFor)
-        ? (mintFor as `0x${string}`)
-        : undefined,
+    address: isValidEthAddress(mintFor)
+      ? (mintFor as `0x${string}`)
+      : undefined,
     chainId: 1,
   });
   const walletAddressFromEns = useEnsAddress({
-    name: mintFor && mintFor.endsWith(".eth") ? mintFor : undefined,
+    name: mintFor?.endsWith(".eth") ? mintFor : undefined,
     chainId: 1,
   });
 

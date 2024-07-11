@@ -241,19 +241,6 @@
   background-color: $nextgen-grey;
 }
 
-.nftAttribute {
-  border: 1px solid $font-color;
-  text-align: center;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  span {
-    white-space: nowrap;
-  }
-}
-
 .mintDetails {
   background-color: white;
   color: black;

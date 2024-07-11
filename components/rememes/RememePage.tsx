@@ -20,6 +20,7 @@ import {
   numberWithCommas,
   parseIpfsUrl,
 } from "../../helpers/Helpers";
+import NFTAttributes from "../nftAttributes/NFTAttributes";
 
 interface Props {
   contract: string;
@@ -405,25 +406,7 @@ export default function RememePage(props: Readonly<Props>) {
               <Col xs={12}>
                 <h1>Attributes</h1>
               </Col>
-              {getAttributes().map((a: any) => (
-                <Col
-                  key={a.trait_type}
-                  xs={{ span: 6 }}
-                  sm={{ span: 3 }}
-                  md={{ span: 2 }}
-                  lg={{ span: 2 }}
-                  className="pt-2 pb-2">
-                  <Container>
-                    <Row>
-                      <Col className={styles.nftAttribute}>
-                        <span>{a.trait_type}</span>
-                        <br />
-                        <span title={a.value}>{a.value}</span>
-                      </Col>
-                    </Row>
-                  </Container>
-                </Col>
-              ))}
+              <NFTAttributes attributes={getAttributes()} />
             </Row>
           )}
         </>

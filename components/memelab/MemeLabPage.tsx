@@ -44,6 +44,7 @@ import {
   getDimensionsFromMetadata,
 } from "../../helpers/nft.helplers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import NFTAttributes from "../nftAttributes/NFTAttributes";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -1178,25 +1179,9 @@ export default function LabPage(props: Readonly<Props>) {
                     </Col>
                   </Row>
                   <Row>
-                    {nft.metadata.attributes.map((a: any) => (
-                      <Col
-                        key={a.trait_type}
-                        xs={{ span: 6 }}
-                        sm={{ span: 3 }}
-                        md={{ span: 2 }}
-                        lg={{ span: 2 }}
-                        className="pt-2 pb-2">
-                        <Container>
-                          <Row>
-                            <Col className={styles.nftAttribute}>
-                              <span>{a.trait_type}</span>
-                              <br />
-                              <span title={a.value}>{a.value}</span>
-                            </Col>
-                          </Row>
-                        </Container>
-                      </Col>
-                    ))}
+                    <Col>
+                      <NFTAttributes attributes={nft.metadata.attributes} />
+                    </Col>
                   </Row>
                 </Container>
               </Col>

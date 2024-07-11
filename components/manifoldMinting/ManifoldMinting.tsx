@@ -85,6 +85,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }, [manifoldClaim?.instanceId]);
 
   function printMint() {
+    if (!manifoldClaim) {
+      return <></>;
+    }
+
     return (
       <ManifoldMintingWidget
         contract={props.contract}

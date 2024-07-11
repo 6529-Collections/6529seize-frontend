@@ -17,6 +17,7 @@ import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
 } from "../../helpers/nft.helplers";
+import NFTAttributes from "../nftAttributes/NFTAttributes";
 
 export function MemePageArt(props: {
   show: boolean;
@@ -333,33 +334,17 @@ export function MemePageArt(props: {
                   </Col>
                 </Row>
                 <Row>
-                  {props.nft.metadata.attributes
-                    .filter(
-                      (a: any) =>
-                        !a.display_type &&
-                        a.trait_type != "Type - Season" &&
-                        a.trait_type != "Type - Meme" &&
-                        a.trait_type != "Type - Card"
-                    )
-                    .map((a: any) => (
-                      <Col
-                        key={a.trait_type}
-                        xs={{ span: 6 }}
-                        sm={{ span: 3 }}
-                        md={{ span: 2 }}
-                        lg={{ span: 2 }}
-                        className="pt-2 pb-2">
-                        <Container>
-                          <Row>
-                            <Col className={styles.nftAttribute}>
-                              <span>{a.trait_type}</span>
-                              <br />
-                              <span title={a.value}>{a.value}</span>
-                            </Col>
-                          </Row>
-                        </Container>
-                      </Col>
-                    ))}
+                  <Col>
+                    <NFTAttributes
+                      attributes={props.nft.metadata.attributes.filter(
+                        (a: any) =>
+                          !a.display_type &&
+                          a.trait_type != "Type - Season" &&
+                          a.trait_type != "Type - Meme" &&
+                          a.trait_type != "Type - Card"
+                      )}
+                    />
+                  </Col>
                 </Row>
               </Container>
             </Col>
