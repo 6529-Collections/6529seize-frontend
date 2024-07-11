@@ -443,6 +443,12 @@ paths:
             format: int64
             minimum: 1
             maximum: 20
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
         - name: group_id
           in: query
           description: Drops by authors that fall into supplied group
@@ -765,37 +771,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - content_type
-                - file_name
-                - file_size
-              properties:
-                file_name:
-                  type: string
-                content_type:
-                  type: string
-                file_size:
-                  type: number
-                  format: int64
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - upload_url
-                  - content_type
-                  - media_url
-                properties:
-                  upload_url:
-                    type: string
-                  content_type:
-                    type: string
-                  media_url:
-                    type: string
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
         "400":
           description: "Invalid request"
   /proxies:
@@ -949,6 +932,29 @@ paths:
         "400":
           description: Invalid request
 
+  /wave-media/prep:
+    post:
+      tags:
+        - Waves
+      summary: Create S3 URL for wave PFP
+      description: "Requires the user to be authenticated"
+      operationId: createWaveMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
+        "400":
+          description: "Invalid request"
+
   /waves:
     get:
       tags:
@@ -1086,7 +1092,7 @@ paths:
                 $ref: "#/components/schemas/GroupFull"
         "400":
           description: Invalid request
-  /groups/{id}/visibility:
+  /groups/{id}/visible:
     post:
       tags:
         - Groups
@@ -1115,19 +1121,19 @@ paths:
           description: Group not found
         "400":
           description: Invalid request
-  /groups/{id}/wallet_groups/{wallet_group_id}:
+  /groups/{id}/identity_groups/{identity_group_id}:
     get:
       tags:
         - Groups
-      summary: Get groups wallet group wallets
-      operationId: getGroupsWalletGroupWallets
+      summary: Get identity groups identities. Identities are represented as primary wallet addresses
+      operationId: getIdentityGroupIdentities
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-        - name: wallet_group_id
+        - name: identity_group_id
           in: path
           required: true
           schema:
@@ -1329,8 +1335,10 @@ components:
         - cic
         - level
         - owns_nfts
-        - wallet_group_id
-        - wallet_group_wallets_count
+        - identity_group_id
+        - identity_group_identities_count
+        - excluded_identity_group_id
+        - excluded_identity_group_identities_count
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1344,10 +1352,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
-        wallet_group_id:
+        identity_group_id:
           type: string
           nullable: true
-        wallet_group_wallets_count:
+        identity_group_identities_count:
+          type: number
+          format: int64
+          nullable: false
+        excluded_identity_group_id:
+          type: string
+          nullable: true
+        excluded_identity_group_identities_count:
           type: number
           format: int64
           nullable: false
@@ -1360,7 +1375,8 @@ components:
         - cic
         - level
         - owns_nfts
-        - wallets
+        - identity_addresses
+        - excluded_identity_addresses
       properties:
         tdh:
           $ref: "#/components/schemas/GroupTdhFilter"
@@ -1374,12 +1390,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupOwnsNft"
-        wallets:
+        identity_addresses:
           anyOf:
             - type: "null"
             - type: array
               items:
                 type: string
+          example: ["0x1234567890123456789012345678901234567890"]
+        excluded_identity_addresses:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
+          example: ["0x1234567890123456789012345678901234567890"]
 
     GroupOwnsNft:
       type: object
@@ -1560,7 +1584,7 @@ components:
       required:
         - id
         - serial_no
-        - wave_id
+        - wave
         - author
         - created_at
         - referenced_nfts
@@ -1583,8 +1607,8 @@ components:
           description: Sequence number of the drop in Seize
           type: number
           format: int64
-        wave_id:
-          type: string
+        wave:
+          $ref: "#/components/schemas/WaveMin"
         author:
           $ref: "#/components/schemas/ProfileMin"
         created_at:
@@ -1796,10 +1820,12 @@ components:
           credit_amount:
             type: number
             format: int64
+            example: 1000
           end_time:
             type: number
             format: int64
             nullable: true
+            example: 1719850339996
 
     DropRatingCategory:
       type: object
@@ -1858,17 +1884,14 @@ components:
           items:
             $ref: "#/components/schemas/DropMedia"
 
-    CreateDropRequest:
+    CreateWaveDropRequest:
       type: object
       required:
-        - wave_id
         - referenced_nfts
         - mentioned_users
         - metadata
         - parts
       properties:
-        wave_id:
-          type: string
         title:
           type: string
           maxLength: 250
@@ -1890,6 +1913,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DropMetadata"
+
+    CreateDropRequest:
+      type: object
+      required:
+        - wave_id
+      allOf:
+        - $ref: "#/components/schemas/CreateWaveDropRequest"
+      properties:
+        wave_id:
+          type: string
 
     DropMedia:
       type: object
@@ -2040,14 +2073,24 @@ components:
         - DROP
         - PARTICIPANT
 
+    WaveMetadataType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+
     WaveRequiredMetadata:
       type: object
       required:
         - name
+        - type
       properties:
         name:
           description: Metadata key
           type: string
+        type:
+          $ref: "#/components/schemas/WaveMetadataType"
+
 
     CreateNewWaveVotingConfig:
       type: object
@@ -2090,6 +2133,7 @@ components:
         - credit_category
         - signature_required
         - creditor
+        - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/WaveScope"
@@ -2113,6 +2157,8 @@ components:
           type: boolean
         period:
           $ref: "#/components/schemas/IntRange"
+        authenticated_user_eligible:
+          type: boolean
 
     WaveVisibilityConfig:
       type: object
@@ -2137,6 +2183,8 @@ components:
         - required_metadata
         - signature_required
         - no_of_applications_allowed_per_participant
+        - required_media
+        - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/WaveScope"
@@ -2153,11 +2201,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveRequiredMetadata"
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
         period:
           $ref: "#/components/schemas/IntRange"
+        authenticated_user_eligible:
+          type: boolean
 
     CreateNewWaveParticipationConfig:
       type: object
@@ -2166,6 +2220,7 @@ components:
         - required_metadata
         - signature_required
         - no_of_applications_allowed_per_participant
+        - required_media
       properties:
         scope:
           $ref: "#/components/schemas/CreateNewWaveScope"
@@ -2175,6 +2230,10 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
         required_metadata:
           description: |
             The metadata that must be provided by the participant. 
@@ -2196,7 +2255,8 @@ components:
         - winning_thresholds
         - period
         - max_winners
-        - admin_group_id
+        - admin_group
+        - authenticated_user_eligible_for_admin
       properties:
         type:
           $ref: "#/components/schemas/WaveType"
@@ -2217,28 +2277,104 @@ components:
           type: integer
           format: int64
           minimum: 1
-        admin_group_id:
-          type: string
-          nullable: true
+        admin_group:
+          $ref: "#/components/schemas/WaveScope"
         period:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
+          example: {"min": 1719850339996, "max": 1719850339996}
+        authenticated_user_eligible_for_admin:
+          type: boolean
+
+    CreateWaveConfig:
+      type: object
+      required:
+        - type
+        - time_lock_ms
+        - winning_thresholds
+        - period
+        - max_winners
+        - admin_group
+      properties:
+        type:
+          $ref: "#/components/schemas/WaveType"
+        winning_thresholds:
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is APPROVE
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+        max_winners:
+          description: This amount of top rated drops will win. Must be set if and only if type is RANK
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        time_lock_ms:
+          nullable: true
+          description: Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
+          type: integer
+          format: int64
+          minimum: 1
+        admin_group:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CreateNewWaveScope"
+        period:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+          example: { "min": 1719850339996, "max": 1719850339996 }
+
+
+    WaveOutcomeType:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+
+    WaveOutcomeSubType:
+      type: string
+      enum:
+        - CREDIT_DISTRIBUTION
+
+    WaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
 
     WaveOutcome:
       type: object
       required:
         - type
-        - properties
+        - description
       properties:
         type:
+          $ref: "#/components/schemas/WaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/WaveOutcomeSubType"
+        description:
           type: string
-          description: |
-            Type of the outcome. (Promise, EVM Mint, Crypto Prize etc.)
-        properties:
-          type: object
-          additionalProperties:
-            type: string
+        credit:
+          $ref: "#/components/schemas/WaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            type: number
+
+
+    WaveParticipationRequirement:
+      type: string
+      enum:
+        - IMAGE
+        - AUDIO
+        - VIDEO
 
     Wave:
       type: object
@@ -2247,12 +2383,15 @@ components:
         - serial_no
         - author
         - name
-        - description
+        - picture
+        - description_drop
         - voting
         - visibility
         - participation
         - wave
         - outcomes
+        - created_at
+        - contributors_overview
       properties:
         id:
           description: The ID of the wave
@@ -2266,9 +2405,16 @@ components:
         name:
           description: The name of the wave
           type: string
-        description:
-          description: The description of the wave
+        picture:
+          description: The picture of the wave
           type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
+        created_at:
+          type: number
+          format: int64
+        description_drop:
+          $ref: "#/components/schemas/Drop"
         voting:
           $ref: "#/components/schemas/WaveVotingConfig"
         visibility:
@@ -2281,12 +2427,27 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveOutcome"
+        contributors_overview:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveContributorOverview"
+
+    WaveContributorOverview:
+      required:
+        - contributor_identity
+        - contributor_pfp
+      properties:
+        contributor_identity:
+          type: string
+        contributor_pfp:
+          type: string
 
     CreateNewWave:
       type: object
       required:
         - name
-        - description
+        - picture
+        - description_drop
         - voting
         - visibility
         - participation
@@ -2297,9 +2458,13 @@ components:
           description: The name of the wave
           type: string
           maxLength: 250
-        description:
-          description: The description of the wave
+        picture:
+          description: The picture of the wave
           type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
+        description_drop:
+          $ref: "#/components/schemas/CreateWaveDropRequest"
         voting:
           $ref: "#/components/schemas/CreateNewWaveVotingConfig"
         visibility:
@@ -2307,7 +2472,7 @@ components:
         participation:
           $ref: "#/components/schemas/CreateNewWaveParticipationConfig"
         wave:
-          $ref: "#/components/schemas/WaveConfig"
+          $ref: "#/components/schemas/CreateWaveConfig"
         outcomes:
           type: array
           items:
@@ -2357,9 +2522,11 @@ components:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         credit_amount:
           type: number
           format: int64
+          example: 1000
 
     CreateNewProfileProxyAllocateCicAction:
       type: object
@@ -2378,6 +2545,7 @@ components:
         credit_amount:
           type: number
           format: int64
+          example: 1000
 
     CreateNewProfileProxyCreateWaveAction:
       type: object
@@ -2470,37 +2638,45 @@ components:
             - type: "null"
             - type: number
               format: int64
+          example: 1000
         credit_spent:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1000
         start_time:
           type: number
           format: int64
+          example: 1719850339996
         end_time:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         created_at:
           type: number
           format: int64
+          example: 1719850339996
         accepted_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         rejected_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         revoked_at:
           anyOf:
             - type: "null"
             - type: number
               format: int64
+          example: 1719850339996
         is_active:
           type: boolean
 
@@ -2734,5 +2910,53 @@ components:
           type: number
           format: int64
 
+    CreateMediaUploadUrlRequest:
+      required:
+        - content_type
+        - file_name
+        - file_size
+      properties:
+        content_type:
+          type: string
+          example: "image/png"
+        file_name:
+          type: string
+          example: "image.png"
+        file_size:
+          type: number
+          format: int64
+          example: 1000
+
+    CreateMediaUrlResponse:
+      required:
+        - upload_url
+        - content_type
+        - media_url
+      properties:
+        upload_url:
+          type: string
+          example: "https://example.com/upload/image.png"
+        content_type:
+          type: string
+          example: "image/png"
+        media_url:
+          type: string
+          example: "https://example.com/final/image.png"
+
+    WaveMin:
+      required:
+        - id
+        - name
+        - picture
+        - description_drop_id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+        description_drop_id:
+          type: string
 security:
   - bearerAuth: []

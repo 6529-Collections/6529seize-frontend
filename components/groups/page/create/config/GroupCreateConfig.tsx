@@ -21,12 +21,14 @@ export default function GroupCreateConfig({
   readonly tdh: CreateGroupDescription["tdh"];
   readonly cic: CreateGroupDescription["cic"];
   readonly rep: CreateGroupDescription["rep"];
-  readonly wallets: CreateGroupDescription["wallets"];
+  readonly wallets: CreateGroupDescription["identity_addresses"];
   readonly setLevel: (level: CreateGroupDescription["level"]) => void;
   readonly setTDH: (tdh: CreateGroupDescription["tdh"]) => void;
   readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
   readonly setRep: (rep: CreateGroupDescription["rep"]) => void;
-  readonly setWallets: (wallets: CreateGroupDescription["wallets"]) => void;
+  readonly setWallets: (
+    wallets: CreateGroupDescription["identity_addresses"]
+  ) => void;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-8">

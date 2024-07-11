@@ -10,19 +10,23 @@
  * Do not edit the class manually.
  */
 
-import { WaveMetadataType } from '../models/WaveMetadataType';
 import { HttpFile } from '../http/http';
 
-export class WaveRequiredMetadata {
-    /**
-    * Metadata key
-    */
+export class WaveMin {
+    'id': string;
     'name': string;
-    'type': WaveMetadataType;
+    'picture': string;
+    'description_drop_id': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "id",
+            "baseName": "id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "name",
             "baseName": "name",
@@ -30,19 +34,23 @@ export class WaveRequiredMetadata {
             "format": ""
         },
         {
-            "name": "type",
-            "baseName": "type",
-            "type": "WaveMetadataType",
+            "name": "picture",
+            "baseName": "picture",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "description_drop_id",
+            "baseName": "description_drop_id",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WaveRequiredMetadata.attributeTypeMap;
+        return WaveMin.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-
 

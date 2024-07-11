@@ -9,12 +9,12 @@ export * from '../models/ChangeProfileCicRating';
 export * from '../models/ChangeProfileCicRatingResponse';
 export * from '../models/ChangeProfileRepRating';
 export * from '../models/ChangeProfileRepRatingResponse';
-export * from '../models/CreateDropMediaUrl201Response';
-export * from '../models/CreateDropMediaUrlRequest';
 export * from '../models/CreateDropPart';
 export * from '../models/CreateDropRequest';
 export * from '../models/CreateGroup';
 export * from '../models/CreateGroupDescription';
+export * from '../models/CreateMediaUploadUrlRequest';
+export * from '../models/CreateMediaUrlResponse';
 export * from '../models/CreateNewProfileProxy';
 export * from '../models/CreateNewProfileProxyAllocateCicAction';
 export * from '../models/CreateNewProfileProxyAllocateRepAction';
@@ -27,6 +27,8 @@ export * from '../models/CreateNewWaveParticipationConfig';
 export * from '../models/CreateNewWaveScope';
 export * from '../models/CreateNewWaveVisibilityConfig';
 export * from '../models/CreateNewWaveVotingConfig';
+export * from '../models/CreateWaveConfig';
+export * from '../models/CreateWaveDropRequest';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
 export * from '../models/DropComment';
@@ -71,10 +73,17 @@ export * from '../models/RepRating';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
+export * from '../models/WaveContributorOverview';
 export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
+export * from '../models/WaveMetadataType';
+export * from '../models/WaveMin';
 export * from '../models/WaveOutcome';
+export * from '../models/WaveOutcomeCredit';
+export * from '../models/WaveOutcomeSubType';
+export * from '../models/WaveOutcomeType';
 export * from '../models/WaveParticipationConfig';
+export * from '../models/WaveParticipationRequirement';
 export * from '../models/WaveRequiredMetadata';
 export * from '../models/WaveScope';
 export * from '../models/WaveType';
@@ -92,12 +101,12 @@ import { ChangeProfileCicRating } from '../models/ChangeProfileCicRating';
 import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRatingResponse';
 import { ChangeProfileRepRating } from '../models/ChangeProfileRepRating';
 import { ChangeProfileRepRatingResponse } from '../models/ChangeProfileRepRatingResponse';
-import { CreateDropMediaUrl201Response } from '../models/CreateDropMediaUrl201Response';
-import { CreateDropMediaUrlRequest } from '../models/CreateDropMediaUrlRequest';
 import { CreateDropPart } from '../models/CreateDropPart';
 import { CreateDropRequest } from '../models/CreateDropRequest';
 import { CreateGroup } from '../models/CreateGroup';
 import { CreateGroupDescription } from '../models/CreateGroupDescription';
+import { CreateMediaUploadUrlRequest } from '../models/CreateMediaUploadUrlRequest';
+import { CreateMediaUrlResponse } from '../models/CreateMediaUrlResponse';
 import { CreateNewProfileProxy } from '../models/CreateNewProfileProxy';
 import { CreateNewProfileProxyAllocateCicAction    } from '../models/CreateNewProfileProxyAllocateCicAction';
 import { CreateNewProfileProxyAllocateRepAction    } from '../models/CreateNewProfileProxyAllocateRepAction';
@@ -110,6 +119,8 @@ import { CreateNewWaveParticipationConfig } from '../models/CreateNewWavePartici
 import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
 import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
 import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
+import { CreateWaveConfig       } from '../models/CreateWaveConfig';
+import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
 import { DropComment } from '../models/DropComment';
@@ -153,16 +164,23 @@ import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileIn
 import { RepRating } from '../models/RepRating';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
-import { WaveConfig       } from '../models/WaveConfig';
+import { WaveConfig        } from '../models/WaveConfig';
+import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
-import { WaveOutcome } from '../models/WaveOutcome';
+import { WaveMetadataType } from '../models/WaveMetadataType';
+import { WaveMin } from '../models/WaveMin';
+import { WaveOutcome        } from '../models/WaveOutcome';
+import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
+import { WaveOutcomeSubType } from '../models/WaveOutcomeSubType';
+import { WaveOutcomeType } from '../models/WaveOutcomeType';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
-import { WaveRequiredMetadata } from '../models/WaveRequiredMetadata';
+import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
+import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
-import { WaveVotingConfig        } from '../models/WaveVotingConfig';
+import { WaveVotingConfig         } from '../models/WaveVotingConfig';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -186,6 +204,11 @@ let enumsMap: Set<string> = new Set<string>([
     "RateMatter",
     "WaveCreditScope",
     "WaveCreditType",
+    "WaveMetadataType",
+    "WaveOutcomeCredit",
+    "WaveOutcomeSubType",
+    "WaveOutcomeType",
+    "WaveParticipationRequirement",
     "WaveType",
 ]);
 
@@ -201,12 +224,12 @@ let typeMap: {[index: string]: any} = {
     "ChangeProfileCicRatingResponse": ChangeProfileCicRatingResponse,
     "ChangeProfileRepRating": ChangeProfileRepRating,
     "ChangeProfileRepRatingResponse": ChangeProfileRepRatingResponse,
-    "CreateDropMediaUrl201Response": CreateDropMediaUrl201Response,
-    "CreateDropMediaUrlRequest": CreateDropMediaUrlRequest,
     "CreateDropPart": CreateDropPart,
     "CreateDropRequest": CreateDropRequest,
     "CreateGroup": CreateGroup,
     "CreateGroupDescription": CreateGroupDescription,
+    "CreateMediaUploadUrlRequest": CreateMediaUploadUrlRequest,
+    "CreateMediaUrlResponse": CreateMediaUrlResponse,
     "CreateNewProfileProxy": CreateNewProfileProxy,
     "CreateNewProfileProxyAllocateCicAction": CreateNewProfileProxyAllocateCicAction,
     "CreateNewProfileProxyAllocateRepAction": CreateNewProfileProxyAllocateRepAction,
@@ -219,6 +242,8 @@ let typeMap: {[index: string]: any} = {
     "CreateNewWaveScope": CreateNewWaveScope,
     "CreateNewWaveVisibilityConfig": CreateNewWaveVisibilityConfig,
     "CreateNewWaveVotingConfig": CreateNewWaveVotingConfig,
+    "CreateWaveConfig": CreateWaveConfig,
+    "CreateWaveDropRequest": CreateWaveDropRequest,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
     "DropComment": DropComment,
@@ -260,6 +285,8 @@ let typeMap: {[index: string]: any} = {
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
+    "WaveContributorOverview": WaveContributorOverview,
+    "WaveMin": WaveMin,
     "WaveOutcome": WaveOutcome,
     "WaveParticipationConfig": WaveParticipationConfig,
     "WaveRequiredMetadata": WaveRequiredMetadata,
