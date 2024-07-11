@@ -77,7 +77,6 @@ export default function DropsListItem({
   useEffect(() => setCanVote(getCanVote()), [voteState]);
 
   const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
-  const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
 
   const banner1 =
     drop.author.banner1_color ?? getRandomColorWithSeed(drop.author.handle);
@@ -158,7 +157,6 @@ export default function DropsListItem({
               availableCredit={availableCredit}
               onQuote={onQuote}
             />
-            {haveData && <DropListItemData drop={drop} />}
           </div>
         </div>
       </div>

@@ -3,9 +3,7 @@ import DropPart from "../../part/DropPart";
 import { useEffect, useState } from "react";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
-
 import { DropVoteState } from "../DropsListItem";
-import DropListItemRateGive from "../rate/give/DropListItemRateGive";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -67,10 +65,12 @@ export default function DropListItemContent({
           <DropPartWrapper
             key={`drop-${drop.id}-part-${index}`}
             isFirstPart={index === 0}
+            isLastPart={index === parts.length - 1}
             dropPart={part}
             drop={drop}
             voteState={voteState}
             canVote={canVote}
+            showFull={isFullMode}
             availableCredit={availableCredit}
             onQuote={onQuote}
           >
