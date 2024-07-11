@@ -331,19 +331,13 @@ const CreateDropContent = forwardRef<
               </>
             </p>
           )}
-          {/* <p className="tw-mb-0">
-            <span className="tw-font-semibold tw-text-iron-500">Drops:</span>
-            <span className="tw-pl-1 tw-text-iron-50">
-              <span>4</span>/<span>5</span>
-            </span>
-          </p> */}
-          {/* <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+          <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
             <div>/</div>
             <div>{formatNumberWithCommas(24000)}</div>
-          </div> */}
+          </div>
         </div>
         <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
           <CreateDropSelectFileAudio onFileChange={onFileChange} />

@@ -726,7 +726,7 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${
                                 router.pathname === "/brain" ? "active" : ""
                               }`}
-                              onClick={() => goTo("brain/")}
+                              onClick={() => goTo("/brain")}
                             >
                               Brain
                             </Nav.Link>
