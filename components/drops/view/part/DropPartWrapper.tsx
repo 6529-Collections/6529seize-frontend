@@ -31,16 +31,16 @@ export default function DropPartWrapper({
   return (
     <div
       className={`${
-        isFirstPart && "tw-min-h-36"
+        isFirstPart && ""
       } tw-flex tw-flex-col tw-justify-between tw-h-full`}
     >
-      <div className="tw-flex-1">
+      <div className="tw-flex-1 tw-px-4">
         {children}
-        <div className="sm:tw-ml-12">
+        <div className="sm:tw-ml-[3.25rem]">
           {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
         </div>
       </div>
-      <div className="sm:tw-ml-12">
+      <div className="sm:tw-ml-16">
         <DropPartActionTriggers
           drop={drop}
           dropPart={dropPart}
@@ -51,10 +51,10 @@ export default function DropPartWrapper({
           setIsDiscussionOpen={setIsDiscussionOpen}
           onQuote={onQuote}
         />
-        {isDiscussionOpen && (
-          <DropPartDiscussion dropPart={dropPart} drop={drop} />
-        )}
       </div>
+      {isDiscussionOpen && (
+        <DropPartDiscussion dropPart={dropPart} drop={drop} />
+      )}
     </div>
   );
 }

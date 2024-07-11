@@ -18,7 +18,7 @@ export default function DropPartActionTriggersVoteVotingsSubmit({
 
   return (
     <Tippy content={tooltipLabel}>
-      <span>{haveVoted ? <RateClapSolidIcon /> : <RateClapOutlineIcon />}</span>
+      <div className="-tw-mt-1">{haveVoted ? <RateClapSolidIcon /> : <RateClapOutlineIcon />}</div>
     </Tippy>
   );
 }

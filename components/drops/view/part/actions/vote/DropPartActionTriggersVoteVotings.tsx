@@ -100,7 +100,7 @@ export default function DropPartActionTriggersVoteVotings({
         onClick={onRateSubmit}
         className={`${
           canVote && "icon"
-        } tw-text-iron-500 tw-px-0 tw-group tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300`}
+        } tw-text-iron-500 tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300`}
       >
         <>
           <DropPartActionTriggersVoteVotingsSubmit
@@ -121,14 +121,14 @@ export default function DropPartActionTriggersVoteVotings({
                   drop.context_profile_context.rating > 0
                     ? "tw-bg-green/10"
                     : "tw-bg-red/10"
-                } tw-ml-2 tw-rounded-full tw-w-auto tw-px-1 tw-py-0.5 tw-transition tw-ease-out tw-duration-300`}
+                } tw-ml-2 tw-rounded-full tw-w-auto tw-px-1 tw-transition tw-ease-out tw-duration-300`}
               >
                 <Tippy content="Your given votes">
                   <span
                     className={`${
                       drop.context_profile_context.rating > 0
                         ? "tw-text-green"
-                        : "tw-text-red"
+                        : "tw-text-error"
                     }`}
                   >
                     {formatNumberWithCommas(
