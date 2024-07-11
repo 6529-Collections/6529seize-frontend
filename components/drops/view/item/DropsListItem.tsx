@@ -116,7 +116,7 @@ export default function DropsListItem({
       <div className="tw-px-4 sm:tw-px-5 tw-pb-4 sm:tw-pb-5 tw-pt-2 sm:tw-pt-3">
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           {showWaveInfo && (
-            <div className="tw-absolute tw-z-10 tw-right-0 tw-top-1 tw-flex tw-items-center tw-gap-x-2">
+            <div className="tw-absolute tw-z-10 tw-right-0 tw-top-1 tw-flex tw-items-center tw-gap-x-2 tw-group">
               {drop.wave.picture && (
                 <img
                   src={drop.wave.picture}
@@ -126,10 +126,25 @@ export default function DropsListItem({
               )}
               <Link
                 href={`waves/${drop.wave.id}`}
-                className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
               >
                 {drop.wave.name}
               </Link>
+              <svg
+                className="tw-size-5 tw-flex-shrink-0 tw-text-iron-400 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-ou"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7 17L17 7M17 7H7M17 7V17"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
           )}
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
