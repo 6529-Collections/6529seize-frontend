@@ -831,6 +831,11 @@ export default function ReactQueryWrapper({
       key: QueryKey.DROP_DISCUSSION,
       values: [{ drop_id: drop.id }],
     });
+
+    invalidateQueries({
+      key: QueryKey.WAVE,
+      values: [{ wave_id: drop.wave.id }],
+    });
   };
 
   const onDropDiscussionChange = ({
