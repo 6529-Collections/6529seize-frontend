@@ -8,20 +8,25 @@ import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropVoteState } from "../item/DropsListItem";
 import DropListItemRateGive from "../item/rate/give/DropListItemRateGive";
+import DropListItemData from "../item/data/DropListItemData";
 
 export default function DropPartWrapper({
   drop,
   dropPart,
   isFirstPart,
+  isLastPart,
   voteState,
   canVote,
   availableCredit,
+  showFull,
   onQuote,
   children,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly isFirstPart: boolean;
+  readonly isLastPart: boolean;
+  readonly showFull: boolean;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
@@ -40,6 +45,8 @@ export default function DropPartWrapper({
     setIsDiscussionOpen(state);
     onQuote(null);
   };
+
+  const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
   return (
     <div>
       <div className="tw-inline-flex tw-w-full">
@@ -49,6 +56,11 @@ export default function DropPartWrapper({
             <div className="sm:tw-ml-[3.25rem]">
               {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
             </div>
+          </div>
+          <div>
+            {haveData && isFirstPart && !showFull && (
+              <DropListItemData drop={drop} />
+            )}
           </div>
           <div className="sm:tw-ml-[4.25rem]">
             <DropPartActionTriggers
@@ -75,6 +87,9 @@ export default function DropPartWrapper({
       {isDiscussionOpen && (
         <DropPartDiscussion dropPart={dropPart} drop={drop} />
       )}
+      <div>
+        {haveData && isLastPart && showFull && <DropListItemData drop={drop} />}
+      </div>
     </div>
   );
 }
