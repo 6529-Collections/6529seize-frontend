@@ -115,8 +115,8 @@ export default function DropsListItem({
       />
       <div className="tw-pb-4 sm:tw-pb-4 tw-pt-2 sm:tw-pt-3">
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
-          {/*  {showWaveInfo && (
-            <div className="tw-absolute tw-z-10 tw-right-0 tw-top-1 tw-flex tw-items-center tw-gap-x-2 tw-group">
+          {showWaveInfo && (
+            <div className="tw-absolute tw-z-10 tw-right-14 tw-top-1.5 tw-flex tw-items-center tw-gap-x-2 tw-group">
               {drop.wave.picture && (
                 <img
                   src={drop.wave.picture}
@@ -146,7 +146,7 @@ export default function DropsListItem({
                 </svg>
               </Link>
             </div>
-          )} */}
+          )}
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
               drop={drop}

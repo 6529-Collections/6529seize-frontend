@@ -37,7 +37,7 @@ export default function CreateDropSelectedFileIcon({
     case FILE_TYPES.IMAGE:
       return (
         <svg
-          className="tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
           width="24"
           height="24"
           viewBox="0 0 24 24"
@@ -57,7 +57,7 @@ export default function CreateDropSelectedFileIcon({
     case FILE_TYPES.VIDEO:
       return (
         <svg
-          className="tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
           width="24"
           height="24"
           aria-hidden="true"
@@ -77,7 +77,7 @@ export default function CreateDropSelectedFileIcon({
     case FILE_TYPES.AUDIO:
       return (
         <svg
-          className="tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
           width="24"
           height="24"
           viewBox="0 0 24 24"
