@@ -39,6 +39,7 @@ export default function DropListItemRateGive({
       );
       return;
     }
+    setOnProgressRate(1);
   }, [canVote, availableCredit]);
 
   const onSuccessfulRateChange = () => {
