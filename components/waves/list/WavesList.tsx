@@ -113,6 +113,9 @@ export default function WavesList({
           )}
         </div>
         <div className="tw-mt-6">
+          <div className="tw-text-sm tw-italic tw-text-iron-500">
+            No Waves to show
+          </div>
           <WavesListWrapper
             waves={waves}
             loading={isFetching}

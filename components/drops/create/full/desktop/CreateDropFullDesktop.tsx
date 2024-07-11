@@ -230,9 +230,9 @@ const CreateDropFullDesktop = forwardRef<
               <div className="tw-mt-3">
                 <div className="tw-w-full">
                   <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
-                    <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
+                    <div className="tw-flex tw-items-center tw-gap-x-3">
                       <CreateDropSelectedFileIcon file={file} />
-                      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+                      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-max-w-[456px] tw-truncate">
                         {file.name}
                       </p>
                     </div>
@@ -240,7 +240,7 @@ const CreateDropFullDesktop = forwardRef<
                       onClick={() => onFileChange(null)}
                       type="button"
                       aria-label="Remove file"
-                      className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                      className="-tw-mr-1 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
                     >
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"

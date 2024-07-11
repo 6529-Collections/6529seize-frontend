@@ -35,7 +35,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
       <WaveHeader wave={wave} />
       <div className="tw-mt-6 md:tw-mt-12 tw-pb-16 lg:tw-pb-20 tw-max-w-5xl tw-mx-auto tw-px-4 md:tw-px-0">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-6">
-          <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-6">
+          <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4">
             <WaveSpecs wave={wave} />
             <WaveGroups wave={wave} />
             {false && (
