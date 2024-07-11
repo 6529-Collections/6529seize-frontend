@@ -242,7 +242,7 @@ const DropPart = memo(
 
                 <div className="tw-mt-2 lg:tw-mt-1 tw-h-full">
                   {dropTitle && isFirstPart && (
-                    <p className="tw-font-semibold tw-text-indigo-400 tw-text-md tw-mb-1">
+                    <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
                       {dropTitle}
                     </p>
                   )}

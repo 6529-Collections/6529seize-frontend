@@ -120,7 +120,7 @@ export default function DropsListItem({
               {drop.wave.picture && (
                 <img
                   src={drop.wave.picture}
-                  alt=""
+                  alt="Drop wave image"
                   className="tw-rounded-full tw-h-6 tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-mx-auto tw-object-cover"
                 />
               )}
