@@ -5,7 +5,7 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import { DropPart as IDropPart } from "../../../../../generated/models/DropPart";
-import DropPart from "../../../view/part/DropPart";
+import DropPart, { DropPartSize } from "../../../view/part/DropPart";
 import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
@@ -89,6 +89,7 @@ export default function CreateDropStormViewPartQuote({
           dropTitle={partConfig.dropTitle}
           waveImage={partConfig.waveImage}
           waveId={partConfig.waveId}
+          size={DropPartSize.SMALL}
         />
       )}
     </div>

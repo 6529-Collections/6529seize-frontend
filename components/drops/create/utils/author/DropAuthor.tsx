@@ -5,28 +5,25 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../../user/utils/UserCICAndLevel";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
-
-export enum DropAuthorSize {
-  SMALL = "SMALL",
-  MEDIUM = "MEDIUM",
-}
+import { DropPartSize } from "../../../view/part/DropPart";
 
 export default function DropAuthor({
   profile,
   timestamp,
-  size = DropAuthorSize.MEDIUM,
+  size = DropPartSize.MEDIUM,
 }: {
   readonly profile: ProfileMin;
   readonly timestamp: number;
-  readonly size?: DropAuthorSize;
+  readonly size?: DropPartSize;
 }) {
   const cicType = cicToType(profile.cic);
 
   const getTextClasses = (): string => {
     switch (size) {
-      case DropAuthorSize.SMALL:
+      case DropPartSize.SMALL:
         return "tw-text-sm";
-      case DropAuthorSize.MEDIUM:
+      case DropPartSize.MEDIUM:
+      case DropPartSize.LARGE:
         return "tw-text-md";
       default:
         assertUnreachable(size);
