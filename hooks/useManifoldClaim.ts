@@ -2,9 +2,9 @@ import { useReadContract } from "wagmi";
 import { NULL_MERKLE } from "../constants";
 import { useCallback, useEffect, useState } from "react";
 import { areEqualAddresses } from "../helpers/Helpers";
-import { mainnet, sepolia } from "viem/chains";
+import { mainnet } from "viem/chains";
 
-export const MANIFOLD_NETWORK = sepolia;
+export const MANIFOLD_NETWORK = mainnet;
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",

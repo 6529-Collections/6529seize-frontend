@@ -73,7 +73,7 @@ export default function MemePageMintCountdown(
               },
             ]}
             additional_elements={
-              manifoldClaim.phase === ManifoldPhase.PUBLIC && (
+              manifoldClaim.phase === ManifoldPhase.ALLOWLIST && (
                 <span className="font-smaller pt-1">
                   * The timer above displays the current time remaining for a
                   specific phase of the drop. Please refer to the distribution
