@@ -5,12 +5,17 @@ import { ManifoldMerkleProof } from "./manifold-types";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import {
+  useAccount,
   useReadContract,
   useReadContracts,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { fromGWEI, getTransactionLink } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  fromGWEI,
+  getTransactionLink,
+} from "../../helpers/Helpers";
 import {
   MANIFOLD_NETWORK,
   ManifoldClaim,
@@ -29,7 +34,8 @@ export default function ManifoldMintingWidget(
     setFee: (fee: number) => void;
   }>
 ) {
-  const [connectedAddress, setConnectedAddress] = useState<string>("");
+  const connectedAddress = useAccount();
+  const [mintForAddress, setMintForAddress] = useState<string>("");
 
   const [isError, setIsError] = useState<boolean>(false);
   const [fetchingMerkle, setFetchingMerkle] = useState<boolean>(false);
@@ -43,13 +49,17 @@ export default function ManifoldMintingWidget(
   const [mintError, setMintError] = useState<string>("");
 
   useEffect(() => {
+    mintWrite.reset();
+    setMintStatus(<></>);
+    setMintError("");
+
     if (props.claim.phase === ManifoldPhase.PUBLIC) {
       return;
     }
 
-    if (connectedAddress && props.merkleTreeId) {
+    if (mintForAddress && props.merkleTreeId) {
       setFetchingMerkle(true);
-      const url = `https://apps.api.manifoldxyz.dev/public/merkleTree/${props.merkleTreeId}/merkleInfo?address=${connectedAddress}`;
+      const url = `https://apps.api.manifoldxyz.dev/public/merkleTree/${props.merkleTreeId}/merkleInfo?address=${mintForAddress}`;
       fetch(url)
         .then((response) => {
           response.json().then((data: ManifoldMerkleProof[]) => {
@@ -63,7 +73,7 @@ export default function ManifoldMintingWidget(
           setFetchingMerkle(false);
         });
     }
-  }, [connectedAddress, props.merkleTreeId]);
+  }, [mintForAddress, props.merkleTreeId]);
 
   function getReadContractsParams() {
     const params: any = [];
@@ -133,12 +143,17 @@ export default function ManifoldMintingWidget(
   };
 
   const getMintArgs = () => {
+    const isProxy = !areEqualAddresses(
+      connectedAddress.address,
+      mintForAddress
+    );
+
     const args: any = [props.contract, props.claim.instanceId];
-    if (mintCount > 1) {
+    if (mintCount > 1 || isProxy) {
       args.push(mintCount);
     }
     const selectedMerkleProofs = getSelectedMerkleProofs();
-    if (mintCount > 1) {
+    if (mintCount > 1 || isProxy) {
       if (props.claim.phase === ManifoldPhase.PUBLIC) {
         args.push([]);
         args.push([]);
@@ -150,10 +165,22 @@ export default function ManifoldMintingWidget(
       args.push(selectedMerkleProofs[0]?.value ?? 0);
       args.push(selectedMerkleProofs[0]?.merkleProof ?? []);
     }
-    args.push(connectedAddress);
+
+    args.push(mintForAddress);
+
+    let functionName = "";
+    if (isProxy) {
+      functionName = "mintProxy";
+    } else {
+      if (mintCount > 1) {
+        functionName = "mintBatch";
+      } else {
+        functionName = "mint";
+      }
+    }
 
     return {
-      functionName: mintCount > 1 ? "mintBatch" : "mint",
+      functionName,
       args,
     };
   };
@@ -163,6 +190,7 @@ export default function ManifoldMintingWidget(
     setMintStatus(<></>);
     const value = getValue();
     const args = getMintArgs();
+    console.log("i am args", args);
     mintWrite.writeContract({
       address: props.proxy as `0x${string}`,
       abi: props.abi,
@@ -402,8 +430,8 @@ export default function ManifoldMintingWidget(
         </button>
       );
     }
-    if (!connectedAddress) {
-      return <>Connect your wallet to continue</>;
+    if (!mintForAddress) {
+      return <></>;
     }
 
     if (isError) {
@@ -431,7 +459,7 @@ export default function ManifoldMintingWidget(
                 {merkleProofs.length > 0 ? (
                   printTable("Allowlist Spots", merkleProofs.length)
                 ) : (
-                  <>No spots in current phase for connected address</>
+                  <>No spots in current phase for this address</>
                 )}
               </Col>
             </Row>
@@ -446,10 +474,10 @@ export default function ManifoldMintingWidget(
     <Container className="no-padding">
       <Row>
         <Col>
-          <ManifoldMintingConnect onConnect={setConnectedAddress} />
+          <ManifoldMintingConnect onMintFor={setMintForAddress} />
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="pt-2">
         <Col>{printContent()}</Col>
       </Row>
     </Container>

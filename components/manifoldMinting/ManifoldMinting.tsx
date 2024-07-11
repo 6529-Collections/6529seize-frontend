@@ -1,9 +1,6 @@
 import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import useManifoldClaim, {
-  ManifoldClaimStatus,
-  ManifoldPhase,
-} from "../../hooks/useManifoldClaim";
+import useManifoldClaim from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
 import { ManifoldInstance, getTraitValue } from "./manifold-types";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
@@ -14,11 +11,11 @@ import {
   fromGWEI,
   numberWithCommas,
 } from "../../helpers/Helpers";
-import MintCountdownBox from "../mintCountdownBox/MintCountdownBox";
 import { Time } from "../../helpers/time";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import { ETHEREUM_ICON_TEXT } from "../../constants";
+import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 
 interface Props {
   title: string;
@@ -31,8 +28,6 @@ interface Props {
 export default function ManifoldMinting(props: Readonly<Props>) {
   const [isError, setIsError] = useState<boolean>(false);
 
-  const [fee, setFee] = useState<number>(0);
-
   const manifoldClaim = useManifoldClaim(
     props.contract,
     props.proxy,
@@ -42,6 +37,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       setIsError(true);
     }
   );
+
+  const [fee, setFee] = useState<number>(0);
 
   const [fetching, setFetching] = useState<boolean>(true);
 
@@ -87,14 +84,30 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
   }, [manifoldClaim?.instanceId]);
 
+  function printMint() {
+    return (
+      <ManifoldMintingWidget
+        contract={props.contract}
+        proxy={props.proxy}
+        abi={props.abi}
+        claim={manifoldClaim!}
+        merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
+        setFee={(f: number) => {
+          setFee(f);
+        }}
+      />
+    );
+  }
+
   if (fetching) {
     return (
       <Container className="pt-4 pb-4">
-        <Row>
-          <Col>
-            <h2>
+        <Row className="pb-2">
+          <Col className="d-flex align-items-center gap-2 ">
+            <h2 className="mb-0">
               <span className="font-lightest">Mint</span> {props.title}
             </h2>
+            <span className="badge bg-white text-dark">beta</span>
           </Col>
         </Row>
         <Row className="pt-2">
@@ -110,21 +123,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           </Col>
         </Row>
       </Container>
-    );
-  }
-
-  function printMint() {
-    return (
-      <ManifoldMintingWidget
-        contract={props.contract}
-        proxy={props.proxy}
-        abi={props.abi}
-        claim={manifoldClaim!}
-        merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
-        setFee={(f: number) => {
-          setFee(f);
-        }}
-      />
     );
   }
 
@@ -168,39 +166,9 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           />
         </Col>
       </Row>
-      {manifoldClaim.status !== ManifoldClaimStatus.EXPIRED && (
-        <Row className="pt-3">
-          <Col>
-            <MintCountdownBox
-              title={
-                manifoldClaim.status === ManifoldClaimStatus.UPCOMING
-                  ? `${manifoldClaim.phase} Starts In`
-                  : `${manifoldClaim.phase} Ends In`
-              }
-              date={
-                manifoldClaim.status === ManifoldClaimStatus.UPCOMING
-                  ? manifoldClaim.startDate
-                  : manifoldClaim.endDate
-              }
-              hide_mint_btn={true}
-              btn_label=""
-              mint_link=""
-              new_tab={true}
-              additional_elements={
-                manifoldClaim.phase === ManifoldPhase.ALLOWLIST && (
-                  <span className="font-smaller pt-1">
-                    * The timer above displays the current time remaining for a
-                    specific phase of the drop. Please refer to the distribution
-                    plan to check if you are in the allowlist.
-                  </span>
-                )
-              }
-            />
-          </Col>
-        </Row>
-      )}
       <Row className="pt-3 pb-4">
         <Col sm={12} md={6} className="pt-2 pb-2">
+          <MemePageMintCountdown nft_id={props.token_id} hide_mint_btn={true} />
           <Table className={styles.spotsTable}>
             <tbody>
               <tr>

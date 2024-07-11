@@ -6,7 +6,11 @@ import "../styles/swiper.scss";
 import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
-import { CW_PROJECT_ID, DELEGATION_CONTRACT } from "../constants";
+import {
+  CW_PROJECT_ID,
+  DELEGATION_CONTRACT,
+  SUBSCRIPTIONS_CHAIN,
+} from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
 import { WagmiProvider } from "wagmi";
@@ -193,7 +197,8 @@ export function getChains() {
   if (
     DELEGATION_CONTRACT.chain_id === sepolia.id ||
     (NEXTGEN_CHAIN_ID as number) === sepolia.id ||
-    MANIFOLD_NETWORK.id === sepolia.id
+    SUBSCRIPTIONS_CHAIN.id.toString() === sepolia.id.toString() ||
+    MANIFOLD_NETWORK.id.toString() === sepolia.id.toString()
   ) {
     chains.push(sepolia);
   }

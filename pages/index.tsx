@@ -3,11 +3,7 @@ import styles from "../styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
-import {
-  MEMES_CONTRACT,
-  MEMES_MANIFOLD_PROXY_CONTRACT,
-  MEMES_MINTING_HREF,
-} from "../constants";
+import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFT, MemesExtendedData } from "../entities/INFT";
 
@@ -36,10 +32,6 @@ import NextGenCollectionSlideshow from "../components/nextGen/collections/collec
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
 import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
-import useManifoldClaim, {
-  ManifoldClaimStatus,
-  ManifoldPhase,
-} from "../hooks/useManifoldClaim";
 import DotLoader from "../components/dotLoader/DotLoader";
 import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
 import Link from "next/link";
@@ -50,7 +42,8 @@ import {
   getDimensionsFromMetadata,
 } from "../helpers/nft.helplers";
 import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
-import { MEMES_MANIFOLD_PROXY_ABI } from "../abis";
+import { ManifoldClaim } from "../hooks/useManifoldClaim";
+
 export interface IndexPageProps {
   readonly nft: NFT;
   readonly nftExtended: MemesExtendedData;
@@ -84,8 +77,8 @@ const LatestActivity = dynamic(
   { ssr: false }
 );
 
-const MintCountdown = dynamic(
-  () => import("../components/mintCountdownBox/MintCountdownBox"),
+const MemePageMintCountdown = dynamic(
+  () => import("../components/the-memes/MemePageMintCountdown"),
   { ssr: false }
 );
 
@@ -108,12 +101,7 @@ export default function Home({
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 
-  const manifoldClaim = useManifoldClaim(
-    MEMES_CONTRACT,
-    MEMES_MANIFOLD_PROXY_CONTRACT,
-    MEMES_MANIFOLD_PROXY_ABI,
-    pageProps.nft.id
-  );
+  const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
   useEffect(() => {
     if (connectedProfile?.consolidation.consolidation_key && pageProps.nft) {
@@ -310,43 +298,14 @@ export default function Home({
                         </Table>
                       </Col>
                     </Row>
-                    {manifoldClaim &&
-                      manifoldClaim.status !== ManifoldClaimStatus.EXPIRED &&
-                      !manifoldClaim.isFinalized && (
-                        <Row className="pb-3">
-                          <Col sm={12} md={11}>
-                            <MintCountdown
-                              title={
-                                manifoldClaim.status ===
-                                ManifoldClaimStatus.UPCOMING
-                                  ? `${manifoldClaim.phase} Starts In`
-                                  : `${manifoldClaim.phase} Ends In`
-                              }
-                              date={
-                                manifoldClaim.status ===
-                                ManifoldClaimStatus.UPCOMING
-                                  ? manifoldClaim.startDate
-                                  : manifoldClaim.endDate
-                              }
-                              hide_mint_btn={false}
-                              btn_label="GO TO MINTING PAGE"
-                              mint_link={MEMES_MINTING_HREF}
-                              new_tab={true}
-                              additional_elements={
-                                manifoldClaim.phase ===
-                                  ManifoldPhase.ALLOWLIST && (
-                                  <span className="font-smaller pt-1">
-                                    * The timer above displays the current time
-                                    remaining for a specific phase of the drop.
-                                    Please refer to the distribution plan to
-                                    check if you are in the allowlist.
-                                  </span>
-                                )
-                              }
-                            />
-                          </Col>
-                        </Row>
-                      )}
+                    <Row>
+                      <Col>
+                        <MemePageMintCountdown
+                          nft_id={pageProps.nft.id}
+                          setClaim={setManifoldClaim}
+                        />
+                      </Col>
+                    </Row>
                     <Row>
                       <Col>
                         <h3>Minting Approach</h3>
