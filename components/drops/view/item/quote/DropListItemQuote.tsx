@@ -4,7 +4,6 @@ import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
 
-
 export default function DropListItemQuote({
   waveId,
   quotedDropId,
@@ -32,6 +31,9 @@ export default function DropListItemQuote({
     ),
     [ProfileConnectedStatus.NO_PROFILE]: (
       <CommonInfoBox>Please make a profile to make a quote drop</CommonInfoBox>
+    ),
+    [ProfileConnectedStatus.PROXY]: (
+      <CommonInfoBox>Proxy can&apos;t make a quote drop</CommonInfoBox>
     ),
     [ProfileConnectedStatus.HAVE_PROFILE]: (
       <>

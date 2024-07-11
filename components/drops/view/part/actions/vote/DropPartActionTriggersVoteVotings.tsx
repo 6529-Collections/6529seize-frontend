@@ -72,6 +72,13 @@ export default function DropPartActionTriggersVoteVotings({
       });
       return;
     }
+    if (connectionStatus === ProfileConnectedStatus.PROXY) {
+      setToast({
+        message: "Proxy can't vote",
+        type: "warning",
+      });
+      return;
+    }
     if (loading) return;
     setLoading(true);
     const { success } = await requestAuth();

@@ -8,8 +8,7 @@ import { Wave } from "../../../../generated/models/Wave";
 import { Time } from "../../../../helpers/time";
 
 export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
-  const { connectedProfile, connectionStatus, activeProfileProxy } =
-    useContext(AuthContext);
+  const { connectedProfile, connectionStatus } = useContext(AuthContext);
 
   const submissionIsStarted = wave.participation.period?.min
     ? wave.participation.period.min <= Time.currentMillis()
@@ -33,11 +32,11 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
         return "Please connect to create a drop";
       case ProfileConnectedStatus.NO_PROFILE:
         return "Please make a profile to create a drop";
+      case ProfileConnectedStatus.PROXY:
+        return "Proxy can't create a drop";
+
       case ProfileConnectedStatus.HAVE_PROFILE:
-        if (
-          !wave.participation.authenticated_user_eligible ||
-          activeProfileProxy
-        ) {
+        if (!wave.participation.authenticated_user_eligible) {
           return "You are not eligible to create a drop in this wave";
         }
         return "";
@@ -57,7 +56,6 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
     connectedProfile &&
     connectionStatus === ProfileConnectedStatus.HAVE_PROFILE &&
     wave.participation.authenticated_user_eligible &&
-    !activeProfileProxy &&
     submissionIsStarted &&
     !submissionIsEnded
   ) {

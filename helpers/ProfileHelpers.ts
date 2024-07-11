@@ -4,11 +4,18 @@ import {
 } from "../entities/IProfile";
 import { ProfileMin } from "../generated/models/ProfileMin";
 
-export const getProfileConnectedStatus = (
-  profile: IProfileAndConsolidations | null
-): ProfileConnectedStatus => {
+export const getProfileConnectedStatus = ({
+  profile,
+  isProxy,
+}: {
+  readonly profile: IProfileAndConsolidations | null;
+  readonly isProxy: boolean;
+}): ProfileConnectedStatus => {
   if (!profile) {
     return ProfileConnectedStatus.NOT_CONNECTED;
+  }
+  if (isProxy) {
+    return ProfileConnectedStatus.PROXY;
   }
   if (!profile.profile?.handle) {
     return ProfileConnectedStatus.NO_PROFILE;

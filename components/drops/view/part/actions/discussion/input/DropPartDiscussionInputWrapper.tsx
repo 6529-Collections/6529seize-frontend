@@ -8,6 +8,7 @@ import { DropPart } from "../../../../../../../generated/models/DropPart";
 enum STATE {
   NOT_CONNECTED = "NOT_CONNECTED",
   DONT_HAVE_PROFILE = "DONT_HAVE_PROFILE",
+  PROXY = "PROXY",
   HAVE_PROFILE = "HAVE_PROFILE",
 }
 
@@ -18,13 +19,16 @@ export default function DropPartDiscussionInputWrapper({
   readonly drop: Drop;
   readonly dropPart: DropPart;
 }) {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getConnectedState = () => {
     if (!connectedProfile) {
       return STATE.NOT_CONNECTED;
     }
     if (!connectedProfile.profile) {
       return STATE.DONT_HAVE_PROFILE;
+    }
+    if (!!activeProfileProxy) {
+      return STATE.PROXY;
     }
     return STATE.HAVE_PROFILE;
   };
@@ -40,6 +44,11 @@ export default function DropPartDiscussionInputWrapper({
     [STATE.DONT_HAVE_PROFILE]: (
       <CommonInfoBox>
         Please make a profile to take part in the discussion
+      </CommonInfoBox>
+    ),
+    [STATE.PROXY]: (
+      <CommonInfoBox>
+        Proxy can&apos;t take part in the discussion
       </CommonInfoBox>
     ),
     [STATE.HAVE_PROFILE]: (
