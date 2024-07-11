@@ -35,6 +35,7 @@ export default function DropPartActionTriggers({
       <button
         onClick={() => setIsDiscussionOpen(!isDiscussionOpen)}
         type="button"
+        title="Discuss"
         className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 
         tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
       >
@@ -51,6 +52,7 @@ export default function DropPartActionTriggers({
       <button
         onClick={() => onQuote(dropPart.part_id)}
         type="button"
+        title="Redrop"
         className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-normal tw-transition tw-ease-out tw-duration-300"
       >
         <>
