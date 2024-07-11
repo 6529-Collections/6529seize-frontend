@@ -16,6 +16,17 @@ export default function Waves() {
   const { connectedProfile, requestAuth, activeProfileProxy } =
     useContext(AuthContext);
 
+  const getShowDrops = () =>
+    !!connectedProfile?.profile?.handle &&
+    connectedProfile.level > 1 &&
+    !activeProfileProxy;
+
+  const [showDrops, setShowDrops] = useState(getShowDrops());
+  useEffect(
+    () => setShowDrops(getShowDrops()),
+    [connectedProfile, activeProfileProxy]
+  );
+
   const [viewMode, setViewMode] = useState(WavesViewMode.VIEW);
 
   const getShowCreateNewWaveButton = () =>
@@ -59,5 +70,10 @@ export default function Waves() {
       <div></div>
     ),
   };
+
+  if (!showDrops) {
+    return null;
+  }
+
   return <div className="tailwind-scope">{components[viewMode]}</div>;
 }

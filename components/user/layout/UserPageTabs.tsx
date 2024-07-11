@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
+import { AuthContext } from "../../auth/Auth";
+import { useAccount } from "wagmi";
 
 export enum UserPageTabType {
   BRAIN = "BRAIN",
@@ -62,7 +64,8 @@ export const USER_PAGE_TAB_META: Record<
 
 export default function UserPageTabs() {
   const router = useRouter();
-
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { address } = useAccount();
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
     const match = pathname.match(regex);
@@ -85,6 +88,29 @@ export default function UserPageTabs() {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const getShowDrops = () =>
+    !!connectedProfile?.profile?.handle &&
+    connectedProfile.level > 1 &&
+    !activeProfileProxy &&
+    !!address;
+
+  const [showDrops, setShowDrops] = useState(getShowDrops());
+  useEffect(
+    () => setShowDrops(getShowDrops()),
+    [connectedProfile, activeProfileProxy]
+  );
+
+  const getTabsToShow = () => {
+    if (showDrops) return Object.values(UserPageTabType);
+    return Object.values(UserPageTabType).filter(
+      (tab) => tab !== UserPageTabType.BRAIN
+    );
+  };
+  const [tabsToShow, setTabsToShow] = useState<UserPageTabType[]>(
+    getTabsToShow()
+  );
+  useEffect(() => setTabsToShow(getTabsToShow()), [showDrops]);
+
   return (
     <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div
@@ -95,7 +121,7 @@ export default function UserPageTabs() {
           className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
           aria-label="Tabs"
         >
-          {Object.values(UserPageTabType).map((tabType) => (
+          {tabsToShow.map((tabType) => (
             <UserPageTab
               key={tabType}
               tab={tabType}

@@ -1,7 +1,7 @@
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,6 +12,7 @@ import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
 import HeaderUser from "./user/HeaderUser";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
+import { AuthContext } from "../auth/Auth";
 
 interface Props {
   onLoad?: () => void;
@@ -25,6 +26,7 @@ export interface HeaderLink {
 }
 
 export default function Header(props: Readonly<Props>) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const router = useRouter();
   const account = useAccount();
   const [consolidations, setConsolidations] = useState<string[]>([]);
@@ -35,6 +37,18 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
+
+  const getShowDrops = () =>
+    !!connectedProfile?.profile?.handle &&
+    connectedProfile.level > 1 &&
+    !activeProfileProxy;
+
+  const [showDrops, setShowDrops] = useState<boolean>(getShowDrops());
+
+  useEffect(
+    () => setShowDrops(getShowDrops()),
+    [connectedProfile, activeProfileProxy]
+  );
 
   useEffect(() => {
     function handleResize() {
@@ -139,13 +153,15 @@ export default function Header(props: Readonly<Props>) {
               </h3>
             </Col>
           </Row>
-          <Row className="pt-3 pb-3">
-            <Col>
-              <Link href="/brain">
-                <h3>Brain</h3>
-              </Link>
-            </Col>
-          </Row>
+          {showDrops && (
+            <Row className="pt-3 pb-3">
+              <Col>
+                <Link href="/brain">
+                  <h3>Brain</h3>
+                </Link>
+              </Col>
+            </Row>
+          )}
           <Row className="pt-3 pb-3">
             <Col>
               <h3
@@ -291,13 +307,15 @@ export default function Header(props: Readonly<Props>) {
                     </Link>
                   </Col>
                 </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/waves">
-                      <h3>Waves</h3>
-                    </Link>
-                  </Col>
-                </Row>
+                {showDrops && (
+                  <Row className="pt-3">
+                    <Col>
+                      <Link href="/waves">
+                        <h3>Waves</h3>
+                      </Link>
+                    </Col>
+                  </Row>
+                )}
                 <Row className="pt-3">
                   <Col>
                     <Link href="/nft-activity">
@@ -722,14 +740,16 @@ export default function Header(props: Readonly<Props>) {
                           className={`justify-content-end d-none ${styles.dMdBlock}`}
                         >
                           <Nav className="justify-content-end ml-auto">
-                            <Nav.Link
-                              className={`${styles.mainNavLink} ${
-                                router.pathname === "/brain" ? "active" : ""
-                              }`}
-                              onClick={() => goTo("/brain")}
-                            >
-                              Brain
-                            </Nav.Link>
+                            {showDrops && (
+                              <Nav.Link
+                                className={`${styles.mainNavLink} ${
+                                  router.pathname === "/brain" ? "active" : ""
+                                }`}
+                                onClick={() => goTo("/brain")}
+                              >
+                                Brain
+                              </Nav.Link>
+                            )}
 
                             <NavDropdown
                               title="Collections"
@@ -793,12 +813,14 @@ export default function Header(props: Readonly<Props>) {
                                   path: "/groups",
                                 }}
                               />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Waves",
-                                  path: "/waves",
-                                }}
-                              />
+                              {showDrops && (
+                                <HeaderDesktopLink
+                                  link={{
+                                    name: "Waves",
+                                    path: "/waves",
+                                  }}
+                                />
+                              )}
                               <HeaderDesktopLink
                                 link={{
                                   name: "NFT Activity",
