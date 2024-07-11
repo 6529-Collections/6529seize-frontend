@@ -428,11 +428,248 @@ paths:
         "404":
           description: Profile not found
 
+  /public/drops:
+    get:
+      tags:
+        - Drops
+      summary: Get latest drops viewable to anyone.
+      operationId: getLatestPublicDrops
+      parameters:
+        - name: limit
+          in: query
+          description: How many drops to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
+        - name: group_id
+          in: query
+          description: Drops by authors that fall into supplied group
+          required: false
+          schema:
+            type: string
+        - name: wave_id
+          in: query
+          description: Drops in wave with given ID
+          required: false
+          schema:
+            type: string
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drop"
+  /public/drops/{dropId}:
+    get:
+      tags:
+        - Drops
+      summary: Get a public drop by ID
+      operationId: getPublicDropById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: context_profile
+          in: query
+          description: If supplied drop has some context related to given profile. It can be wallet address, ENS, handle or profile ID.
+          required: false
+          schema:
+            type: string
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drop"
+        "404":
+          description: Drop not found
+  /public/drops/{dropId}/log:
+    get:
+      tags:
+        - Drops
+      summary: Get public drop logs
+      operationId: getPublicDropLogs
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          description: Filter logs by type
+          required: false
+          schema:
+            type: string
+            enum:
+              - DROP_COMMENT
+              - DROP_RATING_EDIT
+              - DROP_CREATED
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 50
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 2000
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DropActivityLog"
+        "404":
+          description: Drop not found
+  /public/drops/{dropId}/parts/{dropPartId}/comments:
+    get:
+      tags:
+        - Drops
+      summary: Get public drop part comments
+      operationId: getPublicDropComments
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dropPartId
+          in: path
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 20
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropCommentsPage"
+        "404":
+          description: Drop not found
   /drops:
     get:
       tags:
         - Drops
-      summary: Get latest drops
+      summary: Get latest drops. Needs authentication. Use /public/drops for public drops.
       operationId: getLatestDrops
       parameters:
         - name: limit
@@ -485,12 +722,6 @@ paths:
             type: number
             format: int64
             minimum: 1
-        - name: context_profile
-          in: query
-          description: If supplied, each drop has some context related to given profile. It can be wallet address, ENS, handle or profile ID.
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: successful operation
@@ -525,7 +756,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get drop by ID
+      summary: Get drop by ID. Needs authenticated user. Use /public/drops/{dropId} for public drops.
       operationId: getDropById
       parameters:
         - name: dropId
@@ -600,7 +831,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get drop logs
+      summary: Get drop logs. Needs authenticated user. Use /public/drops/{dropId}/logs for public drops.
       operationId: getDropLogs
       parameters:
         - name: dropId
@@ -667,7 +898,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get drop part comments
+      summary: Get drop part comments. Needs authenticated user. Use /public/drops/{dropId}/parts/{dropPartId}/comments for public drops.
       operationId: getDropComments
       parameters:
         - name: dropId
@@ -956,11 +1187,72 @@ paths:
         "400":
           description: "Invalid request"
 
+  /public/waves:
+    get:
+      tags:
+        - Waves
+      summary: Get public waves
+      operationId: getPublicWaves
+      parameters:
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: group_id
+          in: query
+          description: Waves by authors that fall into supplied group
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+
+  /public/waves/{id}:
+    get:
+      tags:
+        - Waves
+      summary: Get public wave by ID
+      operationId: getPublicWaveById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wave"
+        "404":
+          description: Wave not found
+
   /waves:
     get:
       tags:
         - Waves
-      summary: Get waves
+      summary: Get waves. Needs authentication. Use /public/waves for public waves.
       operationId: getWaves
       parameters:
         - name: limit
@@ -1020,7 +1312,7 @@ paths:
     get:
       tags:
         - Waves
-      summary: Get wave by ID
+      summary: Get wave by ID. Needs authenticated user. Use /public/waves/{id} for public waves.
       operationId: getWaveById
       parameters:
         - name: id

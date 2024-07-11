@@ -153,20 +153,11 @@ export default function DropsListItem({
               showFull={showFull}
               voteState={voteState}
               canVote={canVote}
+              availableCredit={availableCredit}
               onQuote={onQuote}
             />
             {haveData && <DropListItemData drop={drop} />}
           </div>
-         {/*  <div className="tw-flex tw-flex-col tw-items-center tw-min-h-full">
-            <div className="tw-flex-grow tw-flex tw-flex-col tw-justify-center tw-items-center">
-              <DropListItemRateGive
-                drop={drop}
-                voteState={voteState}
-                canVote={canVote}
-                availableCredit={availableCredit ?? 0}
-              />
-            </div>
-          </div> */}
         </div>
       </div>
     </div>
