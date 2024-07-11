@@ -58,9 +58,10 @@ export default function DropPartWrapper({
             </div>
           </div>
           <div>
-            {haveData && isFirstPart && !showFull && (
-              <DropListItemData drop={drop} />
-            )}
+            {haveData &&
+              ((isFirstPart && !showFull) || (isLastPart && showFull)) && (
+                <DropListItemData drop={drop} />
+              )}
           </div>
           <div className="sm:tw-ml-[4.25rem]">
             <DropPartActionTriggers
@@ -87,9 +88,6 @@ export default function DropPartWrapper({
       {isDiscussionOpen && (
         <DropPartDiscussion dropPart={dropPart} drop={drop} />
       )}
-      <div>
-        {haveData && isLastPart && showFull && <DropListItemData drop={drop} />}
-      </div>
     </div>
   );
 }

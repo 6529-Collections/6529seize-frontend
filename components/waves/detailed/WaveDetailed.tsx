@@ -45,7 +45,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
               </>
             )}
           </div>
-          <div className="tw-w-[672px] tw-rounded-xl tw-overflow-hidden">
+          <div className="tw-w-[672px] tw-overflow-hidden">
             <WaveCreateDrop wave={wave} />
             <WaveDescriptionDrop
               wave={wave}

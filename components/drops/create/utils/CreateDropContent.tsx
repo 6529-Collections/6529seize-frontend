@@ -317,9 +317,9 @@ const CreateDropContent = forwardRef<
             </div>
           </div>
         </LexicalComposer>
-        <div className="tw-mt-2 tw-pb-2 tw-flex tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
           {currentPartCount > 1 && (
-            <p className="tw-mb-0">
+            <p className="tw-mb-0 tw-mt-2 tw-pb-2 ">
               <>
                 <span className="tw-font-semibold tw-text-iron-500">
                   Part:{" "}
@@ -331,15 +331,15 @@ const CreateDropContent = forwardRef<
               </>
             </p>
           )}
-          <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+         {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
             <div>/</div>
             <div>{formatNumberWithCommas(24000)}</div>
-          </div>
+          </div> */}
         </div>
-        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+        <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
           <CreateDropSelectFileAudio onFileChange={onFileChange} />
           <CreateDropSelectFileVideo onFileChange={onFileChange} />
           <CreateDropSelectFileImage onFileChange={onFileChange} />
