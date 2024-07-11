@@ -516,5 +516,6 @@ export interface ProfileAvailableDropRateResponse {
 export enum ProfileConnectedStatus {
   NOT_CONNECTED = "NOT_CONNECTED",
   NO_PROFILE = "NO_PROFILE",
+  PROXY = "PROXY",
   HAVE_PROFILE = "HAVE_PROFILE",
 }

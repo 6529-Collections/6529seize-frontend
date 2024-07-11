@@ -357,9 +357,13 @@ export default function Auth({
         connectedProfile: connectedProfile ?? null,
         receivedProfileProxies,
         activeProfileProxy,
-        connectionStatus: getProfileConnectedStatus(connectedProfile ?? null),
+        connectionStatus: getProfileConnectedStatus({
+          profile: connectedProfile ?? null,
+          isProxy: !!activeProfileProxy,
+        }),
         setActiveProfileProxy: onActiveProfileProxy,
-      }}>
+      }}
+    >
       {children}
       <ToastContainer />
     </AuthContext.Provider>

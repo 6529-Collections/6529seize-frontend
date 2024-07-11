@@ -14,7 +14,7 @@ export default function DropListItemRateGiveChangeButton({
   readonly handleMouseDown: (changeType: RateChangeType) => void;
   readonly handleMouseUp: () => void;
 }) {
-  const { connectionStatus, connectedProfile } = useContext(AuthContext);
+  const { connectionStatus } = useContext(AuthContext);
 
   const svgpaths: Record<RateChangeType, string> = {
     [RateChangeType.INCREASE]: "M18 15L12 9L6 15",
