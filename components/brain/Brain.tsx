@@ -170,6 +170,9 @@ export default function Brain() {
       <div className="tw-max-w-2xl tw-mx-auto">
         <h1 className="tw-block tw-float-none">Stream</h1>
         <div className="tw-mt-4 lg:tw-mt-6">
+          <div className="tw-text-sm tw-italic tw-text-iron-500">
+            No Drops to show
+          </div>
           <DropListWrapper
             drops={drops}
             loading={isFetching}
