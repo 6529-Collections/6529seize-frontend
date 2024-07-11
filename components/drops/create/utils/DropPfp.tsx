@@ -3,26 +3,22 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
+import { DropPartSize } from "../../view/part/DropPart";
 
-export enum DropPFPSize {
-  SMALL = "SMALL",
-  MEDIUM = "MEDIUM",
-  LARGE = "LARGE",
-}
 
 export default function DropPfp({
   pfpUrl,
-  size = DropPFPSize.MEDIUM,
+  size = DropPartSize.MEDIUM,
   isWaveDescriptionDrop = false,
 }: {
   readonly pfpUrl: string | null | undefined;
-  readonly size?: DropPFPSize;
+  readonly size?: DropPartSize;
   readonly isWaveDescriptionDrop?: boolean;
 }) {
-  const SIZE_CLASSES: Record<DropPFPSize, string> = {
-    [DropPFPSize.SMALL]: "tw-h-7 tw-w-7",
-    [DropPFPSize.MEDIUM]: "tw-h-10 tw-w-10",
-    [DropPFPSize.LARGE]: "tw-h-12 tw-w-12",
+  const SIZE_CLASSES: Record<DropPartSize, string> = {
+    [DropPartSize.SMALL]: "tw-h-7 tw-w-7",
+    [DropPartSize.MEDIUM]: "tw-h-10 tw-w-10",
+    [DropPartSize.LARGE]: "tw-h-12 tw-w-12",
   };
 
   return (

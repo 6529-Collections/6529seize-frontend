@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { DropAuthorSize } from "./DropAuthor";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
+import { DropPartSize } from "../../../view/part/DropPart";
 
 export default function DropAuthorHandle({
   profile: { handle },
   size,
 }: {
   readonly profile: ProfileMin;
-  readonly size: DropAuthorSize;
+  readonly size: DropPartSize;
 }) {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string)?.toLowerCase();
@@ -17,9 +17,10 @@ export default function DropAuthorHandle({
 
   const getTextClasses = (): string => {
     switch (size) {
-      case DropAuthorSize.SMALL:
+      case DropPartSize.SMALL:
         return "tw-text-sm";
-      case DropAuthorSize.MEDIUM:
+      case DropPartSize.MEDIUM:
+      case DropPartSize.LARGE:
         return "tw-text-md";
       default:
         assertUnreachable(size);

@@ -7,7 +7,7 @@ import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 
 import { DropPart as IDropPart } from "../../../../../generated/models/DropPart";
-import DropPart from "../DropPart";
+import DropPart, { DropPartSize } from "../DropPart";
 
 export default function DropPartQuote({
   quotedDrop,
@@ -74,6 +74,7 @@ export default function DropPartQuote({
         dropTitle={drop.title}
         waveImage={drop.wave.picture}
         waveId={drop.wave.id}
+        size={DropPartSize.SMALL}
       />
     </div>
   );

@@ -24,7 +24,12 @@ import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNF
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
-import Link from "next/link";
+
+export enum DropPartSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+  LARGE = "LARGE",
+}
 
 const customRenderer = ({
   content,
@@ -130,6 +135,7 @@ const DropPart = memo(
     waveName,
     waveImage,
     waveId,
+    size = DropPartSize.MEDIUM,
   }: {
     readonly profile: ProfileMin;
     readonly dropTitle: string | null;
@@ -147,6 +153,7 @@ const DropPart = memo(
     readonly waveName: string;
     readonly waveImage: string | null;
     readonly waveId: string | null;
+    readonly size?: DropPartSize;
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -210,6 +217,7 @@ const DropPart = memo(
                 <DropPfp
                   pfpUrl={profile.pfp}
                   isWaveDescriptionDrop={isDescriptionDrop}
+                  size={size}
                 />
               </div>
               <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
@@ -218,11 +226,16 @@ const DropPart = memo(
                     <DropPfp
                       pfpUrl={profile.pfp}
                       isWaveDescriptionDrop={isDescriptionDrop}
+                      size={size}
                     />
                   </div>
                   <div className="tw-flex tw-flex-col">
                     <div className="tw-w-full tw-inline-flex tw-justify-between">
-                      <DropAuthor profile={profile} timestamp={createdAt} />
+                      <DropAuthor
+                        profile={profile}
+                        timestamp={createdAt}
+                        size={size}
+                      />
                     </div>
                   </div>
                 </div>
