@@ -10,7 +10,6 @@ import CreateDropCompact, {
 } from "../compact/CreateDropCompact";
 
 import CreateDropFull, { CreateDropFullHandles } from "../full/CreateDropFull";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -24,7 +23,6 @@ import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import { useQuery } from "@tanstack/react-query";
@@ -129,8 +127,6 @@ const CreateDropWrapper = forwardRef<
         }),
       enabled: !!waveId,
     });
-
-    useEffect(() => console.log(wave), [wave]);
 
     const [isStormMode, setIsStormMode] = useState(false);
     const [editorState, setEditorState] = useState<EditorState | null>(null);
@@ -263,7 +259,7 @@ const CreateDropWrapper = forwardRef<
 
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
-      // !missingMedia.length;
+      !missingMedia.length &&
       !missingMetadata.length;
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
@@ -280,7 +276,7 @@ const CreateDropWrapper = forwardRef<
     useEffect(() => {
       setCanSubmit(getCanSubmit());
       setCanAddPart(getCanAddPart());
-    }, [editorState, file, drop, missingMedia]);
+    }, [editorState, file, drop, missingMedia, missingMetadata]);
 
     useEffect(() => {
       if (!onCanSubmitChange) {
@@ -413,6 +409,8 @@ const CreateDropWrapper = forwardRef<
           waveName={waveName}
           waveImage={waveImage}
           waveId={waveId}
+          missingMedia={missingMedia}
+          missingMetadata={missingMetadata}
           onViewChange={setViewType}
           onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
@@ -445,6 +443,8 @@ const CreateDropWrapper = forwardRef<
           waveName={waveName}
           waveImage={waveImage}
           waveId={waveId}
+          missingMedia={missingMedia}
+          missingMetadata={missingMetadata}
           onTitle={setTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}

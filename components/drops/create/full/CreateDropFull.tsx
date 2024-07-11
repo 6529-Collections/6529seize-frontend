@@ -15,6 +15,8 @@ import {
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
+import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 
 export interface CreateDropFullHandles {
   clearEditorState: () => void;
@@ -41,6 +43,8 @@ const CreateDropFull = forwardRef<
     readonly waveName: string;
     readonly waveImage: string | null;
     readonly waveId: string | null;
+    readonly missingMedia: WaveParticipationRequirement[];
+    readonly missingMetadata: WaveRequiredMetadata[];
     readonly onTitle: (newV: string | null) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (key: string) => void;
@@ -76,6 +80,8 @@ const CreateDropFull = forwardRef<
       waveName,
       waveImage,
       waveId,
+      missingMedia,
+      missingMetadata,
       onTitle,
       onMetadataEdit,
       onMetadataRemove,
@@ -122,6 +128,8 @@ const CreateDropFull = forwardRef<
           waveName={waveName}
           waveImage={waveImage}
           waveId={waveId}
+          missingMedia={missingMedia}
+          missingMetadata={missingMetadata}
           onTitle={onTitle}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
@@ -154,6 +162,8 @@ const CreateDropFull = forwardRef<
           waveName={waveName}
           waveImage={waveImage}
           waveId={waveId}
+          missingMedia={missingMedia}
+          missingMetadata={missingMetadata}
           onEditorState={onEditorState}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}

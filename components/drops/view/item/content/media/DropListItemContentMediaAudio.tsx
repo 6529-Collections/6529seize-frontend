@@ -4,7 +4,7 @@ export default function DropListItemContentMediaAudio({
   readonly src: string;
 }) {
   return (
-    <div className="tw-mt-1">
+    <div>
       <audio controls className="tw-w-full tw-max-h-10">
         <source src={src} type="audio/mpeg" />
         Your browser does not support the audio element.

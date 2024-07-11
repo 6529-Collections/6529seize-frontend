@@ -23,7 +23,6 @@ import OneLinerPlugin from "../lexical/plugins/OneLinerPlugin";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import UploadMediaButtonPlugin from "../lexical/plugins/UploadMediaButtonPlugin";
 import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
@@ -54,6 +53,10 @@ import Tippy from "@tippyjs/react";
 import CreateDropSelectFileVideo from "./file/CreateDropSelectFileVideo";
 import CreateDropSelectFileAudio from "./file/CreateDropSelectFileAudio";
 import CreateDropSelectFileImage from "./file/CreateDropSelectFileImage";
+import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
+import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMissingMetadataWarning";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -67,6 +70,8 @@ const CreateDropContent = forwardRef<
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
     readonly canAddPart: boolean;
+    readonly missingMedia: WaveParticipationRequirement[];
+    readonly missingMetadata: WaveRequiredMetadata[];
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -84,6 +89,8 @@ const CreateDropContent = forwardRef<
       type,
       drop,
       canAddPart,
+      missingMedia,
+      missingMetadata,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
@@ -207,9 +214,6 @@ const CreateDropContent = forwardRef<
               <NewHashtagsPlugin onSelect={onHashtagAdded} />
               {viewType === CreateDropViewType.COMPACT && <OneLinerPlugin />}
               <MaxLengthPlugin maxLength={25000} />
-              {/*   {viewType === CreateDropViewType.COMPACT && (
-                <UploadMediaButtonPlugin onFileChange={onFileChange} />
-              )} */}
               {showToggleViewButton && (
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
               )}
@@ -345,27 +349,21 @@ const CreateDropContent = forwardRef<
           <CreateDropSelectFileAudio onFileChange={onFileChange} />
           <CreateDropSelectFileVideo onFileChange={onFileChange} />
           <CreateDropSelectFileImage onFileChange={onFileChange} />
-          {/* <div className="tw-inline-flex tw-items-center tw-gap-x-2">
-            <svg
-              className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="tw-text-xs tw-text-yellow">
-              Audio file is required
-            </span>
-          </div> */}
         </div>
+        {(!!missingMedia.length || !!missingMetadata.length) && (
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+            {!!missingMedia.length && (
+              <CreateDropContentMissingMediaWarning
+                missingMedia={missingMedia}
+              />
+            )}
+            {!!missingMetadata.length && (
+              <CreateDropContentMissingMetadataWarning
+                missingMetadata={missingMetadata}
+              />
+            )}
+          </div>
+        )}
       </div>
     );
   }

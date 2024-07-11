@@ -17,8 +17,11 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateDropStormView from "../../utils/storm/CreateDropStormView";
-import CreateDropSelectFile from "../../utils/file/CreateDropSelectFile";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
+import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
+import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
+import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
+import { WaveRequiredMetadata } from "../../../../../generated/models/WaveRequiredMetadata";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -49,6 +52,8 @@ const CreateDropFullDesktop = forwardRef<
     readonly waveName: string;
     readonly waveImage: string | null;
     readonly waveId: string | null;
+    readonly missingMedia: WaveParticipationRequirement[];
+    readonly missingMetadata: WaveRequiredMetadata[];
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataEdit: (param: DropMetadata) => void;
     readonly onMetadataRemove: (data_key: string) => void;
@@ -83,6 +88,8 @@ const CreateDropFullDesktop = forwardRef<
       waveName,
       waveImage,
       waveId,
+      missingMedia,
+      missingMetadata,
       onViewChange,
       onMetadataEdit,
       onMetadataRemove,
@@ -208,6 +215,8 @@ const CreateDropFullDesktop = forwardRef<
                 type={type}
                 drop={drop}
                 canAddPart={canAddPart}
+                missingMedia={missingMedia}
+                missingMetadata={missingMetadata}
                 onEditorState={onEditorState}
                 onMentionedUser={onMentionedUser}
                 onReferencedNft={onReferencedNft}
@@ -217,7 +226,43 @@ const CreateDropFullDesktop = forwardRef<
               />
             </div>
 
-            {/*  <CreateDropSelectFile onFileChange={onFileChange} file={file} /> */}
+            {file && (
+              <div className="tw-mt-3">
+                <div className="tw-w-full">
+                  <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
+                    <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
+                      <CreateDropSelectedFileIcon file={file} />
+                      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+                        {file.name}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => onFileChange(null)}
+                      type="button"
+                      aria-label="Remove file"
+                      className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                    >
+                      <svg
+                        className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M18 6L6 18M6 6L18 18"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <CreateDropSelectedFilePreview file={file} />
+                </div>
+              </div>
+            )}
             <div className="tw-mt-6">
               <CreateDropFullDesktopMetadata
                 metadata={metadata}
