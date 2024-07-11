@@ -25,11 +25,21 @@ export default function DropPartWrapper({
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
-  readonly onQuote: (dropPartId: number) => void;
+  readonly onQuote: (dropPartId: number | null) => void;
   readonly children: React.ReactNode;
 }) {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
+
+  const setQuoteDrop = (dropPartId: number) => {
+    setIsDiscussionOpen(false);
+    onQuote(dropPartId);
+  };
+
+  const onDiscussionOpen = (state: boolean) => {
+    setIsDiscussionOpen(state);
+    onQuote(null);
+  };
   return (
     <div>
       <div className="tw-inline-flex tw-w-full">
@@ -48,8 +58,8 @@ export default function DropPartWrapper({
               isFirstPart={isFirstPart}
               voteState={voteState}
               canVote={canVote}
-              setIsDiscussionOpen={setIsDiscussionOpen}
-              onQuote={onQuote}
+              setIsDiscussionOpen={onDiscussionOpen}
+              onQuote={setQuoteDrop}
             />
           </div>
         </div>

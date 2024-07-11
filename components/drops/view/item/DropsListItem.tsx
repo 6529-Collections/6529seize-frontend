@@ -84,7 +84,7 @@ export default function DropsListItem({
   const banner2 =
     drop.author.banner2_color ?? getRandomColorWithSeed(drop.author.handle);
 
-  const onQuote = (dropPartId: number) => {
+  const onQuote = (dropPartId: number | null) => {
     if (dropPartId === quoteModePartId) {
       setQuoteModePartId(null);
     } else {

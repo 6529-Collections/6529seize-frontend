@@ -25,7 +25,7 @@ export default function DropListItemContent({
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
-  readonly onQuote: (dropPartId: number) => void;
+  readonly onQuote: (dropPartId: number | null) => void;
 }) {
   const [isFullMode, setIsFullMode] = useState(showFull);
   const getParts = () => {
