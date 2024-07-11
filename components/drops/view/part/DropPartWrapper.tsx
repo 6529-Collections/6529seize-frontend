@@ -40,7 +40,7 @@ export default function DropPartWrapper({
               {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
             </div>
           </div>
-          <div className="sm:tw-ml-16">
+          <div className="sm:tw-ml-[4.25rem]">
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}

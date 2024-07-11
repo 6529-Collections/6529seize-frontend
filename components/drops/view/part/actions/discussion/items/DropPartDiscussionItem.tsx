@@ -9,7 +9,7 @@ export default function DropPartDiscussionItem({
   readonly item: DropComment;
 }) {
   return (
-    <div className="tw-ml-14 tw-flex tw-items-start tw-gap-x-3 tw-py-1 tw-mt-2">
+    <div className="tw-ml-[3.25rem] tw-flex tw-items-start tw-gap-x-3 tw-py-1 tw-mt-3">
       <DropPfp pfpUrl={item.author?.pfp} size={DropPartSize.SMALL} />
       <div className="tw-flex tw-flex-col tw-w-full">
         <DropAuthor
@@ -17,7 +17,7 @@ export default function DropPartDiscussionItem({
           timestamp={new Date(item.created_at).getTime()}
           size={DropPartSize.SMALL}
         />
-        <div className="tw-mt-0.5 tw-w-full">
+        <div className="tw-mt-1 tw-w-full">
           <p className="tw-text-sm tw-text-white tw-font-normal tw-mb-0">
             {item.comment}
           </p>

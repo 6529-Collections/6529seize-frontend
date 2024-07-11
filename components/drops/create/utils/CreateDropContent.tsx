@@ -351,7 +351,7 @@ const CreateDropContent = forwardRef<
           <CreateDropSelectFileImage onFileChange={onFileChange} />
         </div>
         {(!!missingMedia.length || !!missingMetadata.length) && (
-          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+          <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
             {!!missingMedia.length && (
               <CreateDropContentMissingMediaWarning
                 missingMedia={missingMedia}

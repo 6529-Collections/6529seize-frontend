@@ -52,7 +52,7 @@ export default function DropPartQuote({
   }
 
   return (
-    <div className="tw-mt-4 tw-p-2 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid">
+    <div className="tw-mt-4 tw-px-2 tw-pb-2 tw-pt-1 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid">
       <DropPart
         profile={drop.author}
         mentionedUsers={drop.mentioned_users}
