@@ -48,26 +48,31 @@ const CreateDropStormViewPart = memo(
     return (
       <div className="tw-py-2">
         <div className="tw-flex tw-w-full tw-justify-between">
-          <DropPart
-            profile={profile}
-            mentionedUsers={mentionedUsers}
-            referencedNfts={referencedNfts}
-            partContent={part.content}
-            partMedia={partMedia}
-            createdAt={createdAt}
-            isFirstPart={partIndex === 0}
-            isDescriptionDrop={isDescriptionDrop}
-            waveName={waveName}
-            dropTitle={dropTitle}
-            waveImage={waveImage}
-            waveId={waveId}
-          />
-          {quotedDrop && (
-            <CreateDropStormViewPartQuote
-              quotedDrop={quotedDrop}
-              profile={profile}
-            />
-          )}
+          <div className="tw-flex tw-flex-col tw-w-full">
+            <div className="tw-flex tw-flex-col tw-items-stretch">
+              <DropPart
+                profile={profile}
+                mentionedUsers={mentionedUsers}
+                referencedNfts={referencedNfts}
+                partContent={part.content}
+                partMedia={partMedia}
+                createdAt={createdAt}
+                isFirstPart={partIndex === 0}
+                isDescriptionDrop={isDescriptionDrop}
+                waveName={waveName}
+                dropTitle={dropTitle}
+                waveImage={waveImage}
+                waveId={waveId}
+              />
+              <div className="tw-w-2 tw-bg-iron-700"></div>
+            </div>
+            {quotedDrop && (
+              <CreateDropStormViewPartQuote
+                quotedDrop={quotedDrop}
+                profile={profile}
+              />
+            )}
+          </div>
           <div
             onClick={() => removePart(partIndex)}
             role="button"
