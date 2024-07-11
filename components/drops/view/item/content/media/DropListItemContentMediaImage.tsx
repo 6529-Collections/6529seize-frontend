@@ -4,7 +4,7 @@ export default function DropListItemContentMediaImage({
   readonly src: string;
 }) {
   return (
-    <div className="tw-mt-4 md:tw-flex md:tw-justify-center tw-w-full">
+    <div className="md:tw-flex md:tw-justify-center tw-w-full">
       <div className="tw-w-full tw-h-full">
         <img
           src={src}

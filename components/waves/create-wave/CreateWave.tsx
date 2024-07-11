@@ -12,7 +12,6 @@ import {
   CreateWaveStep,
   WaveSignatureType,
 } from "../../../types/waves.types";
-import { getCurrentDayStartTimestamp } from "../../../helpers/calendar/calendar.helpers";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";

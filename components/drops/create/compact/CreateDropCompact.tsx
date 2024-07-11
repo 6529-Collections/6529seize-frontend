@@ -21,6 +21,8 @@ import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFileP
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import CreateDropStormView from "../utils/storm/CreateDropStormView";
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
+import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;
@@ -47,6 +49,8 @@ const CreateDropCompact = forwardRef<
     readonly waveName: string;
     readonly waveImage: string | null;
     readonly waveId: string | null;
+    readonly missingMedia: WaveParticipationRequirement[];
+    readonly missingMetadata: WaveRequiredMetadata[];
     readonly onViewChange: (newV: CreateDropViewType) => void;
     readonly onMetadataRemove: (key: string) => void;
     readonly onEditorState: (editorState: EditorState | null) => void;
@@ -80,6 +84,8 @@ const CreateDropCompact = forwardRef<
       waveName,
       waveImage,
       waveId,
+      missingMedia,
+      missingMetadata,
       onViewChange,
       onMetadataRemove,
       onEditorState,
@@ -150,6 +156,8 @@ const CreateDropCompact = forwardRef<
                 type={type}
                 drop={drop}
                 canAddPart={canAddPart}
+                missingMedia={missingMedia}
+                missingMetadata={missingMetadata}
                 onEditorState={onEditorState}
                 onMentionedUser={onMentionedUser}
                 onReferencedNft={onReferencedNft}

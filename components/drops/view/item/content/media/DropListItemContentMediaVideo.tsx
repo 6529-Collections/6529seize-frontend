@@ -4,7 +4,7 @@ export default function DropListItemContentMediaVideo({
   readonly src: string;
 }) {
   return (
-    <div className="tw-mt-4">
+    <div>
       <video controls autoPlay className="tw-w-full tw-h-full tw-rounded-lg tw-overflow-hidden">
         <source src={src} type="video/mp4" />
         Your browser does not support the video tag.

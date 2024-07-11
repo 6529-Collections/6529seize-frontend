@@ -44,9 +44,7 @@ export default function CreateWaveDrops({
   };
 
   const onRequiredTypeChange = (type: WaveParticipationRequirement) => {
-    const requiredTypes = drops.requiredTypes.includes(type)
-      ? drops.requiredTypes.filter((t) => t !== type)
-      : [...drops.requiredTypes, type];
+    const requiredTypes = drops.requiredTypes.includes(type) ? [] : [type];
 
     setDrops({
       ...drops,
