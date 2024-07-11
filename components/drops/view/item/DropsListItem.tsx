@@ -128,7 +128,9 @@ export default function DropsListItem({
                 href={`waves/${drop.wave.id}`}
                 className="tw-flex tw-items-center tw-gap-x-1 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
               >
-                {drop.wave.name}
+                <span className="tw-max-w-[272px] tw-truncate">
+                  {drop.wave.name}
+                </span>
                 <svg
                   className="tw-size-5 tw-flex-shrink-0 tw-text-iron-400 group-hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-ou"
                   viewBox="0 0 24 24"
