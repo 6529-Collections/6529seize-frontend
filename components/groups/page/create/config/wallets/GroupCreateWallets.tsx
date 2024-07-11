@@ -1,12 +1,17 @@
+import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useEffect, useState } from "react";
 
 export default function GroupCreateWallets({
   wallets,
+  walletsLimit,
+  label,
   setWallets,
 }: {
   readonly wallets: string[] | null;
+  readonly walletsLimit: number;
+  readonly label: string;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
   const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(
@@ -32,7 +37,7 @@ export default function GroupCreateWallets({
     setEmmaWallets(null);
   };
 
-  useEffect(() => console.log(wallets), [wallets]);
+  const isOverLimit = wallets?.length && wallets.length > walletsLimit;
 
   return (
     <div className="tw-col-span-full">
@@ -55,7 +60,7 @@ export default function GroupCreateWallets({
           </svg>
         </span>
         <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
-          Wallets
+         {label}
         </p>
       </div>
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
@@ -73,7 +78,7 @@ export default function GroupCreateWallets({
           <div className="tw-w-full tw-flex tw-items-center tw-gap-x-4">
             <div
               className={`tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl ${
-                true ? " tw-border-error" : " tw-border-primary-400"
+                isOverLimit ? " tw-border-error" : " tw-border-primary-400"
               } tw-bg-iron-950 tw-border tw-border-solid`}
             >
               <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
@@ -98,10 +103,10 @@ export default function GroupCreateWallets({
                   </span>
                   <span
                     className={`tw-font-semibold ${
-                      true ? "tw-text-error" : "tw-text-primary-400"
+                      isOverLimit ? "tw-text-error" : "tw-text-primary-400"
                     }`}
                   >
-                    {wallets.length}
+                    {formatNumberWithCommas(wallets.length)}
                   </span>
                 </span>
               </div>
@@ -131,25 +136,30 @@ export default function GroupCreateWallets({
           </div>
         </div>
       )}
-      <div className="tw-pt-2 tw-text-error tw-text-xs tw-font-medium">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <svg
-            className="tw-size-5 tw-flex-shrink-0 tw-text-error"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>Maximum allowed wallets count is 10,000</span>
+      {isOverLimit && (
+        <div className="tw-pt-2 tw-text-error tw-text-xs tw-font-medium">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <svg
+              className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>
+              Maximum allowed wallets count is{" "}
+              {formatNumberWithCommas(walletsLimit)}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

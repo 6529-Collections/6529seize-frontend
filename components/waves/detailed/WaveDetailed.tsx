@@ -7,7 +7,7 @@ import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
 import WaveOutcomes from "./outcome/WaveOutcomes";
 import WaveSpecs from "./specs/WaveSpecs";
 import WaveGroups from "./groups/WaveGroups";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
@@ -16,6 +16,17 @@ import { commonApiFetch } from "../../../services/api/common-api";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+
+  const getShowDrops = () =>
+    !!connectedProfile?.profile?.handle &&
+    connectedProfile.level > 1 &&
+    !activeProfileProxy;
+
+  const [showDrops, setShowDrops] = useState(getShowDrops());
+  useEffect(
+    () => setShowDrops(getShowDrops()),
+    [connectedProfile, activeProfileProxy]
+  );
 
   const { data: availableRateResponse } =
     useQuery<ProfileAvailableDropRateResponse>({
@@ -29,6 +40,10 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
         }),
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
+
+  if (!showDrops) {
+    return null;
+  }
 
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">

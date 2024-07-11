@@ -39,6 +39,17 @@ export default function Brain() {
   const activeGroupId = useSelector(selectActiveGroupId);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
+  const getShowDrops = () =>
+    !!connectedProfile?.profile?.handle &&
+    connectedProfile.level > 1 &&
+    !activeProfileProxy;
+
+  const [showDrops, setShowDrops] = useState(getShowDrops());
+  useEffect(
+    () => setShowDrops(getShowDrops()),
+    [connectedProfile, activeProfileProxy]
+  );
+
   const getParamsFromUrl = (): BrainQuery => {
     const group = searchParams.get(SEARCH_PARAMS_FIELDS.group);
     const query: Mutable<BrainQuery> = {
@@ -165,14 +176,20 @@ export default function Brain() {
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
 
+  if (!showDrops) {
+    return null;
+  }
+
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-2xl tw-mx-auto">
         <h1 className="tw-block tw-float-none">Stream</h1>
         <div className="tw-mt-4 lg:tw-mt-6">
-          <div className="tw-text-sm tw-italic tw-text-iron-500">
-            No Drops to show
-          </div>
+          {!drops.length && !isFetching && (
+            <div className="tw-text-sm tw-italic tw-text-iron-500">
+              No Drops to show
+            </div>
+          )}
           <DropListWrapper
             drops={drops}
             loading={isFetching}

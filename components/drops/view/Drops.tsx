@@ -91,6 +91,14 @@ export default function Drops() {
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
 
+  if (!drops.length && !isFetching) {
+    return (
+      <div className="tw-text-sm tw-italic tw-text-iron-500">
+        No Drops to show
+      </div>
+    );
+  }
+
   return (
     <DropListWrapper
       drops={drops}

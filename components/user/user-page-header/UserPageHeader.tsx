@@ -138,7 +138,10 @@ export default function UserPageHeader({
             <UserPageHeaderStats profile={profile} />
             {profile.profile?.created_at && (
               <div className="tw-mt-2">
-                <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal">
+                <p
+                  className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal"
+                  suppressHydrationWarning
+                >
                   Profile Enabled:{" "}
                   {formatTimestampToMonthYear(
                     new Date(profile.profile.created_at).getTime()
