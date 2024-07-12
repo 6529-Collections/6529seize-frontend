@@ -767,7 +767,7 @@ export const waitForMilliseconds = async (
 export function parseNftDescriptionToHtml(description: string) {
   let d = description.replaceAll("\n", "<br />");
   d = d.replace(
-    /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
+    /(https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*))/gi,
     '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
   );
   return d;
