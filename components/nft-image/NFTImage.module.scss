@@ -24,7 +24,7 @@
 }
 
 .heightFull {
-  max-height: 95vh !important;
+  max-height: calc(90vh - $header-height) !important;
 }
 
 .height650 {
