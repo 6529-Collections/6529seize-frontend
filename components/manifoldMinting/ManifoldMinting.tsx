@@ -52,7 +52,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   useEffect(() => {
     if (manifoldClaim?.instanceId) {
-      alert(manifoldClaim.instanceId);
       fetch(
         `https://apps.api.manifoldxyz.dev/public/instance/data?id=${manifoldClaim.instanceId}`
       )

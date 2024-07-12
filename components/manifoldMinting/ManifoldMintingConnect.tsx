@@ -8,7 +8,9 @@ import {
   isValidEthAddress,
 } from "../../helpers/Helpers";
 import { AuthContext } from "../auth/Auth";
-import UserCICAndLevel from "../user/utils/UserCICAndLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "../user/utils/UserCICAndLevel";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
@@ -117,7 +119,7 @@ export default function ManifoldMintingConnect(
         <span className="font-smaller font-lighter">Connected Profile</span>
         <span className="pt-1 d-flex align-items-center gap-3">
           <UserCICAndLevel
-            size="lg"
+            size={UserCICAndLevelSize.XLARGE}
             level={connectedProfile?.level ?? 0}
             cicType={type}
           />

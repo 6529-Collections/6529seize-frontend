@@ -482,7 +482,7 @@ export default function ManifoldMintingWidget(
 
   return (
     <Container className="no-padding">
-      {props.claim.status != ManifoldClaimStatus.ENDED && (
+      {props.claim.status !== ManifoldClaimStatus.ENDED && (
         <Row>
           <Col>
             <ManifoldMintingConnect onMintFor={setMintForAddress} />
