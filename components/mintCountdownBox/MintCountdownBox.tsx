@@ -25,7 +25,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
         <Container className="no-padding">
           <Row>
             {!props.hide_mint_btn &&
-              props.buttons.map((btn, index) => (
+              props.buttons.map((btn) => (
                 <Col
                   className="pt-1 pb-1"
                   key={btn.link}

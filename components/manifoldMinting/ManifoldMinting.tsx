@@ -180,9 +180,20 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         <Col sm={12} md={5}>
           <Container className="no-padding">
             <Row className="pt-2 pb-2">
-              <Col>
+              <Col xs={12}>
                 <h3 className="pb-3">{instance.publicData.asset.name}</h3>
-                <Table className={styles.spotsTable}>
+              </Col>
+              <Col xs={12}>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: parseNftDescriptionToHtml(
+                      instance.publicData.asset.description
+                    ),
+                  }}
+                />
+              </Col>
+              <Col xs={12}>
+                <Table className={`pt-3 ${styles.spotsTable}`}>
                   <tbody>
                     {artist && (
                       <tr>
@@ -324,33 +335,15 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             </Row>
           </Container>
         </Col>
-        <Col sm={12} md={7} className="d-flex align-items-center">
+        <Col sm={12} md={7}>
           <NFTImage
             nft={nftImage}
             animation={true}
-            height={650}
+            height="full"
             balance={-1}
             showUnseized={false}
             transparentBG={true}
           />
-        </Col>
-      </Row>
-      <hr />
-      <Row className="pt-3 pb-3">
-        <Col>
-          <Container className="no-padding">
-            <Row>
-              <Col>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: parseNftDescriptionToHtml(
-                      instance.publicData.asset.description
-                    ),
-                  }}
-                />
-              </Col>
-            </Row>
-          </Container>
         </Col>
       </Row>
       <hr />
