@@ -175,16 +175,12 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <Container fluid className="pt-4 pb-4">
+    <Container className="pt-4 pb-4">
       <Row className="pb-3">
         <Col sm={12} md={5}>
-          <Container>
+          <Container className="no-padding">
             <Row className="pt-2 pb-2">
               <Col>
-                <MemePageMintCountdown
-                  nft_id={props.token_id}
-                  hide_mint_btn={true}
-                />
                 <h3 className="pb-3">{instance.publicData.asset.name}</h3>
                 <Table className={styles.spotsTable}>
                   <tbody>
@@ -311,14 +307,16 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                         </b>
                       </td>
                     </tr>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-                      }}>
-                      <td className="pt-2"></td>
-                    </tr>
                   </tbody>
                 </Table>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <MemePageMintCountdown
+                  nft_id={props.token_id}
+                  hide_mint_btn={true}
+                />
               </Col>
             </Row>
             <Row>
