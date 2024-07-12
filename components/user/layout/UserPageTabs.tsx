@@ -90,7 +90,7 @@ export default function UserPageTabs() {
 
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-    connectedProfile.level > 1 &&
+  connectedProfile.level >= 0  &&
     !activeProfileProxy &&
     !!address;
 

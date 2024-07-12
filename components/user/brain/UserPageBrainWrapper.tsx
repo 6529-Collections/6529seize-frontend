@@ -20,7 +20,7 @@ export default function UserPageBrainWrapper({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-    connectedProfile.level > 1 &&
+  connectedProfile.level >= 0  &&
     !activeProfileProxy &&
     !!address;
 

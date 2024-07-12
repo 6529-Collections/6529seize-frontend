@@ -229,18 +229,39 @@ const DropPart = memo(
                       size={size}
                     />
                   </div>
-                  <div className="tw-flex tw-flex-col">
-                    <div className="tw-w-full tw-inline-flex tw-justify-between">
-                      <DropAuthor
-                        profile={profile}
-                        timestamp={createdAt}
-                        size={size}
+                  <div className="tw-w-full tw-flex tw-flex-col sm:tw-flex-row tw-justify-between">
+                    <DropAuthor
+                      profile={profile}
+                      timestamp={createdAt}
+                      size={size}
+                    />
+                    <a className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
+                      <img
+                        src="#"
+                        alt="Drop wave image"
+                        className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
                       />
-                    </div>
+                      <span>Wave name</span>
+                      <svg
+                        className="tw-size-5 tw-flex-shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M7 17L17 7M17 7H7M17 7V17"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </a>
                   </div>
                 </div>
 
-                <div className="tw-mt-2 lg:tw-mt-1 tw-h-full">
+                <div className="tw-mt-2 sm:tw-mt-1 tw-h-full">
                   {dropTitle && isFirstPart && (
                     <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
                       {dropTitle}
@@ -373,7 +394,7 @@ const DropPart = memo(
           </div>
         </CommonAnimationHeight>
         {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
-          <div className="sm:tw-ml-14">
+          <div className="sm:tw-ml-[3.25rem] tw-mt-1">
             <DropListItemContentMedia
               media_mime_type={partMedia.mimeType}
               media_url={partMedia.mediaSrc}

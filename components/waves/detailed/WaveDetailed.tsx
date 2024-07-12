@@ -19,7 +19,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
 
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-    connectedProfile.level > 1 &&
+  connectedProfile.level >= 0  &&
     !activeProfileProxy;
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
