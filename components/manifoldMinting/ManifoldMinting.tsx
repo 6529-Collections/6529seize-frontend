@@ -192,8 +192,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                   }}
                 />
               </Col>
-              <Col xs={12}>
-                <Table className={`pt-3 ${styles.spotsTable}`}>
+              <Col xs={12} className="pt-3">
+                <Table className={styles.spotsTable}>
                   <tbody>
                     {artist && (
                       <tr>
