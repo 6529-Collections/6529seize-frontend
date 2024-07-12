@@ -31,7 +31,7 @@ export default function DropPartActionTriggers({
 
   const userHaveQuoted = !!dropPart.context_profile_context?.quotes_count;
   return (
-    <div className="tw-pt-4 tw-gap-x-8 tw-flex tw-items-center">
+    <div className="tw-pt-4 tw-px-4 sm:tw-px-0 tw-gap-x-8 tw-flex tw-items-center tw-mt-auto">
       <button
         onClick={() => setIsDiscussionOpen(!isDiscussionOpen)}
         type="button"

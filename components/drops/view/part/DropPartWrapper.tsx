@@ -49,7 +49,7 @@ export default function DropPartWrapper({
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
   return (
     <div>
-      <div className="tw-inline-flex tw-w-full">
+      <div className="tw-flex tw-w-full tw-h-full">
         <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full">
           <div className="tw-flex-1 tw-px-4">
             {children}
@@ -63,7 +63,7 @@ export default function DropPartWrapper({
                 <DropListItemData drop={drop} />
               )}
           </div>
-          <div className="sm:tw-ml-[4.25rem]">
+          <div className="sm:tw-ml-[4.25rem] tw-mt-auto">
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
@@ -76,14 +76,16 @@ export default function DropPartWrapper({
             />
           </div>
         </div>
-        {isFirstPart && (
-          <DropListItemRateGive
-            drop={drop}
-            voteState={voteState}
-            canVote={canVote}
-            availableCredit={availableCredit ?? 0}
-          />
-        )}
+        <div>
+          {isFirstPart && (
+            <DropListItemRateGive
+              drop={drop}
+              voteState={voteState}
+              canVote={canVote}
+              availableCredit={availableCredit ?? 0}
+            />
+          )}
+        </div>
       </div>
       {isDiscussionOpen && (
         <DropPartDiscussion dropPart={dropPart} drop={drop} />

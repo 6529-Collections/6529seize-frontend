@@ -84,7 +84,7 @@ export default function WavesList({
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-max-w-2xl tw-mx-auto tw-py-8">
+      <div className="tw-max-w-2xl tw-mx-auto tw-py-8 tw-px-4 md:tw-px-0">
         <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
           <h1>Waves</h1>
           {showCreateNewWaveButton && (
