@@ -1,6 +1,7 @@
 import styles from "./MintCountdownBox.module.scss";
 import DateCountdown from "../date-countdown/DateCountdown";
 import { Container, Row, Col } from "react-bootstrap";
+import Link from "next/link";
 
 interface MintBtn {
   label: JSX.Element | string;
@@ -30,12 +31,12 @@ export default function MintCountdownBox(props: Readonly<Props>) {
                   key={btn.link}
                   sm={12}
                   md={12 / props.buttons.length}>
-                  <a href={btn.link} target={btn.target} rel="noreferrer">
+                  <Link href={btn.link} target={btn.target} rel="noreferrer">
                     <button
                       className={`pt-2 pb-2 btn-block seize-btn no-wrap ${styles.mintBtn}`}>
                       {btn.label}
                     </button>
-                  </a>
+                  </Link>
                 </Col>
               ))}
           </Row>

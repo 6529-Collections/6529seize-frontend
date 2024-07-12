@@ -3,7 +3,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import useManifoldClaim from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
 import { ManifoldInstance, getTraitValue } from "./manifold-types";
-import DotLoader, { Spinner } from "../dotLoader/DotLoader";
+import { Spinner } from "../dotLoader/DotLoader";
 import NFTImage from "../nft-image/NFTImage";
 import Link from "next/link";
 import {
@@ -15,7 +15,11 @@ import {
 import { Time } from "../../helpers/time";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
-import { ETHEREUM_ICON_TEXT } from "../../constants";
+import {
+  ETHEREUM_ICON_TEXT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 
 interface Props {
@@ -96,7 +100,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         proxy={props.proxy}
         abi={props.abi}
         claim={manifoldClaim}
-        merkleTreeId={instance!.publicData.instanceAllowlist.merkleTreeId}
+        merkleTreeId={instance!.publicData.instanceAllowlist?.merkleTreeId}
         setFee={(f: number) => {
           setFee(f);
         }}
@@ -114,6 +118,26 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <span className="badge bg-white text-dark">beta</span>
         </Col>
       </Row>
+    );
+  }
+
+  function printDistributionLink() {
+    let contractPath;
+    switch (props.contract) {
+      case MEMES_CONTRACT:
+        contractPath = "the-memes";
+        break;
+      case MEMELAB_CONTRACT:
+        contractPath = "meme-lab";
+        break;
+      default:
+        contractPath = props.contract;
+        break;
+    }
+    return (
+      <Link href={`/${contractPath}/${props.token_id}/distribution`}>
+        Distribution Plan
+      </Link>
     );
   }
 
@@ -153,7 +177,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   return (
     <Container fluid className="pt-4 pb-4">
       <Row className="pb-3">
-        <Col sm={12} md={{ span: 4, offset: 0 }}>
+        <Col sm={12} md={5}>
           <Container>
             <Row className="pt-2 pb-2">
               <Col>
@@ -189,19 +213,24 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                     <tr>
                       <td className="pt-2">Edition Size</td>
                       <td className="pt-2">
-                        <b>
-                          {numberWithCommas(manifoldClaim.total)} /{" "}
-                          {numberWithCommas(manifoldClaim.totalMax)}
-                          {manifoldClaim.remaining > 0 && (
-                            <> ({manifoldClaim.remaining} remaining)</>
+                        <span className="d-flex align-items-center gap-1">
+                          <b>
+                            {numberWithCommas(manifoldClaim.total)} /{" "}
+                            {numberWithCommas(manifoldClaim.totalMax)}
+                            {manifoldClaim.remaining > 0 && (
+                              <> ({manifoldClaim.remaining} remaining)</>
+                            )}
+                          </b>
+                          {manifoldClaim.isFetching && (
+                            <Spinner dimension={12} />
                           )}
-                        </b>
-                        {manifoldClaim.isFetching && (
-                          <>
-                            {" "}
-                            <DotLoader />
-                          </>
-                        )}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="pt-2">Minting Approach</td>
+                      <td className="pt-2">
+                        <b>{printDistributionLink()}</b>
                       </td>
                     </tr>
                     <tr
@@ -297,7 +326,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             </Row>
           </Container>
         </Col>
-        <Col sm={12} md={8}>
+        <Col sm={12} md={7} className="d-flex align-items-center">
           <NFTImage
             nft={nftImage}
             animation={true}

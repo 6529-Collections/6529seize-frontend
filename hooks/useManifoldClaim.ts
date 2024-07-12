@@ -71,9 +71,10 @@ export default function useManifoldClaim(
       const claimData = data[1];
       const status = getStatus(claimData.startDate, claimData.endDate);
       const publicMerkle = areEqualAddresses(NULL_MERKLE, claimData.merkleRoot);
-      const phase = publicMerkle
-        ? ManifoldPhase.PUBLIC
-        : ManifoldPhase.ALLOWLIST;
+      const phase =
+        publicMerkle && claimData.total > 0
+          ? ManifoldPhase.PUBLIC
+          : ManifoldPhase.ALLOWLIST;
       const remaining =
         phase === ManifoldPhase.PUBLIC && status === ManifoldClaimStatus.ENDED
           ? 0

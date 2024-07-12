@@ -68,7 +68,7 @@ export default function MemePageMintCountdown(
                     </span>
                   </span>
                 ),
-                link: `/the-memes/${props.nft_id}/mint`,
+                link: `/the-memes/mint`,
                 target: "_self",
               },
             ]}
