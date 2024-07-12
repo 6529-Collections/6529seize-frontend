@@ -9,7 +9,7 @@ export const MANIFOLD_NETWORK = mainnet;
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",
   ACTIVE = "active",
-  EXPIRED = "expired",
+  ENDED = "ended",
 }
 
 export enum ManifoldPhase {
@@ -48,7 +48,7 @@ export default function useManifoldClaim(
     } else if (now > start && now < end) {
       return ManifoldClaimStatus.ACTIVE;
     }
-    return ManifoldClaimStatus.EXPIRED;
+    return ManifoldClaimStatus.ENDED;
   }, []);
 
   const readContract = useReadContract({
@@ -75,7 +75,7 @@ export default function useManifoldClaim(
         ? ManifoldPhase.PUBLIC
         : ManifoldPhase.ALLOWLIST;
       const remaining =
-        phase === ManifoldPhase.PUBLIC && status === ManifoldClaimStatus.EXPIRED
+        phase === ManifoldPhase.PUBLIC && status === ManifoldClaimStatus.ENDED
           ? 0
           : Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {

@@ -25,6 +25,7 @@ import {
   numberWithCommas,
   addProtocol,
   printMintDate,
+  parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -1162,7 +1163,7 @@ export default function LabPage(props: Readonly<Props>) {
                   <Row>
                     <Col
                       dangerouslySetInnerHTML={{
-                        __html: parseDescription(nft.description),
+                        __html: parseNftDescriptionToHtml(nft.description),
                       }}></Col>
                   </Row>
                 </Container>
@@ -1217,15 +1218,6 @@ export default function LabPage(props: Readonly<Props>) {
         </Row>
       </Container>
     );
-  }
-
-  function parseDescription(description: string) {
-    let d = description.replaceAll("\n", "<br />");
-    d = d.replace(
-      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
-      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
-    );
-    return d;
   }
 
   function printActivity() {

@@ -5,6 +5,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  parseNftDescriptionToHtml,
   printMintDate,
 } from "../../helpers/Helpers";
 import { useEffect, useState } from "react";
@@ -37,15 +38,6 @@ export function MemePageArt(props: {
       setIsFullScreenSupported(fullScreenSupported());
     }
   }, [router.isReady]);
-
-  function parseDescription(description: string) {
-    let d = description.replaceAll("\n", "<br />");
-    d = d.replace(
-      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
-      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
-    );
-    return d;
-  }
 
   function carouselHandlerSlide(event: any) {
     if (event === 0) {
@@ -317,7 +309,7 @@ export function MemePageArt(props: {
                 <Row>
                   <Col
                     dangerouslySetInnerHTML={{
-                      __html: parseDescription(props.nft.description),
+                      __html: parseNftDescriptionToHtml(props.nft.description),
                     }}></Col>
                 </Row>
               </Container>

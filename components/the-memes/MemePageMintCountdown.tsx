@@ -33,7 +33,7 @@ export default function MemePageMintCountdown(
     }
   }, [manifoldClaim, props.setClaim]);
 
-  if (!manifoldClaim || manifoldClaim.status === ManifoldClaimStatus.EXPIRED) {
+  if (!manifoldClaim || manifoldClaim.status === ManifoldClaimStatus.ENDED) {
     return <></>;
   }
 

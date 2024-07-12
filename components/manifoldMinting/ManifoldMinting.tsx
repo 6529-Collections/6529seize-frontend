@@ -10,6 +10,7 @@ import {
   capitalizeEveryWord,
   fromGWEI,
   numberWithCommas,
+  parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
 import { Time } from "../../helpers/time";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
@@ -51,6 +52,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   useEffect(() => {
     if (manifoldClaim?.instanceId) {
+      alert(manifoldClaim.instanceId);
       fetch(
         `https://apps.api.manifoldxyz.dev/public/instance/data?id=${manifoldClaim.instanceId}`
       )
@@ -103,17 +105,23 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     );
   }
 
+  function printTitle() {
+    return (
+      <Row className="pb-2">
+        <Col className="d-flex align-items-center gap-2 ">
+          <h2 className="mb-0">
+            <span className="font-lightest">Mint</span> {props.title}
+          </h2>
+          <span className="badge bg-white text-dark">beta</span>
+        </Col>
+      </Row>
+    );
+  }
+
   if (fetching) {
     return (
       <Container className="pt-4 pb-4">
-        <Row className="pb-2">
-          <Col className="d-flex align-items-center gap-2 ">
-            <h2 className="mb-0">
-              <span className="font-lightest">Mint</span> {props.title}
-            </h2>
-            <span className="badge bg-white text-dark">beta</span>
-          </Col>
-        </Row>
+        {printTitle()}
         <Row className="pt-2">
           <Col className="d-flex align-items-center gap-3">
             {isError ? (
@@ -133,13 +141,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   if (!manifoldClaim || !instance || !nftImage) {
     return (
       <Container className="pt-4 pb-4">
-        <Row>
-          <Col>
-            <h2>
-              <span className="font-lightest">Mint</span> {props.title}
-            </h2>
-          </Col>
-        </Row>
+        {printTitle()}
         <Row>
           <Col>
             <p>No mint information found</p>
@@ -150,146 +152,184 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="pt-4 pb-4">
-      <Row className="pt-2 pb-2">
-        <Col>
-          <h2>
-            <span className="font-lightest">Mint</span>{" "}
-            {instance.publicData.contract.name} #{props.token_id}
-          </h2>
+    <Container fluid className="pt-4 pb-4">
+      <Row className="pb-3">
+        <Col sm={12} md={{ span: 4, offset: 0 }}>
+          <Container>
+            <Row className="pt-2 pb-2">
+              <Col>
+                <MemePageMintCountdown
+                  nft_id={props.token_id}
+                  hide_mint_btn={true}
+                />
+                <h3 className="pb-3">{instance.publicData.asset.name}</h3>
+                <Table className={styles.spotsTable}>
+                  <tbody>
+                    {artist && (
+                      <tr>
+                        <td>Artist</td>
+                        <td>
+                          <b>
+                            {artist?.handle ? (
+                              <Link href={`/${artist.handle}`}>
+                                {artist.name}
+                              </Link>
+                            ) : (
+                              artist.name
+                            )}
+                          </b>
+                        </td>
+                      </tr>
+                    )}
+                    <tr
+                      style={{
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      }}>
+                      <td className="pt-2"></td>
+                    </tr>
+                    <tr>
+                      <td className="pt-2">Edition Size</td>
+                      <td className="pt-2">
+                        <b>
+                          {numberWithCommas(manifoldClaim.total)} /{" "}
+                          {numberWithCommas(manifoldClaim.totalMax)}
+                          {manifoldClaim.remaining > 0 && (
+                            <> ({manifoldClaim.remaining} remaining)</>
+                          )}
+                        </b>
+                        {manifoldClaim.isFetching && (
+                          <>
+                            {" "}
+                            <DotLoader />
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      }}>
+                      <td className="pt-2"></td>
+                    </tr>
+                    <tr>
+                      <td className="pt-2">Phase</td>
+                      <td className="pt-2">
+                        <b>{manifoldClaim.phase}</b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Phase Start</td>
+                      <td>
+                        <b>
+                          {Time.seconds(
+                            manifoldClaim.startDate
+                          ).toIsoDateTimeString()}{" "}
+                          UTC
+                        </b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Phase End</td>
+                      <td>
+                        <b>
+                          {Time.seconds(
+                            manifoldClaim.endDate
+                          ).toIsoDateTimeString()}{" "}
+                          UTC
+                        </b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Status</td>
+                      <td>
+                        <b>{capitalizeEveryWord(manifoldClaim.status)}</b>
+                      </td>
+                    </tr>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      }}>
+                      <td className="pt-2"></td>
+                    </tr>
+                    <tr>
+                      <td className="pt-2">Mint Price</td>
+                      <td className="pt-2">
+                        <b>
+                          {fromGWEI(manifoldClaim.cost).toFixed(5)}{" "}
+                          {ETHEREUM_ICON_TEXT}
+                        </b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="pb-1">Manifold Fee</td>
+                      <td className="pb-1">
+                        <b>
+                          {fee ? (
+                            <>
+                              {fromGWEI(fee).toFixed(5)} {ETHEREUM_ICON_TEXT}
+                            </>
+                          ) : (
+                            <>-</>
+                          )}
+                        </b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Total Price Per Token</td>
+                      <td>
+                        <b>
+                          {fromGWEI(manifoldClaim.cost + fee).toFixed(5)}{" "}
+                          {ETHEREUM_ICON_TEXT}
+                        </b>
+                      </td>
+                    </tr>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      }}>
+                      <td className="pt-2"></td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            <Row>
+              <Col>{printMint()}</Col>
+            </Row>
+          </Container>
         </Col>
-      </Row>
-      <Row className="pt-2 pb-2">
-        <Col>
+        <Col sm={12} md={8}>
           <NFTImage
             nft={nftImage}
             animation={true}
             height={650}
             balance={-1}
             showUnseized={false}
+            transparentBG={true}
           />
         </Col>
       </Row>
-      <Row className="pt-3 pb-4">
-        <Col sm={12} md={6} className="pt-2 pb-2">
-          <MemePageMintCountdown nft_id={props.token_id} hide_mint_btn={true} />
-          <Table className={styles.spotsTable}>
-            <tbody>
-              <tr>
-                <td>Name</td>
-                <td>
-                  <b>{instance.publicData.asset.name}</b>
-                </td>
-              </tr>
-              {artist && (
-                <tr>
-                  <td>Artist</td>
-                  <td>
-                    <b>
-                      {artist?.handle ? (
-                        <Link href={`/${artist.handle}`}>{artist.name}</Link>
-                      ) : (
-                        artist.name
-                      )}
-                    </b>
-                  </td>
-                </tr>
-              )}
-              <tr>
-                <td className="pt-4 pb-4">Edition Size</td>
-                <td className="pt-4 pb-4">
-                  <b>
-                    {numberWithCommas(manifoldClaim.total)} /{" "}
-                    {numberWithCommas(manifoldClaim.totalMax)}
-                    {manifoldClaim.remaining > 0 && (
-                      <> ({manifoldClaim.remaining} remaining)</>
-                    )}
-                  </b>
-                  {manifoldClaim.isFetching && (
-                    <>
-                      {" "}
-                      <DotLoader />
-                    </>
-                  )}
-                </td>
-              </tr>
-              <tr>
-                <td>Phase</td>
-                <td>
-                  <b>{manifoldClaim.phase}</b>
-                </td>
-              </tr>
-              <tr>
-                <td>Phase Start</td>
-                <td>
-                  <b>
-                    {Time.seconds(
-                      manifoldClaim.startDate
-                    ).toIsoDateTimeString()}{" "}
-                    UTC
-                  </b>
-                </td>
-              </tr>
-              <tr>
-                <td>Phase End</td>
-                <td>
-                  <b>
-                    {Time.seconds(manifoldClaim.endDate).toIsoDateTimeString()}{" "}
-                    UTC
-                  </b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pb-4">Status</td>
-                <td className="pb-4">
-                  <b>{capitalizeEveryWord(manifoldClaim.status)}</b>
-                </td>
-              </tr>
-              <tr>
-                <td>Mint Price</td>
-                <td>
-                  <b>
-                    {fromGWEI(manifoldClaim.cost).toFixed(5)}{" "}
-                    {ETHEREUM_ICON_TEXT}
-                  </b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pb-1">Manifold Fee</td>
-                <td className="pb-1">
-                  <b>
-                    {fee ? (
-                      <>
-                        {fromGWEI(fee).toFixed(5)} {ETHEREUM_ICON_TEXT}
-                      </>
-                    ) : (
-                      <>-</>
-                    )}
-                  </b>
-                </td>
-              </tr>
-              <tr>
-                <td>Total Price Per Token</td>
-                <td>
-                  <b>
-                    {fromGWEI(manifoldClaim.cost + fee).toFixed(5)}{" "}
-                    {ETHEREUM_ICON_TEXT}
-                  </b>
-                </td>
-              </tr>
-            </tbody>
-          </Table>
-        </Col>
-        <Col sm={12} md={6} className="pt-2 pb-2">
-          {printMint()}
+      <hr />
+      <Row className="pt-3 pb-3">
+        <Col>
+          <Container className="no-padding">
+            <Row>
+              <Col>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: parseNftDescriptionToHtml(
+                      instance.publicData.asset.description
+                    ),
+                  }}
+                />
+              </Col>
+            </Row>
+          </Container>
         </Col>
       </Row>
       <hr />
-      <Row className="pt-4">
-        <Col xs={12}>
-          <h4>Attributes</h4>
-        </Col>
-        <Col xs={12}>
+      <Row className="pt-3 pb-3">
+        <Col>
           <NFTAttributes attributes={instance.publicData.asset.attributes} />
         </Col>
       </Row>

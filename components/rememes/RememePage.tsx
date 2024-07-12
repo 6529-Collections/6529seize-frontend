@@ -19,6 +19,7 @@ import {
   isUrl,
   numberWithCommas,
   parseIpfsUrl,
+  parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 
@@ -40,15 +41,6 @@ export default function RememePage(props: Readonly<Props>) {
 
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
-
-  function parseDescription(description: string) {
-    let d = description.replaceAll("\n", "<br />");
-    d = d.replace(
-      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
-      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
-    );
-    return d;
-  }
 
   useEffect(() => {
     if (props.contract && props.id) {
@@ -359,7 +351,7 @@ export default function RememePage(props: Readonly<Props>) {
             <Col
               xs={12}
               dangerouslySetInnerHTML={{
-                __html: parseDescription(rememe.metadata.description),
+                __html: parseNftDescriptionToHtml(rememe.metadata.description),
               }}></Col>
           </Row>
           <Row className="pt-4">

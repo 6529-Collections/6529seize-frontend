@@ -428,7 +428,7 @@ export default function ManifoldMintingWidget(
   }
 
   function printContent() {
-    if (props.claim.status === ManifoldClaimStatus.EXPIRED) {
+    if (props.claim.status === ManifoldClaimStatus.ENDED) {
       return (
         <button
           disabled
@@ -436,7 +436,7 @@ export default function ManifoldMintingWidget(
           style={{
             padding: "0.6rem",
           }}>
-          <b>EXPIRED</b>
+          <b>ENDED</b>
         </button>
       );
     }
@@ -482,11 +482,13 @@ export default function ManifoldMintingWidget(
 
   return (
     <Container className="no-padding">
-      <Row>
-        <Col>
-          <ManifoldMintingConnect onMintFor={setMintForAddress} />
-        </Col>
-      </Row>
+      {props.claim.status != ManifoldClaimStatus.ENDED && (
+        <Row>
+          <Col>
+            <ManifoldMintingConnect onMintFor={setMintForAddress} />
+          </Col>
+        </Row>
+      )}
       <Row className="pt-2">
         <Col>{printContent()}</Col>
       </Row>

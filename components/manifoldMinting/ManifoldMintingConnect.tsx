@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useAccount, useEnsAddress, useEnsName } from "wagmi";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import { isValidEthAddress } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  cicToType,
+  isValidEthAddress,
+} from "../../helpers/Helpers";
+import { AuthContext } from "../auth/Auth";
+import UserCICAndLevel from "../user/utils/UserCICAndLevel";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
@@ -10,6 +16,8 @@ export default function ManifoldMintingConnect(
   }>
 ) {
   const account = useAccount();
+  const { connectedProfile } = useContext(AuthContext);
+
   const [mintForFren, setMintForFren] = useState<boolean>(false);
 
   const [mintFor, setMintFor] = useState<string>("");
@@ -59,10 +67,11 @@ export default function ManifoldMintingConnect(
 
   function printMintFor() {
     return (
-      <div className="d-flex flex-column pt-1 pb-1">
+      <div className="d-flex flex-column pt-2 pb-1">
         <span className="font-smaller font-lighter">Mint For</span>
         <span className="d-flex align-items-center justify-content-between">
           <Form.Control
+            style={{ fontSize: "smaller" }}
             autoFocus
             disabled={mintForLock}
             placeholder={"0x... or ENS"}
@@ -97,40 +106,62 @@ export default function ManifoldMintingConnect(
   }
 
   function printConnected() {
+    const type = cicToType(connectedProfile?.cic?.cic_rating ?? 0);
+    const profileHandle =
+      connectedProfile?.profile?.handle ??
+      connectedProfile?.consolidation.consolidation_display ??
+      account.address;
+    const showAddress = !areEqualAddresses(profileHandle, account.address);
     return (
       <div className="d-flex flex-column pt-1 pb-1">
-        <span className="font-smaller font-lighter">Connected Address</span>
-        <span>
-          <b>{account.address}</b>
+        <span className="font-smaller font-lighter">Connected Profile</span>
+        <span className="pt-1 d-flex align-items-center gap-3">
+          <UserCICAndLevel
+            size="lg"
+            level={connectedProfile?.level ?? 0}
+            cicType={type}
+          />
+          <span className="d-flex flex-column">
+            <b>{profileHandle}</b>
+            {showAddress && (
+              <span className="font-lightest font-smaller">
+                {account.address}
+              </span>
+            )}
+          </span>
         </span>
       </div>
     );
   }
 
   function printContent() {
-    return (
-      <>
-        {printConnected()}
-        {mintForFren && printMintFor()}
-      </>
-    );
+    return <>{mintForFren && printMintFor()}</>;
   }
 
   if (!account.isConnected) {
-    return <HeaderUserConnect />;
+    return (
+      <div className="text-center pt-2 pb-2">
+        <HeaderUserConnect />
+      </div>
+    );
   }
 
   return (
     <Container className="no-padding">
       <Row>
+        <Col>{printConnected()}</Col>
+      </Row>
+      <Row className="pt-3">
         <Col>
           <button
             className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
+            style={{ width: "50%" }}
             onClick={() => setMintForFren(false)}>
             Mint for me
           </button>
           <button
             className={`btn ${mintForFren ? "btn-light" : "btn-dark"}`}
+            style={{ width: "50%" }}
             onClick={() => setMintForFren(true)}>
             Mint for fren
           </button>
