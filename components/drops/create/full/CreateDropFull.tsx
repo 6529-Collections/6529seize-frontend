@@ -22,44 +22,46 @@ export interface CreateDropFullHandles {
   clearEditorState: () => void;
 }
 
-const CreateDropFull = forwardRef<
-  CreateDropFullHandles,
-  {
-    readonly screenType: CreateDropScreenType;
-    readonly profile: ProfileMin;
-    readonly title: string | null;
-    readonly metadata: DropMetadata[];
-    readonly editorState: EditorState | null;
-    readonly file: File | null;
-    readonly canSubmit: boolean;
-    readonly canAddPart: boolean;
-    readonly loading: boolean;
-    readonly showSubmit: boolean;
-    readonly type: CreateDropType;
-    readonly drop: CreateDropConfig | null;
-    readonly showDropError?: boolean;
-    readonly isStormMode: boolean;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
-    readonly missingMedia: WaveParticipationRequirement[];
-    readonly missingMetadata: WaveRequiredMetadata[];
-    readonly onTitle: (newV: string | null) => void;
-    readonly onMetadataEdit: (param: DropMetadata) => void;
-    readonly onMetadataRemove: (key: string) => void;
-    readonly onViewChange: (newV: CreateDropViewType) => void;
-    readonly onEditorState: (editorState: EditorState | null) => void;
-    readonly onMentionedUser: (
-      newUser: Omit<MentionedUser, "current_handle">
-    ) => void;
-    readonly onReferencedNft: (newNft: ReferencedNft) => void;
-    readonly onFileChange: (file: File | null) => void;
-    readonly onDrop: () => void;
-    readonly onDropPart: () => void;
-    readonly removePart: (index: number) => void;
-  }
->(
+export interface CreateDropFullWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string | null;
+}
+
+export interface CreateDropFullProps {
+  readonly screenType: CreateDropScreenType;
+  readonly profile: ProfileMin;
+  readonly title: string | null;
+  readonly metadata: DropMetadata[];
+  readonly editorState: EditorState | null;
+  readonly file: File | null;
+  readonly canSubmit: boolean;
+  readonly canAddPart: boolean;
+  readonly loading: boolean;
+  readonly showSubmit: boolean;
+  readonly type: CreateDropType;
+  readonly drop: CreateDropConfig | null;
+  readonly showDropError?: boolean;
+  readonly isStormMode: boolean;
+  readonly wave: CreateDropFullWaveProps | null;
+  readonly missingMedia: WaveParticipationRequirement[];
+  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly onTitle: (newV: string | null) => void;
+  readonly onMetadataEdit: (param: DropMetadata) => void;
+  readonly onMetadataRemove: (key: string) => void;
+  readonly onViewChange: (newV: CreateDropViewType) => void;
+  readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
+  readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onFileChange: (file: File | null) => void;
+  readonly onDrop: () => void;
+  readonly onDropPart: () => void;
+  readonly removePart: (index: number) => void;
+}
+
+const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
   (
     {
       screenType,
@@ -76,10 +78,7 @@ const CreateDropFull = forwardRef<
       drop,
       showDropError = false,
       isStormMode,
-      isDescriptionDrop,
-      waveName,
-      waveImage,
-      waveId,
+      wave,
       missingMedia,
       missingMetadata,
       onTitle,
@@ -124,10 +123,7 @@ const CreateDropFull = forwardRef<
           drop={drop}
           showDropError={showDropError}
           isStormMode={isStormMode}
-          isDescriptionDrop={isDescriptionDrop}
-          waveName={waveName}
-          waveImage={waveImage}
-          waveId={waveId}
+          wave={wave}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onTitle={onTitle}
@@ -158,10 +154,7 @@ const CreateDropFull = forwardRef<
           drop={drop}
           showSubmit={showSubmit}
           isStormMode={isStormMode}
-          isDescriptionDrop={isDescriptionDrop}
-          waveName={waveName}
-          waveImage={waveImage}
-          waveId={waveId}
+          wave={wave}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onEditorState={onEditorState}

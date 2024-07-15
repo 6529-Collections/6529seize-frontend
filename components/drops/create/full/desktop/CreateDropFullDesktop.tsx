@@ -32,42 +32,47 @@ export interface CreateDropFullDesktopHandles {
   clearEditorState: () => void;
 }
 
+interface CreateDropFullDesktopWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string | null;
+}
+
+interface CreateDropFullDesktopProps {
+  readonly profile: ProfileMin;
+  readonly title: string | null;
+  readonly editorState: EditorState | null;
+  readonly metadata: DropMetadata[];
+  readonly file: File | null;
+  readonly canSubmit: boolean;
+  readonly canAddPart: boolean;
+  readonly type: CreateDropType;
+  readonly loading: boolean;
+  readonly drop: CreateDropConfig | null;
+  readonly showSubmit: boolean;
+  readonly showDropError?: boolean;
+  readonly isStormMode: boolean;
+  readonly wave: CreateDropFullDesktopWaveProps | null;
+  readonly missingMedia: WaveParticipationRequirement[];
+  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly onViewChange: (newV: CreateDropViewType) => void;
+  readonly onMetadataEdit: (param: DropMetadata) => void;
+  readonly onMetadataRemove: (data_key: string) => void;
+  readonly onTitle: (newV: string | null) => void;
+  readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
+  readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onFileChange: (file: File | null) => void;
+  readonly onDrop: () => void;
+  readonly onDropPart: () => void;
+  readonly removePart: (index: number) => void;
+}
+
 const CreateDropFullDesktop = forwardRef<
   CreateDropFullDesktopHandles,
-  {
-    readonly profile: ProfileMin;
-    readonly title: string | null;
-    readonly editorState: EditorState | null;
-    readonly metadata: DropMetadata[];
-    readonly file: File | null;
-    readonly canSubmit: boolean;
-    readonly canAddPart: boolean;
-    readonly type: CreateDropType;
-    readonly loading: boolean;
-    readonly drop: CreateDropConfig | null;
-    readonly showSubmit: boolean;
-    readonly showDropError?: boolean;
-    readonly isStormMode: boolean;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
-    readonly missingMedia: WaveParticipationRequirement[];
-    readonly missingMetadata: WaveRequiredMetadata[];
-    readonly onViewChange: (newV: CreateDropViewType) => void;
-    readonly onMetadataEdit: (param: DropMetadata) => void;
-    readonly onMetadataRemove: (data_key: string) => void;
-    readonly onTitle: (newV: string | null) => void;
-    readonly onEditorState: (editorState: EditorState | null) => void;
-    readonly onMentionedUser: (
-      newUser: Omit<MentionedUser, "current_handle">
-    ) => void;
-    readonly onReferencedNft: (newNft: ReferencedNft) => void;
-    readonly onFileChange: (file: File | null) => void;
-    readonly onDrop: () => void;
-    readonly onDropPart: () => void;
-    readonly removePart: (index: number) => void;
-  }
+  CreateDropFullDesktopProps
 >(
   (
     {
@@ -84,10 +89,7 @@ const CreateDropFullDesktop = forwardRef<
       showSubmit,
       showDropError = false,
       isStormMode,
-      isDescriptionDrop,
-      waveName,
-      waveImage,
-      waveId,
+      wave,
       missingMedia,
       missingMetadata,
       onViewChange,
@@ -155,10 +157,7 @@ const CreateDropFullDesktop = forwardRef<
           <CreateDropStormView
             drop={drop}
             profile={profile}
-            isDescriptionDrop={isDescriptionDrop}
-            waveName={waveName}
-            waveImage={waveImage}
-            waveId={waveId}
+            wave={wave}
             removePart={removePart}
           />
         )}

@@ -21,29 +21,30 @@ export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;
 }
 
-const DropEditor = forwardRef<
-  DropEditorHandles,
-  {
-    readonly profile: ProfileMin;
-    readonly quotedDrop: {
-      readonly dropId: string;
-      readonly partId: number;
-    } | null;
-    readonly isClient?: boolean;
-    readonly type: CreateDropType;
-    readonly loading: boolean;
-    readonly dropEditorRefreshKey: number;
-    readonly showSubmit?: boolean;
-    readonly showDropError?: boolean;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
+interface DropEditorWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string | null;
+}
 
-    readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-    readonly onCanSubmitChange?: (canSubmit: boolean) => void;
-  }
->(
+interface DropEditorProps {
+  readonly profile: ProfileMin;
+  readonly quotedDrop: {
+    readonly dropId: string;
+    readonly partId: number;
+  } | null;
+  readonly isClient?: boolean;
+  readonly type: CreateDropType;
+  readonly loading: boolean;
+  readonly dropEditorRefreshKey: number;
+  readonly showSubmit?: boolean;
+  readonly showDropError?: boolean;
+  readonly wave: DropEditorWaveProps | null;
+  readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
+  readonly onCanSubmitChange?: (canSubmit: boolean) => void;
+}
+
+const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
   (
     {
       profile,
@@ -54,11 +55,7 @@ const DropEditor = forwardRef<
       dropEditorRefreshKey,
       showSubmit = true,
       showDropError = false,
-      isDescriptionDrop,
-      waveName,
-      waveImage,
-      waveId,
-
+      wave,
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -66,8 +63,6 @@ const DropEditor = forwardRef<
   ) => {
     const [init, setInit] = useState(isClient);
     useEffect(() => setInit(true), []);
-
-
 
     const [title, setTitle] = useState<string | null>(null);
     const [metadata, setMetadata] = useState<DropMetadata[]>([]);
@@ -116,10 +111,7 @@ const DropEditor = forwardRef<
           viewType={viewType}
           showSubmit={showSubmit}
           showDropError={showDropError}
-          isDescriptionDrop={isDescriptionDrop}
-          waveName={waveName}
-          waveImage={waveImage}
-          waveId={waveId}
+          wave={wave}
           setViewType={setViewType}
           setDrop={setDrop}
           setMentionedUsers={setMentionedUsers}

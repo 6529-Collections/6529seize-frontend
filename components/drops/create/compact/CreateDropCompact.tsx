@@ -28,41 +28,46 @@ export interface CreateDropCompactHandles {
   clearEditorState: () => void;
 }
 
+interface CreateDropCompactWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string | null;
+}
+
+interface CreateDropCompactProps {
+  readonly profile: ProfileMin;
+  readonly screenType: CreateDropScreenType;
+  readonly editorState: EditorState | null;
+  readonly title: string | null;
+  readonly file: File | null;
+  readonly metadata: DropMetadata[];
+  readonly canSubmit: boolean;
+  readonly canAddPart: boolean;
+  readonly loading: boolean;
+  readonly type: CreateDropType;
+  readonly drop: CreateDropConfig | null;
+  readonly showSubmit: boolean;
+  readonly showDropError?: boolean;
+  readonly isStormMode: boolean;
+  readonly wave: CreateDropCompactWaveProps | null;
+  readonly missingMedia: WaveParticipationRequirement[];
+  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly onViewChange: (newV: CreateDropViewType) => void;
+  readonly onMetadataRemove: (key: string) => void;
+  readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
+  readonly onReferencedNft: (newNft: ReferencedNft) => void;
+  readonly onFileChange: (file: File | null) => void;
+  readonly onDrop?: () => void;
+  readonly onDropPart: () => void;
+  readonly removePart: (index: number) => void;
+}
+
 const CreateDropCompact = forwardRef<
   CreateDropCompactHandles,
-  {
-    readonly profile: ProfileMin;
-    readonly screenType: CreateDropScreenType;
-    readonly editorState: EditorState | null;
-    readonly title: string | null;
-    readonly file: File | null;
-    readonly metadata: DropMetadata[];
-    readonly canSubmit: boolean;
-    readonly canAddPart: boolean;
-    readonly loading: boolean;
-    readonly type: CreateDropType;
-    readonly drop: CreateDropConfig | null;
-    readonly showSubmit: boolean;
-    readonly showDropError?: boolean;
-    readonly isStormMode: boolean;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
-    readonly missingMedia: WaveParticipationRequirement[];
-    readonly missingMetadata: WaveRequiredMetadata[];
-    readonly onViewChange: (newV: CreateDropViewType) => void;
-    readonly onMetadataRemove: (key: string) => void;
-    readonly onEditorState: (editorState: EditorState | null) => void;
-    readonly onMentionedUser: (
-      newUser: Omit<MentionedUser, "current_handle">
-    ) => void;
-    readonly onReferencedNft: (newNft: ReferencedNft) => void;
-    readonly onFileChange: (file: File | null) => void;
-    readonly onDrop?: () => void;
-    readonly onDropPart: () => void;
-    readonly removePart: (index: number) => void;
-  }
+  CreateDropCompactProps
 >(
   (
     {
@@ -80,10 +85,7 @@ const CreateDropCompact = forwardRef<
       drop,
       showDropError = false,
       isStormMode,
-      isDescriptionDrop,
-      waveName,
-      waveImage,
-      waveId,
+      wave,
       missingMedia,
       missingMetadata,
       onViewChange,
@@ -136,10 +138,7 @@ const CreateDropCompact = forwardRef<
           <CreateDropStormView
             drop={drop}
             profile={profile}
-            isDescriptionDrop={isDescriptionDrop}
-            waveName={waveName}
-            waveImage={waveImage}
-            waveId={waveId}
+            wave={wave}
             removePart={removePart}
           />
         )}

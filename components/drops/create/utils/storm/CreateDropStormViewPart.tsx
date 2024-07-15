@@ -8,6 +8,24 @@ import DropPart from "../../../view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
+interface CreateDropStormViewPartWaveProps {
+  name: string;
+  image: string | null;
+  id: string | null;
+}
+
+interface CreateDropStormViewPartProps {
+  readonly profile: ProfileMin;
+  readonly part: CreateDropPart;
+  readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
+  readonly referencedNfts: Array<ReferencedNft>;
+  readonly createdAt: number;
+  readonly wave: CreateDropStormViewPartWaveProps | null;
+  readonly dropTitle: string | null;
+  readonly partIndex: number;
+  readonly removePart: (index: number) => void;
+}
+
 const CreateDropStormViewPart = memo(
   ({
     profile,
@@ -15,27 +33,11 @@ const CreateDropStormViewPart = memo(
     mentionedUsers,
     referencedNfts,
     createdAt,
-    isDescriptionDrop,
-    waveName,
-    waveImage,
+    wave,
     dropTitle,
-    waveId,
     partIndex,
     removePart,
-  }: {
-    readonly profile: ProfileMin;
-    readonly part: CreateDropPart;
-    readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
-    readonly referencedNfts: Array<ReferencedNft>;
-    readonly createdAt: number;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly dropTitle: string | null;
-    readonly waveId: string | null;
-    readonly partIndex: number;
-    readonly removePart: (index: number) => void;
-  }) => {
+  }: CreateDropStormViewPartProps) => {
     const partMedia = part.media.length
       ? {
           mimeType: part.media[0].type,
@@ -58,11 +60,8 @@ const CreateDropStormViewPart = memo(
                 partMedia={partMedia}
                 createdAt={createdAt}
                 isFirstPart={partIndex === 0}
-                isDescriptionDrop={isDescriptionDrop}
-                waveName={waveName}
+                wave={wave}
                 dropTitle={dropTitle}
-                waveImage={waveImage}
-                waveId={waveId}
               />
               <div className="tw-w-2 tw-bg-iron-700"></div>
             </div>
