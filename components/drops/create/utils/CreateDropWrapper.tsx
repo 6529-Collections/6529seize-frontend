@@ -42,41 +42,46 @@ export interface CreateDropWrapperHandles {
   requestDrop: () => CreateDropConfig;
 }
 
+interface CreateDropWrapperWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string | null;
+}
+
+interface CreateDropWrapperProps {
+  readonly profile: ProfileMin;
+  readonly quotedDrop: {
+    dropId: string;
+    partId: number;
+  } | null;
+  readonly type: CreateDropType;
+  readonly loading: boolean;
+  readonly title: string | null;
+  readonly metadata: DropMetadata[];
+  readonly mentionedUsers: Omit<MentionedUser, "current_handle">[];
+  readonly referencedNfts: ReferencedNft[];
+  readonly drop: CreateDropConfig | null;
+  readonly viewType: CreateDropViewType;
+  readonly showSubmit: boolean;
+  readonly showDropError?: boolean;
+  readonly wave: CreateDropWrapperWaveProps | null;
+  readonly setViewType: (newV: CreateDropViewType) => void;
+  readonly setDrop: (newV: CreateDropConfig) => void;
+  readonly setMentionedUsers: (
+    newV: Omit<MentionedUser, "current_handle">[]
+  ) => void;
+  readonly setReferencedNfts: (newV: ReferencedNft[]) => void;
+  readonly setTitle: (newV: string | null) => void;
+  readonly setMetadata: (newV: DropMetadata[]) => void;
+  readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
+  readonly onCanSubmitChange?: (canSubmit: boolean) => void;
+}
+
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const CreateDropWrapper = forwardRef<
   CreateDropWrapperHandles,
-  {
-    readonly profile: ProfileMin;
-    readonly quotedDrop: {
-      dropId: string;
-      partId: number;
-    } | null;
-    readonly type: CreateDropType;
-    readonly loading: boolean;
-    readonly title: string | null;
-    readonly metadata: DropMetadata[];
-    readonly mentionedUsers: Omit<MentionedUser, "current_handle">[];
-    readonly referencedNfts: ReferencedNft[];
-    readonly drop: CreateDropConfig | null;
-    readonly viewType: CreateDropViewType;
-    readonly showSubmit: boolean;
-    readonly showDropError?: boolean;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
-    readonly setViewType: (newV: CreateDropViewType) => void;
-    readonly setDrop: (newV: CreateDropConfig) => void;
-    readonly setMentionedUsers: (
-      newV: Omit<MentionedUser, "current_handle">[]
-    ) => void;
-    readonly setReferencedNfts: (newV: ReferencedNft[]) => void;
-    readonly setTitle: (newV: string | null) => void;
-    readonly setMetadata: (newV: DropMetadata[]) => void;
-    readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-    readonly onCanSubmitChange?: (canSubmit: boolean) => void;
-  }
+  CreateDropWrapperProps
 >(
   (
     {
@@ -92,10 +97,7 @@ const CreateDropWrapper = forwardRef<
       viewType,
       showSubmit,
       showDropError = false,
-      isDescriptionDrop,
-      waveName,
-      waveImage,
-      waveId,
+      wave: waveProps,
       setViewType,
       setDrop,
       setMentionedUsers,
@@ -120,12 +122,12 @@ const CreateDropWrapper = forwardRef<
     }, [breakpoint]);
 
     const { data: wave } = useQuery<Wave>({
-      queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+      queryKey: [QueryKey.WAVE, { wave_id: waveProps?.id }],
       queryFn: async () =>
         await commonApiFetch<Wave>({
-          endpoint: `waves/${waveId}`,
+          endpoint: `waves/${waveProps?.id}`,
         }),
-      enabled: !!waveId,
+      enabled: !!waveProps?.id,
     });
 
     const [isStormMode, setIsStormMode] = useState(false);
@@ -172,7 +174,7 @@ const CreateDropWrapper = forwardRef<
       ) ?? null;
 
     const getMissingRequiredMetadata = (): WaveRequiredMetadata[] => {
-      if (!waveId) {
+      if (!waveProps?.id) {
         return [];
       }
 
@@ -214,7 +216,7 @@ const CreateDropWrapper = forwardRef<
     };
 
     const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
-      if (!waveId) {
+      if (!waveProps?.id) {
         return [];
       }
 
@@ -251,11 +253,11 @@ const CreateDropWrapper = forwardRef<
 
     useEffect(() => {
       setMissingMetadata(getMissingRequiredMetadata());
-    }, [waveId, wave, drop, metadata]);
+    }, [waveProps, wave, drop, metadata]);
 
     useEffect(() => {
       setMissingMedia(getMissingRequiredMedia());
-    }, [waveId, wave, drop, file]);
+    }, [waveProps, wave, drop, file]);
 
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
@@ -405,10 +407,7 @@ const CreateDropWrapper = forwardRef<
           showSubmit={showSubmit}
           showDropError={showDropError}
           isStormMode={isStormMode}
-          isDescriptionDrop={isDescriptionDrop}
-          waveName={waveName}
-          waveImage={waveImage}
-          waveId={waveId}
+          wave={waveProps}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onViewChange={setViewType}
@@ -439,10 +438,7 @@ const CreateDropWrapper = forwardRef<
           showSubmit={showSubmit}
           showDropError={showDropError}
           isStormMode={isStormMode}
-          isDescriptionDrop={isDescriptionDrop}
-          waveName={waveName}
-          waveImage={waveImage}
-          waveId={waveId}
+          wave={waveProps}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onTitle={setTitle}

@@ -10,21 +10,25 @@ export enum DropContentPartType {
   HASHTAG = "HASHTAG",
 }
 
+interface DropListItemContentProps {
+  readonly drop: Drop;
+  readonly showFull?: boolean;
+  readonly voteState: DropVoteState;
+  readonly canVote: boolean;
+  readonly availableCredit: number | null;
+  readonly showWaveInfo?: boolean;
+  readonly onQuote: (dropPartId: number | null) => void;
+}
+
 export default function DropListItemContent({
   drop,
   showFull = false,
   voteState,
   canVote,
   availableCredit,
+  showWaveInfo = true,
   onQuote,
-}: {
-  readonly drop: Drop;
-  readonly showFull?: boolean;
-  readonly voteState: DropVoteState;
-  readonly canVote: boolean;
-  readonly availableCredit: number | null;
-  readonly onQuote: (dropPartId: number | null) => void;
-}) {
+}: DropListItemContentProps) {
   const [isFullMode, setIsFullMode] = useState(showFull);
   const getParts = () => {
     if (!drop.parts.length) {
@@ -89,13 +93,18 @@ export default function DropListItemContent({
                     : null
                 }
                 showFull={isFullMode}
+                wave={
+                  showWaveInfo
+                    ? {
+                        name: drop.wave.name,
+                        image: drop.wave.picture,
+                        id: drop.wave.id,
+                      }
+                    : null
+                }
                 createdAt={drop.created_at}
-                isDescriptionDrop={drop.wave.description_drop_id === drop.id}
-                waveName={drop.wave.name}
-                waveImage={drop.wave.picture}
                 isFirstPart={index === 0}
                 dropTitle={drop.title}
-                waveId={drop.wave.id}
               />
               {showStormExpandButton && index === 0 && (
                 <button

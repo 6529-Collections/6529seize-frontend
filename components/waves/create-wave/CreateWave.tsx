@@ -613,13 +613,13 @@ export default function CreateWave({
         ref={createWaveDescriptionRef}
         profile={profile}
         showDropError={showDropError}
-        waveName={config.overview.name}
-        waveImage={
-          config.overview.image
+        wave={{
+          name: config.overview.name,
+          image: config.overview.image
             ? URL.createObjectURL(config.overview.image)
-            : null
-        }
-        waveId={null}
+            : null,
+          id: null,
+        }}
         onHaveDropToSubmitChange={onHaveDropToSubmitChange}
       />
     ),

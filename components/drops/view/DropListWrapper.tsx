@@ -9,14 +9,12 @@ export default function DropListWrapper({
   drops,
   loading,
   showWaveInfo,
-  showIsWaveDescriptionDrop = false,
   availableCredit,
   onBottomIntersection,
 }: {
   readonly drops: Drop[];
   readonly loading: boolean;
   readonly showWaveInfo: boolean;
-  readonly showIsWaveDescriptionDrop?: boolean;
   readonly availableCredit: number | null;
   readonly onBottomIntersection: (state: boolean) => void;
 }) {
@@ -25,7 +23,6 @@ export default function DropListWrapper({
       <DropsList
         drops={drops}
         showWaveInfo={showWaveInfo}
-        showIsWaveDescriptionDrop={showIsWaveDescriptionDrop}
         availableCredit={availableCredit}
       />
       {loading && (

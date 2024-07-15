@@ -61,13 +61,14 @@ export default function WaveCreateDrop({ wave }: { readonly wave: Wave }) {
   ) {
     return (
       <CreateDrop
-        waveId={wave.id}
         profile={connectedProfile}
         quotedDrop={null}
         type={CreateDropType.DROP}
-        isDescriptionDrop={false}
-        waveName={wave.name}
-        waveImage={wave.picture}
+        wave={{
+          name: wave.name,
+          image: wave.picture,
+          id: wave.id,
+        }}
       />
     );
   }

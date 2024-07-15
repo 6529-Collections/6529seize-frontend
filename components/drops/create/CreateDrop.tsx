@@ -25,30 +25,32 @@ export enum CreateDropViewType {
   FULL = "FULL",
 }
 
-export default function CreateDrop({
-  profile,
-  waveId,
-  quotedDrop,
-  isClient = false,
-  type,
-  isDescriptionDrop,
-  waveName,
-  waveImage,
-  onSuccessfulDrop,
-}: {
+interface CreateDropWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string;
+}
+
+interface CreateDropProps {
   readonly profile: IProfileAndConsolidations;
-  readonly waveId: string;
+  readonly wave: CreateDropWaveProps;
   readonly quotedDrop: {
     dropId: string;
     partId: number;
   } | null;
   readonly isClient?: boolean;
   readonly type: CreateDropType;
-  readonly isDescriptionDrop: boolean;
-  readonly waveName: string;
-  readonly waveImage: string | null;
   readonly onSuccessfulDrop?: () => void;
-}) {
+}
+
+export default function CreateDrop({
+  profile,
+  quotedDrop,
+  wave,
+  isClient = false,
+  type,
+  onSuccessfulDrop,
+}: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onDropCreate } = useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(isClient);
@@ -162,7 +164,7 @@ export default function CreateDrop({
 
     const requestBody: CreateDropRequest = {
       ...dropRequest,
-      wave_id: waveId,
+      wave_id: wave.id,
       parts,
     };
     await addDropMutation.mutateAsync(requestBody);
@@ -180,10 +182,7 @@ export default function CreateDrop({
       type={type}
       loading={submitting}
       dropEditorRefreshKey={dropEditorRefreshKey}
-      isDescriptionDrop={isDescriptionDrop}
-      waveName={waveName}
-      waveImage={waveImage}
-      waveId={waveId}
+      wave={wave}
       onSubmitDrop={submitDrop}
     />
   );

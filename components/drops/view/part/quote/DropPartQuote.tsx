@@ -69,11 +69,12 @@ export default function DropPartQuote({
         showFull={false}
         createdAt={drop.created_at}
         isFirstPart={true}
-        isDescriptionDrop={drop.wave.description_drop_id === drop.id}
-        waveName={drop.wave.name}
         dropTitle={drop.title}
-        waveImage={drop.wave.picture}
-        waveId={drop.wave.id}
+        wave={{
+          name: drop.wave.name,
+          image: drop.wave.picture,
+          id: drop.wave.id,
+        }}
         size={DropPartSize.SMALL}
       />
     </div>

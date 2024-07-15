@@ -10,15 +10,18 @@ import { DropMentionedUser } from "../../../../../generated/models/DropMentioned
 import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 
+interface PartConfigWave {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string;
+}
+
 interface PartConfig {
   readonly part: IDropPart;
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;
   readonly createdAt: number;
-  readonly isDescriptionDrop: boolean;
-  readonly waveName: string;
-  readonly waveImage: string | null;
-  readonly waveId: string | null;
+  readonly wave: PartConfigWave;
   readonly dropTitle: string | null;
 }
 
@@ -53,11 +56,12 @@ export default function CreateDropStormViewPartQuote({
       mentionedUsers: drop.mentioned_users,
       referencedNfts: drop.referenced_nfts,
       createdAt: drop.created_at,
-      isDescriptionDrop: drop.wave.description_drop_id === drop.id,
-      waveName: drop.wave.name,
       dropTitle: drop.title,
-      waveImage: drop.wave.picture,
-      waveId: drop.wave.id,
+      wave: {
+        name: drop.wave.name,
+        image: drop.wave.picture,
+        id: drop.wave.id,
+      },
     };
   };
 
@@ -82,13 +86,10 @@ export default function CreateDropStormViewPartQuote({
               : null
           }
           createdAt={partConfig.createdAt}
-          isDescriptionDrop={partConfig.isDescriptionDrop}
-          waveName={partConfig.waveName}
+          wave={partConfig.wave}
           isFirstPart={true}
           showFull={false}
           dropTitle={partConfig.dropTitle}
-          waveImage={partConfig.waveImage}
-          waveId={partConfig.waveId}
           size={DropPartSize.SMALL}
         />
       )}

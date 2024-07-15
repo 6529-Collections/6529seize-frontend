@@ -141,17 +141,19 @@ export default function WavesList({
               No Waves to show
             </div>
           )}
-          <span className="tw-tracking-tight tw-text-2xl tw-font-medium">
-            Latest
-          </span>
-          <WavesListWrapper
-            waves={waves}
-            loading={isFetching}
-            availableCredit={
-              availableRateResponse?.available_credit_for_rating ?? null
-            }
-            onBottomIntersection={onBottomIntersection}
-          />
+
+          <div className="tw-space-y-12">
+            <WavesListWrapper waves={waves.slice(0, 3)} label="Latest" />
+            <WavesListWrapper
+              waves={waves.slice(0, 3)}
+              label="Most Subscribers"
+            />
+            <WavesListWrapper waves={waves.slice(0, 3)} label="By Level >50" />
+            <WavesListWrapper
+              waves={waves.slice(0, 3)}
+              label="By People You Have Repped"
+            />
+          </div>
         </div>
       </div>
     </div>

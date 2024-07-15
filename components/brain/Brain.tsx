@@ -194,7 +194,6 @@ export default function Brain() {
             drops={drops}
             loading={isFetching}
             showWaveInfo={true}
-            showIsWaveDescriptionDrop={true}
             availableCredit={
               availableRateResponse?.available_credit_for_rating ?? null
             }

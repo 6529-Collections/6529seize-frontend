@@ -24,11 +24,37 @@ import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNF
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
+import Link from "next/link";
 
 export enum DropPartSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
   LARGE = "LARGE",
+}
+
+export interface DropPartPropsMedia {
+  readonly mimeType: string;
+  readonly mediaSrc: string;
+}
+
+export interface DropPartPropsWave {
+  readonly id: string | null;
+  readonly name: string;
+  readonly image: string | null;
+}
+
+export interface DropPartProps {
+  readonly profile: ProfileMin;
+  readonly dropTitle: string | null;
+  readonly mentionedUsers: Array<DropMentionedUser>;
+  readonly referencedNfts: Array<DropReferencedNFT>;
+  readonly partContent: string | null;
+  readonly partMedia: DropPartPropsMedia | null;
+  readonly createdAt: number;
+  readonly isFirstPart: boolean;
+  readonly wave: DropPartPropsWave | null;
+  readonly showFull?: boolean;
+  readonly size?: DropPartSize;
 }
 
 const customRenderer = ({
@@ -131,30 +157,9 @@ const DropPart = memo(
     dropTitle,
     createdAt,
     isFirstPart,
-    isDescriptionDrop,
-    waveName,
-    waveImage,
-    waveId,
+    wave,
     size = DropPartSize.MEDIUM,
-  }: {
-    readonly profile: ProfileMin;
-    readonly dropTitle: string | null;
-    readonly mentionedUsers: Array<DropMentionedUser>;
-    readonly referencedNfts: Array<DropReferencedNFT>;
-    readonly partContent: string | null;
-    readonly partMedia: {
-      readonly mimeType: string;
-      readonly mediaSrc: string;
-    } | null;
-    readonly showFull?: boolean;
-    readonly createdAt: number;
-    readonly isFirstPart: boolean;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
-    readonly size?: DropPartSize;
-  }) => {
+  }: DropPartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const checkOverflow = () => {
@@ -214,20 +219,12 @@ const DropPart = memo(
           >
             <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
               <div className="tw-hidden sm:tw-block">
-                <DropPfp
-                  pfpUrl={profile.pfp}
-                  isWaveDescriptionDrop={isDescriptionDrop}
-                  size={size}
-                />
+                <DropPfp pfpUrl={profile.pfp} size={size} />
               </div>
               <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
                 <div className="tw-flex tw-gap-x-3">
                   <div className="sm:tw-hidden">
-                    <DropPfp
-                      pfpUrl={profile.pfp}
-                      isWaveDescriptionDrop={isDescriptionDrop}
-                      size={size}
-                    />
+                    <DropPfp pfpUrl={profile.pfp} size={size} />
                   </div>
                   <div className="tw-w-full tw-flex tw-flex-col sm:tw-flex-row tw-justify-between">
                     <DropAuthor
@@ -235,29 +232,36 @@ const DropPart = memo(
                       timestamp={createdAt}
                       size={size}
                     />
-                    <a className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
-                      <img
-                        src="#"
-                        alt="Drop wave image"
-                        className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
-                      />
-                      <span>Wave name</span>
-                      <svg
-                        className="tw-size-5 tw-flex-shrink-0"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
+                    {isFirstPart && wave?.id && (
+                      <Link
+                        href={`/waves/${wave.id}`}
+                        className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
                       >
-                        <path
-                          d="M7 17L17 7M17 7H7M17 7V17"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </a>
+                        {wave.image && (
+                          <img
+                            src={wave.image}
+                            alt="Drop wave image"
+                            className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
+                          />
+                        )}
+                        <span>{wave.name}</span>
+                        <svg
+                          className="tw-size-5 tw-flex-shrink-0"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M7 17L17 7M17 7H7M17 7V17"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </Link>
+                    )}
                   </div>
                 </div>
 

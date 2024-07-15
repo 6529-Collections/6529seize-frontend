@@ -4,25 +4,27 @@ import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
 
-export default function DropListItemQuote({
-  waveId,
-  quotedDropId,
-  quotedPartId,
-  init,
-  isDescriptionDrop,
-  waveName,
-  waveImage,
-  onSuccessfulDrop,
-}: {
-  readonly waveId: string;
+interface DropListItemQuoteWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string;
+}
+
+interface DropListItemQuoteProps {
   readonly quotedDropId: string;
   readonly quotedPartId: number;
   readonly init: boolean;
-  readonly isDescriptionDrop: boolean;
-  readonly waveName: string;
-  readonly waveImage: string | null;
+  readonly wave: DropListItemQuoteWaveProps;
   readonly onSuccessfulDrop: () => void;
-}) {
+}
+
+export default function DropListItemQuote({
+  quotedDropId,
+  quotedPartId,
+  init,
+  wave,
+  onSuccessfulDrop,
+}: DropListItemQuoteProps) {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);
 
   const components: Record<ProfileConnectedStatus, React.ReactNode> = {
@@ -40,15 +42,12 @@ export default function DropListItemQuote({
         {connectedProfile && (
           <CreateDrop
             profile={connectedProfile}
-            waveId={waveId}
             quotedDrop={{
               dropId: quotedDropId,
               partId: quotedPartId,
             }}
             isClient={init}
-            isDescriptionDrop={isDescriptionDrop}
-            waveName={waveName}
-            waveImage={waveImage}
+            wave={wave}
             type={CreateDropType.QUOTE}
             onSuccessfulDrop={onSuccessfulDrop}
           />

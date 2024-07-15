@@ -5,24 +5,21 @@ import CreateDropStormViewPart from "./CreateDropStormViewPart";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { Time } from "../../../../../helpers/time";
 
+interface CreateDropStormViewWaveProps {
+  readonly name: string;
+  readonly image: string | null;
+  readonly id: string | null;
+}
+
+interface CreateDropStormViewProps {
+  readonly drop: CreateDropConfig;
+  readonly profile: ProfileMin;
+  readonly wave: CreateDropStormViewWaveProps | null;
+  readonly removePart: (index: number) => void;
+}
+
 const CreateDropStormView = memo(
-  ({
-    drop,
-    profile,
-    isDescriptionDrop,
-    waveName,
-    waveImage,
-    waveId,
-    removePart,
-  }: {
-    readonly drop: CreateDropConfig;
-    readonly profile: ProfileMin;
-    readonly isDescriptionDrop: boolean;
-    readonly waveName: string;
-    readonly waveImage: string | null;
-    readonly waveId: string | null;
-    readonly removePart: (index: number) => void;
-  }) => {
+  ({ drop, profile, wave, removePart }: CreateDropStormViewProps) => {
     const now = Time.currentMillis();
     return (
       <div className="tw-flex tw-flex-col tw-mb-4">
@@ -36,11 +33,8 @@ const CreateDropStormView = memo(
               mentionedUsers={drop.mentioned_users}
               createdAt={now}
               partIndex={index}
-              isDescriptionDrop={isDescriptionDrop}
-              waveName={waveName}
+              wave={wave}
               dropTitle={drop.title ?? null}
-              waveImage={waveImage}
-              waveId={waveId}
               removePart={removePart}
             />
           ))}
