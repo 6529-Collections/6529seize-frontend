@@ -12,12 +12,7 @@ interface Props {
 
 export default function PdfViewer(props: Readonly<Props>) {
   useEffect(() => {
-    import("pdfjs-dist/build/pdf.worker.min.mjs").then((worker) => {
-      pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-        worker.default,
-        import.meta.url
-      ).toString();
-    });
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   }, []);
 
   const [numPages, setNumPages] = useState(0);
@@ -40,7 +35,12 @@ export default function PdfViewer(props: Readonly<Props>) {
     <Container className="no-padding" ref={containerRef}>
       <Row>
         <Col>
-          <Document file={props.file} onLoadSuccess={onDocumentLoadSuccess}>
+          <Document
+            file={props.file}
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={(e) => {
+              console.log("Error loading PDF", e);
+            }}>
             {isLoading && renderedPageNumber ? (
               <Page
                 key={renderedPageNumber}
