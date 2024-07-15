@@ -247,6 +247,12 @@ h5 {
   color: $silver;
 }
 
+.font-color-hover {
+  &:hover {
+    color: $font-color;
+  }
+}
+
 .indented {
   margin-left: 5%;
 }
