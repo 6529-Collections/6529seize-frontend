@@ -1,6 +1,10 @@
 import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import useManifoldClaim, { ManifoldClaim } from "../../hooks/useManifoldClaim";
+import useManifoldClaim, {
+  ManifoldClaim,
+  MEME_PHASES,
+  MemePhase,
+} from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
 import { ManifoldInstance, getTraitValue } from "./manifold-types";
 import { Spinner } from "../dotLoader/DotLoader";
@@ -21,6 +25,12 @@ import {
   MEMES_CONTRACT,
 } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
+import { Distribution } from "../../entities/IDistribution";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowRight,
+  faCircleArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   title: string;
@@ -46,6 +56,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   );
 
   const [fee, setFee] = useState<number>(0);
+  const [mintForAddress, setMintForAddress] = useState<string>("");
 
   const [fetching, setFetching] = useState<boolean>(true);
 
@@ -103,9 +114,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         abi={props.abi}
         claim={manifoldClaim}
         merkleTreeId={instance!.publicData.instanceAllowlist?.merkleTreeId}
-        setFee={(f: number) => {
-          setFee(f);
-        }}
+        setFee={setFee}
+        setMintForAddress={setMintForAddress}
       />
     );
   }
@@ -280,6 +290,16 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         {printImage()}
         {printActions(instance, manifoldClaim)}
       </Row>
+      <Row className="pt-2 pb-3">
+        <Col>
+          <ManifoldMintingPhases
+            address={mintForAddress}
+            contract={props.contract}
+            token_id={props.token_id}
+            active_phase={manifoldClaim.memePhase}
+          />
+        </Col>
+      </Row>
       <hr />
       <Row className="pb-2">
         <Col sm={12} md={6} className="pt-1 pb-1">
@@ -400,6 +420,78 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <NFTAttributes attributes={instance.publicData.asset.attributes} />
         </Col>
       </Row>
+    </Container>
+  );
+}
+
+function ManifoldMintingPhases(
+  props: Readonly<{
+    address: string;
+    contract: string;
+    token_id: number;
+    active_phase: MemePhase | undefined;
+  }>
+) {
+  const [distribution, setDistribution] = useState<Distribution>();
+
+  useEffect(() => {
+    if (props.address) {
+      fetch(
+        `https://api.seize.io/api/distributions?card_id=${props.token_id}&contract=${props.contract}&page=1&search=${props.address}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setDistribution(data.data[0]);
+        });
+    } else {
+      setDistribution(undefined);
+    }
+  }, [props.address]);
+
+  function printPhase(p: MemePhase) {
+    const eligibleMints = distribution?.allowlist.find((phase) =>
+      phase.phase.includes(p.id)
+    );
+
+    let eligibleMintsText =
+      p.id === "public" ? "Unlimited eligible mints" : "No eligible mints";
+
+    if (eligibleMints) {
+      const count = eligibleMints.spots;
+      eligibleMintsText = `${count} Eligible mint${count > 1 ? "s" : ""}`;
+    }
+    return (
+      <Col xs={12} sm={6} md={3} className="pt-1 pb-1" key={`phase-${p.id}`}>
+        <Container className={styles.phaseBox}>
+          <Row>
+            <Col
+              xs={12}
+              className="d-flex align-items-center justify-content-center gap-1">
+              {props.active_phase?.id === p.id && (
+                <FontAwesomeIcon icon={faCircleArrowRight} height={15} />
+              )}
+              <span className="font-bolder font-larger">{p.name}</span>
+            </Col>
+            <Col xs={12} className="text-center">
+              Starts: {p.start}
+            </Col>
+            <Col xs={12} className="text-center">
+              Ends: {p.end}
+            </Col>
+            {props.address && (
+              <Col xs={12} className="text-center">
+                {eligibleMintsText}
+              </Col>
+            )}
+          </Row>
+        </Container>
+      </Col>
+    );
+  }
+
+  return (
+    <Container className="no-padding">
+      <Row>{MEME_PHASES.map((phase) => printPhase(phase))}</Row>
     </Container>
   );
 }

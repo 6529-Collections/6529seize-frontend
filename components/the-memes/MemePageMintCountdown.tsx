@@ -37,16 +37,23 @@ export default function MemePageMintCountdown(
     return <></>;
   }
 
+  const getTitle = () => {
+    const phaseName =
+      manifoldClaim.phase === ManifoldPhase.ALLOWLIST && manifoldClaim.memePhase
+        ? manifoldClaim.memePhase.name
+        : manifoldClaim.phase;
+
+    return manifoldClaim.status === ManifoldClaimStatus.UPCOMING
+      ? `${phaseName} Starts In`
+      : `${phaseName} Ends In`;
+  };
+
   return (
     <Container className="no-padding pb-3">
       <Row>
         <Col>
           <MintCountdownBox
-            title={
-              manifoldClaim.status === ManifoldClaimStatus.UPCOMING
-                ? `${manifoldClaim.phase} Starts In`
-                : `${manifoldClaim.phase} Ends In`
-            }
+            title={getTitle()}
             date={
               manifoldClaim.status === ManifoldClaimStatus.UPCOMING
                 ? manifoldClaim.startDate

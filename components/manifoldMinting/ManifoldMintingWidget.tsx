@@ -32,6 +32,7 @@ export default function ManifoldMintingWidget(
     claim: ManifoldClaim;
     merkleTreeId: number;
     setFee: (fee: number) => void;
+    setMintForAddress: (address: string) => void;
   }>
 ) {
   const connectedAddress = useAccount();
@@ -479,6 +480,10 @@ export default function ManifoldMintingWidget(
       </Container>
     );
   }
+
+  useEffect(() => {
+    props.setMintForAddress(mintForAddress);
+  }, [mintForAddress]);
 
   return (
     <Container className="no-padding">

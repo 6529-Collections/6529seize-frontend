@@ -1,8 +1,9 @@
 import { useReadContract } from "wagmi";
-import { NULL_MERKLE } from "../constants";
+import { MEMES_CONTRACT, NULL_MERKLE } from "../constants";
 import { useCallback, useEffect, useState } from "react";
 import { areEqualAddresses } from "../helpers/Helpers";
 import { mainnet } from "viem/chains";
+import { Time } from "../helpers/time";
 
 export const MANIFOLD_NETWORK = mainnet;
 
@@ -17,6 +18,40 @@ export enum ManifoldPhase {
   PUBLIC = "Public Phase",
 }
 
+export interface MemePhase {
+  id: string;
+  name: string;
+  start: string;
+  end: string;
+}
+
+export const MEME_PHASES: MemePhase[] = [
+  {
+    id: "0",
+    name: "Phase 0 (Allowlist)",
+    start: "14:40:00 UTC",
+    end: "15:20:00 UTC",
+  },
+  {
+    id: "1",
+    name: "Phase 1 (Allowlist)",
+    start: "15:30:00 UTC",
+    end: "15:50:00 UTC",
+  },
+  {
+    id: "2",
+    name: "Phase 2 (Allowlist)",
+    start: "16:00:00 UTC",
+    end: "16:20:00 UTC",
+  },
+  {
+    id: "public",
+    name: "Public Phase",
+    start: "16:20:00 UTC",
+    end: "14:00:00 UTC tomorrow",
+  },
+];
+
 export interface ManifoldClaim {
   instanceId: number;
   total: number;
@@ -27,6 +62,7 @@ export interface ManifoldClaim {
   endDate: number;
   status: ManifoldClaimStatus;
   phase: ManifoldPhase;
+  memePhase?: MemePhase;
   isFetching: boolean;
   isFinalized: boolean;
 }
@@ -50,6 +86,22 @@ export default function useManifoldClaim(
     }
     return ManifoldClaimStatus.ENDED;
   }, []);
+
+  const getMemePhase = useCallback(
+    (phase: ManifoldPhase, start: number, end: number) => {
+      if (!areEqualAddresses(contract, MEMES_CONTRACT)) {
+        return undefined;
+      }
+
+      if (phase === ManifoldPhase.PUBLIC) {
+        return MEME_PHASES.find((mp) => mp.id === "public");
+      }
+
+      const endTime = `${Time.seconds(end).toIsoTimeString()} UTC`;
+      return MEME_PHASES.filter((mp) => mp.end >= endTime)[0];
+    },
+    []
+  );
 
   const readContract = useReadContract({
     address: proxy as `0x${string}`,
@@ -75,6 +127,11 @@ export default function useManifoldClaim(
         publicMerkle && claimData.total > 0
           ? ManifoldPhase.PUBLIC
           : ManifoldPhase.ALLOWLIST;
+      const memePhase = getMemePhase(
+        phase,
+        claimData.startDate,
+        claimData.endDate
+      );
       const remaining =
         phase === ManifoldPhase.PUBLIC && status === ManifoldClaimStatus.ENDED
           ? 0
@@ -89,6 +146,7 @@ export default function useManifoldClaim(
         endDate: Number(claimData.endDate),
         status: status,
         phase: phase,
+        memePhase: memePhase,
         isFetching: false,
         isFinalized: remaining === 0,
       };
