@@ -659,14 +659,6 @@ function ManifoldMemesMintingPhase(
               {getDateTimeString(endDate, props.local_timezone)}
             </span>
           </Col>
-          {/* <Col xs={12} className="text-center">
-            {startText}:{" "}
-            <b>{getDateTimeString(props.phase.start, props.local_timezone)}</b>
-          </Col> */}
-          {/* <Col xs={12} className="text-center">
-            {endText}:{" "}
-            <b> {getDateTimeString(props.phase.end, props.local_timezone)}</b>
-          </Col> */}
           {props.address && (
             <Col xs={12} className={`pt-3 text-center ${eligibleMintsStyle}`}>
               {eligibleMintsText}
