@@ -2,8 +2,7 @@ import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import useManifoldClaim, {
   ManifoldClaim,
-  MEME_PHASES,
-  MemePhase,
+  ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
 import { ManifoldInstance, getTraitValue } from "./manifold-types";
@@ -11,6 +10,7 @@ import { Spinner } from "../dotLoader/DotLoader";
 import NFTImage from "../nft-image/NFTImage";
 import Link from "next/link";
 import {
+  areEqualAddresses,
   capitalizeEveryWord,
   fromGWEI,
   numberWithCommas,
@@ -26,11 +26,6 @@ import {
 } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 import { Distribution } from "../../entities/IDistribution";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowRight,
-  faCircleArrowRight,
-} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   title: string;
@@ -38,10 +33,66 @@ interface Props {
   proxy: string;
   abi: any;
   token_id: number;
+  mint_date: Time;
+}
+
+interface MemePhase {
+  id: string;
+  name: string;
+  type: ManifoldPhase;
+  start: Time;
+  end: Time;
+}
+
+function buildMemesPhases(mint_date: Time) {
+  const phases: MemePhase[] = [
+    {
+      id: "0",
+      name: "Phase 0 (Allowlist)",
+      type: ManifoldPhase.ALLOWLIST,
+      start: mint_date.setTime(14, 40, 0),
+      end: mint_date.setTime(15, 20, 0),
+    },
+    {
+      id: "1",
+      name: "Phase 1 (Allowlist)",
+      type: ManifoldPhase.ALLOWLIST,
+      start: mint_date.setTime(15, 30, 0),
+      end: mint_date.setTime(15, 50, 0),
+    },
+    {
+      id: "2",
+      name: "Phase 2 (Allowlist)",
+      type: ManifoldPhase.ALLOWLIST,
+      start: mint_date.setTime(16, 0, 0),
+      end: mint_date.setTime(16, 20, 0),
+    },
+    {
+      id: "public",
+      name: "Public Phase",
+      type: ManifoldPhase.PUBLIC,
+      start: mint_date.setTime(16, 20, 0),
+      end: mint_date.plusDays(1).setTime(14, 0, 0),
+    },
+  ];
+  return phases;
+}
+
+function getDateTimeString(time: Time, local_timezone: boolean) {
+  if (local_timezone) {
+    return time.toLocaleDateTimeString();
+  }
+
+  const d = time.toIsoDateString();
+  const t = time.toIsoTimeString().split(" ")[0];
+
+  return `${d} ${t.slice(0, 5)} UTC`;
 }
 
 export default function ManifoldMinting(props: Readonly<Props>) {
   const [isError, setIsError] = useState<boolean>(false);
+
+  const [isLocalTimezone, setIsLocalTimezone] = useState<boolean>(true);
 
   const [descriptionClamped, setDescriptionClamped] = useState<boolean>(true);
 
@@ -290,14 +341,55 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         {printImage()}
         {printActions(instance, manifoldClaim)}
       </Row>
-      <Row className="pt-2 pb-3">
-        <Col>
-          <ManifoldMintingPhases
-            address={mintForAddress}
-            contract={props.contract}
-            token_id={props.token_id}
-            active_phase={manifoldClaim.memePhase}
-          />
+      {areEqualAddresses(props.contract, MEMES_CONTRACT) && (
+        <Row className="pt-2 pb-3">
+          <Col>
+            <ManifoldMemesMintingPhases
+              address={mintForAddress}
+              contract={props.contract}
+              token_id={props.token_id}
+              mint_date={props.mint_date}
+              claim={manifoldClaim}
+              local_timezone={isLocalTimezone}
+            />
+          </Col>
+        </Row>
+      )}
+      <Row className="pt-2">
+        <Col xs={12} className="font-color-h">
+          Note: The start/end times have some variance. Watch this page or{" "}
+          <a
+            href="https://twitter.com/6529collections"
+            target="_blank"
+            rel="noreferrer"
+            className="font-color-h font-color-hover">
+            &#64;6529collections
+          </a>{" "}
+          for updates.
+        </Col>
+        <Col className="font-color-h pt-1">
+          All times are in{" "}
+          {isLocalTimezone ? (
+            <>
+              your local timezone.{" "}
+              <button
+                className="btn btn-link"
+                onClick={() => setIsLocalTimezone(false)}>
+                <span className="font-color-hover">Change to UTC</span>
+              </button>
+            </>
+          ) : (
+            <>
+              UTC.{" "}
+              <button
+                className="btn btn-link font-color-hover"
+                onClick={() => setIsLocalTimezone(true)}>
+                <span className="font-color-hover">
+                  Change to your local timezone
+                </span>
+              </button>
+            </>
+          )}
         </Col>
       </Row>
       <hr />
@@ -371,10 +463,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td className="pt-2">Phase Start</td>
                 <td className="pt-2">
                   <b>
-                    {Time.seconds(
-                      manifoldClaim.startDate
-                    ).toIsoDateTimeString()}{" "}
-                    UTC
+                    {getDateTimeString(
+                      Time.seconds(manifoldClaim.startDate),
+                      isLocalTimezone
+                    )}
                   </b>
                 </td>
               </tr>
@@ -382,8 +474,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td className="pt-2">Phase End</td>
                 <td className="pt-2">
                   <b>
-                    {Time.seconds(manifoldClaim.endDate).toIsoDateTimeString()}{" "}
-                    UTC
+                    {getDateTimeString(
+                      Time.seconds(manifoldClaim.endDate),
+                      isLocalTimezone
+                    )}
                   </b>
                 </td>
               </tr>
@@ -424,15 +518,18 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   );
 }
 
-function ManifoldMintingPhases(
+function ManifoldMemesMintingPhases(
   props: Readonly<{
     address: string;
     contract: string;
     token_id: number;
-    active_phase: MemePhase | undefined;
+    mint_date: Time;
+    claim: ManifoldClaim;
+    local_timezone: boolean;
   }>
 ) {
   const [distribution, setDistribution] = useState<Distribution>();
+  const phases = buildMemesPhases(props.mint_date);
 
   useEffect(() => {
     if (props.address) {
@@ -448,50 +545,135 @@ function ManifoldMintingPhases(
     }
   }, [props.address]);
 
-  function printPhase(p: MemePhase) {
-    const eligibleMints = distribution?.allowlist.find((phase) =>
-      phase.phase.includes(p.id)
-    );
+  return (
+    <Container className="no-padding">
+      <Row>
+        {phases.map((phase) => (
+          <ManifoldMemesMintingPhase
+            key={`phase-${phase.id}`}
+            claim={props.claim}
+            address={props.address}
+            phase={phase}
+            distribution={distribution}
+            local_timezone={props.local_timezone}
+          />
+        ))}
+      </Row>
+    </Container>
+  );
+}
 
-    let eligibleMintsText =
-      p.id === "public" ? "Unlimited eligible mints" : "No eligible mints";
+function ManifoldMemesMintingPhase(
+  props: Readonly<{
+    claim: ManifoldClaim;
+    address: string;
+    phase: MemePhase;
+    distribution: Distribution | undefined;
+    local_timezone: boolean;
+  }>
+) {
+  enum PhaseStatus {
+    UPCOMING = "UPCOMING",
+    ACTIVE = "ACTIVE",
+    COMPLETED = "COMPLETED",
+  }
 
-    if (eligibleMints) {
-      const count = eligibleMints.spots;
-      eligibleMintsText = `${count} Eligible mint${count > 1 ? "s" : ""}`;
-    }
-    return (
-      <Col xs={12} sm={6} md={3} className="pt-1 pb-1" key={`phase-${p.id}`}>
-        <Container className={styles.phaseBox}>
-          <Row>
-            <Col
-              xs={12}
-              className="d-flex align-items-center justify-content-center gap-1">
-              {props.active_phase?.id === p.id && (
-                <FontAwesomeIcon icon={faCircleArrowRight} height={15} />
-              )}
-              <span className="font-bolder font-larger">{p.name}</span>
-            </Col>
-            <Col xs={12} className="text-center">
-              Starts: {p.start}
-            </Col>
-            <Col xs={12} className="text-center">
-              Ends: {p.end}
-            </Col>
-            {props.address && (
-              <Col xs={12} className="text-center">
-                {eligibleMintsText}
-              </Col>
-            )}
-          </Row>
-        </Container>
-      </Col>
-    );
+  const eligibleMints = props.distribution?.allowlist.find((phase) =>
+    phase.phase.includes(props.phase.id)
+  );
+
+  let eligibleMintsText =
+    props.phase.id === "public"
+      ? "Unlimited eligible mints"
+      : "No eligible mints";
+  let eligibleMintsStyle = props.phase.id === "public" ? "font-bolder" : "";
+
+  if (eligibleMints) {
+    const count = eligibleMints.spots;
+    eligibleMintsText = `${count} eligible mint${count > 1 ? "s" : ""}`;
+    eligibleMintsStyle = "font-color-green font-bolder";
+  }
+
+  let status: PhaseStatus = PhaseStatus.UPCOMING;
+  if (props.claim.memePhase?.id === props.phase.id) {
+    status = PhaseStatus.ACTIVE;
+  } else if (props.phase.end.lt(Time.now())) {
+    status = PhaseStatus.COMPLETED;
+  }
+
+  let startText = "Expected start";
+  let endText = "Expected end";
+  if (status === PhaseStatus.ACTIVE) {
+    startText = "Started";
+    endText = "Ends";
+  } else if (status === PhaseStatus.COMPLETED) {
+    startText = "Started";
+    endText = "Ended";
+  }
+
+  let startDate = props.phase.start;
+  let endDate = props.phase.end;
+  if (status === PhaseStatus.ACTIVE) {
+    startDate = Time.seconds(props.claim.startDate);
+    endDate = Time.seconds(props.claim.endDate);
   }
 
   return (
-    <Container className="no-padding">
-      <Row>{MEME_PHASES.map((phase) => printPhase(phase))}</Row>
-    </Container>
+    <Col xs={12} sm={6} md={3} className="pt-1 pb-1">
+      <Container
+        className={
+          props.claim.memePhase?.id === props.phase.id
+            ? styles.phaseBoxActive
+            : styles.phaseBox
+        }>
+        <Row>
+          <Col xs={12} className="font-bolder font-larger text-center pb-2">
+            {props.phase.name}
+          </Col>
+          <Col
+            xs={12}
+            className="d-flex align-items-center justify-content-between gap-2">
+            <span className="font-lighter">Status</span>
+            <span
+              className={`${
+                status === PhaseStatus.ACTIVE
+                  ? "font-bolder text-right"
+                  : "text-right"
+              }`}>
+              {status}
+            </span>
+          </Col>
+          <Col
+            xs={12}
+            className="d-flex align-items-center justify-content-between gap-2">
+            <span className="font-lighter">{startText}</span>
+            <span className="text-right">
+              {getDateTimeString(startDate, props.local_timezone)}
+            </span>
+          </Col>
+          <Col
+            xs={12}
+            className="d-flex align-items-center justify-content-between gap-2">
+            <span className="font-lighter">{endText}</span>
+            <span className="text-right">
+              {getDateTimeString(endDate, props.local_timezone)}
+            </span>
+          </Col>
+          {/* <Col xs={12} className="text-center">
+            {startText}:{" "}
+            <b>{getDateTimeString(props.phase.start, props.local_timezone)}</b>
+          </Col> */}
+          {/* <Col xs={12} className="text-center">
+            {endText}:{" "}
+            <b> {getDateTimeString(props.phase.end, props.local_timezone)}</b>
+          </Col> */}
+          {props.address && (
+            <Col xs={12} className={`pt-3 text-center ${eligibleMintsStyle}`}>
+              {eligibleMintsText}
+            </Col>
+          )}
+        </Row>
+      </Container>
+    </Col>
   );
 }

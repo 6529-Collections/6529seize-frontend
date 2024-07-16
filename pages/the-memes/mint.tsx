@@ -9,6 +9,7 @@ import { NFTWithMemesExtendedData } from "../../entities/INFT";
 import { getCommonHeaders } from "../../helpers/server.helpers";
 import { commonApiFetch } from "../../services/api/common-api";
 import Head from "next/head";
+import { Time } from "../../helpers/time";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -23,7 +24,7 @@ const ManifoldMinting = dynamic(
 );
 
 export default function TheMemesMint(props: any) {
-  const nft = props.pageProps.nft;
+  const nft: NFTWithMemesExtendedData = props.pageProps.nft;
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -62,6 +63,7 @@ export default function TheMemesMint(props: any) {
           proxy={MEMES_MANIFOLD_PROXY_CONTRACT}
           abi={MEMES_MANIFOLD_PROXY_ABI}
           token_id={nft.id}
+          mint_date={Time.fromString(nft.mint_date.toString())}
         />
       </main>
     </>

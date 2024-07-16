@@ -60,6 +60,14 @@ export default function ManifoldMintingConnect(
   }, [mintFor]);
 
   useEffect(() => {
+    if (account.address) {
+      setMintFor(account.address as string);
+    } else {
+      setMintFor("");
+    }
+  }, [account.address]);
+
+  useEffect(() => {
     if (mintForFren) {
       props.onMintFor(mintForAddress);
     } else {

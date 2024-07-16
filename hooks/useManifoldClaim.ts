@@ -21,6 +21,7 @@ export enum ManifoldPhase {
 export interface MemePhase {
   id: string;
   name: string;
+  type: ManifoldPhase;
   start: string;
   end: string;
 }
@@ -29,24 +30,28 @@ export const MEME_PHASES: MemePhase[] = [
   {
     id: "0",
     name: "Phase 0 (Allowlist)",
+    type: ManifoldPhase.ALLOWLIST,
     start: "14:40:00 UTC",
     end: "15:20:00 UTC",
   },
   {
     id: "1",
     name: "Phase 1 (Allowlist)",
+    type: ManifoldPhase.ALLOWLIST,
     start: "15:30:00 UTC",
     end: "15:50:00 UTC",
   },
   {
     id: "2",
     name: "Phase 2 (Allowlist)",
+    type: ManifoldPhase.ALLOWLIST,
     start: "16:00:00 UTC",
     end: "16:20:00 UTC",
   },
   {
     id: "public",
     name: "Public Phase",
+    type: ManifoldPhase.PUBLIC,
     start: "16:20:00 UTC",
     end: "14:00:00 UTC tomorrow",
   },
