@@ -3,6 +3,7 @@ import { AuthContext } from "../../../../auth/Auth";
 import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
+import { Drop } from "../../../../../generated/models/Drop";
 
 interface DropListItemQuoteWaveProps {
   readonly name: string;
@@ -11,18 +12,16 @@ interface DropListItemQuoteWaveProps {
 }
 
 interface DropListItemQuoteProps {
-  readonly quotedDropId: string;
+  readonly quotedDrop: Drop;
   readonly quotedPartId: number;
   readonly init: boolean;
-  readonly wave: DropListItemQuoteWaveProps;
   readonly onSuccessfulDrop: () => void;
 }
 
 export default function DropListItemQuote({
-  quotedDropId,
+  quotedDrop,
   quotedPartId,
   init,
-  wave,
   onSuccessfulDrop,
 }: DropListItemQuoteProps) {
   const { connectedProfile, connectionStatus } = useContext(AuthContext);
@@ -39,18 +38,27 @@ export default function DropListItemQuote({
     ),
     [ProfileConnectedStatus.HAVE_PROFILE]: (
       <>
-        {connectedProfile && (
+        {connectedProfile &&
+        quotedDrop.wave.authenticated_user_eligible_to_participate ? (
           <CreateDrop
             profile={connectedProfile}
             quotedDrop={{
-              dropId: quotedDropId,
+              dropId: quotedDrop.id,
               partId: quotedPartId,
             }}
             isClient={init}
-            wave={wave}
+            wave={{
+              name: quotedDrop.wave.name,
+              image: quotedDrop.wave.picture,
+              id: quotedDrop.wave.id,
+            }}
             type={CreateDropType.QUOTE}
             onSuccessfulDrop={onSuccessfulDrop}
           />
+        ) : (
+          <CommonInfoBox>
+            You are not eligible to make a quote drop in this wave
+          </CommonInfoBox>
         )}
       </>
     ),

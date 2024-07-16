@@ -406,6 +406,7 @@ export default function CreateWave({
         message: error as unknown as string,
         type: "error",
       });
+         setSubmitting(false);
     },
   });
 
@@ -420,6 +421,7 @@ export default function CreateWave({
         message: error as unknown as string,
         type: "error",
       });
+      setSubmitting(false);
     },
   });
 

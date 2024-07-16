@@ -24,7 +24,7 @@ export default function WavePage() {
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const { data: wave } = useQuery<Wave>({
+  const { data: wave, isError } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
@@ -55,7 +55,7 @@ export default function WavePage() {
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
-        {wave && <WaveDetailed wave={wave} />}
+        {wave && !isError && <WaveDetailed wave={wave} />}
       </main>
     </>
   );

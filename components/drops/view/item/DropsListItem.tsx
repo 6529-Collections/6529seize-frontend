@@ -86,12 +86,6 @@ export default function DropsListItem({
 
   return (
     <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
-      {/* <DropsListItemChallengeBar
-        maxValue={100000}
-        current={drop.rating}
-        myRate={drop.context_profile_context?.rating ?? null}
-      /> */}
-
       <DropListItemCreateQuote
         drop={drop}
         quotedPartId={quoteModePartId}

@@ -18,7 +18,7 @@ export default function Waves() {
 
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-  connectedProfile.level >= 0  &&
+    connectedProfile.level >= 0 &&
     !activeProfileProxy;
 
   const [showDrops, setShowDrops] = useState(getShowDrops());

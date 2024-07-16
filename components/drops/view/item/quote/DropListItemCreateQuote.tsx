@@ -60,13 +60,8 @@ export default function DropListItemCreateQuote({
                 }}
               >
                 <DropListItemQuote
-                  quotedDropId={drop.id}
+                  quotedDrop={drop}
                   quotedPartId={quotedPartId}
-                  wave={{
-                    name: drop.wave.name,
-                    image: drop.wave.picture,
-                    id: drop.wave.id,
-                  }}
                   init={init}
                   onSuccessfulDrop={onSuccessfulQuote}
                 />
