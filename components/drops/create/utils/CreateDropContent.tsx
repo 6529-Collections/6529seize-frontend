@@ -208,7 +208,7 @@ const CreateDropContent = forwardRef<
                 ErrorBoundary={LexicalErrorBoundary}
               />
               <HistoryPlugin />
-              <AutoFocusPlugin />
+              <AutoFocusPlugin defaultSelection="rootStart"/>
               <OnChangePlugin onChange={onEditorStateChange} />
               <NewMentionsPlugin onSelect={onMentionedUserAdded} />
               <NewHashtagsPlugin onSelect={onHashtagAdded} />

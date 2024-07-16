@@ -169,6 +169,7 @@ type ReactQueryWrapperContextType = {
   onGroupCreate: () => void;
   onIdentityBulkRate: () => void;
   onWaveCreated: () => void;
+  invalidateAll: () => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -193,6 +194,7 @@ export const ReactQueryWrapperContext =
     onGroupCreate: () => {},
     onIdentityBulkRate: () => {},
     onWaveCreated: () => {},
+    invalidateAll: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -799,7 +801,7 @@ export default function ReactQueryWrapper({
         QueryKey.PROFILE_DROPS,
         {
           handleOrWallet: drop.author.handle.toLowerCase(),
-          inputProfile: giverHandle,
+          context_profile: giverHandle,
         },
       ],
       (
@@ -904,6 +906,10 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries();
+  };
+
   const value = useMemo(
     () => ({
       setProfile,
@@ -926,6 +932,7 @@ export default function ReactQueryWrapper({
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
+      invalidateAll,
     }),
     [
       setProfile,
@@ -948,6 +955,7 @@ export default function ReactQueryWrapper({
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
+      invalidateAll,
     ]
   );
 

@@ -52,7 +52,15 @@ export default function DropPartDiscussionInputWrapper({
       </CommonInfoBox>
     ),
     [STATE.HAVE_PROFILE]: (
-      <DropPartDiscussionInput drop={drop} dropPart={dropPart} />
+      <>
+        {drop.wave.authenticated_user_eligible_to_participate ? (
+          <DropPartDiscussionInput drop={drop} dropPart={dropPart} />
+        ) : (
+          <CommonInfoBox>
+            You are not eligible to take part in the discussion in this wave
+          </CommonInfoBox>
+        )}
+      </>
     ),
   };
   return components[state];

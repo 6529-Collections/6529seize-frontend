@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount, useSignMessage } from "wagmi";
@@ -15,7 +15,10 @@ import {
   ProfileConnectedStatus,
 } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
 import { NonceResponse } from "../../generated/models/NonceResponse";
 import { LoginRequest } from "../../generated/models/LoginRequest";
@@ -56,7 +59,9 @@ export default function Auth({
 }: {
   readonly children: React.ReactNode;
 }) {
+  const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { address } = useAccount();
+
   const signMessage = useSignMessage();
 
   const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
@@ -113,7 +118,9 @@ export default function Auth({
   useEffect(() => {
     if (!address) {
       removeAuthJwt();
+      invalidateAll();
       setActiveProfileProxy(null);
+
       return;
     } else {
       const isAuth = validateJwt({
@@ -125,6 +132,7 @@ export default function Auth({
         removeAuthJwt();
         setActiveProfileProxy(null);
         requestAuth();
+        invalidateAll();
       }
     }
   }, [address, activeProfileProxy]);

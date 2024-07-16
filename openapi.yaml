@@ -427,7 +427,6 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
-
   /public/drops:
     get:
       tags:
@@ -3243,6 +3242,7 @@ components:
         - picture
         - description_drop_id
         - authenticated_user_eligible_to_vote
+        - authenticated_user_eligible_to_participate
       properties:
         id:
           type: string
@@ -3253,6 +3253,8 @@ components:
         description_drop_id:
           type: string
         authenticated_user_eligible_to_vote:
+          type: boolean
+        authenticated_user_eligible_to_participate:
           type: boolean
 security:
   - bearerAuth: []

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Drop } from "../../../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../../../generated/models/DropPart";
 import PrimaryButton, {
@@ -35,6 +35,11 @@ export default function DropPartDiscussionInput({
 
   const breakpoint = useBreakpoint();
   const [screenType, setScreenType] = useState<ScreenType>(ScreenType.DESKTOP);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    setTimeout(() => inputRef.current?.focus(), 500);
+  }, []);
 
   useEffect(() => {
     if (breakpoint === "LG") {
@@ -97,6 +102,7 @@ export default function DropPartDiscussionInput({
         >
           <div className="tw-w-full">
             <input
+              ref={inputRef}
               type="text"
               placeholder="Write a comment"
               value={comment ?? ""}
