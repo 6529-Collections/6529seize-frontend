@@ -17,6 +17,7 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 
 export interface CreateDropFullHandles {
   clearEditorState: () => void;
@@ -30,7 +31,7 @@ export interface CreateDropFullWaveProps {
 
 export interface CreateDropFullProps {
   readonly screenType: CreateDropScreenType;
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly metadata: DropMetadata[];
   readonly editorState: EditorState | null;
@@ -42,10 +43,9 @@ export interface CreateDropFullProps {
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
   readonly showDropError?: boolean;
-  readonly isStormMode: boolean;
-  readonly wave: CreateDropFullWaveProps | null;
   readonly missingMedia: WaveParticipationRequirement[];
   readonly missingMetadata: WaveRequiredMetadata[];
+  readonly children: React.ReactNode;
   readonly onTitle: (newV: string | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -58,7 +58,6 @@ export interface CreateDropFullProps {
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
   readonly onDropPart: () => void;
-  readonly removePart: (index: number) => void;
 }
 
 const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
@@ -77,10 +76,9 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       type,
       drop,
       showDropError = false,
-      isStormMode,
-      wave,
       missingMedia,
       missingMetadata,
+      children,
       onTitle,
       onMetadataEdit,
       onMetadataRemove,
@@ -91,7 +89,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       onFileChange,
       onDrop,
       onDropPart,
-      removePart,
     },
     ref
   ) => {
@@ -122,8 +119,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           showSubmit={showSubmit}
           drop={drop}
           showDropError={showDropError}
-          isStormMode={isStormMode}
-          wave={wave}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onTitle={onTitle}
@@ -136,8 +131,9 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onViewChange={onViewChange}
           onDrop={onDrop}
           onDropPart={onDropPart}
-          removePart={removePart}
-        />
+        >
+          {children}
+        </CreateDropFullDesktop>
       ),
       [CreateDropScreenType.MOBILE]: (
         <CreateDropFullMobile
@@ -153,8 +149,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           loading={loading}
           drop={drop}
           showSubmit={showSubmit}
-          isStormMode={isStormMode}
-          wave={wave}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onEditorState={onEditorState}
@@ -167,8 +161,9 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onViewChange={onViewChange}
           onDrop={onDrop}
           onDropPart={onDropPart}
-          removePart={removePart}
-        />
+        >
+          {children}
+        </CreateDropFullMobile>
       ),
     };
     return <div>{components[screenType]}</div>;

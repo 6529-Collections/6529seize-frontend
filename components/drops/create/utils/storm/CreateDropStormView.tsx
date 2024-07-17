@@ -4,6 +4,7 @@ import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateDropStormViewPart from "./CreateDropStormViewPart";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { Time } from "../../../../../helpers/time";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 interface CreateDropStormViewWaveProps {
   readonly name: string;
@@ -13,7 +14,7 @@ interface CreateDropStormViewWaveProps {
 
 interface CreateDropStormViewProps {
   readonly drop: CreateDropConfig;
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly wave: CreateDropStormViewWaveProps | null;
   readonly removePart: (index: number) => void;
 }

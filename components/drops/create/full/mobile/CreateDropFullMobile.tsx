@@ -21,6 +21,7 @@ import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileI
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
 import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
 import { WaveRequiredMetadata } from "../../../../../generated/models/WaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -31,14 +32,8 @@ export interface CreateDropFullMobileHandles {
   clearEditorState: () => void;
 }
 
-interface CreateDropFullMobileWaveProps {
-  readonly name: string;
-  readonly image: string | null;
-  readonly id: string | null;
-}
-
 interface CreateDropFullMobileProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
@@ -49,10 +44,9 @@ interface CreateDropFullMobileProps {
   readonly loading: boolean;
   readonly showSubmit: boolean;
   readonly drop: CreateDropConfig | null;
-  readonly isStormMode: boolean;
-  readonly wave: CreateDropFullMobileWaveProps | null;
   readonly missingMedia: WaveParticipationRequirement[];
   readonly missingMetadata: WaveRequiredMetadata[];
+  readonly children: React.ReactNode;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
@@ -65,7 +59,6 @@ interface CreateDropFullMobileProps {
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onDrop: () => void;
   readonly onDropPart: () => void;
-  readonly removePart: (index: number) => void;
 }
 
 const CreateDropFullMobile = forwardRef<
@@ -85,10 +78,9 @@ const CreateDropFullMobile = forwardRef<
       loading,
       showSubmit,
       drop,
-      isStormMode,
-      wave,
       missingMedia,
       missingMetadata,
+      children,
       onEditorState,
       onMetadataEdit,
       onMetadataRemove,
@@ -99,7 +91,6 @@ const CreateDropFullMobile = forwardRef<
       onViewChange,
       onDrop,
       onDropPart,
-      removePart,
     },
     ref
   ) => {
@@ -138,14 +129,7 @@ const CreateDropFullMobile = forwardRef<
         onViewClick={onViewClick}
       >
         <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
-          {!!drop?.parts.length && isStormMode && (
-            <CreateDropStormView
-              drop={drop}
-              profile={profile}
-              wave={wave}
-              removePart={removePart}
-            />
-          )}
+          {children}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
             <div className="tw-flex tw-justify-end -tw-mb-2">
               {titleState === TITLE_STATE.BUTTON && (

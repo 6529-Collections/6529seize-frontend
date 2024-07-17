@@ -1,12 +1,8 @@
 import { useContext, useEffect, useState } from "react";
-import DropListItemData from "./data/DropListItemData";
 import DropListItemContent from "./content/DropListItemContent";
 import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
-import { getRandomColorWithSeed } from "../../../../helpers/Helpers";
-import Link from "next/link";
 import { AuthContext } from "../../../auth/Auth";
-import DropListItemRateGive from "./rate/give/DropListItemRateGive";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",

@@ -7,6 +7,7 @@ import {
 import DropPart from "../../../view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 interface CreateDropStormViewPartWaveProps {
   name: string;
@@ -15,7 +16,7 @@ interface CreateDropStormViewPartWaveProps {
 }
 
 interface CreateDropStormViewPartProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly part: CreateDropPart;
   readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
   readonly referencedNfts: Array<ReferencedNft>;

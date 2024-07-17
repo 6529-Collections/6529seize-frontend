@@ -186,8 +186,6 @@ export default function DropListItemRateGive({
     }
   };
 
-  const [isHovering, setIsHovering] = useState<boolean>(false);
-
   const getRateText = () =>
     `${onProgressRate > 0 ? "+" : ""}${formatNumberWithCommas(onProgressRate)}`;
 

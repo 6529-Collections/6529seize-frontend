@@ -1,13 +1,11 @@
 import { DropPart } from "../../../../generated/models/DropPart";
 import DropPartDiscussion from "./actions/discussion/DropPartDiscussion";
-
 import DropPartActionTriggers from "./actions/DropPartActionTriggers";
 import { useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropVoteState } from "../item/DropsListItem";
-import DropListItemRateGive from "../item/rate/give/DropListItemRateGive";
 import DropListItemData from "../item/data/DropListItemData";
 
 export interface DropPartWrapperProps {
@@ -67,14 +65,6 @@ export default function DropPartWrapper({
             />
           </div>
         </div>
-        {/* <div>
-          <DropListItemRateGive
-            drop={drop}
-            voteState={voteState}
-            canVote={canVote}
-            availableCredit={availableCredit ?? 0}
-          />
-        </div> */}
       </div>
       {isDiscussionOpen && (
         <DropPartDiscussion dropPart={dropPart} drop={drop} />

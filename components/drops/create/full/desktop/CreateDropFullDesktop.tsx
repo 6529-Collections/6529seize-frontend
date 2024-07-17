@@ -22,6 +22,7 @@ import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileI
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
 import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
 import { WaveRequiredMetadata } from "../../../../../generated/models/WaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -32,14 +33,8 @@ export interface CreateDropFullDesktopHandles {
   clearEditorState: () => void;
 }
 
-interface CreateDropFullDesktopWaveProps {
-  readonly name: string;
-  readonly image: string | null;
-  readonly id: string | null;
-}
-
 interface CreateDropFullDesktopProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
@@ -51,10 +46,9 @@ interface CreateDropFullDesktopProps {
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
   readonly showDropError?: boolean;
-  readonly isStormMode: boolean;
-  readonly wave: CreateDropFullDesktopWaveProps | null;
   readonly missingMedia: WaveParticipationRequirement[];
   readonly missingMetadata: WaveRequiredMetadata[];
+  readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (data_key: string) => void;
@@ -67,7 +61,6 @@ interface CreateDropFullDesktopProps {
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop: () => void;
   readonly onDropPart: () => void;
-  readonly removePart: (index: number) => void;
 }
 
 const CreateDropFullDesktop = forwardRef<
@@ -88,10 +81,9 @@ const CreateDropFullDesktop = forwardRef<
       drop,
       showSubmit,
       showDropError = false,
-      isStormMode,
-      wave,
       missingMedia,
       missingMetadata,
+      children,
       onViewChange,
       onMetadataEdit,
       onMetadataRemove,
@@ -102,7 +94,6 @@ const CreateDropFullDesktop = forwardRef<
       onFileChange,
       onDrop,
       onDropPart,
-      removePart,
     },
     ref
   ) => {
@@ -153,14 +144,7 @@ const CreateDropFullDesktop = forwardRef<
             />
           </svg>
         </button>
-        {!!drop?.parts.length && isStormMode && (
-          <CreateDropStormView
-            drop={drop}
-            profile={profile}
-            wave={wave}
-            removePart={removePart}
-          />
-        )}
+        {children}
         <div className="tw-flex tw-justify-end tw-mb-2 tw-mt-2.5">
           {titleState === TITLE_STATE.BUTTON && (
             <button

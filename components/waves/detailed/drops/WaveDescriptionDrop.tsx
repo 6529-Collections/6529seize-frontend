@@ -1,5 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import DropsListItem from "../../../drops/view/item/DropsListItem";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { Drop } from "../../../../generated/models/Drop";
 
 export default function WaveDescriptionDrop({
   wave,
@@ -8,6 +12,14 @@ export default function WaveDescriptionDrop({
   readonly wave: Wave;
   readonly availableCredit: number | null;
 }) {
+  const { data: drop } = useQuery<Drop>({
+    queryKey: [QueryKey.DROP, { drop_id: wave.description_drop.id }],
+    queryFn: async () =>
+      await commonApiFetch<Drop>({
+        endpoint: `drops/${wave.description_drop.id}`,
+      }),
+  });
+
   return (
     <div className="tw-mb-4 tw-mt-4">
       <div className="tw-inline-flex tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-400">
@@ -28,11 +40,13 @@ export default function WaveDescriptionDrop({
         </svg>
         <span>Description Drop</span>
       </div>
-      <DropsListItem
-        drop={wave.description_drop}
-        showWaveInfo={false}
-        availableCredit={availableCredit}
-      />
+      {drop && (
+        <DropsListItem
+          drop={drop}
+          showWaveInfo={false}
+          availableCredit={availableCredit}
+        />
+      )}
     </div>
   );
 }

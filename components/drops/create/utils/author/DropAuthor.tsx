@@ -6,13 +6,14 @@ import UserCICAndLevel, {
 } from "../../../../user/utils/UserCICAndLevel";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { DropPartSize } from "../../../view/part/DropPart";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 export default function DropAuthor({
   profile,
   timestamp,
   size = DropPartSize.MEDIUM,
 }: {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly timestamp: number;
   readonly size?: DropPartSize;
 }) {

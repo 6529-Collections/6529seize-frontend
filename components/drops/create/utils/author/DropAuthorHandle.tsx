@@ -3,12 +3,13 @@ import { useRouter } from "next/router";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { DropPartSize } from "../../../view/part/DropPart";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 export default function DropAuthorHandle({
   profile: { handle },
   size,
 }: {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly size: DropPartSize;
 }) {
   const router = useRouter();

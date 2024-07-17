@@ -111,6 +111,79 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/NftsPage"
+
+  /identities/{id}/subscriptions:
+    get:
+      tags:
+        - Identities
+      summary: Get subscribed actions to identity for authenticated user.
+      operationId: getIdentitySubscriptions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentitySubscriptionActions"
+        "404":
+          description: Identity not found
+    post:
+      tags:
+        - Identities
+      summary: Subscribe authenticated user to identities actions.
+      operationId: subscribeToIdentityActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentitySubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentitySubscriptionActions"
+        "404":
+          description: Identity not found
+    delete:
+      tags:
+        - Identities
+      summary: Unsubscribe authenticated user from identity actions.
+      operationId: unsubscribeFromIdentityActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentitySubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentitySubscriptionActions"
+
   /profiles/{identity}/proxies:
     get:
       tags:
@@ -893,6 +966,59 @@ paths:
                   $ref: "#/components/schemas/DropActivityLog"
         "404":
           description: Drop not found
+  /drops/{dropId}/subscriptions:
+    post:
+      tags:
+        - Drops
+      summary: Subscribe authenticated user to drop actions.
+      operationId: subscribeToDropActions
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DropSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropSubscriptionActions"
+        "404":
+          description: Wave not found
+    delete:
+      tags:
+        - Drops
+      summary: Unsubscribe authenticated user from drop actions.
+      operationId: unsubscribeFromDropActions
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DropSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropSubscriptionActions"
+        "404":
+          description: Wave not found
   /drops/{dropId}/parts/{dropPartId}/comments:
     get:
       tags:
@@ -1326,6 +1452,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Wave"
+        "404":
+          description: Wave not found
+
+  /waves/{id}/subscriptions:
+    post:
+      tags:
+        - Waves
+      summary: Subscribe authenticated user to wave actions.
+      operationId: subscribeToWaveActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaveSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaveSubscriptionActions"
+        "404":
+          description: Wave not found
+    delete:
+      tags:
+        - Waves
+      summary: Unsubscribe authenticated user from wave actions.
+      operationId: unsubscribeFromWaveActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaveSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaveSubscriptionActions"
         "404":
           description: Wave not found
 
@@ -1892,6 +2072,7 @@ components:
         - rating_logs_count
         - title
         - context_profile_context
+        - subscribed_actions
       properties:
         id:
           type: string
@@ -1955,6 +2136,10 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/DropContextProfileContext"
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropSubscriptionTargetAction"
 
     QuotedDrop:
       type: object
@@ -2015,7 +2200,8 @@ components:
         - tdh
         - level
         - banner1_color
-        - banner2_coloe
+        - banner2_color
+        - subscribed_actions
         - archived
       properties:
         id:
@@ -2044,6 +2230,10 @@ components:
         level:
           type: number
           format: int64
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
         archived:
           type: boolean
 
@@ -2684,6 +2874,7 @@ components:
         - outcomes
         - created_at
         - contributors_overview
+        - subscribed_actions
       properties:
         id:
           description: The ID of the wave
@@ -2723,6 +2914,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveContributorOverview"
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveSubscriptionTargetAction"
 
     WaveContributorOverview:
       required:
@@ -3256,5 +3451,62 @@ components:
           type: boolean
         authenticated_user_eligible_to_participate:
           type: boolean
+
+    IdentitySubscriptionTargetType:
+      type: string
+      enum:
+        - PROFILE
+        - WAVE
+        - DROP
+
+    WaveSubscriptionTargetAction:
+      type: string
+      enum:
+        - DROP_CREATED
+
+    WaveSubscriptionActions:
+        type: object
+        required:
+          - actions
+        properties:
+          actions:
+            type: array
+            items:
+              $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+
+    DropSubscriptionTargetAction:
+      type: string
+      enum:
+        - DROP_COMMENTED
+        - DROP_VOTED
+
+    DropSubscriptionActions:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropSubscriptionTargetAction"
+
+    IdentitySubscriptionTargetAction:
+      type: string
+      enum:
+        - WAVE_CREATED
+        - DROP_CREATED
+        - DROP_COMMENTED
+        - DROP_VOTED
+
+    IdentitySubscriptionActions:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+
 security:
   - bearerAuth: []
