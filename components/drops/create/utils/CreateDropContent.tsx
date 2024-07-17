@@ -208,7 +208,7 @@ const CreateDropContent = forwardRef<
                 ErrorBoundary={LexicalErrorBoundary}
               />
               <HistoryPlugin />
-              <AutoFocusPlugin defaultSelection="rootStart"/>
+              <AutoFocusPlugin defaultSelection="rootStart" />
               <OnChangePlugin onChange={onEditorStateChange} />
               <NewMentionsPlugin onSelect={onMentionedUserAdded} />
               <NewHashtagsPlugin onSelect={onHashtagAdded} />
@@ -317,27 +317,25 @@ const CreateDropContent = forwardRef<
             </div>
           </div>
         </LexicalComposer>
-        <div className="tw-flex tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          {currentPartCount > 1 && (
-            <p className="tw-mb-0 tw-mt-2 tw-pb-2 ">
-              <>
-                <span className="tw-font-semibold tw-text-iron-500">
-                  Part:{" "}
-                  <span className="tw-text-iron-50">{currentPartCount}</span>,
-                </span>
-                <span className="tw-pl-1">
-                  length: {formatNumberWithCommas(charsCount)}
-                </span>
-              </>
-            </p>
-          )}
-         {/*  <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+        <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-2 tw-pb-2 ">
+            <>
+              <span className="tw-font-semibold tw-text-iron-500">
+                Part:{" "}
+                <span className="tw-text-iron-50">{currentPartCount}</span>,
+              </span>
+              <span className="tw-pl-1">
+                length: {formatNumberWithCommas(charsCount)}
+              </span>
+            </>
+          </p>
+          <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
             <div>/</div>
             <div>{formatNumberWithCommas(24000)}</div>
-          </div> */}
+          </div>
         </div>
         <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
           <CreateDropSelectFileAudio onFileChange={onFileChange} />

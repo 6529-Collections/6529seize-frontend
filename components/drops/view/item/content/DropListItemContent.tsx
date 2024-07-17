@@ -29,113 +29,99 @@ export default function DropListItemContent({
   showWaveInfo = true,
   onQuote,
 }: DropListItemContentProps) {
-  const [isFullMode, setIsFullMode] = useState(showFull);
-  const getParts = () => {
-    if (!drop.parts.length) {
-      return [];
-    }
-    if (!isFullMode) {
-      return [drop.parts[0]];
-    }
-    return drop.parts;
-  };
-  const [parts, setParts] = useState(getParts());
-  useEffect(() => setParts(getParts()), [drop.parts, isFullMode]);
-
   const partsCount = drop.parts.length;
   const isStorm = partsCount > 1;
+  const [isFullMode, setIsFullMode] = useState(showFull);
+  const [activePartIndex, setActivePartIndex] = useState<number>(0);
+  const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
+  useEffect(
+    () => setActivePart(drop.parts[activePartIndex]),
+    [activePartIndex]
+  );
 
-  const getShowStormExpandButton = () => {
+  const getShowNextButton = () => {
     if (!isStorm) {
       return false;
     }
-    if (isFullMode) {
+    if (activePartIndex === partsCount - 1) {
       return false;
     }
     return true;
   };
-  const [showStormExpandButton, setShowStormExpandButton] = useState(
-    getShowStormExpandButton()
-  );
-  useEffect(
-    () => setShowStormExpandButton(getShowStormExpandButton()),
-    [isStorm, isFullMode]
-  );
+
+  const getShowPrevButton = () => {
+    if (!isStorm) {
+      return false;
+    }
+    if (activePartIndex === 0) {
+      return false;
+    }
+    return true;
+  };
+
+  const [showNextButton, setShowNextButton] = useState(getShowNextButton());
+  const [showPrevButton, setShowPrevButton] = useState(getShowPrevButton());
+
+  useEffect(() => {
+    setShowNextButton(getShowNextButton());
+    setShowPrevButton(getShowPrevButton());
+  }, [activePartIndex]);
+
+  const onNextPart = () => {
+    if (activePartIndex < partsCount - 1) {
+      setActivePartIndex(activePartIndex + 1);
+    }
+  };
+
+  const onPrevPart = () => {
+    if (activePartIndex > 0) {
+      setActivePartIndex(activePartIndex - 1);
+    }
+  };
 
   return (
     <CommonAnimationHeight>
       <div className="tw-space-y-6 tw-h-full">
-        {parts.map((part, index) => (
-          <DropPartWrapper
-            key={`drop-${drop.id}-part-${index}`}
-            isFirstPart={index === 0}
-            isLastPart={index === parts.length - 1}
-            dropPart={part}
-            drop={drop}
-            voteState={voteState}
-            canVote={canVote}
+        <DropPartWrapper
+          dropPart={activePart}
+          drop={drop}
+          voteState={voteState}
+          canVote={canVote}
+          availableCredit={availableCredit}
+          onQuote={onQuote}
+        >
+          <DropPart
+            profile={drop.author}
+            mentionedUsers={drop.mentioned_users}
+            referencedNfts={drop.referenced_nfts}
+            partContent={activePart.content ?? null}
+            isStorm={isStorm}
+            partMedia={
+              activePart.media.length
+                ? {
+                    mimeType: activePart.media[0].mime_type,
+                    mediaSrc: activePart.media[0].url,
+                  }
+                : null
+            }
             showFull={isFullMode}
-            availableCredit={availableCredit}
-            onQuote={onQuote}
-          >
-            <>
-              <DropPart
-                profile={drop.author}
-                mentionedUsers={drop.mentioned_users}
-                referencedNfts={drop.referenced_nfts}
-                partContent={part.content ?? null}
-                partMedia={
-                  part.media.length
-                    ? {
-                        mimeType: part.media[0].mime_type,
-                        mediaSrc: part.media[0].url,
-                      }
-                    : null
-                }
-                showFull={isFullMode}
-                wave={
-                  showWaveInfo
-                    ? {
-                        name: drop.wave.name,
-                        image: drop.wave.picture,
-                        id: drop.wave.id,
-                      }
-                    : null
-                }
-                createdAt={drop.created_at}
-                isFirstPart={index === 0}
-                dropTitle={drop.title}
-              />
-              {showStormExpandButton && index === 0 && (
-                <button
-                  type="button"
-                  className="sm:tw-ml-[3.25rem] tw-mt-2 tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-py-1.5 tw-text-iron-300 hover:tw-text-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-primary-400 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-                  onClick={() => setIsFullMode(true)}
-                >
-                  <svg
-                    className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-mr-1.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span>Show Storm</span>
-                  <span className="tw-bg-iron-700 tw-rounded-full tw-px-1 tw-text-xs tw-ml-1">
-                    {partsCount}
-                  </span>
-                </button>
-              )}
-            </>
-          </DropPartWrapper>
-        ))}
+            wave={
+              showWaveInfo
+                ? {
+                    name: drop.wave.name,
+                    image: drop.wave.picture,
+                    id: drop.wave.id,
+                  }
+                : null
+            }
+            createdAt={drop.created_at}
+            dropTitle={drop.title}
+            showNextButton={showNextButton}
+            showPrevButton={showPrevButton}
+            onNextPart={onNextPart}
+            onPrevPart={onPrevPart}
+          />
+        </DropPartWrapper>
       </div>
     </CommonAnimationHeight>
   );

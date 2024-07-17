@@ -100,6 +100,7 @@ const CreateDropCompact = forwardRef<
     },
     ref
   ) => {
+
     const getWrapperClasses = () => {
       switch (type) {
         case CreateDropType.DROP:

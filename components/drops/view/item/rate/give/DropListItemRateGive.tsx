@@ -5,6 +5,7 @@ import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { Drop } from "../../../../../../generated/models/Drop";
 import { DropVoteState } from "../../DropsListItem";
+import Tippy from "@tippyjs/react";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",
@@ -185,8 +186,14 @@ export default function DropListItemRateGive({
     }
   };
 
+  const [isHovering, setIsHovering] = useState<boolean>(false);
+
   const getRateText = () =>
     `${onProgressRate > 0 ? "+" : ""}${formatNumberWithCommas(onProgressRate)}`;
+
+  const getShowRate = () => {
+    return canVote && onProgressRate !== 0 && onProgressRate !== 1;
+  };
 
   const getRateClasses = () => {
     if (onProgressRate > 0) {
@@ -199,38 +206,43 @@ export default function DropListItemRateGive({
   };
 
   return (
-    <div className="tw-w-[42px] tw-pr-4 tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-      {canVote && (
-        <div className="tw-text-center tw-bg-iron-900 tw-rounded-lg">
+    <Tippy
+      visible={getShowRate()}
+      placement="top"
+      content={
+        <div className="tw-text-center">
           <span
             className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
           >
             {getRateText()}
           </span>
         </div>
-      )}
-      <div className="tw-flex tw-flex-col tw-items-center">
-        <DropListItemRateGiveChangeButton
-          canVote={canVote}
-          type={RateChangeType.INCREASE}
-          handleMouseDown={handleMouseDown}
-          handleMouseUp={handleMouseUp}
-        />
-        <DropListItemRateGiveSubmit
-          rate={onProgressRate}
-          drop={drop}
-          voteState={voteState}
-          canVote={canVote}
-          availableCredit={availableCredit}
-          onSuccessfulRateChange={onSuccessfulRateChange}
-        />
-        <DropListItemRateGiveChangeButton
-          canVote={canVote}
-          type={RateChangeType.DECREASE}
-          handleMouseDown={handleMouseDown}
-          handleMouseUp={handleMouseUp}
-        />
+      }
+    >
+      <div className=" tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
+        <div className="tw-w-full tw-inline-flex tw-items-center">
+          <DropListItemRateGiveChangeButton
+            canVote={canVote}
+            type={RateChangeType.DECREASE}
+            handleMouseDown={handleMouseDown}
+            handleMouseUp={handleMouseUp}
+          />
+          <DropListItemRateGiveSubmit
+            rate={onProgressRate}
+            drop={drop}
+            voteState={voteState}
+            canVote={canVote}
+            availableCredit={availableCredit}
+            onSuccessfulRateChange={onSuccessfulRateChange}
+          />
+          <DropListItemRateGiveChangeButton
+            canVote={canVote}
+            type={RateChangeType.INCREASE}
+            handleMouseDown={handleMouseDown}
+            handleMouseUp={handleMouseUp}
+          />
+        </div>
       </div>
-    </div>
+    </Tippy>
   );
 }
