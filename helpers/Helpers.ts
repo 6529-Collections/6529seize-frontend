@@ -772,3 +772,16 @@ export function parseNftDescriptionToHtml(description: string) {
   );
   return d;
 }
+
+export function getPathForContract(contract: string) {
+  switch (contract) {
+    case MEMES_CONTRACT:
+      return "the-memes";
+    case GRADIENT_CONTRACT:
+      return "6529-gradient";
+    case MEMELAB_CONTRACT:
+      return "meme-lab";
+    default:
+      return contract;
+  }
+}
