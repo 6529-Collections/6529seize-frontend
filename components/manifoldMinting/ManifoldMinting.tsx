@@ -2,6 +2,7 @@ import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import useManifoldClaim, {
   ManifoldClaim,
+  ManifoldClaimStatus,
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
@@ -586,7 +587,8 @@ function ManifoldMemesMintingPhase(
     props.phase.id === "public"
       ? "Unlimited eligible mints"
       : "No eligible mints";
-  let eligibleMintsStyle = props.phase.id === "public" ? "font-bolder" : "";
+  let eligibleMintsStyle =
+    props.phase.id === "public" ? "font-color-green font-bolder" : "";
 
   if (eligibleMints) {
     const count = eligibleMints.spots;
@@ -595,7 +597,10 @@ function ManifoldMemesMintingPhase(
   }
 
   let status: PhaseStatus = PhaseStatus.UPCOMING;
-  if (props.claim.memePhase?.id === props.phase.id) {
+  if (
+    props.claim.memePhase?.id === props.phase.id &&
+    props.claim.status === ManifoldClaimStatus.ACTIVE
+  ) {
     status = PhaseStatus.ACTIVE;
   } else if (props.phase.end.lt(Time.now())) {
     status = PhaseStatus.COMPLETED;
@@ -633,12 +638,12 @@ function ManifoldMemesMintingPhase(
           <Col
             xs={12}
             className="d-flex align-items-center justify-content-between gap-2">
-            <span className="font-lighter">Status</span>
+            <span className="font-lighter font-smaller">Status</span>
             <span
               className={`${
-                status === PhaseStatus.ACTIVE
-                  ? "font-bolder text-right"
-                  : "text-right"
+                status === PhaseStatus.ACTIVE || status === PhaseStatus.UPCOMING
+                  ? "font-color-blue font-bolder text-right"
+                  : "font-color-red font-bolder text-right opacity-75"
               }`}>
               {status}
             </span>
@@ -646,7 +651,7 @@ function ManifoldMemesMintingPhase(
           <Col
             xs={12}
             className="d-flex align-items-center justify-content-between gap-2">
-            <span className="font-lighter">{startText}</span>
+            <span className="font-lighter font-smaller">{startText}</span>
             <span className="text-right">
               {getDateTimeString(startDate, props.local_timezone)}
             </span>
@@ -654,7 +659,7 @@ function ManifoldMemesMintingPhase(
           <Col
             xs={12}
             className="d-flex align-items-center justify-content-between gap-2">
-            <span className="font-lighter">{endText}</span>
+            <span className="font-lighter font-smaller">{endText}</span>
             <span className="text-right">
               {getDateTimeString(endDate, props.local_timezone)}
             </span>

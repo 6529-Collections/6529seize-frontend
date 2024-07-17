@@ -26,6 +26,12 @@ export default function ManifoldMintingConnect(
   const [mintForAddress, setMintForAddress] = useState("");
   const [mintForLock, setMintForLock] = useState<boolean>(false);
 
+  function reset() {
+    setMintFor("");
+    setMintForAddress("");
+    setMintForLock(false);
+  }
+
   const walletAddressEns = useEnsName({
     address: isValidEthAddress(mintFor)
       ? (mintFor as `0x${string}`)
@@ -43,7 +49,7 @@ export default function ManifoldMintingConnect(
       setMintFor(`${walletAddressEns.data} - ${mintFor}`);
       setMintForLock(true);
     }
-  }, [walletAddressEns.data]);
+  }, [walletAddressEns.isFetched]);
 
   useEffect(() => {
     if (walletAddressFromEns.data) {
@@ -51,7 +57,7 @@ export default function ManifoldMintingConnect(
       setMintFor(`${mintFor} - ${walletAddressFromEns.data}`);
       setMintForLock(true);
     }
-  }, [walletAddressFromEns.data]);
+  }, [walletAddressFromEns.isFetched]);
 
   useEffect(() => {
     if (!walletAddressFromEns.data && !walletAddressEns.data) {
@@ -63,14 +69,16 @@ export default function ManifoldMintingConnect(
     if (account.address) {
       setMintFor(account.address as string);
     } else {
-      setMintFor("");
+      reset();
     }
   }, [account.address]);
 
   useEffect(() => {
     if (mintForFren) {
+      console.log("mintForAddress: " + mintForAddress);
       props.onMintFor(mintForAddress);
     } else {
+      console.log("account.address: " + account.address);
       props.onMintFor(account.address as string);
     }
   }, [mintForAddress, mintForFren]);
@@ -102,11 +110,7 @@ export default function ManifoldMintingConnect(
               style={{
                 width: "fit-content",
               }}
-              onClick={() => {
-                setMintFor("");
-                setMintForAddress("");
-                setMintForLock(false);
-              }}>
+              onClick={() => reset()}>
               <span className="font-smaller font-lighter pt-1">clear</span>
             </button>
           </span>
