@@ -25,6 +25,7 @@ import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
 import Link from "next/link";
+import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 
 export enum DropPartSize {
   SMALL = "SMALL",
@@ -44,7 +45,7 @@ export interface DropPartPropsWave {
 }
 
 export interface DropPartProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly dropTitle: string | null;
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;

@@ -19,23 +19,15 @@ import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import CreateDropStormView from "../utils/storm/CreateDropStormView";
-import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;
 }
-
-interface CreateDropCompactWaveProps {
-  readonly name: string;
-  readonly image: string | null;
-  readonly id: string | null;
-}
-
 interface CreateDropCompactProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
   readonly title: string | null;
@@ -48,10 +40,9 @@ interface CreateDropCompactProps {
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
   readonly showDropError?: boolean;
-  readonly isStormMode: boolean;
-  readonly wave: CreateDropCompactWaveProps | null;
   readonly missingMedia: WaveParticipationRequirement[];
   readonly missingMetadata: WaveRequiredMetadata[];
+  readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataRemove: (key: string) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
@@ -62,7 +53,6 @@ interface CreateDropCompactProps {
   readonly onFileChange: (file: File | null) => void;
   readonly onDrop?: () => void;
   readonly onDropPart: () => void;
-  readonly removePart: (index: number) => void;
 }
 
 const CreateDropCompact = forwardRef<
@@ -84,10 +74,9 @@ const CreateDropCompact = forwardRef<
       type,
       drop,
       showDropError = false,
-      isStormMode,
-      wave,
       missingMedia,
       missingMetadata,
+      children,
       onViewChange,
       onMetadataRemove,
       onEditorState,
@@ -96,11 +85,9 @@ const CreateDropCompact = forwardRef<
       onFileChange,
       onDrop,
       onDropPart,
-      removePart,
     },
     ref
   ) => {
-
     const getWrapperClasses = () => {
       switch (type) {
         case CreateDropType.DROP:
@@ -135,14 +122,7 @@ const CreateDropCompact = forwardRef<
 
     return (
       <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
-        {!!drop?.parts.length && isStormMode && (
-          <CreateDropStormView
-            drop={drop}
-            profile={profile}
-            wave={wave}
-            removePart={removePart}
-          />
-        )}
+        {children}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-hidden sm:tw-block">
             <DropPfp pfpUrl={profile?.pfp} />

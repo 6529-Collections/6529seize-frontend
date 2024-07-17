@@ -10,12 +10,14 @@ import CreateDropWrapper, {
 } from "./utils/CreateDropWrapper";
 import {
   CreateDropConfig,
+  CreateDropPart,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "../../../entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "./CreateDrop";
-import { ProfileMin } from "../../../generated/models/ProfileMin";
+import CreateDropStormView from "./utils/storm/CreateDropStormView";
+import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;
@@ -28,7 +30,7 @@ interface DropEditorWaveProps {
 }
 
 interface DropEditorProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: {
     readonly dropId: string;
     readonly partId: number;
@@ -75,6 +77,8 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       CreateDropViewType.COMPACT
     );
 
+    const [isStormMode, setIsStormMode] = useState(false);
+
     useEffect(() => {
       setTitle(null);
       setMetadata([]);
@@ -92,9 +96,23 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       requestDrop,
     }));
 
+    const onRemovePart = (index: number) => {
+      if (!drop?.parts.length) {
+        return;
+      }
+      const updatedParts: CreateDropPart[] = [...drop.parts];
+
+      updatedParts.splice(index, 1);
+      setDrop({
+        ...drop,
+        parts: updatedParts,
+      });
+    };
+
     if (!init) {
       return null;
     }
+
     return (
       <div>
         <CreateDropWrapper
@@ -112,6 +130,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           showSubmit={showSubmit}
           showDropError={showDropError}
           wave={wave}
+          setIsStormMode={setIsStormMode}
           setViewType={setViewType}
           setDrop={setDrop}
           setMentionedUsers={setMentionedUsers}
@@ -121,7 +140,16 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           onSubmitDrop={onSubmitDrop}
           onCanSubmitChange={onCanSubmitChange}
           key={dropEditorRefreshKey}
-        />
+        >
+          {!!drop?.parts.length && isStormMode ? (
+            <CreateDropStormView
+              drop={drop}
+              profile={profile}
+              wave={wave}
+              removePart={onRemovePart}
+            />
+          ) : null}
+        </CreateDropWrapper>
       </div>
     );
   }

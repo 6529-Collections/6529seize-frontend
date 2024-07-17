@@ -21,6 +21,7 @@ import { useRouter } from "next/router";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
 import { AuthContext } from "../../auth/Auth";
 import dynamic from "next/dynamic";
+import UserPageHeaderSubscribe from "./UserPageHeaderSubscribe";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -46,7 +47,7 @@ export default function UserPageHeader({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
   const { address } = useAccount();
-  const { activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
@@ -124,7 +125,12 @@ export default function UserPageHeader({
               canEdit={canEdit}
               mainAddress={mainAddress}
             />
-
+            {connectedProfile?.profile?.handle &&
+              !activeProfileProxy &&
+              !isMyProfile &&
+              profile.profile?.handle && (
+                <UserPageHeaderSubscribe handle={profile.profile.handle} />
+              )}
             <div className="tw-mt-2">
               <UserLevel level={profile.level} />
             </div>

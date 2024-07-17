@@ -14,6 +14,7 @@ import DropEditor from "./DropEditor";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { ProfileMin } from "../../../generated/models/ProfileMin";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
+import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -56,9 +57,10 @@ export default function CreateDrop({
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
-  const profileMin: ProfileMin | null = profileAndConsolidationsToProfileMin({
-    profile,
-  });
+  const profileMin: ProfileMinWithoutSubs | null =
+    profileAndConsolidationsToProfileMin({
+      profile,
+    });
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 

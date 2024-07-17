@@ -3,6 +3,7 @@ import {
   ProfileConnectedStatus,
 } from "../entities/IProfile";
 import { ProfileMin } from "../generated/models/ProfileMin";
+import { ProfileMinWithoutSubs } from "./ProfileTypes";
 
 export const getProfileConnectedStatus = ({
   profile,
@@ -27,7 +28,7 @@ export const profileAndConsolidationsToProfileMin = ({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
-}): ProfileMin | null =>
+}): ProfileMinWithoutSubs | null =>
   profile.profile
     ? {
         id: profile.profile.external_id,

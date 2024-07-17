@@ -1,6 +1,6 @@
 import { Drop } from "../../../../../generated/models/Drop";
 import DropPart from "../../part/DropPart";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropVoteState } from "../DropsListItem";
@@ -31,6 +31,7 @@ export default function DropListItemContent({
 }: DropListItemContentProps) {
   const partsCount = drop.parts.length;
   const isStorm = partsCount > 1;
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isFullMode, setIsFullMode] = useState(showFull);
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
@@ -59,6 +60,10 @@ export default function DropListItemContent({
     return true;
   };
 
+  const [partChangedAtLeastOnce, setPartChangedAtLeastOnce] = useState(false);
+
+  useEffect(() => setPartChangedAtLeastOnce(false), []);
+
   const [showNextButton, setShowNextButton] = useState(getShowNextButton());
   const [showPrevButton, setShowPrevButton] = useState(getShowPrevButton());
 
@@ -67,21 +72,46 @@ export default function DropListItemContent({
     setShowPrevButton(getShowPrevButton());
   }, [activePartIndex]);
 
+  const scrollIntoView = () => {
+    if (!partChangedAtLeastOnce) {
+      return;
+    }
+    const container = containerRef.current;
+
+    if (container) {
+      const rect = container.getBoundingClientRect();
+
+      // Check if the top of the container is out of view
+      if (rect.top < 0) {
+        container.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "center",
+        });
+      }
+    }
+  };
+
+  const onPartIndex = (index: number) => {
+    setActivePartIndex(index);
+    setPartChangedAtLeastOnce(true);
+  };
+
   const onNextPart = () => {
     if (activePartIndex < partsCount - 1) {
-      setActivePartIndex(activePartIndex + 1);
+      onPartIndex(activePartIndex + 1);
     }
   };
 
   const onPrevPart = () => {
     if (activePartIndex > 0) {
-      setActivePartIndex(activePartIndex - 1);
+      onPartIndex(activePartIndex - 1);
     }
   };
 
   return (
-    <CommonAnimationHeight>
-      <div className="tw-space-y-6 tw-h-full">
+    <CommonAnimationHeight onAnimationCompleted={scrollIntoView}>
+      <div className="tw-space-y-6 tw-h-full" ref={containerRef}>
         <DropPartWrapper
           dropPart={activePart}
           drop={drop}

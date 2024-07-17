@@ -43,6 +43,8 @@ export * from '../models/DropRater';
 export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
+export * from '../models/DropSubscriptionActions';
+export * from '../models/DropSubscriptionTargetAction';
 export * from '../models/Group';
 export * from '../models/GroupCicFilter';
 export * from '../models/GroupDescription';
@@ -52,6 +54,9 @@ export * from '../models/GroupLevelFilter';
 export * from '../models/GroupOwnsNft';
 export * from '../models/GroupRepFilter';
 export * from '../models/GroupTdhFilter';
+export * from '../models/IdentitySubscriptionActions';
+export * from '../models/IdentitySubscriptionTargetAction';
+export * from '../models/IdentitySubscriptionTargetType';
 export * from '../models/IntRange';
 export * from '../models/LoginRequest';
 export * from '../models/LoginResponse';
@@ -86,6 +91,8 @@ export * from '../models/WaveParticipationConfig';
 export * from '../models/WaveParticipationRequirement';
 export * from '../models/WaveRequiredMetadata';
 export * from '../models/WaveScope';
+export * from '../models/WaveSubscriptionActions';
+export * from '../models/WaveSubscriptionTargetAction';
 export * from '../models/WaveType';
 export * from '../models/WaveVisibilityConfig';
 export * from '../models/WaveVotingConfig';
@@ -135,6 +142,8 @@ import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { DropSubscriptionActions } from '../models/DropSubscriptionActions';
+import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
 import { Group } from '../models/Group';
 import { GroupCicFilter     } from '../models/GroupCicFilter';
 import { GroupDescription } from '../models/GroupDescription';
@@ -144,6 +153,9 @@ import { GroupLevelFilter } from '../models/GroupLevelFilter';
 import { GroupOwnsNft, GroupOwnsNftNameEnum    } from '../models/GroupOwnsNft';
 import { GroupRepFilter      } from '../models/GroupRepFilter';
 import { GroupTdhFilter } from '../models/GroupTdhFilter';
+import { IdentitySubscriptionActions } from '../models/IdentitySubscriptionActions';
+import { IdentitySubscriptionTargetAction } from '../models/IdentitySubscriptionTargetAction';
+import { IdentitySubscriptionTargetType } from '../models/IdentitySubscriptionTargetType';
 import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
@@ -178,6 +190,8 @@ import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
 import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
+import { WaveSubscriptionActions } from '../models/WaveSubscriptionActions';
+import { WaveSubscriptionTargetAction } from '../models/WaveSubscriptionTargetAction';
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
 import { WaveVotingConfig         } from '../models/WaveVotingConfig';
@@ -197,8 +211,11 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "DropActivityLogTypeEnum",
+    "DropSubscriptionTargetAction",
     "GroupFilterDirection",
     "GroupOwnsNftNameEnum",
+    "IdentitySubscriptionTargetAction",
+    "IdentitySubscriptionTargetType",
     "NftTokenTypeEnum",
     "ProfileProxyActionType",
     "RateMatter",
@@ -209,6 +226,7 @@ let enumsMap: Set<string> = new Set<string>([
     "WaveOutcomeSubType",
     "WaveOutcomeType",
     "WaveParticipationRequirement",
+    "WaveSubscriptionTargetAction",
     "WaveType",
 ]);
 
@@ -258,6 +276,7 @@ let typeMap: {[index: string]: any} = {
     "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
+    "DropSubscriptionActions": DropSubscriptionActions,
     "Group": Group,
     "GroupCicFilter": GroupCicFilter,
     "GroupDescription": GroupDescription,
@@ -266,6 +285,7 @@ let typeMap: {[index: string]: any} = {
     "GroupOwnsNft": GroupOwnsNft,
     "GroupRepFilter": GroupRepFilter,
     "GroupTdhFilter": GroupTdhFilter,
+    "IdentitySubscriptionActions": IdentitySubscriptionActions,
     "IntRange": IntRange,
     "LoginRequest": LoginRequest,
     "LoginResponse": LoginResponse,
@@ -291,6 +311,7 @@ let typeMap: {[index: string]: any} = {
     "WaveParticipationConfig": WaveParticipationConfig,
     "WaveRequiredMetadata": WaveRequiredMetadata,
     "WaveScope": WaveScope,
+    "WaveSubscriptionActions": WaveSubscriptionActions,
     "WaveVisibilityConfig": WaveVisibilityConfig,
     "WaveVotingConfig": WaveVotingConfig,
 }

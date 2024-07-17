@@ -13,7 +13,6 @@ import CreateDropFull, { CreateDropFullHandles } from "../full/CreateDropFull";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
-  CreateDropPart,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -33,6 +32,7 @@ import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredM
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import Markdown from "react-markdown";
+import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -50,7 +50,7 @@ interface CreateDropWrapperWaveProps {
 }
 
 interface CreateDropWrapperProps {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: {
     dropId: string;
     partId: number;
@@ -66,6 +66,8 @@ interface CreateDropWrapperProps {
   readonly showSubmit: boolean;
   readonly showDropError?: boolean;
   readonly wave: CreateDropWrapperWaveProps | null;
+  readonly children: React.ReactNode;
+  readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
   readonly setMentionedUsers: (
@@ -99,6 +101,8 @@ const CreateDropWrapper = forwardRef<
       showSubmit,
       showDropError = false,
       wave: waveProps,
+      children,
+      setIsStormMode,
       setViewType,
       setDrop,
       setMentionedUsers,
@@ -131,7 +135,6 @@ const CreateDropWrapper = forwardRef<
       enabled: !!waveProps?.id,
     });
 
-    const [isStormMode, setIsStormMode] = useState(false);
     const [editorState, setEditorState] = useState<EditorState | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const onMetadataEdit = ({ data_key, data_value }: DropMetadata) => {
@@ -398,18 +401,7 @@ const CreateDropWrapper = forwardRef<
       requestDrop,
     }));
 
-    const onRemovePart = (index: number) => {
-      if (!drop?.parts.length) {
-        return;
-      }
-      const updatedParts: CreateDropPart[] = [...drop.parts];
 
-      updatedParts.splice(index, 1);
-      setDrop({
-        ...drop,
-        parts: updatedParts,
-      });
-    };
 
     const components: Record<CreateDropViewType, JSX.Element> = {
       [CreateDropViewType.COMPACT]: (
@@ -428,8 +420,6 @@ const CreateDropWrapper = forwardRef<
           type={type}
           showSubmit={showSubmit}
           showDropError={showDropError}
-          isStormMode={isStormMode}
-          wave={waveProps}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onViewChange={setViewType}
@@ -440,8 +430,9 @@ const CreateDropWrapper = forwardRef<
           onFileChange={setFile}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
-          removePart={onRemovePart}
-        />
+        >
+          {children}
+        </CreateDropCompact>
       ),
       [CreateDropViewType.FULL]: (
         <CreateDropFull
@@ -459,8 +450,6 @@ const CreateDropWrapper = forwardRef<
           drop={drop}
           showSubmit={showSubmit}
           showDropError={showDropError}
-          isStormMode={isStormMode}
-          wave={waveProps}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onTitle={setTitle}
@@ -473,8 +462,9 @@ const CreateDropWrapper = forwardRef<
           onFileChange={setFile}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
-          removePart={onRemovePart}
-        />
+        >
+          {children}
+        </CreateDropFull>
       ),
     };
     return (

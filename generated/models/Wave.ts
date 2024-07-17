@@ -16,6 +16,7 @@ import { WaveConfig } from '../models/WaveConfig';
 import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveOutcome } from '../models/WaveOutcome';
 import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
+import { WaveSubscriptionTargetAction } from '../models/WaveSubscriptionTargetAction';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
 import { WaveVotingConfig } from '../models/WaveVotingConfig';
 import { HttpFile } from '../http/http';
@@ -46,6 +47,7 @@ export class Wave {
     'wave': WaveConfig;
     'outcomes': Array<WaveOutcome>;
     'contributors_overview': Array<WaveContributorOverview>;
+    'subscribed_actions': Array<WaveSubscriptionTargetAction>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -126,6 +128,12 @@ export class Wave {
             "name": "contributors_overview",
             "baseName": "contributors_overview",
             "type": "Array<WaveContributorOverview>",
+            "format": ""
+        },
+        {
+            "name": "subscribed_actions",
+            "baseName": "subscribed_actions",
+            "type": "Array<WaveSubscriptionTargetAction>",
             "format": ""
         }    ];
 

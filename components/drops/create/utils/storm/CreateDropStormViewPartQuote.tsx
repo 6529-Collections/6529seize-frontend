@@ -9,6 +9,7 @@ import DropPart, { DropPartSize } from "../../../view/part/DropPart";
 import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
 import { ProfileMin } from "../../../../../generated/models/ProfileMin";
+import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 interface PartConfigWave {
   readonly name: string;
@@ -29,7 +30,7 @@ export default function CreateDropStormViewPartQuote({
   profile,
   quotedDrop,
 }: {
-  readonly profile: ProfileMin;
+  readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: QuotedDrop;
 }) {
   const { data: drop } = useQuery<Drop>({

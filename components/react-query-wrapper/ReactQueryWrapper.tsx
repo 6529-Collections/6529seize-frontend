@@ -33,6 +33,7 @@ export enum QueryKey {
   PROFILE_DROPS = "PROFILE_DROPS",
   PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
+  IDENTITY_SUBSCRIPTIONS = "IDENTITY_SUBSCRIPTIONS",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -143,6 +144,7 @@ type ReactQueryWrapperContextType = {
   onProfileStatementRemove: (params: {
     profile: IProfileAndConsolidations;
   }) => void;
+  onIdentitySubscriptionChange: () => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
   initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
   initLandingPage: ({
@@ -160,6 +162,7 @@ type ReactQueryWrapperContextType = {
     readonly drop: Drop;
     readonly giverHandle: string | null;
   }) => void;
+  readonly invalidateDrops: () => void;
   onDropDiscussionChange: (params: {
     readonly dropId: string;
     readonly dropAuthorHandle: string;
@@ -169,6 +172,7 @@ type ReactQueryWrapperContextType = {
   onGroupCreate: () => void;
   onIdentityBulkRate: () => void;
   onWaveCreated: () => void;
+  onWaveSubscriptionChange: () => void;
   invalidateAll: () => void;
 };
 
@@ -182,18 +186,21 @@ export const ReactQueryWrapperContext =
     onProfileEdit: () => {},
     onProfileStatementAdd: () => {},
     onProfileStatementRemove: () => {},
+    onIdentitySubscriptionChange: () => {},
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     onDropCreate: () => {},
     onDropChange: () => {},
+    invalidateDrops: () => {},
     onDropDiscussionChange: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
     onGroupCreate: () => {},
     onIdentityBulkRate: () => {},
     onWaveCreated: () => {},
+    onWaveSubscriptionChange: () => {},
     invalidateAll: () => {},
   });
 
@@ -900,9 +907,30 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const onWaveCreated = () => {
+  const invalidateAllWaves = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE],
+    });
+  };
+
+  const invalidateDrops = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP],
+    });
+  };
+
+  const onWaveCreated = () => invalidateAllWaves();
+
+  const onWaveSubscriptionChange = () => invalidateAllWaves();
+  const onIdentitySubscriptionChange = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_SUBSCRIPTIONS],
     });
   };
 
@@ -932,7 +960,10 @@ export default function ReactQueryWrapper({
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
+      onWaveSubscriptionChange,
       invalidateAll,
+      onIdentitySubscriptionChange,
+      invalidateDrops,
     }),
     [
       setProfile,
@@ -955,7 +986,10 @@ export default function ReactQueryWrapper({
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
+      onWaveSubscriptionChange,
       invalidateAll,
+      onIdentitySubscriptionChange,
+      invalidateDrops
     ]
   );
 

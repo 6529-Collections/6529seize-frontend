@@ -1,10 +1,15 @@
+import { useContext } from "react";
 import { Drop } from "../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../generated/models/DropPart";
-import DiscussOutlineIcon from "../../../../utils/icons/DiscussOutlineIcon";
-import DiscussSolidIcon from "../../../../utils/icons/DiscussSolidIcon";
 import { DropVoteState } from "../../item/DropsListItem";
 import DropListItemRateGive from "../../item/rate/give/DropListItemRateGive";
-import DropPartActionTriggersVote from "./vote/DropPartActionTriggersVote";
+import DropPartQuoteButton from "../quote/DropPartQuoteButton";
+import DropPartDiscussionButton from "./discussion/DropPartDiscussionButton";
+import DropSubscribe from "./DropSubscribe";
+
+import DropPartActionTriggersVoteVoters from "./vote/DropPartActionTriggersVoteVoters";
+import DropPartActionTriggersVoteVotings from "./vote/DropPartActionTriggersVoteVotings";
+import { AuthContext } from "../../../../auth/Auth";
 
 interface DropPartActionTriggersProps {
   readonly drop: Drop;
@@ -27,65 +32,25 @@ export default function DropPartActionTriggers({
   setIsDiscussionOpen,
   onQuote,
 }: DropPartActionTriggersProps) {
-  const discussionCount = dropPart.discussion_comments_count;
-  const quotesCount = dropPart.quotes_count;
-  const userHaveDiscussed =
-    !!dropPart.context_profile_context?.discussion_comments_count;
-
-  const userHaveQuoted = !!dropPart.context_profile_context?.quotes_count;
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   return (
     <div className="tw-w-full tw-inline-flex tw-justify-between">
-      <div className="tw-pt-4 tw-px-4 sm:tw-px-0 tw-gap-x-8 tw-flex tw-items-center tw-mt-auto">
-        <button
-          onClick={() => setIsDiscussionOpen(!isDiscussionOpen)}
-          type="button"
-          title="Discuss"
-          className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 
-        tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
-        >
-          <>
-            {userHaveDiscussed ? <DiscussSolidIcon /> : <DiscussOutlineIcon />}
-
-            {!!discussionCount && (
-              <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
-                {discussionCount}
-              </div>
-            )}
-          </>
-        </button>
-        <button
-          onClick={() => onQuote(dropPart.part_id)}
-          type="button"
-          title="Redrop"
-          className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-normal tw-transition tw-ease-out tw-duration-300"
-        >
-          <>
-            <svg
-              className={`${
-                userHaveQuoted ? "tw-text-primary-400" : ""
-              } tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300`}
-              viewBox="0 0 512 512"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="currentColor"
-                d="m123.19 137.32 33.81 33.85c9.51 9.51 25.31 9.74 34.64.05a24 24 0 0 0 -.32-33.61l-74.68-74.78a24.67 24.67 0 0 0 -34.9 0l-74.74 74.76a24 24 0 0 0 34 33.94l34.21-34.21v230a89.16 89.16 0 0 0 89.06 89.06h127.73a24 24 0 0 0 0-48h-127.73a41.11 41.11 0 0 1 -41.06-41.06z"
-              ></path>
-              <path
-                fill="currentColor"
-                d="m388.81 374.68-33.81-33.85c-9.51-9.51-25.31-9.74-34.64-.05a24 24 0 0 0 .32 33.61l74.72 74.78a24.67 24.67 0 0 0 34.9 0l74.7-74.76a24 24 0 0 0 -34-33.94l-34.21 34.21v-230a89.16 89.16 0 0 0 -89.06-89.08h-127.73a24 24 0 0 0 0 48h127.73a41.11 41.11 0 0 1 41.06 41.06z"
-              ></path>
-            </svg>
-            {!!quotesCount && (
-              <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
-                {quotesCount}
-              </div>
-            )}
-          </>
-        </button>
+      <div className="tw-px-4 sm:tw-px-0 tw-gap-x-8 tw-flex tw-items-center ">
+        <DropPartDiscussionButton
+          dropPart={dropPart}
+          isDiscussionOpen={isDiscussionOpen}
+          setIsDiscussionOpen={setIsDiscussionOpen}
+        />
+        <DropPartQuoteButton dropPart={dropPart} onQuote={onQuote} />
+        {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
+          <DropSubscribe drop={drop} />
+        )}
       </div>
-      <div>
+      <div className="tw-inline-flex tw-space-x-4 tw-items-center">
+        <DropPartActionTriggersVoteVotings drop={drop} />
+        {!!drop.raters_count && (
+          <DropPartActionTriggersVoteVoters drop={drop} />
+        )}
         <DropListItemRateGive
           drop={drop}
           voteState={voteState}
@@ -93,11 +58,6 @@ export default function DropPartActionTriggers({
           availableCredit={availableCredit ?? 0}
         />
       </div>
-      {/* <DropPartActionTriggersVote
-        drop={drop}
-        voteState={voteState}
-        canVote={canVote}
-      /> */}
     </div>
   );
 }
