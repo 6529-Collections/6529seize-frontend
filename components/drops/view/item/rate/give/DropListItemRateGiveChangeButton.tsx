@@ -63,10 +63,10 @@ export default function DropListItemRateGiveChangeButton({
       onMouseLeave={onMouseUpOrLeave}
       disabled={!canVote}
       aria-label={ariaLabels[type]}
-      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full  tw-bg-transparent tw-h-7 tw-w-7 tw-transition-all tw-duration-300 tw-ease-out`}
+      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full  tw-bg-transparent tw-h-4 tw-w-4 tw-transition-all tw-duration-300 tw-ease-out`}
     >
       <svg
-        className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+        className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-rotate-90"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

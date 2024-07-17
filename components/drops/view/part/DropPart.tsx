@@ -51,10 +51,14 @@ export interface DropPartProps {
   readonly partContent: string | null;
   readonly partMedia: DropPartPropsMedia | null;
   readonly createdAt: number;
-  readonly isFirstPart: boolean;
   readonly wave: DropPartPropsWave | null;
   readonly showFull?: boolean;
   readonly size?: DropPartSize;
+  readonly showNextButton?: boolean;
+  readonly showPrevButton?: boolean;
+  readonly isStorm?: boolean;
+  readonly onNextPart?: () => void;
+  readonly onPrevPart?: () => void;
 }
 
 const customRenderer = ({
@@ -156,122 +160,134 @@ const DropPart = memo(
     showFull = false,
     dropTitle,
     createdAt,
-    isFirstPart,
     wave,
+    isStorm = false,
     size = DropPartSize.MEDIUM,
+    showNextButton = false,
+    showPrevButton = false,
+    onNextPart,
+    onPrevPart,
   }: DropPartProps) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [isOverflowing, setIsOverflowing] = useState(false);
-    const checkOverflow = () => {
-      setIsOverflowing(
-        !!containerRef.current &&
-          containerRef.current.scrollHeight > containerRef.current.clientHeight
-      );
-    };
+    // const containerRef = useRef<HTMLDivElement>(null);
+    // const [isOverflowing, setIsOverflowing] = useState(false);
+    // const checkOverflow = () => {
+    //   setIsOverflowing(
+    //     !!containerRef.current &&
+    //       containerRef.current.scrollHeight > containerRef.current.clientHeight
+    //   );
+    // };
 
-    useEffect(() => {
-      checkOverflow();
-    }, [containerRef]);
+    // useEffect(() => {
+    //   checkOverflow();
+    // }, [containerRef]);
 
-    const [showMore, setShowMore] = useState(showFull);
+    // const [showMore, setShowMore] = useState(showFull);
 
-    useEffect(() => {
-      if (showFull) {
-        setShowMore(true);
-      }
-    }, [showFull]);
+    // useEffect(() => {
+    //   if (showFull) {
+    //     setShowMore(true);
+    //   }
+    // }, [showFull]);
 
-    const [containerHeight, setContainerHeight] = useState(288);
+    // const [containerHeight, setContainerHeight] = useState(288);
 
-    useEffect(() => {
-      if (showMore) {
-        containerRef.current?.style.setProperty("max-height", "100%");
-      } else {
-        containerRef.current?.style.setProperty(
-          "max-height",
-          `${containerHeight}px`
-        );
-      }
-    }, [showMore, containerRef, containerHeight]);
+    // useEffect(() => {
+    //   if (showMore) {
+    //     containerRef.current?.style.setProperty("max-height", "100%");
+    //   } else {
+    //     containerRef.current?.style.setProperty(
+    //       "max-height",
+    //       `${containerHeight}px`
+    //     );
+    //   }
+    // }, [showMore, containerRef, containerHeight]);
 
     const onImageLoaded = () => {
-      if (!containerRef.current) return;
-      const imgs = containerRef.current.querySelectorAll("img");
-      if (imgs.length) {
-        const firstImg = imgs[0];
-        if (firstImg.complete) {
-          const imgRect = firstImg.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-          const isTopVisible = imgRect.top <= containerRect.bottom;
-          if (isTopVisible) {
-            setContainerHeight(288 + firstImg.height + 288);
-          }
-        }
-      }
+      // if (!containerRef.current) return;
+      // const imgs = containerRef.current.querySelectorAll("img");
+      // if (imgs.length) {
+      //   const firstImg = imgs[0];
+      //   if (firstImg.complete) {
+      //     const imgRect = firstImg.getBoundingClientRect();
+      //     const containerRect = containerRef.current.getBoundingClientRect();
+      //     const isTopVisible = imgRect.top <= containerRect.bottom;
+      //     if (isTopVisible) {
+      //       setContainerHeight(288 + firstImg.height + 288);
+      //     }
+      //   }
+      // }
     };
 
     return (
       <>
-        <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
-          <div
-            ref={containerRef}
-            className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
-          >
-            <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
-              <div className="tw-hidden sm:tw-block">
-                <DropPfp pfpUrl={profile.pfp} size={size} />
-              </div>
-              <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-                <div className="tw-flex tw-gap-x-3">
-                  <div className="sm:tw-hidden">
-                    <DropPfp pfpUrl={profile.pfp} size={size} />
-                  </div>
-                  <div className="tw-w-full tw-flex tw-flex-col sm:tw-flex-row tw-justify-between">
-                    <DropAuthor
-                      profile={profile}
-                      timestamp={createdAt}
-                      size={size}
-                    />
-                    {isFirstPart && wave?.id && (
-                      <Link
-                        href={`/waves/${wave.id}`}
-                        className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-                      >
-                        {wave.image && (
-                          <img
-                            src={wave.image}
-                            alt="Drop wave image"
-                            className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
-                          />
-                        )}
-                        <span>{wave.name}</span>
-                        <svg
-                          className="tw-size-5 tw-flex-shrink-0"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M7 17L17 7M17 7H7M17 7V17"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </Link>
-                    )}
-                  </div>
+        {/* <CommonAnimationHeight onAnimationCompleted={checkOverflow}> */}
+        <div
+          // ref={containerRef}
+          className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+        >
+          <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
+            <div className="tw-hidden sm:tw-block">
+              <DropPfp pfpUrl={profile.pfp} size={size} />
+            </div>
+            <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
+              <div className="tw-flex tw-gap-x-3">
+                <div className="sm:tw-hidden">
+                  <DropPfp pfpUrl={profile.pfp} size={size} />
                 </div>
-
-                <div className="tw-mt-2 sm:tw-mt-1 tw-h-full">
-                  {dropTitle && isFirstPart && (
-                    <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
-                      {dropTitle}
-                    </p>
+                <div className="tw-w-full tw-flex tw-flex-col sm:tw-flex-row tw-justify-between">
+                  <DropAuthor
+                    profile={profile}
+                    timestamp={createdAt}
+                    size={size}
+                  />
+                  {wave?.id && (
+                    <Link
+                      href={`/waves/${wave.id}`}
+                      className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                    >
+                      {wave.image && (
+                        <img
+                          src={wave.image}
+                          alt="Drop wave image"
+                          className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
+                        />
+                      )}
+                      <span>{wave.name}</span>
+                      <svg
+                        className="tw-size-5 tw-flex-shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M7 17L17 7M17 7H7M17 7V17"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </Link>
                   )}
-                  <div className="tw-h-full">
+                </div>
+              </div>
+
+              <div className="tw-mt-2 sm:tw-mt-1 tw-h-full">
+                {dropTitle && (
+                  <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
+                    {dropTitle}
+                  </p>
+                )}
+                <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
+                  {onPrevPart && showPrevButton && (
+                    <button onClick={onPrevPart}>&lt;</button>
+                  )}
+                  <div
+                    className={`${
+                      isStorm && "tw-min-h-24"
+                    } tw-h-full tw-w-full`}
+                  >
                     <Markdown
                       rehypePlugins={[
                         [
@@ -375,12 +391,24 @@ const DropPart = memo(
                     >
                       {partContent}
                     </Markdown>
+                    {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
+                      <div className="tw-mt-1">
+                        <DropListItemContentMedia
+                          media_mime_type={partMedia.mimeType}
+                          media_url={partMedia.mediaSrc}
+                        />
+                      </div>
+                    )}
                   </div>
+                  {onNextPart && showNextButton && (
+                    <button onClick={onNextPart}>&gt;</button>
+                  )}
                 </div>
               </div>
             </div>
+          </div>
 
-            {isOverflowing && !showMore && (
+          {/* {isOverflowing && !showMore && (
               <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
                 <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">
                   <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -394,17 +422,9 @@ const DropPart = memo(
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </CommonAnimationHeight>
-        {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
-          <div className="sm:tw-ml-[3.25rem] tw-mt-1">
-            <DropListItemContentMedia
-              media_mime_type={partMedia.mimeType}
-              media_url={partMedia.mediaSrc}
-            />
-          </div>
-        )}
+            )} */}
+        </div>
+        {/* </CommonAnimationHeight> */}
       </>
     );
   }

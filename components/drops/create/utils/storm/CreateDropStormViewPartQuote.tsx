@@ -87,7 +87,6 @@ export default function CreateDropStormViewPartQuote({
           }
           createdAt={partConfig.createdAt}
           wave={partConfig.wave}
-          isFirstPart={true}
           showFull={false}
           dropTitle={partConfig.dropTitle}
           size={DropPartSize.SMALL}

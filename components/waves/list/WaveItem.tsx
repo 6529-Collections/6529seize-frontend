@@ -60,7 +60,6 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
             }
             showFull={false}
             createdAt={wave.description_drop.created_at}
-            isFirstPart={true}
             dropTitle={wave.description_drop.title}
             wave={null}
             size={DropPartSize.SMALL}

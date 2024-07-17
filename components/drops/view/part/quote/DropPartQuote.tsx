@@ -68,7 +68,6 @@ export default function DropPartQuote({
         }
         showFull={false}
         createdAt={drop.created_at}
-        isFirstPart={true}
         dropTitle={drop.title}
         wave={{
           name: drop.wave.name,

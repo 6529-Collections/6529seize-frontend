@@ -10,29 +10,25 @@ import { DropVoteState } from "../item/DropsListItem";
 import DropListItemRateGive from "../item/rate/give/DropListItemRateGive";
 import DropListItemData from "../item/data/DropListItemData";
 
-export default function DropPartWrapper({
-  drop,
-  dropPart,
-  isFirstPart,
-  isLastPart,
-  voteState,
-  canVote,
-  availableCredit,
-  showFull,
-  onQuote,
-  children,
-}: {
+export interface DropPartWrapperProps {
   readonly drop: Drop;
   readonly dropPart: DropPart;
-  readonly isFirstPart: boolean;
-  readonly isLastPart: boolean;
-  readonly showFull: boolean;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
   readonly onQuote: (dropPartId: number | null) => void;
   readonly children: React.ReactNode;
-}) {
+}
+
+export default function DropPartWrapper({
+  drop,
+  dropPart,
+  voteState,
+  canVote,
+  availableCredit,
+  onQuote,
+  children,
+}: DropPartWrapperProps) {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
 
@@ -57,35 +53,28 @@ export default function DropPartWrapper({
               {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
             </div>
           </div>
-          <div>
-            {haveData &&
-              ((isFirstPart && !showFull) || (isLastPart && showFull)) && (
-                <DropListItemData drop={drop} />
-              )}
-          </div>
+          <div>{haveData && <DropListItemData drop={drop} />}</div>
           <div className="sm:tw-ml-[4.25rem] tw-mt-auto">
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
               isDiscussionOpen={isDiscussionOpen}
-              isFirstPart={isFirstPart}
               voteState={voteState}
               canVote={canVote}
+              availableCredit={availableCredit ?? 0}
               setIsDiscussionOpen={onDiscussionOpen}
               onQuote={setQuoteDrop}
             />
           </div>
         </div>
-        <div>
-          {isFirstPart && (
-            <DropListItemRateGive
-              drop={drop}
-              voteState={voteState}
-              canVote={canVote}
-              availableCredit={availableCredit ?? 0}
-            />
-          )}
-        </div>
+        {/* <div>
+          <DropListItemRateGive
+            drop={drop}
+            voteState={voteState}
+            canVote={canVote}
+            availableCredit={availableCredit ?? 0}
+          />
+        </div> */}
       </div>
       {isDiscussionOpen && (
         <DropPartDiscussion dropPart={dropPart} drop={drop} />

@@ -59,7 +59,6 @@ const CreateDropStormViewPart = memo(
                 partContent={part.content}
                 partMedia={partMedia}
                 createdAt={createdAt}
-                isFirstPart={partIndex === 0}
                 wave={wave}
                 dropTitle={dropTitle}
               />

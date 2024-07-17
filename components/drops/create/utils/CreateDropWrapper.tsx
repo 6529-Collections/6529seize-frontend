@@ -32,6 +32,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import Markdown from "react-markdown";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -259,10 +260,22 @@ const CreateDropWrapper = forwardRef<
       setMissingMedia(getMissingRequiredMedia());
     }, [waveProps, wave, drop, file]);
 
+    const getCanSubmitStorm = () => {
+      if (!drop?.parts.length) {
+        return true;
+      }
+      const markdown = getMarkdown();
+      if (markdown?.length && markdown.length > 240) {
+        return false;
+      }
+      return true;
+    };
+
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
       !missingMedia.length &&
-      !missingMetadata.length;
+      !missingMetadata.length &&
+      getCanSubmitStorm();
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
@@ -273,7 +286,16 @@ const CreateDropWrapper = forwardRef<
         getMarkdown()?.length ?? 0
       ) ?? 0) >= 24000;
 
-    const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
+    const getIsCharsLimit = () => {
+      const markDown = getMarkdown();
+      if (!!markDown?.length && markDown.length > 240) {
+        return true;
+      }
+      return false;
+    };
+
+    const getCanAddPart = () =>
+      getHaveMarkdownOrFile() && !getIsDropLimit() && !getIsCharsLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
     useEffect(() => {
       setCanSubmit(getCanSubmit());
