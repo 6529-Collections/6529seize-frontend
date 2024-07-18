@@ -1,4 +1,4 @@
-import { cicToType, getTimeAgo } from "../../../../../helpers/Helpers";
+import { cicToType, getTimeAgo, getTimeAgoShort } from "../../../../../helpers/Helpers";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
 import UserCICAndLevel, {
@@ -53,7 +53,7 @@ export default function DropAuthor({
       <p
         className={`${textClasses} tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500`}
       >
-        {getTimeAgo(timestamp)}
+        {getTimeAgoShort(timestamp)}
       </p>
     </div>
   );

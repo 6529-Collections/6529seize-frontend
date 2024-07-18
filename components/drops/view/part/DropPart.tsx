@@ -231,15 +231,12 @@ const DropPart = memo(
           className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
         >
           <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
-            <div className="tw-hidden sm:tw-block">
-              <DropPfp pfpUrl={profile.pfp} size={size} />
-            </div>
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
               <div className="tw-flex tw-gap-x-3 tw-mr-8">
-                <div className="sm:tw-hidden">
+                <div >
                   <DropPfp pfpUrl={profile.pfp} size={size} />
                 </div>
-                <div className="tw-w-full tw-flex tw-flex-col sm:tw-flex-row tw-justify-between">
+                <div className="tw-w-full tw-space-y-1">
                   <DropAuthor
                     profile={profile}
                     timestamp={createdAt}
@@ -247,35 +244,14 @@ const DropPart = memo(
                   >
                     {components?.authorSubscribe}
                   </DropAuthor>
-                  <div className="tw-inline-flex tw-space-x-2">
+
+                  <div className="tw-flex-1 tw-inline-flex tw-space-x-2">
                     {wave?.id && (
                       <Link
                         href={`/waves/${wave.id}`}
                         className="tw-mt-1.5 sm:-tw-mt-0.5 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
                       >
-                        {wave.image && (
-                          <img
-                            src={wave.image}
-                            alt="Drop wave image"
-                            className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
-                          />
-                        )}
                         <span>{wave.name}</span>
-                        <svg
-                          className="tw-size-5 tw-flex-shrink-0"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M7 17L17 7M17 7H7M17 7V17"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
                       </Link>
                     )}
                   </div>
