@@ -159,9 +159,6 @@ export default function DropListItemContent({
                 !activeProfileProxy ? (
                   <DropListItemSubscribeAuthor drop={drop} />
                 ) : undefined,
-              dropSubscribe:  connectedProfile?.profile?.handle &&
-                connectedProfile.profile.handle !== drop.author.handle &&
-                !activeProfileProxy ?<DropsListItemSubscribeDrop  drop={drop} /> : undefined,
             }}
           />
         </DropPartWrapper>

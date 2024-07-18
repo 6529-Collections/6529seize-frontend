@@ -236,7 +236,7 @@ const DropPart = memo(
               <DropPfp pfpUrl={profile.pfp} size={size} />
             </div>
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-              <div className="tw-flex tw-gap-x-3">
+              <div className="tw-flex tw-gap-x-3 tw-mr-8">
                 <div className="sm:tw-hidden">
                   <DropPfp pfpUrl={profile.pfp} size={size} />
                 </div>
@@ -252,7 +252,7 @@ const DropPart = memo(
                     {wave?.id && (
                       <Link
                         href={`/waves/${wave.id}`}
-                        className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                        className="tw-mt-1.5 sm:-tw-mt-0.5 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
                       >
                         {wave.image && (
                           <img
@@ -284,7 +284,7 @@ const DropPart = memo(
                 </div>
               </div>
 
-              <div className="tw-mt-2 sm:tw-mt-1 tw-h-full">
+              <div className="tw-mt-2 sm:tw-mt-0 tw-h-full">
                 {dropTitle && (
                   <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
                     {dropTitle}
