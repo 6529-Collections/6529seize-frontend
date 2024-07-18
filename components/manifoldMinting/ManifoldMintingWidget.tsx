@@ -201,6 +201,7 @@ export default function ManifoldMintingWidget(
     setMintStatus(<></>);
     const value = getValue();
     const args = getMintArgs();
+    console.log("i am args", args);
     mintWrite.writeContract({
       address: props.proxy as `0x${string}`,
       abi: props.abi,
