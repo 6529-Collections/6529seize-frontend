@@ -32,7 +32,7 @@ export default function DropListItemRateGiveSubmit({
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [mutating, setMutating] = useState<boolean>(false);
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -61,7 +61,7 @@ export default function DropListItemRateGiveSubmit({
       });
     },
     onSettled: () => {
-      setLoading(false);
+      setMutating(false);
     },
   });
 
@@ -74,11 +74,11 @@ export default function DropListItemRateGiveSubmit({
       return;
     }
     if (!rate) return;
-    if (loading) return;
-    setLoading(true);
+    if (mutating) return;
+    setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
-      setLoading(false);
+      setMutating(false);
       return;
     }
 
