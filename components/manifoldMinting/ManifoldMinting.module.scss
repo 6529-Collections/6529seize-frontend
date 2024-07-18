@@ -1,0 +1,33 @@
+@import "../../styles/variables.scss";
+
+.claimed {
+  color: $green;
+}
+
+.spotsTable {
+  tr td {
+    width: 50%;
+  }
+  margin-bottom: 0;
+}
+
+.descriptionClamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phaseBox {
+  border: 3px solid rgb(23, 22, 28);
+  background-color: rgb(23, 22, 28);
+  padding: 18px;
+}
+
+.phaseBoxActive {
+  border: 3px solid white;
+  background-color: rgb(23, 22, 28);
+  padding: 18px;
+}

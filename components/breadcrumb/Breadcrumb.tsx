@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import styles from "./Breadcrumb.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
@@ -21,12 +22,12 @@ export default function Breadcrumb(props: Readonly<Props>) {
               <Col className={`${styles.ellipsis}`}>
                 {props.breadcrumbs.map((crumb, index) => {
                   const crumbAnchor = crumb.href ? (
-                    <a
+                    <Link
                       key={getRandomObjectId()}
                       className={styles.breadcrumbLink}
                       href={crumb.href}>
                       {crumb.display}
-                    </a>
+                    </Link>
                   ) : (
                     <span>{crumb.display}</span>
                   );

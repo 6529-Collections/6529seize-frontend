@@ -5,6 +5,7 @@ import {
   enterArtFullScreen,
   fullScreenSupported,
   numberWithCommas,
+  parseNftDescriptionToHtml,
   printMintDate,
 } from "../../helpers/Helpers";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
 } from "../../helpers/nft.helplers";
+import NFTAttributes from "../nftAttributes/NFTAttributes";
 
 export function MemePageArt(props: {
   show: boolean;
@@ -36,15 +38,6 @@ export function MemePageArt(props: {
       setIsFullScreenSupported(fullScreenSupported());
     }
   }, [router.isReady]);
-
-  function parseDescription(description: string) {
-    let d = description.replaceAll("\n", "<br />");
-    d = d.replace(
-      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
-      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
-    );
-    return d;
-  }
 
   function carouselHandlerSlide(event: any) {
     if (event === 0) {
@@ -316,7 +309,7 @@ export function MemePageArt(props: {
                 <Row>
                   <Col
                     dangerouslySetInnerHTML={{
-                      __html: parseDescription(props.nft.description),
+                      __html: parseNftDescriptionToHtml(props.nft.description),
                     }}></Col>
                 </Row>
               </Container>
@@ -333,33 +326,17 @@ export function MemePageArt(props: {
                   </Col>
                 </Row>
                 <Row>
-                  {props.nft.metadata.attributes
-                    .filter(
-                      (a: any) =>
-                        !a.display_type &&
-                        a.trait_type != "Type - Season" &&
-                        a.trait_type != "Type - Meme" &&
-                        a.trait_type != "Type - Card"
-                    )
-                    .map((a: any) => (
-                      <Col
-                        key={a.trait_type}
-                        xs={{ span: 6 }}
-                        sm={{ span: 3 }}
-                        md={{ span: 2 }}
-                        lg={{ span: 2 }}
-                        className="pt-2 pb-2">
-                        <Container>
-                          <Row>
-                            <Col className={styles.nftAttribute}>
-                              <span>{a.trait_type}</span>
-                              <br />
-                              <span title={a.value}>{a.value}</span>
-                            </Col>
-                          </Row>
-                        </Container>
-                      </Col>
-                    ))}
+                  <Col>
+                    <NFTAttributes
+                      attributes={props.nft.metadata.attributes.filter(
+                        (a: any) =>
+                          !a.display_type &&
+                          a.trait_type != "Type - Season" &&
+                          a.trait_type != "Type - Meme" &&
+                          a.trait_type != "Type - Card"
+                      )}
+                    />
+                  </Col>
                 </Row>
               </Container>
             </Col>
