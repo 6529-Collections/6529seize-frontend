@@ -60,7 +60,6 @@ export interface DropPartProps {
   readonly isStorm?: boolean;
   readonly components?: {
     readonly authorSubscribe?: ReactNode;
-    readonly dropSubscribe?: ReactNode;
   };
   readonly onNextPart?: () => void;
   readonly onPrevPart?: () => void;
@@ -279,7 +278,6 @@ const DropPart = memo(
                         </svg>
                       </Link>
                     )}
-                    {components?.dropSubscribe}
                   </div>
                 </div>
               </div>

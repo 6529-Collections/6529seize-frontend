@@ -10,7 +10,9 @@ import {
 } from "../../../../services/api/common-api";
 import { DropSubscriptionActions } from "../../../../generated/models/DropSubscriptionActions";
 import { DropSubscriptionTargetAction } from "../../../../generated/models/DropSubscriptionTargetAction";
-import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../distribution-plan-tool/common/CircleLoader";
 import { IdentitySubscriptionActions } from "../../../../generated/models/IdentitySubscriptionActions";
 import { IdentitySubscriptionTargetAction } from "../../../../generated/models/IdentitySubscriptionTargetAction";
 
@@ -31,7 +33,7 @@ export default function DropListItemSubscribeAuthor({
   const components: Record<SUBSCRIBED_STATE, React.ReactNode> = {
     [SUBSCRIBED_STATE.SUBSCRIBED]: (
       <svg
-        className="tw-h-4 tw-w-4 -tw-mt-0.5"
+        className="tw-h-3 tw-w-3 "
         width="17"
         height="15"
         viewBox="0 0 17 15"
@@ -49,7 +51,7 @@ export default function DropListItemSubscribeAuthor({
     ),
     [SUBSCRIBED_STATE.UNSUBSCRIBED]: (
       <svg
-        className="tw-h-4 tw-w-4 -tw-mt-0.5"
+        className="tw-h-3 tw-w-3"
         width="17"
         height="15"
         viewBox="0 0 17 15"
@@ -155,7 +157,11 @@ export default function DropListItemSubscribeAuthor({
         disabled={mutating}
         className={`${classes[subscribedState]} tw-flex tw-border-none tw-bg-transparent tw-py-0 tw-px-2 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
       >
-        {mutating ? <CircleLoader /> : components[subscribedState]}
+        {mutating ? (
+          <CircleLoader size={CircleLoaderSize.SMALL} />
+        ) : (
+          components[subscribedState]
+        )}
       </button>
     </Tippy>
   );
