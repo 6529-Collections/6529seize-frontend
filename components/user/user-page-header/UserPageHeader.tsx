@@ -110,27 +110,37 @@ export default function UserPageHeader({
         />
         <div className="tw-relative tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-flex tw-flex-col">
-            <div className="-tw-mt-16 sm:-tw-mt-24 tw-w-min">
-              <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
-                <UserPageHeaderPfp
-                  canEdit={canEdit}
-                  profile={profile}
-                  defaultBanner1={profile.profile?.banner_1 ?? DEFAULT_BANNER_1}
-                  defaultBanner2={profile.profile?.banner_2 ?? DEFAULT_BANNER_2}
-                />
-              </UserPageHeaderPfpWrapper>
+            <div className="tw-flex tw-justify-between">
+              <div className="-tw-mt-16 sm:-tw-mt-24 tw-w-min">
+                <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
+                  <UserPageHeaderPfp
+                    canEdit={canEdit}
+                    profile={profile}
+                    defaultBanner1={
+                      profile.profile?.banner_1 ?? DEFAULT_BANNER_1
+                    }
+                    defaultBanner2={
+                      profile.profile?.banner_2 ?? DEFAULT_BANNER_2
+                    }
+                  />
+                </UserPageHeaderPfpWrapper>
+              </div>
+              <div className="tw-mt-4">
+                {connectedProfile?.profile?.handle &&
+                  !activeProfileProxy &&
+                  !isMyProfile &&
+                  profile.profile?.handle && (
+                    <UserPageHeaderSubscribe handle={profile.profile.handle} />
+                  )}
+              </div>
             </div>
+
             <UserPageHeaderName
               profile={profile}
               canEdit={canEdit}
               mainAddress={mainAddress}
             />
-            {connectedProfile?.profile?.handle &&
-              !activeProfileProxy &&
-              !isMyProfile &&
-              profile.profile?.handle && (
-                <UserPageHeaderSubscribe handle={profile.profile.handle} />
-              )}
+
             <div className="tw-mt-2">
               <UserLevel level={profile.level} />
             </div>

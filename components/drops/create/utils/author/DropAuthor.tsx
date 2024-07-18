@@ -38,14 +38,16 @@ export default function DropAuthor({
 
   const textClasses = getTextClasses();
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-4">
-      <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
-        <UserCICAndLevel
-          level={profile.level}
-          cicType={cicType}
-          size={UserCICAndLevelSize.SMALL}
-        />
-        <DropAuthorHandle profile={profile} size={size} />
+    <div className="tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-flex tw-items-center">
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
+          <UserCICAndLevel
+            level={profile.level}
+            cicType={cicType}
+            size={UserCICAndLevelSize.SMALL}
+          />
+          <DropAuthorHandle profile={profile} size={size} />
+        </div>
         {children}
       </div>
       <p
