@@ -22,63 +22,59 @@ export default function ManifoldMintingConnect(
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);
 
-  const [mintFor, setMintFor] = useState<string>("");
+  const [mintForInput, setMintForInput] = useState<string>("");
+  const [mintForEns, setMintForEns] = useState<string>("");
   const [mintForAddress, setMintForAddress] = useState("");
   const [mintForLock, setMintForLock] = useState<boolean>(false);
 
   function reset() {
-    setMintFor("");
+    setMintForInput("");
+    setMintForEns("");
     setMintForAddress("");
     setMintForLock(false);
   }
 
-  const walletAddressEns = useEnsName({
-    address: isValidEthAddress(mintFor)
-      ? (mintFor as `0x${string}`)
-      : undefined,
+  const addressToEns = useEnsName({
+    address: mintForAddress as `0x${string}`,
     chainId: 1,
   });
-  const walletAddressFromEns = useEnsAddress({
-    name: mintFor?.endsWith(".eth") ? mintFor : undefined,
+  const ensToAddress = useEnsAddress({
+    name: mintForEns,
     chainId: 1,
   });
 
   useEffect(() => {
-    if (walletAddressEns.data) {
-      setMintForAddress(mintFor);
-      setMintFor(`${walletAddressEns.data} - ${mintFor}`);
+    if (addressToEns.data && !mintForLock && mintForFren) {
+      const newEns = addressToEns.data;
+
+      setMintForEns(newEns);
+      setMintForInput(`${newEns} - ${mintForInput}`);
+    }
+    if (mintForInput) {
       setMintForLock(true);
     }
-  }, [walletAddressEns.isFetched]);
+  }, [addressToEns.isFetched]);
 
   useEffect(() => {
-    if (walletAddressFromEns.data) {
-      setMintForAddress(walletAddressFromEns.data);
-      setMintFor(`${mintFor} - ${walletAddressFromEns.data}`);
+    if (ensToAddress.data && !mintForLock && mintForFren) {
+      const newAddress = ensToAddress.data;
+
+      setMintForAddress(newAddress);
+      setMintForInput(`${mintForInput} - ${newAddress}`);
+
       setMintForLock(true);
     }
-  }, [walletAddressFromEns.isFetched]);
+  }, [ensToAddress.isFetched]);
 
   useEffect(() => {
-    if (!walletAddressFromEns.data && !walletAddressEns.data) {
-      props.onMintFor("");
-    }
-  }, [mintFor]);
-
-  useEffect(() => {
-    if (account.address) {
-      setMintFor(account.address as string);
-    } else {
-      reset();
-    }
+    reset();
+    setMintForFren(false);
   }, [account.address]);
 
   useEffect(() => {
     if (mintForFren) {
-      console.log("mintForAddress: " + mintForAddress);
       props.onMintFor(mintForAddress);
     } else {
-      console.log("account.address: " + account.address);
       props.onMintFor(account.address as string);
     }
   }, [mintForAddress, mintForFren]);
@@ -94,13 +90,22 @@ export default function ManifoldMintingConnect(
             disabled={mintForLock}
             placeholder={"0x... or ENS"}
             type="text"
-            value={mintFor}
-            onChange={(e) => setMintFor(e.target.value)}
+            value={mintForInput}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (isValidEthAddress(value)) {
+                setMintForAddress(value);
+              }
+              if (value.endsWith(".eth")) {
+                setMintForEns(value);
+              }
+              setMintForInput(value);
+            }}
           />
         </span>
-        {!mintForAddress && (
+        {!mintForAddress && mintForInput && (
           <span className="font-smaller font-lighter text-danger pt-1">
-            {mintFor ? `Invalid Address` : ``}
+            Invalid Address
           </span>
         )}
         {mintForLock && (
