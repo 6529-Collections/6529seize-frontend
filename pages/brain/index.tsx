@@ -1,7 +1,12 @@
 import Head from "next/head";
-import { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import Brain from "../../components/brain/Brain";
+const Header = dynamic(() => import("../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 export default function BrainPage() {
   const breadcrumbs: Crumb[] = [
@@ -26,9 +31,15 @@ export default function BrainPage() {
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      <SidebarLayout breadcrumbs={breadcrumbs}>
-        <Brain />
-      </SidebarLayout>
+      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+        <div>
+          <Header />
+          <Breadcrumb breadcrumbs={breadcrumbs} />
+        </div>
+        <div className="tw-overflow-hidden tw-h-full tw-w-full">
+          <Brain />
+        </div>
+      </div>
     </>
   );
 }

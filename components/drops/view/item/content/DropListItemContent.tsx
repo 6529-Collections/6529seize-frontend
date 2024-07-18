@@ -1,9 +1,12 @@
 import { Drop } from "../../../../../generated/models/Drop";
 import DropPart from "../../part/DropPart";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropVoteState } from "../DropsListItem";
+import DropListItemSubscribeAuthor from "../DropListItemSubscribeAuthor";
+import { AuthContext } from "../../../../auth/Auth";
+import DropsListItemSubscribeDrop from "../DropsListItemSubscribeDrop";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -32,6 +35,7 @@ export default function DropListItemContent({
   const partsCount = drop.parts.length;
   const isStorm = partsCount > 1;
   const containerRef = useRef<HTMLDivElement>(null);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [isFullMode, setIsFullMode] = useState(showFull);
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
@@ -80,8 +84,6 @@ export default function DropListItemContent({
 
     if (container) {
       const rect = container.getBoundingClientRect();
-
-      // Check if the top of the container is out of view
       if (rect.top < 0) {
         container.scrollIntoView({
           behavior: "smooth",
@@ -150,6 +152,20 @@ export default function DropListItemContent({
             showPrevButton={showPrevButton}
             onNextPart={onNextPart}
             onPrevPart={onPrevPart}
+            components={{
+              authorSubscribe:
+                connectedProfile?.profile?.handle &&
+                connectedProfile.profile.handle !== drop.author.handle &&
+                !activeProfileProxy ? (
+                  <DropListItemSubscribeAuthor drop={drop} />
+                ) : undefined,
+              dropSubscribe:
+                connectedProfile?.profile?.handle &&
+                connectedProfile.profile.handle !== drop.author.handle &&
+                !activeProfileProxy ? (
+                  <DropsListItemSubscribeDrop drop={drop} />
+                ) : undefined,
+            }}
           />
         </DropPartWrapper>
       </div>
