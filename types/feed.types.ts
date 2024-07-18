@@ -1,7 +1,6 @@
 import { Drop } from "../generated/models/Drop";
 import { DropComment } from "../generated/models/DropComment";
 import { DropVote } from "../generated/models/DropVote";
-import { FeedItem } from "../generated/models/FeedItem";
 import { FeedItemType } from "../generated/models/FeedItemType";
 import { Wave } from "../generated/models/Wave";
 
