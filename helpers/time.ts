@@ -207,6 +207,12 @@ export class Time {
     );
   }
 
+  public setTime(hours: number, min?: number, sec?: number): Time {
+    const date = this.toDate();
+    date.setUTCHours(hours, min, sec);
+    return Time.millis(date.getTime());
+  }
+
   public toDate(): Date {
     return new Date(this.ms);
   }
@@ -225,6 +231,16 @@ export class Time {
 
   public toIsoTimeString(): string {
     return this.toIsoString().split("T")[1].split(".")[0];
+  }
+
+  public toLocaleDateTimeString(): string {
+    const date = this.toDate();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
 
   public toString = (): string => {
