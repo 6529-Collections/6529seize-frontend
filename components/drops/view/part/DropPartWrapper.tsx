@@ -47,14 +47,14 @@ export default function DropPartWrapper({
         <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
           <div className="tw-flex-1 tw-px-4 tw-relative tw-z-20">
             {children}
-            <div className="sm:tw-ml-[3.25rem]">
+            <div className="sm:tw-ml-8">
               {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
             </div>
           </div>
           <div className="tw-relative tw-z-10">
             {haveData && <DropListItemData drop={drop} />}
           </div>
-          <div className="sm:tw-ml-[4.25rem] tw-mt-auto tw-relative tw-z-10">
+          <div className="sm:tw-ml-12 tw-mt-auto tw-relative tw-z-10">
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
