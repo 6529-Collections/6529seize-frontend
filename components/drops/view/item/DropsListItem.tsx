@@ -3,6 +3,7 @@ import DropListItemContent from "./content/DropListItemContent";
 import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
+import DropsListItemSubscribeDrop from "./DropsListItemSubscribeDrop";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -99,6 +100,9 @@ export default function DropsListItem({
               showWaveInfo={showWaveInfo}
               onQuote={onQuote}
             />
+            <div className="tw-absolute tw-right-2 tw-top-1">
+              <DropsListItemSubscribeDrop drop={drop} />
+            </div>
           </div>
         </div>
       </div>
