@@ -187,18 +187,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   function printDistributionLink() {
-    let contractPath;
-    switch (props.contract) {
-      case MEMES_CONTRACT:
-        contractPath = "the-memes";
-        break;
-      case MEMELAB_CONTRACT:
-        contractPath = "meme-lab";
-        break;
-      default:
-        contractPath = props.contract;
-        break;
-    }
+    const contractPath = getPathForContract(props.contract);
     return (
       <Link href={`/${contractPath}/${props.token_id}/distribution`}>
         Distribution Plan
