@@ -18,6 +18,16 @@ export default function DropListItemCreateQuote({
   const isOpen = quotedPartId !== null;
   const elemRef = useRef<HTMLDivElement | null>(null);
 
+  const scrollIntoView = () => {
+    if (!isOpen || !elemRef.current) {
+      return;
+    }
+    elemRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
+
   return (
     <div ref={elemRef}>
       <AnimatePresence mode="wait" initial={false}>
@@ -41,7 +51,7 @@ export default function DropListItemCreateQuote({
               },
             }}
           >
-            <CommonAnimationHeight>
+            <CommonAnimationHeight onAnimationCompleted={scrollIntoView}>
               <motion.div
                 initial={{
                   opacity: 0,

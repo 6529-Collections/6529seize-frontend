@@ -1,5 +1,11 @@
 import { Fragment } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
 import { CreateDropType } from "../../CreateDrop";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 
@@ -27,13 +33,13 @@ export default function CreateDropFullMobileWrapper({
     }
   };
   return (
-    <Transition.Root appear={true} show={isOpen} as={Fragment}>
+    <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className="tailwind-scope tw-relative tw-z-50 lg:tw-hidden"
         onClose={onClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="tw-ease-in-out tw-duration-500"
           enterFrom="tw-opacity-0"
@@ -44,12 +50,12 @@ export default function CreateDropFullMobileWrapper({
           afterLeave={onViewClick}
         >
           <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="tw-fixed tw-inset-0">
           <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="tw-transform tw-transition tw-ease-in-out tw-duration-500 sm:tw-duration-700"
                 enterFrom="tw-translate-y-full"
@@ -58,8 +64,8 @@ export default function CreateDropFullMobileWrapper({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen">
-                  <Transition.Child
+                <DialogPanel className="tw-pointer-events-auto tw-relative tw-w-screen">
+                  <TransitionChild
                     as={Fragment}
                     enter="tw-ease-in-out tw-duration-500"
                     enterFrom="tw-opacity-0"
@@ -93,24 +99,24 @@ export default function CreateDropFullMobileWrapper({
                         </svg>
                       </button>
                     </div>
-                  </Transition.Child>
+                  </TransitionChild>
                   <div
                     className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-py-6"
                     style={{ maxHeight: "calc(100dvh - 4rem)" }}
                   >
                     <div className="tw-px-4 sm:tw-px-6">
-                      <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
+                      <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
                         {getTitle()}
-                      </Dialog.Title>
+                      </DialogTitle>
                     </div>
-                    <CommonAnimationHeight>{children}</CommonAnimationHeight>
+                    {children}
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

@@ -1,23 +1,13 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
-
 import { useContext, useEffect, useState } from "react";
 import DropListWrapper from "../drops/view/DropListWrapper";
-import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "../../store/groupSlice";
-import { useRouter } from "next/router";
-import { usePathname, useSearchParams } from "next/navigation";
 import { Mutable } from "../../helpers/Types";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
 import { Drop } from "../../generated/models/Drop";
 import { ProfileAvailableDropRateResponse } from "../../entities/IProfile";
-
-interface QueryUpdateInput {
-  name: keyof typeof SEARCH_PARAMS_FIELDS;
-  value: string | null;
-}
 
 interface BrainQuery {
   readonly group_id?: string;
@@ -27,18 +17,8 @@ interface BrainQuery {
 }
 
 const REQUEST_SIZE = 10;
-
-const SEARCH_PARAMS_FIELDS = {
-  group: "group",
-} as const;
-
 export default function Brain() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const activeGroupId = useSelector(selectActiveGroupId);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
     connectedProfile.level >= 0 &&
@@ -50,64 +30,18 @@ export default function Brain() {
     [connectedProfile, activeProfileProxy]
   );
 
-  const getParamsFromUrl = (): BrainQuery => {
-    const group = searchParams.get(SEARCH_PARAMS_FIELDS.group);
+  const getParams = (): BrainQuery => {
     const query: Mutable<BrainQuery> = {
       limit: `${REQUEST_SIZE}`,
     };
-    if (group) {
-      query.group_id = group;
-    }
     if (connectedProfile?.profile?.handle) {
       query.context_profile = connectedProfile.profile.handle;
     }
     return query;
   };
 
-  const createQueryString = (
-    updateItems: QueryUpdateInput[],
-    lowerCase: boolean = true
-  ): string => {
-    const searchParamsStr = new URLSearchParams(searchParams.toString());
-    for (const { name, value } of updateItems) {
-      const key = SEARCH_PARAMS_FIELDS[name];
-      if (!value) {
-        searchParamsStr.delete(key);
-      } else {
-        searchParamsStr.set(key, lowerCase ? value.toLowerCase() : value);
-      }
-    }
-    return searchParamsStr.toString();
-  };
-
-  const updateFields = async (
-    updateItems: QueryUpdateInput[],
-    lowerCase: boolean = true
-  ): Promise<void> => {
-    const queryString = createQueryString(updateItems, lowerCase);
-    const path = queryString ? pathname + "?" + queryString : pathname;
-    await router.replace(path, undefined, {
-      shallow: true,
-    });
-  };
-
-  useEffect(() => {
-    if (params.group_id !== activeGroupId) {
-      const items: QueryUpdateInput[] = [
-        {
-          name: "group",
-          value: activeGroupId,
-        },
-      ];
-      updateFields(items, false);
-    }
-  }, [activeGroupId]);
-
-  const [params, setParams] = useState(getParamsFromUrl());
-  useEffect(
-    () => setParams(getParamsFromUrl()),
-    [searchParams, connectedProfile]
-  );
+  const [params, setParams] = useState(getParams());
+  useEffect(() => setParams(getParams()), [connectedProfile]);
 
   const [debouncedParams, setDebouncedParams] = useState<BrainQuery>(params);
   useDebounce(() => setDebouncedParams(params), 200, [params]);

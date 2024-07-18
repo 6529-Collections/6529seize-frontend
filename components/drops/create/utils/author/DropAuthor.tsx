@@ -8,15 +8,19 @@ import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { DropPartSize } from "../../../view/part/DropPart";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
+export interface DropAuthorProps {
+  readonly profile: ProfileMinWithoutSubs;
+  readonly timestamp: number;
+  readonly size?: DropPartSize;
+  readonly children?: React.ReactNode;
+}
+
 export default function DropAuthor({
   profile,
   timestamp,
   size = DropPartSize.MEDIUM,
-}: {
-  readonly profile: ProfileMinWithoutSubs;
-  readonly timestamp: number;
-  readonly size?: DropPartSize;
-}) {
+  children,
+}: DropAuthorProps) {
   const cicType = cicToType(profile.cic);
 
   const getTextClasses = (): string => {
@@ -36,12 +40,13 @@ export default function DropAuthor({
   return (
     <div className="tw-flex tw-items-center tw-gap-x-4">
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
-        <DropAuthorHandle profile={profile} size={size} />
         <UserCICAndLevel
           level={profile.level}
           cicType={cicType}
           size={UserCICAndLevelSize.SMALL}
         />
+        <DropAuthorHandle profile={profile} size={size} />
+        {children}
       </div>
       <p
         className={`${textClasses} tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500`}

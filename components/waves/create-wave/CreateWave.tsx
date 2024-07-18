@@ -406,7 +406,7 @@ export default function CreateWave({
         message: error as unknown as string,
         type: "error",
       });
-         setSubmitting(false);
+      setSubmitting(false);
     },
   });
 
@@ -653,7 +653,9 @@ export default function CreateWave({
             </svg>
             <span>Back</span>
           </button>
-          <h1 className="tw-mb-0">Create new Wave</h1>
+          <h1 className="tw-mb-0">
+            Create Wave {!!config.overview.name && `"${config.overview.name}"`}
+          </h1>
         </div>
         <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
           <div className="tw-1/4">

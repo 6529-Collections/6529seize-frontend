@@ -58,6 +58,10 @@ export interface DropPartProps {
   readonly showNextButton?: boolean;
   readonly showPrevButton?: boolean;
   readonly isStorm?: boolean;
+  readonly components?: {
+    readonly authorSubscribe?: ReactNode;
+    readonly dropSubscribe?: ReactNode;
+  };
   readonly onNextPart?: () => void;
   readonly onPrevPart?: () => void;
 }
@@ -166,6 +170,7 @@ const DropPart = memo(
     size = DropPartSize.MEDIUM,
     showNextButton = false,
     showPrevButton = false,
+    components,
     onNextPart,
     onPrevPart,
   }: DropPartProps) => {
@@ -240,37 +245,42 @@ const DropPart = memo(
                     profile={profile}
                     timestamp={createdAt}
                     size={size}
-                  />
-                  {wave?.id && (
-                    <Link
-                      href={`/waves/${wave.id}`}
-                      className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-                    >
-                      {wave.image && (
-                        <img
-                          src={wave.image}
-                          alt="Drop wave image"
-                          className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
-                        />
-                      )}
-                      <span>{wave.name}</span>
-                      <svg
-                        className="tw-size-5 tw-flex-shrink-0"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
+                  >
+                    {components?.authorSubscribe}
+                  </DropAuthor>
+                  <div className="tw-inline-flex tw-space-x-2">
+                    {wave?.id && (
+                      <Link
+                        href={`/waves/${wave.id}`}
+                        className="tw-mt-1.5 sm:-tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
                       >
-                        <path
-                          d="M7 17L17 7M17 7H7M17 7V17"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </Link>
-                  )}
+                        {wave.image && (
+                          <img
+                            src={wave.image}
+                            alt="Drop wave image"
+                            className="tw-rounded-full tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-object-cover"
+                          />
+                        )}
+                        <span>{wave.name}</span>
+                        <svg
+                          className="tw-size-5 tw-flex-shrink-0"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M7 17L17 7M17 7H7M17 7V17"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </Link>
+                    )}
+                    {components?.dropSubscribe}
+                  </div>
                 </div>
               </div>
 
