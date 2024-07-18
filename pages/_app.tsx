@@ -108,6 +108,7 @@ import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
+import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 
 library.add(
   faArrowUp,
@@ -195,7 +196,9 @@ export function getChains() {
   const chains: Chain[] = [mainnet];
   if (
     DELEGATION_CONTRACT.chain_id === sepolia.id ||
-    (NEXTGEN_CHAIN_ID as number) === sepolia.id
+    (NEXTGEN_CHAIN_ID as number) === sepolia.id ||
+    SUBSCRIPTIONS_CHAIN.id.toString() === sepolia.id.toString() ||
+    MANIFOLD_NETWORK.id.toString() === sepolia.id.toString()
   ) {
     chains.push(sepolia);
   }

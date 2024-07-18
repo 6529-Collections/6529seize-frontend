@@ -29,6 +29,7 @@ import {
 import { AuthContext } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import MemePageMintCountdown from "./MemePageMintCountdown";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -243,6 +244,13 @@ export default function MemePage() {
     return (
       <>
         <Container className="p-0">
+          {nft && (
+            <Row>
+              <Col>
+                <MemePageMintCountdown nft_id={nft.id} />
+              </Col>
+            </Row>
+          )}
           <Row>
             {[
               MEME_FOCUS.LIVE,
