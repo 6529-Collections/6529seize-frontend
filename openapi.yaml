@@ -1509,6 +1509,30 @@ paths:
         "404":
           description: Wave not found
 
+  /feed:
+    get:
+      tags:
+        - Feed
+      summary: Get feed
+      operationId: getFeed
+      parameters:
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older items
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedItem"
+
   /groups:
     get:
       tags:
@@ -3507,6 +3531,63 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+
+    DropAndDropComment:
+      type: object
+      required:
+        - drop
+        - comment
+      properties:
+        drop:
+          $ref: "#/components/schemas/Drop"
+        comment:
+          $ref: "#/components/schemas/DropComment"
+
+    DropVote:
+      type: object
+      required:
+        - vote
+        - voter
+      properties:
+        vote:
+          type: number
+          format: int64
+        voter:
+          $ref: "#/components/schemas/ProfileMin"
+
+    DropAndDropVote:
+      type: object
+      required:
+        - drop
+        - vote
+      properties:
+        drop:
+          $ref: "#/components/schemas/Drop"
+        vote:
+          $ref: "#/components/schemas/DropVote"
+
+    FeedItemType:
+      type: string
+      enum:
+        - WAVE_CREATED
+        - DROP_CREATED
+        - DROP_COMMENTED
+        - DROP_VOTED
+
+    FeedItem:
+      type: object
+      required:
+        - serial_no
+        - type
+        - item
+      properties:
+        serial_no:
+          type: number
+          format: int64
+        type:
+          $ref: "#/components/schemas/FeedItemType"
+        item:
+          type: object
 
 security:
   - bearerAuth: []

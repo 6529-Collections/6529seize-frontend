@@ -31,6 +31,8 @@ export * from '../models/CreateWaveConfig';
 export * from '../models/CreateWaveDropRequest';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
+export * from '../models/DropAndDropComment';
+export * from '../models/DropAndDropVote';
 export * from '../models/DropComment';
 export * from '../models/DropCommentsPage';
 export * from '../models/DropContextProfileContext';
@@ -45,6 +47,9 @@ export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
 export * from '../models/DropSubscriptionActions';
 export * from '../models/DropSubscriptionTargetAction';
+export * from '../models/DropVote';
+export * from '../models/FeedItem';
+export * from '../models/FeedItemType';
 export * from '../models/Group';
 export * from '../models/GroupCicFilter';
 export * from '../models/GroupDescription';
@@ -130,6 +135,8 @@ import { CreateWaveConfig       } from '../models/CreateWaveConfig';
 import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
+import { DropAndDropComment } from '../models/DropAndDropComment';
+import { DropAndDropVote } from '../models/DropAndDropVote';
 import { DropComment } from '../models/DropComment';
 import { DropCommentsPage } from '../models/DropCommentsPage';
 import { DropContextProfileContext } from '../models/DropContextProfileContext';
@@ -144,6 +151,9 @@ import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { DropSubscriptionActions } from '../models/DropSubscriptionActions';
 import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
+import { DropVote } from '../models/DropVote';
+import { FeedItem    } from '../models/FeedItem';
+import { FeedItemType } from '../models/FeedItemType';
 import { Group } from '../models/Group';
 import { GroupCicFilter     } from '../models/GroupCicFilter';
 import { GroupDescription } from '../models/GroupDescription';
@@ -212,6 +222,7 @@ let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "DropActivityLogTypeEnum",
     "DropSubscriptionTargetAction",
+    "FeedItemType",
     "GroupFilterDirection",
     "GroupOwnsNftNameEnum",
     "IdentitySubscriptionTargetAction",
@@ -264,6 +275,8 @@ let typeMap: {[index: string]: any} = {
     "CreateWaveDropRequest": CreateWaveDropRequest,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
+    "DropAndDropComment": DropAndDropComment,
+    "DropAndDropVote": DropAndDropVote,
     "DropComment": DropComment,
     "DropCommentsPage": DropCommentsPage,
     "DropContextProfileContext": DropContextProfileContext,
@@ -277,6 +290,8 @@ let typeMap: {[index: string]: any} = {
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
     "DropSubscriptionActions": DropSubscriptionActions,
+    "DropVote": DropVote,
+    "FeedItem": FeedItem,
     "Group": Group,
     "GroupCicFilter": GroupCicFilter,
     "GroupDescription": GroupDescription,

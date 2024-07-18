@@ -59,6 +59,7 @@ export enum QueryKey {
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
   WAVES = "WAVES",
   WAVE = "WAVE",
+  FEED_ITEMS = "FEED_ITEMS",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -989,7 +990,7 @@ export default function ReactQueryWrapper({
       onWaveSubscriptionChange,
       invalidateAll,
       onIdentitySubscriptionChange,
-      invalidateDrops
+      invalidateDrops,
     ]
   );
 
