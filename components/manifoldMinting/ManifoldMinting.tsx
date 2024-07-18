@@ -21,11 +21,7 @@ import {
 import { Time } from "../../helpers/time";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
-import {
-  ETHEREUM_ICON_TEXT,
-  MEMELAB_CONTRACT,
-  MEMES_CONTRACT,
-} from "../../constants";
+import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 import { Distribution } from "../../entities/IDistribution";
 
