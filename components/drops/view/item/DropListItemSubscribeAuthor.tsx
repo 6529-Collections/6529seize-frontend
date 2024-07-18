@@ -69,7 +69,7 @@ export default function DropListItemSubscribeAuthor({
   };
 
   const tooltipText: Record<SUBSCRIBED_STATE, string> = {
-    [SUBSCRIBED_STATE.SUBSCRIBED]: "Unfollow",
+    [SUBSCRIBED_STATE.SUBSCRIBED]: "Following",
     [SUBSCRIBED_STATE.UNSUBSCRIBED]: "Follow",
   };
 

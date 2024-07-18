@@ -9,7 +9,7 @@ export default function DropsListItemSubscribeDrop({
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const title = !!drop.subscribed_actions.length ? "Unsubscribe" : "Subscribe";
+  const title = !!drop.subscribed_actions.length ? "Subscribed" : "Subscribe";
   return (
     <div className="tw-relative" ref={listRef}>
       <button
