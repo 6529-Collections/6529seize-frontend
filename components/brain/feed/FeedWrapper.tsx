@@ -4,6 +4,15 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+import FeedItems from "./FeedItems";
+
+interface FeedWrapperProps {
+  readonly items: TypedFeedItem[];
+  readonly loading: boolean;
+  readonly showWaveInfo: boolean;
+  readonly availableCredit: number | null;
+  readonly onBottomIntersection: (state: boolean) => void;
+}
 
 export default function FeedWrapper({
   items,
@@ -11,17 +20,15 @@ export default function FeedWrapper({
   showWaveInfo,
   availableCredit,
   onBottomIntersection,
-}: {
-  readonly items: TypedFeedItem[];
-  readonly loading: boolean;
-  readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
-  readonly onBottomIntersection: (state: boolean) => void;
-}) {
+}: FeedWrapperProps) {
   console.log(items);
   return (
     <div className="tw-overflow-hidden">
-      <div>feedlist</div>
+      <FeedItems
+        items={items}
+        showWaveInfo={showWaveInfo}
+        availableCredit={availableCredit}
+      />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
