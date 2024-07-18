@@ -8,43 +8,23 @@ import { useDebounce } from "react-use";
 import { AuthContext } from "../auth/Auth";
 import { Drop } from "../../generated/models/Drop";
 import { ProfileAvailableDropRateResponse } from "../../entities/IProfile";
+import FeedWrapper from "./feed/FeedWrapper";
+import { TypedFeedItem } from "../../types/feed.types";
 
-interface BrainQuery {
-  readonly group_id?: string;
-  readonly limit: string;
-  readonly storm_id?: string;
-  readonly context_profile?: string;
-}
+const REQUEST_SIZE = 20;
 
-const REQUEST_SIZE = 10;
 export default function Brain() {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowDrops = () =>
+  const getShowFeed = () =>
     !!connectedProfile?.profile?.handle &&
     connectedProfile.level >= 0 &&
     !activeProfileProxy;
 
-  const [showDrops, setShowDrops] = useState(getShowDrops());
+  const [showFeed, setShowFeed] = useState(getShowFeed());
   useEffect(
-    () => setShowDrops(getShowDrops()),
+    () => setShowFeed(getShowFeed()),
     [connectedProfile, activeProfileProxy]
   );
-
-  const getParams = (): BrainQuery => {
-    const query: Mutable<BrainQuery> = {
-      limit: `${REQUEST_SIZE}`,
-    };
-    if (connectedProfile?.profile?.handle) {
-      query.context_profile = connectedProfile.profile.handle;
-    }
-    return query;
-  };
-
-  const [params, setParams] = useState(getParams());
-  useEffect(() => setParams(getParams()), [connectedProfile]);
-
-  const [debouncedParams, setDebouncedParams] = useState<BrainQuery>(params);
-  useDebounce(() => setDebouncedParams(params), 200, [params]);
 
   const {
     data,
@@ -54,16 +34,14 @@ export default function Brain() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.DROPS, debouncedParams],
+    queryKey: [QueryKey.FEED_ITEMS],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        ...debouncedParams,
-      };
+      const params: Record<string, string> = {};
       if (pageParam) {
         params.serial_no_less_than = `${pageParam}`;
       }
-      return await commonApiFetch<Drop[]>({
-        endpoint: `drops/`,
+      return await commonApiFetch<TypedFeedItem[]>({
+        endpoint: `feed/`,
         params,
       });
     },
@@ -71,12 +49,12 @@ export default function Brain() {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
   });
 
-  const [drops, setDrops] = useState<Drop[]>([]);
+  const [items, setItems] = useState<TypedFeedItem[]>([]);
 
-  useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
+  useEffect(() => setItems(data?.pages.flat() ?? []), [data]);
 
   const onBottomIntersection = (state: boolean) => {
-    if (drops.length < REQUEST_SIZE) {
+    if (items.length < REQUEST_SIZE) {
       return;
     }
     if (!state) {
@@ -110,7 +88,7 @@ export default function Brain() {
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
 
-  if (!showDrops) {
+  if (!showFeed) {
     return null;
   }
 
@@ -119,13 +97,13 @@ export default function Brain() {
       <div className="tw-max-w-2xl tw-mx-auto">
         <h1 className="tw-block tw-float-none">Stream</h1>
         <div className="tw-mt-4 lg:tw-mt-6">
-          {!drops.length && !isFetching && (
+          {!items.length && !isFetching && (
             <div className="tw-text-sm tw-italic tw-text-iron-500">
-              No Drops to show
+              No Feed to show
             </div>
           )}
-          <DropListWrapper
-            drops={drops}
+          <FeedWrapper
+            items={items}
             loading={isFetching}
             showWaveInfo={true}
             availableCredit={

@@ -7,7 +7,7 @@ export default function DropsListItemSubscribeDrop({
 }: {
   readonly drop: Drop;
 }) {
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(true);
   const listRef = useRef<HTMLDivElement>(null);
   const title = !!drop.subscribed_actions.length ? "Subscribed" : "Subscribe";
   return (
