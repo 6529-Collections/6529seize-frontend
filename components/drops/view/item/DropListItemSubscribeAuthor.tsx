@@ -33,7 +33,7 @@ export default function DropListItemSubscribeAuthor({
   const components: Record<SUBSCRIBED_STATE, React.ReactNode> = {
     [SUBSCRIBED_STATE.SUBSCRIBED]: (
       <svg
-        className="tw-h-3 tw-w-3 "
+        className="tw-h-3 tw-w-3"
         width="17"
         height="15"
         viewBox="0 0 17 15"

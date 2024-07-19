@@ -88,7 +88,7 @@ export default function DropsListItem({
         quotedPartId={quoteModePartId}
         onSuccessfulQuote={() => setQuoteModePartId(null)}
       />
-      <div className="tw-pb-4 sm:tw-pb-4 tw-pt-2 sm:tw-pt-3">
+      <div className="tw-pt-2 sm:tw-pt-3">
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
@@ -100,7 +100,7 @@ export default function DropsListItem({
               showWaveInfo={showWaveInfo}
               onQuote={onQuote}
             />
-            <div className="tw-absolute tw-right-2 tw-top-1">
+            <div className="tw-absolute tw-right-4">
               <DropsListItemSubscribeDrop drop={drop} />
             </div>
           </div>

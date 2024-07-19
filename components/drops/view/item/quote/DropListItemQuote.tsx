@@ -64,7 +64,7 @@ export default function DropListItemQuote({
     ),
   };
   return (
-    <div className="tw-w-full tw-py-5 tw-px-4 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-700">
+    <div className="tw-w-full tw-py-4 tw-px-4 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-700">
       {components[connectionStatus]}
     </div>
   );
