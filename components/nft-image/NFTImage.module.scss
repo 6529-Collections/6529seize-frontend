@@ -36,7 +36,8 @@
 }
 
 .height650 {
-  max-height: 650px !important;
+  height: 650px !important;
+  max-width: 100%;
 
   iframe,
   video,
@@ -55,6 +56,7 @@
 
 .height300 {
   height: 300px !important;
+  max-width: 100%;
 
   iframe,
   video,
