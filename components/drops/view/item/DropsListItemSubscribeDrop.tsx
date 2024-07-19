@@ -11,10 +11,10 @@ export default function DropsListItemSubscribeDrop({
   const listRef = useRef<HTMLDivElement>(null);
   const title = !!drop.subscribed_actions.length ? "Subscribed" : "Subscribe";
   return (
-    <div className="tw-relative" ref={listRef}>
+    <div className="tw-relative tw-z-20" ref={listRef}>
       <button
         type="button"
-        className="tw-bg-transparent tw-h-full tw-border-0 tw-block tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-full tw-h-8 tw-w-8 tw-border-0  tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
         id="options-menu-0-button"
         aria-expanded="false"
         aria-haspopup="true"

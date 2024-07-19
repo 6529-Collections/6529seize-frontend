@@ -81,9 +81,9 @@ export default function DropPartDiscussionItems({
     fetchNextPage();
   };
   return (
-    <div>
+    <div className="tw-pb-2">
       <div className={`${!isFetching && "tw-overflow-y-auto"} tw-max-h-72`}>
-        <div >
+        <div>
           {comments.map((item) => (
             <DropPartDiscussionItem key={item.id} item={item} />
           ))}

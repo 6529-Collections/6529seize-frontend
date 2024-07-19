@@ -11,23 +11,21 @@ export default function DropPartActionTriggersVoteVoters({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
-      <div className="tw-flex -tw-space-x-2">
+      <div className="tw-flex tw-items-center -tw-space-x-2">
         {drop.top_raters.map((rater) => (
           <Tippy
             key={rater.profile.id}
             content={`${rater.profile.handle} - ${rater.rating}`}
           >
-            <div>
-              {rater.profile.pfp ? (
-                <img
-                  src={rater.profile.pfp}
-                  alt=""
-                  className="tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-ring-2 tw-ring-black"
-                />
-              ) : (
-                <div className="tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-ring-2 tw-ring-black" />
-              )}
-            </div>
+            {rater.profile.pfp ? (
+              <img
+                src={rater.profile.pfp}
+                alt="Profile Picture"
+                className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800"
+              />
+            ) : (
+              <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800" />
+            )}
           </Tippy>
         ))}
       </div>

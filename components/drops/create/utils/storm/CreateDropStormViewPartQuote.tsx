@@ -71,7 +71,7 @@ export default function CreateDropStormViewPartQuote({
   );
   useEffect(() => setPartConfig(getPartConfig()), [drop]);
   return (
-    <div className="tw-max-w-[516px] tw-ml-12 tw-mt-4 tw-p-2 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid tw-w-full">
+    <div className="tw-mt-2 tw-p-2 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid tw-w-full">
       {!!partConfig && (
         <DropPart
           profile={profile}

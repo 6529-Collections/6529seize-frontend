@@ -39,10 +39,12 @@ export default function DropPartActionTriggers({
         <DropPartQuoteButton dropPart={dropPart} onQuote={onQuote} />
       </div>
       <div className="tw-inline-flex tw-space-x-4 tw-items-center">
-        <DropPartActionTriggersVoteVotings drop={drop} />
-        {!!drop.raters_count && (
-          <DropPartActionTriggersVoteVoters drop={drop} />
-        )}
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <DropPartActionTriggersVoteVotings drop={drop} />
+          {!!drop.raters_count && (
+            <DropPartActionTriggersVoteVoters drop={drop} />
+          )}
+        </div>
         <DropListItemRateGive
           drop={drop}
           voteState={voteState}
