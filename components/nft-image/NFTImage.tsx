@@ -115,9 +115,7 @@ export default function NFTImage(props: Readonly<Props>) {
   return (
     <Col
       xs={12}
-      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
-        styles.imageWrapper
-      } ${props.height === 300 ? styles.height300 : ""} ${bgStyle}`}>
+      className={`mb-2 text-center d-flex align-items-center justify-content-center ${styles.imageWrapper} ${heightStyle} ${bgStyle}`}>
       <Image
         loading="eager"
         priority
@@ -126,6 +124,8 @@ export default function NFTImage(props: Readonly<Props>) {
         style={{
           height: "auto",
           width: "auto",
+          maxWidth: "100%",
+          maxHeight: "100%",
         }}
         id={props.id ?? `image-${props.nft.id}`}
         src={
@@ -147,7 +147,6 @@ export default function NFTImage(props: Readonly<Props>) {
           }
         }}
         alt={props.nft.name}
-        className={heightStyle}
       />
       <NFTImageBalance {...props} />
     </Col>
