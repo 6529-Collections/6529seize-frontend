@@ -36,21 +36,13 @@
 }
 
 .height650 {
-  height: 650px !important;
+  max-height: 650px !important;
   max-width: 100%;
 
   iframe,
   video,
   .modelViewer {
     height: 650px;
-  }
-
-  @media only screen and (max-width: 1200px) {
-    iframe,
-    video,
-    .modelViewer {
-      height: 350px;
-    }
   }
 }
 
