@@ -81,6 +81,25 @@ export default function DropsListItem({
     }
   };
 
+  const getCanSubscribe = () => {
+    if (!connectedProfile?.profile?.handle) {
+      return false;
+    }
+    if (activeProfileProxy) {
+      return false;
+    }
+    if (drop.author.handle === connectedProfile.profile.handle) {
+      return false;
+    }
+    return true;
+  };
+
+  const [canSubscribe, setCanSubscribe] = useState(getCanSubscribe());
+  useEffect(
+    () => setCanSubscribe(getCanSubscribe()),
+    [connectedProfile, activeProfileProxy, drop]
+  );
+
   return (
     <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
       <DropListItemCreateQuote
@@ -98,11 +117,14 @@ export default function DropsListItem({
               canVote={canVote}
               availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
+              smallMenuIsShown={canSubscribe}
               onQuote={onQuote}
             />
-            <div className="tw-absolute tw-right-4">
-              <DropsListItemSubscribeDrop drop={drop} />
-            </div>
+            {canSubscribe && (
+              <div className="tw-absolute tw-right-4">
+                <DropsListItemSubscribeDrop drop={drop} />
+              </div>
+            )}
           </div>
         </div>
       </div>

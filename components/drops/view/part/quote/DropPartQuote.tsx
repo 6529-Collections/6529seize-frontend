@@ -58,6 +58,7 @@ export default function DropPartQuote({
         mentionedUsers={drop.mentioned_users}
         referencedNfts={drop.referenced_nfts}
         partContent={quotedPart.content ?? null}
+        smallMenuIsShown={false}
         partMedia={
           quotedPart.media.length
             ? {

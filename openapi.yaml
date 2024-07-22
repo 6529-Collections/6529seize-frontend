@@ -1373,6 +1373,92 @@ paths:
         "404":
           description: Wave not found
 
+  /public/waves-overview:
+    get:
+      tags:
+        - Waves
+      summary: Get overview of waves by different criteria.
+      operationId: getPublicWavesOverview
+      parameters:
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+            default: 10
+        - name: offset
+          in: query
+          description: Used to find next waves
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: type
+          in: query
+          description: Type of overview
+          required: true
+          schema:
+            type: string
+            enum:
+              - LATEST
+              - MOST_SUBSCRIBED
+              - HIGH_LEVEL_AUTHOR
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+
+  /waves-overview:
+    get:
+      tags:
+        - Waves
+      summary: Get overview of waves by different criteria. User must be authenticated. Public alternative is /public/waves-overview.
+      operationId: getWavesOverview
+      parameters:
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+            default: 10
+        - name: offset
+          in: query
+          description: Used to find next waves
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: type
+          in: query
+          description: Type of overview
+          required: true
+          schema:
+            $ref: "#/components/schemas/WavesOverviewType"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+
   /waves:
     get:
       tags:
@@ -3588,6 +3674,14 @@ components:
           $ref: "#/components/schemas/FeedItemType"
         item:
           type: object
+
+    WavesOverviewType:
+      type: string
+      enum:
+        - LATEST
+        - MOST_SUBSCRIBED
+        - HIGH_LEVEL_AUTHOR
+        - AUTHOR_YOU_HAVE_REPPED
 
 security:
   - bearerAuth: []
