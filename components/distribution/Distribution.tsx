@@ -9,7 +9,11 @@ import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { Distribution, DistributionPhoto } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
-import { capitalizeEveryWord, numberWithCommas } from "../../helpers/Helpers";
+import {
+  areEqualAddresses,
+  capitalizeEveryWord,
+  numberWithCommas,
+} from "../../helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import {
   SearchModalDisplay,
@@ -17,6 +21,8 @@ import {
 } from "../searchModal/SearchModal";
 import DotLoader from "../dotLoader/DotLoader";
 import Address from "../address/Address";
+import { MEMES_CONTRACT } from "../../constants";
+import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 
 enum Sort {
   phase = "phase",
@@ -243,6 +249,25 @@ export default function DistributionPage(props: Readonly<Props>) {
     );
   }
 
+  function printMintingLink() {
+    const nftIdNumber = parseInt(nftId ?? "");
+    if (isNaN(nftIdNumber)) {
+      return <></>;
+    }
+
+    if (areEqualAddresses(props.contract, MEMES_CONTRACT)) {
+      return <MemePageMintCountdown nft_id={nftIdNumber} />;
+    }
+
+    return (
+      <Button
+        className="seize-btn btn-white"
+        onClick={() => window.open(props.minting_link, "_blank")}>
+        Minting Page
+      </Button>
+    );
+  }
+
   return (
     <>
       <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -256,11 +281,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                     <span className="font-lightest">{props.header}</span> Card #
                     {nftId} Distribution
                   </h1>
-                  <Button
-                    className="seize-btn btn-white"
-                    onClick={() => window.open(props.minting_link, "_blank")}>
-                    Minting Page
-                  </Button>
+                  {printMintingLink()}
                 </Col>
               </Row>
               {distributionPhotos.length > 0 && (
@@ -277,16 +298,28 @@ export default function DistributionPage(props: Readonly<Props>) {
               </Row>
               <Row>
                 {!fetching && distributions.length === 0 && (
-                  <Col>
-                    <Image
-                      width="0"
-                      height="0"
-                      style={{ height: "auto", width: "100px" }}
-                      src="/SummerGlasses.svg"
-                      alt="SummerGlasses"
-                    />{" "}
-                    Nothing found
-                  </Col>
+                  <>
+                    <Col xs={12}>
+                      <Image
+                        width="0"
+                        height="0"
+                        style={{ height: "auto", width: "100px" }}
+                        src="/SummerGlasses.svg"
+                        alt="SummerGlasses"
+                      />{" "}
+                      The Distribution Plan will be made available soon!
+                    </Col>
+                    <Col xs={12}>
+                      Please check back later and make sure to also check the{" "}
+                      <a
+                        href="https://twitter.com/6529Collections"
+                        target="_blank"
+                        rel="noreferrer">
+                        &#64;6529Collections
+                      </a>{" "}
+                      account on X for drop updates.
+                    </Col>
+                  </>
                 )}
               </Row>
             </Container>

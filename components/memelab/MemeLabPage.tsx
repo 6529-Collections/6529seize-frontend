@@ -25,6 +25,7 @@ import {
   numberWithCommas,
   addProtocol,
   printMintDate,
+  parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
 import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
@@ -44,6 +45,7 @@ import {
   getDimensionsFromMetadata,
 } from "../../helpers/nft.helplers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import NFTAttributes from "../nftAttributes/NFTAttributes";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -1161,7 +1163,7 @@ export default function LabPage(props: Readonly<Props>) {
                   <Row>
                     <Col
                       dangerouslySetInnerHTML={{
-                        __html: parseDescription(nft.description),
+                        __html: parseNftDescriptionToHtml(nft.description),
                       }}></Col>
                   </Row>
                 </Container>
@@ -1178,25 +1180,9 @@ export default function LabPage(props: Readonly<Props>) {
                     </Col>
                   </Row>
                   <Row>
-                    {nft.metadata.attributes.map((a: any) => (
-                      <Col
-                        key={a.trait_type}
-                        xs={{ span: 6 }}
-                        sm={{ span: 3 }}
-                        md={{ span: 2 }}
-                        lg={{ span: 2 }}
-                        className="pt-2 pb-2">
-                        <Container>
-                          <Row>
-                            <Col className={styles.nftAttribute}>
-                              <span>{a.trait_type}</span>
-                              <br />
-                              <span title={a.value}>{a.value}</span>
-                            </Col>
-                          </Row>
-                        </Container>
-                      </Col>
-                    ))}
+                    <Col>
+                      <NFTAttributes attributes={nft.metadata.attributes} />
+                    </Col>
                   </Row>
                 </Container>
               </Col>
@@ -1232,15 +1218,6 @@ export default function LabPage(props: Readonly<Props>) {
         </Row>
       </Container>
     );
-  }
-
-  function parseDescription(description: string) {
-    let d = description.replaceAll("\n", "<br />");
-    d = d.replace(
-      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
-      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
-    );
-    return d;
   }
 
   function printActivity() {

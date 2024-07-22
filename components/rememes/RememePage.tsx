@@ -19,7 +19,9 @@ import {
   isUrl,
   numberWithCommas,
   parseIpfsUrl,
+  parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
+import NFTAttributes from "../nftAttributes/NFTAttributes";
 
 interface Props {
   contract: string;
@@ -39,15 +41,6 @@ export default function RememePage(props: Readonly<Props>) {
 
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
-
-  function parseDescription(description: string) {
-    let d = description.replaceAll("\n", "<br />");
-    d = d.replace(
-      /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/gi,
-      '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
-    );
-    return d;
-  }
 
   useEffect(() => {
     if (props.contract && props.id) {
@@ -358,7 +351,7 @@ export default function RememePage(props: Readonly<Props>) {
             <Col
               xs={12}
               dangerouslySetInnerHTML={{
-                __html: parseDescription(rememe.metadata.description),
+                __html: parseNftDescriptionToHtml(rememe.metadata.description),
               }}></Col>
           </Row>
           <Row className="pt-4">
@@ -405,25 +398,7 @@ export default function RememePage(props: Readonly<Props>) {
               <Col xs={12}>
                 <h1>Attributes</h1>
               </Col>
-              {getAttributes().map((a: any) => (
-                <Col
-                  key={a.trait_type}
-                  xs={{ span: 6 }}
-                  sm={{ span: 3 }}
-                  md={{ span: 2 }}
-                  lg={{ span: 2 }}
-                  className="pt-2 pb-2">
-                  <Container>
-                    <Row>
-                      <Col className={styles.nftAttribute}>
-                        <span>{a.trait_type}</span>
-                        <br />
-                        <span title={a.value}>{a.value}</span>
-                      </Col>
-                    </Row>
-                  </Container>
-                </Col>
-              ))}
+              <NFTAttributes attributes={getAttributes()} />
             </Row>
           )}
         </>

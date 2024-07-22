@@ -10,7 +10,7 @@ interface Props {
   animation: boolean;
   showThumbnail?: boolean;
   showOriginal?: boolean;
-  height: 300 | 650;
+  height: 300 | 650 | "full";
   balance: number;
   showOwned?: boolean;
   transparentBG?: boolean;
@@ -20,6 +20,16 @@ interface Props {
 }
 
 export default function NFTImage(props: Readonly<Props>) {
+  let heightStyle;
+  if (props.height === "full") {
+    heightStyle = styles.heightFull;
+  } else if (props.height === 650) {
+    heightStyle = styles.height650;
+  } else {
+    heightStyle = styles.height300;
+  }
+  let bgStyle = props.transparentBG ? styles.transparentBG : "";
+
   useEffect(() => {
     if (props.onLoad) {
       props.onLoad();
@@ -34,17 +44,16 @@ export default function NFTImage(props: Readonly<Props>) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} ${
-          props.transparentBG ? styles.transparentBG : ""
-        } d-flex justify-content-center align-items-center`}>
+        className={`${styles.nftAnimation} ${heightStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
         <NFTImageBalance {...props} />
         <iframe
+          title={props.id}
           src={
             props.nft.metadata.animation
               ? props.nft.metadata.animation
               : props.nft.metadata.animation_url
           }
-          id={`${props.id && `${props.id}`}`}
+          id={props.id ?? `iframe-${props.nft.id}`}
         />
       </Col>
     );
@@ -58,11 +67,9 @@ export default function NFTImage(props: Readonly<Props>) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} ${
-          props.transparentBG ? styles.transparentBG : ""
-        } d-flex justify-content-center align-items-center`}>
+        className={`${styles.nftAnimation} ${heightStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
         <NFTImageBalance {...props} />
-        <NFTModel nft={props.nft} />
+        <NFTModel nft={props.nft} id={props.id} />
       </Col>
     );
   }
@@ -76,14 +83,10 @@ export default function NFTImage(props: Readonly<Props>) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} ${
-          props.height === 650 ? styles.height650 : styles.height300
-        } ${
-          props.transparentBG ? styles.transparentBG : ""
-        } d-flex justify-content-center align-items-center`}>
+        className={`${styles.nftAnimation} ${heightStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
         <NFTImageBalance {...props} />
         <video
-          id={`${props.id && `${props.id}`}`}
+          id={props.id ?? `video-${props.nft.id}`}
           autoPlay
           muted
           controls
@@ -112,11 +115,7 @@ export default function NFTImage(props: Readonly<Props>) {
   return (
     <Col
       xs={12}
-      className={`mb-2 text-center d-flex align-items-center justify-content-center ${
-        styles.imageWrapper
-      } ${props.height === 300 ? styles.height300 : ""} ${
-        props.transparentBG && styles.transparentBG
-      }`}>
+      className={`mb-2 text-center d-flex align-items-center justify-content-center ${styles.imageWrapper} ${heightStyle} ${bgStyle}`}>
       <Image
         loading="eager"
         priority
@@ -128,7 +127,7 @@ export default function NFTImage(props: Readonly<Props>) {
           maxWidth: "100%",
           maxHeight: "100%",
         }}
-        id={`${props.id && `${props.id}`}`}
+        id={props.id ?? `image-${props.nft.id}`}
         src={
           props.showThumbnail
             ? props.nft.thumbnail
@@ -148,7 +147,6 @@ export default function NFTImage(props: Readonly<Props>) {
           }
         }}
         alt={props.nft.name}
-        className={props.height === 650 ? styles.height650 : ""}
       />
       <NFTImageBalance {...props} />
     </Col>

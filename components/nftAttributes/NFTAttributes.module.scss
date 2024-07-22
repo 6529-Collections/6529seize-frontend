@@ -1,0 +1,21 @@
+@import "../../styles/variables.scss";
+
+.nftAttribute {
+  border: 1px solid $font-color;
+  text-align: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  span:nth-of-type(1) {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  span:nth-of-type(2) {
+    font-size: 15px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+}
