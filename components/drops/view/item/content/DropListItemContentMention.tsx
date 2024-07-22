@@ -15,6 +15,7 @@ export default function DropListItemContentMention({
       content={<UserProfileTooltip user={user.mentioned_profile_id} />}
     >
       <Link
+        onClick={(e) => e.stopPropagation()}
         href={`/${user.handle_in_content}`}
         target="_blank"
         className="tw-no-underline tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"

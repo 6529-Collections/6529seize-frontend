@@ -82,7 +82,12 @@ export default function DropListItemContentNft({
   const target = getTarget();
 
   return (
-    <Link href={nftHref} className="tw-no-underline" target={target}>
+    <Link
+      onClick={(e) => e.stopPropagation()}
+      href={nftHref}
+      className="tw-no-underline"
+      target={target}
+    >
       <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col" ref={elementRef}>
         <div className="tw-w-full tw-h-full">
           {nft && (

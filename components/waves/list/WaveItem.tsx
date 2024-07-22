@@ -1,13 +1,28 @@
 import Link from "next/link";
 import { Wave } from "../../../generated/models/Wave";
 import { getRandomColorWithSeed } from "../../../helpers/Helpers";
-import DropPart, { DropPartSize } from "../../drops/view/part/DropPart";
+import WaveItemEnding from "./WaveItemEnding";
+import WaveItemDropped from "./WaveItemDropped";
+import WaveItemJoin from "./WaveItemJoin";
 
 export default function WaveItem({ wave }: { readonly wave: Wave }) {
   const banner1 =
     wave.author.banner1_color ?? getRandomColorWithSeed(wave.author.handle);
   const banner2 =
     wave.author.banner2_color ?? getRandomColorWithSeed(wave.author.handle);
+
+  const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
+    { minLevel: 0, classes: "tw-text-[#DA8C60] tw-ring-[#DA8C60]" },
+    { minLevel: 20, classes: "tw-text-[#DAAC60] tw-ring-[#DAAC60]" },
+    { minLevel: 40, classes: "tw-text-[#DAC660] tw-ring-[#DAC660]" },
+    { minLevel: 60, classes: "tw-text-[#AABE68] tw-ring-[#AABE68]" },
+    { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
+  ].reverse();
+
+  const getColorClasses = () =>
+    LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= wave.author.level)
+      ?.classes ?? LEVEL_CLASSES[0].classes;
+
   return (
     <div className="tw-pb-4 tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
       <div
@@ -40,12 +55,15 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
         </div>
       </div>
       <div className="tw-mt-4 tw-px-4">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <Link
+          href={`${wave.author.handle}`}
+          className="tw-no-underline tw-flex tw-items-center tw-gap-x-2"
+        >
           <div className="tw-h-6 tw-w-6">
-            {wave.picture ? (
+            {wave.author.pfp ? (
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-                src={wave.picture}
+                src={wave.author.pfp}
                 alt="#"
               />
             ) : (
@@ -53,12 +71,14 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
             )}
           </div>
           <span className="tw-text-sm tw-font-semibold tw-text-white">
-            punk6529
+            {wave.author.handle}
           </span>
-          <div className="tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[#55B075] tw-ring-[#55B075] tw-text-[0.625rem] tw-leading-3">
-            Level 88
+          <div
+            className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+          >
+            Level {wave.author.level}
           </div>
-        </div>
+        </Link>
         <div className="tw-flex tw-items-center tw-justify-between tw-mt-6">
           <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300">
             <svg
@@ -98,61 +118,13 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
               <span>420</span> <span className="tw-text-iron-400">Joined</span>
             </span>
           </div>
-          <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300">
-            <svg
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
-              />
-            </svg>
-            <span>
-              <span className="tw-text-iron-400">Ending in</span>{" "}
-              <span>7 days</span>
-            </span>
-          </div>
+          <WaveItemEnding wave={wave} />
         </div>
         <div className="tw-flex tw-items-center tw-mt-6">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <div className="tw-flex -tw-space-x-1">
-              <div className="tw-h-6 tw-w-6">
-                <img
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
-                  src="https://cdn.iconscout.com/icon/free/png-256/ethereum-1-283135.png"
-                  alt="#"
-                />
-              </div>
-              <div className="tw-h-6 tw-w-6">
-                <img
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
-                  src="https://cdn.iconscout.com/icon/free/png-256/ethereum-1-283135.png"
-                  alt="#"
-                />
-              </div>
-              <div className="tw-h-6 tw-w-6">
-                <img
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
-                  src="https://cdn.iconscout.com/icon/free/png-256/ethereum-1-283135.png"
-                  alt="#"
-                />
-              </div>
-            </div>
-            <span className="tw-text-sm">
-              <span className="tw-text-iron-300">+1,123</span>{" "}
-              <span className="tw-text-iron-400">Drops</span>
-            </span>
-          </div>
+          <WaveItemDropped wave={wave} />
           <div className="tw-flex tw-items-center tw-gap-x-3 tw-ml-auto">
-            <button
-              type="button"
+            <Link
+              href={`/waves/${wave.id}`}
               className="tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
@@ -175,41 +147,11 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
                   d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                 />
               </svg>
-            </button>
-            <button
-              type="button"
-              className="tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <span>JOIN</span>
-            </button>
+            </Link>
+            <WaveItemJoin wave={wave} />
           </div>
         </div>
       </div>
-
-      {/*   <div className="tw-mt-4 tw-px-4 tw-flex tw-items-center tw-gap-x-3">
-        <div className="tw-px-4 tw-py-4 tw-w-full tw-rounded-lg tw-bg-iron-800">
-          <DropPart
-            profile={wave.author}
-            mentionedUsers={wave.description_drop.mentioned_users}
-            referencedNfts={wave.description_drop.referenced_nfts}
-            partContent={wave.description_drop.parts[0].content ?? null}
-            smallMenuIsShown={false}
-            partMedia={
-              wave.description_drop.parts[0].media[0]
-                ? {
-                    mimeType: wave.description_drop.parts[0].media[0].mime_type,
-                    mediaSrc: wave.description_drop.parts[0].media[0].url,
-                  }
-                : null
-            }
-            showFull={false}
-            createdAt={wave.description_drop.created_at}
-            dropTitle={wave.description_drop.title}
-            wave={null}
-            size={DropPartSize.SMALL}
-          />
-        </div>
-      </div> */}
     </div>
   );
 }

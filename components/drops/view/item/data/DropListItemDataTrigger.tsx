@@ -7,7 +7,10 @@ export default function DropListItemDataTrigger({
 }) {
   return (
     <button
-      onClick={() => setOpen(!open)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setOpen(!open);
+      }}
       type="button"
       className={`${
         open

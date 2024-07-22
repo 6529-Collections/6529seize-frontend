@@ -218,12 +218,12 @@ const CreateDropContent = forwardRef<
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
               )}
               {viewType === CreateDropViewType.FULL && (
-                <Tippy content="Add storm">
+                <Tippy content="Break into storm">
                   <button
                     onClick={onDropPart}
                     disabled={!canAddPart}
                     type="button"
-                    aria-label="Add storm"
+                    aria-label="Break into storm"
                     className={`tw-absolute tw-group tw-top-2 tw-right-3 tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-ease-out tw-transition tw-duration-300 
                     ${
                       !canAddPart
@@ -264,12 +264,12 @@ const CreateDropContent = forwardRef<
                 </Tippy>
               )}
               {viewType === CreateDropViewType.COMPACT && (
-                <Tippy content="Add storm">
+                <Tippy content="Break into storm">
                   <button
                     onClick={onDropPart}
                     disabled={!canAddPart}
                     type="button"
-                    aria-label="Add storm"
+                    aria-label="Break into storm"
                     className={`tw-absolute tw-group tw-top-1 tw-right-11 tw-p-2 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-ease-out tw-transition tw-duration-300 
                     ${
                       !canAddPart
@@ -324,7 +324,9 @@ const CreateDropContent = forwardRef<
                 Part:{" "}
                 <span className="tw-text-iron-50">{currentPartCount}</span>,
               </span>
-              <span className="tw-pl-1">
+              <span
+                className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`}
+              >
                 length: {formatNumberWithCommas(charsCount)}
               </span>
             </>

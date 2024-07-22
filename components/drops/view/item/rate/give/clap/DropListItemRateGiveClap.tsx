@@ -230,7 +230,10 @@ export default function DropListItemRateGiveClap({
           disabled={!rate || !canVote}
           id={`clap-${randomID}`}
           className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-outline-1 tw-outline-transparent tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
-          onClick={handleClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick();
+          }}
         >
           <span>
             <svg

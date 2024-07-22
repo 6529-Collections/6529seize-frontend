@@ -16,7 +16,10 @@ export default function DropPartDiscussionButton({
     !!dropPart.context_profile_context?.discussion_comments_count;
   return (
     <button
-      onClick={() => setIsDiscussionOpen(!isDiscussionOpen)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsDiscussionOpen(!isDiscussionOpen);
+      }}
       type="button"
       title="Discuss"
       className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 

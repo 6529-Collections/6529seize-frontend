@@ -1,28 +1,204 @@
+import { useContext, useEffect, useState } from "react";
 import { Wave } from "../../../generated/models/Wave";
+import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import WaveItem from "./WaveItem";
+import { AuthContext } from "../../auth/Auth";
+import { WavesOverviewParams } from "../../../types/waves.types";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import WaveItem from "./WaveItem";
+
+const LABELS: Record<WavesOverviewType, string> = {
+  [WavesOverviewType.Latest]: "Latest",
+  [WavesOverviewType.MostSubscribed]: "Most subscribed",
+  [WavesOverviewType.HighLevelAuthor]: "High Level Authors",
+  [WavesOverviewType.AuthorYouHaveRepped]: "Waves from Authors You Have Repped",
+};
+
+const SHOW_ALL_REQUEST_SIZE = 12;
+const NORMAL_REQUEST_SIZE = 3;
 
 export default function WavesListWrapper({
-  label,
-  waves,
+  overviewType,
+  showAllType,
+  setShowAllType,
 }: {
-  readonly label: string;
-  readonly waves: Wave[];
+  readonly overviewType: WavesOverviewType;
+  readonly showAllType: WavesOverviewType | null;
+  readonly setShowAllType: (type: WavesOverviewType | null) => void;
 }) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const isShowAll = showAllType === overviewType;
+
+  const getUsePublicWaves = () =>
+    !connectedProfile?.profile?.handle || !!activeProfileProxy;
+  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
+
+  useEffect(
+    () => setUsePublicWaves(getUsePublicWaves()),
+    [connectedProfile, activeProfileProxy]
+  );
+
+  const getParams = (): Omit<WavesOverviewParams, "offset"> => {
+    return {
+      limit: isShowAll ? SHOW_ALL_REQUEST_SIZE : NORMAL_REQUEST_SIZE,
+      type: overviewType,
+    };
+  };
+
+  const [params, setParams] = useState<Omit<WavesOverviewParams, "offset">>(
+    getParams()
+  );
+  useEffect(() => setParams(getParams()), [overviewType, isShowAll]);
+
+  const {
+    data: wavesAuth,
+    fetchNextPage: fetchNextPageAuth,
+    hasNextPage: hasNextPageAuth,
+    isFetching: isFetchingAuth,
+    isFetchingNextPage: isFetchingNextPageAuth,
+    status: statusAuth,
+  } = useInfiniteQuery({
+    queryKey: [QueryKey.WAVES, params],
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      const queryParams: Record<string, string> = {
+        limit: `${params.limit}`,
+        offset: `${pageParam}`,
+        type: params.type,
+      };
+      return await commonApiFetch<Wave[]>({
+        endpoint: `waves-overview`,
+        params: queryParams,
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (_, allPages) => allPages.flat().length,
+    enabled: !usePublicWaves,
+  });
+
+  const {
+    data: wavesPublic,
+    fetchNextPage: fetchNextPagePublic,
+    hasNextPage: hasNextPagePublic,
+    isFetching: isFetchingPublic,
+    isFetchingNextPage: isFetchingNextPagePublic,
+    status: statusPublic,
+  } = useInfiniteQuery({
+    queryKey: [QueryKey.WAVES, params],
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      const queryParams: Record<string, string> = {
+        limit: `${params.limit}`,
+        offset: `${pageParam}`,
+        type: params.type,
+      };
+      return await commonApiFetch<Wave[]>({
+        endpoint: `public/waves-overview`,
+        params: queryParams,
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (_, allPages) => allPages.flat().length,
+    enabled: usePublicWaves,
+  });
+
+  const getWaves = (): Wave[] => {
+    if (usePublicWaves) {
+      return wavesPublic?.pages.flat() ?? [];
+    }
+    return wavesAuth?.pages.flat() ?? [];
+  };
+
+  const [waves, setWaves] = useState<Wave[]>(getWaves());
+  useEffect(
+    () => setWaves(getWaves()),
+    [wavesAuth, wavesPublic, usePublicWaves]
+  );
+
+  const onShowAll = () => {
+    if (showAllType === overviewType) {
+      setShowAllType(null);
+      return;
+    }
+    setShowAllType(overviewType);
+  };
+
+  const onBottomIntersection = (state: boolean) => {
+    if (waves.length < SHOW_ALL_REQUEST_SIZE) {
+      return;
+    }
+    if (!state) {
+      return;
+    }
+    if (usePublicWaves) {
+      if (statusPublic === "pending") {
+        return;
+      }
+      if (isFetchingPublic) {
+        return;
+      }
+      if (isFetchingNextPagePublic) {
+        return;
+      }
+      if (!hasNextPagePublic) {
+        return;
+      }
+      fetchNextPagePublic();
+      return;
+    }
+    if (statusAuth === "pending") {
+      return;
+    }
+    if (isFetchingAuth) {
+      return;
+    }
+    if (isFetchingNextPageAuth) {
+      return;
+    }
+    if (!hasNextPageAuth) {
+      return;
+    }
+    fetchNextPageAuth();
+  };
+
+  if (!waves.length) {
+    return null;
+  }
+
   return (
     <div>
-      <span className="tw-tracking-tight tw-text-2xl tw-font-medium">
-        {label}
-      </span>
+      <div className="tw-inline-flex tw-w-full tw-justify-between">
+        <span className="tw-tracking-tight tw-text-2xl tw-font-medium">
+          {LABELS[overviewType]}
+        </span>
+        <button
+          onClick={onShowAll}
+          className=" tw-bg-transparent tw-border-none
+        tw-text-iron-300 hover:tw-text-iron-400 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out
+        "
+        >
+          {isShowAll ? "Show less" : "Show all"}
+        </button>
+      </div>
       <div className="tw-overflow-hidden">
         <div className="tw-mt-2 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-4">
           {waves.map((wave) => (
-            <WaveItem key={wave.id} wave={wave} />
+            <WaveItem key={`${overviewType}-${wave.id}`} wave={wave} />
           ))}
         </div>
+        {isShowAll && (
+          <>
+            {(isFetchingAuth || isFetchingPublic) && (
+              <div className="tw-w-full tw-text-center tw-mt-8">
+                <CircleLoader size={CircleLoaderSize.XXLARGE} />
+              </div>
+            )}
+            <CommonIntersectionElement onIntersection={onBottomIntersection} />
+          </>
+        )}
       </div>
     </div>
   );

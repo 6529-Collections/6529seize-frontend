@@ -1,13 +1,8 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { Wave } from "../../../generated/models/Wave";
-import WavesListWrapper from "./WavesListWrapper";
 import { useContext, useEffect, useState } from "react";
-import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
+import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import WavesListWrapper from "./WavesListWrapper";
 
-const REQUEST_SIZE = 10;
 export default function WavesList({
   showCreateNewWaveButton,
   onCreateNewWave,
@@ -16,71 +11,25 @@ export default function WavesList({
   readonly onCreateNewWave: () => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES, { limit: REQUEST_SIZE }],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        limit: `${REQUEST_SIZE}`,
-      };
+  const [showAllType, setShowAllType] = useState<WavesOverviewType | null>(
+    null
+  );
 
-      if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
-      }
-
-      return await commonApiFetch<Wave[]>({
-        endpoint: `waves/`,
-        params,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-  });
-
-  const [waves, setWaves] = useState<Wave[]>([]);
-
-  useEffect(() => setWaves(data?.pages.flat() ?? []), [data]);
-
-  const onBottomIntersection = (state: boolean) => {
-    if (waves.length < REQUEST_SIZE) {
-      return;
+  const getWaveOverviewTypes = (): WavesOverviewType[] => {
+    const types = showAllType
+      ? Object.values(WavesOverviewType).filter((t) => t === showAllType)
+      : Object.values(WavesOverviewType);
+    if (!connectedProfile?.profile?.handle || !!activeProfileProxy) {
+      return types.filter((t) => t !== WavesOverviewType.AuthorYouHaveRepped);
     }
-    if (!state) {
-      return;
-    }
-    if (status === "pending") {
-      return;
-    }
-    if (isFetching) {
-      return;
-    }
-    if (isFetchingNextPage) {
-      return;
-    }
-    if (!hasNextPage) {
-      return;
-    }
-    fetchNextPage();
+    return types;
   };
 
-  const { data: availableRateResponse } =
-    useQuery<ProfileAvailableDropRateResponse>({
-      queryKey: [
-        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
-        connectedProfile?.profile?.handle,
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ProfileAvailableDropRateResponse>({
-          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
-        }),
-      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
-    });
+  const [overviewTypes, setOverviewTypes] = useState(getWaveOverviewTypes());
+  useEffect(
+    () => setOverviewTypes(getWaveOverviewTypes()),
+    [connectedProfile, activeProfileProxy, showAllType]
+  );
 
   return (
     <div className="tailwind-scope">
@@ -136,22 +85,15 @@ export default function WavesList({
           </div>
         </div>
         <div className="tw-mt-6">
-          {!waves.length && !isFetching && (
-            <div className="tw-text-sm tw-italic tw-text-iron-500">
-              No Waves to show
-            </div>
-          )}
           <div className="tw-space-y-12">
-            <WavesListWrapper waves={waves.slice(0, 3)} label="Latest" />
-            <WavesListWrapper
-              waves={waves.slice(0, 3)}
-              label="Most Subscribers"
-            />
-            <WavesListWrapper waves={waves.slice(0, 3)} label="By Level >50" />
-            <WavesListWrapper
-              waves={waves.slice(0, 3)}
-              label="By People You Have Repped"
-            />
+            {overviewTypes.map((type) => (
+              <WavesListWrapper
+                key={type}
+                overviewType={type}
+                showAllType={showAllType}
+                setShowAllType={setShowAllType}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -46,6 +46,7 @@ export default function DropAuthorHandle({
       className={`${textClasses} tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50`}
     >
       <Link
+        onClick={(e) => e.stopPropagation()}
         href={`/${handle}`}
         className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
       >
