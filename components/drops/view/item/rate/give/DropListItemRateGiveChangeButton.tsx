@@ -70,7 +70,7 @@ export default function DropListItemRateGiveChangeButton({
       onClick={(e) => e.stopPropagation()}
       disabled={!canVote}
       aria-label={ariaLabels[type]}
-      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent tw-h-4 tw-w-4 tw-transition-all tw-duration-300 tw-ease-out`}
+      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent tw-h-6 tw-w-6 tw-transition-all tw-duration-300 tw-ease-out`}
     >
       <svg
         className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-rotate-90"

@@ -21,10 +21,10 @@ export default function DropPartActionTriggersVoteVoters({
               <img
                 src={rater.profile.pfp}
                 alt="Profile Picture"
-                className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800"
+                className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-700"
               />
             ) : (
-              <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800" />
+              <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-700" />
             )}
           </Tippy>
         ))}
@@ -32,6 +32,7 @@ export default function DropPartActionTriggersVoteVoters({
       <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
         {formatNumberWithCommas(drop.raters_count)} {label}
       </span>
+      <div className="tw-h-1 tw-w-1 tw-bg-iron-700 tw-flex-shrink-0"></div>
     </div>
   );
 }
