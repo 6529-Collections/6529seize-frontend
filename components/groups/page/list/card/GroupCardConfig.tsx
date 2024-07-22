@@ -12,7 +12,7 @@ export default function GroupCardConfig({
     [GroupDescriptionType.CIC]: "CIC",
     [GroupDescriptionType.LEVEL]: "Level",
     [GroupDescriptionType.OWNS_NFTS]: "Owns NFTs",
-    [GroupDescriptionType.WALLETS]: "Wallets",
+    [GroupDescriptionType.WALLETS]: "Identities",
   };
 
   return (

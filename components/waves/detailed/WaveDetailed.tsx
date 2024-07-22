@@ -13,13 +13,26 @@ import { useQuery } from "@tanstack/react-query";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
+import { useSearchParams } from "next/navigation";
+import WaveSingleDrop from "./drops/WaveSingleDrop";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const searchParams = useSearchParams();
+
+  const getActiveDropId = (): string | null => {
+    const dropId = searchParams.get("drop");
+    return dropId ?? null;
+  };
+
+  const [activeDropId, setActiveDropId] = useState<string | null>(
+    getActiveDropId()
+  );
+  useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
 
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-  connectedProfile.level >= 0  &&
+    connectedProfile.level >= 0 &&
     !activeProfileProxy;
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
@@ -61,19 +74,30 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
             )}
           </div>
           <div className="tw-w-[672px] tw-overflow-hidden">
-            <WaveCreateDrop wave={wave} />
-            <WaveDescriptionDrop
-              wave={wave}
-              availableCredit={
-                availableRateResponse?.available_credit_for_rating ?? null
-              }
-            />
-            <WaveDrops
-              wave={wave}
-              availableCredit={
-                availableRateResponse?.available_credit_for_rating ?? null
-              }
-            />
+            {activeDropId ? (
+              <WaveSingleDrop
+                dropId={activeDropId}
+                availableCredit={
+                  availableRateResponse?.available_credit_for_rating ?? null
+                }
+              />
+            ) : (
+              <>
+                <WaveCreateDrop wave={wave} />
+                <WaveDescriptionDrop
+                  wave={wave}
+                  availableCredit={
+                    availableRateResponse?.available_credit_for_rating ?? null
+                  }
+                />
+                <WaveDrops
+                  wave={wave}
+                  availableCredit={
+                    availableRateResponse?.available_credit_for_rating ?? null
+                  }
+                />
+              </>
+            )}
           </div>
         </div>
       </div>

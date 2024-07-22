@@ -7,6 +7,7 @@ import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
+import { useRouter } from "next/router";
 
 export interface DropPartWrapperProps {
   readonly drop: Drop;
@@ -27,6 +28,7 @@ export default function DropPartWrapper({
   onQuote,
   children,
 }: DropPartWrapperProps) {
+  const router = useRouter();
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
 
@@ -41,14 +43,42 @@ export default function DropPartWrapper({
   };
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
+
+  const onDropClick = ({
+    waveId,
+    dropId,
+  }: {
+    readonly waveId: string;
+    readonly dropId: string;
+  }) => {
+    router.push(`/waves/${waveId}?drop=${dropId}`, undefined, {
+      shallow: true,
+    });
+  };
   return (
     <div>
-      <div className="tw-flex tw-w-full tw-h-full">
+      <div
+        className="tw-flex tw-w-full tw-h-full tw-cursor-pointer"
+        onClick={() => onDropClick({ waveId: drop.wave.id, dropId: drop.id })}
+      >
         <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
           <div className="tw-flex-1 tw-px-4 tw-relative tw-z-20">
             {children}
             <div>
-              {quotedDrop && <DropPartQuote quotedDrop={quotedDrop} />}
+              {quotedDrop && (
+                <div
+                  className="tw-cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDropClick({
+                      waveId: drop.wave.id,
+                      dropId: quotedDrop.drop_id,
+                    });
+                  }}
+                >
+                  <DropPartQuote quotedDrop={quotedDrop} />
+                </div>
+              )}
             </div>
           </div>
           <div className="tw-relative tw-z-10">

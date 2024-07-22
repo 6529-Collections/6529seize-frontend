@@ -102,7 +102,6 @@ export default function UserPageHeaderSubscribe({
       return;
     }
     if (isSubscribed) {
-      console.log("yep");
       await unSubscribeMutation.mutateAsync();
       return;
     }

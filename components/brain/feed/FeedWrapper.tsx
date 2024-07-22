@@ -21,7 +21,6 @@ export default function FeedWrapper({
   availableCredit,
   onBottomIntersection,
 }: FeedWrapperProps) {
-  console.log(items);
   return (
     <div className="tw-overflow-hidden">
       <FeedItems

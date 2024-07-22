@@ -58,6 +58,7 @@ export enum QueryKey {
   EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
   WAVES = "WAVES",
+  WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVE = "WAVE",
   FEED_ITEMS = "FEED_ITEMS",
 }
@@ -932,6 +933,9 @@ export default function ReactQueryWrapper({
   const invalidateAllWaves = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_PUBLIC],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVE],

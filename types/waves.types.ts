@@ -1,6 +1,7 @@
 import { WaveCreditType } from "../generated/models/WaveCreditType";
 import { WaveMetadataType } from "../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../generated/models/WaveParticipationRequirement";
+import { WavesOverviewType } from "../generated/models/WavesOverviewType";
 import { WaveType } from "../generated/models/WaveType";
 
 export enum WaveSignatureType {
@@ -126,4 +127,9 @@ export interface SearchWavesParams {
   readonly limit: number;
   readonly serial_no_less_than?: number;
   readonly group_id?: string;
+}
+export interface WavesOverviewParams {
+  limit: number;
+  offset: number;
+  type: WavesOverviewType;
 }

@@ -264,9 +264,6 @@ const CreateDropWrapper = forwardRef<
     }, [waveProps, wave, drop, file]);
 
     const getCanSubmitStorm = () => {
-      if (!drop?.parts.length) {
-        return true;
-      }
       const markdown = getMarkdown();
       if (markdown?.length && markdown.length > 240) {
         return false;

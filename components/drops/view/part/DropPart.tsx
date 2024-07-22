@@ -1,19 +1,10 @@
-import {
-  ReactNode,
-  ClassAttributes,
-  AnchorHTMLAttributes,
-  memo,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
+import { ReactNode, ClassAttributes, AnchorHTMLAttributes, memo } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import { DropContentPartType } from "../item/content/DropListItemContent";
 import DropListItemContentPart, {
   DropListItemContentPartProps,
@@ -21,7 +12,6 @@ import DropListItemContentPart, {
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
-import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
 import Link from "next/link";
@@ -152,7 +142,17 @@ const aHrefRenderer = ({
   if (!isValidLink) {
     return <p>[invalid link]</p>;
   }
-  return <a {...props} />;
+  return (
+    <a
+      onClick={(e) => {
+        e.stopPropagation();
+        if (props.onClick) {
+          props.onClick(e);
+        }
+      }}
+      {...props}
+    />
+  );
 };
 
 const DropPart = memo(
@@ -230,7 +230,7 @@ const DropPart = memo(
         {/* <CommonAnimationHeight onAnimationCompleted={checkOverflow}> */}
         <div
           // ref={containerRef}
-          className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+          className="tw-cursor-pointer tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
         >
           <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
@@ -251,6 +251,7 @@ const DropPart = memo(
                   <div>
                     {wave?.id && (
                       <Link
+                        onClick={(e) => e.stopPropagation()}
                         href={`/waves/${wave.id}`}
                         className="tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
                       >
@@ -268,7 +269,14 @@ const DropPart = memo(
                 )}
                 <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
                   {onPrevPart && showPrevButton && (
-                    <button onClick={onPrevPart}>&lt;</button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPrevPart();
+                      }}
+                    >
+                      &lt;
+                    </button>
                   )}
                   <div
                     className={`${
@@ -388,7 +396,14 @@ const DropPart = memo(
                     )}
                   </div>
                   {onNextPart && showNextButton && (
-                    <button onClick={onNextPart}>&gt;</button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNextPart();
+                      }}
+                    >
+                      &gt;
+                    </button>
                   )}
                 </div>
               </div>
