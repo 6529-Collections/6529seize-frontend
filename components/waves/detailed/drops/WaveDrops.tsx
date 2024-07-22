@@ -2,8 +2,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import DropListWrapper from "../../../drops/view/DropListWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { useRouter } from "next/router";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -25,9 +23,6 @@ export default function WaveDrops({
   readonly wave: Wave;
   readonly availableCredit: number | null;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
   const [query, setQuery] = useState<Query>({
@@ -103,7 +98,7 @@ export default function WaveDrops({
     <DropListWrapper
       drops={drops}
       loading={isFetching}
-      showWaveInfo={false}
+      showWaveInfo={true}
       availableCredit={availableCredit}
       onBottomIntersection={onBottomIntersection}
     />

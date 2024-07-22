@@ -4,42 +4,42 @@ import { DropVote } from "../generated/models/DropVote";
 import { FeedItemType } from "../generated/models/FeedItemType";
 import { Wave } from "../generated/models/Wave";
 
-export type FeedItemWaveCreated = {
+export type IFeedItemWaveCreated = {
   readonly serial_no: number;
   readonly item: Wave;
   readonly type: FeedItemType.WaveCreated;
 };
 
-export type FeedItemDropCreated = {
+export type IFeedItemDropCreated = {
   readonly serial_no: number;
   readonly item: Drop;
   readonly type: FeedItemType.DropCreated;
 };
 
-export type FeedItemDropCommentedItem = {
+export type IFeedItemDropCommentedItem = {
   readonly drop: Drop;
   readonly comment: DropComment;
 };
 
-export type FeedItemDropCommented = {
+export type IFeedItemDropCommented = {
   readonly serial_no: number;
-  readonly item: FeedItemDropCommentedItem;
+  readonly item: IFeedItemDropCommentedItem;
   readonly type: FeedItemType.DropCommented;
 };
 
-export type FeedItemDropVotedItem = {
+export type IFeedItemDropVotedItem = {
   readonly drop: Drop;
   readonly vote: DropVote;
 };
 
-export type FeedItemDropVoted = {
+export type IFeedItemDropVoted = {
   readonly serial_no: number;
-  readonly item: FeedItemDropVotedItem;
+  readonly item: IFeedItemDropVotedItem;
   readonly type: FeedItemType.DropVoted;
 };
 
 export type TypedFeedItem =
-  | FeedItemWaveCreated
-  | FeedItemDropCreated
-  | FeedItemDropCommented
-  | FeedItemDropVoted;
+  | IFeedItemWaveCreated
+  | IFeedItemDropCreated
+  | IFeedItemDropCommented
+  | IFeedItemDropVoted;
