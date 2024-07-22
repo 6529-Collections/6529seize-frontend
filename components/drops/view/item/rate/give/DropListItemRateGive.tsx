@@ -218,7 +218,7 @@ export default function DropListItemRateGive({
       }
     >
       <div className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-        <div className="tw-w-full tw-inline-flex tw-items-center tw-gap-x-1">
+        <div className="tw-w-full tw-inline-flex tw-items-center">
           <DropListItemRateGiveChangeButton
             canVote={canVote}
             type={RateChangeType.DECREASE}

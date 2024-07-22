@@ -40,10 +40,12 @@ export default function DropPartActionTriggers({
       </div>
       <div className="tw-inline-flex tw-space-x-4 tw-items-center">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <DropPartActionTriggersVoteVotings drop={drop} />
           {!!drop.raters_count && (
             <DropPartActionTriggersVoteVoters drop={drop} />
+            
           )}
+         
+          <DropPartActionTriggersVoteVotings drop={drop} />
         </div>
         <DropListItemRateGive
           drop={drop}

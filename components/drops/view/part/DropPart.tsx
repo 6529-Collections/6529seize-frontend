@@ -270,12 +270,27 @@ const DropPart = memo(
                 <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
                   {onPrevPart && showPrevButton && (
                     <button
+                      className="tw-bg-transparent tw-rounded-lg tw-border-0 tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
                       onClick={(e) => {
                         e.stopPropagation();
                         onPrevPart();
                       }}
                     >
-                      &lt;
+                      <svg
+                        className="tw-size-5 tw-flex-shrink-0"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.75 19.5 8.25 12l7.5-7.5"
+                        />
+                      </svg>
                     </button>
                   )}
                   <div
@@ -397,12 +412,27 @@ const DropPart = memo(
                   </div>
                   {onNextPart && showNextButton && (
                     <button
+                      className="tw-bg-transparent tw-rounded-lg tw-border-0 tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
                       onClick={(e) => {
                         e.stopPropagation();
                         onNextPart();
                       }}
                     >
-                      &gt;
+                      <svg
+                        className="tw-size-5 tw-flex-shrink-0"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                        />
+                      </svg>
                     </button>
                   )}
                 </div>
