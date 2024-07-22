@@ -77,6 +77,7 @@ export default function CreateDropStormViewPartQuote({
           profile={profile}
           mentionedUsers={partConfig.mentionedUsers}
           referencedNfts={partConfig.referencedNfts}
+          smallMenuIsShown={false}
           partContent={partConfig.part.content ?? null}
           partMedia={
             partConfig.part.media.length

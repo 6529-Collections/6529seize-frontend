@@ -1,15 +1,96 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import { AnimatePresence, motion } from "framer-motion";
+import { useMutation } from "@tanstack/react-query";
+import {
+  commonApiDeleWithBody,
+  commonApiPost,
+} from "../../../../services/api/common-api";
+import { DropSubscriptionActions } from "../../../../generated/models/DropSubscriptionActions";
+import { DropSubscriptionTargetAction } from "../../../../generated/models/DropSubscriptionTargetAction";
+import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "../../../auth/Auth";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../distribution-plan-tool/common/CircleLoader";
 
 export default function DropsListItemSubscribeDrop({
   drop,
 }: {
   readonly drop: Drop;
 }) {
-  const [isOptionsOpen, setIsOptionsOpen] = useState(true);
+  const { setToast, requestAuth } = useContext(AuthContext);
+  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const title = !!drop.subscribed_actions.length ? "Subscribed" : "Subscribe";
+  const isSubscribed = !!drop.subscribed_actions.length;
+  const title = isSubscribed ? "Subscribed" : "Subscribe";
+  const [mutating, setMutating] = useState(false);
+
+  const subscribeMutation = useMutation({
+    mutationFn: async () => {
+      await commonApiPost<DropSubscriptionActions, DropSubscriptionActions>({
+        endpoint: `drops/${drop.id}/subscriptions`,
+        body: {
+          actions: Object.values(DropSubscriptionTargetAction),
+        },
+      });
+    },
+    onSuccess: () => {
+      setIsOptionsOpen(false);
+      invalidateDrops();
+    },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
+    onSettled: () => {
+      setMutating(false);
+    },
+  });
+
+  const unSubscribeMutation = useMutation({
+    mutationFn: async () => {
+      await commonApiDeleWithBody<
+        DropSubscriptionActions,
+        DropSubscriptionActions
+      >({
+        endpoint: `drops/${drop.id}/subscriptions`,
+        body: {
+          actions: Object.values(DropSubscriptionTargetAction),
+        },
+      });
+    },
+    onSuccess: () => {
+      setIsOptionsOpen(false);
+      invalidateDrops();
+    },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
+    onSettled: () => {
+      setMutating(false);
+    },
+  });
+
+  const onSubscribe = async (): Promise<void> => {
+    setMutating(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      setMutating(false);
+      return;
+    }
+    if (isSubscribed) {
+      await unSubscribeMutation.mutateAsync();
+      return;
+    }
+    await subscribeMutation.mutateAsync();
+  };
   return (
     <div className="tw-relative tw-z-20" ref={listRef}>
       <button
@@ -49,7 +130,9 @@ export default function DropsListItemSubscribeDrop({
             <div>
               <button
                 type="button"
+                disabled={mutating}
                 onClick={(e) => {
+                  onSubscribe();
                   e.stopPropagation();
                 }}
                 className="tw-bg-transparent tw-w-full tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
@@ -57,7 +140,11 @@ export default function DropsListItemSubscribeDrop({
                 tabIndex={-1}
                 id="options-menu-0-item-0"
               >
-                {title}
+                {mutating ? (
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
+                ) : (
+                  title
+                )}
               </button>
             </div>
           </motion.div>

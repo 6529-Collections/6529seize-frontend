@@ -159,6 +159,7 @@ type ReactQueryWrapperContextType = {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
   onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
+  onRedrop: (params: { readonly reDropId: string }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
@@ -193,6 +194,7 @@ export const ReactQueryWrapperContext =
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     onDropCreate: () => {},
+    onRedrop: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
     onDropDiscussionChange: () => {},
@@ -846,6 +848,22 @@ export default function ReactQueryWrapper({
       key: QueryKey.WAVE,
       values: [{ wave_id: drop.wave.id }],
     });
+    invalidateQueries({
+      key: QueryKey.DROP,
+      values: [{ drop_id: drop.id }],
+    });
+  };
+
+  const onRedrop = ({ reDropId }: { readonly reDropId: string }) => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP, { drop_id: reDropId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_DROPS],
+    });
   };
 
   const onDropDiscussionChange = ({
@@ -861,6 +879,9 @@ export default function ReactQueryWrapper({
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP, { drop_id: dropId }],
     });
     queryClient.invalidateQueries({
       queryKey: [
@@ -924,6 +945,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_DROPS],
+    });
   };
 
   const onWaveCreated = () => invalidateAllWaves();
@@ -956,6 +980,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
+      onRedrop,
       onDropChange,
       onDropDiscussionChange,
       onIdentityBulkRate,
@@ -982,6 +1007,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
+      onRedrop,
       onDropChange,
       onDropDiscussionChange,
       onIdentityBulkRate,
