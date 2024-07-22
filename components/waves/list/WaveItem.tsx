@@ -50,6 +50,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
             mentionedUsers={wave.description_drop.mentioned_users}
             referencedNfts={wave.description_drop.referenced_nfts}
             partContent={wave.description_drop.parts[0].content ?? null}
+            smallMenuIsShown={false}
             partMedia={
               wave.description_drop.parts[0].media[0]
                 ? {

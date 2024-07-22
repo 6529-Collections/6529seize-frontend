@@ -101,6 +101,7 @@ export * from '../models/WaveSubscriptionTargetAction';
 export * from '../models/WaveType';
 export * from '../models/WaveVisibilityConfig';
 export * from '../models/WaveVotingConfig';
+export * from '../models/WavesOverviewType';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
@@ -205,6 +206,7 @@ import { WaveSubscriptionTargetAction } from '../models/WaveSubscriptionTargetAc
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
 import { WaveVotingConfig         } from '../models/WaveVotingConfig';
+import { WavesOverviewType } from '../models/WavesOverviewType';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -239,6 +241,7 @@ let enumsMap: Set<string> = new Set<string>([
     "WaveParticipationRequirement",
     "WaveSubscriptionTargetAction",
     "WaveType",
+    "WavesOverviewType",
 ]);
 
 let typeMap: {[index: string]: any} = {

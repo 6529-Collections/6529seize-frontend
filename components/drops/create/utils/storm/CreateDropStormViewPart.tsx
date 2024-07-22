@@ -60,6 +60,7 @@ const CreateDropStormViewPart = memo(
                 partContent={part.content}
                 partMedia={partMedia}
                 createdAt={createdAt}
+                smallMenuIsShown={false}
                 wave={wave}
                 dropTitle={dropTitle}
               />

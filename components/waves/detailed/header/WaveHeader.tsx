@@ -40,27 +40,29 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white">
                 {wave.name}
               </h1>
-              <div className="tw-flex tw-items-center">
-                <div className="tw-flex -tw-space-x-2">
-                  {wave.contributors_overview.map((item) => (
-                    <img
-                      key={item.contributor_identity}
-                      className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                      src={item.contributor_pfp}
-                      alt=""
-                    />
-                  ))}
+              {!!wave.contributors_overview.length && (
+                <div className="tw-flex tw-items-center">
+                  <div className="tw-flex -tw-space-x-2">
+                    {wave.contributors_overview.map((item) => (
+                      <img
+                        key={item.contributor_identity}
+                        className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
+                        src={item.contributor_pfp}
+                        alt=""
+                      />
+                    ))}
+                  </div>
+                  {wave.contributors_overview.length < 5 ? (
+                    <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                      dropped
+                    </span>
+                  ) : (
+                    <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                      and others dropped
+                    </span>
+                  )}
                 </div>
-                {wave.contributors_overview.length < 5 ? (
-                  <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                    dropped
-                  </span>
-                ) : (
-                  <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                    and others dropped
-                  </span>
-                )}
-              </div>
+              )}
             </div>
           </div>
 

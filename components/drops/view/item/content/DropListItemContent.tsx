@@ -6,7 +6,6 @@ import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropVoteState } from "../DropsListItem";
 import DropListItemSubscribeAuthor from "../DropListItemSubscribeAuthor";
 import { AuthContext } from "../../../../auth/Auth";
-import DropsListItemSubscribeDrop from "../DropsListItemSubscribeDrop";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -20,6 +19,7 @@ interface DropListItemContentProps {
   readonly canVote: boolean;
   readonly availableCredit: number | null;
   readonly showWaveInfo?: boolean;
+  readonly smallMenuIsShown: boolean;
   readonly onQuote: (dropPartId: number | null) => void;
 }
 
@@ -30,6 +30,7 @@ export default function DropListItemContent({
   canVote,
   availableCredit,
   showWaveInfo = true,
+  smallMenuIsShown,
   onQuote,
 }: DropListItemContentProps) {
   const partsCount = drop.parts.length;
@@ -43,6 +44,8 @@ export default function DropListItemContent({
     () => setActivePart(drop.parts[activePartIndex]),
     [activePartIndex]
   );
+
+  useEffect(() => setActivePart(drop.parts[activePartIndex]), [drop]);
 
   const getShowNextButton = () => {
     if (!isStorm) {
@@ -128,6 +131,7 @@ export default function DropListItemContent({
             referencedNfts={drop.referenced_nfts}
             partContent={activePart.content ?? null}
             isStorm={isStorm}
+            smallMenuIsShown={smallMenuIsShown}
             partMedia={
               activePart.media.length
                 ? {

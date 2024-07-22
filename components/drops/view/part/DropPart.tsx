@@ -58,6 +58,7 @@ export interface DropPartProps {
   readonly showNextButton?: boolean;
   readonly showPrevButton?: boolean;
   readonly isStorm?: boolean;
+  readonly smallMenuIsShown: boolean;
   readonly components?: {
     readonly authorSubscribe?: ReactNode;
   };
@@ -170,6 +171,7 @@ const DropPart = memo(
     showNextButton = false,
     showPrevButton = false,
     components,
+    smallMenuIsShown,
     onNextPart,
     onPrevPart,
   }: DropPartProps) => {
@@ -232,7 +234,11 @@ const DropPart = memo(
         >
           <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-              <div className="tw-flex tw-gap-x-3 tw-mr-10">
+              <div
+                className={`${
+                  smallMenuIsShown && "tw-mr-10"
+                } tw-flex tw-gap-x-3`}
+              >
                 <DropPfp pfpUrl={profile.pfp} size={size} />
                 <div className="tw-w-full tw-h-10 tw-flex tw-flex-col tw-justify-between">
                   <DropAuthor
