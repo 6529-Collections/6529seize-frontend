@@ -21,12 +21,16 @@ interface Props {
 
 export default function NFTImage(props: Readonly<Props>) {
   let heightStyle;
+  let imageStyle;
   if (props.height === "full") {
-    heightStyle = styles.heightFull;
+    heightStyle = "";
+    imageStyle = styles.heightFull;
   } else if (props.height === 650) {
-    heightStyle = styles.height650;
+    heightStyle = "";
+    imageStyle = styles.height650;
   } else {
     heightStyle = styles.height300;
+    imageStyle = "";
   }
   let bgStyle = props.transparentBG ? styles.transparentBG : "";
 
@@ -53,6 +57,7 @@ export default function NFTImage(props: Readonly<Props>) {
               ? props.nft.metadata.animation
               : props.nft.metadata.animation_url
           }
+          className={imageStyle}
           id={props.id ?? `iframe-${props.nft.id}`}
         />
       </Col>
@@ -97,6 +102,7 @@ export default function NFTImage(props: Readonly<Props>) {
               ? props.nft.compressed_animation
               : props.nft.animation
           }
+          className={imageStyle}
           poster={props.nft.scaled ? props.nft.scaled : props.nft.image}
           onError={({ currentTarget }) => {
             if (
@@ -121,6 +127,7 @@ export default function NFTImage(props: Readonly<Props>) {
         priority
         width="0"
         height="0"
+        className={imageStyle}
         style={{
           height: "auto",
           width: "auto",
