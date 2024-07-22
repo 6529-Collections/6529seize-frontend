@@ -838,3 +838,25 @@ export const waitForMilliseconds = async (
 ): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
+
+export function parseNftDescriptionToHtml(description: string) {
+  let d = description.replaceAll("\n", "<br />");
+  d = d.replace(
+    /(https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*))/gi,
+    '<a href=\'$1\' target="blank" rel="noreferrer">$1</a>'
+  );
+  return d;
+}
+
+export function getPathForContract(contract: string) {
+  switch (contract) {
+    case MEMES_CONTRACT:
+      return "the-memes";
+    case GRADIENT_CONTRACT:
+      return "6529-gradient";
+    case MEMELAB_CONTRACT:
+      return "meme-lab";
+    default:
+      return contract;
+  }
+}
