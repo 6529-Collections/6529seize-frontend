@@ -14,6 +14,7 @@ import {
   areEqualAddresses,
   capitalizeEveryWord,
   fromGWEI,
+  getNameForContract,
   getPathForContract,
   numberWithCommas,
   parseNftDescriptionToHtml,
@@ -229,13 +230,20 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       <Col sm={{ span: 12, order: 2 }} md={{ span: 5, order: 1 }}>
         <Container className="no-padding">
           <Row className="pt-2 pb-2">
-            <Col xs={12}>
+            <Col
+              xs={12}
+              className="d-flex align-items-center justify-content-between">
               <Link
                 href={`/${getPathForContract(props.contract)}/${
                   props.token_id
                 }`}>
-                <h3 className="pb-3">{instance.publicData.asset.name}</h3>
+                <h3 className="mb-0">{instance.publicData.asset.name}</h3>
               </Link>
+            </Col>
+            <Col xs={12} className="pt-1 pb-3 font-lighter">
+              <span>
+                {getNameForContract(props.contract)} #{props.token_id}
+              </span>
             </Col>
             <Col xs={12}>{printDescription(instance)}</Col>
             <Col xs={12} className="pt-3">
