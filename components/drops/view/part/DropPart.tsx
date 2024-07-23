@@ -45,9 +45,8 @@ export interface DropPartProps {
   readonly wave: DropPartPropsWave | null;
   readonly showFull?: boolean;
   readonly size?: DropPartSize;
-  readonly showNextButton?: boolean;
-  readonly showPrevButton?: boolean;
-  readonly isStorm?: boolean;
+  readonly totalPartsCount?: number;
+  readonly currentPartCount?: number;
   readonly smallMenuIsShown: boolean;
   readonly components?: {
     readonly authorSubscribe?: ReactNode;
@@ -166,15 +165,18 @@ const DropPart = memo(
     dropTitle,
     createdAt,
     wave,
-    isStorm = false,
     size = DropPartSize.MEDIUM,
-    showNextButton = false,
-    showPrevButton = false,
+    totalPartsCount,
+    currentPartCount,
     components,
     smallMenuIsShown,
     onNextPart,
     onPrevPart,
   }: DropPartProps) => {
+    const isStorm = totalPartsCount && totalPartsCount > 1;
+    const showPrevButton = currentPartCount && currentPartCount > 1;
+    const showNextButton =
+      currentPartCount && totalPartsCount && currentPartCount < totalPartsCount;
     // const containerRef = useRef<HTMLDivElement>(null);
     // const [isOverflowing, setIsOverflowing] = useState(false);
     // const checkOverflow = () => {
@@ -258,23 +260,27 @@ const DropPart = memo(
                         <span>{wave.name}</span>
                       </Link>
                     )}
-                    <div className="tw-inline-flex">
-                      <svg
-                        className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span className="tw-text-xs tw-text-iron-50">1/51</span>
-                    </div>
+                    {isStorm && (
+                      <div className="tw-inline-flex">
+                        <svg
+                          className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span className="tw-text-xs tw-text-iron-50">
+                          {currentPartCount}/{totalPartsCount}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -285,9 +291,14 @@ const DropPart = memo(
                   </p>
                 )}
                 <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
-                  {onPrevPart && showPrevButton && (
+                  {onPrevPart && isStorm && (
                     <button
-                      className="tw-bg-transparent tw-rounded-lg tw-border-0 tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                      disabled={!showPrevButton}
+                      className={`${
+                        showPrevButton
+                          ? "tw-text-iron-300 hover:tw-text-primary-400"
+                          : "tw-text-iron-600 tw-cursor-default"
+                      } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onPrevPart();
@@ -427,9 +438,14 @@ const DropPart = memo(
                       </div>
                     )}
                   </div>
-                  {onNextPart && showNextButton && (
+                  {onNextPart && isStorm && (
                     <button
-                      className="tw-bg-transparent tw-rounded-lg tw-border-0 tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                      className={`${
+                        showNextButton
+                          ? "tw-text-iron-300 hover:tw-text-primary-400"
+                          : "tw-text-iron-600 tw-cursor-default"
+                      } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
+                      disabled={!showNextButton}
                       onClick={(e) => {
                         e.stopPropagation();
                         onNextPart();

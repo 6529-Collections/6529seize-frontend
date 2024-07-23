@@ -964,6 +964,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_DROPS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
   };
 
   const onWaveCreated = () => invalidateAllWaves();
