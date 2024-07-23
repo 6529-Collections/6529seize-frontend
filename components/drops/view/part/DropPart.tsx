@@ -248,15 +248,17 @@ const DropPart = memo(
                   >
                     {components?.authorSubscribe}
                   </DropAuthor>
-                  {wave?.id && (
-                    <Link
-                      onClick={(e) => e.stopPropagation()}
-                      href={`/waves/${wave.id}`}
-                      className="tw-mb-0 tw-pb-0 tw-inline-flex tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-                    >
-                      <span>{wave.name}</span>
-                    </Link>
-                  )}
+                  <div className="tw-mt-1">
+                    {wave?.id && (
+                      <Link
+                        onClick={(e) => e.stopPropagation()}
+                        href={`/waves/${wave.id}`}
+                        className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                      >
+                        <span>{wave.name}</span>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="tw-mt-2 tw-h-full">

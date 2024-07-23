@@ -101,7 +101,7 @@ export default function DropsListItem({
   );
 
   return (
-    <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out">
       <DropListItemCreateQuote
         drop={drop}
         quotedPartId={quoteModePartId}
