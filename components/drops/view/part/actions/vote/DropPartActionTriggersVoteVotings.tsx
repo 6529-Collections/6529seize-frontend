@@ -24,7 +24,7 @@ export default function DropPartActionTriggersVoteVotings({
               : "tw-bg-red/20"
           } tw-ml-2 tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-transition tw-ease-out tw-duration-300`}
         >
-          <Tippy content="Your given votes">
+          <Tippy content="Your given ratings">
             <span
               className={`${
                 drop.context_profile_context.rating > 0
