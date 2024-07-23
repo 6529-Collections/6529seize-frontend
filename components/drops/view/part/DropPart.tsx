@@ -248,7 +248,7 @@ const DropPart = memo(
                   >
                     {components?.authorSubscribe}
                   </DropAuthor>
-                  <div className="tw-mt-1">
+                  <div className="tw-mt-1 tw-inline-flex tw-items-center tw-justify-between">
                     {wave?.id && (
                       <Link
                         onClick={(e) => e.stopPropagation()}
@@ -258,6 +258,23 @@ const DropPart = memo(
                         <span>{wave.name}</span>
                       </Link>
                     )}
+                    <div className="tw-inline-flex">
+                      <svg
+                        className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span className="tw-text-xs tw-text-iron-50">1/51</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -293,9 +310,6 @@ const DropPart = memo(
                       </svg>
                     </button>
                   )}
-                  <div>
-                    1/3
-                  </div>
                   <div
                     className={`${
                       isStorm && "tw-min-h-24"
