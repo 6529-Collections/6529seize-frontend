@@ -88,7 +88,7 @@ export default function WavesListWrapper({
     isFetchingNextPage: isFetchingNextPagePublic,
     status: statusPublic,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES, params],
+    queryKey: [QueryKey.WAVES_PUBLIC, params],
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       const queryParams: Record<string, string> = {
         limit: `${params.limit}`,

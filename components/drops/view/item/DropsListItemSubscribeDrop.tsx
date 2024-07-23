@@ -13,6 +13,7 @@ import { AuthContext } from "../../../auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
+import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function DropsListItemSubscribeDrop({
   drop,
@@ -23,6 +24,10 @@ export default function DropsListItemSubscribeDrop({
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+
+  useClickAway(listRef, () => setIsOptionsOpen(false));
+  useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
+
   const isSubscribed = !!drop.subscribed_actions.length;
   const title = isSubscribed ? "Subscribed" : "Subscribe";
   const [mutating, setMutating] = useState(false);
