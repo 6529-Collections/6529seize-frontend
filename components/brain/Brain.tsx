@@ -91,7 +91,7 @@ export default function Brain() {
   return (
     <div className="tailwind-scope">
       <div>
-        <div className="tw-flex tw-flex-col tw-items-center tw-pt-8 tw-pb-12">
+        <div className="tw-max-w-2xl tw-mx-auto tw-pt-8 tw-pb-12">
           <h1 className="tw-block tw-float-none">Stream</h1>
           <div className="tw-mt-4 lg:tw-mt-6">
             {!items.length && !isFetching && (
