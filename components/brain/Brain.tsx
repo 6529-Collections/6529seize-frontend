@@ -94,23 +94,25 @@ export default function Brain() {
 
   return (
     <div className="tailwind-scope">
-      <div className="tw-max-w-2xl tw-mx-auto">
-        <h1 className="tw-block tw-float-none">Stream</h1>
-        <div className="tw-mt-4 lg:tw-mt-6">
-          {!items.length && !isFetching && (
-            <div className="tw-text-sm tw-italic tw-text-iron-500">
-              No Feed to show
-            </div>
-          )}
-          <FeedWrapper
-            items={items}
-            loading={isFetching}
-            showWaveInfo={true}
-            availableCredit={
-              availableRateResponse?.available_credit_for_rating ?? null
-            }
-            onBottomIntersection={onBottomIntersection}
-          />
+      <div>
+        <div className="tw-flex tw-flex-col tw-items-center tw-pt-8 tw-pb-12">
+          <h1 className="tw-block tw-float-none">Stream</h1>
+          <div className="tw-mt-4 lg:tw-mt-6">
+            {!items.length && !isFetching && (
+              <div className="tw-text-sm tw-italic tw-text-iron-500">
+                No Feed to show
+              </div>
+            )}
+            <FeedWrapper
+              items={items}
+              loading={isFetching}
+              showWaveInfo={true}
+              availableCredit={
+                availableRateResponse?.available_credit_for_rating ?? null
+              }
+              onBottomIntersection={onBottomIntersection}
+            />
+          </div>
         </div>
       </div>
     </div>
