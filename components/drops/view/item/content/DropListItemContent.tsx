@@ -130,7 +130,7 @@ export default function DropListItemContent({
             mentionedUsers={drop.mentioned_users}
             referencedNfts={drop.referenced_nfts}
             partContent={activePart.content ?? null}
-            isStorm={isStorm}
+            totalPartsCount={partsCount}
             smallMenuIsShown={smallMenuIsShown}
             partMedia={
               activePart.media.length
@@ -152,8 +152,7 @@ export default function DropListItemContent({
             }
             createdAt={drop.created_at}
             dropTitle={drop.title}
-            showNextButton={showNextButton}
-            showPrevButton={showPrevButton}
+            currentPartCount={activePartIndex + 1}
             onNextPart={onNextPart}
             onPrevPart={onPrevPart}
             components={{
