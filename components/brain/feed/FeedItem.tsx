@@ -38,7 +38,13 @@ export default function FeedItem({
       case FeedItemType.DropCommented:
         return <FeedItemDropCommented item={item} />;
       case FeedItemType.DropVoted:
-        return <FeedItemDropVoted item={item} />;
+        return (
+          <FeedItemDropVoted
+            item={item}
+            availableCredit={availableCredit}
+            showWaveInfo={showWaveInfo}
+          />
+        );
       default:
         assertUnreachable(item);
         return <div />;

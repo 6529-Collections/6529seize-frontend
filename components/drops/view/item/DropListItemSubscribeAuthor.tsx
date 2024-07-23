@@ -153,7 +153,10 @@ export default function DropListItemSubscribeAuthor({
   return (
     <Tippy content={tooltipText[subscribedState]} placement="top">
       <button
-        onClick={onSubscribe}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSubscribe();
+        }}
         disabled={mutating}
         className={`${classes[subscribedState]} tw-flex tw-border-none tw-bg-transparent tw-py-0 tw-px-2 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
       >

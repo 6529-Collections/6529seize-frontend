@@ -771,6 +771,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
   };
 
   const dropChangeMutation = ({
@@ -853,6 +856,9 @@ export default function ReactQueryWrapper({
       key: QueryKey.DROP,
       values: [{ drop_id: drop.id }],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
   };
 
   const onRedrop = ({ reDropId }: { readonly reDropId: string }) => {
@@ -864,6 +870,9 @@ export default function ReactQueryWrapper({
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
     });
   };
 
@@ -891,6 +900,9 @@ export default function ReactQueryWrapper({
           handleOrWallet: dropAuthorHandle.toLowerCase(),
         },
       ],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
     });
   };
 
