@@ -32,18 +32,25 @@ export default function FeedItemDropCommented({
             </svg>
           </div>
 
-          <div className="tw-flex tw-gap-x-3">
+          <div className="tw-flex tw-gap-x-3 tw-items-center">
             <div className="tw-h-6 tw-w-6">
-              <img
-                src="#"
-                alt="#"
-                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-              />
+              {item.item.comment.author.pfp ? (
+                <img
+                  src={item.item.comment.author.pfp}
+                  alt="#"
+                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+                />
+              ) : (
+                <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+              )}
             </div>
             <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-              <span className="tw-font-semibold">
+              <Link
+                href={`/${item.item.comment.author.handle}`}
+                className="tw-no-underline tw-font-semibold"
+              >
                 {item.item.comment.author.handle}
-              </span>{" "}
+              </Link>{" "}
               commented
             </span>
           </div>
@@ -60,26 +67,6 @@ export default function FeedItemDropCommented({
                         <div className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
                           <div className="tw-flex tw-gap-x-3 tw-h-full">
                             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-                              {/*   <div className="tw-flex tw-gap-x-3">
-                                <DropPfp
-                                  pfpUrl={item.item.comment.author.pfp}
-                                />
-                                <div className="tw-w-full tw-h-10 tw-flex tw-flex-col tw-justify-between">
-                                  <DropAuthor
-                                    profile={item.item.comment.author}
-                                    timestamp={item.item.comment.created_at}
-                                  ></DropAuthor>
-                                  <div>
-                                    <Link
-                                      onClick={(e) => e.stopPropagation()}
-                                      href={`/waves/${item.item.drop.wave.id}`}
-                                      className="tw-flex tw-items-center tw-gap-x-2 tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-                                    >
-                                      <span>{item.item.drop.wave.name}</span>
-                                    </Link>
-                                  </div>
-                                </div>
-                              </div> */}
                               <div className="tw-h-full">
                                 <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
                                   <div className="tw-h-full tw-w-full">
