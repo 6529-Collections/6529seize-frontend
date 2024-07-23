@@ -54,6 +54,8 @@ export default function FeedItemDropCommented({
               </Link>{" "}
               commented
             </span>
+            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
+            <span className="tw-text-sm tw-text-iron-400 tw-font-normal">1h ago</span>
           </div>
         </div>
 
