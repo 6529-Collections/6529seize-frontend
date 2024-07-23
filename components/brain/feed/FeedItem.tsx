@@ -36,7 +36,13 @@ export default function FeedItem({
           />
         );
       case FeedItemType.DropCommented:
-        return <FeedItemDropCommented item={item} />;
+        return (
+          <FeedItemDropCommented
+            item={item}
+            availableCredit={availableCredit}
+            showWaveInfo={showWaveInfo}
+          />
+        );
       case FeedItemType.DropVoted:
         return (
           <FeedItemDropVoted

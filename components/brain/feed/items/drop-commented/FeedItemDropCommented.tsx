@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { IFeedItemDropCommented } from "../../../../../types/feed.types";
-import DropAuthor from "../../../../drops/create/utils/author/DropAuthor";
-import DropPfp from "../../../../drops/create/utils/DropPfp";
-import DropPart, { DropPartSize } from "../../../../drops/view/part/DropPart";
-import RateClapOutlineIcon from "../../../../utils/icons/RateClapOutlineIcon";
+import DropsListItem from "../../../../drops/view/item/DropsListItem";
 
 export default function FeedItemDropCommented({
   item,
+  showWaveInfo,
+  availableCredit,
 }: {
   readonly item: IFeedItemDropCommented;
+  readonly showWaveInfo: boolean;
+  readonly availableCredit: number | null;
 }) {
   return (
     <div className="tw-flex tw-gap-x-3">
@@ -59,73 +60,15 @@ export default function FeedItemDropCommented({
         <div className="tw-ml-12 tw-flex tw-items-stretch tw-gap-x-3">
           <div className="tw-bg-iron-700 tw-w-1 tw-flex-shrink-0"></div>
           <p className="tw-block tw-mb-0 tw-font-normal tw-text-iron-50 tw-text-md">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste
-            asperiores hic et consequunt
+            {item.item.comment.comment}
           </p>
         </div>
 
-        <div className="tw-relative tw-bg-iron-900 tw-rounded-[14px] tw-border tw-border-solid tw-border-iron-800 tw-cursor-pointer">
-          <div className="tw-w-[672px] tw-py-2 sm:tw-py-3">
-            <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
-              <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
-                <div className="tw-space-y-6 tw-h-full">
-                  <div className="tw-flex tw-w-full tw-h-full">
-                    <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
-                      <div className="tw-flex-1 tw-px-4 tw-relative tw-z-20">
-                        <div className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
-                          <div className="tw-flex tw-gap-x-3 tw-h-full">
-                            <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-                              <div className="tw-h-full">
-                                <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
-                                  <div className="tw-h-full tw-w-full">
-                                    {item.item.comment.comment}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="tw-mt-2 tw-px-4 tw-pb-4 tw-pt-1 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid">
-                            <DropPart
-                              profile={item.item.drop.author}
-                              mentionedUsers={item.item.drop.mentioned_users}
-                              referencedNfts={item.item.drop.referenced_nfts}
-                              partContent={
-                                item.item.drop.parts[0].content ?? null
-                              }
-                              smallMenuIsShown={false}
-                              partMedia={
-                                item.item.drop.parts[0].media.length
-                                  ? {
-                                      mimeType:
-                                        item.item.drop.parts[0].media[0]
-                                          .mime_type,
-                                      mediaSrc:
-                                        item.item.drop.parts[0].media[0].url,
-                                    }
-                                  : null
-                              }
-                              showFull={false}
-                              createdAt={item.item.drop.created_at}
-                              dropTitle={item.item.drop.title}
-                              wave={{
-                                name: item.item.drop.wave.name,
-                                image: item.item.drop.wave.picture,
-                                id: item.item.drop.wave.id,
-                              }}
-                              size={DropPartSize.SMALL}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DropsListItem
+          drop={item.item.drop}
+          showWaveInfo={showWaveInfo}
+          availableCredit={availableCredit}
+        />
       </div>
     </div>
   );
