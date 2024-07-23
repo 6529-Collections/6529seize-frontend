@@ -268,9 +268,14 @@ const DropPart = memo(
                   </p>
                 )}
                 <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
-                  {onPrevPart && showPrevButton && (
+                  {onPrevPart && isStorm && (
                     <button
-                      className="tw-bg-transparent tw-rounded-lg tw-border-0 tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                      disabled={!showPrevButton}
+                      className={`${
+                        showPrevButton
+                          ? "tw-text-iron-300 hover:tw-text-primary-400"
+                          : "tw-text-iron-600 tw-cursor-default"
+                      } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onPrevPart();
@@ -293,9 +298,7 @@ const DropPart = memo(
                       </svg>
                     </button>
                   )}
-                  <div>
-                    1/3
-                  </div>
+                  <div>1/3</div>
                   <div
                     className={`${
                       isStorm && "tw-min-h-24"
@@ -413,9 +416,14 @@ const DropPart = memo(
                       </div>
                     )}
                   </div>
-                  {onNextPart && showNextButton && (
+                  {onNextPart && isStorm && (
                     <button
-                      className="tw-bg-transparent tw-rounded-lg tw-border-0 tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                      className={`${
+                        showNextButton
+                          ? "tw-text-iron-300 hover:tw-text-primary-400"
+                          : "tw-text-iron-600 tw-cursor-default"
+                      } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
+                      disabled={!showNextButton}
                       onClick={(e) => {
                         e.stopPropagation();
                         onNextPart();
