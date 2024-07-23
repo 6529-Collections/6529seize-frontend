@@ -31,9 +31,22 @@ export default function FeedItemDropCommented({
               />
             </svg>
           </div>
-          <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-            {item.item.comment.author.handle} commented
-          </span>
+
+          <div className="tw-flex tw-gap-x-3">
+            <div className="tw-h-6 tw-w-6">
+              <img
+                src="#"
+                alt="#"
+                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+              />
+            </div>
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+              <span className="tw-font-semibold">
+                {item.item.comment.author.handle}
+              </span>{" "}
+              commented
+            </span>
+          </div>
         </div>
 
         <div className="tw-relative tw-bg-iron-900 tw-rounded-[14px] tw-border tw-border-solid tw-border-iron-800 tw-cursor-pointer">
@@ -45,9 +58,9 @@ export default function FeedItemDropCommented({
                     <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
                       <div className="tw-flex-1 tw-px-4 tw-relative tw-z-20">
                         <div className="tw-relative tw-overflow-y-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
-                          <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
+                          <div className="tw-flex tw-gap-x-3 tw-h-full">
                             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-                              <div className="tw-flex tw-gap-x-3">
+                              {/*   <div className="tw-flex tw-gap-x-3">
                                 <DropPfp
                                   pfpUrl={item.item.comment.author.pfp}
                                 />
@@ -66,8 +79,8 @@ export default function FeedItemDropCommented({
                                     </Link>
                                   </div>
                                 </div>
-                              </div>
-                              <div className="tw-mt-2 tw-h-full">
+                              </div> */}
+                              <div className="tw-h-full">
                                 <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
                                   <div className="tw-h-full tw-w-full">
                                     {item.item.comment.comment}
