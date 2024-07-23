@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { IFeedItemDropVoted } from "../../../../../types/feed.types";
-import { numberWithCommas } from "../../../../../helpers/Helpers";
+import {
+  getTimeAgoShort,
+  numberWithCommas,
+} from "../../../../../helpers/Helpers";
 import RateClapOutlineIcon from "../../../../utils/icons/RateClapOutlineIcon";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
 
@@ -60,6 +63,10 @@ export default function FeedItemDropVoted({
                 {item.item.vote.vote > 0 && "+"}
                 {numberWithCommas(item.item.vote.vote)}
               </span>
+            </span>
+            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
+            <span className="tw-text-sm tw-text-iron-400 tw-font-normal">
+              {getTimeAgoShort(item.item.drop.created_at)}
             </span>
           </div>
         </div>

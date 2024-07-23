@@ -7,8 +7,6 @@ import { ProfileAvailableDropRateResponse } from "../../entities/IProfile";
 import FeedWrapper from "./feed/FeedWrapper";
 import { TypedFeedItem } from "../../types/feed.types";
 
-const REQUEST_SIZE = 20;
-
 export default function Brain() {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowFeed = () =>
@@ -50,9 +48,6 @@ export default function Brain() {
   useEffect(() => setItems(data?.pages.flat() ?? []), [data]);
 
   const onBottomIntersection = (state: boolean) => {
-    if (items.length < REQUEST_SIZE) {
-      return;
-    }
     if (!state) {
       return;
     }

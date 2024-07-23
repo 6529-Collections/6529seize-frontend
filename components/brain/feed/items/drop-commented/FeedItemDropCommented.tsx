@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { IFeedItemDropCommented } from "../../../../../types/feed.types";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
+import { getTimeAgoShort } from "../../../../../helpers/Helpers";
 
 export default function FeedItemDropCommented({
   item,
@@ -55,7 +56,9 @@ export default function FeedItemDropCommented({
               commented
             </span>
             <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-400 tw-font-normal">1h ago</span>
+            <span className="tw-text-sm tw-text-iron-400 tw-font-normal">
+              {getTimeAgoShort(item.item.comment.created_at)}
+            </span>
           </div>
         </div>
 
