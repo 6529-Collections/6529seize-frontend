@@ -20,7 +20,13 @@ export default function FeedItem({
   const getComponent = (): JSX.Element => {
     switch (item.type) {
       case FeedItemType.WaveCreated:
-        return <FeedItemWaveCreated item={item} />;
+        return (
+          <FeedItemWaveCreated
+            item={item}
+            showWaveInfo={showWaveInfo}
+            availableCredit={availableCredit}
+          />
+        );
       case FeedItemType.DropCreated:
         return (
           <FeedItemDropCreated

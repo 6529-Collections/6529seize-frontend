@@ -22,7 +22,7 @@ export default function FeedWrapper({
   onBottomIntersection,
 }: FeedWrapperProps) {
   return (
-    <div className="tw-overflow-hidden">
+    <div className="tw-relative">
       <FeedItems
         items={items}
         showWaveInfo={showWaveInfo}
