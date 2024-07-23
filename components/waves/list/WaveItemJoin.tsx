@@ -22,7 +22,7 @@ export default function WaveItemJoin({ wave }: { readonly wave: Wave }) {
     useContext(AuthContext);
   const { onWaveSubscriptionChange } = useContext(ReactQueryWrapperContext);
   const isSubscribed = !!wave.subscribed_actions.length;
-  const label = isSubscribed ? "JOINED" : "JOIN";
+  const label = isSubscribed ? "Joined" : "Join";
   const getCanSubscribe = () =>
     !!connectedProfile?.profile?.handle && !activeProfileProxy;
   const [canSubscribe, setCanSubscribe] = useState(getCanSubscribe());
@@ -51,7 +51,7 @@ export default function WaveItemJoin({ wave }: { readonly wave: Wave }) {
 
   const CLASSES: Record<WaveItemJoinState, string> = {
     [WaveItemJoinState.JOINED]:
-      "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700",
+      "tw-bg-iron-800 tw-ring-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-650",
     [WaveItemJoinState.JOIN]:
       "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white",
     [WaveItemJoinState.CANT_JOIN]:
@@ -126,9 +126,45 @@ export default function WaveItemJoin({ wave }: { readonly wave: Wave }) {
       onClick={onSubscribe}
       type="button"
       disabled={isDisabled}
-      className={`${CLASSES[state]} tw-flex tw-items-center tw-gap-x-2 tw-px-3.5 tw-py-2.5 sm:tw-text-sm tw-rounded-lg tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+      className={`${CLASSES[state]} tw-flex tw-items-center tw-gap-x-2 tw-px-3.5 tw-py-2.5 sm:tw-text-sm tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
     >
-      {mutating ? <CircleLoader /> : label}
+      {mutating ? (
+        <CircleLoader />
+      ) : isSubscribed ? (
+        <svg
+          className="tw-h-3 tw-w-3"
+          viewBox="0 0 17 15"
+          fill="none"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="17"
+          height="15"
+        >
+          <path
+            d="M14.7953 0.853403L5.24867 10.0667L2.71534 7.36007C2.24867 6.92007 1.51534 6.8934 0.982005 7.26674C0.462005 7.6534 0.315338 8.3334 0.635338 8.88007L3.63534 13.7601C3.92867 14.2134 4.43534 14.4934 5.00867 14.4934C5.55534 14.4934 6.07534 14.2134 6.36867 13.7601C6.84867 13.1334 16.0087 2.2134 16.0087 2.2134C17.2087 0.986737 15.7553 -0.093263 14.7953 0.84007V0.853403Z"
+            fillRule="evenodd"
+            clipRule="evenodd"
+            fill="currentColor"
+          ></path>
+        </svg>
+      ) : (
+        <svg
+          className="tw-h-5 tw-w-5 -tw-ml-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 5V19M5 12H19"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          ></path>
+        </svg>
+      )}
+      {!mutating && label}
     </button>
   );
 }
