@@ -85,7 +85,7 @@ export default function WavesList({
           </div>
         </div>
         <div className="tw-mt-6">
-          <div className="tw-space-y-12">
+          <div className="tw-space-y-8">
             {overviewTypes.map((type) => (
               <WavesListWrapper
                 key={type}

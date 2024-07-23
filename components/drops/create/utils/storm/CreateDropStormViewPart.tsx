@@ -49,8 +49,8 @@ const CreateDropStormViewPart = memo(
     const quotedDrop = part.quoted_drop;
 
     return (
-      <div className="tw-p-2 tw-my-2 tw-bg-iron-800/40 tw-rounded-lg">
-        <div className="tw-flex tw-w-full tw-justify-between">
+      <div className="tw-py-2 tw-px-3 tw-my-2 tw-bg-iron-800/40 tw-rounded-lg">
+        <div className="tw-flex tw-w-full tw-justify-between tw-gap-x-3">
           <div className="tw-flex tw-flex-col tw-w-full">
             <div className="tw-flex tw-flex-col tw-items-stretch">
               <DropPart

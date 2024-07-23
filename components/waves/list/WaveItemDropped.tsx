@@ -18,7 +18,7 @@ export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
         ))}
       </div>
       <span className="tw-text-sm">
-        <span className="tw-text-iron-300">+1,123</span>{" "}
+        <span className="tw-text-iron-50 tw-font-medium">+1,123</span>{" "}
         <span className="tw-text-iron-400">Drops</span>
       </span>
     </div>
