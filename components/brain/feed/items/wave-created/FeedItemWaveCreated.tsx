@@ -12,7 +12,7 @@ export default function FeedItemWaveCreated({
 }) {
   return (
     <div className="tw-flex tw-gap-x-3">
-      <div className="tw-mt-0.5 tw-flex-1 tw-space-y-2">
+      <div className="tw-space-y-3">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="md:tw-absolute md:-tw-left-10 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
