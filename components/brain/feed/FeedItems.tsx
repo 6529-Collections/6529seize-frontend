@@ -14,8 +14,8 @@ export default function FeedItems({
   availableCredit,
 }: FeedItemsProps) {
   return (
-    <div className="tw-flex tw-gap-x-3">
-      <div className="tw-flex tw-flex-col tw-gap-y-5 tw-max-w-[672px]">
+    <div className="tw-w-full tw-flex tw-gap-x-3">
+      <div className="tw-flex tw-flex-col tw-gap-y-5 tw-w-[672px]">
         {items.map((item, i) => (
           <FeedItem
             key={`feed-item-${item.type}-${i}`}
