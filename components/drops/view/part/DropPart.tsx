@@ -261,7 +261,7 @@ const DropPart = memo(
                       </Link>
                     )}
                     {isStorm && (
-                      <div className="tw-inline-flex">
+                      <div className="tw-inline-flex tw-relative -tw-right-5">
                         <svg
                           className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
                           viewBox="0 0 24 24"
@@ -321,11 +321,7 @@ const DropPart = memo(
                       </svg>
                     </button>
                   )}
-                  <div
-                    className={`${
-                      isStorm && ""
-                    } tw-h-full tw-w-full`}
-                  >
+                  <div className={`${isStorm && ""} tw-h-full tw-w-full`}>
                     <Markdown
                       rehypePlugins={[
                         [
