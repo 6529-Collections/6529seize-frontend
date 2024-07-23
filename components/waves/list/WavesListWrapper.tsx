@@ -184,7 +184,7 @@ export default function WavesListWrapper({
         </button>
       </div>
       <div className="tw-overflow-hidden">
-        <div className="tw-mt-2 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-4">
+        <div className="tw-mt-3 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-4">
           {waves.map((wave) => (
             <WaveItem key={`${overviewType}-${wave.id}`} wave={wave} />
           ))}
