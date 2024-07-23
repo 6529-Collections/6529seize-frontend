@@ -293,6 +293,9 @@ const DropPart = memo(
                       </svg>
                     </button>
                   )}
+                  <div>
+                    1/3
+                  </div>
                   <div
                     className={`${
                       isStorm && "tw-min-h-24"
