@@ -860,3 +860,16 @@ export function getPathForContract(contract: string) {
       return contract;
   }
 }
+
+export function getNameForContract(contract: string) {
+  switch (contract) {
+    case MEMES_CONTRACT:
+      return "The Memes";
+    case GRADIENT_CONTRACT:
+      return "6529 Gradient";
+    case MEMELAB_CONTRACT:
+      return "Meme Lab";
+    default:
+      return contract;
+  }
+}
