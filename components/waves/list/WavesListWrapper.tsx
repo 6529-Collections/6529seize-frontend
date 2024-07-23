@@ -170,14 +170,14 @@ export default function WavesListWrapper({
 
   return (
     <div>
-      <div className="tw-inline-flex tw-w-full tw-justify-between">
-        <span className="tw-tracking-tight tw-text-2xl tw-font-medium">
+      <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
+        <span className="tw-tracking-tight tw-text-xl tw-font-semibold tw-text-iron-50">
           {LABELS[overviewType]}
         </span>
         <button
           onClick={onShowAll}
           className=" tw-bg-transparent tw-border-none
-        tw-text-iron-300 hover:tw-text-iron-400 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out
+        tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out
         "
         >
           {isShowAll ? "Show less" : "Show all"}
