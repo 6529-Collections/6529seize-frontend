@@ -129,7 +129,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
           </div>
           <WaveItemEnding wave={wave} />
         </div>
-        <div className="tw-flex tw-items-center tw-mt-6">
+        <div className="tw-flex tw-items-center tw-mt-4">
           <WaveItemDropped wave={wave} />
           <div className="tw-flex tw-items-center tw-gap-x-3 tw-ml-auto">
             <Link

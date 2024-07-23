@@ -297,7 +297,7 @@ const DropPart = memo(
                       className={`${
                         showPrevButton
                           ? "tw-text-iron-300 hover:tw-text-primary-400"
-                          : "tw-text-iron-600 tw-cursor-default"
+                          : "tw-text-iron-700 tw-cursor-default"
                       } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -323,7 +323,7 @@ const DropPart = memo(
                   )}
                   <div
                     className={`${
-                      isStorm && "tw-min-h-24"
+                      isStorm && ""
                     } tw-h-full tw-w-full`}
                   >
                     <Markdown
@@ -392,7 +392,7 @@ const DropPart = memo(
                           </h1>
                         ),
                         p: (params) => (
-                          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-text-balance">
+                          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
                             {customRenderer({
                               content: params.children,
                               mentionedUsers,
@@ -443,7 +443,7 @@ const DropPart = memo(
                       className={`${
                         showNextButton
                           ? "tw-text-iron-300 hover:tw-text-primary-400"
-                          : "tw-text-iron-600 tw-cursor-default"
+                          : "tw-text-iron-700 tw-cursor-default"
                       } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
                       disabled={!showNextButton}
                       onClick={(e) => {
