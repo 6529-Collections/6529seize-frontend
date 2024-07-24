@@ -7,7 +7,7 @@ import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
 import WaveOutcomes from "./outcome/WaveOutcomes";
 import WaveSpecs from "./specs/WaveSpecs";
 import WaveGroups from "./groups/WaveGroups";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
@@ -15,9 +15,11 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useSearchParams } from "next/navigation";
 import WaveSingleDrop from "./drops/WaveSingleDrop";
+import { useRouter } from "next/router";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const getActiveDropId = (): string | null => {
@@ -54,6 +56,36 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
 
+  const onBackToList = () => {
+    const updatedQuery = { ...router.query };
+    delete updatedQuery.drop;
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: updatedQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = contentWrapperRef.current;
+
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      if (rect.top < 0) {
+        container.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "center",
+        });
+      }
+    }
+  }, [activeDropId]);
+
   if (!showDrops) {
     return null;
   }
@@ -73,13 +105,17 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
               </>
             )}
           </div>
-          <div className="tw-w-[672px] tw-overflow-hidden">
+          <div
+            className="tw-w-[672px] tw-overflow-hidden"
+            ref={contentWrapperRef}
+          >
             {activeDropId ? (
               <WaveSingleDrop
                 dropId={activeDropId}
                 availableCredit={
                   availableRateResponse?.available_credit_for_rating ?? null
                 }
+                onBackToList={onBackToList}
               />
             ) : (
               <>
