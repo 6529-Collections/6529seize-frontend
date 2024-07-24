@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Wave } from "../../../generated/models/Wave";
-import { getRandomColorWithSeed } from "../../../helpers/Helpers";
+import {
+  getRandomColorWithSeed,
+  numberWithCommas,
+} from "../../../helpers/Helpers";
 import WaveItemEnding from "./WaveItemEnding";
 import WaveItemDropped from "./WaveItemDropped";
 import WaveItemJoin from "./WaveItemJoin";
@@ -123,7 +126,9 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
               />
             </svg>
             <span>
-              <span className="tw-font-medium">420</span>{" "}
+              <span className="tw-font-medium">
+                {numberWithCommas(wave.metrics.subscribers_count)}
+              </span>{" "}
               <span className="tw-text-iron-400">Joined</span>
             </span>
           </div>

@@ -6,6 +6,7 @@ import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropVoteState } from "../DropsListItem";
 import DropListItemSubscribeAuthor from "../DropListItemSubscribeAuthor";
 import { AuthContext } from "../../../../auth/Auth";
+import { useRouter } from "next/router";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -33,6 +34,7 @@ export default function DropListItemContent({
   smallMenuIsShown,
   onQuote,
 }: DropListItemContentProps) {
+  const router = useRouter();
   const partsCount = drop.parts.length;
   const isStorm = partsCount > 1;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -114,6 +116,12 @@ export default function DropListItemContent({
     }
   };
 
+  const onContentClick = () => {
+    router.push(`/waves/${drop.wave.id}?drop=${drop.id}`, undefined, {
+      shallow: true,
+    });
+  };
+
   return (
     <CommonAnimationHeight onAnimationCompleted={scrollIntoView}>
       <div className="tw-space-y-6 tw-h-full" ref={containerRef}>
@@ -124,6 +132,7 @@ export default function DropListItemContent({
           canVote={canVote}
           availableCredit={availableCredit}
           onQuote={onQuote}
+          onContentClick={onContentClick}
         >
           <DropPart
             profile={drop.author}
@@ -155,6 +164,7 @@ export default function DropListItemContent({
             currentPartCount={activePartIndex + 1}
             onNextPart={onNextPart}
             onPrevPart={onPrevPart}
+            onContentClick={onContentClick}
             components={{
               authorSubscribe:
                 connectedProfile?.profile?.handle &&

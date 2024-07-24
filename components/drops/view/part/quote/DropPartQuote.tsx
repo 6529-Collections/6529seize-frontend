@@ -11,8 +11,10 @@ import DropPart, { DropPartSize } from "../DropPart";
 
 export default function DropPartQuote({
   quotedDrop,
+  onContentClick,
 }: {
   readonly quotedDrop: QuotedDrop;
+  readonly onContentClick?: () => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
@@ -76,6 +78,7 @@ export default function DropPartQuote({
           id: drop.wave.id,
         }}
         size={DropPartSize.SMALL}
+        onContentClick={onContentClick}
       />
     </div>
   );

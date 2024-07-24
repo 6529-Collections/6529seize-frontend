@@ -578,12 +578,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: context_profile
-          in: query
-          description: If supplied drop has some context related to given profile. It can be wallet address, ENS, handle or profile ID.
-          required: false
-          schema:
-            type: string
         - name: min_part_id
           in: query
           description: Minimum ID of the parts wrapped in drops
@@ -834,12 +828,6 @@ paths:
         - name: dropId
           in: path
           required: true
-          schema:
-            type: string
-        - name: context_profile
-          in: query
-          description: If supplied drop has some context related to given profile. It can be wallet address, ENS, handle or profile ID.
-          required: false
           schema:
             type: string
         - name: min_part_id
@@ -2985,6 +2973,7 @@ components:
         - created_at
         - contributors_overview
         - subscribed_actions
+        - metrics
       properties:
         id:
           description: The ID of the wave
@@ -3028,6 +3017,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+        metrics:
+          $ref: "#/components/schemas/WaveMetrics"
 
     WaveContributorOverview:
       required:
@@ -3634,12 +3625,16 @@ components:
       required:
         - vote
         - voter
+        - time
       properties:
         vote:
           type: number
           format: int64
         voter:
           $ref: "#/components/schemas/ProfileMin"
+        time:
+          type: number
+          format: int64
 
     DropAndDropVote:
       type: object
@@ -3682,6 +3677,18 @@ components:
         - MOST_SUBSCRIBED
         - HIGH_LEVEL_AUTHOR
         - AUTHOR_YOU_HAVE_REPPED
+
+    WaveMetrics:
+      required:
+        - subscribers_count
+        - drops_count
+      properties:
+        subscribers_count:
+          type: number
+          format: int64
+        drops_count:
+          type: number
+          format: int64
 
 security:
   - bearerAuth: []

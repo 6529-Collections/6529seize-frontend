@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wave } from "../../../generated/models/Wave";
+import { numberWithCommas } from "../../../helpers/Helpers";
 
 export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
   return (
@@ -18,8 +19,12 @@ export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
         ))}
       </div>
       <span className="tw-text-sm">
-        <span className="tw-text-iron-50 tw-font-medium">+1,123</span>{" "}
-        <span className="tw-text-iron-400">Drops</span>
+        <span className="tw-text-iron-50 tw-font-medium">
+          {numberWithCommas(wave.metrics.drops_count)}
+        </span>{" "}
+        <span className="tw-text-iron-400">
+          {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
+        </span>
       </span>
     </div>
   );

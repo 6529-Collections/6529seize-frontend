@@ -87,6 +87,7 @@ export * from '../models/WaveContributorOverview';
 export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
 export * from '../models/WaveMetadataType';
+export * from '../models/WaveMetrics';
 export * from '../models/WaveMin';
 export * from '../models/WaveOutcome';
 export * from '../models/WaveOutcomeCredit';
@@ -192,6 +193,7 @@ import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveMetadataType } from '../models/WaveMetadataType';
+import { WaveMetrics } from '../models/WaveMetrics';
 import { WaveMin } from '../models/WaveMin';
 import { WaveOutcome        } from '../models/WaveOutcome';
 import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
@@ -324,6 +326,7 @@ let typeMap: {[index: string]: any} = {
     "Wave": Wave,
     "WaveConfig": WaveConfig,
     "WaveContributorOverview": WaveContributorOverview,
+    "WaveMetrics": WaveMetrics,
     "WaveMin": WaveMin,
     "WaveOutcome": WaveOutcome,
     "WaveParticipationConfig": WaveParticipationConfig,
