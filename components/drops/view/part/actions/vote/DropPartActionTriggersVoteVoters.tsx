@@ -32,7 +32,7 @@ export default function DropPartActionTriggersVoteVoters({
       <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
         {formatNumberWithCommas(drop.raters_count)} {label}
       </span>
-      <div className="tw-h-1 tw-w-1 tw-bg-iron-700 tw-flex-shrink-0"></div>
+      <div className="tw-h-1 tw-w-1 tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
     </div>
   );
 }

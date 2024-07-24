@@ -135,7 +135,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
             <Link
               title="View Wave"
               href={`/waves/${wave.id}`}
-              className="tw-no-underline tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-bg-iron-700 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-no-underline tw-border-0 tw-rounded-lg tw-bg-iron-700 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
                 className="tw-size-5 tw-flex-shrink-0"
