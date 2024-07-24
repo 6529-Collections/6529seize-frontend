@@ -94,7 +94,7 @@ export default function DropListItemContentNft({
             <img
               src={nft.token.imageSmall}
               alt="NFT token"
-              className="tw-w-full tw-h-full tw-object-center tw-object-contain"
+              className="tw-w-full tw-h-full tw-object-center tw-object-contain lg:tw-max-h-[516px]"
               onLoad={handleImageLoad}
             />
           )}
