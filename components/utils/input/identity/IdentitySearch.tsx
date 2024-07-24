@@ -39,7 +39,7 @@ export default function IdentitySearch({
   };
 
   const ICON_CLASSES: Record<IdentitySearchSize, string> = {
-    [IdentitySearchSize.SM]: "tw-top-3",
+    [IdentitySearchSize.SM]: "tw-top-3.5",
     [IdentitySearchSize.MD]: "tw-top-4",
   };
 
