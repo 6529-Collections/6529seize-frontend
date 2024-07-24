@@ -80,7 +80,9 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                   </svg>
                   <span>
                     {" "}
-                    <span className="tw-font-medium">1</span>{" "}
+                    <span className="tw-font-medium">
+                      {numberWithCommas(wave.metrics.subscribers_count)}
+                    </span>{" "}
                     <span className="tw-text-iron-400">Joined</span>
                   </span>
                 </div>
