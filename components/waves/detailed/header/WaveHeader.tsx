@@ -40,24 +40,51 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white">
                 {wave.name}
               </h1>
-              {!!wave.contributors_overview.length && (
-                <div className="tw-flex tw-items-center">
-                  <div className="tw-flex -tw-space-x-2">
-                    {wave.contributors_overview.map((item) => (
-                      <img
-                        key={item.contributor_identity}
-                        className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                        src={item.contributor_pfp}
-                        alt=""
-                      />
-                    ))}
+              <div className="tw-flex tw-items-center tw-gap-x-2">
+                {!!wave.contributors_overview.length && (
+                  <div className="tw-flex tw-items-center">
+                    <div className="tw-flex -tw-space-x-2">
+                      {wave.contributors_overview.map((item) => (
+                        <img
+                          key={item.contributor_identity}
+                          className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
+                          src={item.contributor_pfp}
+                          alt=""
+                        />
+                      ))}
+                    </div>
+                    <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                      <span className="tw-text-iron-50">
+                        {numberWithCommas(wave.metrics.drops_count)}
+                      </span>{" "}
+                      {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
+                    </span>
                   </div>
-                  <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                    {numberWithCommas(wave.metrics.drops_count)}{" "}
-                    {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
+                )}
+                <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
+                <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50">
+                  <svg
+                    className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+                    ></path>
+                  </svg>
+                  <span>
+                    {" "}
+                    <span className="tw-font-medium">1</span>{" "}
+                    <span className="tw-text-iron-400">Joined</span>
                   </span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
