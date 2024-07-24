@@ -39,7 +39,7 @@ export default function GroupCardHeader({
           </span>
         </Link>
         <div className="tw-flex tw-items-center tw-gap-x-4">
-          <span className="tw-text-sm tw-text-iron-400 tw-font-normal">
+          <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
             {timeAgo}
           </span>
           {!!connectedProfile?.profile?.handle && !activeProfileProxy && (

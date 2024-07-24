@@ -15,7 +15,7 @@ export default function FeedItemDropCommented({
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-3">
-        <div className="tw-inline-flex tw-items-center tw-space-x-2">
+        <div className="tw-inline-flex tw-items-center">
           <div className="md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
@@ -46,7 +46,7 @@ export default function FeedItemDropCommented({
                 <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
               )}
             </div>
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+            <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               <Link
                 href={`/${item.item.comment.author.handle}`}
                 className="tw-no-underline tw-font-semibold"
@@ -56,7 +56,7 @@ export default function FeedItemDropCommented({
               commented
             </span>
             <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-400 tw-font-normal">
+            <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
               {getTimeAgoShort(item.item.comment.created_at)}
             </span>
           </div>

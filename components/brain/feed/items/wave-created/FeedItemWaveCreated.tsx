@@ -13,7 +13,7 @@ export default function FeedItemWaveCreated({
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-space-y-2">
-        <div className="tw-inline-flex tw-items-center tw-space-x-2">
+        <div className="tw-inline-flex tw-items-center">
           <div className="md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
@@ -31,8 +31,9 @@ export default function FeedItemWaveCreated({
               />
             </svg>
           </div>
-          <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-            {item.item.author.handle} created a wave
+          <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+            <span className="tw-font-semibold">{item.item.author.handle}</span>{" "}
+            created a wave
           </span>
         </div>
 

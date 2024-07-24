@@ -238,11 +238,7 @@ const DropPart = memo(
         >
           <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
-              <div
-                className={`${
-                  smallMenuIsShown && "tw-mr-10"
-                } tw-flex tw-gap-x-3`}
-              >
+              <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
                 <DropPfp pfpUrl={profile.pfp} size={size} />
                 <div className="tw-w-full tw-h-10 tw-flex tw-flex-col tw-justify-between">
                   <DropAuthor
@@ -279,7 +275,10 @@ const DropPart = memo(
                           />
                         </svg>
                         <span className="tw-text-xs tw-text-iron-50">
-                          {currentPartCount}/{totalPartsCount}
+                          {currentPartCount} /{" "}
+                          <span className="tw-text-iron-400">
+                            {totalPartsCount}
+                          </span>
                         </span>
                       </div>
                     )}
