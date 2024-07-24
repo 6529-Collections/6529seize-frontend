@@ -53,6 +53,7 @@ export interface DropPartProps {
   };
   readonly onNextPart?: () => void;
   readonly onPrevPart?: () => void;
+  readonly onContentClick?: () => void;
 }
 
 const customRenderer = ({
@@ -172,6 +173,7 @@ const DropPart = memo(
     smallMenuIsShown,
     onNextPart,
     onPrevPart,
+    onContentClick,
   }: DropPartProps) => {
     const isStorm = totalPartsCount && totalPartsCount > 1;
     const showPrevButton = currentPartCount && currentPartCount > 1;
@@ -232,7 +234,7 @@ const DropPart = memo(
         {/* <CommonAnimationHeight onAnimationCompleted={checkOverflow}> */}
         <div
           // ref={containerRef}
-          className="tw-cursor-pointer tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+          className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
         >
           <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
@@ -284,7 +286,17 @@ const DropPart = memo(
                   </div>
                 </div>
               </div>
-              <div className="tw-mt-2 tw-h-full">
+              <div
+                onClick={(e) => {
+                  if (onContentClick) {
+                    e.stopPropagation();
+                    onContentClick();
+                  }
+                }}
+                className={`${
+                  onContentClick && "tw-cursor-pointer"
+                } tw-mt-2 tw-h-full`}
+              >
                 {dropTitle && (
                   <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
                     {dropTitle}

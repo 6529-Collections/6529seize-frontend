@@ -16,6 +16,7 @@ export interface DropPartWrapperProps {
   readonly canVote: boolean;
   readonly availableCredit: number | null;
   readonly onQuote: (dropPartId: number | null) => void;
+  readonly onContentClick?: () => void;
   readonly children: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ export default function DropPartWrapper({
   canVote,
   availableCredit,
   onQuote,
+  onContentClick,
   children,
 }: DropPartWrapperProps) {
   const router = useRouter();
@@ -44,39 +46,19 @@ export default function DropPartWrapper({
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
 
-  const onDropClick = ({
-    waveId,
-    dropId,
-  }: {
-    readonly waveId: string;
-    readonly dropId: string;
-  }) => {
-    router.push(`/waves/${waveId}?drop=${dropId}`, undefined, {
-      shallow: true,
-    });
-  };
   return (
     <div>
-      <div
-        className="tw-flex tw-w-full tw-h-full tw-cursor-pointer"
-        onClick={() => onDropClick({ waveId: drop.wave.id, dropId: drop.id })}
-      >
+      <div className="tw-flex tw-w-full tw-h-full">
         <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
           <div className="tw-flex-1 tw-px-4 tw-relative tw-z-20">
             {children}
             <div>
               {quotedDrop && (
-                <div
-                  className="tw-cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDropClick({
-                      waveId: drop.wave.id,
-                      dropId: quotedDrop.drop_id,
-                    });
-                  }}
-                >
-                  <DropPartQuote quotedDrop={quotedDrop} />
+                <div>
+                  <DropPartQuote
+                    quotedDrop={quotedDrop}
+                    onContentClick={onContentClick}
+                  />
                 </div>
               )}
             </div>

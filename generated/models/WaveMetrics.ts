@@ -10,38 +10,30 @@
  * Do not edit the class manually.
  */
 
-import { ProfileMin } from '../models/ProfileMin';
 import { HttpFile } from '../http/http';
 
-export class DropVote {
-    'vote': number;
-    'voter': ProfileMin;
-    'time': number;
+export class WaveMetrics {
+    'subscribers_count': number;
+    'drops_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "vote",
-            "baseName": "vote",
+            "name": "subscribers_count",
+            "baseName": "subscribers_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "voter",
-            "baseName": "voter",
-            "type": "ProfileMin",
-            "format": ""
-        },
-        {
-            "name": "time",
-            "baseName": "time",
+            "name": "drops_count",
+            "baseName": "drops_count",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return DropVote.attributeTypeMap;
+        return WaveMetrics.attributeTypeMap;
     }
 
     public constructor() {

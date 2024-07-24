@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Wave } from "../../../../generated/models/Wave";
-import { getTimeUntil } from "../../../../helpers/Helpers";
+import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
 import WaveHeaderSubscribe from "./WaveHeaderSubscribe";
 import { AuthContext } from "../../../auth/Auth";
 
@@ -52,15 +52,10 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                       />
                     ))}
                   </div>
-                  {wave.contributors_overview.length < 5 ? (
-                    <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                      dropped
-                    </span>
-                  ) : (
-                    <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                      and others dropped
-                    </span>
-                  )}
+                  <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                    {numberWithCommas(wave.metrics.drops_count)}{" "}
+                    {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
+                  </span>
                 </div>
               )}
             </div>
