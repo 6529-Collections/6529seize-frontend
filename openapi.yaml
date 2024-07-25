@@ -1307,6 +1307,18 @@ paths:
       summary: Get public waves
       operationId: getPublicWaves
       parameters:
+        - name: name
+          in: query
+          description: Search by name or part of name
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Search by author identity
+          required: false
+          schema:
+            type: string
         - name: limit
           in: query
           description: How many waves to return (10 by default)
@@ -1454,6 +1466,18 @@ paths:
       summary: Get waves. Needs authentication. Use /public/waves for public waves.
       operationId: getWaves
       parameters:
+        - name: name
+          in: query
+          description: Search by name or part of name
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Search by author identity
+          required: false
+          schema:
+            type: string
         - name: limit
           in: query
           description: How many waves to return (10 by default)

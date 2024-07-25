@@ -4,7 +4,7 @@ import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
 import WaveItem from "./WaveItem";
 import { AuthContext } from "../../auth/Auth";
 import { WavesOverviewParams } from "../../../types/waves.types";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import CircleLoader, {
@@ -63,7 +63,7 @@ export default function WavesListWrapper({
     isFetchingNextPage: isFetchingNextPageAuth,
     status: statusAuth,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES, params],
+    queryKey: [QueryKey.WAVES_OVERVIEW, params],
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       const queryParams: Record<string, string> = {
         limit: `${params.limit}`,
@@ -88,7 +88,7 @@ export default function WavesListWrapper({
     isFetchingNextPage: isFetchingNextPagePublic,
     status: statusPublic,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_PUBLIC, params],
+    queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC, params],
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       const queryParams: Record<string, string> = {
         limit: `${params.limit}`,

@@ -13,6 +13,7 @@ export enum UserPageTabType {
   SUBSCRIPTIONS = "SUBSCRIPTIONS",
   PROXY = "PROXY",
   GROUPS = "GROUPS",
+  WAVES = "WAVES",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -60,6 +61,11 @@ export const USER_PAGE_TAB_META: Record<
     title: "Groups",
     route: "groups",
   },
+  [UserPageTabType.WAVES]: {
+    tab: UserPageTabType.WAVES,
+    title: "Waves",
+    route: "waves",
+  },
 };
 
 export default function UserPageTabs() {
@@ -90,7 +96,7 @@ export default function UserPageTabs() {
 
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-  connectedProfile.level >= 0  &&
+    connectedProfile.level >= 0 &&
     !activeProfileProxy &&
     !!address;
 
@@ -103,7 +109,7 @@ export default function UserPageTabs() {
   const getTabsToShow = () => {
     if (showDrops) return Object.values(UserPageTabType);
     return Object.values(UserPageTabType).filter(
-      (tab) => tab !== UserPageTabType.BRAIN
+      (tab) => ![UserPageTabType.BRAIN, UserPageTabType.WAVES].includes(tab)
     );
   };
   const [tabsToShow, setTabsToShow] = useState<UserPageTabType[]>(
