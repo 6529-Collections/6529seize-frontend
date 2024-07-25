@@ -57,6 +57,8 @@ export enum QueryKey {
   PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
   EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
+  WAVES_OVERVIEW = "WAVES_OVERVIEW",
+  WAVES_OVERVIEW_PUBLIC = "WAVES_OVERVIEW_PUBLIC",
   WAVES = "WAVES",
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVE = "WAVE",
@@ -943,6 +945,12 @@ export default function ReactQueryWrapper({
   };
 
   const invalidateAllWaves = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_OVERVIEW],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES],
     });
