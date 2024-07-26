@@ -1,5 +1,9 @@
 import { ReferencedNft } from "../../../../../../entities/IDrop";
 import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../../helpers/image.helpers";
 
 export default function DropListItemContentNftDetails({
   referencedNft: { contract, token, name: tokenName },
@@ -14,7 +18,7 @@ export default function DropListItemContentNftDetails({
       {image && (
         <img
           alt="Seize"
-          src={image}
+          src={getScaledImageUri(image, ImageScale.W_AUTO_H_50)}
           className="tw-flex-shrink-0 tw-h-4 tw-w-4"
         />
       )}

@@ -1,4 +1,5 @@
 import { GroupFull } from "../../../../generated/models/GroupFull";
+import { getScaledImageUri, ImageScale } from "../../../../helpers/image.helpers";
 import { CreateWaveGroupStatus } from "../../../../types/waves.types";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
 
@@ -27,7 +28,7 @@ export default function CreateWaveGroupItem({
             {selectedGroup.created_by.pfp ? (
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md tw-ring-1 tw-ring-iron-700"
-                src={selectedGroup.created_by.pfp}
+                src={getScaledImageUri(selectedGroup.created_by.pfp, ImageScale.W_AUTO_H_50)}
                 alt="Profile Picture"
               />
             ) : (
