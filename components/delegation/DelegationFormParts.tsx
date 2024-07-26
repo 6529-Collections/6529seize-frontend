@@ -198,8 +198,6 @@ export function DelegationFormCollectionFormGroup(
       ? SUPPORTED_COLLECTIONS
       : [props.subdelegation.collection];
 
-  props.setCollection(collections[0].contract);
-
   return (
     <Form.Group as={Row} className="pb-4">
       <DelegationFormLabel
