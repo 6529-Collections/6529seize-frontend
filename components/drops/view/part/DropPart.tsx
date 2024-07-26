@@ -446,7 +446,7 @@ const DropPart = memo(
                         {partContent}
                       </Markdown>
                       {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
-                        <div className={partContent ? "tw-mt-8" : "tw-mt-1"}>
+                        <div className={partContent ? "tw-mt-4" : "tw-mt-1"}>
                           <DropListItemContentMedia
                             media_mime_type={partMedia.mimeType}
                             media_url={partMedia.mediaSrc}

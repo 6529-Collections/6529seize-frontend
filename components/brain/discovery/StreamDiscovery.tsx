@@ -114,7 +114,7 @@ export default function StreamDiscovery() {
             <Link
               key={wave.id}
               href={`/waves/${wave.id}`}
-              className="tw-no-underline tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-font-semibold tw-text-sm"
+              className="tw-no-underline tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-font-semibold tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
             >
               {wave.picture ? (
                 <img

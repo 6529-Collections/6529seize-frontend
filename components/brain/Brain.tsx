@@ -182,7 +182,7 @@ export default function Brain() {
                     </svg>
                   </div>
                 </span>
-                <div className="tw-mt-6 tw-relative tw-z-10">
+                <div className="tw-mt-8 tw-relative tw-z-10">
                   <h1 className="tw-relative tw-z-10 tw-block tw-float-none tw-text-4xl">
                     Stream
                   </h1>
@@ -214,7 +214,7 @@ export default function Brain() {
                     </span>
                   </p>
 
-                  <div className="tw-mt-6 tw-relative tw-text-base tw-text-iron-400 tw-font-normal">
+                  <div className="tw-mt-8 tw-relative tw-text-base tw-text-iron-400 tw-font-normal">
                     <div className="tw-mt-6 tw-flex tw-items-center tw-gap-x-3">
                       <Link
                         href="/waves"
@@ -243,7 +243,7 @@ export default function Brain() {
                       <Link
                         type="button"
                         href="waves?new=true"
-                        className="tw-no-underline tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
+                        className="tw-no-underline tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white hover:tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
                       >
                         <svg
                           className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
@@ -286,12 +286,12 @@ export default function Brain() {
             )}
           </div>
         </div>
-        <div className="md:tw-w-[26.5%]">
+        <div className="md:tw-w-[26.5%] tw-sticky tw-top-0">
           {!!items.length && (
-            <div className="tw-mt-12">
+            <div className="tw-mt-16">
               <Link
                 href="/waves?new=true"
-                className="tw-no-underline tw-w-full tw-justify-center tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-no-underline tw-w-full tw-justify-center tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white hover:tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
               >
                 <svg
                   className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
