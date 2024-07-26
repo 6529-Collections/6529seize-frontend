@@ -7,6 +7,7 @@ import {
 import WaveItemEnding from "./WaveItemEnding";
 import WaveItemDropped from "./WaveItemDropped";
 import WaveItemJoin from "./WaveItemJoin";
+import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 
 export default function WaveItem({ wave }: { readonly wave: Wave }) {
   const banner1 =
@@ -46,7 +47,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
             <div className="tw-h-16 tw-w-16">
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900"
-                src={wave.picture}
+                src={getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)}
                 alt="#"
               />
             </div>
@@ -71,7 +72,10 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
               {wave.author.pfp ? (
                 <img
                   className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-                  src={wave.author.pfp}
+                  src={getScaledImageUri(
+                    wave.author.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt="#"
                 />
               ) : (

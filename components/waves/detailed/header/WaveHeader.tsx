@@ -3,6 +3,10 @@ import { Wave } from "../../../../generated/models/Wave";
 import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
 import WaveHeaderSubscribe from "./WaveHeaderSubscribe";
 import { AuthContext } from "../../../auth/Auth";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../helpers/image.helpers";
 
 export default function WaveHeader({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -27,7 +31,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
             {wave.picture ? (
               <img
                 className="tw-h-24 tw-w-24 tw-object-contain tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900"
-                src={wave.picture}
+                src={getScaledImageUri(wave.picture, ImageScale.W_100_H_AUTO)}
                 alt=""
               />
             ) : (
@@ -48,7 +52,10 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                         <img
                           key={item.contributor_identity}
                           className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                          src={item.contributor_pfp}
+                          src={getScaledImageUri(
+                            item.contributor_pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
                           alt=""
                         />
                       ))}

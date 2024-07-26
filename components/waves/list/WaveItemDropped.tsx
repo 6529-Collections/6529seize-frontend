@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Wave } from "../../../generated/models/Wave";
 import { numberWithCommas } from "../../../helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 
 export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
   return (
@@ -11,7 +12,10 @@ export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
             <div className="tw-h-6 tw-w-6">
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
-                src={c.contributor_pfp}
+                src={getScaledImageUri(
+                  c.contributor_pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="#"
               />
             </div>

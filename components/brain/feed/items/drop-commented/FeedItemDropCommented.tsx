@@ -2,6 +2,10 @@ import Link from "next/link";
 import { IFeedItemDropCommented } from "../../../../../types/feed.types";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
 import { getTimeAgoShort } from "../../../../../helpers/Helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../helpers/image.helpers";
 
 export default function FeedItemDropCommented({
   item,
@@ -38,7 +42,10 @@ export default function FeedItemDropCommented({
             <div className="tw-h-7 tw-w-7">
               {item.item.comment.author.pfp ? (
                 <img
-                  src={item.item.comment.author.pfp}
+                  src={getScaledImageUri(
+                    item.item.comment.author.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt="#"
                   className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
                 />

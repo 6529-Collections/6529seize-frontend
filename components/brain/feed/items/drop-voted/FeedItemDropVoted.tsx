@@ -6,6 +6,10 @@ import {
 } from "../../../../../helpers/Helpers";
 import RateClapOutlineIcon from "../../../../utils/icons/RateClapOutlineIcon";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../helpers/image.helpers";
 
 export default function FeedItemDropVoted({
   item,
@@ -39,7 +43,10 @@ export default function FeedItemDropVoted({
             <div className="tw-h-7 tw-w-7">
               {item.item.vote.voter.pfp ? (
                 <img
-                  src={item.item.vote.voter.pfp}
+                  src={getScaledImageUri(
+                    item.item.vote.voter.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt="#"
                   className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
                 />
