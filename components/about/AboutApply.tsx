@@ -5,7 +5,7 @@ export default function AboutApply() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">Apply</h1>
+          <h1>Apply</h1>
         </Col>
       </Row>
       <Row className="pt-3 pb-3">

@@ -15,7 +15,7 @@ export default function CommonRadioButton<T>({
   return (
     <button
       onClick={() => setSelected(value)}
-      className="tw-p-0 tw-flex tw-items-center tw-bg-iron-900 tw-border-none"
+      className="tw-group tw-p-0 tw-flex tw-items-center tw-bg-iron-900 tw-border-none"
     >
       <input
         id={id}
@@ -23,10 +23,11 @@ export default function CommonRadioButton<T>({
         checked={selected === value}
         onChange={() => setSelected(value)}
         className="tw-form-radio tw-h-4 tw-w-4 tw-bg-iron-700 tw-border-iron-600 tw-border tw-border-solid focus:tw-ring-2 tw-ring-offset-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 tw-cursor-pointer"
+        
       />
       <label
         htmlFor={id}
-        className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 tw-cursor-pointer"
+        className="tw-ml-2 tw-block tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300 group-hover:tw-text-iron-200 tw-cursor-pointer"
       >
         {label}
       </label>

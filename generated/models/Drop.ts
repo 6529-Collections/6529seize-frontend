@@ -17,6 +17,7 @@ import { DropPart } from '../models/DropPart';
 import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
 import { ProfileMin } from '../models/ProfileMin';
 import { WaveMin } from '../models/WaveMin';
 import { HttpFile } from '../http/http';
@@ -49,6 +50,7 @@ export class Drop {
     'rating_categories_count': number;
     'rating_logs_count': number;
     'context_profile_context': DropContextProfileContext | null;
+    'subscribed_actions': Array<DropSubscriptionTargetAction>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -159,6 +161,12 @@ export class Drop {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "DropContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "subscribed_actions",
+            "baseName": "subscribed_actions",
+            "type": "Array<DropSubscriptionTargetAction>",
             "format": ""
         }    ];
 

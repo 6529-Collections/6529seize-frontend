@@ -1,0 +1,45 @@
+.editor-placeholder {
+  color: #848490;
+  font-weight: normal;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 11px;
+  left: 14px;
+  font-size: 16px;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+}
+
+.editor-mention {
+  color: rgb(29, 155, 240)
+}
+
+.editor-hashtag {
+  color: rgb(29, 155, 240)
+}
+
+.editor-paragraph {
+  margin-right: 0;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.editor-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.editor-input-one-liner {
+  overflow-x: auto;
+  min-height: 45px;
+}
+
+.editor-input-multi-liner {
+  overflow-y: auto;
+  height: 200px;
+}
+
+.editor-nested-listitem {
+  list-style-type: none;
+}

@@ -196,7 +196,7 @@ export default function ProfileActivityLogs({
         {withFilters && (
           <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
             <div
-              className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-96`}
+              className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-80`}
             >
               <ProfileActivityLogsFilter
                 user={initialParams.handleOrWallet}

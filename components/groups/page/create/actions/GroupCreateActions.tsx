@@ -22,6 +22,21 @@ export default function GroupCreateActions({
 
   const getIsActionsDisabled = () => {
     if (
+      groupConfig.group.identity_addresses?.length &&
+      groupConfig.group.identity_addresses.length > 10000
+    ) {
+      return true;
+    }
+    if (
+      groupConfig.group.excluded_identity_addresses?.length &&
+      groupConfig.group.excluded_identity_addresses.length > 1000
+    ) {
+      return true;
+    }
+    if (groupConfig.group.identity_addresses?.length) {
+      return false;
+    }
+    if (
       groupConfig.group.level.min !== null ||
       groupConfig.group.level.max !== null
     ) {
@@ -57,9 +72,7 @@ export default function GroupCreateActions({
     if (groupConfig.group.owns_nfts.length) {
       return false;
     }
-    if (groupConfig.group.identity_addresses?.length) {
-      return false;
-    }
+
     return true;
   };
 

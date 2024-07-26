@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { IdentitySubscriptionTargetAction } from '../models/IdentitySubscriptionTargetAction';
 import { HttpFile } from '../http/http';
 
 export class ProfileMin {
@@ -17,11 +18,12 @@ export class ProfileMin {
     'handle': string;
     'pfp': string | null;
     'banner1_color': string | null;
-    'banner2_color'?: string | null;
+    'banner2_color': string | null;
     'cic': number;
     'rep': number;
     'tdh': number;
     'level': number;
+    'subscribed_actions': Array<IdentitySubscriptionTargetAction>;
     'archived': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -80,6 +82,12 @@ export class ProfileMin {
             "baseName": "level",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "subscribed_actions",
+            "baseName": "subscribed_actions",
+            "type": "Array<IdentitySubscriptionTargetAction>",
+            "format": ""
         },
         {
             "name": "archived",
