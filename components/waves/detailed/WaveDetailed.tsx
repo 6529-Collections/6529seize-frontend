@@ -21,7 +21,6 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const getActiveDropId = (): string | null => {
     const dropId = searchParams.get("drop");
     return dropId ?? null;
