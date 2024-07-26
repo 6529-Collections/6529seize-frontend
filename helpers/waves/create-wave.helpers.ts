@@ -205,10 +205,10 @@ const getVotingValidationErrors = ({
     voting.type === WaveCreditType.Tdh ||
     voting.type === WaveCreditType.Unique
   ) {
-    if (!!voting.profileId) {
+    if (voting.profileId) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_MUST_BE_EMPTY);
     }
-    if (!!voting.category) {
+    if (voting.category) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_CATEGORY_MUST_BE_EMPTY);
     }
   } else {

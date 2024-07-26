@@ -24,7 +24,7 @@ export default function CreateWaveOutcomeWarning({
       setWarning(null);
       return;
     }
-    if (!!maxWinners) {
+    if (maxWinners) {
       setWarning(null);
       return;
     }

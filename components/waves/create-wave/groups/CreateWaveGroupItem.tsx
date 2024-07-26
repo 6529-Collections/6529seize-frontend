@@ -1,5 +1,8 @@
 import { GroupFull } from "../../../../generated/models/GroupFull";
-import { getScaledImageUri, ImageScale } from "../../../../helpers/image.helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../helpers/image.helpers";
 import { CreateWaveGroupStatus } from "../../../../types/waves.types";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
 
@@ -16,11 +19,7 @@ export default function CreateWaveGroupItem({
     return (
       <CommonBorderedRadioButton
         type={CreateWaveGroupStatus.GROUP}
-        selected={
-          !!selectedGroup
-            ? CreateWaveGroupStatus.GROUP
-            : CreateWaveGroupStatus.NONE
-        }
+        selected={CreateWaveGroupStatus.GROUP}
         onChange={onSelectedClick}
       >
         <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -28,7 +27,10 @@ export default function CreateWaveGroupItem({
             {selectedGroup.created_by.pfp ? (
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md tw-ring-1 tw-ring-iron-700"
-                src={getScaledImageUri(selectedGroup.created_by.pfp, ImageScale.W_AUTO_H_50)}
+                src={getScaledImageUri(
+                  selectedGroup.created_by.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile Picture"
               />
             ) : (
@@ -50,7 +52,7 @@ export default function CreateWaveGroupItem({
     <CommonBorderedRadioButton
       type={CreateWaveGroupStatus.GROUP}
       selected={
-        !!selectedGroup
+        selectedGroup
           ? CreateWaveGroupStatus.GROUP
           : CreateWaveGroupStatus.NONE
       }

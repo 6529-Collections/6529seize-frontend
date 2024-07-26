@@ -130,7 +130,7 @@ export default function CreateWave({
   }) => {
     if (direction === "forward") {
       const newErrors = getCreateWaveValidationErrors({ config, step });
-      if (!!newErrors.length) {
+      if (newErrors.length) {
         setErrors(newErrors);
         return;
       }

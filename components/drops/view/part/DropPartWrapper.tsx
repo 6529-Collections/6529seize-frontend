@@ -7,7 +7,6 @@ import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
-import { useRouter } from "next/router";
 
 export interface DropPartWrapperProps {
   readonly drop: Drop;
@@ -30,7 +29,6 @@ export default function DropPartWrapper({
   onContentClick,
   children,
 }: DropPartWrapperProps) {
-  const router = useRouter();
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
 

@@ -56,7 +56,6 @@ export default function CreateWaveOutcomesRowRepRank({
         <div className="tw-col-span-1 tw-flex tw-justify-end">
           <button
             onClick={removeOutcome}
-            role="button"
             aria-label="Remove"
             className="tw-h-8 tw-w-8 tw-text-error tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-error/10 focus:tw-scale-90 tw-transform tw-transition tw-duration-300 tw-ease-out"
           >
