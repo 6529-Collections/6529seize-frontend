@@ -215,12 +215,16 @@ export default function ManifoldMintingWidget(
   useEffect(() => {
     if (mintWrite.error) {
       setMintStatus(<></>);
-      setMintError(
-        mintWrite.error.message
-          .split("Request Arguments")[0]
-          .split(".")[0]
-          .split("Contract Call")[0]
-      );
+      const fullError = mintWrite.error.message;
+      const resolvedError = fullError
+        .split("Request Arguments")[0]
+        .split(".")[0]
+        .split("Contract Call")[0];
+      if (!resolvedError || resolvedError.length < 5) {
+        setMintError(fullError);
+      } else {
+        setMintError(resolvedError);
+      }
     }
   }, [mintWrite.error]);
 
