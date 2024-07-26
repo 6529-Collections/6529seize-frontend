@@ -6,7 +6,6 @@ import {
 } from "../../../../../entities/IDrop";
 import DropPart from "../../../view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 interface CreateDropStormViewPartWaveProps {

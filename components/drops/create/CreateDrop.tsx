@@ -12,7 +12,6 @@ import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWr
 import { DropMedia } from "../../../generated/models/DropMedia";
 import DropEditor from "./DropEditor";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
-import { ProfileMin } from "../../../generated/models/ProfileMin";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 

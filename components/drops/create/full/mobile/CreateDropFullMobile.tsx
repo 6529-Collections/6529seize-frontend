@@ -1,6 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
-
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -15,8 +14,6 @@ import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
-import CreateDropStormView from "../../utils/storm/CreateDropStormView";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
 import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";

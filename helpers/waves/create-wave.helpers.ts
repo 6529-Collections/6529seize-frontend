@@ -1,4 +1,3 @@
-import { CreateDropRequest } from "../../generated/models/CreateDropRequest";
 import { CreateNewWave } from "../../generated/models/CreateNewWave";
 import { CreateWaveDropRequest } from "../../generated/models/CreateWaveDropRequest";
 import { IntRange } from "../../generated/models/IntRange";

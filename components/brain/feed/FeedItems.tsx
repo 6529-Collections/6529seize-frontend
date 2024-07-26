@@ -1,5 +1,4 @@
 import { TypedFeedItem } from "../../../types/feed.types";
-import RateClapOutlineIcon from "../../utils/icons/RateClapOutlineIcon";
 import FeedItem from "./FeedItem";
 
 export interface FeedItemsProps {

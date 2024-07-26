@@ -1,8 +1,5 @@
 import { WaveType } from "../../../../../../../generated/models/WaveType";
-import {
-  CreateWaveOutcomeConfig,
-  CreateWaveOutcomeType,
-} from "../../../../../../../types/waves.types";
+import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 import CreateWaveOutcomesRowManualApprove from "./CreateWaveOutcomesRowManualApprove";
 import CreateWaveOutcomesRowManualRank from "./CreateWaveOutcomesRowManualRank";
 

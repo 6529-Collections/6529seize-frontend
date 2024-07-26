@@ -5,7 +5,6 @@ import {
   CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import { WaveType } from "../../../../../generated/models/WaveType";
-import CreateWaveWarning from "../../utils/CreateWaveWarning";
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
 
 export default function CreateWaveOutcomesManual({

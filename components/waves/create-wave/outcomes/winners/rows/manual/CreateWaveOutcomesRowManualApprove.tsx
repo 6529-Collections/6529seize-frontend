@@ -1,8 +1,5 @@
 import Tippy from "@tippyjs/react";
-import {
-  formatLargeNumber,
-  formatNumberWithCommas,
-} from "../../../../../../../helpers/Helpers";
+import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types";
 
 export default function CreateWaveOutcomesRowManualApprove({

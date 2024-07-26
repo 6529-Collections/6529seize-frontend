@@ -12,7 +12,6 @@ import { GroupFull } from "../../../../generated/models/GroupFull";
 import { WaveType } from "../../../../generated/models/WaveType";
 import CreateWaveGroupItem from "./CreateWaveGroupItem";
 import SelectGroupModalWrapper from "../../../utils/select-group/SelectGroupModalWrapper";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export default function CreateWaveGroup({
   waveType,

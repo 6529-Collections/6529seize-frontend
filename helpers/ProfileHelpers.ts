@@ -2,7 +2,6 @@ import {
   IProfileAndConsolidations,
   ProfileConnectedStatus,
 } from "../entities/IProfile";
-import { ProfileMin } from "../generated/models/ProfileMin";
 import { ProfileMinWithoutSubs } from "./ProfileTypes";
 
 export const getProfileConnectedStatus = ({
@@ -40,7 +39,6 @@ export const profileAndConsolidationsToProfileMin = ({
         rep: profile.rep,
         tdh: profile.consolidation.tdh,
         level: profile.level,
-        // TODO: add archived to ProfileMin
         archived: false,
       }
     : null;

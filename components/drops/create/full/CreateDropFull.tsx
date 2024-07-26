@@ -14,7 +14,6 @@ import {
 } from "../../../../entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";

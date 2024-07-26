@@ -183,14 +183,12 @@ export default function WavesListSearchResults({
             <WaveItem key={`waves-${wave.id}`} wave={wave} />
           ))}
         </div>
-        <>
-          {(isFetchingAuth || isFetchingPublic) && (
-            <div className="tw-w-full tw-text-center tw-mt-8">
-              <CircleLoader size={CircleLoaderSize.XXLARGE} />
-            </div>
-          )}
-          <CommonIntersectionElement onIntersection={onBottomIntersection} />
-        </>
+        {(isFetchingAuth || isFetchingPublic) && (
+          <div className="tw-w-full tw-text-center tw-mt-8">
+            <CircleLoader size={CircleLoaderSize.XXLARGE} />
+          </div>
+        )}
+        <CommonIntersectionElement onIntersection={onBottomIntersection} />
       </div>
     </div>
   );

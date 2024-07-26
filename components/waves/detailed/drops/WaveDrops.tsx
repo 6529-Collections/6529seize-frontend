@@ -25,11 +25,11 @@ export default function WaveDrops({
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
-  const [query, setQuery] = useState<Query>({
+  const query: Query = {
     limit: `${REQUEST_SIZE}`,
     context_profile: connectedProfile?.profile?.handle,
     wave_id: wave.id,
-  });
+  };
 
   const {
     data,

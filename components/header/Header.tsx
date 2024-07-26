@@ -714,8 +714,6 @@ export default function Header(props: Readonly<Props>) {
     );
   }
 
-  const goTo = (path: string) => router.push(path);
-
   return (
     <>
       {printBurgerMenu()}

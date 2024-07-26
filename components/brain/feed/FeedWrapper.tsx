@@ -1,4 +1,3 @@
-import { FeedItem } from "../../../generated/models/FeedItem";
 import { TypedFeedItem } from "../../../types/feed.types";
 import CircleLoader, {
   CircleLoaderSize,

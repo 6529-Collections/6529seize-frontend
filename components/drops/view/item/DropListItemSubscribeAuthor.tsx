@@ -8,8 +8,6 @@ import {
   commonApiDeleWithBody,
   commonApiPost,
 } from "../../../../services/api/common-api";
-import { DropSubscriptionActions } from "../../../../generated/models/DropSubscriptionActions";
-import { DropSubscriptionTargetAction } from "../../../../generated/models/DropSubscriptionTargetAction";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
