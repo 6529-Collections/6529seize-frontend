@@ -18,7 +18,7 @@ export default function WavesListSearch({
       <div className="tw-flex-1">
         <div className="tw-relative">
           <svg
-            className="tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5"
+            className="tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5"
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -29,13 +29,31 @@ export default function WavesListSearch({
               clipRule="evenodd"
             ></path>
           </svg>
+          {waveName && (
+            <svg
+              onClick={() => setWaveName(null)}
+              className="tw-cursor-pointer tw-absolute tw-right-3 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 7L7 17M7 7L17 17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
           <input
             type="text"
             placeholder=" "
             id="search-waves"
             value={waveName ?? ""}
             onChange={(e) => setWaveName(e.target.value)}
-            className="tw-form-input tw-block tw-w-full tw-text-base tw-leading-5 tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650 tw-peer tw-pl-10 tw-pt-4 tw-pb-3 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-text-white tw-text-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400"
+            className="tw-form-input tw-block tw-w-full tw-text-base tw-leading-5 tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650 tw-peer tw-pl-10 tw-pt-3 tw-pb-3 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-text-white tw-text-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400"
           />
           <label
             htmlFor="search-waves"

@@ -31,7 +31,7 @@ export default function WavesListHeader({
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
       <h1>Waves</h1>
-      <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
+      <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
         <WavesListSearch
           identity={identity}
           waveName={waveName}

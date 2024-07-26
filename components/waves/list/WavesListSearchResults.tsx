@@ -166,10 +166,16 @@ export default function WavesListSearchResults({
 
   return (
     <div>
-      <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
-        <span className="tw-tracking-tight tw-text-xl tw-font-semibold tw-text-iron-50">
+      <div>
+        <span className="tw-tracking-tight tw-text-xl tw-font-medium tw-text-iron-50">
           Search
         </span>
+        {waves.length === 0 && !isFetchingAuth && !isFetchingPublic && (
+          <p className="tw-mt-2 tw-block tw-mb-0 tw-text-sm tw-italic tw-text-iron-500">
+            No results found. Please try a different keyword or create a new
+            wave.
+          </p>
+        )}
       </div>
       <div className="tw-overflow-hidden">
         <div className="tw-mt-3 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-4">
