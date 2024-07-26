@@ -19,7 +19,6 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
-import OneLinerPlugin from "../lexical/plugins/OneLinerPlugin";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
@@ -50,9 +49,6 @@ import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer"
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
-import CreateDropSelectFileVideo from "./file/CreateDropSelectFileVideo";
-import CreateDropSelectFileAudio from "./file/CreateDropSelectFileAudio";
-import CreateDropSelectFileImage from "./file/CreateDropSelectFileImage";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
@@ -333,13 +329,6 @@ const CreateDropContent = forwardRef<
               </>
             )}
           </p>
-          {/*    <div className="tw-mt-1.5 tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
-            <div className="tw-font-semibold tw-text-iron-300">
-              {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
-            </div>
-            <div>/</div>
-            <div>{formatNumberWithCommas(24000)}</div>
-          </div> */}
         </div>
         <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
           <label>
@@ -363,7 +352,17 @@ const CreateDropContent = forwardRef<
                   d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
                 />
               </svg>
-              <input type="file" className="tw-hidden" />
+              <input
+                type="file"
+                className="tw-hidden"
+                accept="image/*,video/*,audio/*"
+                onChange={(e: any) => {
+                  if (e.target.files) {
+                    const f = e.target.files[0];
+                    onFileChange(f);
+                  }
+                }}
+              />
               <span className="tw-text-sm tw-font-medium">Upload Media</span>
             </div>
           </label>
