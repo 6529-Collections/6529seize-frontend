@@ -56,7 +56,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
         <div className="tw-mt-2">
           <Link
             href={`/waves/${wave.id}`}
-            className="tw-no-underline tw-text-lg tw-font-semibold tw-text-white"
+            className="tw-no-underline tw-text-lg tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
           >
             {wave.name}
           </Link>
