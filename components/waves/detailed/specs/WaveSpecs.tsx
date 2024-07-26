@@ -23,7 +23,7 @@ export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
               </div> */}
               <WaveTypeIcon waveType={wave.wave.type} />
               <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
-                <span className="tw-font-medium tw-text-iron-400">Voting</span>
+                <span className="tw-font-medium tw-text-iron-400">Rating</span>
                 <div className="tw-flex tw-flex-col tw-gap-y-1.5">
                   <span className="tw-font-medium tw-text-iron-50 tw-text-md">
                     By TDH

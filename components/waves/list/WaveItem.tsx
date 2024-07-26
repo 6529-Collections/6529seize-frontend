@@ -41,19 +41,17 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
         }}
       ></div>
       <div className="tw-flex tw-gap-x-2 tw-px-4">
-        <div className="-tw-mt-5 tw-relative tw-flex-shrink-0">
-          <div className="tw-h-16 tw-w-16">
-            {wave.picture ? (
+        {wave.picture && (
+          <div className="-tw-mt-5 tw-relative tw-flex-shrink-0">
+            <div className="tw-h-16 tw-w-16">
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900"
                 src={wave.picture}
                 alt="#"
               />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900" />
-            )}
+            </div>
           </div>
-        </div>
+        )}
         <div className="tw-mt-2">
           <Link
             href={`/waves/${wave.id}`}
