@@ -4,6 +4,10 @@ import WaveGroupViewIcon from "./WaveGroupViewIcon";
 import WaveGroupDropIcon from "./WaveGroupDropIcon";
 import WaveGroupVoteIcon from "./WaveGroupVoteIcon";
 import WaveGroupAdminIcon from "./WaveGroupAdminIcon";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../helpers/image.helpers";
 
 export enum WaveGroupType {
   VIEW = "VIEW",
@@ -51,7 +55,10 @@ export default function WaveGroup({
             {scope.group.author.pfp ? (
               <img
                 className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
-                src={scope.group.author.pfp}
+                src={getScaledImageUri(
+                  scope.group.author.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile Picture"
               />
             ) : (

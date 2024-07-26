@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { Wave } from "../../../../generated/models/Wave";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../helpers/image.helpers";
 
 export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
   return (
@@ -12,15 +16,13 @@ export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
         {wave.author.pfp ? (
           <img
             className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
-            src={wave.author.pfp}
+            src={getScaledImageUri(wave.author.pfp, ImageScale.W_AUTO_H_50)}
             alt="Profile Picture"
           />
         ) : (
           <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
         )}
-        <span className="tw-font-medium tw-text-md">
-          {wave.author.handle}
-        </span>
+        <span className="tw-font-medium tw-text-md">{wave.author.handle}</span>
       </Link>
     </div>
   );
