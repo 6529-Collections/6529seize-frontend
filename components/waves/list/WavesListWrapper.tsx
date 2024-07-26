@@ -174,13 +174,26 @@ export default function WavesListWrapper({
         <span className="tw-tracking-tight tw-text-xl tw-font-semibold tw-text-iron-50">
           {LABELS[overviewType]}
         </span>
-        <button
+       <button
           onClick={onShowAll}
-          className=" tw-bg-transparent tw-border-none
-        tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out
-        "
+          className="tw-bg-transparent tw-border-none tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center"
         >
           {isShowAll ? "Show less" : "Show all"}
+          <svg
+            className="tw-ml-2 tw-transform tw-transition-transform tw-duration-300 tw-ease-out"
+            style={{ display: isShowAll ? "inline-block" : "none" }}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
         </button>
       </div>
       <div className="tw-overflow-hidden">

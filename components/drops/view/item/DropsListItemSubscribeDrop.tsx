@@ -29,7 +29,7 @@ export default function DropsListItemSubscribeDrop({
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
   const isSubscribed = !!drop.subscribed_actions.length;
-  const title = isSubscribed ? "Subscribed" : "Subscribe";
+  const title = isSubscribed ? "Unsubscribe" : "Subscribe Drop";
   const [mutating, setMutating] = useState(false);
 
   const subscribeMutation = useMutation({
@@ -100,7 +100,7 @@ export default function DropsListItemSubscribeDrop({
     <div className="tw-relative tw-z-20" ref={listRef}>
       <button
         type="button"
-        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-full tw-h-8 tw-w-8 tw-border-0  tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-full tw-h-8 tw-w-8 tw-border-0 tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
         id="options-menu-0-button"
         aria-expanded="false"
         aria-haspopup="true"
@@ -122,7 +122,7 @@ export default function DropsListItemSubscribeDrop({
       <AnimatePresence mode="wait" initial={false}>
         {isOptionsOpen && (
           <motion.div
-            className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none"
+            className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-40 tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="options-menu-0-button"
@@ -140,13 +140,16 @@ export default function DropsListItemSubscribeDrop({
                   onSubscribe();
                   e.stopPropagation();
                 }}
-                className="tw-bg-transparent tw-w-full tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
+                className="tw-flex tw-items-center tw-bg-transparent tw-w-full tw-border-none tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
                 role="menuitem"
                 tabIndex={-1}
                 id="options-menu-0-item-0"
               >
                 {mutating ? (
-                  <CircleLoader size={CircleLoaderSize.SMALL} />
+                  <>
+                    <span className="tw-mr-2">{title}</span>
+                    <CircleLoader size={CircleLoaderSize.SMALL} />
+                  </>
                 ) : (
                   title
                 )}

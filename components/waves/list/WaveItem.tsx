@@ -30,7 +30,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
     <div
       style={{
         background:
-          "linear-gradient(77deg, rgba(63, 47, 58, 0.50) -23.26%, rgba(46, 53, 66, 0.40) 48.19%, rgba(26, 34, 49, 0.40) 106.85%)",
+          "linear-gradient(77deg, rgba(63, 47, 58, 0.50) -23.26%, rgba(46, 53, 66, 0.50) 48.19%, rgba(26, 34, 49, 0.50) 106.85%)",
       }}
       className="tw-pb-4 tw-relative tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
     >

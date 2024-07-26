@@ -39,7 +39,7 @@ export default function IdentitySearch({
   };
 
   const ICON_CLASSES: Record<IdentitySearchSize, string> = {
-    [IdentitySearchSize.SM]: "tw-top-3.5",
+    [IdentitySearchSize.SM]: "tw-top-3",
     [IdentitySearchSize.MD]: "tw-top-4",
   };
 
@@ -108,7 +108,7 @@ export default function IdentitySearch({
           error
             ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error"
             : "tw-ring-iron-650 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400"
-        } tw-form-input tw-block tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650 tw-peer tw-pl-10 tw-pt-4 tw-pb-3 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+        } tw-form-input tw-block tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650 tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
           searchCriteria
             ? "focus:tw-text-white tw-text-primary-400"
             : "tw-text-white"
