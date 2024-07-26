@@ -52,7 +52,6 @@ export default function DropListItemContent({
       return;
     }
     const container = containerRef.current;
-
     if (container) {
       const rect = container.getBoundingClientRect();
       if (rect.top < 0) {
