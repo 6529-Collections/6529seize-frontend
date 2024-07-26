@@ -363,15 +363,6 @@ export default function Header(props: Readonly<Props>) {
                     </Link>
                   </Col>
                 </Row>
-                {showDrops && (
-                  <Row className="pt-3">
-                    <Col>
-                      <Link href="/waves">
-                        <h3>Waves</h3>
-                      </Link>
-                    </Col>
-                  </Row>
-                )}
                 <Row className="pt-3">
                   <Col>
                     <Link href="/nft-activity">
@@ -879,14 +870,6 @@ export default function Header(props: Readonly<Props>) {
                                   path: "/groups",
                                 }}
                               />
-                              {showDrops && (
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Waves",
-                                    path: "/waves",
-                                  }}
-                                />
-                              )}
                               <HeaderDesktopLink
                                 link={{
                                   name: "NFT Activity",

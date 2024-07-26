@@ -1,6 +1,10 @@
 import Tippy from "@tippyjs/react";
 import { Drop } from "../../../../../../generated/models/Drop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../../helpers/image.helpers";
 
 export default function DropPartActionTriggersVoteVoters({
   drop,
@@ -19,7 +23,10 @@ export default function DropPartActionTriggersVoteVoters({
           >
             {rater.profile.pfp ? (
               <img
-                src={rater.profile.pfp}
+                src={getScaledImageUri(
+                  rater.profile.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile Picture"
                 className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-700"
               />
