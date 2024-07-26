@@ -12,9 +12,11 @@ import StreamDiscovery from "./discovery/StreamDiscovery";
 export default function Brain() {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowFeed = () =>
-    !!connectedProfile?.profile?.handle &&
-    connectedProfile.level >= 0 &&
-    !activeProfileProxy;
+    !!(
+      !!connectedProfile?.profile?.handle &&
+      connectedProfile.level >= 50 &&
+      !activeProfileProxy
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showFeed, setShowFeed] = useState(getShowFeed());
   useEffect(
@@ -87,6 +89,14 @@ export default function Brain() {
 
   return (
     <div className="tailwind-scope tw-pt-8 tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="md:tw-flex tw-justify-center ">
+        <div className="tw-text-iron-500 tw-text-sm tw-py-4">
+          These pages are in closed alpha for level 50 and above. They are not
+          ready for public release. Lots of improvements and bugs to fix.
+          Currently only &quot;chat&quot; waves are active.
+        </div>
+      </div>
+
       <div className="md:tw-flex tw-justify-center tw-gap-x-5 xl:tw-ml-16">
         <div className="md:tw-w-[672px] tw-flex-shrink-0">
           <div>

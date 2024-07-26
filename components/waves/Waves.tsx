@@ -23,9 +23,11 @@ export default function Waves() {
   const isCreateNewWave = searchParams.get(NEW_WAVE_SEARCH_PARAM);
 
   const getShowDrops = () =>
-    !!connectedProfile?.profile?.handle &&
-    connectedProfile.level >= 0 &&
-    !activeProfileProxy;
+    !!(
+      !!connectedProfile?.profile?.handle &&
+      connectedProfile.level >= 50 &&
+      !activeProfileProxy
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(

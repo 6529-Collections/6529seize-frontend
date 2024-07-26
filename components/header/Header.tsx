@@ -40,9 +40,11 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
 
   const getShowDrops = () =>
-    !!connectedProfile?.profile?.handle &&
-    connectedProfile.level >= 0 &&
-    !activeProfileProxy;
+    !!(
+      !!connectedProfile?.profile?.handle &&
+      connectedProfile.level >= 50 &&
+      !activeProfileProxy
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState<boolean>(getShowDrops());
 

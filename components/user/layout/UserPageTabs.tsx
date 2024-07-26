@@ -95,10 +95,12 @@ export default function UserPageTabs() {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const getShowDrops = () =>
-    !!connectedProfile?.profile?.handle &&
-    connectedProfile.level >= 0 &&
-    !activeProfileProxy &&
-    !!address;
+    !!(
+      !!connectedProfile?.profile?.handle &&
+      connectedProfile.level >= 50 &&
+      !activeProfileProxy &&
+      !!address
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(

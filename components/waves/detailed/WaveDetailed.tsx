@@ -33,9 +33,11 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
 
   const getShowDrops = () =>
-    !!connectedProfile?.profile?.handle &&
-    connectedProfile.level >= 0 &&
-    !activeProfileProxy;
+    !!(
+      !!connectedProfile?.profile?.handle &&
+      connectedProfile.level >= 50 &&
+      !activeProfileProxy
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(
@@ -93,7 +95,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">
       <WaveHeader wave={wave} />
-     <div className="tw-mt-6 md:tw-mt-12 tw-pb-16 lg:tw-pb-20 tw-max-w-5xl tw-mx-auto tw-px-4 md:tw-px-0">
+      <div className="tw-mt-6 md:tw-mt-12 tw-pb-16 lg:tw-pb-20 tw-max-w-5xl tw-mx-auto tw-px-4 md:tw-px-0">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-6">
           <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4">
             <WaveSpecs wave={wave} />
@@ -136,7 +138,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
             )}
           </div>
         </div>
-      </div> 
+      </div>
     </div>
   );
 }
