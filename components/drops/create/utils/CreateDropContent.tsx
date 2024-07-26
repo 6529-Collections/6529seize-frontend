@@ -101,7 +101,6 @@ const CreateDropContent = forwardRef<
       nodes: [
         MentionNode,
         HashtagNode,
-        // NftNode,
         RootNode,
         HeadingNode,
         ListNode,
@@ -163,10 +162,6 @@ const CreateDropContent = forwardRef<
     }));
 
     const currentPartCount = (drop?.parts.length ?? 0) + 1;
-    const currentTotalPartsCharCount =
-      drop?.parts.reduce((acc, part) => acc + (part.content?.length ?? 0), 0) ??
-      0;
-
     const [charsCount, setCharsCount] = useState(0);
     useEffect(() => {
       editorState?.read(() =>
@@ -208,7 +203,6 @@ const CreateDropContent = forwardRef<
               <OnChangePlugin onChange={onEditorStateChange} />
               <NewMentionsPlugin onSelect={onMentionedUserAdded} />
               <NewHashtagsPlugin onSelect={onHashtagAdded} />
-              {/* {viewType === CreateDropViewType.COMPACT && <OneLinerPlugin />} */}
               <MaxLengthPlugin maxLength={25000} />
               {showToggleViewButton && (
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
@@ -366,9 +360,6 @@ const CreateDropContent = forwardRef<
               <span className="tw-text-sm tw-font-medium">Upload Media</span>
             </div>
           </label>
-          {/*   <CreateDropSelectFileAudio onFileChange={onFileChange} />
-          <CreateDropSelectFileVideo onFileChange={onFileChange} />
-          <CreateDropSelectFileImage onFileChange={onFileChange} /> */}
         </div>
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">

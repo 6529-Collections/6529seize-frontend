@@ -1,6 +1,4 @@
 import { EditorState } from "lexical";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-
 import CreateDropContent, {
   CreateDropContentHandles,
 } from "../../utils/CreateDropContent";
@@ -16,8 +14,6 @@ import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import CreateDropStormView from "../../utils/storm/CreateDropStormView";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
 import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";

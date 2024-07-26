@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { WaveType } from "../../../../generated/models/WaveType";
 import { CreateWaveStep } from "../../../../types/waves.types";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 

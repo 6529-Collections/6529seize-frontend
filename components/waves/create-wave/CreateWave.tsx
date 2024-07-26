@@ -362,7 +362,7 @@ export default function CreateWave({
 
   const addWaveMutation = useMutation({
     mutationFn: async (body: CreateNewWave) =>
-      (await commonApiPost)<CreateNewWave, Wave>({
+      await commonApiPost<CreateNewWave, Wave>({
         endpoint: `waves`,
         body,
       }),
@@ -700,9 +700,6 @@ export default function CreateWave({
                   )}
                 </div>
               </div>
-              {/* <div className="tw-absolute tw-inset-0">
-              <CreateWaveSvg />
-            </div> */}
             </div>
           </div>
         </div>

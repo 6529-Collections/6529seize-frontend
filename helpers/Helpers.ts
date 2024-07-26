@@ -764,29 +764,7 @@ export const formatLargeNumber = (num: number): string => {
   return isNegative ? "-" + formattedNum : formattedNum;
 };
 
-const CAN_SEE_DROPS_CONFIG = {
-  minLevel: 16,
-  minTDH: 30000,
-};
 
-// TODO
-export const getCanProfileSeeDrops = ({
-  profile,
-}: {
-  profile: IProfileAndConsolidations | null;
-}): boolean => {
-  return true;
-  // if (!profile?.profile?.handle) {
-  //   return false;
-  // }
-  // return (
-  //   (profile.level >= CAN_SEE_DROPS_CONFIG.minLevel &&
-  //     profile.consolidation.tdh >= CAN_SEE_DROPS_CONFIG.minTDH) ||
-  //   ["simo", "ragne", "gelato2"].includes(
-  //     profile.profile?.handle.toLocaleLowerCase()
-  //   )
-  // );
-};
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
 

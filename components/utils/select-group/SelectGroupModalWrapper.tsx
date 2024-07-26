@@ -1,9 +1,7 @@
-import { createPortal } from "react-dom";
 import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
 import { GroupFull } from "../../../generated/models/GroupFull";
 import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
 import SelectGroupModal from "./SelectGroupModal";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 
 export default function SelectGroupModalWrapper({
   isOpen,

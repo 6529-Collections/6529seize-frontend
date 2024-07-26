@@ -1,5 +1,4 @@
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import DropPfp from "../utils/DropPfp";
 import CreateDropContent, {
   CreateDropContentHandles,

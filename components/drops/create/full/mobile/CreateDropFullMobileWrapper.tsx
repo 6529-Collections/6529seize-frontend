@@ -7,7 +7,6 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { CreateDropType } from "../../CreateDrop";
-import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 
 export default function CreateDropFullMobileWrapper({
   isOpen,

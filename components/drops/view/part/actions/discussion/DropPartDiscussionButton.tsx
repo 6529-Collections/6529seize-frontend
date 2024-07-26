@@ -25,15 +25,13 @@ export default function DropPartDiscussionButton({
       className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 
         tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
     >
-      <>
-        {userHaveDiscussed ? <DiscussSolidIcon /> : <DiscussOutlineIcon />}
+      {userHaveDiscussed ? <DiscussSolidIcon /> : <DiscussOutlineIcon />}
 
-        {!!discussionCount && (
-          <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
-            {discussionCount}
-          </div>
-        )}
-      </>
+      {!!discussionCount && (
+        <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
+          {discussionCount}
+        </div>
+      )}
     </button>
   );
 }

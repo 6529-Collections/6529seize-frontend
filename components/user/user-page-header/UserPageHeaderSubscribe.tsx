@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { IdentitySubscriptionActions } from "../../../generated/models/IdentitySubscriptionActions";
 import {
   QueryKey,

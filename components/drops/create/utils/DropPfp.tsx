@@ -1,4 +1,3 @@
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import {
   getScaledImageUri,
   ImageScale,

@@ -8,7 +8,6 @@ import { DropPart as IDropPart } from "../../../../../generated/models/DropPart"
 import DropPart, { DropPartSize } from "../../../view/part/DropPart";
 import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 interface PartConfigWave {

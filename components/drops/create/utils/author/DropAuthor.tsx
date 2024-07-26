@@ -1,14 +1,9 @@
-import {
-  cicToType,
-  getTimeAgo,
-  getTimeAgoShort,
-} from "../../../../../helpers/Helpers";
+import { cicToType, getTimeAgoShort } from "../../../../../helpers/Helpers";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../../user/utils/UserCICAndLevel";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { DropPartSize } from "../../../view/part/DropPart";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 

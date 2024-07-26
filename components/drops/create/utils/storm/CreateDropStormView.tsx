@@ -2,7 +2,6 @@ import { memo } from "react";
 import { CreateDropConfig } from "../../../../../entities/IDrop";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateDropStormViewPart from "./CreateDropStormViewPart";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
 import { Time } from "../../../../../helpers/time";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 

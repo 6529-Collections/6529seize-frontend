@@ -1,7 +1,4 @@
-import {
-  CreateWaveConfig,
-  CreateWaveStepStatus,
-} from "../../types/waves.types";
+import { CreateWaveStepStatus } from "../../types/waves.types";
 
 export const getCreateWaveStepStatus = ({
   stepIndex,
