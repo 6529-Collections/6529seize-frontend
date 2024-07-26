@@ -318,7 +318,7 @@ const CreateDropContent = forwardRef<
           </div>
         </LexicalComposer>
         <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          <p className="tw-mb-0 tw-mt-2 tw-pb-2 ">
+          <p className="tw-mb-0 tw-mt-1.5 tw-pb-2 ">
             {!!drop?.parts.length && (
               <>
                 <span className="tw-font-semibold tw-text-iron-500">
@@ -333,18 +333,43 @@ const CreateDropContent = forwardRef<
               </>
             )}
           </p>
-          <div className="tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
+          {/*    <div className="tw-mt-1.5 tw-inline-flex tw-gap-x-0.5 tw-text-iron-400">
             <div className="tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(currentTotalPartsCharCount + charsCount)}
             </div>
             <div>/</div>
             <div>{formatNumberWithCommas(24000)}</div>
-          </div>
+          </div> */}
         </div>
-        <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
-          <CreateDropSelectFileAudio onFileChange={onFileChange} />
+        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+          <label>
+            <div
+              role="button"
+              aria-label="Select audio file"
+              className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+            >
+              <svg
+                className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                />
+              </svg>
+              <input type="file" className="tw-hidden" />
+              <span className="tw-text-sm tw-font-medium">Upload Media</span>
+            </div>
+          </label>
+          {/*   <CreateDropSelectFileAudio onFileChange={onFileChange} />
           <CreateDropSelectFileVideo onFileChange={onFileChange} />
-          <CreateDropSelectFileImage onFileChange={onFileChange} />
+          <CreateDropSelectFileImage onFileChange={onFileChange} /> */}
         </div>
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
