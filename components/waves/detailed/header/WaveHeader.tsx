@@ -31,7 +31,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
             {wave.picture ? (
               <img
                 className="tw-h-24 tw-w-24 tw-object-contain tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900"
-                src={getScaledImageUri(wave.picture, ImageScale.W_100_H_AUTO)}
+                src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
                 alt=""
               />
             ) : (
