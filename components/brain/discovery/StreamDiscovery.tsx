@@ -23,7 +23,7 @@ export default function StreamDiscovery() {
 
   const getParams = (): Omit<WavesOverviewParams, "offset"> => {
     return {
-      limit: 5,
+      limit: 10,
       type: WavesOverviewType.MostSubscribed,
     };
   };

@@ -141,7 +141,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           onCanSubmitChange={onCanSubmitChange}
           key={dropEditorRefreshKey}
         >
-          {!!drop?.parts.length && isStormMode ? (
+          {!!drop?.parts.length && isStormMode && !loading ? (
             <CreateDropStormView
               drop={drop}
               profile={profile}
