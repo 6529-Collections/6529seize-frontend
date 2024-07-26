@@ -7,7 +7,7 @@ export default function UserPageHeaderAboutStatement({
 }) {
   if (!statement) {
     return (
-      <div className="tw-mt-3 tw-text-sm tw-italic">
+      <div className="tw-text-sm tw-italic">
         Click to add an About statement
       </div>
     );

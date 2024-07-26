@@ -146,6 +146,7 @@ export default function GroupCreate({
               cic={groupConfig.group.cic}
               rep={groupConfig.group.rep}
               wallets={groupConfig.group.identity_addresses}
+              excludeWallets={groupConfig.group.excluded_identity_addresses}
               setLevel={(level) =>
                 setGroupConfig((prev) => ({
                   ...prev,
@@ -177,6 +178,15 @@ export default function GroupCreate({
                 setGroupConfig((prev) => ({
                   ...prev,
                   group: { ...prev.group, identity_addresses: wallets },
+                }))
+              }
+              setExcludeWallets={(wallets) =>
+                setGroupConfig((prev) => ({
+                  ...prev,
+                  group: {
+                    ...prev.group,
+                    excluded_identity_addresses: wallets,
+                  },
                 }))
               }
             />

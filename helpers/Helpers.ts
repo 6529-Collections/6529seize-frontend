@@ -19,6 +19,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "../components/nextGen/nextgen_contracts";
+import { Period } from "./Types";
 
 export function formatAddress(address: string) {
   if (
@@ -609,6 +610,32 @@ export const getTimeAgo = (milliseconds: number): string => {
   }
 };
 
+export const getTimeAgoShort = (milliseconds: number): string => {
+  const currentTime = new Date().getTime();
+  const timeDifference = currentTime - milliseconds;
+
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  if (years > 0) {
+    return `${years}y`;
+  } else if (months > 0) {
+    return `${months}M`;
+  } else if (days > 0) {
+    return `${days}d`;
+  } else if (hours > 0) {
+    return `${hours}h`;
+  } else if (minutes > 0) {
+    return `${minutes}m`;
+  } else {
+    return `Just now`;
+  }
+};
+
 export const getTimeUntil = (milliseconds: number): string => {
   const currentTime = new Date().getTime();
   let timeDifference = milliseconds - currentTime;
@@ -719,9 +746,35 @@ export const formatTimestampToMonthYear = (timestamp: number): string => {
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 };
 
+export const formatLargeNumber = (num: number): string => {
+  const isNegative = num < 0;
+  const absNum = Math.abs(num);
+
+  let formattedNum;
+  if (absNum < 1000) {
+    formattedNum = absNum.toString(); // less than 1000
+  } else if (absNum < 10000) {
+    formattedNum = (absNum / 1000).toFixed(1) + "k"; // less than 1 million
+  } else if (absNum < 1000000) {
+    formattedNum = (absNum / 1000).toFixed(0) + "k"; // less than 1 million
+  } else {
+    formattedNum = (absNum / 1000000).toFixed(1) + "M"; // 1 million or more
+  }
+
+  return isNegative ? "-" + formattedNum : formattedNum;
+};
+
+
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
 
+export const PERIOD_LABELS: Record<Period, string> = {
+  [Period.MINUTES]: "Minutes",
+  [Period.HOURS]: "Hours",
+  [Period.DAYS]: "Days",
+  [Period.WEEKS]: "Weeks",
+  [Period.MONTHS]: "Months",
+};
 const hashSeed = (seed: string): number => {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {

@@ -1,103 +1,39 @@
 import { ReactElement } from "react";
-import {
-  ApiProfileRepRatesState,
-  IProfileAndConsolidations,
-  RateMatter,
-} from "../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
-  getInitialRatersParams,
   getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
+import UserPageBrainWrapper from "../../components/user/brain/UserPageBrainWrapper";
 
-import { ActivityLogParams } from "../../components/profile-activity/ProfileActivityLogs";
-import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
-import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
-import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
-
-export interface UserPageRepPropsRepRates {
-  readonly ratings: ApiProfileRepRatesState;
-  readonly rater: string | null;
-}
-
-export interface UserPageRepProps {
+interface Props {
   readonly profile: IProfileAndConsolidations;
-  readonly handleOrWallet: string;
 }
 
-const MATTER_TYPE = RateMatter.REP;
-
-const getInitialActivityLogParams = (
-  handleOrWallet: string
-): ActivityLogParams => ({
-  page: 1,
-  pageSize: 10,
-  logTypes: getProfileLogTypes({
-    logTypes: [],
-  }),
-  matter: RateMatter.REP,
-  targetType: FilterTargetType.ALL,
-  handleOrWallet,
-  groupId: null,
-});
-
-const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
-  pageProps,
-}) => {
-  const initialRepGivenParams = getInitialRatersParams({
-    handleOrWallet: pageProps.handleOrWallet,
-    matter: MATTER_TYPE,
-    given: false,
-  });
-
-  const initialRepReceivedParams = getInitialRatersParams({
-    handleOrWallet: pageProps.handleOrWallet,
-    matter: MATTER_TYPE,
-    given: true,
-  });
-  const initialActivityLogParams = getInitialActivityLogParams(
-    pageProps.handleOrWallet
-  );
-
-  return (
-    <div className="tailwind-scope">
-      <UserPageRepWrapper
-        profile={pageProps.profile}
-        initialRepReceivedParams={initialRepReceivedParams}
-        initialRepGivenParams={initialRepGivenParams}
-        initialActivityLogParams={initialActivityLogParams}
-      />
-    </div>
-  );
-};
-
-Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageRepProps }>
-) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
-};
+const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
+  <div className="tailwind-scope">
+    <UserPageBrainWrapper profile={pageProps.profile} />
+  </div>
+);
+Page.getLayout = (page: ReactElement<{ pageProps: Props }>) => (
+  <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
+);
 
 export default Page;
-
 export async function getServerSideProps(
   req: any,
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: UserPageRepProps;
+  props: Props;
 }> {
   try {
     const headers = getCommonHeaders(req);
     const handleOrWallet = req.query.user.toLowerCase() as string;
     const profile = await getUserProfile({ user: handleOrWallet, headers });
-
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
@@ -111,7 +47,6 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        handleOrWallet,
       },
     };
   } catch (e: any) {

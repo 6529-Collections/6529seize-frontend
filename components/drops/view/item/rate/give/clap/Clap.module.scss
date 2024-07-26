@@ -1,0 +1,79 @@
+
+$btn-dimension: 36px;
+$primary-color: rgba(189, 195, 199, 1);
+$secondary-color: rgba(39, 174, 96, 1);
+$positive-color: rgba(39, 174, 96, 1);
+$neutral-color: rgba(189, 195, 199, 1);
+$negative-color: rgba(192, 57, 43, 1);
+
+
+.clap {
+  border-radius: 50%;
+  width: $btn-dimension;
+  height: $btn-dimension;
+  background: none;
+
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    border-radius: 50%;
+    width: $btn-dimension - 1px;
+    height: $btn-dimension - 1px;
+  }
+
+ 
+}
+
+.clapPositive {
+  &:hover {
+    &:after {
+      animation: shockwave-positive 1s ease-in infinite;
+    }
+  }
+}
+
+
+.clapNegative {
+  &:hover {
+    &:after {
+      animation: shockwave-negative 1s ease-in infinite;
+    }
+  }
+}
+
+.clapCount {
+  top: -$btn-dimension/1.6;
+
+}
+
+
+@keyframes shockwave-positive {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px $positive-color;
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 50px darken($positive-color, 20%), inset 0 0 10px $positive-color;
+  }
+}
+
+@keyframes shockwave-negative {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px $negative-color;
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 50px darken($negative-color, 20%), inset 0 0 10px $negative-color;
+  }
+}

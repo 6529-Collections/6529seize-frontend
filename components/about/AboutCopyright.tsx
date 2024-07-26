@@ -6,7 +6,7 @@ export default function AboutCopyright() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">Copyright</h1>
+          <h1>Copyright</h1>
         </Col>
       </Row>
       <Row>

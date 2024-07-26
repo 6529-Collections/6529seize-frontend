@@ -1,5 +1,5 @@
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
-import IdentitySearch from "../../../../utils/input/identity/IdentitySearch";
+import IdentitySearch, { IdentitySearchSize } from "../../../../utils/input/identity/IdentitySearch";
 
 export default function GroupsListSearch({
   identity,
@@ -32,6 +32,7 @@ export default function GroupsListSearch({
       <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
         {showIdentitySearch && (
           <IdentitySearch
+            size={IdentitySearchSize.SM}
             identity={identity}
             setIdentity={setIdentity}
             label="By Identity"

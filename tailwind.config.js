@@ -15,10 +15,17 @@ module.exports = {
   },
   theme: {
     extend: {
+      boxShadow: {
+        "drop-btn-inactive":
+          "0px -4px 2px 0px rgba(0, 0, 0, 0.25) inset, 0px 2px 1px 0px rgba(255, 255, 255, 0.25) inset",
+        "drop-btn-active":
+          "0px 0px 120px 0px #9917FF, 0px 0px 1px 3px rgba(255, 255, 255, 0.10), 0px -1px 2px 0px rgba(0, 0, 0, 0.25) inset, 0px 1px 1px 0px rgba(255, 255, 255, 0.25) inset",
+      },
       screens: {
         "3xl": "2048px",
       },
       fontSize: {
+        xxs: ["0.8125rem", "20px"],
         md: ["0.9375rem", "24px"],
       },
       colors: {

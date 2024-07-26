@@ -54,12 +54,14 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
   );
 
   return (
-    <UserPageIdentityWrapper
-      profile={pageProps.profile}
-      initialCICReceivedParams={initialCICReceivedParams}
-      initialCICGivenParams={initialCICGivenParams}
-      initialActivityLogParams={initialActivityLogParams}
-    />
+    <div className="tailwind-scope">
+      <UserPageIdentityWrapper
+        profile={pageProps.profile}
+        initialCICReceivedParams={initialCICReceivedParams}
+        initialCICGivenParams={initialCICGivenParams}
+        initialActivityLogParams={initialActivityLogParams}
+      />
+    </div>
   );
 };
 
@@ -89,7 +91,7 @@ export async function getServerSideProps(
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req,
-      subroute: "collected",
+      subroute: "identity",
     });
 
     if (needsRedirect) {

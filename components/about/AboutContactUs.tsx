@@ -5,7 +5,7 @@ export default function AboutContactUs() {
     <Container>
       <Row>
         <Col>
-          <h1 className="float-none">
+          <h1>
             <span className="font-lightest">Contact</span> Us
           </h1>
         </Col>
