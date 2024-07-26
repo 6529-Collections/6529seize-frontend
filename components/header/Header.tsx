@@ -37,10 +37,11 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuAbout, setShowBurgerMenuAbout] = useState(false);
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
+  const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
 
   const getShowDrops = () =>
     !!connectedProfile?.profile?.handle &&
-  connectedProfile.level >= 0  &&
+    connectedProfile.level >= 0 &&
     !activeProfileProxy;
 
   const [showDrops, setShowDrops] = useState<boolean>(getShowDrops());
@@ -57,6 +58,7 @@ export default function Header(props: Readonly<Props>) {
       setShowBurgerMenuAbout(false);
       setShowBurgerMenuCommunity(false);
       setShowBurgerMenuTools(false);
+      setShowBurgerMenuBrain(false);
     }
 
     window.addEventListener("resize", handleResize);
@@ -125,6 +127,7 @@ export default function Header(props: Readonly<Props>) {
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
+                  setShowBurgerMenuBrain(false);
                 }}
               ></FontAwesomeIcon>
             </Col>
@@ -156,10 +159,61 @@ export default function Header(props: Readonly<Props>) {
           {showDrops && (
             <Row className="pt-3 pb-3">
               <Col>
-                <Link href="/brain">
-                  <h3>Brain</h3>
-                </Link>
+                <h3
+                  onClick={() => {
+                    setShowBurgerMenuCollections(false);
+                    setShowBurgerMenuCommunity(false);
+                    setShowBurgerMenuAbout(false);
+                    setShowBurgerMenuTools(false);
+                    setShowBurgerMenuBrain(!showBurgerMenuBrain);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      setShowBurgerMenuCollections(false);
+                      setShowBurgerMenuCommunity(false);
+                      setShowBurgerMenuAbout(false);
+                      setShowBurgerMenuTools(false);
+                      setShowBurgerMenuBrain(!showBurgerMenuBrain);
+                    }
+                  }}
+                  className={`${styles.burgerMenuHeader}
+                  ${
+                    showBurgerMenuBrain
+                      ? styles.burgerMenuCaretClose
+                      : styles.burgerMenuCaretOpen
+                  }`}
+                >
+                  Brain
+                </h3>
               </Col>
+              {showBurgerMenuBrain && (
+                <Container>
+                  <Row>
+                    <Col xs={{ span: 6, offset: 3 }}>
+                      <hr />
+                    </Col>
+                  </Row>
+                  <Row className="pt-3">
+                    <Col>
+                      <Link href="/brain">
+                        <h3>My Stream</h3>
+                      </Link>
+                    </Col>
+                  </Row>
+                  <Row className="pt-3">
+                    <Col>
+                      <Link href="/waves">
+                        <h3>Waves</h3>
+                      </Link>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs={{ span: 6, offset: 3 }}>
+                      <hr />
+                    </Col>
+                  </Row>
+                </Container>
+              )}
             </Row>
           )}
           <Row className="pt-3 pb-3">
@@ -170,6 +224,7 @@ export default function Header(props: Readonly<Props>) {
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuAbout(false);
                   setShowBurgerMenuTools(false);
+                  setShowBurgerMenuBrain(false);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -177,6 +232,7 @@ export default function Header(props: Readonly<Props>) {
                     setShowBurgerMenuCommunity(false);
                     setShowBurgerMenuAbout(false);
                     setShowBurgerMenuTools(false);
+                    setShowBurgerMenuBrain(false);
                   }
                 }}
                 className={`${styles.burgerMenuHeader}
@@ -741,14 +797,24 @@ export default function Header(props: Readonly<Props>) {
                         >
                           <Nav className="justify-content-end ml-auto">
                             {showDrops && (
-                              <Nav.Link
-                                className={`${styles.mainNavLink} ${
-                                  router.pathname === "/brain" ? "active" : ""
-                                }`}
-                                onClick={() => goTo("/brain")}
+                              <NavDropdown
+                                title="Brain"
+                                align={"start"}
+                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
                               >
-                                Brain
-                              </Nav.Link>
+                                <HeaderDesktopLink
+                                  link={{
+                                    name: "My Stream",
+                                    path: "/brain",
+                                  }}
+                                />
+                                <HeaderDesktopLink
+                                  link={{
+                                    name: "Waves",
+                                    path: "/waves",
+                                  }}
+                                />
+                              </NavDropdown>
                             )}
 
                             <NavDropdown

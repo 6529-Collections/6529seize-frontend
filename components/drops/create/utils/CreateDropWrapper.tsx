@@ -23,7 +23,6 @@ import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
-import { ProfileMin } from "../../../../generated/models/ProfileMin";
 import { useQuery } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -31,7 +30,6 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
-import Markdown from "react-markdown";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 
 export enum CreateDropScreenType {
@@ -275,7 +273,7 @@ const CreateDropWrapper = forwardRef<
       !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
       !missingMedia.length &&
       !missingMetadata.length &&
-      getCanSubmitStorm();
+      !!(!!drop?.parts.length ? getCanSubmitStorm() : true);
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
@@ -397,8 +395,6 @@ const CreateDropWrapper = forwardRef<
     useImperativeHandle(ref, () => ({
       requestDrop,
     }));
-
-
 
     const components: Record<CreateDropViewType, JSX.Element> = {
       [CreateDropViewType.COMPACT]: (
