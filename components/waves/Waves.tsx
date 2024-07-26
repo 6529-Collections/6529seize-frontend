@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import WavesList from "./list/WavesList";
 import { AuthContext } from "../auth/Auth";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -17,8 +17,6 @@ const NEW_WAVE_SEARCH_PARAM = "new";
 
 export default function Waves() {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
   const { connectedProfile, requestAuth, activeProfileProxy } =
     useContext(AuthContext);
 
@@ -35,7 +33,14 @@ export default function Waves() {
     [connectedProfile, activeProfileProxy]
   );
 
-  const [viewMode, setViewMode] = useState(WavesViewMode.VIEW);
+  const getShouldSetCreateNewWave = () =>
+    isCreateNewWave &&
+    !!connectedProfile?.profile?.handle &&
+    !activeProfileProxy;
+
+  const [viewMode, setViewMode] = useState(
+    getShouldSetCreateNewWave() ? WavesViewMode.CREATE : WavesViewMode.VIEW
+  );
 
   const getShowCreateNewWaveButton = () =>
     !!connectedProfile?.profile?.handle && !activeProfileProxy;
@@ -57,11 +62,7 @@ export default function Waves() {
   };
 
   useEffect(() => {
-    if (
-      isCreateNewWave &&
-      !!connectedProfile?.profile?.handle &&
-      !activeProfileProxy
-    ) {
+    if (getShouldSetCreateNewWave()) {
       onViewModeChange(WavesViewMode.CREATE);
     }
   }, [isCreateNewWave]);
