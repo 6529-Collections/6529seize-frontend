@@ -1,0 +1,27 @@
+@import "../../styles/variables.scss";
+
+.iconEnabled {
+  width: 14px;
+  cursor: pointer;
+}
+
+.iconDisabled {
+  width: 14px;
+  opacity: 0.6;
+}
+
+.goToLast {
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+    color: darken($color: $font-color, $amount: $darken-percentage);
+  }
+}
+
+.pageInput {
+  width: 35px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid $font-color;
+}

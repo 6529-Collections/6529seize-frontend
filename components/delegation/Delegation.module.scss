@@ -1,0 +1,660 @@
+@import "../../styles/variables.scss";
+
+.Web3NetworkSwitch {
+  display: none !important;
+}
+
+.connectBtn {
+  background-color: white;
+  color: black !important;
+  border: none;
+  padding: 8px;
+  line-height: 40px;
+  font-size: larger;
+  width: 75%;
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: white, $amount: 15);
+  }
+}
+
+.viewManageBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: black;
+  width: fit-content;
+  padding: 8px 12px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: white, $amount: 10);
+  }
+}
+
+.viewManageBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: white, $amount: 20);
+  color: $lighter-grey-2;
+}
+
+.collectionDelegationsAccordion {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    float: none;
+  }
+
+  button {
+    font-weight: bold;
+  }
+}
+
+.collectionDelegationsAccordionItem {
+  border-radius: 0 !important;
+  background-color: rgb(25, 25, 25);
+}
+
+.collectionDelegationsAccordionItemDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $blue, $amount: 10);
+
+  button {
+    color: $font-color-h !important;
+  }
+}
+
+.closeNewDelegationForm {
+  height: 28px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.useCaseWalletLink {
+  color: $font-color-h;
+  font-size: smaller;
+  text-decoration: underline;
+
+  &:hover {
+    color: $dark-grey;
+  }
+}
+
+.useCaseWalletUpdate {
+  border: none !important;
+  background-color: $blue;
+  color: white;
+  padding: 10px 15px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color: $blue, $amount: 5);
+  }
+}
+
+.useCaseWalletUpdateDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $blue, $amount: 10);
+  color: $font-color-h;
+}
+
+.useCaseWalletRevoke {
+  border: none !important;
+  background-color: $raspberry;
+  color: white;
+  padding: 10px 15px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color: $raspberry, $amount: 5);
+  }
+}
+
+.useCaseWalletRevokeDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $raspberry, $amount: 10);
+  color: $font-color-h;
+}
+
+.addNewDelegationBtn {
+  width: 100%;
+  border: none !important;
+  font-weight: 600;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $blue;
+  color: white;
+  padding: 15px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: lighten($color: $blue, $amount: 5);
+  }
+}
+
+.addNewDelegationBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $blue, $amount: 10);
+  color: $font-color-h;
+}
+
+.revokeDelegationBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  margin-top: 15px;
+  background-color: $raspberry;
+  color: white;
+  width: fit-content;
+  padding: 12px 16px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: $raspberry, $amount: 5);
+  }
+}
+
+.revokeDelegationBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $raspberry, $amount: 10);
+  color: $font-color-h;
+}
+
+.lockDelegationBtn {
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  margin-top: 15px;
+  background-color: darken($color: #d7710d, $amount: 10);
+  color: white;
+  width: fit-content;
+  padding: 12px 16px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: #d7710d, $amount: 15);
+  }
+}
+
+.lockDelegationBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: #d7710d, $amount: 20);
+  color: $font-color-h;
+}
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+  height: 100%;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.formInputLockUseCase {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 50px;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.newDelegationFormToggle {
+  line-height: 24px;
+  display: inline-block;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-right: 15px;
+
+  input {
+    border-color: transparent !important;
+    background-color: white !important;
+    cursor: pointer;
+  }
+
+  input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .newDelegationFormToggle {
+    margin-left: 8px;
+  }
+}
+
+.newDelegationSubmitBtn {
+  background-color: $green;
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+  margin-top: 15px;
+  color: white;
+
+  &:hover {
+    background-color: darken($color: $green, $amount: 5);
+  }
+}
+
+.newDelegationSubmitBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $green, $amount: 10);
+  color: $font-color-h;
+}
+
+.newDelegationCancelBtn {
+  background-color: white;
+  padding-left: 15px;
+  padding-right: 25px;
+  color: black !important;
+  margin-right: 15px;
+  margin-top: 15px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($color: white, $amount: 15);
+  }
+}
+
+.newDelegationError {
+  color: lighten($color: $raspberry, $amount: 12);
+}
+
+.newDelegationSuccess {
+  color: lighten($color: $green, $amount: 12);
+}
+
+.lockUseCaseBtn {
+  background-color: lighten($color: $lightest-grey, $amount: 25);
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: black !important;
+  height: 50px;
+
+  &:hover {
+    background-color: lighten($color: $lightest-grey, $amount: 20);
+  }
+}
+
+.newDelegationRedultsList {
+  ul {
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  ul li {
+    line-height: 42px;
+  }
+}
+
+.buttonIcon {
+  width: 14px;
+  height: 14px;
+  margin-right: 3px;
+}
+
+.backBtn {
+  border: none;
+  background-color: transparent !important;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 20px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    margin-top: -2px;
+  }
+
+  &:hover {
+    color: $font-color-h;
+  }
+}
+
+.leftBorder {
+  height: 100%;
+  border-left: 1px solid $lighter-grey;
+}
+
+@media only screen and (max-width: 767px) {
+  .leftBorder {
+    border-left: none !important;
+  }
+}
+
+.delegationsTableUseCaseHeader {
+  padding-top: 1rem !important;
+  padding-bottom: 0.2rem !important;
+  font-weight: bold;
+}
+
+.delegationsTableScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.delegationsTableScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.delegationsTable {
+  margin-bottom: 0;
+  tr td {
+    white-space: nowrap;
+  }
+  tr th {
+    white-space: nowrap;
+    line-height: 30px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  tr td a {
+    text-decoration: none;
+  }
+}
+
+.delegationsTable > :not(header) > * > * {
+  padding: 0.2rem;
+}
+
+.etherscanLink {
+  color: $font-color-h;
+
+  &:hover {
+    color: $font-color;
+  }
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.toastWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.toast {
+  position: fixed;
+  z-index: 101;
+  top: 140px !important;
+
+  a {
+    color: black !important;
+  }
+}
+
+.connectWalletButton {
+  background-color: white !important;
+  color: black !important;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  border: none !important;
+  padding: 6px 20px;
+  margin-left: 20px;
+}
+
+.switchNetworkButton {
+  background-color: white !important;
+  color: black !important;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  border: none !important;
+  padding: 6px 20px;
+}
+
+.delegationFetchingLabel {
+  color: $font-color-h;
+  margin-left: 15px;
+}
+
+.delegationActiveLabel {
+  color: lighten($color: $green, $amount: 10);
+}
+
+.delegationExpiredLabel {
+  color: lighten($color: $raspberry, $amount: 10);
+}
+
+.consolidationActiveLabel {
+  color: lighten($color: $blue, $amount: 20);
+}
+
+.consolidationNotAcceptedLabel {
+  color: lighten($color: $orange, $amount: 10);
+}
+
+.documentationLink {
+  text-decoration: none;
+  height: 32px;
+  display: inline-block;
+
+  svg {
+    margin-right: 10px;
+    margin-top: -2px;
+    width: 30px;
+    height: 30px;
+  }
+
+  span {
+    font-size: smaller;
+    display: inline-block;
+    line-height: 32px;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.delegationLink {
+  text-decoration: none;
+  height: 32px;
+  display: inline-block;
+
+  img {
+    margin-right: 10px;
+    margin-top: -2px;
+    width: 30px;
+    height: 30px;
+  }
+
+  span {
+    font-size: smaller;
+    display: inline-block;
+    line-height: 32px;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.formInputDisabled {
+  pointer-events: none !important;
+  color: $font-color-h !important;
+}
+
+.delegationContractLinksHeader {
+  font-weight: bold;
+  color: $font-color-h;
+  text-align: center;
+}
+
+.hint {
+  font-weight: bold;
+}
+
+.registerHeading {
+  cursor: pointer;
+  &:hover {
+    color: $font-color;
+  }
+}
+
+.registerHeadingActive {
+  color: $font-color;
+}
+
+.infoIconLink {
+  height: 18px;
+  margin-left: 8px;
+  cursor: pointer;
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.infoIcon {
+  height: 18px;
+  margin-left: 8px;
+  cursor: help;
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.formCheckColumn {
+  width: 5%;
+}
+
+.menuLeft {
+  width: 20%;
+  flex: none;
+
+  a {
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+.menuLeftItem {
+  cursor: pointer;
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+.menuLeftItemActive {
+  text-decoration: underline;
+}
+
+.menuRight {
+  width: 80%;
+}
+
+.menuLeftFull {
+  width: 100%;
+  display: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  .menuLeft {
+    display: none;
+  }
+
+  .menuLeftFull {
+    display: block;
+  }
+
+  .menuRight {
+    width: 100%;
+  }
+}
+
+.delegationCenterSection {
+  background-color: rgb(25, 25, 25);
+  height: 100%;
+  position: relative;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+@media only screen and (min-width: 787px) {
+  .delegationCenterSectionList {
+    height: 100px;
+  }
+}
+
+.addNewDelegationWrapper {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+@media only screen and (max-width: 1400px) {
+  .addNewDelegationWrapper {
+    height: 120px;
+    flex-direction: column;
+  }
+}
+
+.subDelegationSubHeading {
+  font-size: smaller;
+}
+
+.collectionSelectionButton {
+  width: 100%;
+  border: 2px solid white !important;
+  border-radius: 0 !important;
+  background-color: white;
+  color: black;
+  font-size: larger;
+  font-weight: bolder;
+  padding: 0.5rem 1rem;
+
+  img {
+    height: 40px;
+    width: auto;
+  }
+
+  &:hover {
+    background-color: $almost-very-dark-grey;
+    color: white;
+  }
+}
+
+.delegationAccordionBlock {
+  padding: 15px;
+  background-color: $very-dark-grey !important;
+}

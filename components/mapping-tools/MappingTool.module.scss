@@ -1,0 +1,92 @@
+@import "../../styles/variables.scss";
+
+.placeholder {
+  height: 500px;
+}
+
+.formInput {
+  color: $dark-grey !important;
+  border-radius: 0 !important;
+  border-color: $lightest-grey;
+  cursor: pointer;
+
+  &:focus {
+    border-color: $blue !important;
+  }
+}
+
+.formInputHidden {
+  display: none;
+}
+
+.submitBtn {
+  width: 100%;
+  border-radius: 0;
+  background-color: $green;
+  padding-left: 15px;
+  padding-right: 25px;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+  margin-top: 15px;
+  color: white;
+
+  &:active {
+    background-color: $green !important;
+  }
+
+  &:hover {
+    background-color: darken($color: $green, $amount: 5);
+  }
+}
+
+.submitBtnDisabled {
+  pointer-events: none !important;
+  background-color: darken($color: $green, $amount: 10);
+  color: $font-color-h;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.toolArea {
+  padding: 25px 30px;
+  background-color: $almost-very-dark-grey;
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 50px;
+  background-color: $very-dark-grey;
+  align-items: center;
+  gap: 2rem;
+  border: 2px dashed $lighter-grey;
+  cursor: pointer;
+
+  &:hover {
+    border: 2px dashed $lightest-grey;
+  }
+}
+
+.uploadAreaActive {
+  border: 2px dashed $lightest-grey;
+}
+
+.uploadIcon {
+  height: 4rem;
+}
+
+.clearBtn {
+  height: 25px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none !important;
+  }
+}

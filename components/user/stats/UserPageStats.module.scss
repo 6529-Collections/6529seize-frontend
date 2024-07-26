@@ -1,0 +1,49 @@
+.scrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.collectedAccordionButton {
+  background-color: rgb(28, 28, 33) !important;
+  border: 1px solid rgb(55, 55, 61) !important;
+  box-shadow: none !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+.collectedAccordionBody {
+  color: rgb(147, 147, 159);
+  background-color: rgb(19, 19, 22) !important;
+  border-left: 1px solid rgb(55, 55, 61) !important;
+  border-right: 1px solid rgb(55, 55, 61) !important;
+  border-bottom: 1px solid rgb(55, 55, 61) !important;
+}
+
+.collectedAccordionTable {
+  border: none;
+  color: rgb(147, 147, 159);
+  margin-bottom: 0;
+  th,
+  td {
+    color: rgb(147, 147, 159);
+    border-bottom: 0px;
+    padding: 0.3rem 0.2rem;
+    white-space: nowrap;
+  }
+}
+
+.collectedAccordionTableValue {
+  text-align: right;
+  color: white !important;
+}
+
+.fadedColor {
+  color: rgb(147, 147, 159);
+}

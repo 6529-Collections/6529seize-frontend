@@ -1,0 +1,84 @@
+@import "../../styles/variables.scss";
+
+.aboutMenuLeft {
+  width: 15%;
+  flex: none;
+
+  a {
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+.aboutMenuLeftItem {
+  cursor: pointer;
+  &:hover {
+    color: $lightest-grey;
+  }
+}
+
+.aboutMenuLeftItemActive {
+  text-decoration: underline;
+}
+
+.aboutMenuRight {
+  width: 85%;
+}
+
+.aboutMenuLeftFull {
+  width: 100%;
+  display: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  .aboutMenuLeft {
+    display: none;
+  }
+
+  .aboutMenuLeftFull {
+    display: block;
+  }
+
+  .aboutMenuRight {
+    width: 100%;
+  }
+}
+
+.calendarTable {
+  th {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+  td {
+    border: 1px solid white !important;
+    width: 50%;
+    padding: 10px;
+  }
+}
+
+.cookiePolicyTable {
+  th {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+  td {
+    border: 1px solid white !important;
+    width: fit-content;
+    padding: 10px;
+  }
+}
+
+.lastUpdateText {
+  color: $font-color-h !important;
+}
+
+.htmlContainer {
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: $main-font !important;
+    float: none;
+    color: $font-color;
+  }
+}

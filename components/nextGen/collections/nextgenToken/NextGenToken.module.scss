@@ -1,0 +1,164 @@
+@import "../../../../styles/variables.scss";
+
+.modeRow {
+  background-color: black;
+}
+
+.modeIcon {
+  width: 22px;
+  height: 22px;
+  fill: $font-color-h;
+  color: $font-color-h;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    color: lightgray;
+    transform: scale(1.1);
+  }
+}
+
+.modeIconSelected {
+  color: $font-color;
+}
+
+.lightBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(245, 245, 245);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.blackBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.lightBoxContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightBoxCloseIcon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
+  color: black;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.blackBoxCloseIcon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.traitDiv {
+  background-color: rgb(23, 22, 28);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.015);
+  }
+}
+
+.downloadBtn {
+  padding: 0;
+  background-color: transparent !important;
+  border: none !important;
+  display: flex;
+
+  &::after {
+    display: none !important;
+  }
+}
+
+.tokenPropertiesAccordionBody {
+  color: white;
+  background-color: $nextgen-grey;
+}
+
+.imageResolutionBtn {
+  font-weight: bolder;
+  font-size: smaller !important;
+  padding: 0;
+  background-color: $font-color-h;
+  border: none !important;
+  color: black;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 2px;
+  min-width: 35px;
+
+  &:hover {
+    background-color: white;
+  }
+}
+
+.imageResolutionBtnSelected {
+  background-color: white;
+}
+
+.sceneBtn {
+  background-color: transparent;
+  border: 2px solid white !important;
+
+  &:hover {
+    background-color: white;
+    color: black;
+  }
+}
+
+.customRenderDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 10px;
+  margin-right: 20px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    @media only screen and (max-width: 800px) {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+.customRenderInput {
+  color: black;
+  width: fit-content;
+}

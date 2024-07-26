@@ -1,0 +1,24 @@
+@import "../../styles/variables.scss";
+
+.breadcrumb {
+  background-color: $lighter-grey;
+  height: 30px;
+  line-height: 30px;
+  font-size: 12px;
+  z-index: 1;
+  position: relative;
+}
+
+.breadcrumbLink {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline !important;
+  }
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

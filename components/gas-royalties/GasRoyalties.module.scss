@@ -1,0 +1,100 @@
+@import "../../styles/variables.scss";
+
+.scrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.gasTable,
+.royaltiesTable {
+  tr td {
+    white-space: nowrap;
+    align-items: center;
+    vertical-align: middle;
+    span {
+      float: left;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      a {
+        line-height: 40px;
+      }
+    }
+  }
+
+  th {
+    white-space: nowrap;
+    line-height: 28px;
+  }
+
+  th span {
+    white-space: nowrap;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  thead tr {
+    background-color: transparent !important;
+  }
+
+  tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.gasTable > :not(caption) > * > *,
+.royaltiesTable > :not(caption) > * > * {
+  padding: 0.5rem;
+}
+
+.filterDropdown {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 15px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+      @media only screen and (max-width: 800px) {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+.collectionFocus {
+  &:hover {
+    color: $font-color;
+    cursor: pointer;
+  }
+}
+
+.collectionFocusActive {
+  color: $font-color;
+  transform: scale(1.02);
+}
+
+.infoIcon {
+  color: $font-color-h;
+  height: 18px;
+  cursor: pointer;
+
+  &:hover {
+    color: $font-color;
+  }
+}

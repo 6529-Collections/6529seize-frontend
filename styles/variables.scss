@@ -1,0 +1,39 @@
+@import "./fonts.scss";
+
+//FONT FAMILIES
+$square-font: "Square One", sans-serif;
+// $main-font: Arial;
+$main-font: "Montserrat", sans-serif;
+
+$header-height: 120px;
+
+// FONT SIZES
+$font-size: 16px;
+$font-smaller: 14px;
+$font-smallest: 12px;
+
+// COLORS
+$off-white: rgb(215, 215, 215);
+$lightest-grey: rgb(154, 154, 154);
+$lighter-grey-2: rgb(100, 100, 100);
+$lighter-grey: rgb(68, 68, 68);
+$almost-very-dark-grey: rgb(30, 30, 30);
+$very-dark-grey: rgb(34, 34, 34);
+$dark-grey: rgb(51, 51, 51);
+$nextgen-grey: rgb(40, 40, 40);
+$font-color: white;
+$font-color-h: $lightest-grey;
+$font-color-dark: black;
+$bg-color-1: black;
+$bg-color-2: $very-dark-grey;
+
+$darken-percentage: 30%;
+
+$pink: #da2089;
+$green: #208359;
+$blue: #267c93;
+$orange: #ffa500;
+$salmon: #1861ff;
+$yellow: #ffff00;
+$raspberry: #c51d34;
+$silver: rgb(147, 147, 159);

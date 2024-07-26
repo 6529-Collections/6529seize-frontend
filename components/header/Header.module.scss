@@ -1,0 +1,277 @@
+@import "../../styles/variables.scss";
+
+.mainContainer {
+  font-size: larger;
+  z-index: 600;
+  position: relative;
+  min-height: $header-height;
+  background-color: $bg-color-1;
+}
+
+.headerRow {
+  min-height: $header-height;
+  z-index: 10;
+}
+
+.headerLeft {
+  height: $header-height;
+}
+
+.logoIcon {
+  width: 100%;
+  height: auto;
+  max-width: 250px;
+}
+
+.headerRight {
+  font-weight: bold;
+  font-size: $font-size;
+}
+
+.burgerMenuBtn {
+  max-height: 28px !important;
+  cursor: pointer;
+}
+
+.burgerMenu {
+  position: fixed;
+  display: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $bg-color-1;
+  z-index: 51;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  overflow-y: auto;
+
+  a {
+    text-decoration: none;
+    h3,
+    h4 {
+      float: none;
+      color: white !important;
+    }
+  }
+
+  .burgerMenuCaretOpen::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    position: relative;
+    top: 2px;
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+  }
+
+  .burgerMenuCaretClose::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    position: relative;
+    top: 2px;
+    border-top: 0;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0.3em solid;
+    border-left: 0.3em solid transparent;
+  }
+}
+
+.burgerMenuHeader {
+  float: none;
+  color: white !important;
+}
+
+.burgerMenuOpen {
+  display: block;
+}
+
+.burgerMenuClose {
+  width: 35px;
+  cursor: pointer;
+}
+
+.mainNavLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 16px;
+  white-space: nowrap;
+  a span {
+    text-decoration: none !important;
+  }
+
+  @media only screen and (max-width: 1400px) {
+    font-size: 16px;
+  }
+}
+
+.mainNavLinkPadding {
+  padding-right: 15px;
+}
+
+.connectBtn {
+  background-color: white;
+  padding-left: 12px;
+  padding-right: 22px;
+}
+
+.fontBlack {
+  a:first-of-type {
+    color: black;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dMdNone {
+    display: none !important;
+  }
+  .dMdBlock {
+    display: block !important;
+  }
+}
+
+.headerPlaceholder {
+  z-index: 10;
+  position: relative;
+  min-height: $header-height;
+  background-color: $bg-color-1;
+}
+
+.userDropdown {
+  background-color: white;
+  border-left: 0.5px solid black;
+  display: inline-block;
+
+  ::after {
+    display: none !important;
+  }
+}
+
+.consolidationDropDown {
+  ::after {
+    display: none;
+  }
+}
+
+.consolidationDropdownBtn {
+  border: none;
+  height: 40px;
+  background-color: white;
+  color: black !important;
+  text-align: center;
+  margin-left: 2px;
+
+  svg {
+    height: 20px;
+    width: 20px;
+  }
+
+  &:hover {
+    background-color: $off-white;
+  }
+
+  &::after {
+    display: none !important;
+  }
+}
+
+.userProfileBtn {
+  border: none;
+  height: 40px;
+  background-color: white;
+  color: black !important;
+  text-align: center;
+  margin-left: 2px;
+
+  svg {
+    height: 20px;
+    width: 20px;
+  }
+
+  &:hover {
+    background-color: $off-white;
+  }
+}
+
+.userBtn {
+  border: none;
+  height: 40px;
+  padding: 0;
+  padding-left: 8px;
+  padding-right: 8px;
+  width: 30px !important;
+  background-color: white;
+  color: black !important;
+  display: inline-block;
+  position: relative;
+  width: 10px;
+}
+
+.consolidationBtnActive {
+  background-color: #ffff00;
+
+  &:hover {
+    background-color: darken(#ffff00, 5%);
+  }
+}
+
+.userBtnIcon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 7px solid #000;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+}
+
+.viewModeDropdown {
+  button {
+    width: 100%;
+    height: 100%;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    font-size: inherit !important;
+    text-align: left;
+    padding: 6px 12px 6px 20px;
+  }
+  button::before {
+    left: 6px;
+    top: calc((100% - 10px) / 2);
+  }
+}
+
+.viewModeIcon {
+  height: $font-size;
+  padding-right: 8px;
+}
+
+.viewModeIconConsolidation {
+  color: #ffff00;
+}
+
+.dropdownItemProfile {
+  padding: 6px 12px 6px 20px;
+}
+
+.dropdownItemHeader {
+  color: $font-color-h !important;
+}
+
+.new {
+  margin-left: 8px;
+  background-color: white;
+  border-radius: 5px;
+  color: black;
+  font-size: smaller;
+  padding: 2px 5px;
+  border: 1px solid white;
+}

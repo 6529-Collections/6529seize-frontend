@@ -1,0 +1,7 @@
+{
+  "sonarlint.connectedMode.project": {
+    "connectionId": "VSCode",
+    "projectKey": "6529-Collections_6529seize-frontend"
+  },
+  "editor.tabSize": 2
+}

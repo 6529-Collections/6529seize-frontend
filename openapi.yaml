@@ -1,0 +1,3718 @@
+openapi: 3.0.3
+
+info:
+  title: Seize API
+  description: This is the API interface description for the most commonly used operations in Seize API.  Some modifying endpoints require an authentication token.   We are in the process of documenting all Seize APIs.   If there is an API that you need, please ping us in Discord and we will aim to prioritize its documentation.
+  version: 1.0.0
+servers:
+  - url: /api
+
+paths:
+  /auth/nonce:
+    get:
+      tags:
+        - Authentication
+      summary: Get a message to sign with your web3 wallet
+      operationId: getNonce
+      parameters:
+        - name: signer_address
+          in: query
+          description: Your wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NonceResponse'
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate and get JWT token
+      operationId: getAuthToken
+      parameters:
+        - name: signer_address
+          in: query
+          description: Your wallet address
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 'Invalid request'
+
+  /nfts:
+    get:
+      tags:
+        - NFTs
+      summary: Get NFTs
+      operationId: getNfts
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 101
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: id
+          in: query
+          description: Filter by NFT ID
+          required: false
+          schema:
+            type: string
+        - name: contract
+          in: query
+          description: Filter by NFT ID
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NftsPage"
+
+  /identities/{id}/subscriptions:
+    get:
+      tags:
+        - Identities
+      summary: Get subscribed actions to identity for authenticated user.
+      operationId: getIdentitySubscriptions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentitySubscriptionActions"
+        "404":
+          description: Identity not found
+    post:
+      tags:
+        - Identities
+      summary: Subscribe authenticated user to identities actions.
+      operationId: subscribeToIdentityActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentitySubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentitySubscriptionActions"
+        "404":
+          description: Identity not found
+    delete:
+      tags:
+        - Identities
+      summary: Unsubscribe authenticated user from identity actions.
+      operationId: unsubscribeFromIdentityActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentitySubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentitySubscriptionActions"
+
+  /profiles/{identity}/proxies:
+    get:
+      tags:
+        - Proxies
+      summary: Get profile proxies
+      operationId: getProfileProxies
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileProxy"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/proxies/received:
+    get:
+      tags:
+        - Proxies
+      summary: Get proxies received by a profile
+      operationId: getProxiesReceived
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileProxy"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/proxies/granted:
+    get:
+      tags:
+        - Proxies
+      summary: Get proxies granted by a profile
+      operationId: getProxiesGranted
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileProxy"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/rep/rating:
+    post:
+      tags:
+        - ProfileREP
+      summary: Change profile REP rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
+      operationId: rateProfileRep
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProfileRepRating"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeProfileRepRatingResponse"
+        "400":
+          description: "Invalid request"
+    get:
+      tags:
+          - ProfileREP
+      summary: Get profile REP rating
+      operationId: getProfileRepRating
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: from_identity
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepRating"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/rep/ratings/by-rater:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get profile REP ratings by rater
+      operationId: getProfileRepRatingsByRater
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: given
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 2000
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_modified
+              - rating
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/cic/rating:
+    post:
+      tags:
+        - ProfileCIC
+      summary: Change profile CIC rating. If you are authenticated as proxy, you will be rating on behalf of the profile you are proxying.
+      operationId: rateProfileCic
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProfileCicRating"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeProfileCicRatingResponse"
+        "400":
+          description: "Invalid request"
+
+  /ratings:
+    post:
+      tags:
+        - Ratings
+      summary: Bulk rate. Supplied amount will be added to all target identities. If same identity is supplied multiple times, all the additions will be summed up. Targets must be represented as Ethereum wallet addresses. ENS names and profile handles are not supported.
+      operationId: bulkRate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkRateRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkRateResponse"
+        "400":
+          description: "Invalid request"
+
+  /ratings/credit:
+    get:
+      tags:
+        - Ratings
+      summary: Get available credit for rating
+      operationId: getCreditLeft
+      parameters:
+        - name: rater
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: rater_representative
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailableRatingCredit"
+
+  /profiles/{identity}/repcic/ratings/by-rater:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get profile CIC ratings by rater
+      operationId: getProfileCicRatingsByRater
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: given
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 2000
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_modified
+              - rating
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
+        "404":
+          description: Profile not found
+  /public/drops:
+    get:
+      tags:
+        - Drops
+      summary: Get latest drops viewable to anyone.
+      operationId: getLatestPublicDrops
+      parameters:
+        - name: limit
+          in: query
+          description: How many drops to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
+        - name: group_id
+          in: query
+          description: Drops by authors that fall into supplied group
+          required: false
+          schema:
+            type: string
+        - name: wave_id
+          in: query
+          description: Drops in wave with given ID
+          required: false
+          schema:
+            type: string
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drop"
+  /public/drops/{dropId}:
+    get:
+      tags:
+        - Drops
+      summary: Get a public drop by ID
+      operationId: getPublicDropById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drop"
+        "404":
+          description: Drop not found
+  /public/drops/{dropId}/log:
+    get:
+      tags:
+        - Drops
+      summary: Get public drop logs
+      operationId: getPublicDropLogs
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          description: Filter logs by type
+          required: false
+          schema:
+            type: string
+            enum:
+              - DROP_COMMENT
+              - DROP_RATING_EDIT
+              - DROP_CREATED
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 50
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 2000
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DropActivityLog"
+        "404":
+          description: Drop not found
+  /public/drops/{dropId}/parts/{dropPartId}/comments:
+    get:
+      tags:
+        - Drops
+      summary: Get public drop part comments
+      operationId: getPublicDropComments
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dropPartId
+          in: path
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 20
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropCommentsPage"
+        "404":
+          description: Drop not found
+  /drops:
+    get:
+      tags:
+        - Drops
+      summary: Get latest drops. Needs authentication. Use /public/drops for public drops.
+      operationId: getLatestDrops
+      parameters:
+        - name: limit
+          in: query
+          description: How many drops to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
+        - name: group_id
+          in: query
+          description: Drops by authors that fall into supplied group
+          required: false
+          schema:
+            type: string
+        - name: wave_id
+          in: query
+          description: Drops in wave with given ID
+          required: false
+          schema:
+            type: string
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drop"
+    post:
+      tags:
+        - Drops
+      summary: Create a drop
+      description: "Requires the user to be authenticated"
+      operationId: createDrop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDropRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drop"
+        "400":
+          description: "Invalid request"
+  /drops/{dropId}:
+    get:
+      tags:
+        - Drops
+      summary: Get drop by ID. Needs authenticated user. Use /public/drops/{dropId} for public drops.
+      operationId: getDropById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: min_part_id
+          in: query
+          description: Minimum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: max_part_id
+          in: query
+          description: Maximum ID of the parts wrapped in drops
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drop"
+        "404":
+          description: Drop not found
+
+  /drops/{dropId}/ratings:
+    post:
+      tags:
+        - Drops
+      summary: Rate a drop
+      description: "Requires the user to be authenticated"
+      operationId: rateDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DropRatingRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drop"
+        "404":
+          description: Drop not found
+        "400":
+          description: "Invalid request"
+
+  /drops/{dropId}/log:
+    get:
+      tags:
+        - Drops
+      summary: Get drop logs. Needs authenticated user. Use /public/drops/{dropId}/logs for public drops.
+      operationId: getDropLogs
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          description: Filter logs by type
+          required: false
+          schema:
+            type: string
+            enum:
+              - DROP_COMMENT
+              - DROP_RATING_EDIT
+              - DROP_CREATED
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 50
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 2000
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DropActivityLog"
+        "404":
+          description: Drop not found
+  /drops/{dropId}/subscriptions:
+    post:
+      tags:
+        - Drops
+      summary: Subscribe authenticated user to drop actions.
+      operationId: subscribeToDropActions
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DropSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropSubscriptionActions"
+        "404":
+          description: Wave not found
+    delete:
+      tags:
+        - Drops
+      summary: Unsubscribe authenticated user from drop actions.
+      operationId: unsubscribeFromDropActions
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DropSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropSubscriptionActions"
+        "404":
+          description: Wave not found
+  /drops/{dropId}/parts/{dropPartId}/comments:
+    get:
+      tags:
+        - Drops
+      summary: Get drop part comments. Needs authenticated user. Use /public/drops/{dropId}/parts/{dropPartId}/comments for public drops.
+      operationId: getDropComments
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dropPartId
+          in: path
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            description: Default is DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            description: Default is created_at
+            type: string
+            enum:
+              - created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            description: Default is 1
+            type: number
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            description: Default is 20
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropCommentsPage"
+        "404":
+          description: Drop not found
+    post:
+      tags:
+        - Drops
+      summary: Write a discussion comment for drop part
+      description: "Requires the user to be authenticated"
+      operationId: commentDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dropPartId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewDropComment"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropComment"
+        "404":
+          description: Drop not found
+        "400":
+          description: "Invalid request"
+
+  /drop-media/prep:
+    post:
+      tags:
+        - Drops
+      summary: Create S3 URL for drop media upload
+      description: "Requires the user to be authenticated"
+      operationId: createDropMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
+        "400":
+          description: "Invalid request"
+  /proxies:
+    post:
+      tags:
+        - Proxies
+      summary: Create a new proxy
+      description: Requires the user to be authenticated
+      operationId: createProxy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNewProfileProxy"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileProxy"
+        "400":
+          description: Invalid request
+  /proxies/{proxyId}:
+    get:
+      tags:
+        - Proxies
+      summary: Get proxy by ID
+      operationId: getProxyById
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileProxy"
+        "404":
+          description: Proxy not found
+  /proxies/{proxyId}/actions:
+    post:
+      tags:
+        - Proxies
+      summary: Add action to proxy
+      description: Requires the user to be authenticated
+      operationId: addActionToProxy
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/schemas/CreateNewProfileProxyAllocateRepAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyAllocateCicAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyCreateWaveAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyReadWaveAction"
+                - $ref: "#/components/schemas/CreateNewProfileProxyCreateWaveParticipationDropAction"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileProxyAction"
+        "404":
+          description: Proxy not found
+        "400":
+          description: Invalid request
+
+  /proxies/{proxyId}/actions/{actionId}/acceptance:
+    post:
+      tags:
+        - Proxies
+      summary: Accept action
+      operationId: acceptAction
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - action
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - ACCEPT
+                    - REJECT
+                    - REVOKE
+                    - RESTORE
+      responses:
+        "201":
+          description: successful operation
+        "404":
+          description: Proxy or action not found
+        "400":
+          description: Invalid request
+
+  /proxies/{proxyId}/actions/{actionId}:
+    put:
+      tags:
+        - Proxies
+      summary: Update action
+      operationId: updateAction
+      parameters:
+        - name: proxyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProxyActionRequest"
+      responses:
+        "201":
+          description: successful operation
+        "404":
+          description: Proxy or action not found
+        "400":
+          description: Invalid request
+
+  /wave-media/prep:
+    post:
+      tags:
+        - Waves
+      summary: Create S3 URL for wave PFP
+      description: "Requires the user to be authenticated"
+      operationId: createWaveMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
+        "400":
+          description: "Invalid request"
+
+  /public/waves:
+    get:
+      tags:
+        - Waves
+      summary: Get public waves
+      operationId: getPublicWaves
+      parameters:
+        - name: name
+          in: query
+          description: Search by name or part of name
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Search by author identity
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: group_id
+          in: query
+          description: Waves by authors that fall into supplied group
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+
+  /public/waves/{id}:
+    get:
+      tags:
+        - Waves
+      summary: Get public wave by ID
+      operationId: getPublicWaveById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wave"
+        "404":
+          description: Wave not found
+
+  /public/waves-overview:
+    get:
+      tags:
+        - Waves
+      summary: Get overview of waves by different criteria.
+      operationId: getPublicWavesOverview
+      parameters:
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+            default: 10
+        - name: offset
+          in: query
+          description: Used to find next waves
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: type
+          in: query
+          description: Type of overview
+          required: true
+          schema:
+            type: string
+            enum:
+              - LATEST
+              - MOST_SUBSCRIBED
+              - HIGH_LEVEL_AUTHOR
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+
+  /waves-overview:
+    get:
+      tags:
+        - Waves
+      summary: Get overview of waves by different criteria. User must be authenticated. Public alternative is /public/waves-overview.
+      operationId: getWavesOverview
+      parameters:
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+            default: 10
+        - name: offset
+          in: query
+          description: Used to find next waves
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: type
+          in: query
+          description: Type of overview
+          required: true
+          schema:
+            $ref: "#/components/schemas/WavesOverviewType"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+
+  /waves:
+    get:
+      tags:
+        - Waves
+      summary: Get waves. Needs authentication. Use /public/waves for public waves.
+      operationId: getWaves
+      parameters:
+        - name: name
+          in: query
+          description: Search by name or part of name
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Search by author identity
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: How many waves to return (10 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older drops
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: group_id
+          in: query
+          description: Waves by authors that fall into supplied group
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wave"
+    post:
+      tags:
+        - Waves
+      summary: Create new wave
+      description: Requires the user to be authenticated
+      operationId: createWave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNewWave"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wave"
+        "400":
+          description: Invalid request
+
+  /waves/{id}:
+    get:
+      tags:
+        - Waves
+      summary: Get wave by ID. Needs authenticated user. Use /public/waves/{id} for public waves.
+      operationId: getWaveById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wave"
+        "404":
+          description: Wave not found
+
+  /waves/{id}/subscriptions:
+    post:
+      tags:
+        - Waves
+      summary: Subscribe authenticated user to wave actions.
+      operationId: subscribeToWaveActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaveSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaveSubscriptionActions"
+        "404":
+          description: Wave not found
+    delete:
+      tags:
+        - Waves
+      summary: Unsubscribe authenticated user from wave actions.
+      operationId: unsubscribeFromWaveActions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaveSubscriptionActions"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaveSubscriptionActions"
+        "404":
+          description: Wave not found
+
+  /feed:
+    get:
+      tags:
+        - Feed
+      summary: Get feed
+      operationId: getFeed
+      parameters:
+        - name: serial_no_less_than
+          in: query
+          description: Used to find older items
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedItem"
+
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Search for user groups
+      operationId: searchUserGroups
+      parameters:
+        - name: group_name
+          description: Partial or full name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: author_identity
+          description: Group author identity
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: created_at_less_than
+          description: created at date less than
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GroupFull"
+    post:
+      tags:
+        - Groups
+      summary: Create a group
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroup"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupFull"
+        "400":
+          description: Invalid request
+  /groups/{id}/visible:
+    post:
+      tags:
+        - Groups
+      summary: Change group visibility
+      operationId: changeGroupVisibility
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeGroupVisibility"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupFull"
+        "404":
+          description: Group not found
+        "400":
+          description: Invalid request
+  /groups/{id}/identity_groups/{identity_group_id}:
+    get:
+      tags:
+        - Groups
+      summary: Get identity groups identities. Identities are represented as primary wallet addresses
+      operationId: getIdentityGroupIdentities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: identity_group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: Group not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    IntRange:
+      type: object
+      required:
+        - min
+        - max
+      properties:
+        min:
+          description: Included
+          type: number
+          format: int64
+          nullable: true
+        max:
+          description: Included
+          type: number
+          format: int64
+          nullable: true
+
+    AvailableRatingCredit:
+      type: object
+      required:
+        - credit
+      properties:
+        cic_credit:
+          type: number
+          format: int64
+        rep_credit:
+          type: number
+          format: int64
+
+    BulkRateResponse:
+      type: object
+      required:
+        - skipped
+      properties:
+        skipped:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkRateSkippedIdentity"
+
+    BulkRateSkippedIdentity:
+      type: object
+      required:
+        - identity
+        - reason
+      properties:
+        identity:
+          type: string
+        reason:
+          type: string
+
+    BulkRateRequest:
+      type: object
+      required:
+        - matter
+        - category
+        - amount_to_add
+        - target_wallet_addresses
+      properties:
+        matter:
+          $ref: "#/components/schemas/RateMatter"
+        category:
+          type: string
+          maxLength: 100
+          nullable: true
+          pattern: "^[a-zA-Z0-9?!,.'() ]$"
+          description: "Category of the rating must be set when matter is REP and null if matter is CIC"
+        amount_to_add:
+          type: number
+          format: int64
+          example: 1
+        target_wallet_addresses:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: "0x[a-fA-F0-9]{40}"
+            description: "Wallet address of the target profile"
+
+    RateMatter:
+      type: string
+      enum:
+        - REP
+        - CIC
+
+    RatingWithProfileInfoAndLevel:
+      type: object
+      required:
+        - profile_id
+        - handle
+        - wallets
+        - tdh
+        - rating
+        - cic
+        - last_modified
+        - level
+      properties:
+        profile_id:
+          type: string
+        handle:
+          type: string
+        wallets:
+          type: array
+          items:
+            type: string
+        tdh:
+          type: number
+          format: int64
+        rating:
+          type: number
+          format: int64
+        cic:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+
+    RatingWithProfileInfoAndLevelPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RatingWithProfileInfoAndLevel"
+
+    Group:
+      type: object
+      required:
+        - id
+        - name
+        - author
+        - created_at
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        created_at:
+          type: number
+          format: int64
+
+    GroupFull:
+      type: object
+      required:
+        - id
+        - name
+        - group
+        - created_at
+        - created_by
+        - visible
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        group:
+          $ref: "#/components/schemas/GroupDescription"
+        created_at:
+          type: number
+          format: int64
+        created_by:
+          $ref: "#/components/schemas/ProfileMin"
+        visible:
+          type: boolean
+
+    GroupDescription:
+      type: object
+      required:
+        - tdh
+        - rep
+        - cic
+        - level
+        - owns_nfts
+        - identity_group_id
+        - identity_group_identities_count
+        - excluded_identity_group_id
+        - excluded_identity_group_identities_count
+      properties:
+        tdh:
+          $ref: "#/components/schemas/GroupTdhFilter"
+        rep:
+          $ref: "#/components/schemas/GroupRepFilter"
+        cic:
+          $ref: "#/components/schemas/GroupCicFilter"
+        level:
+          $ref: "#/components/schemas/GroupLevelFilter"
+        owns_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupOwnsNft"
+        identity_group_id:
+          type: string
+          nullable: true
+        identity_group_identities_count:
+          type: number
+          format: int64
+          nullable: false
+        excluded_identity_group_id:
+          type: string
+          nullable: true
+        excluded_identity_group_identities_count:
+          type: number
+          format: int64
+          nullable: false
+
+    CreateGroupDescription:
+      type: object
+      required:
+        - tdh
+        - rep
+        - cic
+        - level
+        - owns_nfts
+        - identity_addresses
+        - excluded_identity_addresses
+      properties:
+        tdh:
+          $ref: "#/components/schemas/GroupTdhFilter"
+        rep:
+          $ref: "#/components/schemas/GroupRepFilter"
+        cic:
+          $ref: "#/components/schemas/GroupCicFilter"
+        level:
+          $ref: "#/components/schemas/GroupLevelFilter"
+        owns_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupOwnsNft"
+        identity_addresses:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
+          example: ["0x1234567890123456789012345678901234567890"]
+        excluded_identity_addresses:
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                type: string
+          example: ["0x1234567890123456789012345678901234567890"]
+
+    GroupOwnsNft:
+      type: object
+      required:
+        - name
+        - tokens
+      properties:
+        name:
+          type: string
+          enum:
+            - MEMES
+            - MEMELAB
+            - NEXTGEN
+            - GRADIENTS
+        tokens:
+          type: array
+          items:
+            type: string
+
+    GroupTdhFilter:
+      type: object
+      required:
+        - min
+        - max
+      properties:
+        min:
+          type: number
+          minimum: 0
+          format: int64
+          nullable: true
+        max:
+          type: number
+          minimum: 0
+          format: int64
+          nullable: true
+
+    GroupCicFilter:
+      type: object
+      required:
+        - min
+        - max
+        - direction
+        - user_identity
+      properties:
+        min:
+          type: number
+          format: int64
+          nullable: true
+        max:
+          type: number
+          format: int64
+          nullable: true
+        user_identity:
+          type: string
+          minLength: 1
+          maxLength: 200
+          nullable: true
+        direction:
+          example: "RECEIVED"
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/GroupFilterDirection"
+
+    GroupRepFilter:
+      type: object
+      required:
+        - min
+        - max
+        - category
+        - direction
+        - user_identity
+      properties:
+        min:
+          type: number
+          format: int64
+          nullable: true
+        max:
+          type: number
+          format: int64
+          nullable: true
+        category:
+          type: string
+          minLength: 1
+          maxLength: 200
+          nullable: true
+        user_identity:
+          type: string
+          minLength: 1
+          maxLength: 200
+          nullable: true
+        direction:
+          example: "RECEIVED"
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/GroupFilterDirection"
+
+    GroupLevelFilter:
+      type: object
+      required:
+        - min
+        - max
+      properties:
+        min:
+          type: number
+          format: int64
+          nullable: true
+        max:
+          type: number
+          format: int64
+          nullable: true
+
+    GroupFilterDirection:
+        type: string
+        enum:
+          - RECEIVED
+          - SENT
+
+    CreateGroup:
+      type: object
+      required:
+        - name
+        - group
+        - visible
+      properties:
+        name:
+          type: string
+        group:
+          $ref: "#/components/schemas/CreateGroupDescription"
+
+    ChangeGroupVisibility:
+      type: object
+      required:
+        - visible
+        - old_version_id
+      properties:
+        visible:
+          type: boolean
+        old_version_id:
+          type: string
+          minLength: 1
+          nullable: true
+
+    PageBase:
+      type: object
+      required:
+        - count
+        - page
+        - next
+      properties:
+        count:
+          type: number
+          format: int64
+        page:
+          type: number
+          format: int64
+        next:
+          type: boolean
+
+    PageWithNextUriBase:
+      type: object
+      required:
+        - count
+        - page
+        - next
+      properties:
+        count:
+          type: number
+          format: int64
+        page:
+          type: number
+          format: int64
+        next:
+          type: string
+          nullable: true
+
+    Drop:
+      type: object
+      required:
+        - id
+        - serial_no
+        - wave
+        - author
+        - created_at
+        - referenced_nfts
+        - mentioned_users
+        - metadata
+        - parts
+        - parts_count
+        - rating
+        - top_raters
+        - raters_count
+        - top_rating_categories
+        - rating_categories_count
+        - rating_logs_count
+        - title
+        - context_profile_context
+        - subscribed_actions
+      properties:
+        id:
+          type: string
+        serial_no:
+          description: Sequence number of the drop in Seize
+          type: number
+          format: int64
+        wave:
+          $ref: "#/components/schemas/WaveMin"
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        created_at:
+          description: Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
+          type: number
+          format: int64
+        title:
+          type: string
+          maxLength: 250
+          nullable: true
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropPart"
+        parts_count:
+          description: "Number of drops in the storm"
+          type: number
+          format: int64
+        referenced_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropReferencedNFT"
+        mentioned_users:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMentionedUser"
+        metadata:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMetadata"
+        rating:
+          type: number
+          format: int64
+        top_raters:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRater"
+        raters_count:
+          type: number
+          format: int64
+        top_rating_categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRatingCategory"
+        rating_categories_count:
+          type: number
+          format: int64
+        rating_logs_count:
+          type: number
+          format: int64
+        context_profile_context:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DropContextProfileContext"
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropSubscriptionTargetAction"
+
+    QuotedDrop:
+      type: object
+      required:
+        - drop_id
+        - drop_part_id
+      properties:
+        drop_id:
+          type: string
+        drop_part_id:
+          type: number
+          format: int64
+
+    DropPart:
+      type: object
+      required:
+        - part_id
+        - media
+        - discussion_comments_count
+        - quotes_count
+        - quoted_drop
+        - content
+      properties:
+        part_id:
+          description: "Which drop in the storm is this drop"
+          type: number
+          format: int64
+        content:
+          type: string
+          maxLength: 25000
+          nullable: true
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMedia"
+        quoted_drop:
+          anyOf:
+            - $ref: "#/components/schemas/QuotedDrop"
+            - type: "null"
+        discussion_comments_count:
+          type: number
+          format: int64
+        quotes_count:
+          type: number
+          format: int64
+        context_profile_context:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DropPartContextProfileContext"
+    ProfileMin:
+      type: object
+      required:
+        - id
+        - handle
+        - pfp
+        - cic
+        - rep
+        - tdh
+        - level
+        - banner1_color
+        - banner2_color
+        - subscribed_actions
+        - archived
+      properties:
+        id:
+          type: string
+          format: uuid
+        handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
+        banner1_color:
+          type: string
+          nullable: true
+        banner2_color:
+          type: string
+          nullable: true
+        cic:
+          type: number
+          format: int64
+        rep:
+          type: number
+          format: int64
+        tdh:
+          type: number
+          format: int64
+        level:
+          type: number
+          format: int64
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+        archived:
+          type: boolean
+
+    DropReferencedNFT:
+      type: object
+      required:
+        - contract
+        - token
+        - name
+      properties:
+        contract:
+          type: string
+          maxLength: 100
+        token:
+          type: string
+          maxLength: 250
+        name:
+          type: string
+          maxLength: 500
+
+    DropMentionedUser:
+      type: object
+      required:
+        - mentioned_profile_id
+        - handle_in_content
+      properties:
+        mentioned_profile_id:
+          type: string
+          format: uuid
+        handle_in_content:
+          type: string
+          maxLength: 100
+        current_handle:
+          type: string
+          maxLength: 100
+          nullable: true
+
+    DropMetadata:
+      type: object
+      required:
+        - data_key
+        - data_value
+      properties:
+        data_key:
+          type: string
+          maxLength: 500
+        data_value:
+          type: string
+          maxLength: 500
+
+    DropRater:
+      type: object
+      required:
+        - profile
+        - rating
+      properties:
+        profile:
+          $ref: "#/components/schemas/ProfileMin"
+        rating:
+          type: number
+          format: int64
+
+    UpdateProxyActionRequest:
+        type: object
+        properties:
+          credit_amount:
+            type: number
+            format: int64
+            example: 1000
+          end_time:
+            type: number
+            format: int64
+            nullable: true
+            example: 1719850339996
+
+    DropRatingCategory:
+      type: object
+      required:
+        - category
+        - rating
+      properties:
+        category:
+          type: string
+        rating:
+          type: number
+          format: int64
+
+    DropContextProfileContext:
+      type: object
+      required:
+        - categories
+        - rating
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRatingCategory"
+        rating:
+          type: number
+          format: int64
+
+    DropPartContextProfileContext:
+      type: object
+      required:
+        - discussion_comments_count
+        - quotes_count
+      properties:
+        discussion_comments_count:
+          type: number
+          format: int64
+        quotes_count:
+          type: number
+          format: int64
+
+    CreateDropPart:
+      type: object
+      required:
+        - media
+      properties:
+        content:
+          type: string
+          maxLength: 25000
+          nullable: true
+        quoted_drop:
+          anyOf:
+            - $ref: "#/components/schemas/QuotedDrop"
+            - type: "null"
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMedia"
+
+    CreateWaveDropRequest:
+      type: object
+      required:
+        - referenced_nfts
+        - mentioned_users
+        - metadata
+        - parts
+      properties:
+        title:
+          type: string
+          maxLength: 250
+          nullable: true
+        parts:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/CreateDropPart"
+        referenced_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropReferencedNFT"
+        mentioned_users:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMentionedUser"
+        metadata:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMetadata"
+
+    CreateDropRequest:
+      type: object
+      required:
+        - wave_id
+      allOf:
+        - $ref: "#/components/schemas/CreateWaveDropRequest"
+      properties:
+        wave_id:
+          type: string
+
+    DropMedia:
+      type: object
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+          maxLength: 2000
+        mime_type:
+          type: string
+          maxLength: 100
+
+    DropRatingRequest:
+      type: object
+      required:
+        - rating
+        - category
+      properties:
+        rating:
+          type: number
+          format: int64
+        category:
+          type: string
+          maxLength: 100
+
+    DropActivityLog:
+      type: object
+      required:
+        - id
+        - profile_id
+        - author
+        - contents
+        - target_id
+        - type
+        - created_at
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+          format: uuid
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        target_id:
+          type: string
+        contents:
+          type: object
+        type:
+          type: string
+          enum:
+            - DROP_COMMENT
+            - DROP_RATING_EDIT
+            - DROP_CREATED
+        created_at:
+          type: number
+          format: int64
+
+    DropComment:
+      type: object
+      required:
+        - id
+        - author
+        - comment
+        - created_at
+      properties:
+        id:
+          type: number
+          format: int64
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        comment:
+          type: string
+          maxLength: 2000
+        created_at:
+          type: number
+          format: int64
+
+    NewDropComment:
+      type: object
+      required:
+        - comment
+      properties:
+        comment:
+          type: string
+          maxLength: 2000
+
+    DropCommentsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropComment"
+
+    CreateNewWaveScope:
+      type: object
+      required:
+        - group_id
+      properties:
+        group_id:
+          description: "If null, everyone is included"
+          type: string
+          nullable: true
+
+    WaveScope:
+      title: Scope
+      description: A scope of audience
+      type: object
+      required:
+        - group
+      properties:
+        group:
+          description: "If null, everyone is included"
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/Group"
+
+    WaveCreditType:
+      type: string
+      description: |
+        What will be counted as a credit. UNIQUE means each voter gets one vote.
+      enum:
+        - TDH
+        - REP
+        - UNIQUE
+
+    WaveType:
+      type: string
+      enum:
+        - APPROVE
+        - RANK
+        - CHAT
+
+    WaveCreditScope:
+      description: |
+        The scope of the credit. 
+        * WAVE - Credit is spendable across all drops in wave. 
+        * DROP - The amount of votes, voter can give to a drop is not affected by votes spent on other drops. 
+        * PARTICIPANT: The amount of votes, voter can give to a drop by concrete participant is only affected by voted given by same user to other drops by the same participant.
+      enum:
+        - WAVE
+        - DROP
+        - PARTICIPANT
+
+    WaveMetadataType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+
+    WaveRequiredMetadata:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          description: Metadata key
+          type: string
+        type:
+          $ref: "#/components/schemas/WaveMetadataType"
+
+
+    CreateNewWaveVotingConfig:
+      type: object
+      required:
+        - scope
+        - credit_type
+        - credit_scope
+        - credit_category
+        - signature_required
+        - creditor_id
+      properties:
+        scope:
+          $ref: "#/components/schemas/CreateNewWaveScope"
+        credit_type:
+          $ref: "#/components/schemas/WaveCreditType"
+        credit_scope:
+          $ref: "#/components/schemas/WaveCreditScope"
+        credit_category:
+          description: "Only relevant when credit_type=REP.
+            The REP category which is usable as credit.
+            If not set then all categories will be usable as voting credits."
+          type: string
+          nullable: true
+        creditor_id:
+          description: "Only relevant when credit_type=REP"
+          type: string
+          nullable: true
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: "#/components/schemas/IntRange"
+
+    WaveVotingConfig:
+      type: object
+      required:
+        - scope
+        - credit_type
+        - credit_scope
+        - credit_category
+        - signature_required
+        - creditor
+        - authenticated_user_eligible
+      properties:
+        scope:
+          $ref: "#/components/schemas/WaveScope"
+        credit_type:
+          $ref: "#/components/schemas/WaveCreditType"
+        credit_scope:
+          $ref: "#/components/schemas/WaveCreditScope"
+        credit_category:
+          description: "Only relevant when credit_type=REP.
+            The REP category which is usable as credit.
+            If not set then all categories will be usable as voting credits."
+          type: string
+          nullable: true
+        creditor:
+          description: "Only relevant when credit_type=REP"
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ProfileMin"
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: "#/components/schemas/IntRange"
+        authenticated_user_eligible:
+          type: boolean
+
+    WaveVisibilityConfig:
+      type: object
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: "#/components/schemas/WaveScope"
+
+    CreateNewWaveVisibilityConfig:
+      type: object
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: "#/components/schemas/CreateNewWaveScope"
+
+    WaveParticipationConfig:
+      type: object
+      required:
+        - scope
+        - required_metadata
+        - signature_required
+        - no_of_applications_allowed_per_participant
+        - required_media
+        - authenticated_user_eligible
+      properties:
+        scope:
+          $ref: "#/components/schemas/WaveScope"
+        no_of_applications_allowed_per_participant:
+          description: "The number of applications allowed per participant. Infinite if omitted."
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        required_metadata:
+          description: |
+            The metadata that must be provided by the participant. 
+            Empty array if nothing is required.
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveRequiredMetadata"
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: "#/components/schemas/IntRange"
+        authenticated_user_eligible:
+          type: boolean
+
+    CreateNewWaveParticipationConfig:
+      type: object
+      required:
+        - scope
+        - required_metadata
+        - signature_required
+        - no_of_applications_allowed_per_participant
+        - required_media
+      properties:
+        scope:
+          $ref: "#/components/schemas/CreateNewWaveScope"
+        no_of_applications_allowed_per_participant:
+          description: "The number of applications allowed per participant. Infinite if omitted."
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 1
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveParticipationRequirement"
+        required_metadata:
+          description: |
+            The metadata that must be provided by the participant. 
+            Empty array if nothing is required.
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveRequiredMetadata"
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        period:
+          $ref: "#/components/schemas/IntRange"
+
+    WaveConfig:
+      type: object
+      required:
+        - type
+        - time_lock_ms
+        - winning_thresholds
+        - period
+        - max_winners
+        - admin_group
+        - authenticated_user_eligible_for_admin
+      properties:
+        type:
+          $ref: "#/components/schemas/WaveType"
+        winning_thresholds:
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is APPROVE
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+        max_winners:
+          description: This amount of top rated drops will win. Must be set if and only if type is RANK
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        time_lock_ms:
+          nullable: true
+          description: Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
+          type: integer
+          format: int64
+          minimum: 1
+        admin_group:
+          $ref: "#/components/schemas/WaveScope"
+        period:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+          example: {"min": 1719850339996, "max": 1719850339996}
+        authenticated_user_eligible_for_admin:
+          type: boolean
+
+    CreateWaveConfig:
+      type: object
+      required:
+        - type
+        - time_lock_ms
+        - winning_thresholds
+        - period
+        - max_winners
+        - admin_group
+      properties:
+        type:
+          $ref: "#/components/schemas/WaveType"
+        winning_thresholds:
+          description: Drops which rate tally ends up in this range will win. Must be set if and only if type is APPROVE
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+        max_winners:
+          description: This amount of top rated drops will win. Must be set if and only if type is RANK
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        time_lock_ms:
+          nullable: true
+          description: Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
+          type: integer
+          format: int64
+          minimum: 1
+        admin_group:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CreateNewWaveScope"
+        period:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntRange"
+          example: { "min": 1719850339996, "max": 1719850339996 }
+
+
+    WaveOutcomeType:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+
+    WaveOutcomeSubType:
+      type: string
+      enum:
+        - CREDIT_DISTRIBUTION
+
+    WaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
+
+    WaveOutcome:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          $ref: "#/components/schemas/WaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/WaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/WaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            type: number
+
+
+    WaveParticipationRequirement:
+      type: string
+      enum:
+        - IMAGE
+        - AUDIO
+        - VIDEO
+
+    Wave:
+      type: object
+      required:
+        - id
+        - serial_no
+        - author
+        - name
+        - picture
+        - description_drop
+        - voting
+        - visibility
+        - participation
+        - wave
+        - outcomes
+        - created_at
+        - contributors_overview
+        - subscribed_actions
+        - metrics
+      properties:
+        id:
+          description: The ID of the wave
+          type: string
+        serial_no:
+          description: Sequence number of the wave in Seize
+          type: number
+          format: int64
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        name:
+          description: The name of the wave
+          type: string
+        picture:
+          description: The picture of the wave
+          type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
+        created_at:
+          type: number
+          format: int64
+        description_drop:
+          $ref: "#/components/schemas/Drop"
+        voting:
+          $ref: "#/components/schemas/WaveVotingConfig"
+        visibility:
+          $ref: "#/components/schemas/WaveVisibilityConfig"
+        participation:
+          $ref: "#/components/schemas/WaveParticipationConfig"
+        wave:
+          $ref: "#/components/schemas/WaveConfig"
+        outcomes:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveOutcome"
+        contributors_overview:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveContributorOverview"
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+        metrics:
+          $ref: "#/components/schemas/WaveMetrics"
+
+    WaveContributorOverview:
+      required:
+        - contributor_identity
+        - contributor_pfp
+      properties:
+        contributor_identity:
+          type: string
+        contributor_pfp:
+          type: string
+
+    CreateNewWave:
+      type: object
+      required:
+        - name
+        - picture
+        - description_drop
+        - voting
+        - visibility
+        - participation
+        - wave
+        - outcomes
+      properties:
+        name:
+          description: The name of the wave
+          type: string
+          maxLength: 250
+        picture:
+          description: The picture of the wave
+          type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
+        description_drop:
+          $ref: "#/components/schemas/CreateWaveDropRequest"
+        voting:
+          $ref: "#/components/schemas/CreateNewWaveVotingConfig"
+        visibility:
+          $ref: "#/components/schemas/CreateNewWaveVisibilityConfig"
+        participation:
+          $ref: "#/components/schemas/CreateNewWaveParticipationConfig"
+        wave:
+          $ref: "#/components/schemas/CreateWaveConfig"
+        outcomes:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveOutcome"
+
+    CreateNewProfileProxy:
+      type: object
+      required:
+        - target_id
+      properties:
+        target_id:
+          type: string
+
+    ProfileProxy:
+      type: object
+      required:
+        - id
+        - granted_to
+        - created_at
+        - created_by
+        - actions
+      properties:
+        id:
+          type: string
+        granted_to:
+          $ref: "#/components/schemas/ProfileMin"
+        created_at:
+          type: number
+        created_by:
+          $ref: "#/components/schemas/ProfileMin"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileProxyAction"
+
+    CreateNewProfileProxyAllocateRepAction:
+      type: object
+      required:
+        - action_type
+        - end_time
+        - credit_amount
+      properties:
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1719850339996
+        credit_amount:
+          type: number
+          format: int64
+          example: 1000
+
+    CreateNewProfileProxyAllocateCicAction:
+      type: object
+      required:
+        - action_type
+        - end_time
+        - credit_amount
+      properties:
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+        credit_amount:
+          type: number
+          format: int64
+          example: 1000
+
+    CreateNewProfileProxyCreateWaveAction:
+      type: object
+      required:
+        - action_type
+        - end_time
+      properties:
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+
+    CreateNewProfileProxyReadWaveAction:
+      type: object
+      required:
+        - action_type
+        - end_time
+      properties:
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+
+    CreateNewProfileProxyCreateWaveParticipationDropAction:
+      type: object
+      required:
+        - action_type
+        - end_time
+      properties:
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+    CreateNewProfileProxyRateWaveDropAction:
+      type: object
+      required:
+        - action_type
+        - end_time
+      properties:
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+
+    ProfileProxyActionType:
+      type: string
+      enum:
+        - ALLOCATE_REP
+        - ALLOCATE_CIC
+        - CREATE_WAVE
+        - READ_WAVE
+        - CREATE_DROP_TO_WAVE
+        - RATE_WAVE_DROP
+    ProfileProxyAction:
+      type: object
+      required:
+        - id
+        - proxy_id
+        - action_type
+        - credit_amount
+        - credit_spent
+        - start_time
+        - end_time
+        - accepted_at
+        - rejected_at
+        - revoked_at
+        - created_at
+        - is_active
+      properties:
+        id:
+          type: string
+        proxy_id:
+          type: string
+        action_type:
+          $ref: "#/components/schemas/ProfileProxyActionType"
+        credit_amount:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1000
+        credit_spent:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1000
+        start_time:
+          type: number
+          format: int64
+          example: 1719850339996
+        end_time:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1719850339996
+        created_at:
+          type: number
+          format: int64
+          example: 1719850339996
+        accepted_at:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1719850339996
+        rejected_at:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1719850339996
+        revoked_at:
+          anyOf:
+            - type: "null"
+            - type: number
+              format: int64
+          example: 1719850339996
+        is_active:
+          type: boolean
+
+    Nft:
+      type: object
+      required:
+        - id
+        - contract
+        - mint_price
+        - supply
+        - name
+        - collection
+        - token_type
+        - hodl_rate
+        - description
+        - artist
+        - uri
+        - thumbnail
+        - image
+        - animation
+        - metadata
+        - tdh
+        - tdh__raw
+        - tdh_rank
+        - market_cap
+        - floor_price
+        - scaled
+        - compressed_animation
+        - icon
+        - total_volume_last_24_hours
+        - total_volume_last_7_days
+        - total_volume_last_1_month
+        - total_volume
+        - created_at
+        - mint_date
+        - boosted_tdh
+        - artist_seize_handle
+        - has_distribution
+      properties:
+        id:
+          type: integer
+          format: int64
+        contract:
+          type: string
+        mint_price:
+          type: number
+          format: float
+        supply:
+          type: integer
+          format: int64
+        name:
+          type: string
+        collection:
+          type: string
+        token_type:
+          type: string
+          enum:
+            - ERC1155
+            - EEC721
+        hodl_rate:
+          type: number
+          format: float
+        description:
+          type: string
+        artist:
+          type: string
+        uri:
+          type: string
+          nullable: true
+        thumbnail:
+          type: string
+        image:
+          type: string
+          nullable: true
+        animation:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+        tdh:
+          type: number
+          format: int64
+        tdh__raw:
+          type: number
+          format: int64
+        tdh_rank:
+          type: number
+          format: int64
+        market_cap:
+          type: number
+          format: float
+        floor_price:
+          type: number
+          format: float
+        scaled:
+          type: string
+        compressed_animation:
+          type: string
+          nullable: true
+        icon:
+          type: string
+        total_volume_last_24_hours:
+          type: number
+          format: float
+        total_volume_last_7_days:
+          type: number
+          format: float
+        total_volume_last_1_month:
+          type: number
+          format: float
+        total_volume:
+          type: number
+          format: float
+        created_at:
+          type: string
+          format: date-time
+        mint_date:
+          type: string
+          format: date-time
+        boosted_tdh:
+          type: number
+          format: int64
+        artist_seize_handle:
+          type: string
+          nullable: true
+        has_distribution:
+          type: boolean
+
+    NftsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Nft"
+
+    NonceResponse:
+      type: object
+      required:
+        - nonce
+        - server_signature
+      properties:
+        nonce:
+          type: string
+        server_signature:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - client_signature
+        - server_signature
+      properties:
+        client_signature:
+          type: string
+        server_signature:
+          type: string
+        role:
+          type: string
+
+    LoginResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    RepRating:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: number
+          format: int64
+
+
+    ChangeProfileRepRating:
+        type: object
+        required:
+            - amount
+            - category
+        properties:
+          amount:
+            type: number
+            format: int64
+          category:
+            type: string
+            maxLength: 100
+            minLength: 1
+            pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
+
+    ChangeProfileRepRatingResponse:
+      type: object
+      required:
+        - total_rep_rating_for_category
+        - rep_rating_for_category_by_user
+      properties:
+        total_rep_rating_for_category:
+          type: number
+          format: int64
+        rep_rating_for_category_by_user:
+          type: number
+          format: int64
+
+    ChangeProfileCicRating:
+      type: object
+      required:
+        - amount
+        - category
+      properties:
+        amount:
+          type: number
+          format: int64
+
+    ChangeProfileCicRatingResponse:
+      type: object
+      required:
+        - total_cic_rating
+        - cic_rating_by_user
+      properties:
+        total_cic_rating:
+          type: number
+          format: int64
+        cic_rating_by_user:
+          type: number
+          format: int64
+
+    CreateMediaUploadUrlRequest:
+      required:
+        - content_type
+        - file_name
+        - file_size
+      properties:
+        content_type:
+          type: string
+          example: "image/png"
+        file_name:
+          type: string
+          example: "image.png"
+        file_size:
+          type: number
+          format: int64
+          example: 1000
+
+    CreateMediaUrlResponse:
+      required:
+        - upload_url
+        - content_type
+        - media_url
+      properties:
+        upload_url:
+          type: string
+          example: "https://example.com/upload/image.png"
+        content_type:
+          type: string
+          example: "image/png"
+        media_url:
+          type: string
+          example: "https://example.com/final/image.png"
+
+    WaveMin:
+      required:
+        - id
+        - name
+        - picture
+        - description_drop_id
+        - authenticated_user_eligible_to_vote
+        - authenticated_user_eligible_to_participate
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+        description_drop_id:
+          type: string
+        authenticated_user_eligible_to_vote:
+          type: boolean
+        authenticated_user_eligible_to_participate:
+          type: boolean
+
+    IdentitySubscriptionTargetType:
+      type: string
+      enum:
+        - PROFILE
+        - WAVE
+        - DROP
+
+    WaveSubscriptionTargetAction:
+      type: string
+      enum:
+        - DROP_CREATED
+
+    WaveSubscriptionActions:
+        type: object
+        required:
+          - actions
+        properties:
+          actions:
+            type: array
+            items:
+              $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+
+    DropSubscriptionTargetAction:
+      type: string
+      enum:
+        - DROP_COMMENTED
+        - DROP_VOTED
+
+    DropSubscriptionActions:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropSubscriptionTargetAction"
+
+    IdentitySubscriptionTargetAction:
+      type: string
+      enum:
+        - WAVE_CREATED
+        - DROP_CREATED
+        - DROP_COMMENTED
+        - DROP_VOTED
+
+    IdentitySubscriptionActions:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+
+    DropAndDropComment:
+      type: object
+      required:
+        - drop
+        - comment
+      properties:
+        drop:
+          $ref: "#/components/schemas/Drop"
+        comment:
+          $ref: "#/components/schemas/DropComment"
+
+    DropVote:
+      type: object
+      required:
+        - vote
+        - voter
+        - time
+      properties:
+        vote:
+          type: number
+          format: int64
+        voter:
+          $ref: "#/components/schemas/ProfileMin"
+        time:
+          type: number
+          format: int64
+
+    DropAndDropVote:
+      type: object
+      required:
+        - drop
+        - vote
+      properties:
+        drop:
+          $ref: "#/components/schemas/Drop"
+        vote:
+          $ref: "#/components/schemas/DropVote"
+
+    FeedItemType:
+      type: string
+      enum:
+        - WAVE_CREATED
+        - DROP_CREATED
+        - DROP_COMMENTED
+        - DROP_VOTED
+
+    FeedItem:
+      type: object
+      required:
+        - serial_no
+        - type
+        - item
+      properties:
+        serial_no:
+          type: number
+          format: int64
+        type:
+          $ref: "#/components/schemas/FeedItemType"
+        item:
+          type: object
+
+    WavesOverviewType:
+      type: string
+      enum:
+        - LATEST
+        - MOST_SUBSCRIBED
+        - HIGH_LEVEL_AUTHOR
+        - AUTHOR_YOU_HAVE_REPPED
+
+    WaveMetrics:
+      required:
+        - subscribers_count
+        - drops_count
+      properties:
+        subscribers_count:
+          type: number
+          format: int64
+        drops_count:
+          type: number
+          format: int64
+
+security:
+  - bearerAuth: []

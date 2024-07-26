@@ -1,0 +1,22 @@
+@import "../../styles/variables.scss";
+
+.downloadUrlWidget {
+  background-color: transparent;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  gap: 0.5rem;
+
+  &:hover {
+    color: darken($color: $font-color, $amount: $darken-percentage);
+    svg {
+      color: darken($color: $font-color, $amount: $darken-percentage);
+    }
+  }
+
+  svg {
+    width: 20px;
+    color: white;
+  }
+}

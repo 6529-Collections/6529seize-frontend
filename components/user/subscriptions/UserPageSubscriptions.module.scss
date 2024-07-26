@@ -1,0 +1,76 @@
+@import "../../../styles/variables.scss";
+
+.topUpHistoryAccordionButton {
+  background-color: rgb(28, 28, 33) !important;
+  border: 1px solid rgb(55, 55, 61) !important;
+  box-shadow: none !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+.topUpHistoryAccordionBody {
+  color: $font-color;
+  background-color: rgb(19, 19, 22) !important;
+  border-left: 1px solid rgb(55, 55, 61) !important;
+  border-right: 1px solid rgb(55, 55, 61) !important;
+  border-bottom: 1px solid rgb(55, 55, 61) !important;
+}
+
+.subscriptionHistoryEntry {
+  overflow: auto;
+  border: 1px solid rgb(55, 55, 61);
+  padding: 10px;
+}
+
+.nftSubscriptionsTable {
+  td {
+    color: rgb(147, 147, 159);
+    border-top: 1px solid rgb(55, 55, 61) !important;
+    border-bottom: 1px solid rgb(55, 55, 61) !important;
+    padding: 10px 20px;
+    white-space: nowrap;
+  }
+
+  tr:last-child td {
+    border-bottom: none !important;
+    padding: 5px 20px;
+  }
+}
+
+.tagContainer {
+  min-width: 150px;
+  display: flex;
+  justify-content: center;
+}
+
+.subscribedTag {
+  width: fit-content;
+  color: #00ff00;
+  background-color: #004400;
+  border: 1px solid #00aa00;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  transition: opacity 0.5s;
+
+  &.clicked {
+    color: #ff0000;
+    background-color: #440000;
+    border: 1px solid #aa0000;
+  }
+}
+
+.notSubscribedTag {
+  color: #999999;
+  background-color: #242430;
+  border: 1px solid #777777;
+  padding: 2px 10px;
+  border-radius: 9999px;
+}
+
+.sendBtn {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  width: 100%;
+}

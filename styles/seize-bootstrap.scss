@@ -1,0 +1,234 @@
+@import "~bootstrap/scss/bootstrap.scss";
+@import "./variables.scss";
+
+@media (max-width: 1000px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 850px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 950px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1050px !important;
+  }
+}
+
+@media (min-width: 1300px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1150px !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1250px !important;
+  }
+}
+
+@media (min-width: 1500px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1280px !important;
+  }
+}
+
+.navbar-expand .navbar-nav .dropdown-menu,
+.dropdown .dropdown-menu,
+.dropdown-center .dropdown-menu {
+  background-color: $bg-color-1;
+  border-top: 3px solid white;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}
+
+@media (max-width: 1000px) {
+  .navbar-expand .navbar-nav .dropdown-menu,
+  .dropdown .dropdown-menu,
+  .dropdown-center .dropdown-menu {
+    box-shadow: 0 2px 2px rgba(150, 150, 150, 0.3);
+  }
+}
+
+.dropdown-header {
+  padding: 5px 10px;
+  font-size: inherit;
+  width: 98%;
+  margin-left: 1%;
+}
+
+.dropdown-item {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 98%;
+  margin-left: 1%;
+  color: $font-color !important;
+}
+
+.dropdown-toggle::after {
+  margin-top: 11px;
+  margin-left: 5px;
+}
+
+.dropdown-item.active,
+.dropdown-item:active,
+.dropdown-item:hover {
+  background-color: $very-dark-grey !important;
+  color: $font-color !important;
+}
+
+.dropdown-item:focus {
+  background-color: initial !important;
+}
+
+.nav-link {
+  color: $font-color;
+  padding: 0 !important;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.navbar-nav .show > .nav-link,
+.navbar-nav .nav-link.active {
+  pointer-events: none !important;
+  color: $lightest-grey;
+}
+
+table:not(.tailwind-scope table),
+thead:not(.tailwind-scope thead),
+tbody:not(.tailwind-scope tbody),
+tfoot:not(.tailwind-scope tfoot),
+tr:not(.tailwind-scope tr),
+td:not(.tailwind-scope td),
+th:not(.tailwind-scope th) {
+  color: $font-color !important;
+  border: none;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.1rem 0.1rem;
+  background-color: transparent;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: $lightest-grey;
+}
+
+.dropdown-divider {
+  border-color: $very-dark-grey !important;
+}
+
+.modal-content {
+  color: black;
+  border-radius: 0;
+}
+
+.modal-header {
+  color: black;
+  background-color: white;
+  border-radius: 0;
+  border: none !important;
+
+  .btn-close {
+    opacity: 1;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.carousel-indicators {
+  bottom: -50px !important;
+}
+
+.carousel-control-prev {
+  left: -40px;
+}
+
+.carousel-control-next {
+  right: -40px;
+}
+
+.accordion-button {
+  color: $font-color !important;
+}
+
+.accordion-button::after {
+  position: absolute;
+  right: 20px;
+}
+
+.accordion-item:not(.tailwind-scope .accordion-item) .accordion-button {
+  border-radius: 0;
+}
+
+.accordion-item {
+  border: none;
+}
+
+.accordion-button {
+  background-color: rgb(30, 30, 30) !important;
+}
+
+.accordion-button::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.accordion-button:not(.collapsed)::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.form-select:focus {
+  border-color: $dark-grey;
+}
+
+.toast-header {
+  color: black !important;
+  background-color: $off-white !important;
+  border-radius: 0 !important;
+  font-size: larger;
+  font-weight: bolder !important;
+  padding: 10px 20px;
+}
+
+.toast-body {
+  color: black !important;
+  background-color: white !important;
+  font-size: larger;
+  padding: 20px;
+}

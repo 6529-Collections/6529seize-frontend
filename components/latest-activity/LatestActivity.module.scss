@@ -1,0 +1,120 @@
+@import "../../styles/variables.scss";
+
+.scrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.iconGreen {
+  width: 20px;
+  color: lightgreen;
+}
+
+.iconBlue {
+  width: 20px;
+  color: lightskyblue;
+}
+
+.iconWhite {
+  width: 20px;
+  color: white;
+}
+
+.iconRed {
+  width: 20px;
+  color: $raspberry;
+}
+
+.iconEnabled {
+  cursor: pointer;
+}
+
+.iconDisabled {
+  opacity: 0.6;
+}
+
+.transactionLink {
+  font-size: smaller;
+}
+
+.activityTable {
+  tr td {
+    white-space: nowrap;
+  }
+  tr td:first-child {
+    width: 1%;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.activityTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
+
+.nftImage {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.filterDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 15px;
+  a {
+    line-height: 30px;
+  }
+  button {
+    font-size: larger !important;
+    font-weight: bolder !important;
+    cursor: copy;
+    padding: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    &::after {
+      margin-top: 0.8rem;
+    }
+  }
+  div {
+    width: 60%;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .filterDropdown {
+    button {
+      &::after {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+.latestActivityRow {
+  td {
+    padding-left: 20px !important;
+  }
+}
+
+.gasIcon {
+  height: 20px;
+  cursor: pointer;
+}
+
+.royalties {
+  font-size: larger;
+  cursor: pointer;
+}

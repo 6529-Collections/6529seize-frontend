@@ -1,0 +1,488 @@
+@import "./variables.scss";
+@import "react-toggle/style.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// add the code bellow
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+#seize-web3-network-switch {
+  display: none;
+}
+
+body {
+  background: $bg-color-1;
+  background-color: $bg-color-2 !important;
+  color: $font-color !important;
+  font-size: $font-size !important;
+  font-family: $main-font !important;
+  overflow: auto;
+}
+
+textarea,
+select,
+input,
+button {
+  color: $font-color;
+}
+
+textarea:not(.tailwind-scope textarea),
+select:not(.tailwind-scope select),
+input:not(.tailwind-scope input),
+button:not(.tailwind-scope button),
+video:not(.tailwind-scope video),
+svg:not(.tailwind-scope svg) {
+  font-size: $font-size;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+code {
+  color: #25e4eb;
+}
+
+a {
+  outline: 0 !important;
+  text-decoration: underline;
+  color: $font-color;
+}
+
+a:hover {
+  color: darken($color: $font-color, $amount: $darken-percentage);
+}
+
+@media only screen and (max-width: 1200px) {
+  body,
+  button:not(.tailwind-scope button),
+  textarea:not(.tailwind-scope textarea),
+  select,
+  input:not(.tailwind-scope input),
+  button:not(.tailwind-scope button),
+  video,
+  select {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  body,
+  button:not(.tailwind-scope button),
+  textarea:not(.tailwind-scope textarea),
+  select,
+  input:not(.tailwind-scope input),
+  button:not(.tailwind-scope button),
+  video,
+  select {
+    font-size: $font-smallest !important;
+  }
+}
+
+* {
+  &:before,
+  &:after {
+    position: absolute;
+    content: "";
+  }
+}
+
+b:not(.tailwind-scope b) {
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: $font-color;
+}
+
+h2:not(.tailwind-scope h2) {
+  font-size: 36px;
+  font-weight: 700;
+  color: $font-color;
+}
+
+h3:not(.tailwind-scope h3) {
+  font-size: 28px;
+  font-weight: 700;
+  color: $font-color;
+}
+
+h4:not(.tailwind-scope h4) {
+  font-size: 24px;
+  font-weight: 700;
+  color: $font-color;
+}
+
+h5:not(.tailwind-scope h5) {
+  font-size: 20px;
+  font-weight: 700;
+  color: $font-color;
+}
+
+@media only screen and (max-width: 800px) {
+  h1:not(.tailwind-scope h1) {
+    font-size: 26px;
+  }
+
+  h2:not(.tailwind-scope h2) {
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  h3:not(.tailwind-scope h3) {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  h4:not(.tailwind-scope h4) {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  h5:not(.tailwind-scope h5) {
+    font-size: 16px;
+    font-weight: bold;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.no-padding {
+  padding: 0;
+}
+
+#walletconnect-wrapper {
+  color: black !important;
+
+  a {
+    color: black !important;
+  }
+
+  input {
+    color: black !important;
+  }
+}
+
+.-cbwsdk-try-extension-cta {
+  background-color: #0052ff !important;
+  padding: 10px !important;
+}
+
+#footer {
+  font-size: $font-smaller;
+  background-color: $bg-color-1;
+  padding: 2rem;
+  line-height: 18px;
+
+  img {
+    height: 18px;
+    vertical-align: bottom;
+  }
+
+  @media only screen and (max-width: 800px) {
+    img {
+      height: 14px;
+      vertical-align: middle;
+    }
+  }
+
+  a {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  a:hover {
+    opacity: 0.75;
+  }
+}
+
+.twitter-share-button {
+  background-color: #1d9bf0 !important;
+  height: 30px;
+  box-sizing: border-box;
+  padding: 1px 12px 1px 6px !important;
+  border-radius: 9999px;
+  font-size: smaller !important;
+
+  &:hover {
+    background-color: #0c7abf !important;
+  }
+}
+
+.font-color {
+  color: $font-color;
+}
+
+.font-color-h {
+  color: $font-color-h;
+}
+
+.font-color-silver {
+  color: $silver;
+}
+
+.font-color-blue {
+  color: #0d6efd;
+}
+
+.font-color-green {
+  color: #28a745;
+}
+
+.font-color-red {
+  color: #dc3545;
+}
+
+.font-color-hover {
+  &:hover {
+    color: $font-color;
+  }
+}
+
+.indented {
+  margin-left: 5%;
+}
+
+.font-smaller {
+  font-size: smaller;
+}
+
+.font-larger {
+  font-size: larger;
+}
+
+.font-bolder {
+  font-weight: bold;
+}
+
+.font-lighter {
+  font-weight: 200;
+}
+
+.font-lightest {
+  font-weight: 100;
+}
+
+.no-wrap {
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.icon-black {
+  background-color: $very-dark-grey;
+  color: white;
+  display: block;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  border-radius: 15px;
+}
+
+.icon-white {
+  background-color: white;
+  color: $very-dark-grey;
+  display: block;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  border-radius: 15px;
+}
+
+.decoration-none {
+  text-decoration: none;
+}
+
+.decoration-underline {
+  text-decoration: underline;
+}
+
+.decoration-hover-underline {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.scale-hover {
+  img {
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+.seize-btn {
+  border-radius: 0 !important;
+  border: 0 !important;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-weight: bold;
+}
+
+.seize-btn-link {
+  border-radius: 0 !important;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: transparent !important;
+  border: transparent !important;
+  text-decoration: underline;
+  color: $font-color !important;
+
+  &:hover {
+    color: $font-color-h !important;
+  }
+}
+
+.btn-white {
+  background-color: white !important;
+  color: black !important;
+
+  &:hover {
+    background-color: $off-white !important;
+  }
+}
+
+.btn-black {
+  background-color: black !important;
+  color: white !important;
+
+  &:hover {
+    background-color: $dark-grey !important;
+  }
+}
+
+.btn-green {
+  background-color: $green;
+  color: white !important;
+
+  &:hover {
+    background-color: lighten($color: $green, $amount: 5);
+  }
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.edit-profile {
+  opacity: 0;
+  transition: visibility 0s, opacity 0.3s ease-out;
+}
+
+.edit-profile:hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+.unselectable {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.btn-link {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: inherit !important;
+  }
+
+  &:hover {
+    color: $font-color-h !important;
+  }
+}
+
+.scrollbar-width {
+  scrollbar-width: thin;
+}
+
+.horizontal-menu-hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.horizontal-menu-hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera*/
+}
+
+.horizontal-menu-scrollable-x {
+  -webkit-overflow-scrolling: touch; /* For momentum scroll on iOS */
+}
+
+.table-scroll-container {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}
+
+.react-toggle--checked .react-toggle-thumb,
+.react-toggle--focus .react-toggle-thumb {
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .icon:hover {
+    color: #ffffff;
+  }
+}
+
+pre code {
+  word-break: break-word;
+}
+
+.word-break {
+  word-break: break-word;
+}
+.react-toggle--disabled {
+  opacity: 0.75;
+}
+
+@-moz-document url-prefix() {
+  .firefox-svg {
+    opacity: 0.3 !important;
+  }
+}
+
+.float-left {
+  float: left;
+}

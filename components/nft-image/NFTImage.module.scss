@@ -1,0 +1,109 @@
+@import "../../styles/variables.scss";
+
+.nftAnimation {
+  background-color: $dark-grey;
+  padding: 0;
+  position: relative;
+
+  .modelViewer {
+    background-color: $bg-color-1;
+  }
+
+  iframe,
+  .modelViewer {
+    width: 100%;
+  }
+
+  video {
+    max-width: 100%;
+  }
+
+  svg {
+    width: 100%;
+  }
+}
+
+.heightFull {
+  max-height: calc(90vh - $header-height) !important;
+
+  iframe,
+  video,
+  .modelViewer {
+    max-height: calc(90vh - $header-height) !important;
+    max-width: 90vw;
+  }
+}
+
+.height650 {
+  max-height: 650px !important;
+  max-width: 100%;
+
+  iframe,
+  video,
+  .modelViewer {
+    height: 650px;
+  }
+}
+
+.height300 {
+  height: 300px !important;
+  max-width: 100%;
+
+  iframe,
+  video,
+  .modelViewer {
+    height: 300px;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .height300 {
+    height: 250px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .height300 {
+    height: 200px;
+  }
+}
+
+.imageWrapper {
+  background-color: $dark-grey;
+  padding: 0;
+  position: relative;
+}
+
+.balance {
+  font-family: $main-font;
+  font-size: $font-size;
+  color: $lightest-grey !important;
+  margin-right: 10px;
+  padding: 2px 5px;
+  white-space: nowrap;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+  background-color: transparent;
+  position: absolute;
+  bottom: -40px;
+}
+
+.balanceBigger {
+  padding: 6px 25px;
+  bottom: -45px;
+}
+
+.transparentBG {
+  background-color: transparent !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  .balance {
+    font-size: $font-smaller !important;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  .balance {
+    font-size: $font-smallest !important;
+  }
+}

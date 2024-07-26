@@ -1,0 +1,38 @@
+@import "../../styles/variables.scss";
+
+.prenode {
+  padding: 20px;
+  border: 1px solid transparent;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.01);
+    border: 1px solid $dark-grey;
+    cursor: pointer;
+  }
+
+  table {
+    margin-bottom: 0;
+
+    tr td {
+      padding-bottom: 10px;
+    }
+  }
+}
+
+.error {
+  color: red;
+}
+
+.warning {
+  color: orange;
+}
+
+.success {
+  color: green;
+}
+
+.unknown {
+  color: $lighter-grey-2;
+}

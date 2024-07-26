@@ -1,0 +1,135 @@
+name: Build - Upload to S3 - Deploy to Elastic Beanstalk
+
+on: workflow_dispatch
+
+env:
+  AWS_BUCKET: "seize-web"
+  COMMIT_SHA: "${{ github.sha }}"
+  AWS_REGION: "us-east-1"
+  BEANSTALK_APP_NAME: "seize app"
+  BEANSTALK_ENV_NAME: "Seizeapp-env"
+  NODE_ENV: "production"
+  API_ENDPOINT: "https://api.seize.io"
+  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
+  BASE_ENDPOINT: "https://seize.io"
+  NEXTGEN_CHAIN_ID: "1"
+
+jobs:
+  build-upload-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install --also=dev
+
+      - name: Build App
+        env:
+          NODE_ENV: "production"
+          API_ENDPOINT: ${{ env.API_ENDPOINT }}
+          ALLOWLIST_API_ENDPOINT: ${{ env.ALLOWLIST_API_ENDPOINT }}
+          BASE_ENDPOINT: ${{ env.BASE_ENDPOINT }}
+          VERSION: ${{ env.COMMIT_SHA }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
+        run: npm run build
+
+      - name: Build Target
+        run: |
+          mkdir -p target/_next
+          cp -r .next/static target/_next/
+          zip -r package.zip . -x '*.git*' 'node_modules/*' 'target/*'
+          mv package.zip target/
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload assets to S3
+        run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
+
+      - name: Get commit message
+        run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+
+      - name: Create new ElasticBeanstalk Application Version
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
+          --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
+          --version-label "${{ env.COMMIT_SHA }}" \
+          --description "${{ env.COMMIT_MESSAGE }}"
+
+      - name: Deploy new Version to ElasticBeanstalk
+        run: |
+          aws elasticbeanstalk update-environment \
+          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
+          --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
+          --version-label "${{ env.COMMIT_SHA }}"
+
+      - name: Check Elastic Beanstalk health and readiness (60s warmup then 20 retries with 30s delay)
+        run: |
+          echo "Warmup..."
+          MAX_RETRIES=20
+          COUNTER=0
+          sleep 60
+          while : ; do
+            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
+            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
+            echo "Environment health: $ENV_HEALTH"
+            echo "Environment status: $ENV_STATUS"
+            if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
+              echo "Environment is healthy and ready!"
+              break
+            elif [[ $COUNTER -eq $MAX_RETRIES ]]; then
+              echo "Environment did not become healthy and ready within the expected time."
+              exit 1
+            fi
+            COUNTER=$((COUNTER+1))
+            echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
+            sleep 30
+          done
+
+      - name: Validate Deployment
+        run: |
+          DEPLOYED_BEANSTALK_VERSION=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ env.BEANSTALK_ENV_NAME }} \
+            --query 'Environments[0].VersionLabel' \
+            --output text)
+          echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
+          if [ "$DEPLOYED_BEANSTALK_VERSION" != "${{ env.COMMIT_SHA }}" ]; then
+            echo "Deployed version does not match the commit SHA."
+            exit 1
+          else
+            echo "Deployed version valid!"
+          fi
+
+      - name: Notify about failure
+        uses: sarisia/actions-status-discord@v1
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          content: "<@&1162355330798325861>"
+          color: 0xff0000
+
+      - name: Notify about success
+        uses: sarisia/actions-status-discord@v1
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Seize PROD WEB DEPLOY: CI pipeline complete"
+          description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          color: 0x00ff00

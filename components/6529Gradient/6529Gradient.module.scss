@@ -1,0 +1,100 @@
+@import "../../styles/variables.scss";
+
+.sortDirection {
+  width: $font-size;
+  cursor: pointer;
+}
+
+.disabled {
+  color: $lightest-grey;
+  text-decoration: none;
+  &:hover {
+    color: white;
+  }
+}
+
+.sort {
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.nftNextdisabled,
+.nftPreviousdisabled {
+  pointer-events: none !important;
+  color: darken($color: $font-color, $amount: $darken-percentage);
+}
+
+.subheading {
+  color: $font-color;
+}
+
+.fullScreen {
+  cursor: pointer;
+  width: 20px;
+}
+
+.marketplace {
+  margin-right: 15px;
+}
+
+.marketplace:hover {
+  opacity: 0.75;
+}
+
+.transactionsTable {
+  tr td {
+    white-space: nowrap;
+  }
+  tr td:first-child {
+    width: 1%;
+  }
+
+  tr {
+    line-height: 40px;
+  }
+
+  tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.transactionsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.transactionsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.transactionsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
+
+.gap {
+  height: 8px;
+  width: 8px;
+}
+
+.gradientTable {
+  td {
+    width: 50%;
+  }
+}
+
+.nextPreviousNft {
+  width: 35px;
+  svg {
+    width: 35px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .nextPreviousNft {
+    width: 25px;
+    svg {
+      width: 25px;
+    }
+  }
+}

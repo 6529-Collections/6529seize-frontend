@@ -1,0 +1,47 @@
+@import "../../styles/variables.scss";
+
+.downloadsScrollContainer {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+}
+
+.downloadsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.downloadsTable {
+  tr td {
+    white-space: nowrap;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  td {
+    line-height: 40px;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.downloadsTable > :not(caption) > * > * {
+  padding: 0.5rem 1rem;
+}
+
+.downloadLink {
+  width: 100%;
+  border: 1px solid white;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $almost-very-dark-grey;
+    border: 1px solid $off-white;
+  }
+}

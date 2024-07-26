@@ -1,0 +1,173 @@
+@import "./variables.scss";
+
+.main {
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.mainContainer {
+  background-color: $bg-color-2;
+}
+
+.latestDropImage {
+  background-color: $dark-grey;
+  padding: 0;
+  position: relative;
+
+  img {
+    max-width: 100%;
+    max-height: 650px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 650px;
+  }
+
+  video {
+    width: 100%;
+    height: 650px;
+  }
+}
+
+.marketplace {
+  margin-right: 15px;
+}
+
+.marketplace:hover {
+  opacity: 0.75;
+}
+
+.pageNotFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 100px;
+
+  img {
+    width: 100px;
+    fill: white;
+  }
+}
+
+.hideWidget {
+  border: 1px solid white;
+  background-color: transparent;
+}
+
+.tdhMain {
+  h3,
+  h4 {
+    float: none;
+  }
+}
+
+.tdhFormula {
+  line-height: 75px;
+  color: lightblue;
+  font-size: larger;
+  font-weight: bold;
+  padding-left: 20px;
+}
+
+.login {
+  height: 100vh;
+  text-align: center;
+  background-color: $very-dark-grey;
+  .loginImage {
+    max-width: 100%;
+    max-height: 100vh;
+  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginPrompt {
+  position: absolute;
+  width: 100%;
+  height: 100px;
+  z-index: 10;
+  bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  input {
+    padding-left: 10px;
+    border: none;
+    height: 40px;
+    background-color: $almost-very-dark-grey;
+    width: 80%;
+    max-width: 400px;
+  }
+}
+
+.nftImagePadding {
+  padding-bottom: 35px;
+}
+
+.memeLabHeader {
+  h1 {
+    float: right;
+  }
+}
+
+.htmlContainer {
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: $main-font !important;
+    float: none;
+  }
+  ul li {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+}
+
+.instructionsLink {
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: darken($color: $font-color, $amount: $darken-percentage);
+  }
+}
+
+.nextGenQuestion {
+  height: calc(100vh - $header-height - 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewAllLink {
+  text-decoration: none;
+  span {
+    white-space: nowrap;
+    font-size: $font-smaller;
+    font-weight: 700;
+    border-bottom: 3px solid $font-color;
+
+    &:hover {
+      color: darken($color: $font-color, $amount: $darken-percentage);
+      border-bottom: 3px solid
+        darken($color: $font-color, $amount: $darken-percentage);
+    }
+
+    @media only screen and (max-width: 800px) {
+      font-size: 12px !important;
+    }
+  }
+}
+
+.communityMetricsTable {
+  max-width: 750px;
+}
+
+.communityMetricsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
