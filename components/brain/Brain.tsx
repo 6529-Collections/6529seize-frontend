@@ -286,7 +286,7 @@ export default function Brain() {
             )}
           </div>
         </div>
-        <div className="md:tw-w-[26.5%] tw-sticky tw-top-0">
+        <div className="md:tw-w-[26.5%] ">
           {!!items.length && (
             <div className="tw-mt-16">
               <Link
