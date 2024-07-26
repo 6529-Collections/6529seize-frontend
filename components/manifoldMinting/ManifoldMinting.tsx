@@ -279,9 +279,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               />
             </Col>
           </Row>
-          {/* <Row>
-            <Col>{printMint()}</Col>
-          </Row> */}
         </Container>
       </Col>
     );
