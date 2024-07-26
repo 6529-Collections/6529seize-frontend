@@ -217,6 +217,19 @@ const CreateDropWrapper = forwardRef<
       return null; // Unknown or unsupported file type
     };
 
+    const getMedias = (): File[] => {
+      if (drop?.parts.length) {
+        return drop.parts.reduce<File[]>(
+          (acc, part) => [...acc, ...(part.media ?? [])],
+          file ? [file] : []
+        );
+      }
+      if (file) {
+        return [file];
+      }
+      return [];
+    };
+
     const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
       if (!waveProps?.id) {
         return [];
@@ -228,14 +241,7 @@ const CreateDropWrapper = forwardRef<
       if (!drop?.parts.length && !file) {
         return wave.participation.required_media;
       }
-      const medias = drop?.parts.length
-        ? drop.parts.reduce<File[]>(
-            (acc, part) => [...acc, ...(part.media ?? [])],
-            file ? [file] : []
-          )
-        : file
-        ? [file]
-        : [];
+      const medias = getMedias();
       return wave.participation.required_media.filter((i) => {
         const file = medias.find((j) => getRequirementFromFileType(j) === i);
         if (!file) {
@@ -273,7 +279,7 @@ const CreateDropWrapper = forwardRef<
       !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
       !missingMedia.length &&
       !missingMetadata.length &&
-      !!(!!drop?.parts.length ? getCanSubmitStorm() : true);
+      !!(drop?.parts.length ? getCanSubmitStorm() : true);
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 

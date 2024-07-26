@@ -36,51 +36,17 @@ export default function DropListItemContent({
 }: DropListItemContentProps) {
   const router = useRouter();
   const partsCount = drop.parts.length;
-  const isStorm = partsCount > 1;
   const containerRef = useRef<HTMLDivElement>(null);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [isFullMode, setIsFullMode] = useState(showFull);
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
   useEffect(
     () => setActivePart(drop.parts[activePartIndex]),
     [activePartIndex]
   );
-
   useEffect(() => setActivePart(drop.parts[activePartIndex]), [drop]);
-
-  const getShowNextButton = () => {
-    if (!isStorm) {
-      return false;
-    }
-    if (activePartIndex === partsCount - 1) {
-      return false;
-    }
-    return true;
-  };
-
-  const getShowPrevButton = () => {
-    if (!isStorm) {
-      return false;
-    }
-    if (activePartIndex === 0) {
-      return false;
-    }
-    return true;
-  };
-
   const [partChangedAtLeastOnce, setPartChangedAtLeastOnce] = useState(false);
-
   useEffect(() => setPartChangedAtLeastOnce(false), []);
-
-  const [showNextButton, setShowNextButton] = useState(getShowNextButton());
-  const [showPrevButton, setShowPrevButton] = useState(getShowPrevButton());
-
-  useEffect(() => {
-    setShowNextButton(getShowNextButton());
-    setShowPrevButton(getShowPrevButton());
-  }, [activePartIndex]);
-
   const scrollIntoView = () => {
     if (!partChangedAtLeastOnce) {
       return;
@@ -149,7 +115,7 @@ export default function DropListItemContent({
                   }
                 : null
             }
-            showFull={isFullMode}
+            showFull={showFull}
             wave={
               showWaveInfo
                 ? {

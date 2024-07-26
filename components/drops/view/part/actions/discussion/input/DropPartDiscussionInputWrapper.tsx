@@ -27,7 +27,7 @@ export default function DropPartDiscussionInputWrapper({
     if (!connectedProfile.profile) {
       return STATE.DONT_HAVE_PROFILE;
     }
-    if (!!activeProfileProxy) {
+    if (activeProfileProxy) {
       return STATE.PROXY;
     }
     return STATE.HAVE_PROFILE;

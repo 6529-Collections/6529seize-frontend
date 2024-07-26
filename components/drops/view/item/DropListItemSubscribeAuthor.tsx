@@ -24,7 +24,7 @@ export default function DropListItemSubscribeAuthor({
 }: {
   readonly drop: Drop;
 }) {
-  const subscribedState = !!drop.author.subscribed_actions.length
+  const subscribedState = drop.author.subscribed_actions.length
     ? SUBSCRIBED_STATE.SUBSCRIBED
     : SUBSCRIBED_STATE.UNSUBSCRIBED;
 

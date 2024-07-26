@@ -14,7 +14,7 @@ export default function CreateWaveGroups({
 }: {
   readonly waveType: WaveType;
   readonly groups: WaveGroupsConfig;
-  readonly onGroupSelect: ({}: {
+  readonly onGroupSelect: (param: {
     group: GroupFull | null;
     groupType: CreateWaveGroupConfigType;
   }) => void;

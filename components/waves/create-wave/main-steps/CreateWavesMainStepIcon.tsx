@@ -7,7 +7,7 @@ export default function CreateWavesMainStepIcon({
 }: {
   readonly stepStatus: CreateWaveStepStatus;
 }) {
-  const [debouncedStepStatus, setDebounceStepStatus] = useState(stepStatus);
+  const [debounceStepStatus, setDebounceStepStatus] = useState(stepStatus);
   useDebounce(
     () => {
       setDebounceStepStatus(stepStatus);
@@ -72,7 +72,7 @@ export default function CreateWavesMainStepIcon({
     <span
       className={`${WRAPPER_CLASSES[stepStatus]} tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-transform tw-transition tw-ease-out tw-duration-300`}
     >
-      {components[debouncedStepStatus]}
+      {components[debounceStepStatus]}
     </span>
   );
 }
