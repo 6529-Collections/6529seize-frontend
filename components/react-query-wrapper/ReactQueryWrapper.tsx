@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ApiProfileRepRatesState,
@@ -8,13 +8,14 @@ import {
   RateMatter,
   RatingWithProfileInfoAndLevel,
 } from "../../entities/IProfile";
-import { UserPageRepPropsRepRates } from "../../pages/[user]";
+import { UserPageRepPropsRepRates } from "../../pages/[user]/rep";
 import { CountlessPage, Page } from "../../helpers/Types";
 import {
   ActivityLogParams,
   convertActivityLogParams,
 } from "../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { Drop } from "../../generated/models/Drop";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
 
 export enum QueryKey {
@@ -29,7 +30,10 @@ export enum QueryKey {
   PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
+  PROFILE_DROPS = "PROFILE_DROPS",
+  PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
+  IDENTITY_SUBSCRIPTIONS = "IDENTITY_SUBSCRIPTIONS",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -41,6 +45,10 @@ export enum QueryKey {
   COLLECTION_ALLOWLIST_PROOFS = "COLLECTION_ALLOWLIST_PROOFS",
   NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
   COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
+  RESERVOIR_NFT = "RESERVOIR_NFT",
+  DROPS = "DROPS",
+  DROP = "DROP",
+  DROP_DISCUSSION = "DROP_DISCUSSION",
   GROUPS = "GROUPS",
   GROUP = "GROUP",
   GROUP_WALLET_GROUP_WALLETS = "GROUP_WALLET_GROUP_WALLETS",
@@ -49,6 +57,12 @@ export enum QueryKey {
   PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
   EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
+  WAVES_OVERVIEW = "WAVES_OVERVIEW",
+  WAVES_OVERVIEW_PUBLIC = "WAVES_OVERVIEW_PUBLIC",
+  WAVES = "WAVES",
+  WAVES_PUBLIC = "WAVES_PUBLIC",
+  WAVE = "WAVE",
+  FEED_ITEMS = "FEED_ITEMS",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
@@ -134,6 +148,7 @@ type ReactQueryWrapperContextType = {
   onProfileStatementRemove: (params: {
     profile: IProfileAndConsolidations;
   }) => void;
+  onIdentitySubscriptionChange: () => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
   initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
   initLandingPage: ({
@@ -146,10 +161,24 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
+  onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
+  onRedrop: (params: { readonly reDropId: string }) => void;
+  onDropChange: (params: {
+    readonly drop: Drop;
+    readonly giverHandle: string | null;
+  }) => void;
+  readonly invalidateDrops: () => void;
+  onDropDiscussionChange: (params: {
+    readonly dropId: string;
+    readonly dropAuthorHandle: string;
+  }) => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
   onGroupCreate: () => void;
   onIdentityBulkRate: () => void;
+  onWaveCreated: () => void;
+  onWaveSubscriptionChange: () => void;
+  invalidateAll: () => void;
 };
 
 export const ReactQueryWrapperContext =
@@ -162,14 +191,23 @@ export const ReactQueryWrapperContext =
     onProfileEdit: () => {},
     onProfileStatementAdd: () => {},
     onProfileStatementRemove: () => {},
+    onIdentitySubscriptionChange: () => {},
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
+    onDropCreate: () => {},
+    onRedrop: () => {},
+    onDropChange: () => {},
+    invalidateDrops: () => {},
+    onDropDiscussionChange: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
     onGroupCreate: () => {},
     onIdentityBulkRate: () => {},
+    onWaveCreated: () => {},
+    onWaveSubscriptionChange: () => {},
+    invalidateAll: () => {},
   });
 
 export default function ReactQueryWrapper({
@@ -722,6 +760,154 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onDropCreate = ({
+    profile,
+  }: {
+    profile: IProfileAndConsolidations;
+  }) => {
+    const handles = getHandlesFromProfile(profile);
+    invalidateQueries({
+      key: QueryKey.PROFILE_DROPS,
+      values: handles.map((handle) => ({ handleOrWallet: handle })),
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
+  };
+
+  const dropChangeMutation = ({
+    oldData,
+    drop,
+  }: {
+    oldData:
+      | {
+          pages: Drop[][];
+        }
+      | undefined;
+    drop: Drop;
+  }) => {
+    if (!oldData) {
+      return oldData;
+    }
+    return {
+      ...oldData,
+      pages: oldData.pages.map((page) => {
+        return page.map((d) => {
+          if (d.id === drop.id) {
+            return drop;
+          }
+          return d;
+        });
+      }),
+    };
+  };
+
+  const onDropChange = ({
+    drop,
+    giverHandle,
+  }: {
+    readonly drop: Drop;
+    readonly giverHandle: string | null;
+  }) => {
+    queryClient.setQueryData(
+      [
+        QueryKey.PROFILE_DROPS,
+        {
+          handleOrWallet: drop.author.handle.toLowerCase(),
+          context_profile: giverHandle,
+        },
+      ],
+      (
+        oldData:
+          | {
+              pages: Drop[][];
+            }
+          | undefined
+      ) => dropChangeMutation({ oldData, drop })
+    );
+    queryClient.setQueriesData(
+      {
+        queryKey: [QueryKey.DROPS],
+      },
+      (
+        oldData:
+          | {
+              pages: Drop[][];
+            }
+          | undefined
+      ) => dropChangeMutation({ oldData, drop })
+    );
+    if (giverHandle) {
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_RATE, giverHandle],
+      });
+    }
+    invalidateQueries({
+      key: QueryKey.DROP_DISCUSSION,
+      values: [{ drop_id: drop.id }],
+    });
+
+    invalidateQueries({
+      key: QueryKey.WAVE,
+      values: [{ wave_id: drop.wave.id }],
+    });
+    invalidateQueries({
+      key: QueryKey.DROP,
+      values: [{ drop_id: drop.id }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
+  };
+
+  const onRedrop = ({ reDropId }: { readonly reDropId: string }) => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP, { drop_id: reDropId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
+  };
+
+  const onDropDiscussionChange = ({
+    dropId,
+    dropAuthorHandle,
+  }: {
+    readonly dropId: string;
+    dropAuthorHandle: string;
+  }) => {
+    invalidateQueries({
+      key: QueryKey.DROP_DISCUSSION,
+      values: [{ drop_id: dropId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP, { drop_id: dropId }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [
+        QueryKey.PROFILE_DROPS,
+        {
+          handleOrWallet: dropAuthorHandle.toLowerCase(),
+        },
+      ],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
+  };
+
   const onIdentityBulkRate = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_LOGS],
@@ -758,27 +944,111 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const invalidateAllWaves = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_OVERVIEW],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_PUBLIC],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE],
+    });
+  };
+
+  const invalidateDrops = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.FEED_ITEMS],
+    });
+  };
+
+  const onWaveCreated = () => invalidateAllWaves();
+
+  const onWaveSubscriptionChange = () => invalidateAllWaves();
+  const onIdentitySubscriptionChange = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_SUBSCRIPTIONS],
+    });
+  };
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries();
+  };
+
+  const value = useMemo(
+    () => ({
+      setProfile,
+      setProfileProxy,
+      onProfileProxyModify,
+      onProfileCICModify,
+      onProfileRepModify,
+      onProfileEdit,
+      onProfileStatementAdd,
+      onProfileStatementRemove,
+      initProfileRepPage,
+      initProfileIdentityPage,
+      initLandingPage,
+      initCommunityActivityPage,
+      onGroupRemoved,
+      onGroupChanged,
+      onDropCreate,
+      onRedrop,
+      onDropChange,
+      onDropDiscussionChange,
+      onIdentityBulkRate,
+      onGroupCreate,
+      onWaveCreated,
+      onWaveSubscriptionChange,
+      invalidateAll,
+      onIdentitySubscriptionChange,
+      invalidateDrops,
+    }),
+    [
+      setProfile,
+      setProfileProxy,
+      onProfileProxyModify,
+      onProfileCICModify,
+      onProfileRepModify,
+      onProfileEdit,
+      onProfileStatementAdd,
+      onProfileStatementRemove,
+      initProfileRepPage,
+      initProfileIdentityPage,
+      initLandingPage,
+      initCommunityActivityPage,
+      onGroupRemoved,
+      onGroupChanged,
+      onDropCreate,
+      onRedrop,
+      onDropChange,
+      onDropDiscussionChange,
+      onIdentityBulkRate,
+      onGroupCreate,
+      onWaveCreated,
+      onWaveSubscriptionChange,
+      invalidateAll,
+      onIdentitySubscriptionChange,
+      invalidateDrops,
+    ]
+  );
+
   return (
-    <ReactQueryWrapperContext.Provider
-      value={{
-        setProfile,
-        setProfileProxy,
-        onProfileProxyModify,
-        onProfileCICModify,
-        onProfileRepModify,
-        onProfileEdit,
-        onProfileStatementAdd,
-        onProfileStatementRemove,
-        initProfileRepPage,
-        initProfileIdentityPage,
-        initLandingPage,
-        initCommunityActivityPage,
-        onGroupRemoved,
-        onGroupChanged,
-        onGroupCreate,
-        onIdentityBulkRate,
-      }}
-    >
+    <ReactQueryWrapperContext.Provider value={value}>
       {children}
     </ReactQueryWrapperContext.Provider>
   );

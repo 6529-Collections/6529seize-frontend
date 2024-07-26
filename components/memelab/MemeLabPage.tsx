@@ -1390,7 +1390,7 @@ export default function LabPage(props: Readonly<Props>) {
                     <Col>
                       {nftId && (
                         <>
-                          <h2>
+                          <h2 className="float-left">
                             <a
                               href={`/meme-lab/${
                                 parseInt(nftId) - 1
@@ -1403,7 +1403,7 @@ export default function LabPage(props: Readonly<Props>) {
                               <FontAwesomeIcon icon="chevron-circle-left" />
                             </a>
                           </h2>
-                          <h2>
+                          <h2 className="float-left">
                             &nbsp;
                             <a
                               href={`/meme-lab/${

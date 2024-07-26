@@ -1,3 +1,9 @@
+import {
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+  NEXTGEN_CONTRACT,
+} from "../constants";
 import { numberWithCommas } from "./Helpers";
 
 export function getFileTypeFromMetadata(metadata: any) {
@@ -11,3 +17,9 @@ export function getDimensionsFromMetadata(metadata: any) {
     metadata.animation_details?.height ?? metadata.image_details.height
   )}`;
 }
+
+export const isMemesEcosystemContract = (contract: string): boolean => {
+  return [MEMES_CONTRACT, GRADIENT_CONTRACT, MEMELAB_CONTRACT, NEXTGEN_CONTRACT]
+    .map((c) => c.toLowerCase())
+    .includes(contract.toLowerCase());
+};

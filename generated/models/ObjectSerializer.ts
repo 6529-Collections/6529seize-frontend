@@ -31,6 +31,8 @@ export * from '../models/CreateWaveConfig';
 export * from '../models/CreateWaveDropRequest';
 export * from '../models/Drop';
 export * from '../models/DropActivityLog';
+export * from '../models/DropAndDropComment';
+export * from '../models/DropAndDropVote';
 export * from '../models/DropComment';
 export * from '../models/DropCommentsPage';
 export * from '../models/DropContextProfileContext';
@@ -43,6 +45,11 @@ export * from '../models/DropRater';
 export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
+export * from '../models/DropSubscriptionActions';
+export * from '../models/DropSubscriptionTargetAction';
+export * from '../models/DropVote';
+export * from '../models/FeedItem';
+export * from '../models/FeedItemType';
 export * from '../models/Group';
 export * from '../models/GroupCicFilter';
 export * from '../models/GroupDescription';
@@ -52,6 +59,9 @@ export * from '../models/GroupLevelFilter';
 export * from '../models/GroupOwnsNft';
 export * from '../models/GroupRepFilter';
 export * from '../models/GroupTdhFilter';
+export * from '../models/IdentitySubscriptionActions';
+export * from '../models/IdentitySubscriptionTargetAction';
+export * from '../models/IdentitySubscriptionTargetType';
 export * from '../models/IntRange';
 export * from '../models/LoginRequest';
 export * from '../models/LoginResponse';
@@ -77,6 +87,7 @@ export * from '../models/WaveContributorOverview';
 export * from '../models/WaveCreditScope';
 export * from '../models/WaveCreditType';
 export * from '../models/WaveMetadataType';
+export * from '../models/WaveMetrics';
 export * from '../models/WaveMin';
 export * from '../models/WaveOutcome';
 export * from '../models/WaveOutcomeCredit';
@@ -86,9 +97,12 @@ export * from '../models/WaveParticipationConfig';
 export * from '../models/WaveParticipationRequirement';
 export * from '../models/WaveRequiredMetadata';
 export * from '../models/WaveScope';
+export * from '../models/WaveSubscriptionActions';
+export * from '../models/WaveSubscriptionTargetAction';
 export * from '../models/WaveType';
 export * from '../models/WaveVisibilityConfig';
 export * from '../models/WaveVotingConfig';
+export * from '../models/WavesOverviewType';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
@@ -123,6 +137,8 @@ import { CreateWaveConfig       } from '../models/CreateWaveConfig';
 import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { Drop } from '../models/Drop';
 import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
+import { DropAndDropComment } from '../models/DropAndDropComment';
+import { DropAndDropVote } from '../models/DropAndDropVote';
 import { DropComment } from '../models/DropComment';
 import { DropCommentsPage } from '../models/DropCommentsPage';
 import { DropContextProfileContext } from '../models/DropContextProfileContext';
@@ -135,6 +151,11 @@ import { DropRater } from '../models/DropRater';
 import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { DropSubscriptionActions } from '../models/DropSubscriptionActions';
+import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
+import { DropVote } from '../models/DropVote';
+import { FeedItem    } from '../models/FeedItem';
+import { FeedItemType } from '../models/FeedItemType';
 import { Group } from '../models/Group';
 import { GroupCicFilter     } from '../models/GroupCicFilter';
 import { GroupDescription } from '../models/GroupDescription';
@@ -144,6 +165,9 @@ import { GroupLevelFilter } from '../models/GroupLevelFilter';
 import { GroupOwnsNft, GroupOwnsNftNameEnum    } from '../models/GroupOwnsNft';
 import { GroupRepFilter      } from '../models/GroupRepFilter';
 import { GroupTdhFilter } from '../models/GroupTdhFilter';
+import { IdentitySubscriptionActions } from '../models/IdentitySubscriptionActions';
+import { IdentitySubscriptionTargetAction } from '../models/IdentitySubscriptionTargetAction';
+import { IdentitySubscriptionTargetType } from '../models/IdentitySubscriptionTargetType';
 import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
@@ -169,6 +193,7 @@ import { WaveContributorOverview } from '../models/WaveContributorOverview';
 import { WaveCreditScope } from '../models/WaveCreditScope';
 import { WaveCreditType } from '../models/WaveCreditType';
 import { WaveMetadataType } from '../models/WaveMetadataType';
+import { WaveMetrics } from '../models/WaveMetrics';
 import { WaveMin } from '../models/WaveMin';
 import { WaveOutcome        } from '../models/WaveOutcome';
 import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
@@ -178,9 +203,12 @@ import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
 import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
 import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
 import { WaveScope } from '../models/WaveScope';
+import { WaveSubscriptionActions } from '../models/WaveSubscriptionActions';
+import { WaveSubscriptionTargetAction } from '../models/WaveSubscriptionTargetAction';
 import { WaveType } from '../models/WaveType';
 import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
 import { WaveVotingConfig         } from '../models/WaveVotingConfig';
+import { WavesOverviewType } from '../models/WavesOverviewType';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -197,8 +225,12 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "DropActivityLogTypeEnum",
+    "DropSubscriptionTargetAction",
+    "FeedItemType",
     "GroupFilterDirection",
     "GroupOwnsNftNameEnum",
+    "IdentitySubscriptionTargetAction",
+    "IdentitySubscriptionTargetType",
     "NftTokenTypeEnum",
     "ProfileProxyActionType",
     "RateMatter",
@@ -209,7 +241,9 @@ let enumsMap: Set<string> = new Set<string>([
     "WaveOutcomeSubType",
     "WaveOutcomeType",
     "WaveParticipationRequirement",
+    "WaveSubscriptionTargetAction",
     "WaveType",
+    "WavesOverviewType",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -246,6 +280,8 @@ let typeMap: {[index: string]: any} = {
     "CreateWaveDropRequest": CreateWaveDropRequest,
     "Drop": Drop,
     "DropActivityLog": DropActivityLog,
+    "DropAndDropComment": DropAndDropComment,
+    "DropAndDropVote": DropAndDropVote,
     "DropComment": DropComment,
     "DropCommentsPage": DropCommentsPage,
     "DropContextProfileContext": DropContextProfileContext,
@@ -258,6 +294,9 @@ let typeMap: {[index: string]: any} = {
     "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
+    "DropSubscriptionActions": DropSubscriptionActions,
+    "DropVote": DropVote,
+    "FeedItem": FeedItem,
     "Group": Group,
     "GroupCicFilter": GroupCicFilter,
     "GroupDescription": GroupDescription,
@@ -266,6 +305,7 @@ let typeMap: {[index: string]: any} = {
     "GroupOwnsNft": GroupOwnsNft,
     "GroupRepFilter": GroupRepFilter,
     "GroupTdhFilter": GroupTdhFilter,
+    "IdentitySubscriptionActions": IdentitySubscriptionActions,
     "IntRange": IntRange,
     "LoginRequest": LoginRequest,
     "LoginResponse": LoginResponse,
@@ -286,11 +326,13 @@ let typeMap: {[index: string]: any} = {
     "Wave": Wave,
     "WaveConfig": WaveConfig,
     "WaveContributorOverview": WaveContributorOverview,
+    "WaveMetrics": WaveMetrics,
     "WaveMin": WaveMin,
     "WaveOutcome": WaveOutcome,
     "WaveParticipationConfig": WaveParticipationConfig,
     "WaveRequiredMetadata": WaveRequiredMetadata,
     "WaveScope": WaveScope,
+    "WaveSubscriptionActions": WaveSubscriptionActions,
     "WaveVisibilityConfig": WaveVisibilityConfig,
     "WaveVotingConfig": WaveVotingConfig,
 }

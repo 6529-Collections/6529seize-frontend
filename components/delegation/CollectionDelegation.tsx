@@ -850,7 +850,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     );
     return (
       <>
-        <h5 className="float-none pt-3 pb-1">Delegations</h5>
+        <h5 className="pt-3 pb-1">Delegations</h5>
         <Accordion
           alwaysOpen
           className={styles.collectionDelegationsAccordion}
@@ -899,7 +899,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="float-none pt-5 pb-1">
+        <h5 className="pt-5 pb-1">
           Use A Delegation Manager (For Delegations or Consolidations)
         </h5>
         <Accordion
@@ -965,7 +965,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printConsolidations() {
     return (
       <>
-        <h5 className="float-none pt-5 pb-1">Consolidations</h5>
+        <h5 className="pt-5 pb-1">Consolidations</h5>
         <Accordion
           alwaysOpen
           className={`${styles.collectionDelegationsAccordion}`}

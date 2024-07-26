@@ -19,13 +19,3 @@ export type TDHFilter = FilterMinMax;
 export type CICFilter = FilterMinMaxDirectionAndUser;
 export type LevelFilter = FilterMinMax;
 
-export interface ProfileMin {
-  readonly id: string;
-  readonly handle: string;
-  readonly pfp: string | null;
-  readonly cic: number;
-  readonly rep: number;
-  readonly tdh: number;
-  readonly level: number;
-}
-

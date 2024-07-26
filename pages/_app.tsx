@@ -106,6 +106,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
+import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";

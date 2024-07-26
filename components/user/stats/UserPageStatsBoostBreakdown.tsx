@@ -85,10 +85,10 @@ export default function UserPageStatsBoostBreakdown({
     if (breakdown) {
       return (
         <tr key={getRandomObjectId()}>
-          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
+          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-800 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
             {name}
           </td>
-          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
+          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-800 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
             {breakdown.available ? (
               <span className="d-flex align-items-center justify-content-center gap-2">
                 {breakdown.available.toFixed(2)}
@@ -98,7 +98,7 @@ export default function UserPageStatsBoostBreakdown({
               "-"
             )}
           </td>
-          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
+          <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-800 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">
             {breakdown.acquired ? (
               <span className="d-flex align-items-center justify-content-center gap-2">
                 {breakdown.acquired.toFixed(2)}
@@ -117,14 +117,14 @@ export default function UserPageStatsBoostBreakdown({
 
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
-      <div className="d-flex align-items-center justify-content-between">
+      <div className="tw-flex tw-items-center tw-justify-between">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           Boost Breakdown
         </h3>
         <span>
           <a
             href="/community-metrics#tdh-1.3"
-            className="decoration-hover-underline">
+            className="decoration-hover-underline tw-text-sm">
             TDH Version: 1.3
           </a>
         </span>
@@ -133,7 +133,7 @@ export default function UserPageStatsBoostBreakdown({
         <div className="tw-flow-root">
           <div className="tw-inline-block tw-min-w-full tw-align-middle">
             <table className="tw-min-w-full">
-              <thead className="tw-bg-iron-900">
+              <thead className="tw-bg-iron-900 tw-border-b tw-border-iron-700 tw-border-x-0 tw-border-t-0">
                 <tr key={getRandomObjectId()}>
                   <th
                     scope="col"
@@ -161,7 +161,7 @@ export default function UserPageStatsBoostBreakdown({
                       tdh?.boost_breakdown.gradients
                     )}
                     <tr key={getRandomObjectId()}>
-                      <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
+                      <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-semibold tw-text-white-400">
                         TOTAL BOOST
                       </td>
                       <td className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-700 tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400 tw-text-center">

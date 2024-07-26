@@ -13,6 +13,7 @@ import CommonInfoBox from "../../../utils/CommonInfoBox";
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.CIC]: "CIC rate",
   [RateMatter.REP]: "give Rep for",
+  [RateMatter.DROP_REP]: "give Drop Rep for",
 };
 
 enum RaterContext {
@@ -46,6 +47,8 @@ export default function UserPageRateWrapper({
         return !!activeProfileProxy?.actions.find(
           (action) => action.action_type === ProfileProxyActionType.AllocateRep
         );
+      case RateMatter.DROP_REP:
+        return false;
       default:
         assertUnreachable(type);
         return false;

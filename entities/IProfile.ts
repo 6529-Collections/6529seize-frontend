@@ -368,6 +368,7 @@ export type ProfileActivityLog =
 export enum RateMatter {
   CIC = "CIC",
   REP = "REP",
+  DROP_REP = "DROP_REP",
 }
 
 export interface ProfilesMatterRating {
@@ -496,4 +497,25 @@ export interface CommunityMemberOverview {
   readonly pfp: string | null;
   readonly last_activity: number | null;
   readonly wallet: string;
+}
+
+export interface ProfileMinimal {
+  readonly id: string;
+  readonly handle: string;
+  readonly pfp: string | null;
+  readonly cic: number;
+  readonly rep: number;
+  readonly tdh: number;
+  readonly level: number;
+}
+
+export interface ProfileAvailableDropRateResponse {
+  readonly available_credit_for_rating: number;
+}
+
+export enum ProfileConnectedStatus {
+  NOT_CONNECTED = "NOT_CONNECTED",
+  NO_PROFILE = "NO_PROFILE",
+  PROXY = "PROXY",
+  HAVE_PROFILE = "HAVE_PROFILE",
 }

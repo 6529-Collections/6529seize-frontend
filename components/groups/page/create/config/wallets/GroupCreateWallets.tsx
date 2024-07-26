@@ -1,12 +1,17 @@
+import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useEffect, useState } from "react";
 
 export default function GroupCreateWallets({
   wallets,
+  walletsLimit,
+  label,
   setWallets,
 }: {
   readonly wallets: string[] | null;
+  readonly walletsLimit: number;
+  readonly label: string;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
   const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(
@@ -32,7 +37,7 @@ export default function GroupCreateWallets({
     setEmmaWallets(null);
   };
 
-  useEffect(() => console.log(wallets), [wallets]);
+  const isOverLimit = wallets?.length && wallets.length > walletsLimit;
 
   return (
     <div className="tw-col-span-full">
@@ -55,7 +60,7 @@ export default function GroupCreateWallets({
           </svg>
         </span>
         <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
-          Wallets
+         {label}
         </p>
       </div>
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
@@ -69,32 +74,42 @@ export default function GroupCreateWallets({
         />
       </div>
       {!!wallets?.length && (
-        <div className="tw-mt-4 lg:tw-inline-flex">
-          <div className="tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-primary-400">
-            <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
-              <svg
-                className="tw-size-6 tw-flex-shrink-0 tw-text-primary-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 7.99983V4.50048C16 3.66874 16 3.25287 15.8248 2.9973C15.6717 2.77401 15.4346 2.62232 15.1678 2.57691C14.8623 2.52493 14.4847 2.6992 13.7295 3.04775L4.85901 7.14182C4.18551 7.45267 3.84875 7.6081 3.60211 7.84915C3.38406 8.06225 3.21762 8.32238 3.1155 8.60966C3 8.93462 3 9.30551 3 10.0473V14.9998M16.5 14.4998H16.51M3 11.1998L3 17.7998C3 18.9199 3 19.48 3.21799 19.9078C3.40973 20.2841 3.71569 20.5901 4.09202 20.7818C4.51984 20.9998 5.07989 20.9998 6.2 20.9998H17.8C18.9201 20.9998 19.4802 20.9998 19.908 20.7818C20.2843 20.5901 20.5903 20.2841 20.782 19.9078C21 19.48 21 18.9199 21 17.7998V11.1998C21 10.0797 21 9.51967 20.782 9.09185C20.5903 8.71552 20.2843 8.40956 19.908 8.21782C19.4802 7.99983 18.9201 7.99983 17.8 7.99983L6.2 7.99983C5.0799 7.99983 4.51984 7.99983 4.09202 8.21781C3.7157 8.40956 3.40973 8.71552 3.21799 9.09185C3 9.51967 3 10.0797 3 11.1998ZM17 14.4998C17 14.776 16.7761 14.9998 16.5 14.9998C16.2239 14.9998 16 14.776 16 14.4998C16 14.2237 16.2239 13.9998 16.5 13.9998C16.7761 13.9998 17 14.2237 17 14.4998Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="tw-inline-flex tw-gap-x-1.5">
-                <span className="tw-text-primary-400 tw-font-medium">
-                  Total unique wallets:
+        <div className="tw-mt-4">
+          <div className="tw-w-full tw-flex tw-items-center tw-gap-x-4">
+            <div
+              className={`tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl ${
+                isOverLimit ? " tw-border-error" : " tw-border-primary-400"
+              } tw-bg-iron-950 tw-border tw-border-solid`}
+            >
+              <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
+                <svg
+                  className="tw-size-6 tw-flex-shrink-0 tw-text-iron-300"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M16 7.99983V4.50048C16 3.66874 16 3.25287 15.8248 2.9973C15.6717 2.77401 15.4346 2.62232 15.1678 2.57691C14.8623 2.52493 14.4847 2.6992 13.7295 3.04775L4.85901 7.14182C4.18551 7.45267 3.84875 7.6081 3.60211 7.84915C3.38406 8.06225 3.21762 8.32238 3.1155 8.60966C3 8.93462 3 9.30551 3 10.0473V14.9998M16.5 14.4998H16.51M3 11.1998L3 17.7998C3 18.9199 3 19.48 3.21799 19.9078C3.40973 20.2841 3.71569 20.5901 4.09202 20.7818C4.51984 20.9998 5.07989 20.9998 6.2 20.9998H17.8C18.9201 20.9998 19.4802 20.9998 19.908 20.7818C20.2843 20.5901 20.5903 20.2841 20.782 19.9078C21 19.48 21 18.9199 21 17.7998V11.1998C21 10.0797 21 9.51967 20.782 9.09185C20.5903 8.71552 20.2843 8.40956 19.908 8.21782C19.4802 7.99983 18.9201 7.99983 17.8 7.99983L6.2 7.99983C5.0799 7.99983 4.51984 7.99983 4.09202 8.21781C3.7157 8.40956 3.40973 8.71552 3.21799 9.09185C3 9.51967 3 10.0797 3 11.1998ZM17 14.4998C17 14.776 16.7761 14.9998 16.5 14.9998C16.2239 14.9998 16 14.776 16 14.4998C16 14.2237 16.2239 13.9998 16.5 13.9998C16.7761 13.9998 17 14.2237 17 14.4998Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="tw-inline-flex tw-gap-x-1.5">
+                  <span className="tw-text-iron-400 tw-font-medium">
+                    Total unique wallets:
+                  </span>
+                  <span
+                    className={`tw-font-semibold ${
+                      isOverLimit ? "tw-text-error" : "tw-text-primary-400"
+                    }`}
+                  >
+                    {formatNumberWithCommas(wallets.length)}
+                  </span>
                 </span>
-                <span className="tw-text-primary-400 tw-font-bold">
-                  {wallets.length}
-                </span>
-              </span>
+              </div>
             </div>
             <button
               onClick={removeWallets}
@@ -118,6 +133,30 @@ export default function GroupCreateWallets({
                 />
               </svg>
             </button>
+          </div>
+        </div>
+      )}
+      {isOverLimit && (
+        <div className="tw-pt-2 tw-text-error tw-text-xs tw-font-medium">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <svg
+              className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>
+              Maximum allowed wallets count is{" "}
+              {formatNumberWithCommas(walletsLimit)}
+            </span>
           </div>
         </div>
       )}
