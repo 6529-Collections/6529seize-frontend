@@ -21,7 +21,7 @@ export default function UserPageBrainWrapper({
   const getShowDrops = () =>
     !!(
       !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 50 &&
+      connectedProfile.level >= 30 &&
       !activeProfileProxy &&
       !!address
     ) || connectedProfile?.profile?.handle === "simo";
