@@ -24,7 +24,7 @@ export default function StreamDiscovery() {
   const getParams = (): Omit<WavesOverviewParams, "offset"> => {
     return {
       limit: 10,
-      type: WavesOverviewType.Latest,
+      type: WavesOverviewType.MostSubscribed,
     };
   };
 
@@ -105,7 +105,7 @@ export default function StreamDiscovery() {
               />
             </svg>
             <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-              Latest Waves
+              Popular Waves
             </p>
           </div>
         </div>
