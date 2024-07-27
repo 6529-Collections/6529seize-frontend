@@ -14,7 +14,7 @@ export default function Brain() {
   const getShowFeed = () =>
     !!(
       !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 50 &&
+      connectedProfile.level >= 30 &&
       !activeProfileProxy
     ) || connectedProfile?.profile?.handle === "simo";
 
