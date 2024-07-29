@@ -17,7 +17,7 @@ export default function MyStreamPage() {
   return (
     <>
       <Head>
-        <title>Brain | 6529 SEIZE</title>
+        <title>My Stream | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="My Stream | 6529 SEIZE" />
         <meta
