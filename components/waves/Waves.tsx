@@ -66,8 +66,7 @@ export default function Waves() {
   useEffect(() => {
     if (getShouldSetCreateNewWave()) {
       onViewModeChange(WavesViewMode.CREATE);
-      return
-    } 
+    }
   }, [isCreateNewWave]);
 
   useEffect(() => {
