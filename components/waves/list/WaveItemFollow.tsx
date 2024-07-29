@@ -20,7 +20,7 @@ enum WaveItemFollowState {
 export default function WaveItemFollow({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy, setToast, requestAuth } =
     useContext(AuthContext);
-  const { onWaveSubscriptionChange } = useContext(ReactQueryWrapperContext);
+  const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
   const isSubscribed = !!wave.subscribed_actions.length;
   const label = isSubscribed ? "Following" : "Follow";
   const getCanSubscribe = () =>
@@ -68,7 +68,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: Wave }) {
       });
     },
     onSuccess: () => {
-      onWaveSubscriptionChange();
+      onWaveFollowChange();
     },
     onError: (error) => {
       setToast({
@@ -94,7 +94,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: Wave }) {
       });
     },
     onSuccess: () => {
-      onWaveSubscriptionChange();
+      onWaveFollowChange();
     },
     onError: (error) => {
       setToast({
