@@ -48,7 +48,7 @@ export default function NFTImage(props: Readonly<Props>) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} ${heightStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
+        className={`${styles.nftAnimation} ${heightStyle} ${imageStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
         <NFTImageBalance {...props} />
         <iframe
           title={props.id}
@@ -57,7 +57,6 @@ export default function NFTImage(props: Readonly<Props>) {
               ? props.nft.metadata.animation
               : props.nft.metadata.animation_url
           }
-          className={imageStyle}
           id={props.id ?? `iframe-${props.nft.id}`}
         />
       </Col>
