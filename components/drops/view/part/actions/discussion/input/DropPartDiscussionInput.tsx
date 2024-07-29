@@ -104,7 +104,7 @@ export default function DropPartDiscussionInput({
             <input
               ref={inputRef}
               type="text"
-              placeholder="Write a comment"
+              placeholder="Drop a comment"
               value={comment ?? ""}
               onChange={onCommentChange}
               maxLength={250}

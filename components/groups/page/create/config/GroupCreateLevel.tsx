@@ -15,7 +15,7 @@ export default function GroupCreateLevel({
           Level
         </p>
         <p className="tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          Set the group&apos;s minimum level requirement.
         </p>
       </div>
       <GroupCreateNumericValue

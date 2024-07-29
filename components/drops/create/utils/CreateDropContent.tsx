@@ -135,9 +135,9 @@ const CreateDropContent = forwardRef<
     const getPlaceHolderText = () => {
       switch (type) {
         case CreateDropType.DROP:
-          return "Start a drop...";
+          return "Drop a post";
         case CreateDropType.QUOTE:
-          return "Quote this drop...";
+          return "Quote a drop";
         default:
           assertUnreachable(type);
           return "";
