@@ -129,12 +129,14 @@ export default function StreamDiscovery() {
             </Link>
           ))}
         </div>
-        <Link
-          href="/waves"
-          className="tw-no-underline tw-inline-flex tw-w-full tw-justify-end tw-pt-2 tw-bg-transparent tw-border-none tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center"
-        >
-          Show more
-        </Link>
+        <div className="tw-mt-2 tw-text-right">
+          <Link
+            href="/waves"
+            className="tw-no-underline tw-inline-flex tw-bg-transparent tw-border-none tw-text-primary-400 hover:tw-text-primary-500 tw-text-xs tw-font-medium tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center"
+          >
+            Show more
+          </Link>
+        </div>
       </div>
     </div>
   );

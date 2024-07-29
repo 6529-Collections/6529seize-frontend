@@ -16,7 +16,7 @@ export default function Brain() {
       !!connectedProfile?.profile?.handle &&
       connectedProfile.level >= 30 &&
       !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "simo";
+    ) || connectedProfile?.profile?.handle === "ragne";
 
   const [showFeed, setShowFeed] = useState(getShowFeed());
   useEffect(
@@ -296,7 +296,7 @@ export default function Brain() {
             )}
           </div>
         </div>
-        <div className="md:tw-w-[26.5%] ">
+        <div className="md:tw-w-[27%]">
           {!!items.length && (
             <div className="tw-mt-16">
               <Link

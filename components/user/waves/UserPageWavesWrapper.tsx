@@ -24,7 +24,7 @@ export default function UserPageWavesWrapper({
       connectedProfile.level >= 30 &&
       !activeProfileProxy &&
       !!address
-    ) || connectedProfile?.profile?.handle === "simo";
+    ) || connectedProfile?.profile?.handle === "ragne";
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(() => {
