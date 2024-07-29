@@ -11,18 +11,18 @@ import { WaveSubscriptionActions } from "../../../generated/models/WaveSubscript
 import { WaveSubscriptionTargetAction } from "../../../generated/models/WaveSubscriptionTargetAction";
 import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 
-enum WaveItemJoinState {
-  JOINED = "JOINED",
-  JOIN = "JOIN",
-  CANT_JOIN = "DISABLED",
+enum WaveItemFollowState {
+  FOLLOWING = "FOLLOWING",
+  FOLLOW = "FOLLOW",
+  CANT_FOLLOW = "CANT_FOLLOW",
 }
 
-export default function WaveItemJoin({ wave }: { readonly wave: Wave }) {
+export default function WaveItemFollow({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy, setToast, requestAuth } =
     useContext(AuthContext);
   const { onWaveSubscriptionChange } = useContext(ReactQueryWrapperContext);
   const isSubscribed = !!wave.subscribed_actions.length;
-  const label = isSubscribed ? "Joined" : "Join";
+  const label = isSubscribed ? "Following" : "Follow";
   const getCanSubscribe = () =>
     !!connectedProfile?.profile?.handle && !activeProfileProxy;
   const [canSubscribe, setCanSubscribe] = useState(getCanSubscribe());
@@ -36,25 +36,25 @@ export default function WaveItemJoin({ wave }: { readonly wave: Wave }) {
   const [isDisabled, setIsDisabled] = useState(getIsDisabled());
   useEffect(() => setIsDisabled(getIsDisabled()), [mutating, canSubscribe]);
 
-  const getState = (): WaveItemJoinState => {
+  const getState = (): WaveItemFollowState => {
     if (!canSubscribe) {
-      return WaveItemJoinState.CANT_JOIN;
+      return WaveItemFollowState.CANT_FOLLOW;
     }
     if (isSubscribed) {
-      return WaveItemJoinState.JOINED;
+      return WaveItemFollowState.FOLLOWING;
     }
-    return WaveItemJoinState.JOIN;
+    return WaveItemFollowState.FOLLOW;
   };
 
   const [state, setState] = useState(getState());
   useEffect(() => setState(getState()), [isSubscribed, canSubscribe]);
 
-  const CLASSES: Record<WaveItemJoinState, string> = {
-    [WaveItemJoinState.JOINED]:
+  const CLASSES: Record<WaveItemFollowState, string> = {
+    [WaveItemFollowState.FOLLOWING]:
       "tw-bg-iron-800 tw-ring-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-650",
-    [WaveItemJoinState.JOIN]:
+    [WaveItemFollowState.FOLLOW]:
       "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white",
-    [WaveItemJoinState.CANT_JOIN]:
+    [WaveItemFollowState.CANT_FOLLOW]:
       "tw-opacity-50 tw-cursor-not-allowed tw-bg-primary-500 tw-ring-primary-500 tw-text-white",
   };
 

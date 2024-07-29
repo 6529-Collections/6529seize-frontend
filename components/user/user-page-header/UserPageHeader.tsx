@@ -21,7 +21,7 @@ import { useRouter } from "next/router";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
 import { AuthContext } from "../../auth/Auth";
 import dynamic from "next/dynamic";
-import UserPageHeaderSubscribe from "./UserPageHeaderSubscribe";
+import UserPageHeaderFollow from "./UserPageHeaderFollow";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -130,7 +130,7 @@ export default function UserPageHeader({
                   !activeProfileProxy &&
                   !isMyProfile &&
                   profile.profile?.handle && (
-                    <UserPageHeaderSubscribe handle={profile.profile.handle} />
+                    <UserPageHeaderFollow handle={profile.profile.handle} />
                   )}
               </div>
             </div>

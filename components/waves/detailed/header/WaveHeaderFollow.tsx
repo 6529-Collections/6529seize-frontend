@@ -11,14 +11,14 @@ import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 
-export default function WaveHeaderSubscribe({ wave }: { readonly wave: Wave }) {
+export default function WaveHeaderFollow({ wave }: { readonly wave: Wave }) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { onWaveSubscriptionChange } = useContext(ReactQueryWrapperContext);
-  const isSubscribed = !!wave.subscribed_actions.length;
-  const label = isSubscribed ? "Joined" : "Join";
+  const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
+  const following = !!wave.subscribed_actions.length;
+  const label = following ? "Following" : "Follow";
   const [mutating, setMutating] = useState(false);
 
-  const subscribeMutation = useMutation({
+  const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<WaveSubscriptionActions, WaveSubscriptionActions>({
         endpoint: `waves/${wave.id}/subscriptions`,
@@ -28,7 +28,7 @@ export default function WaveHeaderSubscribe({ wave }: { readonly wave: Wave }) {
       });
     },
     onSuccess: () => {
-      onWaveSubscriptionChange();
+      onWaveFollowChange();
     },
     onError: (error) => {
       setToast({
@@ -41,7 +41,7 @@ export default function WaveHeaderSubscribe({ wave }: { readonly wave: Wave }) {
     },
   });
 
-  const unSubscribeMutation = useMutation({
+  const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
         WaveSubscriptionActions,
@@ -54,7 +54,7 @@ export default function WaveHeaderSubscribe({ wave }: { readonly wave: Wave }) {
       });
     },
     onSuccess: () => {
-      onWaveSubscriptionChange();
+      onWaveFollowChange();
     },
     onError: (error) => {
       setToast({
@@ -67,27 +67,27 @@ export default function WaveHeaderSubscribe({ wave }: { readonly wave: Wave }) {
     },
   });
 
-  const onSubscribe = async (): Promise<void> => {
+  const onFollow = async (): Promise<void> => {
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
       setMutating(false);
       return;
     }
-    if (isSubscribed) {
-      await unSubscribeMutation.mutateAsync();
+    if (following) {
+      await unFollowMutation.mutateAsync();
       return;
     }
-    await subscribeMutation.mutateAsync();
+    await followMutation.mutateAsync();
   };
 
   return (
     <button
-      onClick={onSubscribe}
+      onClick={onFollow}
       disabled={mutating}
       type="button"
       className={`tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-px-3.5 tw-py-2.5 sm:tw-text-sm tw-rounded-lg tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset ${
-        isSubscribed
+        following
           ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
           : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
       } tw-transition tw-duration-300 tw-ease-out`}
@@ -96,7 +96,7 @@ export default function WaveHeaderSubscribe({ wave }: { readonly wave: Wave }) {
         <div className="tw-mr-1">
           <CircleLoader />
         </div>
-      ) : isSubscribed ? (
+      ) : following ? (
         <svg
           className="tw-h-3 tw-w-3"
           width="17"

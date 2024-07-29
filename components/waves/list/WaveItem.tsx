@@ -6,7 +6,7 @@ import {
 } from "../../../helpers/Helpers";
 import WaveItemEnding from "./WaveItemEnding";
 import WaveItemDropped from "./WaveItemDropped";
-import WaveItemJoin from "./WaveItemJoin";
+import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 
 export default function WaveItem({ wave }: { readonly wave: Wave }) {
@@ -131,7 +131,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
               <span className="tw-font-medium">
                 {numberWithCommas(wave.metrics.subscribers_count)}
               </span>{" "}
-              <span className="tw-text-iron-400">Joined</span>
+              <span className="tw-text-iron-400">Followers</span>
             </span>
           </div>
           <WaveItemEnding wave={wave} />
@@ -165,7 +165,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
                 />
               </svg>
             </Link>
-            <WaveItemJoin wave={wave} />
+            <WaveItemFollow wave={wave} />
           </div>
         </div>
       </div>

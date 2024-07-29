@@ -15,7 +15,7 @@ import CircleLoader, {
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
-export default function DropsListItemSubscribeDrop({
+export default function DropsListItemFollowDrop({
   drop,
 }: {
   readonly drop: Drop;
@@ -28,11 +28,11 @@ export default function DropsListItemSubscribeDrop({
   useClickAway(listRef, () => setIsOptionsOpen(false));
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
-  const isSubscribed = !!drop.subscribed_actions.length;
-  const title = isSubscribed ? "Unsubscribe" : "Subscribe Drop";
+  const following = !!drop.subscribed_actions.length;
+  const title = following ? "Following" : "Follow";
   const [mutating, setMutating] = useState(false);
 
-  const subscribeMutation = useMutation({
+  const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<DropSubscriptionActions, DropSubscriptionActions>({
         endpoint: `drops/${drop.id}/subscriptions`,
@@ -56,7 +56,7 @@ export default function DropsListItemSubscribeDrop({
     },
   });
 
-  const unSubscribeMutation = useMutation({
+  const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
         DropSubscriptionActions,
@@ -83,18 +83,18 @@ export default function DropsListItemSubscribeDrop({
     },
   });
 
-  const onSubscribe = async (): Promise<void> => {
+  const onFollow = async (): Promise<void> => {
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
       setMutating(false);
       return;
     }
-    if (isSubscribed) {
-      await unSubscribeMutation.mutateAsync();
+    if (following) {
+      await unFollowMutation.mutateAsync();
       return;
     }
-    await subscribeMutation.mutateAsync();
+    await followMutation.mutateAsync();
   };
   return (
     <div className="tw-relative tw-z-20" ref={listRef}>
@@ -137,7 +137,7 @@ export default function DropsListItemSubscribeDrop({
                 type="button"
                 disabled={mutating}
                 onClick={(e) => {
-                  onSubscribe();
+                  onFollow();
                   e.stopPropagation();
                 }}
                 className="tw-flex tw-items-center tw-bg-transparent tw-w-full tw-border-none tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"

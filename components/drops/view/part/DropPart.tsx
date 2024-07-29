@@ -58,7 +58,7 @@ export interface DropPartProps {
   readonly currentPartCount?: number;
   readonly smallMenuIsShown: boolean;
   readonly components?: {
-    readonly authorSubscribe?: ReactNode;
+    readonly authorFollow?: ReactNode;
   };
   readonly onNextPart?: () => void;
   readonly onPrevPart?: () => void;
@@ -255,7 +255,7 @@ const DropPart = memo(
                     timestamp={createdAt}
                     size={size}
                   >
-                    {components?.authorSubscribe}
+                    {components?.authorFollow}
                   </DropAuthor>
                   <div className="tw-mt-1 tw-inline-flex tw-items-center tw-justify-between">
                     {wave?.id && (

@@ -33,7 +33,7 @@ export enum QueryKey {
   PROFILE_DROPS = "PROFILE_DROPS",
   PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
-  IDENTITY_SUBSCRIPTIONS = "IDENTITY_SUBSCRIPTIONS",
+  IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
   WALLET_TDH = "WALLET_TDH",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
   REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
@@ -148,7 +148,7 @@ type ReactQueryWrapperContextType = {
   onProfileStatementRemove: (params: {
     profile: IProfileAndConsolidations;
   }) => void;
-  onIdentitySubscriptionChange: () => void;
+  onIdentityFollowChange: () => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
   initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
   initLandingPage: ({
@@ -177,7 +177,7 @@ type ReactQueryWrapperContextType = {
   onGroupCreate: () => void;
   onIdentityBulkRate: () => void;
   onWaveCreated: () => void;
-  onWaveSubscriptionChange: () => void;
+  onWaveFollowChange: () => void;
   invalidateAll: () => void;
 };
 
@@ -191,7 +191,7 @@ export const ReactQueryWrapperContext =
     onProfileEdit: () => {},
     onProfileStatementAdd: () => {},
     onProfileStatementRemove: () => {},
-    onIdentitySubscriptionChange: () => {},
+    onIdentityFollowChange: () => {},
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
@@ -206,7 +206,7 @@ export const ReactQueryWrapperContext =
     onGroupCreate: () => {},
     onIdentityBulkRate: () => {},
     onWaveCreated: () => {},
-    onWaveSubscriptionChange: () => {},
+    onWaveFollowChange: () => {},
     invalidateAll: () => {},
   });
 
@@ -979,10 +979,10 @@ export default function ReactQueryWrapper({
 
   const onWaveCreated = () => invalidateAllWaves();
 
-  const onWaveSubscriptionChange = () => invalidateAllWaves();
-  const onIdentitySubscriptionChange = () => {
+  const onWaveFollowChange = () => invalidateAllWaves();
+  const onIdentityFollowChange = () => {
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_SUBSCRIPTIONS],
+      queryKey: [QueryKey.IDENTITY_FOLLOWERS],
     });
   };
 
@@ -1013,9 +1013,9 @@ export default function ReactQueryWrapper({
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
-      onWaveSubscriptionChange,
+      onWaveFollowChange,
       invalidateAll,
-      onIdentitySubscriptionChange,
+      onIdentityFollowChange,
       invalidateDrops,
     }),
     [
@@ -1040,9 +1040,9 @@ export default function ReactQueryWrapper({
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
-      onWaveSubscriptionChange,
+      onWaveFollowChange,
       invalidateAll,
-      onIdentitySubscriptionChange,
+      onIdentityFollowChange,
       invalidateDrops,
     ]
   );
