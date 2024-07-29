@@ -1,15 +1,15 @@
-import dynamic from "next/dynamic";
 import { FullPageRequest } from "../helpers/Types";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import Head from "next/head";
 import { Crumb } from "../components/breadcrumb/Breadcrumb";
 import SidebarLayout from "../components/utils/sidebar/SidebarLayout";
 import CommunityMembers from "../components/community/CommunityMembers";
-
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { useSelector } from "react-redux";
+import { selectActiveGroupId } from "../store/groupSlice";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { GroupFull } from "../generated/models/GroupFull";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../services/api/common-api";
+import { useEffect, useState } from "react";
 
 export enum CommunityMembersSortOption {
   DISPLAY = "display",
@@ -25,10 +25,33 @@ export interface CommunityMembersQuery
 }
 
 export default function CommunityPage() {
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Community" },
-  ];
+  const activeGroupId = useSelector(selectActiveGroupId);
+  const { data: activeGroup } = useQuery<GroupFull>({
+    queryKey: [QueryKey.GROUP, activeGroupId],
+    queryFn: async () =>
+      await commonApiFetch<GroupFull>({
+        endpoint: `groups/${activeGroupId}`,
+      }),
+    placeholderData: keepPreviousData,
+    enabled: !!activeGroupId,
+  });
+
+  const getBreadcrumbs = (): Crumb[] => {
+    if (activeGroupId && activeGroup) {
+      return [
+        { display: "Home", href: "/" },
+        { display: "Community", href: "/community" },
+        { display: activeGroup.name },
+      ];
+    }
+    return [{ display: "Home", href: "/" }, { display: "Community" }];
+  };
+
+  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(getBreadcrumbs());
+
+  useEffect(() => {
+    setBreadcrumbs(getBreadcrumbs());
+  }, [activeGroupId, activeGroup]);
 
   return (
     <>

@@ -4,10 +4,11 @@ import { numberWithCommas } from "../../../helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 
 export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
+  const firstXContributors = wave.contributors_overview.slice(0, 5);
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
       <div className="tw-flex -tw-space-x-1">
-        {wave.contributors_overview.map((c) => (
+        {firstXContributors.map((c) => (
           <Link href={`${c.contributor_identity}`} key={c.contributor_identity}>
             <div className="tw-h-6 tw-w-6">
               <img

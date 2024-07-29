@@ -3,7 +3,9 @@ import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
 import GroupCreateRep from "./GroupCreateRep";
 import GroupCreateTDH from "./GroupCreateTDH";
-import GroupCreateWallets from "./wallets/GroupCreateWallets";
+import GroupCreateWallets, {
+  GroupCreateWalletsType,
+} from "./wallets/GroupCreateWallets";
 
 export default function GroupCreateConfig({
   level,
@@ -45,14 +47,14 @@ export default function GroupCreateConfig({
         <GroupCreateRep rep={rep} setRep={setRep} />
       </div>
       <GroupCreateWallets
+        type={GroupCreateWalletsType.INCLUDE}
         wallets={wallets}
-        label="Include Wallets"
         setWallets={setWallets}
         walletsLimit={10000}
       />
       <GroupCreateWallets
+        type={GroupCreateWalletsType.EXCLUDE}
         wallets={excludeWallets}
-        label="Exclude Wallets"
         setWallets={setExcludeWallets}
         walletsLimit={1000}
       />
