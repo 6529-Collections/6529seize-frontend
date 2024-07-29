@@ -199,7 +199,7 @@ export default function Brain() {
                   <p className="tw-max-w-xl tw-mt-2 tw-text-lg tw-text-iron-400 tw-font-normal">
                     Engage with the community and get started by{" "}
                     <span className="tw-font-semibold tw-text-transparent tw-bg-clip-text tw-bg-gradient-to-r tw-from-indigo-400 tw-to-indigo-500">
-                      joining or creating a{" "}
+                      following or creating a{" "}
                       <svg
                         className="tw-inline tw-h-6 tw-w-6 tw-text-indigo-300 tw-mr-1 tw-ml-1"
                         viewBox="0 0 48 48"

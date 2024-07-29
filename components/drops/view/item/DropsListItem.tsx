@@ -3,7 +3,7 @@ import DropListItemContent from "./content/DropListItemContent";
 import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
-import DropsListItemSubscribeDrop from "./DropsListItemSubscribeDrop";
+import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -81,7 +81,7 @@ export default function DropsListItem({
     }
   };
 
-  const getCanSubscribe = () => {
+  const getCanFollow = () => {
     if (!connectedProfile?.profile?.handle) {
       return false;
     }
@@ -94,9 +94,9 @@ export default function DropsListItem({
     return true;
   };
 
-  const [canSubscribe, setCanSubscribe] = useState(getCanSubscribe());
+  const [canFollow, setCanFollow] = useState(getCanFollow());
   useEffect(
-    () => setCanSubscribe(getCanSubscribe()),
+    () => setCanFollow(getCanFollow()),
     [connectedProfile, activeProfileProxy, drop]
   );
 
@@ -117,12 +117,12 @@ export default function DropsListItem({
               canVote={canVote}
               availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
-              smallMenuIsShown={canSubscribe}
+              smallMenuIsShown={canFollow}
               onQuote={onQuote}
             />
-            {canSubscribe && (
+            {canFollow && (
               <div className="tw-absolute tw-right-10">
-                <DropsListItemSubscribeDrop drop={drop} />
+                <DropsListItemFollowDrop drop={drop} />
               </div>
             )}
           </div>

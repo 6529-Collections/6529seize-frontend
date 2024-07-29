@@ -4,7 +4,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropVoteState } from "../DropsListItem";
-import DropListItemSubscribeAuthor from "../DropListItemSubscribeAuthor";
+import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
 
@@ -131,11 +131,11 @@ export default function DropListItemContent({
             onPrevPart={onPrevPart}
             onContentClick={onContentClick}
             components={{
-              authorSubscribe:
+              authorFollow:
                 connectedProfile?.profile?.handle &&
                 connectedProfile.profile.handle !== drop.author.handle &&
                 !activeProfileProxy ? (
-                  <DropListItemSubscribeAuthor drop={drop} />
+                  <DropListItemFollowAuthor drop={drop} />
                 ) : undefined,
             }}
           />

@@ -14,22 +14,22 @@ import CircleLoader, {
 import { IdentitySubscriptionActions } from "../../../../generated/models/IdentitySubscriptionActions";
 import { IdentitySubscriptionTargetAction } from "../../../../generated/models/IdentitySubscriptionTargetAction";
 
-enum SUBSCRIBED_STATE {
-  SUBSCRIBED = "SUBSCRIBED",
-  UNSUBSCRIBED = "UNSUBSCRIBED",
+enum FOLLOW_STATE {
+  FOLLOWING = "FOLLOWING",
+  NOT_FOLLOWING = "NOT_FOLLOWING",
 }
 
-export default function DropListItemSubscribeAuthor({
+export default function DropListItemFollowAuthor({
   drop,
 }: {
   readonly drop: Drop;
 }) {
-  const subscribedState = drop.author.subscribed_actions.length
-    ? SUBSCRIBED_STATE.SUBSCRIBED
-    : SUBSCRIBED_STATE.UNSUBSCRIBED;
+  const followState = drop.author.subscribed_actions.length
+    ? FOLLOW_STATE.FOLLOWING
+    : FOLLOW_STATE.NOT_FOLLOWING;
 
-  const components: Record<SUBSCRIBED_STATE, React.ReactNode> = {
-    [SUBSCRIBED_STATE.SUBSCRIBED]: (
+  const components: Record<FOLLOW_STATE, React.ReactNode> = {
+    [FOLLOW_STATE.FOLLOWING]: (
       <svg
         className="tw-h-3 tw-w-3"
         width="17"
@@ -47,7 +47,7 @@ export default function DropListItemSubscribeAuthor({
         />
       </svg>
     ),
-    [SUBSCRIBED_STATE.UNSUBSCRIBED]: (
+    [FOLLOW_STATE.NOT_FOLLOWING]: (
       <svg
         className="tw-h-3 tw-w-3"
         width="17"
@@ -67,22 +67,21 @@ export default function DropListItemSubscribeAuthor({
     ),
   };
 
-  const classes: Record<SUBSCRIBED_STATE, string> = {
-    [SUBSCRIBED_STATE.SUBSCRIBED]:
-      "tw-text-primary-500 hover:tw-text-primary-400",
-    [SUBSCRIBED_STATE.UNSUBSCRIBED]: "tw-text-iron-500 hover:tw-text-iron-50",
+  const classes: Record<FOLLOW_STATE, string> = {
+    [FOLLOW_STATE.FOLLOWING]: "tw-text-primary-500 hover:tw-text-primary-400",
+    [FOLLOW_STATE.NOT_FOLLOWING]: "tw-text-iron-500 hover:tw-text-iron-50",
   };
 
-  const tooltipText: Record<SUBSCRIBED_STATE, string> = {
-    [SUBSCRIBED_STATE.SUBSCRIBED]: "Following",
-    [SUBSCRIBED_STATE.UNSUBSCRIBED]: "Follow",
+  const tooltipText: Record<FOLLOW_STATE, string> = {
+    [FOLLOW_STATE.FOLLOWING]: "Following",
+    [FOLLOW_STATE.NOT_FOLLOWING]: "Follow",
   };
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState(false);
 
-  const subscribeMutation = useMutation({
+  const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<
         IdentitySubscriptionActions,
@@ -108,7 +107,7 @@ export default function DropListItemSubscribeAuthor({
     },
   });
 
-  const unSubscribeMutation = useMutation({
+  const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
         IdentitySubscriptionActions,
@@ -134,34 +133,34 @@ export default function DropListItemSubscribeAuthor({
     },
   });
 
-  const onSubscribe = async (): Promise<void> => {
+  const onFollow = async (): Promise<void> => {
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
       setMutating(false);
       return;
     }
-    if (subscribedState === SUBSCRIBED_STATE.SUBSCRIBED) {
-      await unSubscribeMutation.mutateAsync();
+    if (followState === FOLLOW_STATE.FOLLOWING) {
+      await unFollowMutation.mutateAsync();
       return;
     }
-    await subscribeMutation.mutateAsync();
+    await followMutation.mutateAsync();
   };
 
   return (
-    <Tippy content={tooltipText[subscribedState]} placement="top">
+    <Tippy content={tooltipText[followState]} placement="top">
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onSubscribe();
+          onFollow();
         }}
         disabled={mutating}
-        className={`${classes[subscribedState]} tw-flex tw-border-none tw-bg-transparent tw-py-0 tw-px-2 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
+        className={`${classes[followState]} tw-flex tw-border-none tw-bg-transparent tw-py-0 tw-px-2 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
       >
         {mutating ? (
           <CircleLoader size={CircleLoaderSize.SMALL} />
         ) : (
-          components[subscribedState]
+          components[followState]
         )}
       </button>
     </Tippy>

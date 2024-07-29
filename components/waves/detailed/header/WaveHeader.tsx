@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Wave } from "../../../../generated/models/Wave";
 import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
-import WaveHeaderSubscribe from "./WaveHeaderSubscribe";
+import WaveHeaderFollow from "./WaveHeaderFollow";
 import { AuthContext } from "../../../auth/Auth";
 import {
   getScaledImageUri,
@@ -92,7 +92,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                     <span className="tw-font-medium">
                       {numberWithCommas(wave.metrics.subscribers_count)}
                     </span>{" "}
-                    <span className="tw-text-iron-400">Joined</span>
+                    <span className="tw-text-iron-400">Followers</span>
                   </span>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
               )}
             </div>
             {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
-              <WaveHeaderSubscribe wave={wave} />
+              <WaveHeaderFollow wave={wave} />
             )}
           </div>
         </div>

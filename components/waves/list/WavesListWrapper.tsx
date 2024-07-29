@@ -14,7 +14,7 @@ import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 
 const LABELS: Record<WavesOverviewType, string> = {
   [WavesOverviewType.Latest]: "Latest",
-  [WavesOverviewType.MostSubscribed]: "Most subscribed",
+  [WavesOverviewType.MostSubscribed]: "Most Followed",
   [WavesOverviewType.HighLevelAuthor]: "High Level Authors",
   [WavesOverviewType.AuthorYouHaveRepped]: "Waves from Authors You Have Repped",
 };

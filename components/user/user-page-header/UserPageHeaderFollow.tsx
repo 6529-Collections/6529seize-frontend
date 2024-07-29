@@ -14,34 +14,34 @@ import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { IdentitySubscriptionTargetAction } from "../../../generated/models/IdentitySubscriptionTargetAction";
 import { AuthContext } from "../../auth/Auth";
 
-export default function UserPageHeaderSubscribe({
+export default function UserPageHeaderFollow({
   handle,
 }: {
   readonly handle: string;
 }) {
-  const { onIdentitySubscriptionChange } = useContext(ReactQueryWrapperContext);
+  const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const { data: subscriptions, isFetching } =
     useQuery<IdentitySubscriptionActions>({
-      queryKey: [QueryKey.IDENTITY_SUBSCRIPTIONS, handle],
+      queryKey: [QueryKey.IDENTITY_FOLLOWERS, handle],
       queryFn: async () =>
         await commonApiFetch<IdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
         }),
     });
 
-  const getIsSubscribed = () => !!subscriptions?.actions.length;
-  const getLabel = () => (getIsSubscribed() ? "Subscribed" : "Subscribe");
+  const getFollowing = () => !!subscriptions?.actions.length;
+  const getLabel = () => (getFollowing() ? "Following" : "Follow");
 
-  const [isSubscribed, setIsSubscribed] = useState<boolean>(getIsSubscribed());
+  const [following, setFollowing] = useState<boolean>(getFollowing());
   const [label, setLabel] = useState<string>(getLabel());
   useEffect(() => {
-    setIsSubscribed(getIsSubscribed());
+    setFollowing(getFollowing());
     setLabel(getLabel());
   }, [subscriptions]);
 
-  const subscribeMutation = useMutation({
+  const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<
         IdentitySubscriptionActions,
@@ -54,7 +54,7 @@ export default function UserPageHeaderSubscribe({
       });
     },
     onSuccess: () => {
-      onIdentitySubscriptionChange();
+      onIdentityFollowChange();
     },
     onError: (error) => {
       setToast({
@@ -67,7 +67,7 @@ export default function UserPageHeaderSubscribe({
     },
   });
 
-  const unSubscribeMutation = useMutation({
+  const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
         IdentitySubscriptionActions,
@@ -80,7 +80,7 @@ export default function UserPageHeaderSubscribe({
       });
     },
     onSuccess: () => {
-      onIdentitySubscriptionChange();
+      onIdentityFollowChange();
     },
     onError: (error) => {
       setToast({
@@ -93,34 +93,34 @@ export default function UserPageHeaderSubscribe({
     },
   });
 
-  const onSubscribe = async (): Promise<void> => {
+  const onFollow = async (): Promise<void> => {
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
       setMutating(false);
       return;
     }
-    if (isSubscribed) {
-      await unSubscribeMutation.mutateAsync();
+    if (following) {
+      await unFollowMutation.mutateAsync();
       return;
     }
-    await subscribeMutation.mutateAsync();
+    await followMutation.mutateAsync();
   };
 
   return (
     <button
-      onClick={onSubscribe}
+      onClick={onFollow}
       disabled={mutating || isFetching}
       type="button"
       className={`tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-px-3.5 tw-py-2.5 tw-text-sm tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset ${
-        isSubscribed
+        following
           ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
           : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
       } tw-transition tw-duration-300 tw-ease-out`}
     >
       {mutating || isFetching ? (
         <CircleLoader />
-      ) : isSubscribed ? (
+      ) : following ? (
         <svg
           className="tw-h-3 tw-w-3"
           width="17"
