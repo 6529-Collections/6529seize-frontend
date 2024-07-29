@@ -1,11 +1,14 @@
 import { useRef, useCallback, useContext, useState, useEffect } from "react";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
 import { AuthContext } from "../../../../../auth/Auth";
+import { GroupCreateWalletsType } from "./GroupCreateWallets";
 
 export default function CreateGroupWalletsUpload({
+  type,
   wallets,
   setWallets,
 }: {
+  readonly type: GroupCreateWalletsType;
   readonly wallets: string[] | null;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
@@ -149,7 +152,7 @@ export default function CreateGroupWalletsUpload({
             </p>
           </div>
           <input
-            id="create-group-csv-upload"
+            id={`wallets-upload-${type}`}
             ref={inputRef}
             type="file"
             className="tw-hidden"
@@ -175,13 +178,13 @@ export default function CreateGroupWalletsUpload({
                   type="checkbox"
                   checked={isMyPrimaryWalletAdded}
                   onChange={includePrimaryWalletChange}
-                  id="include_my_primary_wallet"
+                  id={`${type}_my_primary_wallet`}
                   className="tw-cursor-pointer tw-form-checkbox tw-w-4 tw-h-4 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
                 />
               </div>
               <div className="tw-ml-3 tw-text-sm tw-leading-6">
                 <label
-                  htmlFor="include_my_primary_wallet"
+                  htmlFor={`${type}_my_primary_wallet`}
                   className="tw-cursor-pointer tw-font-medium tw-text-iron-50"
                 >
                   Include my primary wallet

@@ -44,7 +44,7 @@ export default function Header(props: Readonly<Props>) {
       !!connectedProfile?.profile?.handle &&
       connectedProfile.level >= 30 &&
       !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "ragne";
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState<boolean>(getShowDrops());
 

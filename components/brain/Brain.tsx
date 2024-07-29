@@ -16,7 +16,7 @@ export default function Brain() {
       !!connectedProfile?.profile?.handle &&
       connectedProfile.level >= 30 &&
       !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "ragne";
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showFeed, setShowFeed] = useState(getShowFeed());
   useEffect(

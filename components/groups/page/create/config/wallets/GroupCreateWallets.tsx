@@ -3,17 +3,27 @@ import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useEffect, useState } from "react";
 
+export enum GroupCreateWalletsType {
+  INCLUDE = "INCLUDE",
+  EXCLUDE = "EXCLUDE",
+}
+
 export default function GroupCreateWallets({
+  type,
   wallets,
   walletsLimit,
-  label,
   setWallets,
 }: {
+  readonly type: GroupCreateWalletsType;
   readonly wallets: string[] | null;
   readonly walletsLimit: number;
-  readonly label: string;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
+  const LABELS: Record<GroupCreateWalletsType, string> = {
+    [GroupCreateWalletsType.INCLUDE]: "Include Wallets",
+    [GroupCreateWalletsType.EXCLUDE]: "Exclude Wallets",
+  };
+
   const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(
     wallets
   );
@@ -60,11 +70,12 @@ export default function GroupCreateWallets({
           </svg>
         </span>
         <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
-         {label}
+          {LABELS[type]}
         </p>
       </div>
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
         <CreateGroupWalletsUpload
+          type={type}
           setWallets={onUploadedWalletsChange}
           wallets={uploadedWallets}
         />

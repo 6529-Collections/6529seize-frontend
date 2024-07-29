@@ -27,7 +27,7 @@ export default function Waves() {
       !!connectedProfile?.profile?.handle &&
       connectedProfile.level >= 30 &&
       !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "ragne";
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(
@@ -66,7 +66,8 @@ export default function Waves() {
   useEffect(() => {
     if (getShouldSetCreateNewWave()) {
       onViewModeChange(WavesViewMode.CREATE);
-    }
+      return
+    } 
   }, [isCreateNewWave]);
 
   useEffect(() => {

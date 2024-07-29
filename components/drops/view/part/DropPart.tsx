@@ -189,17 +189,18 @@ const DropPart = memo(
     const showNextButton =
       currentPartCount && totalPartsCount && currentPartCount < totalPartsCount;
     const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const checkOverflow = () => {
       setIsOverflowing(
-        !!containerRef.current &&
-          containerRef.current.scrollHeight > containerRef.current.clientHeight
+        !!contentRef.current &&
+          contentRef.current.scrollHeight > contentRef.current.clientHeight
       );
     };
 
     useEffect(() => {
       checkOverflow();
-    }, [containerRef]);
+    }, [contentRef]);
 
     const [showMore, setShowMore] = useState(showFull);
 
@@ -213,23 +214,23 @@ const DropPart = memo(
 
     useEffect(() => {
       if (showMore) {
-        containerRef.current?.style.setProperty("max-height", "100%");
+        contentRef.current?.style.setProperty("max-height", "100%");
       } else {
-        containerRef.current?.style.setProperty(
+        contentRef.current?.style.setProperty(
           "max-height",
           `${containerHeight}px`
         );
       }
-    }, [showMore, containerRef, containerHeight]);
+    }, [showMore, contentRef, containerHeight]);
 
     const onImageLoaded = () => {
-      if (!containerRef.current) return;
-      const imgs = containerRef.current.querySelectorAll("img");
+      if (!contentRef.current) return;
+      const imgs = contentRef.current.querySelectorAll("img");
       if (imgs.length) {
         const firstImg = imgs[0];
         if (firstImg.complete) {
           const imgRect = firstImg.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
+          const containerRect = contentRef.current.getBoundingClientRect();
           const isTopVisible = imgRect.top <= containerRect.bottom;
           if (isTopVisible) {
             setContainerHeight(288 + firstImg.height + 288);
@@ -340,7 +341,10 @@ const DropPart = memo(
                       </svg>
                     </button>
                   )}
-                  <div className={`${isStorm && ""} tw-h-full tw-w-full`}>
+                  <div
+                    className={`${isStorm && ""} tw-h-full tw-w-full`}
+                    ref={contentRef}
+                  >
                     <Markdown
                       rehypePlugins={[
                         [
@@ -449,6 +453,7 @@ const DropPart = memo(
                         <DropListItemContentMedia
                           media_mime_type={partMedia.mimeType}
                           media_url={partMedia.mediaSrc}
+                          onImageLoaded={onImageLoaded}
                         />
                       </div>
                     )}

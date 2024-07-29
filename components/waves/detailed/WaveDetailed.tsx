@@ -37,7 +37,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
       !!connectedProfile?.profile?.handle &&
       connectedProfile.level >= 30 &&
       !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "ragne";
+    ) || connectedProfile?.profile?.handle === "simo";
 
   const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(

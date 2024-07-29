@@ -14,6 +14,8 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
   const ending = wave.wave.period?.max
     ? getTimeUntil(wave.wave.period.max)
     : null;
+
+  const firstXContributors = wave.contributors_overview.slice(0, 10);
   return (
     <div>
       <div>
@@ -45,10 +47,10 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                 {wave.name}
               </h1>
               <div className="tw-flex tw-items-center tw-gap-x-2">
-                {!!wave.contributors_overview.length && (
+                {!!firstXContributors.length && (
                   <div className="tw-flex tw-items-center">
                     <div className="tw-flex -tw-space-x-2">
-                      {wave.contributors_overview.map((item) => (
+                      {firstXContributors.map((item) => (
                         <img
                           key={item.contributor_identity}
                           className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
