@@ -11,8 +11,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 export default function MyStreamPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Brain" },
-    { display: "My Stream" },
+    { display: "Brain - My Stream" },
   ];
   return (
     <>
