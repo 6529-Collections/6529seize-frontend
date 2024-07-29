@@ -8,22 +8,23 @@ const Header = dynamic(() => import("../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function BrainPage() {
+export default function MyStreamPage() {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Brain" },
+    { display: "My Stream" },
   ];
   return (
     <>
       <Head>
         <title>Brain | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Brain | 6529 SEIZE" />
+        <meta name="description" content="My Stream | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/brain`}
+          content={`${process.env.BASE_ENDPOINT}/my-stream`}
         />
-        <meta property="og:title" content="Brain" />
+        <meta property="og:title" content="My Stream" />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}

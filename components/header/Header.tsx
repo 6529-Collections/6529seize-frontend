@@ -197,7 +197,7 @@ export default function Header(props: Readonly<Props>) {
                   </Row>
                   <Row className="pt-3">
                     <Col>
-                      <Link href="/brain">
+                      <Link href="/my-stream">
                         <h3>My Stream</h3>
                       </Link>
                     </Col>
@@ -796,7 +796,7 @@ export default function Header(props: Readonly<Props>) {
                                 <HeaderDesktopLink
                                   link={{
                                     name: "My Stream",
-                                    path: "/brain",
+                                    path: "/my-stream",
                                   }}
                                 />
                                 <HeaderDesktopLink

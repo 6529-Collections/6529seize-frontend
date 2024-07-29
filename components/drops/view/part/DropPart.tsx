@@ -297,6 +297,11 @@ const DropPart = memo(
               <div
                 onClick={(e) => {
                   if (onContentClick) {
+                    const selection = window.getSelection();
+                    if (selection && selection.toString().length > 0) {
+                      return;
+                    }
+
                     e.stopPropagation();
                     onContentClick();
                   }
