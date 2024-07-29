@@ -27,6 +27,7 @@ export default function DropListItemContentMediaVideo({
         controls
         autoPlay
         muted
+        loop
         className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-[516px]"
         onClick={handleVideoClick}
       >
