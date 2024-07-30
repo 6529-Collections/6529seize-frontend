@@ -9,7 +9,7 @@ export default function DropListItemDataContentProfiles({
   return (
     <div>
       <p className="tw-mb-0 tw-text-xxs tw-text-iron-500 tw-font-normal">
-        Profiles mentioned
+        Identities mentioned
       </p>
       <ul className="tw-pl-0 tw-mb-0 tw-inline-flex tw-list-none tw-gap-x-1 tw-text-xxs tw-text-iron-50 tw-font-medium">
         {profiles.map((profile, i) => (
