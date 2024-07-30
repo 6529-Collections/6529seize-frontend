@@ -121,7 +121,7 @@ export default function DropsListItem({
               onQuote={onQuote}
             />
             {canSubscribe && (
-              <div className="tw-absolute tw-right-10">
+              <div className="tw-absolute tw-right-12">
                 <DropsListItemSubscribeDrop drop={drop} />
               </div>
             )}

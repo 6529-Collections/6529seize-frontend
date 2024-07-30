@@ -102,7 +102,7 @@ const CreateDropFullDesktop = forwardRef<
         case CreateDropType.DROP:
           return `${
             showDropError ? "tw-border-error " : "tw-border-iron-800"
-          } tw-p-4 sm:tw-p-5 tw-rounded-xl tw-border tw-border-solid`;
+          } tw-p-4 tw-rounded-xl tw-border tw-border-solid`;
         case CreateDropType.QUOTE:
           return "";
         default:
@@ -168,7 +168,7 @@ const CreateDropFullDesktop = forwardRef<
             </button>
           )}
         </div>
-        <div className="tw-flex tw-w-full tw-gap-x-4">
+        <div className="tw-flex tw-w-full tw-gap-x-2">
           <div className="tw-mt-0.5">
             <DropPfp pfpUrl={profile?.pfp} />
           </div>

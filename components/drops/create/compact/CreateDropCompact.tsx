@@ -92,7 +92,7 @@ const CreateDropCompact = forwardRef<
         case CreateDropType.DROP:
           return `${
             showDropError ? "tw-border-error " : "tw-border-iron-800"
-          } tw-p-2 sm:tw-p-5 tw-rounded-xl tw-border tw-border-solid`;
+          } tw-p-2 sm:tw-p-4 tw-rounded-xl tw-border tw-border-solid`;
         case CreateDropType.QUOTE:
           return "";
         default:
@@ -122,11 +122,11 @@ const CreateDropCompact = forwardRef<
     return (
       <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
         {children}
-        <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
+        <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2">
           <div className="tw-hidden sm:tw-block">
             <DropPfp pfpUrl={profile?.pfp} />
           </div>
-          <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
+          <div className="tw-w-full tw-flex tw-items-end tw-gap-x-2">
             <div className="tw-w-full">
               <CreateDropContent
                 ref={editorRef}
@@ -161,6 +161,101 @@ const CreateDropCompact = forwardRef<
                 </PrimaryButton>
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="tw-ml-14 tw-text-xs tw-font-medium tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1.5 tw-pb-2">
+            <>
+              <span className="tw-font-semibold tw-text-iron-500">
+                Part: <span className="tw-text-iron-50">77</span>,{" "}
+              </span>
+              <span
+              /*  className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`} */
+              >
+                length:
+              </span>
+            </>
+          </p>
+        </div>
+
+        <div className="tw-ml-10 tw-mt-2.5 tw-flex tw-items-center tw-gap-x-6">
+          <div className="tw-flex tw-items-center tw-gap-x-6">
+            <button
+              type="button"
+              className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+            >
+              <svg
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <svg
+                className="tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="tw-ml-2 tw-text-sm tw-font-medium">
+                Break into storm
+              </span>
+            </button>
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-x-6">
+            <label>
+              <div
+                role="button"
+                aria-label="Select audio file"
+                className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+              >
+                <svg
+                  className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                  />
+                </svg>
+                <input
+                  type="file"
+                  className="tw-hidden"
+                  accept="image/*,video/*,audio/*"
+                  onChange={(e: any) => {
+                    if (e.target.files) {
+                      const f = e.target.files[0];
+                      onFileChange(f);
+                    }
+                  }}
+                />
+                <span className="tw-text-sm tw-font-medium">Upload Media</span>
+              </div>
+            </label>
           </div>
         </div>
 

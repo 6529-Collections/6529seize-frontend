@@ -82,7 +82,7 @@ export default function DropPartDiscussionItems({
   };
   return (
     <div className="tw-pb-2">
-      <div className={`${!isFetching && "tw-overflow-y-auto"} tw-max-h-72`}>
+      <div className={`${!isFetching && "tw-overflow-y-auto scrollbar-width"} tw-max-h-72 tw-pr-4`}>
         <div>
           {comments.map((item) => (
             <DropPartDiscussionItem key={item.id} item={item} />

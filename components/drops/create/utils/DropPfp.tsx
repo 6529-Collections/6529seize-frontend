@@ -12,7 +12,7 @@ export default function DropPfp({
   readonly size?: DropPartSize;
 }) {
   const SIZE_CLASSES: Record<DropPartSize, string> = {
-    [DropPartSize.SMALL]: "tw-h-7 tw-w-7",
+    [DropPartSize.SMALL]: "tw-h-8 tw-w-8",
     [DropPartSize.MEDIUM]: "tw-h-10 tw-w-10",
     [DropPartSize.LARGE]: "tw-h-12 tw-w-12",
   };
