@@ -449,6 +449,14 @@ const DropPart = memo(
                           </code>
                         ),
                         a: (params) => aHrefRenderer(params),
+                        img: (params) => (
+                          <img
+                            {...params}
+                            alt="Seize"
+                            onLoad={onImageLoaded}
+                            className="tw-w-full"
+                          />
+                        ),
                       }}
                     >
                       {partContent}

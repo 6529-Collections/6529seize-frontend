@@ -53,6 +53,9 @@ import { WaveParticipationRequirement } from "../../../../generated/models/WaveP
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMissingMetadataWarning";
+import DragDropPastePlugin from "../lexical/plugins/DragDropPastePlugin";
+import { ImageNode } from "../lexical/nodes/ImageNode";
+import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -114,6 +117,7 @@ const CreateDropContent = forwardRef<
         AutoLinkNode,
         LinkNode,
         HorizontalRuleNode,
+        ImageNode,
       ],
       editorState,
       onError(error: Error): void {
@@ -172,6 +176,7 @@ const CreateDropContent = forwardRef<
             ...TRANSFORMERS,
             MENTION_TRANSFORMER,
             HASHTAG_TRANSFORMER,
+            IMAGE_TRANSFORMER,
           ])?.length ?? 0
         )
       );
@@ -206,6 +211,7 @@ const CreateDropContent = forwardRef<
               <NewMentionsPlugin onSelect={onMentionedUserAdded} />
               <NewHashtagsPlugin onSelect={onHashtagAdded} />
               <MaxLengthPlugin maxLength={25000} />
+              <DragDropPastePlugin />
               {showToggleViewButton && (
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
               )}

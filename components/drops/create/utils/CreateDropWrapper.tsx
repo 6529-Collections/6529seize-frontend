@@ -31,6 +31,7 @@ import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredM
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
+import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -167,6 +168,7 @@ const CreateDropWrapper = forwardRef<
           ...TRANSFORMERS,
           MENTION_TRANSFORMER,
           HASHTAG_TRANSFORMER,
+          IMAGE_TRANSFORMER,
         ])
       ) ?? null;
 
