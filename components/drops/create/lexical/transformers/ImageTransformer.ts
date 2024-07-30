@@ -13,7 +13,7 @@ export const IMAGE_TRANSFORMER: TextMatchTransformer = {
   importRegExp: /!(?:\[([^[]*)\])(?:\(([^(]+)\))/,
   regExp: /!(?:\[([^[]*)\])(?:\(([^(]+)\))$/,
   replace: (textNode, match) => {
-    const [, altText, src] = match;
+    const [, _, src] = match;
     const imageNode = $createImageNode({ src });
     textNode.replace(imageNode);
   },

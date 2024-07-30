@@ -452,6 +452,7 @@ const DropPart = memo(
                         img: (params) => (
                           <img
                             {...params}
+                            alt="Seize"
                             onLoad={onImageLoaded}
                             className="tw-w-full"
                           />

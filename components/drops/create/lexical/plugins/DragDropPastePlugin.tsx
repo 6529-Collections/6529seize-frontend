@@ -10,17 +10,12 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { DRAG_DROP_PASTE } from "@lexical/rich-text";
 import { isMimeType, mediaFileReader } from "@lexical/utils";
 import {
-  $createParagraphNode,
-  $createTextNode,
   $getNodeByKey,
   $insertNodes,
-  COMMAND_PRIORITY_LOW,
-  INSERT_PARAGRAPH_COMMAND,
+  COMMAND_PRIORITY_LOW
 } from "lexical";
 import { useEffect } from "react";
 import { commonApiPost } from "../../../../../services/api/common-api";
-import { $createHashtagNode } from "../nodes/HashtagNode";
-import { $createMentionNode } from "../nodes/MentionNode";
 import { $createImageNode } from "../nodes/ImageNode";
 
 const ACCEPTABLE_IMAGE_TYPES = [
@@ -73,11 +68,8 @@ export default function DragDropPaste(): null {
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
           );
-          for (const { file, result } of filesResult) {
+          for (const { file } of filesResult) {
             if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
-              const url =
-                "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7c6c885e-87b2-11ee-9661-02424e2c14ad/db5b5b66-b56a-4492-8b5a-a82a02aa0d72.avif";
-
               editor.update(() => {
                 const imageNode = $createImageNode({ src: "loading" });
                 $insertNodes([imageNode]);
