@@ -4,6 +4,7 @@ import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
 import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
+import DropsListItemDeleteDrop from "./DropsListItemDeleteDrop";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -100,6 +101,25 @@ export default function DropsListItem({
     [connectedProfile, activeProfileProxy, drop]
   );
 
+  const getCanDelete = () => {
+    if (!connectedProfile?.profile?.handle) {
+      return false;
+    }
+    if (activeProfileProxy) {
+      return false;
+    }
+    return (
+      drop.author.handle === connectedProfile.profile.handle ||
+      drop.wave.author.handle === connectedProfile.profile.handle
+    );
+  };
+
+  const [canDelete, setCanDelete] = useState(getCanDelete());
+  useEffect(
+    () => setCanDelete(getCanDelete()),
+    [connectedProfile, activeProfileProxy, drop]
+  );
+
   return (
     <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out">
       <DropListItemCreateQuote
@@ -117,12 +137,17 @@ export default function DropsListItem({
               canVote={canVote}
               availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
-              smallMenuIsShown={canFollow}
+              smallMenuIsShown={canFollow || canDelete}
               onQuote={onQuote}
             />
             {canFollow && (
               <div className="tw-absolute tw-right-10">
                 <DropsListItemFollowDrop drop={drop} />
+              </div>
+            )}
+            {canDelete && (
+              <div className="tw-absolute tw-right-10">
+                <DropsListItemDeleteDrop drop={drop} />
               </div>
             )}
           </div>
