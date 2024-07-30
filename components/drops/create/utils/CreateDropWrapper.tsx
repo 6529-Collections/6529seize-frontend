@@ -71,6 +71,9 @@ interface CreateDropWrapperProps {
   readonly setMentionedUsers: (
     newV: Omit<MentionedUser, "current_handle">[]
   ) => void;
+  readonly onMentionedUser: (
+    newUser: Omit<MentionedUser, "current_handle">
+  ) => void;
   readonly setReferencedNfts: (newV: ReferencedNft[]) => void;
   readonly setTitle: (newV: string | null) => void;
   readonly setMetadata: (newV: DropMetadata[]) => void;
@@ -105,6 +108,7 @@ const CreateDropWrapper = forwardRef<
       setDrop,
       setMentionedUsers,
       setReferencedNfts,
+      onMentionedUser,
       setTitle,
       setMetadata,
       onSubmitDrop,
@@ -148,16 +152,7 @@ const CreateDropWrapper = forwardRef<
     const onMetadataRemove = (data_key: string) => {
       setMetadata(metadata.filter((m) => m.data_key !== data_key));
     };
-    const onMentionedUser = (
-      newUser: Omit<MentionedUser, "current_handle">
-    ) => {
-      setMentionedUsers([
-        ...mentionedUsers.filter(
-          (i) => i.mentioned_profile_id !== newUser.mentioned_profile_id
-        ),
-        newUser,
-      ]);
-    };
+
     const onReferencedNft = (newNft: ReferencedNft) => {
       setReferencedNfts([
         ...referencedNfts.filter(

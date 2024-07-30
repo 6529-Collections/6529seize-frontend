@@ -34,7 +34,7 @@ export default function MentionsTypeaheadMenuItem({
           isSelected ? "tw-bg-iron-700" : "tw-bg-transparent"
         }  tw-py-2 tw-w-full tw-h-full  tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
       >
-        <div className="tw-w-[15rem] tw-inline-flex tw-justify-between tw-items-center">
+        <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
           <div className="tw-inline-flex tw-space-x-2 tw-items-center">
             {option.picture && (
               <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900">
@@ -53,10 +53,10 @@ export default function MentionsTypeaheadMenuItem({
               </div>
             )}
             <div>
-              <div className="tw-text-sm tw-w-[15rem] tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
+              <div className="tw-text-sm tw-w-[12rem] tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
                 {option.handle}
               </div>
-              <div className="tw-text-xs tw-w-[15rem] tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
+              <div className="tw-text-xs tw-w-[12rem] tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
                 {option.display}
               </div>
             </div>
