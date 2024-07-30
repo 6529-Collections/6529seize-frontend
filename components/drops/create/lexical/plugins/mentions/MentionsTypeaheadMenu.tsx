@@ -20,7 +20,7 @@ export default function MentionsTypeaheadMenu({
     }
   });
   return (
-    <div className="tailwind-scope tw-absolute tw-z-50 tw-mt-1 tw-min-w-[17.4rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5 tw-p-2">
+    <div className="tailwind-scope tw-absolute tw-z-50 tw-mt-1 tw-w-[20rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5 tw-p-2">
       <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
         {options.map((option, i: number) => (
           <MentionsTypeaheadMenuItem

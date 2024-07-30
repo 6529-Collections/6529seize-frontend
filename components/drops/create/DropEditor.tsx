@@ -79,6 +79,14 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
 
     const [isStormMode, setIsStormMode] = useState(false);
 
+    const onMentionedUser = (
+      newUser: Omit<MentionedUser, "current_handle">
+    ) => {
+      setMentionedUsers((curr) => {
+        return [...curr, newUser];
+      });
+    };
+
     useEffect(() => {
       setTitle(null);
       setMetadata([]);
@@ -134,6 +142,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setViewType={setViewType}
           setDrop={setDrop}
           setMentionedUsers={setMentionedUsers}
+          onMentionedUser={onMentionedUser}
           setReferencedNfts={setReferencedNfts}
           setTitle={setTitle}
           setMetadata={setMetadata}

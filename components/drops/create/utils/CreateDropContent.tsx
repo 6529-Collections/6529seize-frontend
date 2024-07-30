@@ -127,7 +127,9 @@ const CreateDropContent = forwardRef<
 
     const onMentionedUserAdded = (
       user: Omit<MentionedUser, "current_handle">
-    ) => onMentionedUser(user);
+    ) => {
+      onMentionedUser(user);
+    };
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const showToggleViewButton = viewType === CreateDropViewType.COMPACT;

@@ -14,6 +14,7 @@ import DropEditor from "./DropEditor";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
+import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -136,6 +137,19 @@ export default function CreateDrop({
     ];
   };
 
+  const filterMentionedUsers = ({
+    mentionedUsers,
+    parts,
+  }: {
+    readonly mentionedUsers: DropMentionedUser[];
+    readonly parts: CreateDropPart[];
+  }): DropMentionedUser[] =>
+    mentionedUsers.filter((user) =>
+      parts.some((part) =>
+        part.content?.includes(`@[${user.handle_in_content}]`)
+      )
+    );
+
   const generatePart = async (
     part: CreateDropPart
   ): Promise<CreateDropRequestPart> => {
@@ -168,6 +182,10 @@ export default function CreateDrop({
 
     const requestBody: CreateDropRequest = {
       ...dropRequest,
+      mentioned_users: filterMentionedUsers({
+        mentionedUsers: dropRequest.mentioned_users,
+        parts: dropRequest.parts,
+      }),
       wave_id: wave.id,
       parts,
     };
