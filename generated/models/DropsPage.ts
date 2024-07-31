@@ -11,31 +11,44 @@
  */
 
 import { Drop } from '../models/Drop';
-import { DropComment } from '../models/DropComment';
 import { HttpFile } from '../http/http';
 
-export class DropAndDropComment {
-    'drop': Drop;
-    'comment': DropComment;
+export class DropsPage {
+    'data': Array<Drop>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "drop",
-            "baseName": "drop",
-            "type": "Drop",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<Drop>",
             "format": ""
         },
         {
-            "name": "comment",
-            "baseName": "comment",
-            "type": "DropComment",
+            "name": "count",
+            "baseName": "count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropAndDropComment.attributeTypeMap;
+        return DropsPage.attributeTypeMap;
     }
 
     public constructor() {

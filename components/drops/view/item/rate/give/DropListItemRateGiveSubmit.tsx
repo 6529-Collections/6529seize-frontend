@@ -82,10 +82,7 @@ export default function DropListItemRateGiveSubmit({
       return;
     }
 
-    const previousRate =
-      drop.context_profile_context?.categories?.find(
-        (c) => c.category === DEFAULT_DROP_RATE_CATEGORY
-      )?.rating ?? 0;
+    const previousRate = drop.context_profile_context?.rating ?? 0;
 
     const newRate = previousRate + rate;
 

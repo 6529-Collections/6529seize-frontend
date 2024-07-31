@@ -9,9 +9,8 @@ import { createBreakpoint } from "react-use";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../../auth/Auth";
-import { NewDropComment } from "../../../../../../../generated/models/NewDropComment";
-import { DropComment } from "../../../../../../../generated/models/DropComment";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
+import { CreateDropRequest } from "../../../../../../../generated/models/CreateDropRequest";
 
 enum ScreenType {
   DESKTOP = "DESKTOP",
@@ -30,8 +29,8 @@ export default function DropPartDiscussionInput({
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
   const author = drop.author;
-  const [comment, setComment] = useState<string | null>(null);
-  const [addingComment, setAddingComment] = useState<boolean>(false);
+  const [reply, setReply] = useState<string | null>(null);
+  const [addingReply, setAddingReply] = useState<boolean>(false);
 
   const breakpoint = useBreakpoint();
   const [screenType, setScreenType] = useState<ScreenType>(ScreenType.DESKTOP);
@@ -49,19 +48,20 @@ export default function DropPartDiscussionInput({
     }
   }, [breakpoint]);
 
-  const onCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(e.target.value);
+  const onReplyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setReply(e.target.value);
   };
 
-  const addCommentMutation = useMutation({
-    mutationFn: async (body: NewDropComment) => {
-      await commonApiPost<NewDropComment, DropComment>({
-        endpoint: `drops/${drop.id}/parts/${dropPart.part_id}/comments`,
+  const addReplyMutation = useMutation({
+    mutationFn: async (body: CreateDropRequest) => {
+      await commonApiPost<CreateDropRequest, Drop>({
+        endpoint: `drops`,
         body,
       });
     },
     onSuccess: () => {
-      setComment(null);
+      setReply(null);
+      // TODO
       onDropDiscussionChange({
         dropAuthorHandle: author?.handle,
         dropId: drop.id,
@@ -74,20 +74,37 @@ export default function DropPartDiscussionInput({
       });
     },
     onSettled: () => {
-      setAddingComment(false);
+      setAddingReply(false);
     },
   });
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!comment) return;
-    setAddingComment(true);
+    if (!reply) return;
+    setAddingReply(true);
     const { success } = await requestAuth();
     if (!success) {
-      setAddingComment(false);
+      setAddingReply(false);
       return;
     }
-    await addCommentMutation.mutateAsync({ comment });
+    await addReplyMutation.mutateAsync({
+      wave_id: drop.wave.id,
+      reply_to: {
+        drop_id: drop.id,
+        drop_part_id: dropPart.part_id,
+      },
+      title: null,
+      parts: [
+        {
+          content: reply,
+          quoted_drop: null,
+          media: [],
+        },
+      ],
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
   };
 
   return (
@@ -104,9 +121,9 @@ export default function DropPartDiscussionInput({
             <input
               ref={inputRef}
               type="text"
-              placeholder="Drop a comment"
-              value={comment ?? ""}
-              onChange={onCommentChange}
+              placeholder="Drop a reply"
+              value={reply ?? ""}
+              onChange={onReplyChange}
               maxLength={250}
               className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-text-md tw-leading-6 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
             />
@@ -114,15 +131,15 @@ export default function DropPartDiscussionInput({
           <div className="tw-self-end">
             <PrimaryButton
               type="submit"
-              disabled={!comment || addingComment}
-              loading={addingComment}
+              disabled={!reply || addingReply}
+              loading={addingReply}
               size={
                 screenType === ScreenType.MOBILE
                   ? PrimaryButtonSize.SMALL
                   : PrimaryButtonSize.MEDIUM
               }
             >
-              Send
+              Reply
             </PrimaryButton>
           </div>
         </form>

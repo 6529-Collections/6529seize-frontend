@@ -13,6 +13,6 @@
 import { HttpFile } from '../http/http';
 
 export enum DropSubscriptionTargetAction {
-    Commented = 'DROP_COMMENTED',
+    Replied = 'DROP_REPLIED',
     Voted = 'DROP_VOTED'
 }

@@ -1,18 +1,18 @@
 import Link from "next/link";
-import { IFeedItemDropCommented } from "../../../../../types/feed.types";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
 import { getTimeAgoShort } from "../../../../../helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../../helpers/image.helpers";
+import { IFeedItemDropReplied } from "../../../../../types/feed.types";
 
-export default function FeedItemDropCommented({
+export default function FeedItemDropReplied({
   item,
   showWaveInfo,
   availableCredit,
 }: {
-  readonly item: IFeedItemDropCommented;
+  readonly item: IFeedItemDropReplied;
   readonly showWaveInfo: boolean;
   readonly availableCredit: number | null;
 }) {
@@ -72,7 +72,7 @@ export default function FeedItemDropCommented({
         <div className="tw-ml-12 tw-flex tw-items-stretch tw-gap-x-3">
           <div className="tw-bg-iron-700 tw-w-1 tw-flex-shrink-0"></div>
           <p className="tw-block tw-mb-0 tw-font-normal tw-text-iron-50 tw-text-md">
-            {item.item.comment.comment}
+            {item.item.comment.parts[0].content}
           </p>
         </div>
 

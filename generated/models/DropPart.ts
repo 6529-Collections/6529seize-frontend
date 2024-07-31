@@ -23,7 +23,7 @@ export class DropPart {
     'content': string | null;
     'media': Array<DropMedia>;
     'quoted_drop': QuotedDrop | null;
-    'discussion_comments_count': number;
+    'replies_count': number;
     'quotes_count': number;
     'context_profile_context'?: DropPartContextProfileContext | null;
 
@@ -55,8 +55,8 @@ export class DropPart {
             "format": ""
         },
         {
-            "name": "discussion_comments_count",
-            "baseName": "discussion_comments_count",
+            "name": "replies_count",
+            "baseName": "replies_count",
             "type": "number",
             "format": "int64"
         },

@@ -42,9 +42,8 @@ export default function DropPartActionTriggers({
         <div className="tw-flex tw-items-center tw-gap-x-2">
           {!!drop.raters_count && (
             <DropPartActionTriggersVoteVoters drop={drop} />
-            
           )}
-         
+
           <DropPartActionTriggersVoteVotings drop={drop} />
         </div>
         <DropListItemRateGive

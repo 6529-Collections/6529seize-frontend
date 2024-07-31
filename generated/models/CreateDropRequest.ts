@@ -14,10 +14,12 @@ import { CreateDropPart } from '../models/CreateDropPart';
 import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { ReplyToDrop } from '../models/ReplyToDrop';
 import { HttpFile } from '../http/http';
 
 export class CreateDropRequest {
     'wave_id': string;
+    'reply_to'?: ReplyToDrop;
     'title'?: string | null;
     'parts': Array<CreateDropPart>;
     'referenced_nfts': Array<DropReferencedNFT>;
@@ -31,6 +33,12 @@ export class CreateDropRequest {
             "name": "wave_id",
             "baseName": "wave_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "reply_to",
+            "baseName": "reply_to",
+            "type": "ReplyToDrop",
             "format": ""
         },
         {

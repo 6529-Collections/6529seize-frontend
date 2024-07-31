@@ -21,6 +21,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: short_nonce
+          in: query
+          description: If true, the nonce will be shorter and easier to sign. Default is false.
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           description: successful operation
@@ -500,6 +506,7 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
+
   /public/drops:
     get:
       tags:
@@ -603,79 +610,12 @@ paths:
                 $ref: "#/components/schemas/Drop"
         "404":
           description: Drop not found
-  /public/drops/{dropId}/log:
+  /public/drops/{dropId}/parts/{dropPartId}/replies:
     get:
       tags:
         - Drops
-      summary: Get public drop logs
-      operationId: getPublicDropLogs
-      parameters:
-        - name: dropId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: log_type
-          in: query
-          description: Filter logs by type
-          required: false
-          schema:
-            type: string
-            enum:
-              - DROP_COMMENT
-              - DROP_RATING_EDIT
-              - DROP_CREATED
-        - name: sort_direction
-          in: query
-          required: false
-          schema:
-            description: Default is DESC
-            type: string
-            enum:
-              - ASC
-              - DESC
-        - name: sort
-          in: query
-          required: false
-          schema:
-            description: Default is created_at
-            type: string
-            enum:
-              - created_at
-        - name: page
-          in: query
-          required: false
-          schema:
-            description: Default is 1
-            type: number
-            format: int64
-            minimum: 1
-        - name: page_size
-          in: query
-          required: false
-          schema:
-            description: Default is 50
-            type: number
-            format: int64
-            minimum: 1
-            maximum: 2000
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/DropActivityLog"
-        "404":
-          description: Drop not found
-  /public/drops/{dropId}/parts/{dropPartId}/comments:
-    get:
-      tags:
-        - Drops
-      summary: Get public drop part comments
-      operationId: getPublicDropComments
+      summary: Get public reply drops
+      operationId: getPublicReplyDrops
       parameters:
         - name: dropId
           in: path
@@ -728,7 +668,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DropCommentsPage"
+                $ref: "#/components/schemas/DropsPage"
         "404":
           description: Drop not found
   /drops:
@@ -886,74 +826,6 @@ paths:
           description: Drop not found
         "400":
           description: "Invalid request"
-
-  /drops/{dropId}/log:
-    get:
-      tags:
-        - Drops
-      summary: Get drop logs. Needs authenticated user. Use /public/drops/{dropId}/logs for public drops.
-      operationId: getDropLogs
-      parameters:
-        - name: dropId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: log_type
-          in: query
-          description: Filter logs by type
-          required: false
-          schema:
-            type: string
-            enum:
-              - DROP_COMMENT
-              - DROP_RATING_EDIT
-              - DROP_CREATED
-        - name: sort_direction
-          in: query
-          required: false
-          schema:
-            description: Default is DESC
-            type: string
-            enum:
-              - ASC
-              - DESC
-        - name: sort
-          in: query
-          required: false
-          schema:
-            description: Default is created_at
-            type: string
-            enum:
-              - created_at
-        - name: page
-          in: query
-          required: false
-          schema:
-            description: Default is 1
-            type: number
-            format: int64
-            minimum: 1
-        - name: page_size
-          in: query
-          required: false
-          schema:
-            description: Default is 50
-            type: number
-            format: int64
-            minimum: 1
-            maximum: 2000
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/DropActivityLog"
-        "404":
-          description: Drop not found
   /drops/{dropId}/subscriptions:
     post:
       tags:
@@ -1007,12 +879,12 @@ paths:
                 $ref: "#/components/schemas/DropSubscriptionActions"
         "404":
           description: Wave not found
-  /drops/{dropId}/parts/{dropPartId}/comments:
+  /drops/{dropId}/parts/{dropPartId}/replies:
     get:
       tags:
         - Drops
-      summary: Get drop part comments. Needs authenticated user. Use /public/drops/{dropId}/parts/{dropPartId}/comments for public drops.
-      operationId: getDropComments
+      summary: Get reply drops
+      operationId: getReplyDrops
       parameters:
         - name: dropId
           in: path
@@ -1065,44 +937,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DropCommentsPage"
+                $ref: "#/components/schemas/DropsPage"
         "404":
           description: Drop not found
-    post:
-      tags:
-        - Drops
-      summary: Write a discussion comment for drop part
-      description: "Requires the user to be authenticated"
-      operationId: commentDrop
-      parameters:
-        - name: dropId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: dropPartId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewDropComment"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DropComment"
-        "404":
-          description: Drop not found
-        "400":
-          description: "Invalid request"
 
   /drop-media/prep:
     post:
@@ -1879,6 +1716,19 @@ components:
           items:
             $ref: "#/components/schemas/RatingWithProfileInfoAndLevel"
 
+
+    DropsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Drop"
+
     Group:
       type: object
       required:
@@ -2189,9 +2039,6 @@ components:
         - rating
         - top_raters
         - raters_count
-        - top_rating_categories
-        - rating_categories_count
-        - rating_logs_count
         - title
         - context_profile_context
         - subscribed_actions
@@ -2204,6 +2051,8 @@ components:
           format: int64
         wave:
           $ref: "#/components/schemas/WaveMin"
+        reply_to:
+          $ref: "#/components/schemas/ReplyToDrop"
         author:
           $ref: "#/components/schemas/ProfileMin"
         created_at:
@@ -2244,16 +2093,6 @@ components:
         raters_count:
           type: number
           format: int64
-        top_rating_categories:
-          type: array
-          items:
-            $ref: "#/components/schemas/DropRatingCategory"
-        rating_categories_count:
-          type: number
-          format: int64
-        rating_logs_count:
-          type: number
-          format: int64
         context_profile_context:
           anyOf:
             - type: "null"
@@ -2275,12 +2114,24 @@ components:
           type: number
           format: int64
 
+    ReplyToDrop:
+      type: object
+      required:
+        - drop_id
+        - drop_part_id
+      properties:
+        drop_id:
+          type: string
+        drop_part_id:
+          type: number
+          format: int64
+
     DropPart:
       type: object
       required:
         - part_id
         - media
-        - discussion_comments_count
+        - replies_count
         - quotes_count
         - quoted_drop
         - content
@@ -2301,7 +2152,7 @@ components:
           anyOf:
             - $ref: "#/components/schemas/QuotedDrop"
             - type: "null"
-        discussion_comments_count:
+        replies_count:
           type: number
           format: int64
         quotes_count:
@@ -2431,28 +2282,11 @@ components:
             nullable: true
             example: 1719850339996
 
-    DropRatingCategory:
-      type: object
-      required:
-        - category
-        - rating
-      properties:
-        category:
-          type: string
-        rating:
-          type: number
-          format: int64
-
     DropContextProfileContext:
       type: object
       required:
-        - categories
         - rating
       properties:
-        categories:
-          type: array
-          items:
-            $ref: "#/components/schemas/DropRatingCategory"
         rating:
           type: number
           format: int64
@@ -2460,10 +2294,10 @@ components:
     DropPartContextProfileContext:
       type: object
       required:
-        - discussion_comments_count
+        - replies_count
         - quotes_count
       properties:
-        discussion_comments_count:
+        replies_count:
           type: number
           format: int64
         quotes_count:
@@ -2527,6 +2361,8 @@ components:
       properties:
         wave_id:
           type: string
+        reply_to:
+          $ref: "#/components/schemas/ReplyToDrop"
 
     DropMedia:
       type: object
@@ -2553,79 +2389,6 @@ components:
         category:
           type: string
           maxLength: 100
-
-    DropActivityLog:
-      type: object
-      required:
-        - id
-        - profile_id
-        - author
-        - contents
-        - target_id
-        - type
-        - created_at
-      properties:
-        id:
-          type: string
-        profile_id:
-          type: string
-          format: uuid
-        author:
-          $ref: "#/components/schemas/ProfileMin"
-        target_id:
-          type: string
-        contents:
-          type: object
-        type:
-          type: string
-          enum:
-            - DROP_COMMENT
-            - DROP_RATING_EDIT
-            - DROP_CREATED
-        created_at:
-          type: number
-          format: int64
-
-    DropComment:
-      type: object
-      required:
-        - id
-        - author
-        - comment
-        - created_at
-      properties:
-        id:
-          type: number
-          format: int64
-        author:
-          $ref: "#/components/schemas/ProfileMin"
-        comment:
-          type: string
-          maxLength: 2000
-        created_at:
-          type: number
-          format: int64
-
-    NewDropComment:
-      type: object
-      required:
-        - comment
-      properties:
-        comment:
-          type: string
-          maxLength: 2000
-
-    DropCommentsPage:
-      type: object
-      required:
-        - data
-      allOf:
-        - $ref: "#/components/schemas/PageBase"
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/DropComment"
 
     CreateNewWaveScope:
       type: object
@@ -3602,7 +3365,7 @@ components:
     DropSubscriptionTargetAction:
       type: string
       enum:
-        - DROP_COMMENTED
+        - DROP_REPLIED
         - DROP_VOTED
 
     DropSubscriptionActions:
@@ -3620,7 +3383,7 @@ components:
       enum:
         - WAVE_CREATED
         - DROP_CREATED
-        - DROP_COMMENTED
+        - DROP_REPLIED
         - DROP_VOTED
 
     IdentitySubscriptionActions:
@@ -3632,17 +3395,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
-
-    DropAndDropComment:
-      type: object
-      required:
-        - drop
-        - comment
-      properties:
-        drop:
-          $ref: "#/components/schemas/Drop"
-        comment:
-          $ref: "#/components/schemas/DropComment"
 
     DropVote:
       type: object
@@ -3676,7 +3428,7 @@ components:
       enum:
         - WAVE_CREATED
         - DROP_CREATED
-        - DROP_COMMENTED
+        - DROP_REPLIED
         - DROP_VOTED
 
     FeedItem:
