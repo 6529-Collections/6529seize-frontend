@@ -21,7 +21,7 @@ import UserPageSubscriptionsAirdropAddress, {
 import {
   isMintingToday,
   numberOfCardsForSeasonEnd,
-} from "../../../helpers/meme_calendar.helplers";
+} from "../../../helpers/meme_calendar.helpers";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -254,7 +254,8 @@ export default function UserPageSubscriptions(
                 <span>
                   <a
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline">
+                    className="font-smaller font-color-silver decoration-hover-underline"
+                  >
                     Learn More
                   </a>
                 </span>

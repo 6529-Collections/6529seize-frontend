@@ -17,26 +17,17 @@ export default function UserPageBrainWrapper({
   const user = (router.query.user as string).toLowerCase();
 
   const { address } = useAccount();
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowDrops = () =>
-    !!(
-      !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 20 &&
-      !activeProfileProxy &&
-      !!address
-    ) || connectedProfile?.profile?.handle === "simo";
+  const { connectedProfile, activeProfileProxy, showWaves } =
+    useContext(AuthContext);
 
-  const [showDrops, setShowDrops] = useState(getShowDrops());
   useEffect(() => {
-    const showDrops = getShowDrops();
-    if (showDrops) {
-      setShowDrops(true);
+    if (showWaves) {
       return;
     }
     if (connectedProfile || !address) {
       router.push(`${user}/rep`);
     }
-  }, [connectedProfile, activeProfileProxy, address]);
+  }, [connectedProfile, activeProfileProxy, address, showWaves]);
 
   const { data: profile } = useQuery<IProfileAndConsolidations>({
     queryKey: [QueryKey.PROFILE, user.toLowerCase()],
@@ -48,7 +39,7 @@ export default function UserPageBrainWrapper({
     initialData: initialProfile,
   });
 
-  if (!showDrops) {
+  if (!showWaves) {
     return null;
   }
 

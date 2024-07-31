@@ -15,7 +15,7 @@ import {
   NEXTGEN_CONTRACT,
 } from "../../../../../../constants";
 import Link from "next/link";
-import { isMemesEcosystemContract } from "../../../../../../helpers/nft.helplers";
+import { isMemesEcosystemContract } from "../../../../../../helpers/nft.helpers";
 
 export default function DropListItemContentNft({
   nft: { contract, token, name },
