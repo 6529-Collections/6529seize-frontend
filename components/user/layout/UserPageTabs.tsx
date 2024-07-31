@@ -70,8 +70,7 @@ export const USER_PAGE_TAB_META: Record<
 
 export default function UserPageTabs() {
   const router = useRouter();
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { address } = useAccount();
+  const { showWaves } = useContext(AuthContext);
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
     const match = pathname.match(regex);
@@ -94,22 +93,8 @@ export default function UserPageTabs() {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const getShowDrops = () =>
-    !!(
-      !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 30 &&
-      !activeProfileProxy &&
-      !!address
-    ) || connectedProfile?.profile?.handle === "simo";
-
-  const [showDrops, setShowDrops] = useState(getShowDrops());
-  useEffect(
-    () => setShowDrops(getShowDrops()),
-    [connectedProfile, activeProfileProxy]
-  );
-
   const getTabsToShow = () => {
-    if (showDrops) return Object.values(UserPageTabType);
+    if (showWaves) return Object.values(UserPageTabType);
     return Object.values(UserPageTabType).filter(
       (tab) => ![UserPageTabType.BRAIN, UserPageTabType.WAVES].includes(tab)
     );
@@ -117,7 +102,7 @@ export default function UserPageTabs() {
   const [tabsToShow, setTabsToShow] = useState<UserPageTabType[]>(
     getTabsToShow()
   );
-  useEffect(() => setTabsToShow(getTabsToShow()), [showDrops]);
+  useEffect(() => setTabsToShow(getTabsToShow()), [showWaves]);
 
   return (
     <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">

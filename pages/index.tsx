@@ -41,7 +41,7 @@ import { NftOwner } from "../entities/IOwner";
 import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
-} from "../helpers/nft.helplers";
+} from "../helpers/nft.helpers";
 import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 import { ManifoldClaim } from "../hooks/useManifoldClaim";
 

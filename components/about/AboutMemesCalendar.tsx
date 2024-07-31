@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { MEMES_CALENDARS } from "../../helpers/meme_calendar.helplers";
+import { MEMES_CALENDARS } from "../../helpers/meme_calendar.helpers";
 
 export default function AboutMemesCalendar() {
   return (
@@ -18,12 +18,14 @@ export default function AboutMemesCalendar() {
               className="table table-bordered"
               style={{
                 borderColor: "white",
-              }}>
+              }}
+            >
               <thead>
                 <tr>
                   <th
                     colSpan={2}
-                    style={{ paddingTop: "25px", paddingBottom: "25px" }}>
+                    style={{ paddingTop: "25px", paddingBottom: "25px" }}
+                  >
                     {calendar.year}: {calendar.title}
                   </th>
                 </tr>
@@ -36,7 +38,8 @@ export default function AboutMemesCalendar() {
                         border: "1px solid white",
                         width: "50%",
                         padding: "10px",
-                      }}>
+                      }}
+                    >
                       {block.start.toMonthAndDayString()} to{" "}
                       {block.end.toMonthAndDayString()}
                     </td>
@@ -45,7 +48,8 @@ export default function AboutMemesCalendar() {
                         border: "1px solid white",
                         width: "50%",
                         padding: "10px",
-                      }}>
+                      }}
+                    >
                       {block.title}
                     </td>
                   </tr>

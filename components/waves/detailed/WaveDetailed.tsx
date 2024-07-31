@@ -18,7 +18,8 @@ import WaveSingleDrop from "./drops/WaveSingleDrop";
 import { useRouter } from "next/router";
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy, showWaves } =
+    useContext(AuthContext);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -31,19 +32,6 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
     getActiveDropId()
   );
   useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
-
-  const getShowDrops = () =>
-    !!(
-      !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 20 &&
-      !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "simo";
-
-  const [showDrops, setShowDrops] = useState(getShowDrops());
-  useEffect(
-    () => setShowDrops(getShowDrops()),
-    [connectedProfile, activeProfileProxy]
-  );
 
   const { data: availableRateResponse } =
     useQuery<ProfileAvailableDropRateResponse>({
@@ -88,7 +76,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
     }
   }, [activeDropId]);
 
-  if (!showDrops) {
+  if (!showWaves) {
     return null;
   }
 

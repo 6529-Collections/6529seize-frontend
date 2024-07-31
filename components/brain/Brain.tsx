@@ -2,7 +2,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../auth/Auth";
+import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../auth/Auth";
 import { ProfileAvailableDropRateResponse } from "../../entities/IProfile";
 import FeedWrapper from "./feed/FeedWrapper";
 import { TypedFeedItem } from "../../types/feed.types";
@@ -10,19 +10,8 @@ import Link from "next/link";
 import StreamDiscovery from "./discovery/StreamDiscovery";
 
 export default function Brain() {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowFeed = () =>
-    !!(
-      !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 20 &&
-      !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "simo";
-
-  const [showFeed, setShowFeed] = useState(getShowFeed());
-  useEffect(
-    () => setShowFeed(getShowFeed()),
-    [connectedProfile, activeProfileProxy]
-  );
+  const { connectedProfile, activeProfileProxy, showWaves } =
+    useContext(AuthContext);
 
   const {
     data,
@@ -83,7 +72,7 @@ export default function Brain() {
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
 
-  if (!showFeed) {
+  if (!showWaves) {
     return null;
   }
 
@@ -91,9 +80,9 @@ export default function Brain() {
     <div className="tailwind-scope tw-pt-8 tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
       <div className="md:tw-flex tw-justify-center ">
         <div className="tw-text-iron-500 tw-text-sm tw-py-4">
-          These pages are in closed alpha for level 30 and above. They are not
-          ready for public release. Lots of improvements and bugs to fix.
-          Currently only &quot;chat&quot; waves are active.
+          These pages are in closed alpha for level {WAVES_MIN_ACCESS_LEVEL} and
+          above. They are not ready for public release. Lots of improvements and
+          bugs to fix. Currently only &quot;chat&quot; waves are active.
         </div>
       </div>
 

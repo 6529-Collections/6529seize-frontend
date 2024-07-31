@@ -31,6 +31,7 @@ type AuthContextType = {
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ProfileProxy[];
   readonly activeProfileProxy: ProfileProxy | null;
+  readonly showWaves: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: ({
     message,
@@ -44,11 +45,14 @@ type AuthContextType = {
   ) => Promise<void>;
 };
 
+export const WAVES_MIN_ACCESS_LEVEL = 20;
+
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
   receivedProfileProxies: [],
   activeProfileProxy: null,
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
+  showWaves: false,
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
   setActiveProfileProxy: async () => {},
@@ -357,6 +361,29 @@ export default function Auth({
     }
   };
 
+  const getShowWaves = (): boolean => {
+    if (!connectedProfile?.profile?.handle) {
+      return false;
+    }
+    if (connectedProfile.level < WAVES_MIN_ACCESS_LEVEL) {
+      return false;
+    }
+    if (activeProfileProxy) {
+      return false;
+    }
+
+    if (!address) {
+      return false;
+    }
+    return true;
+  };
+
+  const [showWaves, setShowWaves] = useState(getShowWaves());
+
+  useEffect(() => {
+    setShowWaves(getShowWaves());
+  }, [connectedProfile, activeProfileProxy, address]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -365,6 +392,7 @@ export default function Auth({
         connectedProfile: connectedProfile ?? null,
         receivedProfileProxies,
         activeProfileProxy,
+        showWaves,
         connectionStatus: getProfileConnectedStatus({
           profile: connectedProfile ?? null,
           isProxy: !!activeProfileProxy,

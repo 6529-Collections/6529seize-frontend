@@ -17,23 +17,10 @@ const NEW_WAVE_SEARCH_PARAM = "new";
 
 export default function Waves() {
   const searchParams = useSearchParams();
-  const { connectedProfile, requestAuth, activeProfileProxy } =
+  const { connectedProfile, requestAuth, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 
   const isCreateNewWave = searchParams.get(NEW_WAVE_SEARCH_PARAM);
-
-  const getShowDrops = () =>
-    !!(
-      !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 20 &&
-      !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "simo";
-
-  const [showDrops, setShowDrops] = useState(getShowDrops());
-  useEffect(
-    () => setShowDrops(getShowDrops()),
-    [connectedProfile, activeProfileProxy]
-  );
 
   const getShouldSetCreateNewWave = () =>
     isCreateNewWave &&
@@ -92,7 +79,7 @@ export default function Waves() {
     ),
   };
 
-  if (!showDrops) {
+  if (!showWaves) {
     return null;
   }
 

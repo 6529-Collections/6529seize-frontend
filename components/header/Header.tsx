@@ -26,7 +26,7 @@ export interface HeaderLink {
 }
 
 export default function Header(props: Readonly<Props>) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { showWaves } = useContext(AuthContext);
   const router = useRouter();
   const account = useAccount();
   const [consolidations, setConsolidations] = useState<string[]>([]);
@@ -38,20 +38,6 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuCommunity, setShowBurgerMenuCommunity] = useState(false);
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
   const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
-
-  const getShowDrops = () =>
-    !!(
-      !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 20 &&
-      !activeProfileProxy
-    ) || connectedProfile?.profile?.handle === "simo";
-
-  const [showDrops, setShowDrops] = useState<boolean>(getShowDrops());
-
-  useEffect(
-    () => setShowDrops(getShowDrops()),
-    [connectedProfile, activeProfileProxy]
-  );
 
   useEffect(() => {
     function handleResize() {
@@ -158,7 +144,7 @@ export default function Header(props: Readonly<Props>) {
               </h3>
             </Col>
           </Row>
-          {showDrops && (
+          {showWaves && (
             <Row className="pt-3 pb-3">
               <Col>
                 <h3
@@ -787,7 +773,7 @@ export default function Header(props: Readonly<Props>) {
                           className={`justify-content-end d-none ${styles.dMdBlock}`}
                         >
                           <Nav className="justify-content-end ml-auto">
-                            {showDrops && (
+                            {showWaves && (
                               <NavDropdown
                                 title="Brain"
                                 align={"start"}

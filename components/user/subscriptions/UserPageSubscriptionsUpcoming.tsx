@@ -18,7 +18,7 @@ import Tippy from "@tippyjs/react";
 import {
   getMintingDates,
   isMintingToday,
-} from "../../../helpers/meme_calendar.helplers";
+} from "../../../helpers/meme_calendar.helpers";
 import { useQuery } from "@tanstack/react-query";
 import { Time } from "../../../helpers/time";
 
@@ -102,7 +102,8 @@ function SubscriptionExpandButton(
   return (
     <button
       className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}>
+      onClick={() => props.setExpanded(!props.expanded)}
+    >
       {props.expanded ? (
         <>
           Show Less <FontAwesomeIcon icon="circle-chevron-up" height={"20px"} />
@@ -212,7 +213,8 @@ function SubscriptionRow(
               <Tippy
                 placement="right"
                 theme="light"
-                content="No changes allowed on minting day">
+                content="No changes allowed on minting day"
+              >
                 <span>
                   - Minting Today{" "}
                   <FontAwesomeIcon icon="info-circle" height={"20px"} />
