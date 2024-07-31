@@ -42,7 +42,7 @@ export default function Header(props: Readonly<Props>) {
   const getShowDrops = () =>
     !!(
       !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 30 &&
+      connectedProfile.level >= 20 &&
       !activeProfileProxy
     ) || connectedProfile?.profile?.handle === "simo";
 

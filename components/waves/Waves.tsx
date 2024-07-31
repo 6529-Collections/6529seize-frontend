@@ -25,7 +25,7 @@ export default function Waves() {
   const getShowDrops = () =>
     !!(
       !!connectedProfile?.profile?.handle &&
-      connectedProfile.level >= 30 &&
+      connectedProfile.level >= 20 &&
       !activeProfileProxy
     ) || connectedProfile?.profile?.handle === "simo";
 
