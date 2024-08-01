@@ -17,7 +17,7 @@ export default function FeedItems({
       <div className="tw-flex tw-flex-col tw-w-[672px]">
         {items.map((item, i) => (
           <FeedItem
-            key={`feed-item-${item.type}-${i}`}
+            key={`feed-item-${item.serial_no}`}
             item={item}
             showWaveInfo={showWaveInfo}
             availableCredit={availableCredit}
