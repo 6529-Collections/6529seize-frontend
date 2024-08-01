@@ -12,24 +12,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class NewDropComment {
-    'comment': string;
-
-    static readonly discriminator: string | undefined = undefined;
-
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "comment",
-            "baseName": "comment",
-            "type": "string",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return NewDropComment.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
+export enum NotificationCause {
+    IdentitySubscribed = 'IDENTITY_SUBSCRIBED',
+    IdentityMentioned = 'IDENTITY_MENTIONED',
+    DropQuoted = 'DROP_QUOTED',
+    DropReplied = 'DROP_REPLIED',
+    DropVoted = 'DROP_VOTED'
 }
-

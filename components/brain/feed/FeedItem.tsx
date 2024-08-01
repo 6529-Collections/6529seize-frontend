@@ -1,7 +1,7 @@
 import { FeedItemType } from "../../../generated/models/FeedItemType";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { TypedFeedItem } from "../../../types/feed.types";
-import FeedItemDropCommented from "./items/drop-commented/FeedItemDropCommented";
+import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemDropVoted from "./items/drop-voted/FeedItemDropVoted";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
@@ -35,9 +35,9 @@ export default function FeedItem({
             showWaveInfo={showWaveInfo}
           />
         );
-      case FeedItemType.DropCommented:
+      case FeedItemType.DropReplied:
         return (
-          <FeedItemDropCommented
+          <FeedItemDropReplied
             item={item}
             availableCredit={availableCredit}
             showWaveInfo={showWaveInfo}

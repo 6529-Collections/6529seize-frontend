@@ -15,6 +15,6 @@ import { HttpFile } from '../http/http';
 export enum IdentitySubscriptionTargetAction {
     WaveCreated = 'WAVE_CREATED',
     DropCreated = 'DROP_CREATED',
-    DropCommented = 'DROP_COMMENTED',
+    DropReplied = 'DROP_REPLIED',
     DropVoted = 'DROP_VOTED'
 }

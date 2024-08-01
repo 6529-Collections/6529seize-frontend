@@ -4,7 +4,6 @@ import { useDebounce } from "react-use";
 import { QueryKey } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../../../services/api/common-api";
 import { Page } from "../../../../../../../helpers/Types";
-import { DropComment } from "../../../../../../../generated/models/DropComment";
 import { Drop } from "../../../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../../../generated/models/DropPart";
 import DropPartDiscussionItem from "./DropPartDiscussionItem";
@@ -46,8 +45,8 @@ export default function DropPartDiscussionItems({
       if (pageParam) {
         params.page = `${pageParam}`;
       }
-      return await commonApiFetch<Page<DropComment>>({
-        endpoint: `drops/${drop.id}/parts/${dropPart.part_id}/comments`,
+      return await commonApiFetch<Page<Drop>>({
+        endpoint: `drops/${drop.id}/parts/${dropPart.part_id}/replies`,
         params,
       });
     },
@@ -56,9 +55,9 @@ export default function DropPartDiscussionItems({
     enabled: requestAllowed,
   });
 
-  const [comments, setComments] = useState<DropComment[]>([]);
+  const [replies, setReplies] = useState<Drop[]>([]);
   useEffect(() => {
-    setComments(items?.pages.flatMap((page) => page.data) ?? []);
+    setReplies(items?.pages.flatMap((page) => page.data) ?? []);
   }, [items]);
 
   const onBottomIntersection = (state: boolean) => {
@@ -84,7 +83,7 @@ export default function DropPartDiscussionItems({
     <div className="tw-pb-2">
       <div className={`${!isFetching && "tw-overflow-y-auto"} tw-max-h-72`}>
         <div>
-          {comments.map((item) => (
+          {replies.map((item) => (
             <DropPartDiscussionItem key={item.id} item={item} />
           ))}
         </div>

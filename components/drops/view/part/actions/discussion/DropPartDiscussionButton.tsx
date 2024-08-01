@@ -11,9 +11,8 @@ export default function DropPartDiscussionButton({
   readonly isDiscussionOpen: boolean;
   readonly setIsDiscussionOpen: (open: boolean) => void;
 }) {
-  const discussionCount = dropPart.discussion_comments_count;
-  const userHaveDiscussed =
-    !!dropPart.context_profile_context?.discussion_comments_count;
+  const discussionCount = dropPart.replies_count;
+  const userHaveDiscussed = !!dropPart.context_profile_context?.replies_count;
   return (
     <button
       onClick={(e) => {

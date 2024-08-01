@@ -12,28 +12,28 @@
 
 import { HttpFile } from '../http/http';
 
-export class DropRatingCategory {
-    'category': string;
-    'rating': number;
+export class ReplyToDrop {
+    'drop_id': string;
+    'drop_part_id': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "category",
-            "baseName": "category",
+            "name": "drop_id",
+            "baseName": "drop_id",
             "type": "string",
             "format": ""
         },
         {
-            "name": "rating",
-            "baseName": "rating",
+            "name": "drop_part_id",
+            "baseName": "drop_part_id",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return DropRatingCategory.attributeTypeMap;
+        return ReplyToDrop.attributeTypeMap;
     }
 
     public constructor() {

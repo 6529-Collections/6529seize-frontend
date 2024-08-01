@@ -15,10 +15,10 @@ import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
 import { DropPart } from '../models/DropPart';
 import { DropRater } from '../models/DropRater';
-import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
 import { ProfileMin } from '../models/ProfileMin';
+import { ReplyToDrop } from '../models/ReplyToDrop';
 import { WaveMin } from '../models/WaveMin';
 import { HttpFile } from '../http/http';
 
@@ -29,6 +29,7 @@ export class Drop {
     */
     'serial_no': number;
     'wave': WaveMin;
+    'reply_to'?: ReplyToDrop;
     'author': ProfileMin;
     /**
     * Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
@@ -46,9 +47,6 @@ export class Drop {
     'rating': number;
     'top_raters': Array<DropRater>;
     'raters_count': number;
-    'top_rating_categories': Array<DropRatingCategory>;
-    'rating_categories_count': number;
-    'rating_logs_count': number;
     'context_profile_context': DropContextProfileContext | null;
     'subscribed_actions': Array<DropSubscriptionTargetAction>;
 
@@ -71,6 +69,12 @@ export class Drop {
             "name": "wave",
             "baseName": "wave",
             "type": "WaveMin",
+            "format": ""
+        },
+        {
+            "name": "reply_to",
+            "baseName": "reply_to",
+            "type": "ReplyToDrop",
             "format": ""
         },
         {
@@ -136,24 +140,6 @@ export class Drop {
         {
             "name": "raters_count",
             "baseName": "raters_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "top_rating_categories",
-            "baseName": "top_rating_categories",
-            "type": "Array<DropRatingCategory>",
-            "format": ""
-        },
-        {
-            "name": "rating_categories_count",
-            "baseName": "rating_categories_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "rating_logs_count",
-            "baseName": "rating_logs_count",
             "type": "number",
             "format": "int64"
         },

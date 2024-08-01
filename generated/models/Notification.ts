@@ -10,17 +10,19 @@
  * Do not edit the class manually.
  */
 
+import { Drop } from '../models/Drop';
+import { NotificationCause } from '../models/NotificationCause';
 import { ProfileMin } from '../models/ProfileMin';
 import { HttpFile } from '../http/http';
 
-export class DropActivityLog {
-    'id': string;
-    'profile_id': string;
-    'author': ProfileMin;
-    'target_id': string;
-    'contents': any;
-    'type': DropActivityLogTypeEnum;
+export class Notification {
+    'id': number;
+    'cause': NotificationCause;
     'created_at': number;
+    'read_at': number | null;
+    'related_identity': ProfileMin;
+    'related_drops': Array<Drop>;
+    'additional_context': any;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,37 +30,13 @@ export class DropActivityLog {
         {
             "name": "id",
             "baseName": "id",
-            "type": "string",
-            "format": ""
+            "type": "number",
+            "format": "int64"
         },
         {
-            "name": "profile_id",
-            "baseName": "profile_id",
-            "type": "string",
-            "format": "uuid"
-        },
-        {
-            "name": "author",
-            "baseName": "author",
-            "type": "ProfileMin",
-            "format": ""
-        },
-        {
-            "name": "target_id",
-            "baseName": "target_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "contents",
-            "baseName": "contents",
-            "type": "any",
-            "format": ""
-        },
-        {
-            "name": "type",
-            "baseName": "type",
-            "type": "DropActivityLogTypeEnum",
+            "name": "cause",
+            "baseName": "cause",
+            "type": "NotificationCause",
             "format": ""
         },
         {
@@ -66,10 +44,34 @@ export class DropActivityLog {
             "baseName": "created_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "read_at",
+            "baseName": "read_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "related_identity",
+            "baseName": "related_identity",
+            "type": "ProfileMin",
+            "format": ""
+        },
+        {
+            "name": "related_drops",
+            "baseName": "related_drops",
+            "type": "Array<Drop>",
+            "format": ""
+        },
+        {
+            "name": "additional_context",
+            "baseName": "additional_context",
+            "type": "any",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return DropActivityLog.attributeTypeMap;
+        return Notification.attributeTypeMap;
     }
 
     public constructor() {
@@ -77,9 +79,4 @@ export class DropActivityLog {
 }
 
 
-export enum DropActivityLogTypeEnum {
-    Comment = 'DROP_COMMENT',
-    RatingEdit = 'DROP_RATING_EDIT',
-    Created = 'DROP_CREATED'
-}
 

@@ -10,22 +10,14 @@
  * Do not edit the class manually.
  */
 
-import { DropRatingCategory } from '../models/DropRatingCategory';
 import { HttpFile } from '../http/http';
 
 export class DropContextProfileContext {
-    'categories': Array<DropRatingCategory>;
     'rating': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "categories",
-            "baseName": "categories",
-            "type": "Array<DropRatingCategory>",
-            "format": ""
-        },
         {
             "name": "rating",
             "baseName": "rating",

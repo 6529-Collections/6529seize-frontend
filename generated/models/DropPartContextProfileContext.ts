@@ -13,15 +13,15 @@
 import { HttpFile } from '../http/http';
 
 export class DropPartContextProfileContext {
-    'discussion_comments_count': number;
+    'replies_count': number;
     'quotes_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "discussion_comments_count",
-            "baseName": "discussion_comments_count",
+            "name": "replies_count",
+            "baseName": "replies_count",
             "type": "number",
             "format": "int64"
         },

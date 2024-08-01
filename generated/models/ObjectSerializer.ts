@@ -30,11 +30,7 @@ export * from '../models/CreateNewWaveVotingConfig';
 export * from '../models/CreateWaveConfig';
 export * from '../models/CreateWaveDropRequest';
 export * from '../models/Drop';
-export * from '../models/DropActivityLog';
-export * from '../models/DropAndDropComment';
 export * from '../models/DropAndDropVote';
-export * from '../models/DropComment';
-export * from '../models/DropCommentsPage';
 export * from '../models/DropContextProfileContext';
 export * from '../models/DropMedia';
 export * from '../models/DropMentionedUser';
@@ -42,12 +38,12 @@ export * from '../models/DropMetadata';
 export * from '../models/DropPart';
 export * from '../models/DropPartContextProfileContext';
 export * from '../models/DropRater';
-export * from '../models/DropRatingCategory';
 export * from '../models/DropRatingRequest';
 export * from '../models/DropReferencedNFT';
 export * from '../models/DropSubscriptionActions';
 export * from '../models/DropSubscriptionTargetAction';
 export * from '../models/DropVote';
+export * from '../models/DropsPage';
 export * from '../models/FeedItem';
 export * from '../models/FeedItemType';
 export * from '../models/Group';
@@ -65,10 +61,12 @@ export * from '../models/IdentitySubscriptionTargetType';
 export * from '../models/IntRange';
 export * from '../models/LoginRequest';
 export * from '../models/LoginResponse';
-export * from '../models/NewDropComment';
 export * from '../models/Nft';
 export * from '../models/NftsPage';
 export * from '../models/NonceResponse';
+export * from '../models/Notification';
+export * from '../models/NotificationCause';
+export * from '../models/NotificationsResponse';
 export * from '../models/PageBase';
 export * from '../models/PageWithNextUriBase';
 export * from '../models/ProfileMin';
@@ -80,6 +78,7 @@ export * from '../models/RateMatter';
 export * from '../models/RatingWithProfileInfoAndLevel';
 export * from '../models/RatingWithProfileInfoAndLevelPage';
 export * from '../models/RepRating';
+export * from '../models/ReplyToDrop';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
@@ -136,11 +135,7 @@ import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingC
 import { CreateWaveConfig       } from '../models/CreateWaveConfig';
 import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
 import { Drop } from '../models/Drop';
-import { DropActivityLog     , DropActivityLogTypeEnum    } from '../models/DropActivityLog';
-import { DropAndDropComment } from '../models/DropAndDropComment';
 import { DropAndDropVote } from '../models/DropAndDropVote';
-import { DropComment } from '../models/DropComment';
-import { DropCommentsPage } from '../models/DropCommentsPage';
 import { DropContextProfileContext } from '../models/DropContextProfileContext';
 import { DropMedia } from '../models/DropMedia';
 import { DropMentionedUser } from '../models/DropMentionedUser';
@@ -148,12 +143,12 @@ import { DropMetadata } from '../models/DropMetadata';
 import { DropPart } from '../models/DropPart';
 import { DropPartContextProfileContext } from '../models/DropPartContextProfileContext';
 import { DropRater } from '../models/DropRater';
-import { DropRatingCategory } from '../models/DropRatingCategory';
 import { DropRatingRequest } from '../models/DropRatingRequest';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { DropSubscriptionActions } from '../models/DropSubscriptionActions';
 import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
 import { DropVote } from '../models/DropVote';
+import { DropsPage } from '../models/DropsPage';
 import { FeedItem    } from '../models/FeedItem';
 import { FeedItemType } from '../models/FeedItemType';
 import { Group } from '../models/Group';
@@ -171,10 +166,12 @@ import { IdentitySubscriptionTargetType } from '../models/IdentitySubscriptionTa
 import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
-import { NewDropComment } from '../models/NewDropComment';
 import { Nft      , NftTokenTypeEnum                            } from '../models/Nft';
 import { NftsPage } from '../models/NftsPage';
 import { NonceResponse } from '../models/NonceResponse';
+import { Notification        } from '../models/Notification';
+import { NotificationCause } from '../models/NotificationCause';
+import { NotificationsResponse } from '../models/NotificationsResponse';
 import { PageBase } from '../models/PageBase';
 import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
 import { ProfileMin } from '../models/ProfileMin';
@@ -186,6 +183,7 @@ import { RateMatter } from '../models/RateMatter';
 import { RatingWithProfileInfoAndLevel } from '../models/RatingWithProfileInfoAndLevel';
 import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileInfoAndLevelPage';
 import { RepRating } from '../models/RepRating';
+import { ReplyToDrop } from '../models/ReplyToDrop';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
 import { WaveConfig        } from '../models/WaveConfig';
@@ -224,7 +222,6 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
-    "DropActivityLogTypeEnum",
     "DropSubscriptionTargetAction",
     "FeedItemType",
     "GroupFilterDirection",
@@ -232,6 +229,7 @@ let enumsMap: Set<string> = new Set<string>([
     "IdentitySubscriptionTargetAction",
     "IdentitySubscriptionTargetType",
     "NftTokenTypeEnum",
+    "NotificationCause",
     "ProfileProxyActionType",
     "RateMatter",
     "WaveCreditScope",
@@ -279,11 +277,7 @@ let typeMap: {[index: string]: any} = {
     "CreateWaveConfig": CreateWaveConfig,
     "CreateWaveDropRequest": CreateWaveDropRequest,
     "Drop": Drop,
-    "DropActivityLog": DropActivityLog,
-    "DropAndDropComment": DropAndDropComment,
     "DropAndDropVote": DropAndDropVote,
-    "DropComment": DropComment,
-    "DropCommentsPage": DropCommentsPage,
     "DropContextProfileContext": DropContextProfileContext,
     "DropMedia": DropMedia,
     "DropMentionedUser": DropMentionedUser,
@@ -291,11 +285,11 @@ let typeMap: {[index: string]: any} = {
     "DropPart": DropPart,
     "DropPartContextProfileContext": DropPartContextProfileContext,
     "DropRater": DropRater,
-    "DropRatingCategory": DropRatingCategory,
     "DropRatingRequest": DropRatingRequest,
     "DropReferencedNFT": DropReferencedNFT,
     "DropSubscriptionActions": DropSubscriptionActions,
     "DropVote": DropVote,
+    "DropsPage": DropsPage,
     "FeedItem": FeedItem,
     "Group": Group,
     "GroupCicFilter": GroupCicFilter,
@@ -309,10 +303,11 @@ let typeMap: {[index: string]: any} = {
     "IntRange": IntRange,
     "LoginRequest": LoginRequest,
     "LoginResponse": LoginResponse,
-    "NewDropComment": NewDropComment,
     "Nft": Nft,
     "NftsPage": NftsPage,
     "NonceResponse": NonceResponse,
+    "Notification": Notification,
+    "NotificationsResponse": NotificationsResponse,
     "PageBase": PageBase,
     "PageWithNextUriBase": PageWithNextUriBase,
     "ProfileMin": ProfileMin,
@@ -322,6 +317,7 @@ let typeMap: {[index: string]: any} = {
     "RatingWithProfileInfoAndLevel": RatingWithProfileInfoAndLevel,
     "RatingWithProfileInfoAndLevelPage": RatingWithProfileInfoAndLevelPage,
     "RepRating": RepRating,
+    "ReplyToDrop": ReplyToDrop,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,

@@ -10,45 +10,31 @@
  * Do not edit the class manually.
  */
 
-import { ProfileMin } from '../models/ProfileMin';
+import { Notification } from '../models/Notification';
 import { HttpFile } from '../http/http';
 
-export class DropComment {
-    'id': number;
-    'author': ProfileMin;
-    'comment': string;
-    'created_at': number;
+export class NotificationsResponse {
+    'notifications': Array<Notification>;
+    'unread_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "author",
-            "baseName": "author",
-            "type": "ProfileMin",
+            "name": "notifications",
+            "baseName": "notifications",
+            "type": "Array<Notification>",
             "format": ""
         },
         {
-            "name": "comment",
-            "baseName": "comment",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "created_at",
-            "baseName": "created_at",
+            "name": "unread_count",
+            "baseName": "unread_count",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return DropComment.attributeTypeMap;
+        return NotificationsResponse.attributeTypeMap;
     }
 
     public constructor() {

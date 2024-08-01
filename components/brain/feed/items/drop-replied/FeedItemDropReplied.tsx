@@ -1,18 +1,18 @@
 import Link from "next/link";
-import { IFeedItemDropCommented } from "../../../../../types/feed.types";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
 import { getTimeAgoShort } from "../../../../../helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../../helpers/image.helpers";
+import { IFeedItemDropReplied } from "../../../../../types/feed.types";
 
-export default function FeedItemDropCommented({
+export default function FeedItemDropReplied({
   item,
   showWaveInfo,
   availableCredit,
 }: {
-  readonly item: IFeedItemDropCommented;
+  readonly item: IFeedItemDropReplied;
   readonly showWaveInfo: boolean;
   readonly availableCredit: number | null;
 }) {
@@ -40,10 +40,10 @@ export default function FeedItemDropCommented({
 
           <div className="tw-flex tw-gap-x-2 tw-items-center">
             <div className="tw-h-7 tw-w-7">
-              {item.item.comment.author.pfp ? (
+              {item.item.reply.author.pfp ? (
                 <img
                   src={getScaledImageUri(
-                    item.item.comment.author.pfp,
+                    item.item.reply.author.pfp,
                     ImageScale.W_AUTO_H_50
                   )}
                   alt="#"
@@ -55,16 +55,16 @@ export default function FeedItemDropCommented({
             </div>
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               <Link
-                href={`/${item.item.comment.author.handle}`}
+                href={`/${item.item.reply.author.handle}`}
                 className="tw-no-underline tw-font-semibold"
               >
-                {item.item.comment.author.handle}
+                {item.item.reply.author.handle}
               </Link>{" "}
-              commented
+              replied
             </span>
             <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
             <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-              {getTimeAgoShort(item.item.comment.created_at)}
+              {getTimeAgoShort(item.item.reply.created_at)}
             </span>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function FeedItemDropCommented({
         <div className="tw-ml-12 tw-flex tw-items-stretch tw-gap-x-3">
           <div className="tw-bg-iron-700 tw-w-1 tw-flex-shrink-0"></div>
           <p className="tw-block tw-mb-0 tw-font-normal tw-text-iron-50 tw-text-md">
-            {item.item.comment.comment}
+            {item.item.reply.parts[0].content}
           </p>
         </div>
 

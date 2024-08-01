@@ -1,5 +1,4 @@
 import { Drop } from "../generated/models/Drop";
-import { DropComment } from "../generated/models/DropComment";
 import { DropVote } from "../generated/models/DropVote";
 import { FeedItemType } from "../generated/models/FeedItemType";
 import { Wave } from "../generated/models/Wave";
@@ -16,15 +15,15 @@ export type IFeedItemDropCreated = {
   readonly type: FeedItemType.DropCreated;
 };
 
-export type IFeedItemDropCommentedItem = {
+export type IFeedItemDropRepliedItem = {
   readonly drop: Drop;
-  readonly comment: DropComment;
+  readonly reply: Drop;
 };
 
-export type IFeedItemDropCommented = {
+export type IFeedItemDropReplied = {
   readonly serial_no: number;
-  readonly item: IFeedItemDropCommentedItem;
-  readonly type: FeedItemType.DropCommented;
+  readonly item: IFeedItemDropRepliedItem;
+  readonly type: FeedItemType.DropReplied;
 };
 
 export type IFeedItemDropVotedItem = {
@@ -41,5 +40,5 @@ export type IFeedItemDropVoted = {
 export type TypedFeedItem =
   | IFeedItemWaveCreated
   | IFeedItemDropCreated
-  | IFeedItemDropCommented
+  | IFeedItemDropReplied
   | IFeedItemDropVoted;
