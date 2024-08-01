@@ -9,7 +9,7 @@ import Link from "next/link";
 import FeedWrapper from "../feed/FeedWrapper";
 
 export default function MyStream() {
-  const { connectedProfile, activeProfileProxy, showWaves } =
+  const { connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
 
   const {

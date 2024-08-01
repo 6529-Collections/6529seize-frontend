@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { NotificationsResponse } from "../../../generated/models/NotificationsResponse";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import Link from "next/link";
 
 export default function HeaderNotifications() {

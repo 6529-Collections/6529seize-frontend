@@ -26,7 +26,7 @@ export default function Notifications() {
         <h1 className="tw-relative tw-z-10 tw-block tw-float-none tw-text-4xl">
           Notifications
         </h1>
-        <div className="tw-mt-6">nots</div>
+        <div className="tw-mt-6">{notifications?.unread_count}</div>
       </div>
     </div>
   );
