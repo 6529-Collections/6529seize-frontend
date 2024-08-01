@@ -60,7 +60,7 @@ export default function FeedItemDropReplied({
               >
                 {item.item.comment.author.handle}
               </Link>{" "}
-              commented
+              replied
             </span>
             <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
             <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
