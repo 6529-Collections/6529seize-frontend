@@ -29,8 +29,10 @@ export default function WavesListHeader({
     [connectedProfile, activeProfileProxy]
   );
   return (
-    <div className="tw-mt-6 lg:tw-mt-8">
-      <h1>Waves</h1>
+    <div className="tw-mt-4 lg:tw-mt-8">
+      <h1 className="tw-relative tw-z-10 tw-block tw-float-none tw-text-4xl">
+        Waves
+      </h1>
       <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
         <WavesListSearch
           identity={identity}

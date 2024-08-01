@@ -15,7 +15,7 @@ export default function WavesListSearch({
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
-      <div className="tw-flex-1">
+      <div className="tw-w-full sm:tw-flex-1">
         <div className="tw-relative">
           <svg
             className="tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5"
@@ -64,7 +64,7 @@ export default function WavesListSearch({
           </label>
         </div>
       </div>
-      <div className="tw-flex-1">
+      <div className="tw-w-full sm:tw-flex-1">
         <IdentitySearch
           size={IdentitySearchSize.SM}
           identity={identity}

@@ -49,8 +49,8 @@ export default function WavesList({
   return (
     <div className="tailwind-scope">
       <div className="tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-        <div className="md:tw-flex tw-justify-center ">
-          <div className="tw-text-iron-500 tw-text-sm tw-py-2">
+        <div className="lg:tw-flex tw-justify-center xl:tw-ml-16">
+          <div className="tw-text-iron-500 tw-text-xs tw-py-4">
             These pages are in closed alpha for level 30 and above. They are not
             ready for public release. Lots of improvements and bugs to fix.
             Currently only &quot;chat&quot; waves are active.
