@@ -118,6 +118,54 @@ paths:
                 items:
                   $ref: "#/components/schemas/NftsPage"
 
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Get notifications for authenticated user.
+      operationId: getNotifications
+      parameters:
+        - name: limit
+          in: query
+          description: Default is 10
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 101
+        - name: id_less_than
+          in: query
+          description: Used to find older notifications
+          required: false
+          schema:
+            type: number
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationsResponse"
+
+  /notifications/{id}/read:
+    post:
+      tags:
+        - Notifications
+      summary: Mark notification as read
+      operationId: markNotificationAsRead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Notification ID or string "all" to mark all notifications as read
+      responses:
+        "201":
+          description: successful operation
+
   /identities/{id}/subscriptions:
     get:
       tags:
@@ -564,6 +612,12 @@ paths:
             type: number
             format: int64
             minimum: 1
+        - name: include_replies
+          in: query
+          description: If true then reply drops will be included in top level (false by default)
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -728,6 +782,12 @@ paths:
             type: number
             format: int64
             minimum: 1
+        - name: include_replies
+          in: query
+          description: If true then reply drops will be included in top level (false by default)
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -3465,6 +3525,61 @@ components:
         drops_count:
           type: number
           format: int64
+
+    NotificationsResponse:
+      type: object
+      required:
+        - notifications
+        - unread_count
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+        unread_count:
+          type: number
+          format: int64
+
+    NotificationCause:
+      type: string
+      enum:
+        - IDENTITY_SUBSCRIBED
+        - IDENTITY_MENTIONED
+        - DROP_QUOTED
+        - DROP_REPLIED
+        - DROP_VOTED
+
+    Notification:
+        type: object
+        required:
+          - id
+          - cause
+          - created_at
+          - read_at
+          - related_identity
+          - related_drops
+          - additional_context
+        properties:
+          id:
+            type: number
+            format: int64
+          cause:
+            $ref: "#/components/schemas/NotificationCause"
+          created_at:
+            type: number
+            format: int64
+          read_at:
+            type: number
+            format: int64
+            nullable: true
+          related_identity:
+            $ref: "#/components/schemas/ProfileMin"
+          related_drops:
+            type: array
+            items:
+              $ref: "#/components/schemas/Drop"
+          additional_context:
+            type: object
 
 security:
   - bearerAuth: []

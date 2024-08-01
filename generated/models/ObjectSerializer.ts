@@ -64,6 +64,9 @@ export * from '../models/LoginResponse';
 export * from '../models/Nft';
 export * from '../models/NftsPage';
 export * from '../models/NonceResponse';
+export * from '../models/Notification';
+export * from '../models/NotificationCause';
+export * from '../models/NotificationsResponse';
 export * from '../models/PageBase';
 export * from '../models/PageWithNextUriBase';
 export * from '../models/ProfileMin';
@@ -166,6 +169,9 @@ import { LoginResponse } from '../models/LoginResponse';
 import { Nft      , NftTokenTypeEnum                            } from '../models/Nft';
 import { NftsPage } from '../models/NftsPage';
 import { NonceResponse } from '../models/NonceResponse';
+import { Notification        } from '../models/Notification';
+import { NotificationCause } from '../models/NotificationCause';
+import { NotificationsResponse } from '../models/NotificationsResponse';
 import { PageBase } from '../models/PageBase';
 import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
 import { ProfileMin } from '../models/ProfileMin';
@@ -223,6 +229,7 @@ let enumsMap: Set<string> = new Set<string>([
     "IdentitySubscriptionTargetAction",
     "IdentitySubscriptionTargetType",
     "NftTokenTypeEnum",
+    "NotificationCause",
     "ProfileProxyActionType",
     "RateMatter",
     "WaveCreditScope",
@@ -299,6 +306,8 @@ let typeMap: {[index: string]: any} = {
     "Nft": Nft,
     "NftsPage": NftsPage,
     "NonceResponse": NonceResponse,
+    "Notification": Notification,
+    "NotificationsResponse": NotificationsResponse,
     "PageBase": PageBase,
     "PageWithNextUriBase": PageWithNextUriBase,
     "ProfileMin": ProfileMin,

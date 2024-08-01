@@ -17,7 +17,7 @@ export type IFeedItemDropCreated = {
 
 export type IFeedItemDropRepliedItem = {
   readonly drop: Drop;
-  readonly comment: Drop;
+  readonly reply: Drop;
 };
 
 export type IFeedItemDropReplied = {
