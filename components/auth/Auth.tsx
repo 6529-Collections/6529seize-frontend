@@ -45,7 +45,8 @@ type AuthContextType = {
   ) => Promise<void>;
 };
 
-export const WAVES_MIN_ACCESS_LEVEL = 20;
+// TODO: change this to the minimum access level required to view waves
+export const WAVES_MIN_ACCESS_LEVEL = 0;
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,

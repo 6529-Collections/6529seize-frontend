@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../auth/Auth";
 import Link from "next/link";
 import StreamDiscovery from "./discovery/StreamDiscovery";
-import MyStream from "./my-stream/MyStream";
+import Notifications from "./notifications/Notifications";
 
 export default function Brain() {
   const { showWaves } = useContext(AuthContext);
@@ -22,7 +22,8 @@ export default function Brain() {
       </div>
 
       <div className="md:tw-flex tw-justify-center tw-gap-x-5 xl:tw-ml-16">
-        <MyStream />
+        <Notifications />
+        {/* <MyStream /> */}
         <div className="md:tw-w-[27%]">
           <div className="tw-mt-16">
             <Link

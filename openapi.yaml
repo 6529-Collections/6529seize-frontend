@@ -28,12 +28,12 @@ paths:
           schema:
             type: boolean
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NonceResponse'
+                $ref: "#/components/schemas/NonceResponse"
   /auth/login:
     post:
       tags:
@@ -52,16 +52,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
-        '400':
-          description: 'Invalid request'
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: "Invalid request"
 
   /nfts:
     get:
@@ -336,7 +336,7 @@ paths:
           description: "Invalid request"
     get:
       tags:
-          - ProfileREP
+        - ProfileREP
       summary: Get profile REP rating
       operationId: getProfileRepRating
       parameters:
@@ -1013,14 +1013,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+              $ref: "#/components/schemas/CreateMediaUploadUrlRequest"
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateMediaUrlResponse'
+                $ref: "#/components/schemas/CreateMediaUrlResponse"
         "400":
           description: "Invalid request"
   /proxies:
@@ -1186,14 +1186,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+              $ref: "#/components/schemas/CreateMediaUploadUrlRequest"
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateMediaUrlResponse'
+                $ref: "#/components/schemas/CreateMediaUrlResponse"
         "400":
           description: "Invalid request"
 
@@ -1776,7 +1776,6 @@ components:
           items:
             $ref: "#/components/schemas/RatingWithProfileInfoAndLevel"
 
-
     DropsPage:
       type: object
       required:
@@ -2020,10 +2019,10 @@ components:
           nullable: true
 
     GroupFilterDirection:
-        type: string
-        enum:
-          - RECEIVED
-          - SENT
+      type: string
+      enum:
+        - RECEIVED
+        - SENT
 
     CreateGroup:
       type: object
@@ -2330,17 +2329,17 @@ components:
           format: int64
 
     UpdateProxyActionRequest:
-        type: object
-        properties:
-          credit_amount:
-            type: number
-            format: int64
-            example: 1000
-          end_time:
-            type: number
-            format: int64
-            nullable: true
-            example: 1719850339996
+      type: object
+      properties:
+        credit_amount:
+          type: number
+          format: int64
+          example: 1000
+        end_time:
+          type: number
+          format: int64
+          nullable: true
+          example: 1719850339996
 
     DropContextProfileContext:
       type: object
@@ -2517,7 +2516,6 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/WaveMetadataType"
-
 
     CreateNewWaveVotingConfig:
       type: object
@@ -2710,7 +2708,7 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
-          example: {"min": 1719850339996, "max": 1719850339996}
+          example: { "min": 1719850339996, "max": 1719850339996 }
         authenticated_user_eligible_for_admin:
           type: boolean
 
@@ -2753,7 +2751,6 @@ components:
             - $ref: "#/components/schemas/IntRange"
           example: { "min": 1719850339996, "max": 1719850339996 }
 
-
     WaveOutcomeType:
       type: string
       enum:
@@ -2794,7 +2791,6 @@ components:
           type: array
           items:
             type: number
-
 
     WaveParticipationRequirement:
       type: string
@@ -3293,21 +3289,20 @@ components:
           type: number
           format: int64
 
-
     ChangeProfileRepRating:
-        type: object
-        required:
-            - amount
-            - category
-        properties:
-          amount:
-            type: number
-            format: int64
-          category:
-            type: string
-            maxLength: 100
-            minLength: 1
-            pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
+      type: object
+      required:
+        - amount
+        - category
+      properties:
+        amount:
+          type: number
+          format: int64
+        category:
+          type: string
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
 
     ChangeProfileRepRatingResponse:
       type: object
@@ -3413,14 +3408,14 @@ components:
         - DROP_CREATED
 
     WaveSubscriptionActions:
-        type: object
-        required:
-          - actions
-        properties:
-          actions:
-            type: array
-            items:
-              $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveSubscriptionTargetAction"
 
     DropSubscriptionTargetAction:
       type: string
@@ -3550,36 +3545,36 @@ components:
         - DROP_VOTED
 
     Notification:
-        type: object
-        required:
-          - id
-          - cause
-          - created_at
-          - read_at
-          - related_identity
-          - related_drops
-          - additional_context
-        properties:
-          id:
-            type: number
-            format: int64
-          cause:
-            $ref: "#/components/schemas/NotificationCause"
-          created_at:
-            type: number
-            format: int64
-          read_at:
-            type: number
-            format: int64
-            nullable: true
-          related_identity:
-            $ref: "#/components/schemas/ProfileMin"
-          related_drops:
-            type: array
-            items:
-              $ref: "#/components/schemas/Drop"
-          additional_context:
-            type: object
+      type: object
+      required:
+        - id
+        - cause
+        - created_at
+        - read_at
+        - related_identity
+        - related_drops
+        - additional_context
+      properties:
+        id:
+          type: number
+          format: int64
+        cause:
+          $ref: "#/components/schemas/NotificationCause"
+        created_at:
+          type: number
+          format: int64
+        read_at:
+          type: number
+          format: int64
+          nullable: true
+        related_identity:
+          $ref: "#/components/schemas/ProfileMin"
+        related_drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/Drop"
+        additional_context:
+          type: object
 
 security:
   - bearerAuth: []
