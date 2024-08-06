@@ -1,24 +1,48 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { IdentitySubscriptionActions } from "../../../generated/models/IdentitySubscriptionActions";
+import { useContext, useEffect, useState } from "react";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "../../auth/Auth";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { IdentitySubscriptionActions } from "../../../generated/models/IdentitySubscriptionActions";
 import {
   commonApiDeleWithBody,
   commonApiFetch,
   commonApiPost,
 } from "../../../services/api/common-api";
-import { useContext, useEffect, useState } from "react";
-import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { IdentitySubscriptionTargetAction } from "../../../generated/models/IdentitySubscriptionTargetAction";
-import { AuthContext } from "../../auth/Auth";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../distribution-plan-tool/common/CircleLoader";
 
-export default function UserPageHeaderFollow({
+export enum UserFollowBtnSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+}
+
+export default function UserFollowBtn({
   handle,
+  size = UserFollowBtnSize.MEDIUM,
 }: {
   readonly handle: string;
+  readonly size?: UserFollowBtnSize;
 }) {
+  const BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
+    [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-0.5 tw-text-xs",
+    [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
+  };
+
+  const SVG_CLASSES: Record<UserFollowBtnSize, string> = {
+    [UserFollowBtnSize.SMALL]: "tw-h-4 tw-w-4",
+    [UserFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
+  };
+
+  const LOADER_SIZES: Record<UserFollowBtnSize, CircleLoaderSize> = {
+    [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
+    [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
+  };
+
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
@@ -112,14 +136,14 @@ export default function UserPageHeaderFollow({
       onClick={onFollow}
       disabled={mutating || isFetching}
       type="button"
-      className={`tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-px-3.5 tw-py-2.5 tw-text-sm tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset ${
+      className={`${BUTTON_CLASSES[size]} ${
         following
           ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
           : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
-      } tw-transition tw-duration-300 tw-ease-out`}
+      } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
     >
       {mutating || isFetching ? (
-        <CircleLoader />
+        <CircleLoader size={LOADER_SIZES[size]} />
       ) : following ? (
         <svg
           className="tw-h-3 tw-w-3"
@@ -139,7 +163,7 @@ export default function UserPageHeaderFollow({
         </svg>
       ) : (
         <svg
-          className="tw-h-5 tw-w-5"
+          className={SVG_CLASSES[size]}
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

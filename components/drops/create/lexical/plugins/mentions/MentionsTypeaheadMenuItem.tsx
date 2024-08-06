@@ -18,12 +18,9 @@ export default function MentionsTypeaheadMenuItem({
   readonly option: MentionTypeaheadOption;
 }) {
   return (
-    <option
-      key={option.key}
-      tabIndex={-1}
+    <li
       className="tw-h-full"
       ref={option.setRefElement}
-      aria-selected={isSelected}
       id={"typeahead-item-" + index}
     >
       <button
@@ -80,6 +77,6 @@ export default function MentionsTypeaheadMenuItem({
           )}
         </div>
       </button>
-    </option>
+    </li>
   );
 }

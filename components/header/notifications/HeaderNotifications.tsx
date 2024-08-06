@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -12,7 +12,7 @@ export default function HeaderNotifications() {
   const { data: notifications } = useQuery<NotificationsResponse>({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
-      { identity: connectedProfile?.profile?.handle },
+      { identity: connectedProfile?.profile?.handle, limit: "1" },
     ],
     queryFn: async () =>
       await commonApiFetch<NotificationsResponse>({
@@ -22,6 +22,7 @@ export default function HeaderNotifications() {
         },
       }),
     enabled: !!connectedProfile?.profile?.handle,
+    refetchInterval: 30000,
   });
 
   const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(
@@ -33,9 +34,9 @@ export default function HeaderNotifications() {
   }, [notifications]);
 
   return (
-    <div className="tailwind-scope tw-relative">
+    <div className="tailwind-scope tw-relative lg:tw-mr-3">
       <Link
-        href="/my-stream"
+        href="/my-stream/notifications"
         aria-label="Notifications"
         title="Notifications"
         className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-h-11 tw-w-11 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"

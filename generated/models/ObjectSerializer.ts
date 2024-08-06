@@ -55,9 +55,11 @@ export * from '../models/GroupLevelFilter';
 export * from '../models/GroupOwnsNft';
 export * from '../models/GroupRepFilter';
 export * from '../models/GroupTdhFilter';
+export * from '../models/IdentityAndSubscriptionActions';
 export * from '../models/IdentitySubscriptionActions';
 export * from '../models/IdentitySubscriptionTargetAction';
 export * from '../models/IdentitySubscriptionTargetType';
+export * from '../models/IncomingIdentitySubscriptionsPage';
 export * from '../models/IntRange';
 export * from '../models/LoginRequest';
 export * from '../models/LoginResponse';
@@ -67,6 +69,7 @@ export * from '../models/NonceResponse';
 export * from '../models/Notification';
 export * from '../models/NotificationCause';
 export * from '../models/NotificationsResponse';
+export * from '../models/OutgoingIdentitySubscriptionsPage';
 export * from '../models/PageBase';
 export * from '../models/PageWithNextUriBase';
 export * from '../models/ProfileMin';
@@ -79,6 +82,7 @@ export * from '../models/RatingWithProfileInfoAndLevel';
 export * from '../models/RatingWithProfileInfoAndLevelPage';
 export * from '../models/RepRating';
 export * from '../models/ReplyToDrop';
+export * from '../models/TargetAndSubscriptionActions';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
@@ -160,9 +164,11 @@ import { GroupLevelFilter } from '../models/GroupLevelFilter';
 import { GroupOwnsNft, GroupOwnsNftNameEnum    } from '../models/GroupOwnsNft';
 import { GroupRepFilter      } from '../models/GroupRepFilter';
 import { GroupTdhFilter } from '../models/GroupTdhFilter';
+import { IdentityAndSubscriptionActions } from '../models/IdentityAndSubscriptionActions';
 import { IdentitySubscriptionActions } from '../models/IdentitySubscriptionActions';
 import { IdentitySubscriptionTargetAction } from '../models/IdentitySubscriptionTargetAction';
 import { IdentitySubscriptionTargetType } from '../models/IdentitySubscriptionTargetType';
+import { IncomingIdentitySubscriptionsPage } from '../models/IncomingIdentitySubscriptionsPage';
 import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
@@ -172,6 +178,7 @@ import { NonceResponse } from '../models/NonceResponse';
 import { Notification        } from '../models/Notification';
 import { NotificationCause } from '../models/NotificationCause';
 import { NotificationsResponse } from '../models/NotificationsResponse';
+import { OutgoingIdentitySubscriptionsPage } from '../models/OutgoingIdentitySubscriptionsPage';
 import { PageBase } from '../models/PageBase';
 import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
 import { ProfileMin } from '../models/ProfileMin';
@@ -184,6 +191,7 @@ import { RatingWithProfileInfoAndLevel } from '../models/RatingWithProfileInfoAn
 import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileInfoAndLevelPage';
 import { RepRating } from '../models/RepRating';
 import { ReplyToDrop } from '../models/ReplyToDrop';
+import { TargetAndSubscriptionActions } from '../models/TargetAndSubscriptionActions';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { Wave } from '../models/Wave';
 import { WaveConfig        } from '../models/WaveConfig';
@@ -299,7 +307,9 @@ let typeMap: {[index: string]: any} = {
     "GroupOwnsNft": GroupOwnsNft,
     "GroupRepFilter": GroupRepFilter,
     "GroupTdhFilter": GroupTdhFilter,
+    "IdentityAndSubscriptionActions": IdentityAndSubscriptionActions,
     "IdentitySubscriptionActions": IdentitySubscriptionActions,
+    "IncomingIdentitySubscriptionsPage": IncomingIdentitySubscriptionsPage,
     "IntRange": IntRange,
     "LoginRequest": LoginRequest,
     "LoginResponse": LoginResponse,
@@ -308,6 +318,7 @@ let typeMap: {[index: string]: any} = {
     "NonceResponse": NonceResponse,
     "Notification": Notification,
     "NotificationsResponse": NotificationsResponse,
+    "OutgoingIdentitySubscriptionsPage": OutgoingIdentitySubscriptionsPage,
     "PageBase": PageBase,
     "PageWithNextUriBase": PageWithNextUriBase,
     "ProfileMin": ProfileMin,
@@ -318,6 +329,7 @@ let typeMap: {[index: string]: any} = {
     "RatingWithProfileInfoAndLevelPage": RatingWithProfileInfoAndLevelPage,
     "RepRating": RepRating,
     "ReplyToDrop": ReplyToDrop,
+    "TargetAndSubscriptionActions": TargetAndSubscriptionActions,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "Wave": Wave,
     "WaveConfig": WaveConfig,

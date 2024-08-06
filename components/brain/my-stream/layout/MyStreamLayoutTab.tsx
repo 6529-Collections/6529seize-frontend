@@ -1,21 +1,17 @@
+import { MY_STREAM_TAB_META, MyStreamTabType } from "./MyStreamLayoutTabs";
 import { useEffect, useRef, useState } from "react";
-import { USER_PAGE_TAB_META, UserPageTabType } from "./UserPageTabs";
-import { useRouter } from "next/router";
 import Link from "next/link";
 
-export default function UserPageTab({
+export default function MyStreamLayoutTab({
   tab,
   parentRef,
   activeTab,
 }: {
-  readonly tab: UserPageTabType;
+  readonly tab: MyStreamTabType;
   readonly parentRef: React.RefObject<HTMLDivElement>;
-  readonly activeTab: UserPageTabType;
+  readonly activeTab: MyStreamTabType;
 }) {
-  const router = useRouter();
-  const handleOrWallet = router.query.user as string;
-
-  const path = `/${handleOrWallet}/${USER_PAGE_TAB_META[tab].route}`;
+  const path = `/${MY_STREAM_TAB_META[tab].route}`;
 
   const [isActive, setIsActive] = useState<boolean>(tab === activeTab);
   useEffect(() => {
@@ -60,15 +56,12 @@ export default function UserPageTab({
   return (
     <Link
       ref={ref}
-      href={{
-        pathname: path,
-        query: router.query.address ? { address: router.query.address } : {},
-      }}
+      href={path}
       className={`${
         isActive ? "tw-pointer-events-none" : ""
       }  tw-no-underline tw-leading-4 tw-p-0 tw-text-base tw-font-semibold`}
     >
-      <div className={classes}>{USER_PAGE_TAB_META[tab].title}</div>
+      <div className={classes}>{MY_STREAM_TAB_META[tab].title}</div>
     </Link>
   );
 }

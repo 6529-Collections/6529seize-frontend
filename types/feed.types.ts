@@ -1,6 +1,9 @@
 import { Drop } from "../generated/models/Drop";
 import { DropVote } from "../generated/models/DropVote";
 import { FeedItemType } from "../generated/models/FeedItemType";
+import { NotificationCause } from "../generated/models/NotificationCause";
+import { NotificationsResponse } from "../generated/models/NotificationsResponse";
+import { ProfileMin } from "../generated/models/ProfileMin";
 import { Wave } from "../generated/models/Wave";
 
 export type IFeedItemWaveCreated = {
@@ -42,3 +45,73 @@ export type TypedFeedItem =
   | IFeedItemDropCreated
   | IFeedItemDropReplied
   | IFeedItemDropVoted;
+
+export type INotificationIdentitySubscribed = {
+  readonly id: number;
+  readonly cause: NotificationCause.IdentitySubscribed;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ProfileMin;
+};
+
+export type INotificationIdentityMentioned = {
+  readonly id: number;
+  readonly cause: NotificationCause.IdentityMentioned;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ProfileMin;
+  readonly related_drops: Array<Drop>;
+};
+
+export type INotificationDropVoted = {
+  readonly id: number;
+  readonly cause: NotificationCause.DropVoted;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ProfileMin;
+  readonly related_drops: Array<Drop>;
+  readonly additional_context: {
+    readonly vote: number;
+  };
+};
+
+export type INotificationDropQuoted = {
+  readonly id: number;
+  readonly cause: NotificationCause.DropQuoted;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ProfileMin;
+  readonly related_drops: Array<Drop>;
+  readonly additional_context: {
+    readonly quote_drop_id: string;
+    readonly quote_drop_part: string;
+    readonly quoted_drop_id: string;
+    readonly quoted_drop_part: string;
+  };
+};
+
+export type INotificationDropReplied = {
+  readonly id: number;
+  readonly cause: NotificationCause.DropReplied;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ProfileMin;
+  readonly related_drops: Array<Drop>;
+  readonly additional_context: {
+    readonly reply_drop_id: string;
+    readonly replied_drop_id: string;
+    readonly replied_drop_part: string;
+  };
+};
+
+export type TypedNotification =
+  | INotificationIdentitySubscribed
+  | INotificationIdentityMentioned
+  | INotificationDropVoted
+  | INotificationDropQuoted
+  | INotificationDropReplied;
+
+export interface TypedNotificationsResponse
+  extends Omit<NotificationsResponse, "notifications"> {
+  readonly notifications: TypedNotification[];
+}

@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import { AuthContext } from "../../auth/Auth";
-import { useAccount } from "wagmi";
 
 export enum UserPageTabType {
   BRAIN = "BRAIN",
