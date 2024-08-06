@@ -1,15 +1,7 @@
-import { ReactNode, useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { ReactNode } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
-import { useRouter } from "next/router";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import MyStreamLayoutTabs from "./MyStreamLayoutTabs";

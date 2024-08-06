@@ -5,7 +5,9 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import UserFollowBtn from "../../../user/utils/UserFollowBtn";
+import UserFollowBtn, {
+  UserFollowBtnSize,
+} from "../../../user/utils/UserFollowBtn";
 
 export default function NotificationIdentitySubscribed({
   notification,
@@ -44,7 +46,10 @@ export default function NotificationIdentitySubscribed({
           {getTimeAgoShort(notification.created_at)}
         </span>
       </div>
-      <UserFollowBtn handle={notification.related_identity.handle} />
+      <UserFollowBtn
+        handle={notification.related_identity.handle}
+        size={UserFollowBtnSize.SMALL}
+      />
     </div>
   );
 }
