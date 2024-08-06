@@ -2,7 +2,6 @@ import { ReactNode, useContext } from "react";
 import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../auth/Auth";
 import Link from "next/link";
 import StreamDiscovery from "./discovery/StreamDiscovery";
-import Notifications from "./notifications/Notifications";
 
 export default function Brain({ children }: { readonly children: ReactNode }) {
   const { showWaves } = useContext(AuthContext);

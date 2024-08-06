@@ -30,7 +30,6 @@ export default function HeaderUserContext({
             Create profile
           </Link>
         )}
-        <HeaderNotifications />
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import Link from "next/link";
 import HeaderUser from "./user/HeaderUser";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { AuthContext } from "../auth/Auth";
+import HeaderNotifications from "./notifications/HeaderNotifications";
 
 interface Props {
   onLoad?: () => void;
@@ -749,7 +750,8 @@ export default function Header(props: Readonly<Props>) {
                         <div
                           className={`${styles.dMdNone} d-flex align-items-center`}
                         >
-                          <div className="tw-mr-6 xl:tw-mr-2">
+                          <div className="tw-inline-flex tw-space-x-2 tw-mr-6 xl:tw-mr-2">
+                            {showWaves && <HeaderNotifications />}
                             <HeaderSearchButton />
                           </div>
                           <Image
@@ -1078,6 +1080,7 @@ export default function Header(props: Readonly<Props>) {
                               />
                             </NavDropdown>
                             <HeaderUser />
+                            {showWaves && <HeaderNotifications />}
                             <HeaderSearchButton />
                           </Nav>
                         </Navbar>
