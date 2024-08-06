@@ -166,6 +166,97 @@ paths:
         "201":
           description: successful operation
 
+  /identity-subscriptions/outgoing/{target_type}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get outgoing subscriptions for authenticated user.
+      operationId: getOutgoingSubscriptions
+      parameters:
+        - name: target_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - IDENTITY
+              - WAVE
+              - DROP
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            default: 1
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OutgoingIdentitySubscriptionsPage"
+
+  /identity-subscriptions/incoming/{target_type}/{target_id}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get identities subscribed to target.
+      operationId: getIncomingSubscriptionsForTarget
+      parameters:
+        - name: target_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - IDENTITY
+              - WAVE
+              - DROP
+        - name: target_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            default: 10
+            maximum: 100
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            default: 1
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IncomingIdentitySubscriptionsPage"
+
   /identities/{id}/subscriptions:
     get:
       tags:
@@ -554,7 +645,6 @@ paths:
                 $ref: "#/components/schemas/RatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
-
   /public/drops:
     get:
       tags:
@@ -3575,6 +3665,57 @@ components:
             $ref: "#/components/schemas/Drop"
         additional_context:
           type: object
+
+    IdentityAndSubscriptionActions:
+      type: object
+      required:
+        - identity
+        - actions
+      properties:
+        identity:
+          $ref: "#/components/schemas/ProfileMin"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+
+    TargetAndSubscriptionActions:
+      type: object
+      required:
+        - target
+        - actions
+      properties:
+        target:
+          description: "Wave or drop or identity"
+          type: object
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+
+    IncomingIdentitySubscriptionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentityAndSubscriptionActions"
+
+    OutgoingIdentitySubscriptionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TargetAndSubscriptionActions"
 
 security:
   - bearerAuth: []

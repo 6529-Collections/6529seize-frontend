@@ -1,12 +1,11 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
 import MyStreamLayout from "../../components/brain/my-stream/layout/MyStreamLayout";
-
-import MyStream from "../../components/brain/my-stream/MyStream";
+import Notifications from "../../components/brain/notifications/Notifications";
 
 const Page: NextPageWithLayout<{}> = () => (
   <div className="tailwind-scope">
-    <MyStream />
+    <Notifications />
   </div>
 );
 Page.getLayout = (page: ReactElement) => (

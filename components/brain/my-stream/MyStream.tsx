@@ -9,8 +9,7 @@ import Link from "next/link";
 import FeedWrapper from "../feed/FeedWrapper";
 
 export default function MyStream() {
-  const { connectedProfile, activeProfileProxy } =
-    useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const {
     data,
@@ -251,9 +250,6 @@ export default function MyStream() {
           </div>
         ) : (
           <>
-            <h1 className="tw-relative tw-z-10 tw-block tw-float-none tw-text-4xl">
-              Stream
-            </h1>
             <div className="tw-mt-6">
               <FeedWrapper
                 items={items}

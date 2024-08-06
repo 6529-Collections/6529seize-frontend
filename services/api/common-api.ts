@@ -63,6 +63,25 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   return res.json();
 };
 
+export const commonApiPostWithoutBodyAndResponse = async (param: {
+  endpoint: string;
+  headers?: Record<string, string>;
+}): Promise<void> => {
+  let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: getHeaders(param.headers),
+    body: "",
+  });
+  if (!res.ok) {
+    const body: any = await res.json();
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
+  }
+  return;
+};
+
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string>;

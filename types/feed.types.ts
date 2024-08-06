@@ -2,6 +2,7 @@ import { Drop } from "../generated/models/Drop";
 import { DropVote } from "../generated/models/DropVote";
 import { FeedItemType } from "../generated/models/FeedItemType";
 import { NotificationCause } from "../generated/models/NotificationCause";
+import { NotificationsResponse } from "../generated/models/NotificationsResponse";
 import { ProfileMin } from "../generated/models/ProfileMin";
 import { Wave } from "../generated/models/Wave";
 
@@ -109,3 +110,8 @@ export type TypedNotification =
   | INotificationDropVoted
   | INotificationDropQuoted
   | INotificationDropReplied;
+
+export interface TypedNotificationsResponse
+  extends Omit<NotificationsResponse, "notifications"> {
+  readonly notifications: TypedNotification[];
+}
