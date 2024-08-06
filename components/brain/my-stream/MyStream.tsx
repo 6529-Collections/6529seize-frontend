@@ -5,12 +5,11 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
-import Link from "next/link";
 import FeedWrapper from "../feed/FeedWrapper";
 import MyStreamNoItems from "./layout/MyStreamNoItems";
 
 export default function MyStream() {
-  const { connectedProfile, activeProfileProxy, requestAuth } =
+  const { connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
 
   const {

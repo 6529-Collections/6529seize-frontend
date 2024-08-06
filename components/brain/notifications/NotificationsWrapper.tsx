@@ -1,4 +1,3 @@
-import { Notification } from "../../../generated/models/Notification";
 import { TypedNotification } from "../../../types/feed.types";
 import CircleLoader, {
   CircleLoaderSize,

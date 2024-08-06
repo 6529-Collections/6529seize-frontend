@@ -79,7 +79,6 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
       rej(body?.error ?? res.statusText ?? "Something went wrong")
     );
   }
-  return;
 };
 
 export const commonApiDelete = async (param: {

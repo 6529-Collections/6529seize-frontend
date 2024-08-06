@@ -8,7 +8,6 @@ import {
   commonApiFetch,
   commonApiPostWithoutBodyAndResponse,
 } from "../../../services/api/common-api";
-import Link from "next/link";
 import NotificationsWrapper from "./NotificationsWrapper";
 import {
   TypedNotification,

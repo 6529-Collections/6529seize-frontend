@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import { MY_STREAM_TAB_META, MyStreamTabType } from "./MyStreamLayoutTabs";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
