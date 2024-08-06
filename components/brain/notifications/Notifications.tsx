@@ -99,8 +99,10 @@ export default function Notifications() {
   return (
     <div className="md:tw-w-[672px] tw-flex-shrink-0">
       <div>
-        {!items.length && !isFetching ? (
-          <MyStreamNoItems />
+        {!!items.length && !isFetching ? (
+          <div className="tw-mt-32">
+            <MyStreamNoItems />
+          </div>
         ) : (
           <>
             <div className="tw-mt-6">
