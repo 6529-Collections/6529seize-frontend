@@ -1,0 +1,66 @@
+@import "../../../styles/variables.scss";
+
+.capacitorWidget {
+  position: fixed;
+  right: 20px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  transform: translateY(44px);
+  transition: transform 0.2s ease-out;
+  z-index: 1000;
+}
+
+.slider {
+  background-color: black;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.buttonContainer {
+  background-color: black;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.expanded {
+  transform: translateY(0);
+}
+
+.expandButton {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+
+  svg {
+    width: 24px;
+    color: white;
+  }
+}
+
+.button {
+  color: black;
+  height: 24px;
+  width: 24px;
+  border: none;
+  border-radius: 12px;
+  position: relative;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    margin: 3px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &:hover {
+    svg {
+      color: black;
+    }
+  }
+}
