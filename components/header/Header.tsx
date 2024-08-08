@@ -438,6 +438,18 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
+                    <Link href="/tools/desktop-app">
+                      <h3>Desktop App</h3>
+                    </Link>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs={{ span: 6, offset: 3 }}>
+                    <hr />
+                  </Col>
+                </Row>
+                <Row className="pt-3">
+                  <Col>
                     <Link href="/tools/subscriptions-report">
                       <h3>Subscriptions Report</h3>
                     </Link>
@@ -884,6 +896,13 @@ export default function Header(props: Readonly<Props>) {
                               title="Tools"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Desktop App",
+                                  path: "/tools/desktop-app",
+                                }}
+                              />
+                              <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
                                   name: "Subscriptions Report",
