@@ -50,6 +50,8 @@ export default function DesktopApp() {
               md={6}
               className="pt-4 pb-4 d-flex flex-wrap align-items-center justify-content-center gap-5">
               <Image
+                priority
+                loading="eager"
                 src="/windows.svg"
                 alt="Microsoft Windows"
                 width="0"
@@ -122,6 +124,8 @@ export default function DesktopApp() {
               md={6}
               className="pt-4 pb-4 d-flex flex-wrap align-items-center justify-content-center gap-5">
               <Image
+                priority
+                loading="eager"
                 src="/apple.svg"
                 alt="Apple macOS"
                 width="0"
