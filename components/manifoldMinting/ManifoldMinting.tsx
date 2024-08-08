@@ -593,13 +593,13 @@ function ManifoldMemesMintingPhase(
   }
 
   let status: PhaseStatus = PhaseStatus.UPCOMING;
-  if (
+  if (props.phase.end.lt(Time.now()) || props.claim.isFinalized) {
+    status = PhaseStatus.COMPLETED;
+  } else if (
     props.claim.memePhase?.id === props.phase.id &&
     props.claim.status === ManifoldClaimStatus.ACTIVE
   ) {
     status = PhaseStatus.ACTIVE;
-  } else if (props.phase.end.lt(Time.now())) {
-    status = PhaseStatus.COMPLETED;
   }
 
   let startText = "Expected start";
@@ -623,7 +623,8 @@ function ManifoldMemesMintingPhase(
     <Col xs={12} sm={6} md={3} className="pt-1 pb-1">
       <Container
         className={
-          props.claim.memePhase?.id === props.phase.id
+          props.claim.memePhase?.id === props.phase.id &&
+          !props.claim.isFinalized
             ? styles.phaseBoxActive
             : styles.phaseBox
         }>
