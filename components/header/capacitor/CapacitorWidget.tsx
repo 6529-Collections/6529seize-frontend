@@ -4,8 +4,6 @@ import {
   faArrowLeft,
   faArrowRight,
   faChevronDown,
-  faChevronLeft,
-  faChevronRight,
   faChevronUp,
   faRefresh,
 } from "@fortawesome/free-solid-svg-icons";
