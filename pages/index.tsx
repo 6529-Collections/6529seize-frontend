@@ -190,8 +190,7 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container className="no-padding">
                     <Row>
                       {pageProps.nft.animation ||
@@ -199,8 +198,7 @@ export default function Home({
                         <span
                           className={
                             connectedProfile ? styles.nftImagePadding : ""
-                          }
-                        >
+                          }>
                           <NFTImage
                             nft={pageProps.nft}
                             animation={true}
@@ -214,8 +212,7 @@ export default function Home({
                           href={`/the-memes/${pageProps.nft.id}`}
                           className={
                             connectedProfile ? styles.nftImagePadding : ""
-                          }
-                        >
+                          }>
                           <NFTImage
                             nft={pageProps.nft}
                             animation={true}
@@ -234,8 +231,7 @@ export default function Home({
                   xs={{ span: 12 }}
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container>
                     <Row>
                       <Col>
@@ -336,8 +332,7 @@ export default function Home({
                     <Row className="pb-3">
                       <Col>
                         <Link
-                          href={`/the-memes/${pageProps.nft.id}/distribution`}
-                        >
+                          href={`/the-memes/${pageProps.nft.id}/distribution`}>
                           Distribution Plan
                         </Link>
                       </Col>
@@ -349,7 +344,9 @@ export default function Home({
                             <td>Status</td>
                             <td>
                               <b>
-                                {capitalizeEveryWord(manifoldClaim?.status)}
+                                {manifoldClaim?.isFinalized
+                                  ? "Sold Out"
+                                  : capitalizeEveryWord(manifoldClaim?.status)}
                               </b>
                             </td>
                           </tr>
@@ -394,8 +391,7 @@ export default function Home({
                         <a
                           href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${pageProps.nft.id}`}
                           target="_blank"
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           <Image
                             className={styles.marketplace}
                             src="/opensea.png"
@@ -407,8 +403,7 @@ export default function Home({
                         <a
                           href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${pageProps.nft.id}`}
                           target="_blank"
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           <Image
                             className={styles.marketplace}
                             src="/x2y2.png"
@@ -436,8 +431,7 @@ export default function Home({
                         href={`/nextgen/collection/${formatNameForUrl(
                           pageProps.nextGenFeatured.name
                         )}`}
-                        className={styles.viewAllLink}
-                      >
+                        className={styles.viewAllLink}>
                         <span>View Collection</span>
                       </Link>
                     </Col>
