@@ -73,7 +73,7 @@ export default function DesktopApp() {
               <div className="d-flex flex-column gap-3">
                 <div className="d-flex align-items-center gap-2">
                   <a
-                    href="https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/6529+CORE-mac-arm64-0.0.1.dmg"
+                    href="https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/6529+CORE-win-x64-0.0.1.exe"
                     target="_blank"
                     rel="noreferrer"
                     className="font-larger decoration-hover-underline d-flex align-items-center gap-2">
