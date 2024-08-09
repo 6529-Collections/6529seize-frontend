@@ -20,7 +20,7 @@
 .logoIcon {
   width: 100%;
   height: auto;
-  max-width: 250px;
+  max-width: min(40vw, 250px);
 }
 
 .headerRight {
