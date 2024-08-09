@@ -26,6 +26,7 @@ import { LoginResponse } from "../../generated/models/LoginResponse";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 
+
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
   readonly connectionStatus: ProfileConnectedStatus;
@@ -45,7 +46,8 @@ type AuthContextType = {
   ) => Promise<void>;
 };
 
-export const WAVES_MIN_ACCESS_LEVEL = 20;
+// TODO: change to 20
+export const WAVES_MIN_ACCESS_LEVEL = 0;
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
