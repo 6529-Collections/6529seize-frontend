@@ -151,6 +151,18 @@ const aHrefRenderer = ({
   if (isValidLink) {
     return <p>[invalid link]</p>;
   }
+
+  const baseEndpoint = process.env.BASE_ENDPOINT || "";
+
+  const isExternalLink = href && baseEndpoint && !href.startsWith(baseEndpoint);
+
+  if (isExternalLink) {
+    props.rel = "noopener noreferrer nofollow";
+    props.target = "_blank";
+  } else {
+    props.href = href?.replace(baseEndpoint, "");
+  }
+
   return (
     <a
       onClick={(e) => {
@@ -243,8 +255,7 @@ const DropPart = memo(
       <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
         <div
           ref={containerRef}
-          className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
-        >
+          className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
           <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
               <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
@@ -253,8 +264,7 @@ const DropPart = memo(
                   <DropAuthor
                     profile={profile}
                     timestamp={createdAt}
-                    size={size}
-                  >
+                    size={size}>
                     {components?.authorFollow}
                   </DropAuthor>
                   <div className="tw-mt-1 tw-inline-flex tw-items-center tw-justify-between">
@@ -262,8 +272,7 @@ const DropPart = memo(
                       <Link
                         onClick={(e) => e.stopPropagation()}
                         href={`/waves/${wave.id}`}
-                        className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-                      >
+                        className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
                         <span>{wave.name}</span>
                       </Link>
                     )}
@@ -273,8 +282,7 @@ const DropPart = memo(
                           className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
                           viewBox="0 0 24 24"
                           fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
+                          xmlns="http://www.w3.org/2000/svg">
                           <path
                             d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
                             stroke="currentColor"
@@ -308,8 +316,7 @@ const DropPart = memo(
                 }}
                 className={`${
                   onContentClick && "tw-cursor-pointer"
-                } tw-mt-2 tw-h-full`}
-              >
+                } tw-mt-2 tw-h-full`}>
                 {dropTitle && (
                   <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
                     {dropTitle}
@@ -327,8 +334,7 @@ const DropPart = memo(
                       onClick={(e) => {
                         e.stopPropagation();
                         onPrevPart();
-                      }}
-                    >
+                      }}>
                       <svg
                         className="tw-size-5 tw-flex-shrink-0"
                         xmlns="http://www.w3.org/2000/svg"
@@ -336,8 +342,7 @@ const DropPart = memo(
                         aria-hidden="true"
                         viewBox="0 0 24 24"
                         strokeWidth="1.5"
-                        stroke="currentColor"
-                      >
+                        stroke="currentColor">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -348,8 +353,7 @@ const DropPart = memo(
                   )}
                   <div
                     className={`${isStorm && ""} tw-h-full tw-w-full`}
-                    ref={contentRef}
-                  >
+                    ref={contentRef}>
                     <Markdown
                       rehypePlugins={[
                         [
@@ -438,8 +442,7 @@ const DropPart = memo(
                         code: (params) => (
                           <code
                             style={{ textOverflow: "unset" }}
-                            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
-                          >
+                            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words">
                             {customRenderer({
                               content: params.children,
                               mentionedUsers,
@@ -457,8 +460,7 @@ const DropPart = memo(
                             className="tw-w-full"
                           />
                         ),
-                      }}
-                    >
+                      }}>
                       {partContent}
                     </Markdown>
                     {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
@@ -482,8 +484,7 @@ const DropPart = memo(
                       onClick={(e) => {
                         e.stopPropagation();
                         onNextPart();
-                      }}
-                    >
+                      }}>
                       <svg
                         className="tw-size-5 tw-flex-shrink-0"
                         xmlns="http://www.w3.org/2000/svg"
@@ -491,8 +492,7 @@ const DropPart = memo(
                         aria-hidden="true"
                         viewBox="0 0 24 24"
                         strokeWidth="1.5"
-                        stroke="currentColor"
-                      >
+                        stroke="currentColor">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -513,8 +513,7 @@ const DropPart = memo(
                   <button
                     onClick={() => setShowMore(!showMore)}
                     type="button"
-                    className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-                  >
+                    className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
                     Show full drop
                   </button>
                 </div>
