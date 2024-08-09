@@ -2,6 +2,7 @@ import Link from "next/link";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { useRouter } from "next/router";
+import UserPageFollowers from "../followers/UserPageFollowers";
 
 export default function UserPageHeaderStats({
   profile,
@@ -35,6 +36,7 @@ export default function UserPageHeaderStats({
             Rep
           </span>
         </Link>
+        <UserPageFollowers profile={profile} />
       </div>
     </div>
   );
