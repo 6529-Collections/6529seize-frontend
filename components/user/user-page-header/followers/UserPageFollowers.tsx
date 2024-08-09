@@ -17,7 +17,7 @@ export default function UserPageFollowers({
     useQuery<IncomingIdentitySubscriptionsPage>({
       queryKey: [
         QueryKey.IDENTITY_FOLLOWERS,
-        { external_id: profile.profile?.external_id, limit: 1 },
+        { external_id: profile.profile?.external_id, page_size: 1 },
       ],
       queryFn: async () =>
         await commonApiFetch<IncomingIdentitySubscriptionsPage>({
