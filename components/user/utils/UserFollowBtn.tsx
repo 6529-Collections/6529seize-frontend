@@ -48,7 +48,7 @@ export default function UserFollowBtn({
   const [mutating, setMutating] = useState<boolean>(false);
   const { data: subscriptions, isFetching } =
     useQuery<IdentitySubscriptionActions>({
-      queryKey: [QueryKey.IDENTITY_FOLLOWERS, handle],
+      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
       queryFn: async () =>
         await commonApiFetch<IdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
