@@ -33,6 +33,7 @@ export enum QueryKey {
   PROFILE_DROPS = "PROFILE_DROPS",
   PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
+  IDENTITY_FOLLOWING_ACTIONS = "IDENTITY_FOLLOWING_ACTIONS",
   IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
   IDENTITY_NOTIFICATIONS = "IDENTITY_NOTIFICATIONS",
   WALLET_TDH = "WALLET_TDH",
@@ -984,6 +985,9 @@ export default function ReactQueryWrapper({
 
   const onWaveFollowChange = () => invalidateAllWaves();
   const onIdentityFollowChange = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWERS],
     });
