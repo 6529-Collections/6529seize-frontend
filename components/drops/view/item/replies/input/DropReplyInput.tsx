@@ -194,7 +194,7 @@ const DropReplyInput = forwardRef<
             </p>
           )}
         </div>
-        <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
+        {/* <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
           <label>
             <div
               role="button"
@@ -230,7 +230,7 @@ const DropReplyInput = forwardRef<
               <span className="tw-text-sm tw-font-medium">Upload Media</span>
             </div>
           </label>
-        </div>
+        </div> */}
       </div>
     );
   }

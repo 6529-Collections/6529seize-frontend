@@ -149,7 +149,7 @@ export default function DropReplyMarkdown({
       className="tw-w-full"
       components={{
         h5: (params) => (
-          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out">
           {customRenderer({
             content: params.children,
             mentionedUsers,
@@ -159,7 +159,7 @@ export default function DropReplyMarkdown({
         </p>
         ),
         h4: (params) => (
-          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out">
           {customRenderer({
             content: params.children,
             mentionedUsers,
@@ -169,7 +169,7 @@ export default function DropReplyMarkdown({
         </p>
         ),
         h3: (params) => (
-          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out">
           {customRenderer({
             content: params.children,
             mentionedUsers,
@@ -179,7 +179,7 @@ export default function DropReplyMarkdown({
         </p>
         ),
         h2: (params) => (
-          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out">
           {customRenderer({
             content: params.children,
             mentionedUsers,
@@ -189,7 +189,7 @@ export default function DropReplyMarkdown({
         </p>
         ),
         h1: (params) => (
-          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out">
           {customRenderer({
             content: params.children,
             mentionedUsers,
@@ -199,7 +199,7 @@ export default function DropReplyMarkdown({
         </p>
         ),
         p: (params) => (
-          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
+          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out">
             {customRenderer({
               content: params.children,
               mentionedUsers,

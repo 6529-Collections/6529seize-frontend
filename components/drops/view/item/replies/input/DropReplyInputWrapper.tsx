@@ -245,7 +245,7 @@ export default function DropReplyInputWrapper({
   };
 
   return (
-    <div className="tw-flex tw-items-start tw-gap-x-3 tw-w-full tw-px-4 tw-pb-3">
+    <div className="tw-flex tw-items-start tw-gap-x-3 tw-w-full tw-px-4">
       <DropReplyInput
         ref={dropReplyInputRef}
         editorState={editorState}
