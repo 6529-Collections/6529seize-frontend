@@ -17,6 +17,12 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
+import IdentityFollowers from "../followers/IdentityFollowers";
+
+enum IdentityPageView {
+  CONTENT = "CONTENT",
+  FOLLOWERS = "FOLLOWERS",
+}
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -93,6 +99,25 @@ export default function UserPageLayout({
     profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);
 
+  const [activeView, setActiveView] = useState<IdentityPageView>(
+    IdentityPageView.FOLLOWERS
+  );
+
+  const components: Record<IdentityPageView, JSX.Element> = {
+    [IdentityPageView.CONTENT]: (
+      <>
+        {isLoadingTabData ? (
+          <div className="tw-text-base tw-font-normal tw-text-iron-200">
+            Loading...
+          </div>
+        ) : (
+          children
+        )}
+      </>
+    ),
+    [IdentityPageView.FOLLOWERS]: <IdentityFollowers />,
+  };
+
   useEffect(() => {
     const handleStart = (toPath: string, options: { shallow: boolean }) => {
       const toUser = toPath.split("/")[1].toLowerCase();
@@ -140,20 +165,12 @@ export default function UserPageLayout({
 
       <main className="tw-min-h-[100dvh]">
         <Header />
-        <div
-          className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20"
-        >
+        <div className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20">
           <UserPageHeader profile={profile} mainAddress={mainAddress} />
           <div className="tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
             <UserPageTabs />
             <div className="tw-mt-6 lg:tw-mt-8">
-              {isLoadingTabData ? (
-                <div className="tw-text-base tw-font-normal tw-text-iron-200">
-                  Loading...
-                </div>
-              ) : (
-                children
-              )}
+              {components[activeView]}
             </div>
           </div>
         </div>
