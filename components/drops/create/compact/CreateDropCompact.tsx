@@ -92,7 +92,7 @@ const CreateDropCompact = forwardRef<
         case CreateDropType.DROP:
           return `${
             showDropError ? "tw-border-error " : "tw-border-iron-800"
-          } tw-p-2 sm:tw-p-5 tw-rounded-xl tw-border tw-border-solid`;
+          } tw-p-2 sm:tw-px-4 sm:tw-py-3 tw-rounded-xl tw-border tw-border-solid`;
         case CreateDropType.QUOTE:
           return "";
         default:
