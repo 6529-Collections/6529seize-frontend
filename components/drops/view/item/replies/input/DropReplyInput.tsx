@@ -178,8 +178,8 @@ const DropReplyInput = forwardRef<
           </div>
         </LexicalComposer>
         <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          <p className="tw-mb-0 tw-mt-1.5 tw-pb-2 ">
-            {!!drop?.parts.length && (
+          {!!drop?.parts.length && (
+            <p className="tw-mb-0 tw-mt-1.5 tw-pb-2">
               <>
                 <span className="tw-font-semibold tw-text-iron-500">
                   Part:{" "}
@@ -191,10 +191,10 @@ const DropReplyInput = forwardRef<
                   length: {formatNumberWithCommas(charsCount)}
                 </span>
               </>
-            )}
-          </p>
+            </p>
+          )}
         </div>
-        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+        <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
           <label>
             <div
               role="button"

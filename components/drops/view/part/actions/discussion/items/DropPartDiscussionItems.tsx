@@ -82,7 +82,7 @@ export default function DropPartDiscussionItems({
     fetchNextPage();
   };
   return (
-    <div className="tw-pb-2">
+    <div>
       <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
         <div>
           {replies.map((item) => (

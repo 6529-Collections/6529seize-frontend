@@ -97,30 +97,34 @@ export default function DropReply(props: DropReplyProps) {
   };
 
   return (
-    <div className="tw-ml-12 tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer" onClick={onReplyClick}>
-      <div className="tw-flex tw-items-center tw-gap-x-1.5">
-        <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
-          <div className="tw-rounded-lg tw-h-full tw-w-full">
-            <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
-              <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
-                <DropPfp
-                  pfpUrl={finalDrop?.author.pfp}
-                  size={DropPartSize.SMALL}
-                />
+    <div>
+      <div className="tw-ml-16 tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer">
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
+            <div className="tw-rounded-md tw-h-full tw-w-full">
+              <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-800">
+                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-md tw-overflow-hidden">
+                  <DropPfp
+                    pfpUrl={finalDrop?.author.pfp}
+                    size={DropPartSize.SMALL}
+                  />
+                </div>
               </div>
             </div>
           </div>
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-50 tw-font-semibold">
+            {finalDrop?.author.handle}
+          </p>
         </div>
-        <span className="tw-text-sm tw-text-iron-50 tw-font-semibold">
-          {finalDrop?.author.handle}
-        </span>
+        <div onClick={onReplyClick}>
+          <DropPartMarkdown
+            partContent={replyContent}
+            mentionedUsers={finalDrop?.mentioned_users ?? []}
+            referencedNfts={finalDrop?.referenced_nfts ?? []}
+            onImageLoaded={() => undefined}
+          />
+        </div>
       </div>
-      <DropPartMarkdown
-        partContent={replyContent}
-        mentionedUsers={finalDrop?.mentioned_users ?? []}
-        referencedNfts={finalDrop?.referenced_nfts ?? []}
-        onImageLoaded={() => undefined}
-      />
     </div>
   );
 }

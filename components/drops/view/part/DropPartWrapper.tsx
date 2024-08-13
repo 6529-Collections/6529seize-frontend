@@ -61,10 +61,10 @@ export default function DropPartWrapper({
               )}
             </div>
           </div>
-          <div className="tw-relative tw-z-10">
+          <div className="tw-relative tw-z-10 tw-ml-[54px]">
             {haveData && <DropListItemData drop={drop} />}
           </div>
-          <div className="tw-px-4 tw-mt-2 tw-pb-2 tw-relative tw-z-10">
+          <div className="tw-px-4 tw-mt-2 tw-pb-2 tw-relative tw-z-10 tw-ml-[54px]">
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}

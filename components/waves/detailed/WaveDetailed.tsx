@@ -101,9 +101,9 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
             className="tw-w-[672px] tw-overflow-hidden"
             ref={contentWrapperRef}
           >
-            <WaveDetailedFollowers />
+           {/*  <WaveDetailedFollowers /> */}
 
-            {/*   {activeDropId ? (
+            {activeDropId ? (
               <WaveSingleDrop
                 dropId={activeDropId}
                 availableCredit={
@@ -127,8 +127,7 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
                   }
                 />
               </>
-            )} */}
-            
+            )}
           </div>
         </div>
       </div>

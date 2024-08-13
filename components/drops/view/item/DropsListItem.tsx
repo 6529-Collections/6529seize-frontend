@@ -129,7 +129,12 @@ export default function DropsListItem({
       />
       <div className="tw-pt-2 sm:tw-pt-3">
         {replyProps && (
-          <DropReply {...replyProps} />
+          <div className="tw-mb-1.5">
+            <div className="tw-relative tw-flex tw-justify-end">
+              <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-8 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[2px] tw-border-l-[2px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
+            </div>
+            <DropReply {...replyProps} />
+          </div>
         )}
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
@@ -144,7 +149,7 @@ export default function DropsListItem({
               onQuote={onQuote}
             />
             {canFollow && (
-              <div className="tw-absolute tw-right-10">
+              <div className="tw-absolute tw-right-14">
                 <DropsListItemFollowDrop drop={drop} />
               </div>
             )}
