@@ -8,7 +8,13 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 
-export default function WaveHeader({ wave }: { readonly wave: Wave }) {
+export default function WaveHeader({
+  wave,
+  onFollowersClick,
+}: {
+  readonly wave: Wave;
+  readonly onFollowersClick: () => void;
+}) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeUntil(wave.created_at);
   const ending = wave.wave.period?.max
@@ -71,7 +77,10 @@ export default function WaveHeader({ wave }: { readonly wave: Wave }) {
                   </div>
                 )}
                 <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
-                <div className="tw-cursor-pointer tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50 hover:tw-underline tw-transition tw-duration-300 tw-ease-out">
+                <div
+                  onClick={onFollowersClick}
+                  className="tw-cursor-pointer tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+                >
                   <svg
                     className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
                     xmlns="http://www.w3.org/2000/svg"
