@@ -10,7 +10,7 @@ export default function WaveDetailedFollower({
 }) {
   const cicType = cicToType(follower.identity.cic);
   return (
-    <div className="tw-flex tw-gap-x-3">
+    <div className="tw-flex tw-items-center tw-gap-x-3">
       <div className="tw-h-10 tw-w-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg">
         <div className="tw-rounded-lg tw-h-full tw-w-full">
           <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
@@ -45,12 +45,7 @@ export default function WaveDetailedFollower({
               </Link>
             </p>
           </div>
-
         </div>
-        <p className="tw-mt-2 tw-text-md tw-mb-0 tw-text-iron-50 tw-font-normal">
-          fighting for an open metaverse. the most bullish person in the world
-          about the incredible powers of NFTs.
-        </p>
       </div>
     </div>
   );
