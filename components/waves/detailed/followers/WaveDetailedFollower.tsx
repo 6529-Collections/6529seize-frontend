@@ -1,21 +1,29 @@
+import Link from "next/link";
 import { IdentityAndSubscriptionActions } from "../../../../generated/models/IdentityAndSubscriptionActions";
+import { cicToType } from "../../../../helpers/Helpers";
+import UserCICAndLevel, { UserCICAndLevelSize } from "../../../user/utils/UserCICAndLevel";
 
 export default function WaveDetailedFollower({
   follower,
 }: {
   readonly follower: IdentityAndSubscriptionActions;
 }) {
+  const cicType = cicToType(follower.identity.cic);
   return (
     <div className="tw-flex tw-gap-x-3">
       <div className="tw-h-10 tw-w-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg">
         <div className="tw-rounded-lg tw-h-full tw-w-full">
           <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
             <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
-              <img
-                src="#"
-                alt=""
-                className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
-              />
+              {follower.identity.pfp ? (
+                <img
+                  src={follower.identity.pfp}
+                  alt=""
+                  className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                />
+              ) : (
+                <div className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain" />
+              )}
             </div>
           </div>
         </div>
@@ -23,39 +31,21 @@ export default function WaveDetailedFollower({
       <div className="tw-flex tw-flex-col">
         <div className="tw-flex tw-items-center tw-gap-x-1">
           <div className="tw-items-center tw-flex tw-gap-x-2">
-            <div className="tw-relative">
-              <div className="tw-h-4 tw-w-4 tw-text-[9px] tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-iron-300 tw-text-iron-300">
-                nr
-              </div>
-              <span className="-tw-top-[0.1875rem] tw-h-2 tw-w-2 tw-bg-[#FEDF89] tw-flex-shrink-0 tw-absolute -tw-right-1 tw-block tw-rounded-full"></span>
-            </div>
+          <UserCICAndLevel
+            level={follower.identity.level}
+            cicType={cicType}
+            size={UserCICAndLevelSize.SMALL}
+          />
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50">
-              <a
-                href=""
+              <Link
+                href={`/${follower.identity.handle}`}
                 className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
               >
-                punk6529
-              </a>
+                {follower.identity.handle}
+              </Link>
             </p>
           </div>
-          <button className="tw-text-iron-500 hover:tw-text-iron-50 tw-flex tw-border-none tw-bg-transparent tw-py-0 tw-px-2 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out">
-            <svg
-              className="tw-h-3 tw-w-3"
-              width="17"
-              height="15"
-              viewBox="0 0 17 15"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M14.7953 0.853403L5.24867 10.0667L2.71534 7.36007C2.24867 6.92007 1.51534 6.8934 0.982005 7.26674C0.462005 7.6534 0.315338 8.3334 0.635338 8.88007L3.63534 13.7601C3.92867 14.2134 4.43534 14.4934 5.00867 14.4934C5.55534 14.4934 6.07534 14.2134 6.36867 13.7601C6.84867 13.1334 16.0087 2.2134 16.0087 2.2134C17.2087 0.986737 15.7553 -0.093263 14.7953 0.84007V0.853403Z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
+
         </div>
         <p className="tw-mt-2 tw-text-md tw-mb-0 tw-text-iron-50 tw-font-normal">
           fighting for an open metaverse. the most bullish person in the world

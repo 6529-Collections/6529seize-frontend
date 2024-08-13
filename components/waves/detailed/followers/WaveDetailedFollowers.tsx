@@ -36,6 +36,7 @@ export default function WaveDetailedFollowers({
       QueryKey.WAVE_FOLLOWERS,
       {
         ...query,
+        target_type: "WAVE",
         wave_id: wave.id,
       },
     ],
@@ -47,7 +48,7 @@ export default function WaveDetailedFollowers({
         params.page = `${pageParam}`;
       }
       return await commonApiFetch<IncomingIdentitySubscriptionsPage>({
-        endpoint: `drops/`,
+        endpoint: `/identity-subscriptions/incoming/WAVE/${wave.id}`,
         params,
       });
     },
@@ -58,7 +59,7 @@ export default function WaveDetailedFollowers({
   const [followers, setFollowers] = useState<IdentityAndSubscriptionActions[]>(
     []
   );
-  useEffect(() => setFollowers(data?.pages.flatMap(page => page.data.flat()) ?? []), [data]);
+  useEffect(() => setFollowers(data?.pages.flatMap(page => page.data) ?? []), [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (followers.length < REQUEST_SIZE) {
