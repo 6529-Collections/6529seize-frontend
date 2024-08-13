@@ -64,6 +64,7 @@ export enum QueryKey {
   WAVES = "WAVES",
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVE = "WAVE",
+  WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
   FEED_ITEMS = "FEED_ITEMS",
 }
 
