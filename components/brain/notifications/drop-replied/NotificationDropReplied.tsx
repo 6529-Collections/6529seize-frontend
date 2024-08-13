@@ -65,15 +65,9 @@ export default function NotificationDropReplied({
           </div>
         </div>
 
-        <div className="tw-ml-12 tw-flex tw-items-stretch tw-gap-x-3">
-          <div className="tw-bg-iron-700 tw-w-1 tw-flex-shrink-0"></div>
-          <p className="tw-block tw-mb-0 tw-font-normal tw-text-iron-50 tw-text-md">
-            {notification.related_drops[1].parts[0].content}
-          </p>
-        </div>
-
         <DropsListItem
           drop={notification.related_drops[0]}
+          replyToDrop={notification.related_drops[1]}
           showWaveInfo={true}
           availableCredit={0}
         />

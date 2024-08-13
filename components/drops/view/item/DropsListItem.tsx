@@ -4,6 +4,7 @@ import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
 import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
+import DropReply, { DropReplyProps } from "./replies/DropReply";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -27,11 +28,13 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
 
 export default function DropsListItem({
   drop,
+  replyToDrop,
   showFull = false,
   showWaveInfo = true,
   availableCredit,
 }: {
   readonly drop: Drop;
+  readonly replyToDrop: Drop | null;
   readonly showFull?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
@@ -100,6 +103,23 @@ export default function DropsListItem({
     [connectedProfile, activeProfileProxy, drop]
   );
 
+  const getReplyProps = (): DropReplyProps | null => {
+    if (replyToDrop) {
+      return { reply: replyToDrop };
+    }
+
+    if (drop.reply_to?.drop_id) {
+      return {
+        dropId: drop.reply_to.drop_id,
+        partId: drop.reply_to.drop_part_id,
+      };
+    }
+
+    return null;
+  };
+
+  const replyProps = getReplyProps();
+
   return (
     <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out">
       <DropListItemCreateQuote
@@ -108,6 +128,9 @@ export default function DropsListItem({
         onSuccessfulQuote={() => setQuoteModePartId(null)}
       />
       <div className="tw-pt-2 sm:tw-pt-3">
+        {replyProps && (
+          <DropReply {...replyProps} />
+        )}
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent

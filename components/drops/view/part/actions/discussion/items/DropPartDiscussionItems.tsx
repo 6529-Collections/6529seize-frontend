@@ -6,18 +6,20 @@ import { commonApiFetch } from "../../../../../../../services/api/common-api";
 import { Page } from "../../../../../../../helpers/Types";
 import { Drop } from "../../../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../../../generated/models/DropPart";
-import DropPartDiscussionItem from "./DropPartDiscussionItem";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../../../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../../../../../utils/CommonIntersectionElement";
+import DropsListItem from "../../../../item/DropsListItem";
 
 export default function DropPartDiscussionItems({
   drop,
   dropPart,
+  availableCredit,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
+  readonly availableCredit: number | null;
 }) {
   const animating = false;
   const [requestAllowed, setRequestAllowed] = useState(false);
@@ -81,10 +83,19 @@ export default function DropPartDiscussionItems({
   };
   return (
     <div className="tw-pb-2">
-      <div className={`${!isFetching && "tw-overflow-y-auto"} tw-max-h-72`}>
+      <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
         <div>
           {replies.map((item) => (
-            <DropPartDiscussionItem key={item.id} item={item} />
+            <DropsListItem
+              key={item.id}
+              drop={{
+                ...item,
+                reply_to: undefined,
+              }}
+              replyToDrop={null}
+              showWaveInfo={true}
+              availableCredit={availableCredit}
+            />
           ))}
         </div>
         <div className="tw-text-center">

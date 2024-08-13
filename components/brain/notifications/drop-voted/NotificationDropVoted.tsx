@@ -73,6 +73,7 @@ export default function NotificationDropVoted({
 
         <DropsListItem
           drop={notification.related_drops[0]}
+          replyToDrop={null}
           showWaveInfo={true}
           availableCredit={0}
         />

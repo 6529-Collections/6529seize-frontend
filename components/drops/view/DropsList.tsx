@@ -1,5 +1,4 @@
 import { Drop } from "../../../generated/models/Drop";
-import DropItem from "./item/DropItem";
 import DropsListItem from "./item/DropsListItem";
 
 export default function DropsList({
@@ -14,7 +13,13 @@ export default function DropsList({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4">
       {drops.map((drop) => (
-        <DropItem drop={drop} key={drop.id} />
+        <DropsListItem
+          drop={drop}
+          key={drop.id}
+          availableCredit={availableCredit}
+          replyToDrop={null}
+          showWaveInfo={showWaveInfo}
+        />
       ))}
     </div>
   );

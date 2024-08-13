@@ -79,7 +79,11 @@ export default function DropPartWrapper({
         </div>
       </div>
       {isDiscussionOpen && (
-        <DropPartDiscussion dropPart={dropPart} drop={drop} />
+        <DropPartDiscussion
+          dropPart={dropPart}
+          drop={drop}
+          availableCredit={availableCredit}
+        />
       )}
     </div>
   );
