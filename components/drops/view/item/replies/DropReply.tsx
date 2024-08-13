@@ -7,6 +7,7 @@ import { DropPartSize } from "../../part/DropPart";
 import { useEffect, useState } from "react";
 import DropPartMarkdown from "../../part/DropPartMarkdown";
 import { useRouter } from "next/router";
+import DropReplyMarkdown from "./DropReplyMarkdown";
 
 interface DropReplyPropsWithDrop {
   readonly reply: Drop;
@@ -117,7 +118,7 @@ export default function DropReply(props: DropReplyProps) {
           </p>
         </div>
         <div onClick={onReplyClick}>
-          <DropPartMarkdown
+          <DropReplyMarkdown
             partContent={replyContent}
             mentionedUsers={finalDrop?.mentioned_users ?? []}
             referencedNfts={finalDrop?.referenced_nfts ?? []}

@@ -32,12 +32,14 @@ export default function DropsListItem({
   showFull = false,
   showWaveInfo = true,
   availableCredit,
+  isReply = false,
 }: {
   readonly drop: Drop;
   readonly replyToDrop: Drop | null;
   readonly showFull?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
+  readonly isReply?: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -121,7 +123,7 @@ export default function DropsListItem({
   const replyProps = getReplyProps();
 
   return (
-    <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out">
+    <div className={`${!isReply && 'tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out'} tw-relative tw-bg-iron-900`}>
       <DropListItemCreateQuote
         drop={drop}
         quotedPartId={quoteModePartId}

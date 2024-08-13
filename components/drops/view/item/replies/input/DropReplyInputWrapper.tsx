@@ -25,9 +25,11 @@ import { DropMedia } from "../../../../../../generated/models/DropMedia";
 export default function DropReplyInputWrapper({
   drop: originalDrop,
   dropPart,
+  onReply,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
+  readonly onReply: () => void;
 }) {
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
@@ -97,6 +99,7 @@ export default function DropReplyInputWrapper({
         dropAuthorHandle: originalDrop.author?.handle,
         dropId: originalDrop.id,
       });
+      onReply()
     },
     onError: (error) => {
       setToast({

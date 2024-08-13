@@ -83,6 +83,7 @@ export default function DropPartWrapper({
           dropPart={dropPart}
           drop={drop}
           availableCredit={availableCredit}
+          closeReplies={() => setIsDiscussionOpen(false)}
         />
       )}
     </div>

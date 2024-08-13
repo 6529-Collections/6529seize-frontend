@@ -84,7 +84,7 @@ export default function DropPartDiscussionItems({
   return (
     <div>
       <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
-        <div>
+        <div className="tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700">
           {replies.map((item) => (
             <DropsListItem
               key={item.id}
@@ -95,6 +95,7 @@ export default function DropPartDiscussionItems({
               replyToDrop={null}
               showWaveInfo={true}
               availableCredit={availableCredit}
+              isReply={true}
             />
           ))}
         </div>
