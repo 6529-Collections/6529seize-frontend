@@ -8,17 +8,57 @@ import Image from "next/image";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import yaml from "js-yaml";
+import { GetServerSideProps } from "next";
+
+interface FileData {
+  url: string;
+  sha512: string;
+  size: number;
+}
+
+interface LatestYml {
+  version: string;
+  files: FileData[];
+}
+
+interface DownloadLink {
+  url: string;
+  display: string;
+}
+
+interface OSInfo {
+  name: "windows" | "mac" | "linux";
+  url: string;
+  displayName: string;
+}
+
+interface DownloadLinks {
+  osName: string;
+  version: string;
+  files: DownloadLink[];
+}
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function DesktopApp() {
+export default function DesktopApp(
+  props: Readonly<{
+    pageProps: {
+      downloadLinks: DownloadLinks[];
+    };
+  }>
+) {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Desktop App" },
   ];
+
+  const { downloadLinks } = props.pageProps;
+
+  console.log("i am here", downloadLinks);
 
   const isMobile = useIsMobileScreen();
 
@@ -173,3 +213,89 @@ export default function DesktopApp() {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const osConfigs: OSInfo[] = [
+    {
+      name: "windows",
+      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
+      displayName: "Windows",
+    },
+    {
+      name: "mac",
+      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
+      displayName: "macOS",
+    },
+    {
+      name: "linux",
+      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
+      displayName: "Linux",
+    },
+  ];
+
+  const fetchYml = async (url: string): Promise<LatestYml> => {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${url}`);
+    }
+
+    const text = await response.text();
+    return yaml.load(text) as LatestYml;
+  };
+
+  const buildDisplayName = (
+    url: string,
+    os: "windows" | "mac" | "linux"
+  ): string => {
+    if (os === "windows") {
+      if (url.includes("x64")) return "x64";
+      if (url.includes("arm64")) return "ARM64";
+      if (url.includes("ia32")) return "x32";
+      return "Universal";
+    } else if (os === "mac") {
+      if (url.includes("arm64") || url.includes("Silicon")) return "Silicon";
+      if (url.includes("x64") || url.includes("Intel")) return "Intel";
+      return "Universal";
+    } else if (os === "linux") {
+      return "Universal";
+    }
+    return "Unknown";
+  };
+
+  const downloadLinks: DownloadLinks[] = [];
+
+  for (const osConfig of osConfigs) {
+    try {
+      const ymlData = await fetchYml(osConfig.url);
+      const files = ymlData.files
+        .filter(
+          (file) =>
+            file.url.endsWith(".exe") ||
+            file.url.endsWith(".dmg") ||
+            file.url.endsWith(".AppImage")
+        )
+        .map((file) => ({
+          url: `https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/${osConfig.name}/${file.url}`,
+          display: buildDisplayName(file.url, osConfig.name),
+        }));
+
+      downloadLinks.push({
+        osName: osConfig.displayName,
+        version: ymlData.version,
+        files,
+      });
+    } catch (error) {
+      console.error(
+        `Failed to fetch or process ${osConfig.displayName}:`,
+        error
+      );
+    }
+  }
+
+  return {
+    props: {
+      downloadLinks,
+    },
+  };
+};
