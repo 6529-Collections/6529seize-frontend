@@ -88,6 +88,9 @@
     },
     "viem": {
       "ws": "8.17.1"
+    },
+    "@openapitools/openapi-generator-cli": {
+      "axios": "1.7.4"
     }
   }
 }
