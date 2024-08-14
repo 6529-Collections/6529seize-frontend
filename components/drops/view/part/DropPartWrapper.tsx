@@ -69,9 +69,9 @@ export default function DropPartWrapper({
     dropReplyDepth === 0
       ? "tw-pl-0"
       : dropReplyDepth === 1
-      ? "tw-pl-12"
+      ? "tw-pl-[52px]"
       : "tw-pl-8";
-  const replyInputIntent = dropReplyDepth > 1 ? "tw-pl-0" : "tw-pl-12";
+  const replyInputIntent = dropReplyDepth > 1 ? "tw-pl-0" : "tw-pl-[52px]";
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -97,10 +97,10 @@ export default function DropPartWrapper({
             {haveData && <DropListItemData drop={drop} />}
           </div>
           <div
-            className={`tw-px-4  tw-relative tw-z-10 ${
+            className={`tw-px-4 tw-relative tw-z-10 ${
               size === DropPartSize.SMALL
                 ? "tw-ml-[0px]"
-                : "tw-ml-[54px] tw-mt-2 tw-pb-2"
+                : "tw-ml-[54px] tw-mt-2"
             }`}
           >
             <DropPartActionTriggers
@@ -119,7 +119,7 @@ export default function DropPartWrapper({
         </div>
       </div>
       {!!(showReplyInput || isDiscussionOpen || quoteModePartId) && (
-        <div className="tw-pb-2">
+        <div>
           {quoteModePartId && (
             <div className={replyInputIntent}>
               <DropListItemQuote

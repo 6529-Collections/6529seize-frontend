@@ -122,7 +122,7 @@ export default function DropsListItem({
         "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out"
       }  tw-relative tw-bg-iron-900`}
     >
-      <div className="tw-pt-2 sm:tw-pt-3">
+      <div className="tw-pt-2 tw-pb-2">
         {replyProps && (
           <div className="tw-mb-1.5">
             <div className="tw-relative tw-flex tw-justify-end">
