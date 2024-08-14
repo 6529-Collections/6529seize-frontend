@@ -138,7 +138,10 @@ export default function DropPartWrapper({
               <DropReplyInputWrapper
                 drop={drop}
                 dropPart={dropPart}
-                onReply={() => setShowReplyInput(false)}
+                onReply={() => {
+                  setShowReplyInput(false)
+                  setIsDiscussionOpen(true)
+                }}
               />
             </div>
           )}
