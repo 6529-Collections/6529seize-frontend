@@ -54,7 +54,8 @@ export default function DropPartWrapper({
   };
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
-  const intent = dropReplyDepth === 0 ? "tw-pl-0" : dropReplyDepth === 1 ? "tw-pl-12" : "tw-pl-8";
+  const repliesIntent = dropReplyDepth === 0 ? "tw-pl-0" : dropReplyDepth === 1 ? "tw-pl-12" : "tw-pl-8";
+  const replyInputIntent =dropReplyDepth > 1 ? "tw-pl-0" : "tw-pl-12";
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -92,21 +93,25 @@ export default function DropPartWrapper({
         </div>
       </div>
       {!!(showReplyInput || isDiscussionOpen) && (
-        <div className={`${intent } tw-pb-2`}>
+        <div className="tw-pb-2">
           {showReplyInput && (
-            <DropReplyInputWrapper
+           <div className={replyInputIntent}>
+             <DropReplyInputWrapper
               drop={drop}
               dropPart={dropPart}
               onReply={() => setShowReplyInput(false)}
             />
+           </div>
           )}
           {isDiscussionOpen && (
-            <DropPartDiscussion
+          <div className={repliesIntent}>
+              <DropPartDiscussion
               dropPart={dropPart}
               drop={drop}
               availableCredit={availableCredit}
               dropReplyDepth={dropReplyDepth}
             />
+          </div>
           )}
         </div>
       )}
