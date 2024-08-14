@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { IdentityAndSubscriptionActions } from "../../../../generated/models/IdentityAndSubscriptionActions";
-import { cicToType } from "../../../../helpers/Helpers";
-import UserCICAndLevel, { UserCICAndLevelSize } from "../../../user/utils/UserCICAndLevel";
+import { IdentityAndSubscriptionActions } from "../../../generated/models/IdentityAndSubscriptionActions";
+import { cicToType } from "../../../helpers/Helpers";
+import UserCICAndLevel, { UserCICAndLevelSize } from "../../user/utils/UserCICAndLevel";
 
-export default function WaveDetailedFollower({
+export default function Follower({
   follower,
 }: {
   readonly follower: IdentityAndSubscriptionActions;

@@ -5,7 +5,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { IncomingIdentitySubscriptionsPage } from "../../../../generated/models/IncomingIdentitySubscriptionsPage";
 import { useEffect, useState } from "react";
 import { IdentityAndSubscriptionActions } from "../../../../generated/models/IdentityAndSubscriptionActions";
-import WaveDetailedFollowersListWrapper from "./WaveDetailedFollowersListWrapper";
+import FollowersListWrapper from "../../../utils/followers/FollowersListWrapper";
 
 const REQUEST_SIZE = 100;
 
@@ -111,7 +111,7 @@ export default function WaveDetailedFollowers({
           Followers
         </div>
 
-      <WaveDetailedFollowersListWrapper followers={followers} loading={isFetching} onBottomIntersection={onBottomIntersection} />
+      <FollowersListWrapper followers={followers} loading={isFetching} onBottomIntersection={onBottomIntersection} />
       </div>
     </div>
   );

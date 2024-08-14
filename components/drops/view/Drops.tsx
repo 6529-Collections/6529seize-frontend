@@ -34,6 +34,7 @@ export default function Drops() {
       const params: Record<string, string> = {
         limit: `${REQUEST_SIZE}`,
         author: handleOrWallet,
+        include_replies: "true",
       };
       if (pageParam) {
         params.serial_no_less_than = `${pageParam}`;

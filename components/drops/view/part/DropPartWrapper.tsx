@@ -7,6 +7,7 @@ import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
+import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 
 export interface DropPartWrapperProps {
   readonly drop: Drop;
@@ -32,6 +33,7 @@ export default function DropPartWrapper({
   children,
 }: DropPartWrapperProps) {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
+  const [showReplyInput, setShowReplyInput] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
 
   const setQuoteDrop = (dropPartId: number) => {
@@ -44,8 +46,12 @@ export default function DropPartWrapper({
     onQuote(null);
   };
 
-  const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
+  const onReplyButtonClick = () => {
+    setShowReplyInput(!showReplyInput);
+  };
 
+  const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
+  const intent = dropReplyDepth > 0;
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -76,18 +82,29 @@ export default function DropPartWrapper({
               availableCredit={availableCredit ?? 0}
               setIsDiscussionOpen={onDiscussionOpen}
               onQuote={setQuoteDrop}
+              onReplyButtonClick={onReplyButtonClick}
             />
           </div>
         </div>
       </div>
-      {isDiscussionOpen && (
-        <DropPartDiscussion
-          dropPart={dropPart}
-          drop={drop}
-          availableCredit={availableCredit}
-          dropReplyDepth={dropReplyDepth}
-          closeReplies={() => setIsDiscussionOpen(false)}
-        />
+      {!!(showReplyInput || isDiscussionOpen) && (
+        <div className={`${intent && "tw-pl-12"} tw-pb-2`}>
+          {showReplyInput && (
+            <DropReplyInputWrapper
+              drop={drop}
+              dropPart={dropPart}
+              onReply={() => setIsDiscussionOpen(false)}
+            />
+          )}
+          {isDiscussionOpen && (
+            <DropPartDiscussion
+              dropPart={dropPart}
+              drop={drop}
+              availableCredit={availableCredit}
+              dropReplyDepth={dropReplyDepth}
+            />
+          )}
+        </div>
       )}
     </div>
   );

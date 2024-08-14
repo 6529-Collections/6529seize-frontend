@@ -7,6 +7,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
+import Link from "next/link";
 
 export default function UserPageFollowers({
   profile,
@@ -17,7 +18,7 @@ export default function UserPageFollowers({
     useQuery<IncomingIdentitySubscriptionsPage>({
       queryKey: [
         QueryKey.IDENTITY_FOLLOWERS,
-        { external_id: profile.profile?.external_id, page_size: 1 },
+        { profile_id: profile.profile?.external_id, page_size: 1,  target_type: "IDENTITY", },
       ],
       queryFn: async () =>
         await commonApiFetch<IncomingIdentitySubscriptionsPage>({
@@ -30,7 +31,7 @@ export default function UserPageFollowers({
     });
 
   return (
-    <div className="tw-inline-flex tw-items-center tw-gap-x-1">
+    <Link href={`/${profile.profile?.handle}/followers`} className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 hover:tw-underline tw-transition tw-duration-300 tw-ease-out">
       {isFetching ? (
         <CircleLoader size={CircleLoaderSize.SMALL} />
       ) : (
@@ -39,8 +40,8 @@ export default function UserPageFollowers({
         </span>
       )}
       <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
-        Followers
+        {followers?.count === 1 ? "Follower" : "Followers"}
       </span>
-    </div>
+    </Link>
   );
 }

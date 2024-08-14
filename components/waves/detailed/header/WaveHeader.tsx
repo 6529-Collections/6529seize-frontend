@@ -101,7 +101,11 @@ export default function WaveHeader({
                     <span className="tw-font-medium">
                       {numberWithCommas(wave.metrics.subscribers_count)}
                     </span>{" "}
-                    <span className="tw-text-iron-400">Followers</span>
+                    <span className="tw-text-iron-400">
+                      {wave.metrics.subscribers_count === 1
+                        ? "Follower"
+                        : "Followers"}
+                    </span>
                   </span>
                 </div>
               </div>

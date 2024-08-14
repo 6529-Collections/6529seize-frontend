@@ -4,6 +4,7 @@ import { DropVoteState } from "../../item/DropsListItem";
 import DropListItemRateGive from "../../item/rate/give/DropListItemRateGive";
 import DropPartQuoteButton from "../quote/DropPartQuoteButton";
 import DropPartDiscussionButton from "./discussion/DropPartDiscussionButton";
+import DropPartReplyButton from "./discussion/DropPartReplyButton";
 import DropPartActionTriggersVoteVoters from "./vote/DropPartActionTriggersVoteVoters";
 import DropPartActionTriggersVoteVotings from "./vote/DropPartActionTriggersVoteVotings";
 
@@ -16,6 +17,7 @@ interface DropPartActionTriggersProps {
   readonly availableCredit: number | null;
   readonly setIsDiscussionOpen: (open: boolean) => void;
   readonly onQuote: (dropPartId: number) => void;
+  readonly onReplyButtonClick: () => void;
 }
 
 export default function DropPartActionTriggers({
@@ -27,6 +29,7 @@ export default function DropPartActionTriggers({
   availableCredit,
   setIsDiscussionOpen,
   onQuote,
+  onReplyButtonClick,
 }: DropPartActionTriggersProps) {
   return (
     <div className="tw-w-full tw-inline-flex tw-justify-between">
@@ -36,6 +39,7 @@ export default function DropPartActionTriggers({
           isDiscussionOpen={isDiscussionOpen}
           setIsDiscussionOpen={setIsDiscussionOpen}
         />
+        <DropPartReplyButton onReplyButtonClick={onReplyButtonClick}/>
         <DropPartQuoteButton dropPart={dropPart} onQuote={onQuote} />
       </div>
       <div className="tw-inline-flex tw-space-x-4 tw-items-center">

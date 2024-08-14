@@ -1,11 +1,11 @@
-import { IdentityAndSubscriptionActions } from "../../../../generated/models/IdentityAndSubscriptionActions";
+import { IdentityAndSubscriptionActions } from "../../../generated/models/IdentityAndSubscriptionActions";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../distribution-plan-tool/common/CircleLoader";
-import CommonIntersectionElement from "../../../utils/CommonIntersectionElement";
-import WaveDetailedFollowersList from "./WaveDetailedFollowersList";
+} from "../../distribution-plan-tool/common/CircleLoader";
+import CommonIntersectionElement from "../CommonIntersectionElement";
+import FollowersList from "./FollowersList";
 
-export default function WaveDetailedFollowersListWrapper({
+export default function FollowersListWrapper({
   followers,
   loading,
   onBottomIntersection,
@@ -16,7 +16,7 @@ export default function WaveDetailedFollowersListWrapper({
 }) {
   return (
     <div className="tw-overflow-hidden">
-      <WaveDetailedFollowersList followers={followers} />
+      <FollowersList followers={followers} />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
