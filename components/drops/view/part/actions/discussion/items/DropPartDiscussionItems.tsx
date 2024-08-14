@@ -92,10 +92,7 @@ export default function DropPartDiscussionItems({
           {replies.map((item) => (
             <DropsListItem
               key={item.id}
-              drop={{
-                ...item,
-                reply_to: undefined,
-              }}
+              drop={item}
               replyToDrop={null}
               showWaveInfo={true}
               availableCredit={availableCredit}

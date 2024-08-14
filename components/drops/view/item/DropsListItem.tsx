@@ -122,8 +122,8 @@ export default function DropsListItem({
         "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
       }  tw-relative tw-bg-iron-900`}
     >
-      <div className="tw-pt-2 tw-pb-2">
-        {replyProps && (
+      <div className={`${dropReplyDepth === 0 && 'tw-pb-2'} tw-pt-2`}>
+        {replyProps && dropReplyDepth === 0 && (
           <div className="tw-mb-1.5">
             <div className="tw-relative tw-flex tw-justify-end">
               <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-8 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[2px] tw-border-l-[2px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>

@@ -7,6 +7,7 @@ import { DropVoteState } from "../DropsListItem";
 import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
+import DropListItemContentWrapper from "./DropListItemContentWrapper";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -41,7 +42,6 @@ export default function DropListItemContent({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
-  
   useEffect(
     () => setActivePart(drop.parts[activePartIndex]),
     [activePartIndex]
@@ -92,7 +92,10 @@ export default function DropListItemContent({
   const size = dropReplyDepth > 1 ? DropPartSize.SMALL : DropPartSize.MEDIUM;
 
   return (
-    <CommonAnimationHeight onAnimationCompleted={scrollIntoView}>
+    <DropListItemContentWrapper
+      scrollIntoView={scrollIntoView}
+      shouldWrap={dropReplyDepth === 0}
+    >
       <div className="tw-space-y-6 tw-h-full" ref={containerRef}>
         <DropPartWrapper
           dropPart={activePart}
@@ -122,7 +125,7 @@ export default function DropListItemContent({
             }
             showFull={showFull}
             wave={
-              showWaveInfo 
+              showWaveInfo
                 ? {
                     name: drop.wave.name,
                     image: drop.wave.picture,
@@ -147,6 +150,6 @@ export default function DropListItemContent({
           />
         </DropPartWrapper>
       </div>
-    </CommonAnimationHeight>
+    </DropListItemContentWrapper>
   );
 }

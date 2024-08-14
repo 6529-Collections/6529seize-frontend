@@ -96,9 +96,10 @@ export default function DropReplyInputWrapper({
       setDrop(null);
       onDropDiscussionChange({
         dropAuthorHandle: originalDrop.author?.handle,
+        parentDropId: originalDrop.reply_to?.drop_id ?? null,
         dropId: originalDrop.id,
       });
-      onReply()
+      onReply();
     },
     onError: (error) => {
       setToast({
