@@ -9,6 +9,8 @@ import { DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
+import DropListItemCreateQuote from "../item/quote/DropListItemCreateQuote";
+import DropListItemQuote from "../item/quote/DropListItemQuote";
 
 export interface DropPartWrapperProps {
   readonly drop: Drop;
@@ -18,7 +20,6 @@ export interface DropPartWrapperProps {
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly size?: DropPartSize;
-  readonly onQuote: (dropPartId: number | null) => void;
   readonly onContentClick?: () => void;
   readonly children: React.ReactNode;
 }
@@ -31,7 +32,6 @@ export default function DropPartWrapper({
   availableCredit,
   dropReplyDepth,
   size = DropPartSize.MEDIUM,
-  onQuote,
   onContentClick,
   children,
 }: DropPartWrapperProps) {
@@ -39,9 +39,15 @@ export default function DropPartWrapper({
   const [showReplyInput, setShowReplyInput] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
 
-  const setQuoteDrop = (dropPartId: number) => {
-    setIsDiscussionOpen(false);
-    onQuote(dropPartId);
+  const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
+
+  const onQuote = (dropPartId: number | null) => {
+    if (dropPartId === quoteModePartId) {
+      setQuoteModePartId(null);
+    } else {
+      setShowReplyInput(false);
+      setQuoteModePartId(dropPartId);
+    }
   };
 
   const onDiscussionOpen = (state: boolean) => {
@@ -50,12 +56,22 @@ export default function DropPartWrapper({
   };
 
   const onReplyButtonClick = () => {
-    setShowReplyInput(!showReplyInput);
+    if (showReplyInput) {
+      setShowReplyInput(false);
+    } else {
+      setQuoteModePartId(null);
+      setShowReplyInput(true);
+    }
   };
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
-  const repliesIntent = dropReplyDepth === 0 ? "tw-pl-0" : dropReplyDepth === 1 ? "tw-pl-12" : "tw-pl-8";
-  const replyInputIntent =dropReplyDepth > 1 ? "tw-pl-0" : "tw-pl-12";
+  const repliesIntent =
+    dropReplyDepth === 0
+      ? "tw-pl-0"
+      : dropReplyDepth === 1
+      ? "tw-pl-12"
+      : "tw-pl-8";
+  const replyInputIntent = dropReplyDepth > 1 ? "tw-pl-0" : "tw-pl-12";
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -73,10 +89,20 @@ export default function DropPartWrapper({
               )}
             </div>
           </div>
-          <div className={`tw-relative tw-z-10 ${size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px]"}`}>
+          <div
+            className={`tw-relative tw-z-10 ${
+              size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px]"
+            }`}
+          >
             {haveData && <DropListItemData drop={drop} />}
           </div>
-          <div className={`tw-px-4  tw-relative tw-z-10 ${size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px] tw-mt-2 tw-pb-2"}`}>
+          <div
+            className={`tw-px-4  tw-relative tw-z-10 ${
+              size === DropPartSize.SMALL
+                ? "tw-ml-[0px]"
+                : "tw-ml-[54px] tw-mt-2 tw-pb-2"
+            }`}
+          >
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
@@ -86,32 +112,43 @@ export default function DropPartWrapper({
               availableCredit={availableCredit ?? 0}
               size={size}
               setIsDiscussionOpen={onDiscussionOpen}
-              onQuote={setQuoteDrop}
+              onQuote={onQuote}
               onReplyButtonClick={onReplyButtonClick}
             />
           </div>
         </div>
       </div>
-      {!!(showReplyInput || isDiscussionOpen) && (
+      {!!(showReplyInput || isDiscussionOpen || quoteModePartId) && (
         <div className="tw-pb-2">
+          {quoteModePartId && (
+            <div className={replyInputIntent}>
+              <DropListItemQuote
+                quotedDrop={drop}
+                quotedPartId={quoteModePartId}
+                init={true}
+                onSuccessfulDrop={() => setQuoteModePartId(null)}
+              />
+            </div>
+          )}
+
           {showReplyInput && (
-           <div className={replyInputIntent}>
-             <DropReplyInputWrapper
-              drop={drop}
-              dropPart={dropPart}
-              onReply={() => setShowReplyInput(false)}
-            />
-           </div>
+            <div className={replyInputIntent}>
+              <DropReplyInputWrapper
+                drop={drop}
+                dropPart={dropPart}
+                onReply={() => setShowReplyInput(false)}
+              />
+            </div>
           )}
           {isDiscussionOpen && (
-          <div className={repliesIntent}>
+            <div className={repliesIntent}>
               <DropPartDiscussion
-              dropPart={dropPart}
-              drop={drop}
-              availableCredit={availableCredit}
-              dropReplyDepth={dropReplyDepth}
-            />
-          </div>
+                dropPart={dropPart}
+                drop={drop}
+                availableCredit={availableCredit}
+                dropReplyDepth={dropReplyDepth}
+              />
+            </div>
           )}
         </div>
       )}

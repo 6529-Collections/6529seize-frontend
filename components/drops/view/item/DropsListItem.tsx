@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import DropListItemContent from "./content/DropListItemContent";
-import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
 import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
@@ -78,15 +77,7 @@ export default function DropsListItem({
   const [canVote, setCanVote] = useState(getCanVote());
   useEffect(() => setCanVote(getCanVote()), [voteState]);
 
-  const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
 
-  const onQuote = (dropPartId: number | null) => {
-    if (dropPartId === quoteModePartId) {
-      setQuoteModePartId(null);
-    } else {
-      setQuoteModePartId(dropPartId);
-    }
-  };
 
   const getCanFollow = () => {
     if (!connectedProfile?.profile?.handle) {
@@ -131,11 +122,6 @@ export default function DropsListItem({
         "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out"
       }  tw-relative tw-bg-iron-900`}
     >
-      <DropListItemCreateQuote
-        drop={drop}
-        quotedPartId={quoteModePartId}
-        onSuccessfulQuote={() => setQuoteModePartId(null)}
-      />
       <div className="tw-pt-2 sm:tw-pt-3">
         {replyProps && (
           <div className="tw-mb-1.5">
@@ -156,7 +142,6 @@ export default function DropsListItem({
               showWaveInfo={showWaveInfo}
               smallMenuIsShown={canFollow}
               dropReplyDepth={dropReplyDepth}
-              onQuote={onQuote}
             />
             {canFollow && (
               <div className="tw-absolute tw-right-14">

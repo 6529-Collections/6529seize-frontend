@@ -22,7 +22,6 @@ interface DropListItemContentProps {
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
   readonly dropReplyDepth: number;
-  readonly onQuote: (dropPartId: number | null) => void;
 }
 
 export default function DropListItemContent({
@@ -34,7 +33,6 @@ export default function DropListItemContent({
   showWaveInfo = true,
   smallMenuIsShown,
   dropReplyDepth,
-  onQuote,
 }: DropListItemContentProps) {
   const router = useRouter();
   const partsCount = drop.parts.length;
@@ -42,6 +40,8 @@ export default function DropListItemContent({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
+
+  
   useEffect(
     () => setActivePart(drop.parts[activePartIndex]),
     [activePartIndex]
@@ -102,7 +102,6 @@ export default function DropListItemContent({
           availableCredit={availableCredit}
           dropReplyDepth={dropReplyDepth}
           size={size}
-          onQuote={onQuote}
           onContentClick={onContentClick}
         >
           <DropPart
