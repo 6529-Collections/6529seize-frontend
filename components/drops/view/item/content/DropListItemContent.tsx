@@ -1,5 +1,5 @@
 import { Drop } from "../../../../../generated/models/Drop";
-import DropPart from "../../part/DropPart";
+import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
 import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
@@ -89,6 +89,8 @@ export default function DropListItemContent({
     });
   };
 
+  const size = dropReplyDepth > 1 ? DropPartSize.SMALL : DropPartSize.MEDIUM;
+
   return (
     <CommonAnimationHeight onAnimationCompleted={scrollIntoView}>
       <div className="tw-space-y-6 tw-h-full" ref={containerRef}>
@@ -99,11 +101,13 @@ export default function DropListItemContent({
           canVote={canVote}
           availableCredit={availableCredit}
           dropReplyDepth={dropReplyDepth}
+          size={size}
           onQuote={onQuote}
           onContentClick={onContentClick}
         >
           <DropPart
             profile={drop.author}
+            size={size}
             mentionedUsers={drop.mentioned_users}
             referencedNfts={drop.referenced_nfts}
             partContent={activePart.content ?? null}
@@ -119,7 +123,7 @@ export default function DropListItemContent({
             }
             showFull={showFull}
             wave={
-              showWaveInfo
+              showWaveInfo 
                 ? {
                     name: drop.wave.name,
                     image: drop.wave.picture,

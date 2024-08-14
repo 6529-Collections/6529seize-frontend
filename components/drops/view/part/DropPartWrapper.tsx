@@ -8,6 +8,7 @@ import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
+import { DropPartSize } from "./DropPart";
 
 export interface DropPartWrapperProps {
   readonly drop: Drop;
@@ -16,6 +17,7 @@ export interface DropPartWrapperProps {
   readonly canVote: boolean;
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
+  readonly size?: DropPartSize;
   readonly onQuote: (dropPartId: number | null) => void;
   readonly onContentClick?: () => void;
   readonly children: React.ReactNode;
@@ -28,6 +30,7 @@ export default function DropPartWrapper({
   canVote,
   availableCredit,
   dropReplyDepth,
+  size = DropPartSize.MEDIUM,
   onQuote,
   onContentClick,
   children,
@@ -51,7 +54,7 @@ export default function DropPartWrapper({
   };
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
-  const intent = dropReplyDepth > 0;
+  const intent = dropReplyDepth === 0 ? "tw-pl-0" : dropReplyDepth === 1 ? "tw-pl-12" : "tw-pl-8";
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -69,10 +72,10 @@ export default function DropPartWrapper({
               )}
             </div>
           </div>
-          <div className="tw-relative tw-z-10 tw-ml-[54px]">
+          <div className={`tw-relative tw-z-10 ${size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px]"}`}>
             {haveData && <DropListItemData drop={drop} />}
           </div>
-          <div className="tw-px-4 tw-mt-2 tw-pb-2 tw-relative tw-z-10 tw-ml-[54px]">
+          <div className={`tw-px-4  tw-relative tw-z-10 ${size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px] tw-mt-2 tw-pb-2"}`}>
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
@@ -80,6 +83,7 @@ export default function DropPartWrapper({
               voteState={voteState}
               canVote={canVote}
               availableCredit={availableCredit ?? 0}
+              size={size}
               setIsDiscussionOpen={onDiscussionOpen}
               onQuote={setQuoteDrop}
               onReplyButtonClick={onReplyButtonClick}
@@ -88,12 +92,12 @@ export default function DropPartWrapper({
         </div>
       </div>
       {!!(showReplyInput || isDiscussionOpen) && (
-        <div className={`${intent && "tw-pl-12"} tw-pb-2`}>
+        <div className={`${intent } tw-pb-2`}>
           {showReplyInput && (
             <DropReplyInputWrapper
               drop={drop}
               dropPart={dropPart}
-              onReply={() => setIsDiscussionOpen(false)}
+              onReply={() => setShowReplyInput(false)}
             />
           )}
           {isDiscussionOpen && (

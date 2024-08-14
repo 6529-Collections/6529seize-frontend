@@ -86,7 +86,7 @@ export default function DropPartDiscussionItems({
   return (
     <div>
       <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
-        <div className="tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700">
+        <div>
           {replies.map((item) => (
             <DropsListItem
               key={item.id}

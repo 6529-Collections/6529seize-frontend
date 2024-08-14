@@ -13,12 +13,15 @@ export default function DropPartDiscussion({
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
 }) {
+  const showBorder = dropReplyDepth === 0
   return (
-    <DropPartDiscussionItems
-      drop={drop}
-      dropPart={dropPart}
-      availableCredit={availableCredit}
-      dropReplyDepth={dropReplyDepth}
-    />
+    <div className={`${showBorder && "tw-mt-2 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-700"}`}>
+      <DropPartDiscussionItems
+        drop={drop}
+        dropPart={dropPart}
+        availableCredit={availableCredit}
+        dropReplyDepth={dropReplyDepth}
+      />
+    </div>
   );
 }
