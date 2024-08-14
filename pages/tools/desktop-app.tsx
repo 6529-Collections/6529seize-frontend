@@ -260,33 +260,43 @@ export const getServerSideProps: GetServerSideProps = async () => {
     return yaml.load(text) as LatestYml;
   };
 
+  const getWindowsDisplayName = (url: string) => {
+    if (url.includes("x64"))
+      return { name: "64-bit (x64)", note: "Recommended" };
+    if (url.includes("arm64")) return { name: "ARM64" };
+    if (url.includes("ia32")) return { name: "32-bit (x32)" };
+    return { name: "Universal", note: "Larger file size" };
+  };
+
+  const getMacDisplayName = (url: string) => {
+    if (url.includes("arm64") || url.includes("Silicon"))
+      return { name: "Silicon" };
+    if (url.includes("x64") || url.includes("Intel")) return { name: "Intel" };
+    return { name: "Universal" };
+  };
+
+  const getLinuxDisplayName = (url: string) => {
+    if (url.includes("AppImage"))
+      return { name: "AppImage", note: "Recommended" };
+    if (url.includes("deb")) return { name: "Debian", note: ".deb" };
+    if (url.includes("rpm")) return { name: "Red Hat", note: ".rpm" };
+    return { name: "Universal" };
+  };
+
   const buildDisplayName = (
     url: string,
     os: "windows" | "mac" | "linux"
-  ): {
-    name: string;
-    note?: string;
-  } => {
-    if (os === "windows") {
-      if (url.includes("x64"))
-        return { name: "64-bit (x64)", note: "Recommended" };
-      if (url.includes("arm64")) return { name: "ARM64" };
-      if (url.includes("ia32")) return { name: "32-bit (x32)" };
-      return { name: "Universal", note: "Larger file size" };
-    } else if (os === "mac") {
-      if (url.includes("arm64") || url.includes("Silicon"))
-        return { name: "Silicon" };
-      if (url.includes("x64") || url.includes("Intel"))
-        return { name: "Intel" };
-      return { name: "Universal" };
-    } else if (os === "linux") {
-      if (url.includes("AppImage"))
-        return { name: "AppImage", note: "Recommended" };
-      if (url.includes("deb")) return { name: "Debian", note: ".deb" };
-      if (url.includes("rpm")) return { name: "Red Hat", note: ".rpm" };
-      return { name: "Universal" };
+  ): { name: string; note?: string } => {
+    switch (os) {
+      case "windows":
+        return getWindowsDisplayName(url);
+      case "mac":
+        return getMacDisplayName(url);
+      case "linux":
+        return getLinuxDisplayName(url);
+      default:
+        return { name: "Unknown" };
     }
-    return { name: "Unknown" };
   };
 
   const downloadLinks: DownloadLinks[] = [];
