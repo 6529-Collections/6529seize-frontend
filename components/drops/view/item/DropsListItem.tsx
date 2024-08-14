@@ -119,7 +119,7 @@ export default function DropsListItem({
     <div
       className={`${
         !isReply &&
-        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out"
+        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
       }  tw-relative tw-bg-iron-900`}
     >
       <div className="tw-pt-2 tw-pb-2">

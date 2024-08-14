@@ -21,7 +21,7 @@ export default function WaveDescriptionDrop({
   });
 
   return (
-    <div className="tw-mb-4 tw-mt-4">
+    <div className="tw-mb-2 md:tw-mb-4 tw-mt-4">
       <div className="tw-inline-flex tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-400">
         <svg
           className="tw-size-4 tw-text-iron-400"

@@ -102,7 +102,7 @@ export default function DropPartWrapper({
             className={`tw-px-4 tw-relative tw-z-10 ${
               size === DropPartSize.SMALL
                 ? "tw-ml-[0px]"
-                : "tw-ml-[54px] tw-mt-2"
+                : "tw-ml-9 sm:tw-ml-[54px] tw-mt-2"
             }`}
           >
             <DropPartActionTriggers
