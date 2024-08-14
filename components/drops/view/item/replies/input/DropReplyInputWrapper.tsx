@@ -94,7 +94,6 @@ export default function DropReplyInputWrapper({
     },
     onSuccess: () => {
       setDrop(null);
-      // TODO
       onDropDiscussionChange({
         dropAuthorHandle: originalDrop.author?.handle,
         dropId: originalDrop.id,

@@ -41,11 +41,13 @@ export default function DropPartActionTriggers({
           size === DropPartSize.SMALL ? "tw-gap-x-6" : "tw-gap-x-6"
         } tw-px-4 sm:tw-px-0  tw-flex tw-items-center`}
       >
-        <DropPartDiscussionButton
-          dropPart={dropPart}
-          isDiscussionOpen={isDiscussionOpen}
-          setIsDiscussionOpen={setIsDiscussionOpen}
-        />
+        {!!dropPart.replies_count && (
+          <DropPartDiscussionButton
+            dropPart={dropPart}
+            isDiscussionOpen={isDiscussionOpen}
+            setIsDiscussionOpen={setIsDiscussionOpen}
+          />
+        )}
         <DropPartReplyButton onReplyButtonClick={onReplyButtonClick} />
         <DropPartQuoteButton dropPart={dropPart} onQuote={onQuote} />
       </div>
