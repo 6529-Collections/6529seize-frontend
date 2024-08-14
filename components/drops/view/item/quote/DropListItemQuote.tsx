@@ -46,6 +46,7 @@ export default function DropListItemQuote({
               dropId: quotedDrop.id,
               partId: quotedPartId,
             }}
+            showProfile={false}
             isClient={init}
             wave={{
               name: quotedDrop.wave.name,

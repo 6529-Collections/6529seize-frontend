@@ -14,6 +14,8 @@ export default function DropPartDiscussionButton({
 }) {
   const discussionCount = dropPart.replies_count;
   const userHaveDiscussed = !!dropPart.context_profile_context?.replies_count;
+
+
   return (
     <Tippy content="Replies">
       <button

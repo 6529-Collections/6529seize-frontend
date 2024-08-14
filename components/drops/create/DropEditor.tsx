@@ -41,6 +41,7 @@ interface DropEditorProps {
   readonly dropEditorRefreshKey: number;
   readonly showSubmit?: boolean;
   readonly showDropError?: boolean;
+  readonly showProfile?: boolean;
   readonly wave: DropEditorWaveProps | null;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
   readonly onCanSubmitChange?: (canSubmit: boolean) => void;
@@ -57,6 +58,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       dropEditorRefreshKey,
       showSubmit = true,
       showDropError = false,
+      showProfile = true,
       wave,
       onSubmitDrop,
       onCanSubmitChange,
@@ -127,6 +129,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           ref={createDropWrapperRef}
           profile={profile}
           quotedDrop={quotedDrop}
+          showProfile={showProfile}
           type={type}
           loading={loading}
           title={title}

@@ -9,7 +9,6 @@ import { DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
-import DropListItemCreateQuote from "../item/quote/DropListItemCreateQuote";
 import DropListItemQuote from "../item/quote/DropListItemQuote";
 
 export interface DropPartWrapperProps {
@@ -51,6 +50,9 @@ export default function DropPartWrapper({
   };
 
   const onDiscussionOpen = (state: boolean) => {
+    if (!dropPart.replies_count) {
+      return
+    }
     setIsDiscussionOpen(state);
     onQuote(null);
   };

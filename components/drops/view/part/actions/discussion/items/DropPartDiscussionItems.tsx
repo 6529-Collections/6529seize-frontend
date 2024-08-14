@@ -83,10 +83,12 @@ export default function DropPartDiscussionItems({
 
     fetchNextPage();
   };
+
+  const showDivide = dropReplyDepth === 0
   return (
     <div>
       <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
-        <div>
+        <div className={`${showDivide && "tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700"}`}>
           {replies.map((item) => (
             <DropsListItem
               key={item.id}
