@@ -276,8 +276,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   };
 
   const getLinuxDisplayName = (url: string) => {
-    if (url.includes("AppImage"))
-      return { name: "AppImage", note: "Recommended" };
+    if (url.includes("AppImage")) return { name: "AppImage" };
     if (url.includes("deb")) return { name: "Debian", note: ".deb" };
     if (url.includes("rpm")) return { name: "Red Hat", note: ".rpm" };
     return { name: "Universal" };
