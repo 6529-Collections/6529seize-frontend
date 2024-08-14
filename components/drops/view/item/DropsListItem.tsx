@@ -33,6 +33,7 @@ export default function DropsListItem({
   showWaveInfo = true,
   availableCredit,
   isReply = false,
+  dropReplyDepth = 0,
 }: {
   readonly drop: Drop;
   readonly replyToDrop: Drop | null;
@@ -40,6 +41,7 @@ export default function DropsListItem({
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
   readonly isReply?: boolean;
+  readonly dropReplyDepth?: number;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -153,6 +155,7 @@ export default function DropsListItem({
               availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
               smallMenuIsShown={canFollow}
+              dropReplyDepth={dropReplyDepth}
               onQuote={onQuote}
             />
             {canFollow && (

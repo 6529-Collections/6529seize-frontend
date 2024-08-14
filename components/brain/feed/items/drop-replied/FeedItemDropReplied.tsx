@@ -12,8 +12,8 @@ export default function FeedItemDropReplied({
 }) {
   return (
     <DropsListItem
-      drop={item.item.drop}
-      replyToDrop={item.item.reply}
+      drop={item.item.reply}
+      replyToDrop={item.item.drop}
       showWaveInfo={showWaveInfo}
       availableCredit={availableCredit}
     />

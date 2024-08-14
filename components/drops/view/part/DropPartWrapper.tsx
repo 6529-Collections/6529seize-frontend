@@ -14,6 +14,7 @@ export interface DropPartWrapperProps {
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
+  readonly dropReplyDepth: number;
   readonly onQuote: (dropPartId: number | null) => void;
   readonly onContentClick?: () => void;
   readonly children: React.ReactNode;
@@ -25,6 +26,7 @@ export default function DropPartWrapper({
   voteState,
   canVote,
   availableCredit,
+  dropReplyDepth,
   onQuote,
   onContentClick,
   children,
@@ -83,6 +85,7 @@ export default function DropPartWrapper({
           dropPart={dropPart}
           drop={drop}
           availableCredit={availableCredit}
+          dropReplyDepth={dropReplyDepth}
           closeReplies={() => setIsDiscussionOpen(false)}
         />
       )}

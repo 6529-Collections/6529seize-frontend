@@ -21,6 +21,7 @@ interface DropListItemContentProps {
   readonly availableCredit: number | null;
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
+  readonly dropReplyDepth: number;
   readonly onQuote: (dropPartId: number | null) => void;
 }
 
@@ -32,6 +33,7 @@ export default function DropListItemContent({
   availableCredit,
   showWaveInfo = true,
   smallMenuIsShown,
+  dropReplyDepth,
   onQuote,
 }: DropListItemContentProps) {
   const router = useRouter();
@@ -96,6 +98,7 @@ export default function DropListItemContent({
           voteState={voteState}
           canVote={canVote}
           availableCredit={availableCredit}
+          dropReplyDepth={dropReplyDepth}
           onQuote={onQuote}
           onContentClick={onContentClick}
         >

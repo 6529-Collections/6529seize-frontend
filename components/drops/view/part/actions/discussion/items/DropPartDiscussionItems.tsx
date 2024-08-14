@@ -15,10 +15,12 @@ import DropsListItem from "../../../../item/DropsListItem";
 export default function DropPartDiscussionItems({
   drop,
   dropPart,
+  dropReplyDepth,
   availableCredit,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
+  readonly dropReplyDepth: number;
   readonly availableCredit: number | null;
 }) {
   const animating = false;
@@ -96,6 +98,7 @@ export default function DropPartDiscussionItems({
               showWaveInfo={true}
               availableCredit={availableCredit}
               isReply={true}
+              dropReplyDepth={dropReplyDepth + 1}
             />
           ))}
         </div>
