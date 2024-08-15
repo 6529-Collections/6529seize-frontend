@@ -100,7 +100,7 @@ export default function DropPartDiscussionItems({
   const showDivide = dropReplyDepth === 0;
   return (
     <div>
-      <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
+      <div className={`${!isFetching && ""}`}>
         <div
           className={`${
             showDivide &&
