@@ -23,6 +23,7 @@ interface DropListItemContentProps {
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
   readonly dropReplyDepth: number;
+  readonly onDiscussionStateChange?: (state: boolean) => void;
 }
 
 export default function DropListItemContent({
@@ -34,6 +35,7 @@ export default function DropListItemContent({
   showWaveInfo = true,
   smallMenuIsShown,
   dropReplyDepth,
+  onDiscussionStateChange,
 }: DropListItemContentProps) {
   const router = useRouter();
   const partsCount = drop.parts.length;
@@ -106,6 +108,7 @@ export default function DropListItemContent({
           dropReplyDepth={dropReplyDepth}
           size={size}
           onContentClick={onContentClick}
+          onDiscussionStateChange={onDiscussionStateChange}
         >
           <DropPart
             profile={drop.author}

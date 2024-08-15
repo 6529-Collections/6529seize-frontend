@@ -17,11 +17,13 @@ export default function DropPartDiscussionItems({
   dropPart,
   dropReplyDepth,
   availableCredit,
+  setRepliesOpen,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly dropReplyDepth: number;
   readonly availableCredit: number | null;
+  readonly setRepliesOpen: (state: boolean) => void;
 }) {
   const animating = false;
   const [requestAllowed, setRequestAllowed] = useState(false);
@@ -59,10 +61,21 @@ export default function DropPartDiscussionItems({
     enabled: requestAllowed,
   });
 
+  const [activeDiscussionDropId, setActiveDiscussionDropId] = useState<
+    string | null
+  >(null);
+
   const [replies, setReplies] = useState<Drop[]>([]);
   useEffect(() => {
-    setReplies(items?.pages.flatMap((page) => page.data) ?? []);
-  }, [items]);
+    const results = items?.pages.flatMap((page) => page.data) ?? []
+    if (!activeDiscussionDropId ) {
+      setReplies(results);
+      setRepliesOpen(false);
+      return
+    }
+    setReplies(results.filter((item) => item.id === activeDiscussionDropId));
+    setRepliesOpen(true);
+  }, [items, activeDiscussionDropId]);
 
   const onBottomIntersection = (state: boolean) => {
     if (!state) {
@@ -84,11 +97,16 @@ export default function DropPartDiscussionItems({
     fetchNextPage();
   };
 
-  const showDivide = dropReplyDepth === 0
+  const showDivide = dropReplyDepth === 0;
   return (
     <div>
       <div className={`${!isFetching && "tw-overflow-y-auto"}`}>
-        <div className={`${showDivide && "tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700"}`}>
+        <div
+          className={`${
+            showDivide &&
+            "tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700"
+          }`}
+        >
           {replies.map((item) => (
             <DropsListItem
               key={item.id}
@@ -97,7 +115,8 @@ export default function DropPartDiscussionItems({
               showWaveInfo={true}
               availableCredit={availableCredit}
               isReply={true}
-              dropReplyDepth={dropReplyDepth + 1}
+              dropReplyDepth={activeDiscussionDropId ? 1 : dropReplyDepth + 1}
+              onDiscussionStateChange={setActiveDiscussionDropId}
             />
           ))}
         </div>

@@ -7,11 +7,13 @@ export default function DropPartDiscussion({
   dropPart,
   availableCredit,
   dropReplyDepth,
+  setRepliesOpen,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
+  readonly setRepliesOpen: (state: boolean) => void;
 }) {
   const showBorder = dropReplyDepth === 0
   return (
@@ -21,6 +23,7 @@ export default function DropPartDiscussion({
         dropPart={dropPart}
         availableCredit={availableCredit}
         dropReplyDepth={dropReplyDepth}
+        setRepliesOpen={setRepliesOpen}
       />
     </div>
   );

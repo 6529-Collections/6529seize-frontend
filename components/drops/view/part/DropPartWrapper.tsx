@@ -1,7 +1,7 @@
 import { DropPart } from "../../../../generated/models/DropPart";
 import DropPartDiscussion from "./actions/discussion/DropPartDiscussion";
 import DropPartActionTriggers from "./actions/DropPartActionTriggers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
@@ -20,6 +20,7 @@ export interface DropPartWrapperProps {
   readonly dropReplyDepth: number;
   readonly size?: DropPartSize;
   readonly onContentClick?: () => void;
+  readonly onDiscussionStateChange?: (state: boolean) => void;
   readonly children: React.ReactNode;
 }
 
@@ -32,9 +33,16 @@ export default function DropPartWrapper({
   dropReplyDepth,
   size = DropPartSize.MEDIUM,
   onContentClick,
+  onDiscussionStateChange,
   children,
 }: DropPartWrapperProps) {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
+
+  useEffect(
+    () => onDiscussionStateChange && onDiscussionStateChange(isDiscussionOpen),
+    [isDiscussionOpen]
+  );
+
   const [showReplyInput, setShowReplyInput] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
 
@@ -51,7 +59,7 @@ export default function DropPartWrapper({
 
   const onDiscussionOpen = (state: boolean) => {
     if (!dropPart.replies_count) {
-      return
+      return;
     }
     setIsDiscussionOpen(state);
     onQuote(null);
@@ -67,13 +75,21 @@ export default function DropPartWrapper({
   };
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
-  const repliesIntent =
-    dropReplyDepth === 0
-      ? "tw-pl-0"
-      : dropReplyDepth === 1
-      ? "tw-pl-[52px]"
-      : "tw-pl-8";
-  const replyInputIntent = dropReplyDepth > 1 ? "tw-pl-0" : "tw-pl-[52px]";
+  const [repliesOpen, setRepliesOpen] = useState(false);
+  const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
+    'tw-pl-0'
+  );
+
+  useEffect(() => {
+    if (repliesOpen) {
+      setRepliesIntent("tw-pl-0");
+      return
+    }
+    setRepliesIntent(dropReplyDepth > 0 ? "tw-pl-12" : "tw-pl-0");
+  }, [dropReplyDepth, repliesOpen]);
+
+  //const repliesIntent = dropReplyDepth > 0 ? "tw-pl-12" : "tw-pl-0";
+  const replyInputIntent = "tw-pl-0";
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -139,8 +155,8 @@ export default function DropPartWrapper({
                 drop={drop}
                 dropPart={dropPart}
                 onReply={() => {
-                  setShowReplyInput(false)
-                  setIsDiscussionOpen(true)
+                  setShowReplyInput(false);
+                  setIsDiscussionOpen(true);
                 }}
               />
             </div>
@@ -152,6 +168,7 @@ export default function DropPartWrapper({
                 drop={drop}
                 availableCredit={availableCredit}
                 dropReplyDepth={dropReplyDepth}
+                setRepliesOpen={setRepliesOpen}
               />
             </div>
           )}

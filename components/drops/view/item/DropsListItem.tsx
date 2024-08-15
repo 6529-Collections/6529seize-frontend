@@ -33,6 +33,7 @@ export default function DropsListItem({
   availableCredit,
   isReply = false,
   dropReplyDepth = 0,
+  onDiscussionStateChange,
 }: {
   readonly drop: Drop;
   readonly replyToDrop: Drop | null;
@@ -41,6 +42,7 @@ export default function DropsListItem({
   readonly availableCredit: number | null;
   readonly isReply?: boolean;
   readonly dropReplyDepth?: number;
+  readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -76,8 +78,6 @@ export default function DropsListItem({
   const getCanVote = () => voteState === DropVoteState.CAN_VOTE;
   const [canVote, setCanVote] = useState(getCanVote());
   useEffect(() => setCanVote(getCanVote()), [voteState]);
-
-
 
   const getCanFollow = () => {
     if (!connectedProfile?.profile?.handle) {
@@ -122,7 +122,7 @@ export default function DropsListItem({
         "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
       }  tw-relative tw-bg-iron-900`}
     >
-      <div className={`${dropReplyDepth === 0 && 'tw-pb-2'} tw-pt-2`}>
+      <div className={`${dropReplyDepth === 0 && "tw-pb-2"} tw-pt-2`}>
         {replyProps && dropReplyDepth === 0 && (
           <div className="tw-mb-1.5">
             <div className="tw-relative tw-flex tw-justify-end">
@@ -142,6 +142,11 @@ export default function DropsListItem({
               showWaveInfo={showWaveInfo}
               smallMenuIsShown={canFollow}
               dropReplyDepth={dropReplyDepth}
+              onDiscussionStateChange={(state) => {
+                if (state) {
+                  onDiscussionStateChange?.(drop.id)
+                }
+              }}
             />
             {canFollow && (
               <div className="tw-absolute tw-right-14">
