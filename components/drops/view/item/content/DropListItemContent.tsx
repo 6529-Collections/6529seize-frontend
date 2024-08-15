@@ -98,7 +98,7 @@ export default function DropListItemContent({
       scrollIntoView={scrollIntoView}
       shouldWrap={dropReplyDepth === 0}
     >
-      <div className="tw-space-y-6 tw-h-full" ref={containerRef}>
+      <div className="tw-space-y-6 tw-h-full " ref={containerRef}>
         <DropPartWrapper
           dropPart={activePart}
           drop={drop}
