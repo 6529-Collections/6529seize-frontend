@@ -84,7 +84,7 @@ export default function DropPartWrapper({
   }, [dropReplyDepth, repliesOpen]);
 
 
-  const replyInputIntent = "tw-pl-0";
+  const replyInputIntent = "tw-pl-12";
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -143,7 +143,6 @@ export default function DropPartWrapper({
                 dropPart={dropPart}
                 onReply={() => {
                   setShowReplyInput(false);
-                  // TODO: not sure it will work as expected
                   onDiscussionButtonClick();
                 }}
               />

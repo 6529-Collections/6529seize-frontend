@@ -67,11 +67,11 @@ export default function DropPartDiscussionItems({
 
   const [replies, setReplies] = useState<Drop[]>([]);
   useEffect(() => {
-    const results = items?.pages.flatMap((page) => page.data) ?? []
-    if (!activeDiscussionDropId ) {
+    const results = items?.pages.flatMap((page) => page.data) ?? [];
+    if (!activeDiscussionDropId) {
       setReplies(results);
       setRepliesOpen(false);
-      return
+      return;
     }
     setReplies(results.filter((item) => item.id === activeDiscussionDropId));
     setRepliesOpen(true);
@@ -97,16 +97,10 @@ export default function DropPartDiscussionItems({
     fetchNextPage();
   };
 
-  const showDivide = dropReplyDepth === 0;
   return (
     <div>
-      <div className={`${!isFetching && ""}`}>
-        <div
-          className={`${
-            showDivide &&
-            "tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-iron-700"
-          }`}
-        >
+      <div>
+        <div>
           {replies.map((item) => (
             <DropsListItem
               key={item.id}

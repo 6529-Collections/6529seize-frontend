@@ -120,7 +120,7 @@ export default function DropsListItem({
   const [randomKey, setRandomKey] = useState(getRandomObjectId());
 
   const onDiscussionButtonClick = () => {
-
+    console.log(dropReplyDepth, isDiscussionOpen)
     if (!isDiscussionOpen) {
       onDiscussionStateChange?.(drop.id);
       setIsDiscussionOpen(true);
