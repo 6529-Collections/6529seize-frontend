@@ -4,6 +4,7 @@ import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
 import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
 import DropReply, { DropReplyProps } from "./replies/DropReply";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -45,6 +46,7 @@ export default function DropsListItem({
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
 
   const getVoteState = () => {
     if (!connectedProfile) {
@@ -115,6 +117,17 @@ export default function DropsListItem({
 
   const replyProps = getReplyProps();
 
+  const [randomKey, setRandomKey] = useState(getRandomObjectId());
+
+  const onDiscussionButtonClick = () => {
+
+    if (!isDiscussionOpen) {
+      onDiscussionStateChange?.(drop.id);
+      setIsDiscussionOpen(true);
+    }
+    setRandomKey(getRandomObjectId());
+  };
+
   return (
     <div
       className={`${
@@ -134,6 +147,7 @@ export default function DropsListItem({
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
+              key={randomKey}
               drop={drop}
               showFull={showFull}
               voteState={voteState}
@@ -142,11 +156,8 @@ export default function DropsListItem({
               showWaveInfo={showWaveInfo}
               smallMenuIsShown={canFollow}
               dropReplyDepth={dropReplyDepth}
-              onDiscussionStateChange={(state) => {
-                if (state) {
-                  onDiscussionStateChange?.(drop.id)
-                }
-              }}
+              isDiscussionOpen={isDiscussionOpen}
+              onDiscussionButtonClick={onDiscussionButtonClick}
             />
             {canFollow && (
               <div className="tw-absolute tw-right-14">

@@ -5,12 +5,10 @@ import DiscussSolidIcon from "../../../../../utils/icons/DiscussSolidIcon";
 
 export default function DropPartDiscussionButton({
   dropPart,
-  isDiscussionOpen,
-  setIsDiscussionOpen,
+  onDiscussionButtonClick,
 }: {
   readonly dropPart: DropPart;
-  readonly isDiscussionOpen: boolean;
-  readonly setIsDiscussionOpen: (open: boolean) => void;
+  readonly onDiscussionButtonClick: () => void;
 }) {
   const discussionCount = dropPart.replies_count;
   const userHaveDiscussed = !!dropPart.context_profile_context?.replies_count;
@@ -21,7 +19,7 @@ export default function DropPartDiscussionButton({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          setIsDiscussionOpen(!isDiscussionOpen);
+          onDiscussionButtonClick();
         }}
         type="button"
         className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 

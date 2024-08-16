@@ -193,7 +193,7 @@ const DropPart = memo(
                 }}
                 className={`${
                   onContentClick && "tw-cursor-pointer"
-                } tw-mt-2 tw-h-full ${size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px]"}`}
+                } tw-mt-2 tw-h-full tw-ml-[54px]`}
               >
                 {dropTitle && (
                   <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">

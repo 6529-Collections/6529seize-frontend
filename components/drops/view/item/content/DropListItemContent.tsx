@@ -1,7 +1,6 @@
 import { Drop } from "../../../../../generated/models/Drop";
 import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
-import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropVoteState } from "../DropsListItem";
 import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
@@ -23,7 +22,8 @@ interface DropListItemContentProps {
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
   readonly dropReplyDepth: number;
-  readonly onDiscussionStateChange?: (state: boolean) => void;
+  readonly isDiscussionOpen: boolean;
+  readonly onDiscussionButtonClick: () => void;
 }
 
 export default function DropListItemContent({
@@ -35,7 +35,8 @@ export default function DropListItemContent({
   showWaveInfo = true,
   smallMenuIsShown,
   dropReplyDepth,
-  onDiscussionStateChange,
+  isDiscussionOpen,
+  onDiscussionButtonClick
 }: DropListItemContentProps) {
   const router = useRouter();
   const partsCount = drop.parts.length;
@@ -106,9 +107,9 @@ export default function DropListItemContent({
           canVote={canVote}
           availableCredit={availableCredit}
           dropReplyDepth={dropReplyDepth}
-          size={size}
+          isDiscussionOpen={isDiscussionOpen}
           onContentClick={onContentClick}
-          onDiscussionStateChange={onDiscussionStateChange}
+          onDiscussionButtonClick={onDiscussionButtonClick}
         >
           <DropPart
             profile={drop.author}

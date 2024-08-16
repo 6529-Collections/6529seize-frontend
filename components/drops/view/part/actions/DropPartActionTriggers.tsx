@@ -2,7 +2,6 @@ import { Drop } from "../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../generated/models/DropPart";
 import { DropVoteState } from "../../item/DropsListItem";
 import DropListItemRateGive from "../../item/rate/give/DropListItemRateGive";
-import { DropPartSize } from "../DropPart";
 import DropPartQuoteButton from "../quote/DropPartQuoteButton";
 import DropPartDiscussionButton from "./discussion/DropPartDiscussionButton";
 import DropPartReplyButton from "./discussion/DropPartReplyButton";
@@ -12,12 +11,10 @@ import DropPartActionTriggersVoteVotings from "./vote/DropPartActionTriggersVote
 interface DropPartActionTriggersProps {
   readonly drop: Drop;
   readonly dropPart: DropPart;
-  readonly isDiscussionOpen: boolean;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
-  readonly size?: DropPartSize;
-  readonly setIsDiscussionOpen: (open: boolean) => void;
+  readonly onDiscussionButtonClick: () => void;
   readonly onQuote: (dropPartId: number) => void;
   readonly onReplyButtonClick: () => void;
 }
@@ -25,27 +22,22 @@ interface DropPartActionTriggersProps {
 export default function DropPartActionTriggers({
   drop,
   dropPart,
-  isDiscussionOpen,
   voteState,
   canVote,
   availableCredit,
-  size = DropPartSize.MEDIUM,
-  setIsDiscussionOpen,
+  onDiscussionButtonClick,
   onQuote,
   onReplyButtonClick,
 }: DropPartActionTriggersProps) {
   return (
     <div className="tw-w-full tw-inline-flex tw-justify-between">
       <div
-        className={`${
-          size === DropPartSize.SMALL ? "tw-gap-x-6" : "tw-gap-x-6"
-        } tw-px-4 sm:tw-px-0  tw-flex tw-items-center`}
+        className="tw-px-4 sm:tw-px-0 tw-gap-x-6 tw-flex tw-items-center"
       >
         {!!dropPart.replies_count && (
           <DropPartDiscussionButton
             dropPart={dropPart}
-            isDiscussionOpen={isDiscussionOpen}
-            setIsDiscussionOpen={setIsDiscussionOpen}
+            onDiscussionButtonClick={onDiscussionButtonClick}
           />
         )}
         <DropPartReplyButton onReplyButtonClick={onReplyButtonClick} />

@@ -18,9 +18,9 @@ export interface DropPartWrapperProps {
   readonly canVote: boolean;
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
-  readonly size?: DropPartSize;
+  readonly isDiscussionOpen: boolean;
   readonly onContentClick?: () => void;
-  readonly onDiscussionStateChange?: (state: boolean) => void;
+  readonly onDiscussionButtonClick: () => void;
   readonly children: React.ReactNode;
 }
 
@@ -31,17 +31,12 @@ export default function DropPartWrapper({
   canVote,
   availableCredit,
   dropReplyDepth,
-  size = DropPartSize.MEDIUM,
+  isDiscussionOpen,
   onContentClick,
-  onDiscussionStateChange,
+  onDiscussionButtonClick,
   children,
 }: DropPartWrapperProps) {
-  const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
 
-  useEffect(
-    () => onDiscussionStateChange && onDiscussionStateChange(isDiscussionOpen),
-    [isDiscussionOpen]
-  );
 
   const [showReplyInput, setShowReplyInput] = useState(false);
   const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
@@ -57,11 +52,11 @@ export default function DropPartWrapper({
     }
   };
 
-  const onDiscussionOpen = (state: boolean) => {
+  const onDiscussionOpen = () => {
     if (!dropPart.replies_count) {
       return;
     }
-    setIsDiscussionOpen(state);
+    onDiscussionButtonClick();
     onQuote(null);
   };
 
@@ -88,7 +83,7 @@ export default function DropPartWrapper({
     setRepliesIntent(dropReplyDepth > 0 ? "tw-pl-12" : "tw-pl-0");
   }, [dropReplyDepth, repliesOpen]);
 
-  //const repliesIntent = dropReplyDepth > 0 ? "tw-pl-12" : "tw-pl-0";
+
   const replyInputIntent = "tw-pl-0";
   return (
     <div>
@@ -108,28 +103,20 @@ export default function DropPartWrapper({
             </div>
           </div>
           <div
-            className={`tw-relative tw-z-10 ${
-              size === DropPartSize.SMALL ? "tw-ml-[0px]" : "tw-ml-[54px]"
-            }`}
+            className={`tw-relative tw-z-10 tw-ml-[54px]`}
           >
             {haveData && <DropListItemData drop={drop} />}
           </div>
           <div
-            className={`tw-px-4 tw-relative tw-z-10 ${
-              size === DropPartSize.SMALL
-                ? "tw-ml-[0px]"
-                : "tw-ml-9 sm:tw-ml-[54px] tw-mt-2"
-            }`}
+            className="tw-px-4 tw-relative tw-z-10 tw-ml-9 sm:tw-ml-[54px] tw-mt-2"
           >
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
-              isDiscussionOpen={isDiscussionOpen}
               voteState={voteState}
               canVote={canVote}
               availableCredit={availableCredit ?? 0}
-              size={size}
-              setIsDiscussionOpen={onDiscussionOpen}
+              onDiscussionButtonClick={onDiscussionOpen}
               onQuote={onQuote}
               onReplyButtonClick={onReplyButtonClick}
             />
@@ -156,7 +143,8 @@ export default function DropPartWrapper({
                 dropPart={dropPart}
                 onReply={() => {
                   setShowReplyInput(false);
-                  setIsDiscussionOpen(true);
+                  // TODO: not sure it will work as expected
+                  onDiscussionButtonClick();
                 }}
               />
             </div>
