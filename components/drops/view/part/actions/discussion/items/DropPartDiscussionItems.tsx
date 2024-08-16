@@ -100,25 +100,23 @@ export default function DropPartDiscussionItems({
   return (
     <div>
       <div>
-        <div>
-          {replies.map((item) => (
-            <DropsListItem
-              key={item.id}
-              drop={item}
-              replyToDrop={null}
-              showWaveInfo={true}
-              availableCredit={availableCredit}
-              isReply={true}
-              dropReplyDepth={activeDiscussionDropId ? 1 : dropReplyDepth + 1}
-              onDiscussionStateChange={setActiveDiscussionDropId}
-            />
-          ))}
-        </div>
-        <div className="tw-text-center">
-          {isFetching && <CircleLoader size={CircleLoaderSize.SMALL} />}
-        </div>
-        <CommonIntersectionElement onIntersection={onBottomIntersection} />
+        {replies.map((item) => (
+          <DropsListItem
+            key={item.id}
+            drop={item}
+            replyToDrop={null}
+            showWaveInfo={true}
+            availableCredit={availableCredit}
+            isReply={true}
+            dropReplyDepth={activeDiscussionDropId ? 1 : dropReplyDepth + 1}
+            onDiscussionStateChange={setActiveDiscussionDropId}
+          />
+        ))}
       </div>
+      <div className="tw-text-center">
+        {isFetching && <CircleLoader size={CircleLoaderSize.SMALL} />}
+      </div>
+      <CommonIntersectionElement onIntersection={onBottomIntersection} />
     </div>
   );
 }
