@@ -120,7 +120,6 @@ export default function DropsListItem({
   const [randomKey, setRandomKey] = useState(getRandomObjectId());
 
   const onDiscussionButtonClick = () => {
-    console.log(dropReplyDepth, isDiscussionOpen);
     if (!isDiscussionOpen) {
       onDiscussionStateChange?.(drop.id);
       setIsDiscussionOpen(true);
@@ -133,7 +132,7 @@ export default function DropsListItem({
       className={`${
         !isReply &&
         "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
-      }  tw-relative tw-bg-iron-900 not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800`}
+      }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && "not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800"}`}
     >
       <div className={`${dropReplyDepth === 0 && "tw-pb-2"} tw-pt-2 `}>
         {replyProps && dropReplyDepth === 0 && (

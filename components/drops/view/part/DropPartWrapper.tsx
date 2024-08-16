@@ -19,6 +19,7 @@ export interface DropPartWrapperProps {
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
+  readonly size?: DropPartSize;
   readonly onContentClick?: () => void;
   readonly onDiscussionButtonClick: () => void;
   readonly children: React.ReactNode;
@@ -32,6 +33,7 @@ export default function DropPartWrapper({
   availableCredit,
   dropReplyDepth,
   isDiscussionOpen,
+  size = DropPartSize.MEDIUM,
   onContentClick,
   onDiscussionButtonClick,
   children,
@@ -74,6 +76,7 @@ export default function DropPartWrapper({
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
     'tw-pl-0'
   );
+  
 
   useEffect(() => {
     if (repliesOpen) {
@@ -103,12 +106,12 @@ export default function DropPartWrapper({
             </div>
           </div>
           <div
-            className={`tw-relative tw-z-10 tw-ml-[54px]`}
+            className={`tw-relative tw-z-10 ${size === DropPartSize.SMALL ? "sm:tw-ml-[40px]" : "sm:tw-ml-[54px]"}`}
           >
             {haveData && <DropListItemData drop={drop} />}
           </div>
           <div
-            className="tw-px-4 tw-relative tw-z-10 tw-ml-9 sm:tw-ml-[54px] tw-mt-2"
+            className={`tw-px-4 tw-relative tw-z-10 tw-ml-9 tw-mt-2 ${size === DropPartSize.SMALL ? "sm:tw-ml-[40px]" : "sm:tw-ml-[54px]"}`}
           >
             <DropPartActionTriggers
               drop={drop}

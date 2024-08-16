@@ -105,6 +105,7 @@ export default function DropListItemContent({
           drop={drop}
           voteState={voteState}
           canVote={canVote}
+          size={size}
           availableCredit={availableCredit}
           dropReplyDepth={dropReplyDepth}
           isDiscussionOpen={isDiscussionOpen}
