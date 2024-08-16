@@ -20,11 +20,10 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
         </div>
       </div>
 
-      <div className="md:tw-flex tw-justify-center tw-gap-x-5 xl:tw-ml-16">
-      
-        {children}
-        <div className="md:tw-w-[27%]">
-          <div className="tw-mt-16">
+      <div className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-center tw-gap-x-5 xl:tw-ml-16 tw-gap-y-4">
+        <div className="tw-order-2 lg:tw-order-1">{children}</div>
+        <div className="tw-order-1 lg:tw-order-2 lg:tw-w-[27%]">
+          <div className="lg:tw-mt-16">
             <Link
               href="/waves?new=true"
               className="tw-no-underline tw-w-full tw-justify-center tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white hover:tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"

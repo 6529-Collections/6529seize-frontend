@@ -14,7 +14,7 @@ export default function WavesListSearch({
   readonly setWaveName: (waveName: string | null) => void;
 }) {
   return (
-    <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
+    <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row sm:tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
       <div className="tw-flex-1">
         <div className="tw-relative">
           <svg

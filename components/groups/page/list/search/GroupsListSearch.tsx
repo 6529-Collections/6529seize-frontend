@@ -29,7 +29,7 @@ export default function GroupsListSearch({
 
   return (
     <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
-      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
+      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row sm:tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
         {showIdentitySearch && (
           <IdentitySearch
             size={IdentitySearchSize.SM}
