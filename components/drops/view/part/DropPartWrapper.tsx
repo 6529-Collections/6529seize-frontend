@@ -161,33 +161,38 @@ export default function DropPartWrapper({
         </div>
       </div>
       {!!(showReplyInput || isDiscussionOpen || quoteModePartId) && (
-        <div className="tw-relative">
-
-        {/*   <div
-            className={`tw-absolute tw-top-0 tw-h-[61px] tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
-          ></div> */}
-
+        <div>
           {quoteModePartId && (
-            <div className={replyInputIntent}>
-              <DropListItemQuote
-                quotedDrop={drop}
-                quotedPartId={quoteModePartId}
-                init={true}
-                onSuccessfulDrop={() => setQuoteModePartId(null)}
-              />
+            <div className="tw-relative">
+              <div
+                className={`tw-absolute tw-top-0 tw-h-full tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
+              ></div>
+              <div className={replyInputIntent}>
+                <DropListItemQuote
+                  quotedDrop={drop}
+                  quotedPartId={quoteModePartId}
+                  init={true}
+                  onSuccessfulDrop={() => setQuoteModePartId(null)}
+                />
+              </div>
             </div>
           )}
 
           {showReplyInput && (
-            <div className={replyInputIntent}>
-              <DropReplyInputWrapper
-                drop={drop}
-                dropPart={dropPart}
-                onReply={() => {
-                  setShowReplyInput(false);
-                  onDiscussionButtonClick();
-                }}
-              />
+            <div className="tw-relative">
+              <div
+                className={`tw-absolute tw-top-0 tw-h-full tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
+              ></div>
+              <div className={replyInputIntent}>
+                <DropReplyInputWrapper
+                  drop={drop}
+                  dropPart={dropPart}
+                  onReply={() => {
+                    setShowReplyInput(false);
+                    onDiscussionButtonClick();
+                  }}
+                />
+              </div>
             </div>
           )}
           {isDiscussionOpen && (
