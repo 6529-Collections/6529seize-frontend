@@ -105,7 +105,13 @@ export default function DropPartWrapper({
           >
             <div
               className={` tw-flex-1 tw-w-[1.5px] tw-bg-iron-700 ${
-                (showReplyInput || isDiscussionOpen) && !(connectingLineType === DropConnectingLineType.BOTTOM && !activeDiscussionDropId) ? "tw-visible" : "tw-hidden"
+                (showReplyInput || isDiscussionOpen) &&
+                !(
+                  connectingLineType === DropConnectingLineType.BOTTOM &&
+                  !activeDiscussionDropId
+                )
+                  ? "tw-visible"
+                  : "tw-hidden"
               }`}
             ></div>
           </div>
@@ -133,6 +139,7 @@ export default function DropPartWrapper({
           >
             {haveData && <DropListItemData drop={drop} />}
           </div>
+
           <div
             className={`tw-px-4 tw-relative tw-z-10 tw-ml-9 tw-mt-2 ${
               size === DropPartSize.SMALL
@@ -154,7 +161,12 @@ export default function DropPartWrapper({
         </div>
       </div>
       {!!(showReplyInput || isDiscussionOpen || quoteModePartId) && (
-        <div>
+        <div className="tw-relative">
+
+        {/*   <div
+            className={`tw-absolute tw-top-0 tw-h-[61px] tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
+          ></div> */}
+
           {quoteModePartId && (
             <div className={replyInputIntent}>
               <DropListItemQuote
