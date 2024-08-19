@@ -76,6 +76,9 @@ export default function DropPartWrapper({
   >(null);
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
+
+
+
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
     "tw-pl-0"
@@ -90,6 +93,22 @@ export default function DropPartWrapper({
   }, [dropReplyDepth, repliesOpen]);
 
   const replyInputIntent = "tw-pl-12";
+
+  const getShowInputLine = (): boolean => {
+    return (
+      !(connectingLineType === DropConnectingLineType.FULL && !repliesOpen) &&
+      !(
+        connectingLineType === DropConnectingLineType.BOTTOM &&
+        !activeDiscussionDropId
+      ) &&
+      isDiscussionOpen
+    );
+  };
+  const [showInputLine, setShowInputLine] = useState(getShowInputLine());
+  useEffect(
+    () => setShowInputLine(getShowInputLine()),
+    [connectingLineType, activeDiscussionDropId, isDiscussionOpen, repliesOpen]
+  );
   return (
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
@@ -164,9 +183,11 @@ export default function DropPartWrapper({
         <div>
           {quoteModePartId && (
             <div className="tw-relative">
-              <div
-                className={`tw-absolute tw-top-0 tw-h-full tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
-              ></div>
+              {showInputLine && (
+                <div
+                  className={`tw-absolute tw-top-0 tw-h-full tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
+                ></div>
+              )}
               <div className={replyInputIntent}>
                 <DropListItemQuote
                   quotedDrop={drop}
@@ -180,9 +201,11 @@ export default function DropPartWrapper({
 
           {showReplyInput && (
             <div className="tw-relative">
-              <div
-                className={`tw-absolute tw-top-0 tw-h-full tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
-              ></div>
+              {showInputLine && (
+                <div
+                  className={`tw-absolute tw-top-0 tw-h-full tw-bottom-0 tw-left-[2.15rem] tw-w-[1.5px] tw-bg-iron-700 tw-z-[1]`}
+                ></div>
+              )}
               <div className={replyInputIntent}>
                 <DropReplyInputWrapper
                   drop={drop}
