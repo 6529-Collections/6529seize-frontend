@@ -37,7 +37,7 @@ export default function DropPartActionTriggers({
       `${window.location.protocol}//${window.location.host}/waves/${drop.wave.id}?drop=${drop.id}`
     );
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000); // Hide "Copied!" after 2 seconds
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
