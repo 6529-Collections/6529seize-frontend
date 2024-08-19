@@ -135,7 +135,7 @@ export default function DropsListItem({
       }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && ""}`}
       /* not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800 */
     >
-      <div className={`${dropReplyDepth === 0 && "tw-pb-2"} tw-pt-2`}>
+      <div className={`${dropReplyDepth === 0 && "tw-pb-2 tw-pt-2"}`}>
         {replyProps && dropReplyDepth === 0 && (
           <div className="tw-mb-1.5">
             <div className="tw-relative tw-flex tw-justify-end">

@@ -88,9 +88,8 @@ export default function DropPartWrapper({
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
         <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
-          
-          <div className="tw-absolute tw-top-2 tw-left-[2.15rem] tw-bottom-0 tw-flex tw-flex-col tw-items-center tw-pr-4">
-            {/*  <div className="tw-w-[38px] tw-h-[38px] tw-rounded-lg tw-bg-white tw-mb-2"></div> */}
+
+          <div className="tw-absolute tw-z-[1] tw-top-0 tw-left-[2.15rem] tw-bottom-0 tw-flex tw-flex-col tw-items-center">
             <div
               className={`tw-flex-1 tw-w-[1.5px] tw-bg-iron-700 ${
                 showReplyInput || isDiscussionOpen ? "tw-visible" : "tw-hidden"
