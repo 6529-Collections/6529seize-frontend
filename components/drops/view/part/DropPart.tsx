@@ -130,7 +130,7 @@ const DropPart = memo(
           ref={containerRef}
           className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
         >
-          <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
+          <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full tw-relative">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
               <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
                 <DropPfp pfpUrl={profile.pfp} size={size} />
@@ -193,7 +193,9 @@ const DropPart = memo(
                 }}
                 className={`${
                   onContentClick && "tw-cursor-pointer"
-                } tw-mt-2 tw-h-full ${size === DropPartSize.SMALL ? "tw-ml-[40px]" : "tw-ml-[54px]"}`}
+                } tw-mt-2 tw-h-full ${
+                  size === DropPartSize.SMALL ? "tw-ml-[40px]" : "tw-ml-[54px]"
+                }`}
               >
                 {dropTitle && (
                   <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
@@ -285,7 +287,6 @@ const DropPart = memo(
               </div>
             </div>
           </div>
-
           {isOverflowing && !showMore && (
             <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
               <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">

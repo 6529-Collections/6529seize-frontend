@@ -132,13 +132,14 @@ export default function DropsListItem({
       className={`${
         !isReply &&
         "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
-      }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && "not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800"}`}
+      }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && ""}`}
+      /* not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800 */
     >
-      <div className={`${dropReplyDepth === 0 && "tw-pb-2"} tw-pt-2 `}>
+      <div className={`${dropReplyDepth === 0 && "tw-pb-2"} tw-pt-2`}>
         {replyProps && dropReplyDepth === 0 && (
           <div className="tw-mb-1.5">
             <div className="tw-relative tw-flex tw-justify-end">
-              <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-8 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[2px] tw-border-l-[2px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
+              <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-8 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
             </div>
             <DropReply {...replyProps} />
           </div>
