@@ -37,6 +37,26 @@ export default function DropPartActionTriggers({
           setIsDiscussionOpen={setIsDiscussionOpen}
         />
         <DropPartQuoteButton dropPart={dropPart} onQuote={onQuote} />
+        <button
+          type="button"
+          title="Copy Link"
+          className="tw-text-iron-500 icon tw-p-0 tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-normal tw-transition tw-ease-out tw-duration-300"
+        >
+          <svg
+            className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+            />
+          </svg>
+        </button>
       </div>
       <div className="tw-inline-flex tw-space-x-4 tw-items-center">
         <div className="tw-flex tw-items-center tw-gap-x-2">
