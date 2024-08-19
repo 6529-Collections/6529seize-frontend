@@ -2,7 +2,7 @@ import { Drop } from "../../../../../generated/models/Drop";
 import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
 import DropPartWrapper from "../../part/DropPartWrapper";
-import { DropVoteState } from "../DropsListItem";
+import { DropConnectingLineType, DropVoteState } from "../DropsListItem";
 import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
@@ -23,6 +23,7 @@ interface DropListItemContentProps {
   readonly smallMenuIsShown: boolean;
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
+  readonly connectingLineType?: DropConnectingLineType | null;
   readonly onDiscussionButtonClick: () => void;
 }
 
@@ -36,6 +37,7 @@ export default function DropListItemContent({
   smallMenuIsShown,
   dropReplyDepth,
   isDiscussionOpen,
+  connectingLineType = DropConnectingLineType.NONE,
   onDiscussionButtonClick
 }: DropListItemContentProps) {
   const router = useRouter();
@@ -109,6 +111,7 @@ export default function DropListItemContent({
           availableCredit={availableCredit}
           dropReplyDepth={dropReplyDepth}
           isDiscussionOpen={isDiscussionOpen}
+          connectingLineType={connectingLineType}
           onContentClick={onContentClick}
           onDiscussionButtonClick={onDiscussionButtonClick}
         >

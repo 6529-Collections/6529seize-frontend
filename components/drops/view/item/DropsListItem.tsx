@@ -16,6 +16,13 @@ export enum DropVoteState {
   CAN_VOTE = "CAN_VOTE",
 }
 
+export enum DropConnectingLineType {
+  NONE = "NONE",
+  TOP = "TOP",
+  FULL = "FULL",
+  BOTTOM = "BOTTOm",
+}
+
 export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to rate",
   [DropVoteState.NO_PROFILE]: "Create a profile to rate",
@@ -34,6 +41,7 @@ export default function DropsListItem({
   availableCredit,
   isReply = false,
   dropReplyDepth = 0,
+  connectingLineType = DropConnectingLineType.BOTTOM,
   onDiscussionStateChange,
 }: {
   readonly drop: Drop;
@@ -43,6 +51,7 @@ export default function DropsListItem({
   readonly availableCredit: number | null;
   readonly isReply?: boolean;
   readonly dropReplyDepth?: number;
+  readonly connectingLineType?: DropConnectingLineType | null;
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -157,6 +166,7 @@ export default function DropsListItem({
               smallMenuIsShown={canFollow}
               dropReplyDepth={dropReplyDepth}
               isDiscussionOpen={isDiscussionOpen}
+              connectingLineType={connectingLineType}
               onDiscussionButtonClick={onDiscussionButtonClick}
             />
             {canFollow && (

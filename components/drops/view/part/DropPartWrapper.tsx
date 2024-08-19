@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
-import { DropVoteState } from "../item/DropsListItem";
+import { DropConnectingLineType, DropVoteState } from "../item/DropsListItem";
 import DropListItemData from "../item/data/DropListItemData";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
@@ -20,6 +20,7 @@ export interface DropPartWrapperProps {
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
   readonly size?: DropPartSize;
+  readonly connectingLineType?: DropConnectingLineType | null;
   readonly onContentClick?: () => void;
   readonly onDiscussionButtonClick: () => void;
   readonly children: React.ReactNode;
@@ -34,6 +35,7 @@ export default function DropPartWrapper({
   dropReplyDepth,
   isDiscussionOpen,
   size = DropPartSize.MEDIUM,
+  connectingLineType = DropConnectingLineType.NONE,
   onContentClick,
   onDiscussionButtonClick,
   children,
@@ -69,6 +71,10 @@ export default function DropPartWrapper({
     }
   };
 
+  const [activeDiscussionDropId, setActiveDiscussionDropId] = useState<
+    string | null
+  >(null);
+
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
@@ -88,11 +94,18 @@ export default function DropPartWrapper({
     <div>
       <div className="tw-flex tw-w-full tw-h-full">
         <div className="tw-flex tw-flex-col tw-justify-between tw-h-full tw-w-full tw-relative">
-
-          <div className="tw-absolute tw-z-[1] tw-top-0 tw-left-[2.15rem] tw-bottom-0 tw-flex tw-flex-col tw-items-center">
+          <div
+            className={`${
+              connectingLineType === DropConnectingLineType.FULL &&
+              !repliesOpen &&
+              "tw-h-8"
+            } ${
+              connectingLineType === DropConnectingLineType.BOTTOM && "tw-pt-8"
+            }  tw-absolute tw-z-[1] tw-top-0 tw-left-[2.15rem] tw-bottom-0 tw-flex tw-flex-col tw-items-center`}
+          >
             <div
-              className={`tw-flex-1 tw-w-[1.5px] tw-bg-iron-700 ${
-                showReplyInput || isDiscussionOpen ? "tw-visible" : "tw-hidden"
+              className={` tw-flex-1 tw-w-[1.5px] tw-bg-iron-700 ${
+                (showReplyInput || isDiscussionOpen) && !(connectingLineType === DropConnectingLineType.BOTTOM && !activeDiscussionDropId) ? "tw-visible" : "tw-hidden"
               }`}
             ></div>
           </div>
@@ -172,6 +185,8 @@ export default function DropPartWrapper({
                 drop={drop}
                 availableCredit={availableCredit}
                 dropReplyDepth={dropReplyDepth}
+                activeDiscussionDropId={activeDiscussionDropId}
+                setActiveDiscussionDropId={setActiveDiscussionDropId}
                 setRepliesOpen={setRepliesOpen}
               />
             </div>

@@ -7,12 +7,16 @@ export default function DropPartDiscussion({
   dropPart,
   availableCredit,
   dropReplyDepth,
+  activeDiscussionDropId,
+  setActiveDiscussionDropId,
   setRepliesOpen,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
+  readonly activeDiscussionDropId: string | null
+  readonly setActiveDiscussionDropId: (id: string | null) => void;
   readonly setRepliesOpen: (state: boolean) => void;
 }) {
   return (
@@ -21,6 +25,8 @@ export default function DropPartDiscussion({
       dropPart={dropPart}
       availableCredit={availableCredit}
       dropReplyDepth={dropReplyDepth}
+      activeDiscussionDropId={activeDiscussionDropId}
+      setActiveDiscussionDropId={setActiveDiscussionDropId}
       setRepliesOpen={setRepliesOpen}
     />
   );

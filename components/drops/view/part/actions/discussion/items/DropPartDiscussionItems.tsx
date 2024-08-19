@@ -10,19 +10,23 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../../../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../../../../../utils/CommonIntersectionElement";
-import DropsListItem from "../../../../item/DropsListItem";
+import DropsListItem, { DropConnectingLineType } from "../../../../item/DropsListItem";
 
 export default function DropPartDiscussionItems({
   drop,
   dropPart,
   dropReplyDepth,
   availableCredit,
+  activeDiscussionDropId,
+  setActiveDiscussionDropId,
   setRepliesOpen,
 }: {
   readonly drop: Drop;
   readonly dropPart: DropPart;
   readonly dropReplyDepth: number;
   readonly availableCredit: number | null;
+  readonly activeDiscussionDropId: string | null
+  readonly setActiveDiscussionDropId: (id: string | null) => void;
   readonly setRepliesOpen: (state: boolean) => void;
 }) {
   const animating = false;
@@ -63,9 +67,7 @@ export default function DropPartDiscussionItems({
     enabled: requestAllowed,
   });
 
-  const [activeDiscussionDropId, setActiveDiscussionDropId] = useState<
-    string | null
-  >(null);
+
 
   const [replies, setReplies] = useState<Drop[]>([]);
   useEffect(() => {
@@ -111,6 +113,7 @@ export default function DropPartDiscussionItems({
             availableCredit={availableCredit}
             isReply={true}
             dropReplyDepth={activeDiscussionDropId ? 1 : dropReplyDepth + 1}
+            connectingLineType={DropConnectingLineType.FULL}
             onDiscussionStateChange={setActiveDiscussionDropId}
           />
         ))}
