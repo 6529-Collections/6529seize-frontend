@@ -80,7 +80,7 @@ export default function DropPartWrapper({
       setRepliesIntent("tw-pl-0");
       return;
     }
-    setRepliesIntent(dropReplyDepth > 0 ? "tw-pl-12" : "tw-pl-0");
+    setRepliesIntent("tw-pl-12");
   }, [dropReplyDepth, repliesOpen]);
 
   const replyInputIntent = "tw-pl-12";

@@ -92,7 +92,7 @@ export default function DropListItemContent({
     });
   };
 
-  const size = dropReplyDepth > 1 ? DropPartSize.SMALL : DropPartSize.MEDIUM;
+  const size = dropReplyDepth > 0 ? DropPartSize.SMALL : DropPartSize.MEDIUM;
 
   return (
     <DropListItemContentWrapper

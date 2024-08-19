@@ -25,5 +25,3 @@ export default function DropPartDiscussion({
     />
   );
 }
-
-// tw-mt-2 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-700

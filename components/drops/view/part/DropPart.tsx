@@ -95,7 +95,7 @@ const DropPart = memo(
       }
     }, [showFull]);
 
-    const [containerHeight, setContainerHeight] = useState(288);
+    const [containerHeight, setContainerHeight] = useState(500);
 
     useEffect(() => {
       if (showMore) {

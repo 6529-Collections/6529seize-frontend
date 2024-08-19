@@ -42,11 +42,13 @@ export default function DropPartDiscussionItems({
       {
         drop_id: drop.id,
         drop_part_id: dropPart.part_id,
+        sort_direction: "ASC"
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: `5`,
+        sort_direction: "ASC"
       };
       if (pageParam) {
         params.page = `${pageParam}`;
