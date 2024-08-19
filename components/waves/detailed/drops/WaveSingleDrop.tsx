@@ -51,6 +51,7 @@ export default function WaveSingleDrop({
         drop={drop}
         replyToDrop={null}
         showWaveInfo={true}
+        initialDiscussionOpen={true}
         availableCredit={availableCredit}
       />
     </div>

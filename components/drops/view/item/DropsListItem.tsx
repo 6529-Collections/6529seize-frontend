@@ -42,6 +42,7 @@ export default function DropsListItem({
   isReply = false,
   dropReplyDepth = 0,
   connectingLineType = DropConnectingLineType.BOTTOM,
+  initialDiscussionOpen = false,
   onDiscussionStateChange,
 }: {
   readonly drop: Drop;
@@ -52,10 +53,11 @@ export default function DropsListItem({
   readonly isReply?: boolean;
   readonly dropReplyDepth?: number;
   readonly connectingLineType?: DropConnectingLineType | null;
+  readonly initialDiscussionOpen?: boolean;
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
+  const [isDiscussionOpen, setIsDiscussionOpen] = useState(initialDiscussionOpen);
 
   const getVoteState = () => {
     if (!connectedProfile) {
