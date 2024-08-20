@@ -13,6 +13,7 @@ export enum UserPageTabType {
   PROXY = "PROXY",
   GROUPS = "GROUPS",
   WAVES = "WAVES",
+  FOLLOWERS = "FOLLOWERS",
 }
 
 export const USER_PAGE_TAB_META: Record<
@@ -64,6 +65,11 @@ export const USER_PAGE_TAB_META: Record<
     tab: UserPageTabType.WAVES,
     title: "Waves",
     route: "waves",
+  },
+  [UserPageTabType.FOLLOWERS]: {
+    tab: UserPageTabType.FOLLOWERS,
+    title: "Followers",
+    route: "followers",
   },
 };
 

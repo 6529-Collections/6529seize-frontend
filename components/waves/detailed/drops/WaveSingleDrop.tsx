@@ -49,7 +49,9 @@ export default function WaveSingleDrop({
       </button>
       <DropsListItem
         drop={drop}
+        replyToDrop={null}
         showWaveInfo={true}
+        initialDiscussionOpen={true}
         availableCredit={availableCredit}
       />
     </div>

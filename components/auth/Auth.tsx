@@ -26,6 +26,7 @@ import { LoginResponse } from "../../generated/models/LoginResponse";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 
+
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
   readonly connectionStatus: ProfileConnectedStatus;

@@ -11,13 +11,14 @@ export default function DropsList({
   readonly availableCredit: number | null;
 }) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-4">
+    <div className="tw-flex tw-flex-col tw-gap-y-2.5">
       {drops.map((drop) => (
         <DropsListItem
           drop={drop}
           key={drop.id}
-          showWaveInfo={showWaveInfo}
           availableCredit={availableCredit}
+          replyToDrop={null}
+          showWaveInfo={showWaveInfo}
         />
       ))}
     </div>

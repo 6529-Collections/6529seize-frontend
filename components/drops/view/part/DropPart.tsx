@@ -1,22 +1,5 @@
-import {
-  ReactNode,
-  ClassAttributes,
-  AnchorHTMLAttributes,
-  memo,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
-import Markdown, { ExtraProps } from "react-markdown";
-import rehypeExternalLinks from "rehype-external-links";
-import rehypeSanitize from "rehype-sanitize";
-import remarkGfm from "remark-gfm";
+import { ReactNode, memo, useRef, useState, useEffect } from "react";
 
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { DropContentPartType } from "../item/content/DropListItemContent";
-import DropListItemContentPart, {
-  DropListItemContentPartProps,
-} from "../item/content/DropListItemContentPart";
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
@@ -25,6 +8,7 @@ import DropAuthor from "../../create/utils/author/DropAuthor";
 import Link from "next/link";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
+import DropPartMarkdown from "./DropPartMarkdown";
 
 export enum DropPartSize {
   SMALL = "SMALL",
@@ -64,117 +48,6 @@ export interface DropPartProps {
   readonly onPrevPart?: () => void;
   readonly onContentClick?: () => void;
 }
-
-const customRenderer = ({
-  content,
-  mentionedUsers,
-  referencedNfts,
-  onImageLoaded,
-}: {
-  readonly content: ReactNode | undefined;
-  readonly mentionedUsers: Array<DropMentionedUser>;
-  readonly referencedNfts: Array<DropReferencedNFT>;
-  readonly onImageLoaded: () => void;
-}) => {
-  if (typeof content !== "string") {
-    return content;
-  }
-
-  const splitter = getRandomObjectId();
-
-  const values: Record<string, DropListItemContentPartProps> = {
-    ...mentionedUsers.reduce(
-      (acc, user) => ({
-        ...acc,
-        [`@[${user.handle_in_content}]`]: {
-          type: DropContentPartType.MENTION,
-          value: user,
-          match: `@[${user.handle_in_content}]`,
-        },
-      }),
-      {}
-    ),
-    ...referencedNfts.reduce(
-      (acc, nft) => ({
-        ...acc,
-        [`#[${nft.name}]`]: {
-          type: DropContentPartType.HASHTAG,
-          value: nft,
-          match: `#[${nft.name}]`,
-        },
-      }),
-      {}
-    ),
-  };
-
-  let currentContent = content;
-
-  for (const token of Object.values(values)) {
-    currentContent = currentContent.replaceAll(
-      token.match,
-      `${splitter}${token.match}${splitter}`
-    );
-  }
-
-  const parts = currentContent
-    .split(splitter)
-    .filter((part) => part !== "")
-    .map((part) => {
-      const partProps = values[part];
-      if (partProps) {
-        const randomId = getRandomObjectId();
-        return (
-          <DropListItemContentPart
-            key={randomId}
-            part={partProps}
-            onImageLoaded={onImageLoaded}
-          />
-        );
-      } else {
-        return part;
-      }
-    });
-
-  return parts;
-};
-
-const aHrefRenderer = ({
-  node,
-  ...props
-}: ClassAttributes<HTMLAnchorElement> &
-  AnchorHTMLAttributes<HTMLAnchorElement> &
-  ExtraProps) => {
-  const { href } = props;
-  const isValidLink =
-    href?.startsWith("..") || href?.startsWith("/") || !href?.includes(".");
-
-  if (isValidLink) {
-    return <p>[invalid link]</p>;
-  }
-
-  const baseEndpoint = process.env.BASE_ENDPOINT || "";
-
-  const isExternalLink = href && baseEndpoint && !href.startsWith(baseEndpoint);
-
-  if (isExternalLink) {
-    props.rel = "noopener noreferrer nofollow";
-    props.target = "_blank";
-  } else {
-    props.href = href?.replace(baseEndpoint, "");
-  }
-
-  return (
-    <a
-      onClick={(e) => {
-        e.stopPropagation();
-        if (props.onClick) {
-          props.onClick(e);
-        }
-      }}
-      {...props}
-    />
-  );
-};
 
 const DropPart = memo(
   ({
@@ -222,7 +95,7 @@ const DropPart = memo(
       }
     }, [showFull]);
 
-    const [containerHeight, setContainerHeight] = useState(288);
+    const [containerHeight, setContainerHeight] = useState(500);
 
     useEffect(() => {
       if (showMore) {
@@ -255,8 +128,9 @@ const DropPart = memo(
       <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
         <div
           ref={containerRef}
-          className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
-          <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full">
+          className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+        >
+          <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full tw-relative">
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
               <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
                 <DropPfp pfpUrl={profile.pfp} size={size} />
@@ -264,7 +138,8 @@ const DropPart = memo(
                   <DropAuthor
                     profile={profile}
                     timestamp={createdAt}
-                    size={size}>
+                    size={size}
+                  >
                     {components?.authorFollow}
                   </DropAuthor>
                   <div className="tw-mt-1 tw-inline-flex tw-items-center tw-justify-between">
@@ -272,7 +147,8 @@ const DropPart = memo(
                       <Link
                         onClick={(e) => e.stopPropagation()}
                         href={`/waves/${wave.id}`}
-                        className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
+                        className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                      >
                         <span>{wave.name}</span>
                       </Link>
                     )}
@@ -282,7 +158,8 @@ const DropPart = memo(
                           className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
                           viewBox="0 0 24 24"
                           fill="none"
-                          xmlns="http://www.w3.org/2000/svg">
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
                           <path
                             d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
                             stroke="currentColor"
@@ -316,7 +193,10 @@ const DropPart = memo(
                 }}
                 className={`${
                   onContentClick && "tw-cursor-pointer"
-                } tw-mt-2 tw-h-full`}>
+                } tw-mt-2 tw-h-full ${
+                  size === DropPartSize.SMALL ? "tw-ml-[40px]" : "tw-ml-[54px]"
+                }`}
+              >
                 {dropTitle && (
                   <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
                     {dropTitle}
@@ -334,7 +214,8 @@ const DropPart = memo(
                       onClick={(e) => {
                         e.stopPropagation();
                         onPrevPart();
-                      }}>
+                      }}
+                    >
                       <svg
                         className="tw-size-5 tw-flex-shrink-0"
                         xmlns="http://www.w3.org/2000/svg"
@@ -342,7 +223,8 @@ const DropPart = memo(
                         aria-hidden="true"
                         viewBox="0 0 24 24"
                         strokeWidth="1.5"
-                        stroke="currentColor">
+                        stroke="currentColor"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -353,116 +235,14 @@ const DropPart = memo(
                   )}
                   <div
                     className={`${isStorm && ""} tw-h-full tw-w-full`}
-                    ref={contentRef}>
-                    <Markdown
-                      rehypePlugins={[
-                        [
-                          rehypeExternalLinks,
-                          {
-                            target: "_blank",
-                            rel: ["noopener", "noreferrer", "nofollow'"],
-                            protocols: ["http", "https"],
-                          },
-                        ],
-                        [rehypeSanitize],
-                      ]}
-                      remarkPlugins={[remarkGfm]}
-                      className="tw-w-full"
-                      components={{
-                        h5: (params) => (
-                          <h5 className="tw-text-iron-50 tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </h5>
-                        ),
-                        h4: (params) => (
-                          <h4 className="tw-text-iron-50 tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </h4>
-                        ),
-                        h3: (params) => (
-                          <h3 className="tw-text-iron-50 tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </h3>
-                        ),
-                        h2: (params) => (
-                          <h2 className="tw-text-iron-50 tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </h2>
-                        ),
-                        h1: (params) => (
-                          <h1 className="tw-text-iron-50 tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </h1>
-                        ),
-                        p: (params) => (
-                          <p className="last:tw-mb-0 tw-text-md tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </p>
-                        ),
-                        li: (params) => (
-                          <li className="tw-text-iron-50 tw-break-words word-break">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </li>
-                        ),
-                        code: (params) => (
-                          <code
-                            style={{ textOverflow: "unset" }}
-                            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words">
-                            {customRenderer({
-                              content: params.children,
-                              mentionedUsers,
-                              referencedNfts,
-                              onImageLoaded,
-                            })}
-                          </code>
-                        ),
-                        a: (params) => aHrefRenderer(params),
-                        img: (params) => (
-                          <img
-                            {...params}
-                            alt="Seize"
-                            onLoad={onImageLoaded}
-                            className="tw-w-full"
-                          />
-                        ),
-                      }}>
-                      {partContent}
-                    </Markdown>
+                    ref={contentRef}
+                  >
+                    <DropPartMarkdown
+                      mentionedUsers={mentionedUsers}
+                      referencedNfts={referencedNfts}
+                      partContent={partContent}
+                      onImageLoaded={onImageLoaded}
+                    />
                     {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
                       <div className={partContent ? "tw-mt-4" : "tw-mt-1"}>
                         <DropListItemContentMedia
@@ -484,7 +264,8 @@ const DropPart = memo(
                       onClick={(e) => {
                         e.stopPropagation();
                         onNextPart();
-                      }}>
+                      }}
+                    >
                       <svg
                         className="tw-size-5 tw-flex-shrink-0"
                         xmlns="http://www.w3.org/2000/svg"
@@ -492,7 +273,8 @@ const DropPart = memo(
                         aria-hidden="true"
                         viewBox="0 0 24 24"
                         strokeWidth="1.5"
-                        stroke="currentColor">
+                        stroke="currentColor"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -505,7 +287,6 @@ const DropPart = memo(
               </div>
             </div>
           </div>
-
           {isOverflowing && !showMore && (
             <div className="tw-bg-gradient-to-t tw-from-iron-900 tw-h-48 tw-absolute tw-inset-x-0 tw-bottom-0">
               <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-end">
@@ -513,7 +294,8 @@ const DropPart = memo(
                   <button
                     onClick={() => setShowMore(!showMore)}
                     type="button"
-                    className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+                    className="tw-relative tw-shadow tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-700 tw-px-2 tw-py-1.5 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+                  >
                     Show full drop
                   </button>
                 </div>

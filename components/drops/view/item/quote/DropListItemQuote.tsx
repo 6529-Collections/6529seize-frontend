@@ -46,6 +46,7 @@ export default function DropListItemQuote({
               dropId: quotedDrop.id,
               partId: quotedPartId,
             }}
+            showProfile={false}
             isClient={init}
             wave={{
               name: quotedDrop.wave.name,
@@ -64,7 +65,7 @@ export default function DropListItemQuote({
     ),
   };
   return (
-    <div className="tw-w-full tw-py-4 tw-px-4 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-700">
+    <div className="tw-w-full tw-px-4 tw-pb-2 tw-pt-2">
       {components[connectionStatus]}
     </div>
   );
