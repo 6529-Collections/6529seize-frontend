@@ -10,6 +10,7 @@ import DropListItemData from "../item/data/DropListItemData";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
 import DropListItemQuote from "../item/quote/DropListItemQuote";
+import DropInputWrapper from "../../utils/DropInputWrapper";
 
 export interface DropPartWrapperProps {
   readonly drop: Drop;
@@ -76,8 +77,6 @@ export default function DropPartWrapper({
   >(null);
 
   const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
-
-
 
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
@@ -189,12 +188,14 @@ export default function DropPartWrapper({
                 ></div>
               )}
               <div className={replyInputIntent}>
-                <DropListItemQuote
-                  quotedDrop={drop}
-                  quotedPartId={quoteModePartId}
-                  init={true}
-                  onSuccessfulDrop={() => setQuoteModePartId(null)}
-                />
+                <DropInputWrapper drop={drop}>
+                  <DropListItemQuote
+                    quotedDrop={drop}
+                    quotedPartId={quoteModePartId}
+                    init={true}
+                    onSuccessfulDrop={() => setQuoteModePartId(null)}
+                  />
+                </DropInputWrapper>
               </div>
             </div>
           )}
@@ -207,14 +208,16 @@ export default function DropPartWrapper({
                 ></div>
               )}
               <div className={replyInputIntent}>
-                <DropReplyInputWrapper
-                  drop={drop}
-                  dropPart={dropPart}
-                  onReply={() => {
-                    setShowReplyInput(false);
-                    onDiscussionButtonClick();
-                  }}
-                />
+                <DropInputWrapper drop={drop}>
+                  <DropReplyInputWrapper
+                    drop={drop}
+                    dropPart={dropPart}
+                    onReply={() => {
+                      setShowReplyInput(false);
+                      onDiscussionButtonClick();
+                    }}
+                  />
+                </DropInputWrapper>
               </div>
             </div>
           )}
