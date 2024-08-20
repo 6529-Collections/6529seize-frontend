@@ -14,7 +14,7 @@ export default function WaveDetailedContent({
   readonly activeDropId: string | null;
   readonly wave: Wave;
   readonly availableRateResponse: ProfileAvailableDropRateResponse | undefined;
-  onBackToList: () => void;
+  readonly onBackToList: () => void;
 }) {
   if (activeDropId) {
     return (

@@ -48,7 +48,6 @@ import {
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
@@ -226,17 +225,15 @@ const CreateDropContent = forwardRef<
         <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
           {!!drop?.parts.length && (
             <p className="tw-mb-0 tw-mt-1.5 tw-pb-2">
-              <>
-                <span className="tw-font-semibold tw-text-iron-500">
-                  Part:{" "}
-                  <span className="tw-text-iron-50">{currentPartCount}</span>,
-                </span>
-                <span
-                  className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`}
-                >
-                  length: {formatNumberWithCommas(charsCount)}
-                </span>
-              </>
+              <span className="tw-font-semibold tw-text-iron-500">
+                Part:{" "}
+                <span className="tw-text-iron-50">{currentPartCount}</span>,
+              </span>
+              <span
+                className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`}
+              >
+                length: {formatNumberWithCommas(charsCount)}
+              </span>
             </p>
           )}
         </div>

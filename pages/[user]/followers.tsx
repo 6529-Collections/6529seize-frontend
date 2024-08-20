@@ -7,7 +7,6 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
-import UserPageBrainWrapper from "../../components/user/brain/UserPageBrainWrapper";
 import UserPageFollowers from "../../components/user/followers/UserPageFollowers";
 
 interface Props {
