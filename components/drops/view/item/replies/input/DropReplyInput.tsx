@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import { EditorState, RootNode } from "lexical";
 import {
   CreateDropConfig,
@@ -28,10 +22,7 @@ import ExampleTheme from "../../../../create/lexical/ExampleTheme";
 import ClearEditorPlugin, {
   ClearEditorPluginHandles,
 } from "../../../../create/lexical/plugins/ClearEditorPlugin";
-import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
-import { MENTION_TRANSFORMER } from "../../../../create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../../../../create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../../../../create/lexical/transformers/ImageTransformer";
+import { TRANSFORMERS } from "@lexical/markdown";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -46,7 +37,6 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 
 export interface DropReplyInputHandles {
   clearEditorState: () => void;
@@ -129,21 +119,6 @@ const DropReplyInput = forwardRef<
     useImperativeHandle(ref, () => ({
       clearEditorState,
     }));
-
-    const currentPartCount = (drop?.parts.length ?? 0) + 1;
-    const [charsCount, setCharsCount] = useState(0);
-    useEffect(() => {
-      editorState?.read(() =>
-        setCharsCount(
-          $convertToMarkdownString([
-            ...TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            HASHTAG_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-          ])?.length ?? 0
-        )
-      );
-    }, [editorState]);
 
     return (
       <div className="tailwind-scope tw-w-full">
