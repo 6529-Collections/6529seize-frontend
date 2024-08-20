@@ -31,7 +31,6 @@ export default function DropReplyInputWrapper({
   readonly dropPart: DropPart;
   readonly onReply: () => void;
 }) {
-  // TODO - Make sure that identity can reply (and quote)
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
 

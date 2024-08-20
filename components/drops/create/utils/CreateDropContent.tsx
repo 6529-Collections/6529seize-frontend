@@ -181,6 +181,12 @@ const CreateDropContent = forwardRef<
       );
     }, [editorState]);
 
+    const [isStormMode, setIsStormMode] = useState(false);
+    const breakIntoStorm = () => {
+      onDropPart();
+      setIsStormMode(true);
+    }
+
     return (
       <div className="tailwind-scope">
         <LexicalComposer initialConfig={editorConfig}>
@@ -223,7 +229,7 @@ const CreateDropContent = forwardRef<
           </div>
         </LexicalComposer>
         <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          {!!drop?.parts.length && (
+          {!!drop?.parts.length && isStormMode && (
             <p className="tw-mb-0 tw-mt-1.5 tw-pb-2">
               <span className="tw-font-semibold tw-text-iron-500">
                 Part:{" "}
@@ -275,7 +281,7 @@ const CreateDropContent = forwardRef<
           </label>
           {canAddPart && (
             <button
-              onClick={onDropPart}
+              onClick={breakIntoStorm}
               disabled={!canAddPart}
               type="button"
               className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
