@@ -86,15 +86,14 @@ export default function DropReplyInputWrapper({
   };
 
   const addReplyMutation = useMutation({
-    mutationFn: async (body: CreateDropRequest) => {
-      await commonApiPost<CreateDropRequest, Drop>({
-        endpoint: `drops`,
-        body,
-      });
-    },
-    onSuccess: () => {
+    mutationFn: async (body: CreateDropRequest) => await commonApiPost<CreateDropRequest, Drop>({
+      endpoint: `drops`,
+      body,
+    }),
+    onSuccess: (respone: Drop) => {
       setDrop(null);
       onDropDiscussionChange({
+        replyDrop: respone,
         dropAuthorHandle: originalDrop.author?.handle,
         parentDropId: originalDrop.reply_to?.drop_id ?? null,
         dropId: originalDrop.id,
