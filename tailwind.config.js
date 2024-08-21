@@ -64,5 +64,12 @@ module.exports = {
       fontSize: ["placeholder"],
     },
   },
-  plugins: [require("@tailwindcss/forms")({ strategy: "class" })],
+  plugins: [
+    require("@tailwindcss/forms")({
+      strategy: "class",
+    }),
+    function ({ addVariant }) {
+      addVariant("not-first", "&:not(:first-child)");
+    },
+  ],
 };

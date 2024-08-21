@@ -80,6 +80,7 @@ export default function FeedItemDropVoted({
 
         <DropsListItem
           drop={item.item.drop}
+          replyToDrop={null}
           showWaveInfo={showWaveInfo}
           availableCredit={availableCredit}
         />

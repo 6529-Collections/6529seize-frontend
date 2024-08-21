@@ -1,12 +1,12 @@
 import { Drop } from "../../../../../generated/models/Drop";
-import DropPart from "../../part/DropPart";
+import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
-import CommonAnimationHeight from "../../../../utils/animation/CommonAnimationHeight";
 import DropPartWrapper from "../../part/DropPartWrapper";
-import { DropVoteState } from "../DropsListItem";
+import { DropConnectingLineType, DropVoteState } from "../DropsListItem";
 import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
+import DropListItemContentWrapper from "./DropListItemContentWrapper";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -21,7 +21,10 @@ interface DropListItemContentProps {
   readonly availableCredit: number | null;
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
-  readonly onQuote: (dropPartId: number | null) => void;
+  readonly dropReplyDepth: number;
+  readonly isDiscussionOpen: boolean;
+  readonly connectingLineType?: DropConnectingLineType | null;
+  readonly onDiscussionButtonClick: () => void;
 }
 
 export default function DropListItemContent({
@@ -32,7 +35,10 @@ export default function DropListItemContent({
   availableCredit,
   showWaveInfo = true,
   smallMenuIsShown,
-  onQuote,
+  dropReplyDepth,
+  isDiscussionOpen,
+  connectingLineType = DropConnectingLineType.NONE,
+  onDiscussionButtonClick
 }: DropListItemContentProps) {
   const router = useRouter();
   const partsCount = drop.parts.length;
@@ -40,6 +46,7 @@ export default function DropListItemContent({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
+
   useEffect(
     () => setActivePart(drop.parts[activePartIndex]),
     [activePartIndex]
@@ -87,20 +94,30 @@ export default function DropListItemContent({
     });
   };
 
+  const size = dropReplyDepth > 0 && !isDiscussionOpen ? DropPartSize.SMALL : DropPartSize.MEDIUM;
+
   return (
-    <CommonAnimationHeight onAnimationCompleted={scrollIntoView}>
+    <DropListItemContentWrapper
+      scrollIntoView={scrollIntoView}
+      shouldWrap={dropReplyDepth === 0}
+    >
       <div className="tw-space-y-6 tw-h-full" ref={containerRef}>
         <DropPartWrapper
           dropPart={activePart}
           drop={drop}
           voteState={voteState}
           canVote={canVote}
+          size={size}
           availableCredit={availableCredit}
-          onQuote={onQuote}
+          dropReplyDepth={dropReplyDepth}
+          isDiscussionOpen={isDiscussionOpen}
+          connectingLineType={connectingLineType}
           onContentClick={onContentClick}
+          onDiscussionButtonClick={onDiscussionButtonClick}
         >
           <DropPart
             profile={drop.author}
+            size={size}
             mentionedUsers={drop.mentioned_users}
             referencedNfts={drop.referenced_nfts}
             partContent={activePart.content ?? null}
@@ -141,6 +158,6 @@ export default function DropListItemContent({
           />
         </DropPartWrapper>
       </div>
-    </CommonAnimationHeight>
+    </DropListItemContentWrapper>
   );
 }

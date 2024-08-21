@@ -48,7 +48,6 @@ import {
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import Tippy from "@tippyjs/react";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
@@ -182,6 +181,12 @@ const CreateDropContent = forwardRef<
       );
     }, [editorState]);
 
+    const [isStormMode, setIsStormMode] = useState(false);
+    const breakIntoStorm = () => {
+      onDropPart();
+      setIsStormMode(true);
+    }
+
     return (
       <div className="tailwind-scope">
         <LexicalComposer initialConfig={editorConfig}>
@@ -192,8 +197,8 @@ const CreateDropContent = forwardRef<
                   <ContentEditable
                     className={`${
                       viewType === CreateDropViewType.COMPACT
-                        ? "editor-input-one-liner tw-pr-24"
-                        : "editor-input-multi-liner tw-pr-10"
+                        ? "editor-input-one-liner tw-pr-10"
+                        : "editor-input-multi-liner"
                     } tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
                   tw-pl-3.5 tw-py-2.5`}
                   />
@@ -215,98 +220,6 @@ const CreateDropContent = forwardRef<
               {showToggleViewButton && (
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
               )}
-              {viewType === CreateDropViewType.FULL && (
-                <Tippy content="Break into storm">
-                  <button
-                    onClick={onDropPart}
-                    disabled={!canAddPart}
-                    type="button"
-                    aria-label="Break into storm"
-                    className={`tw-absolute tw-group tw-top-2 tw-right-3 tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-ease-out tw-transition tw-duration-300 
-                    ${
-                      !canAddPart
-                        ? "tw-cursor-default tw-text-iron-600"
-                        : "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400"
-                    }`}
-                  >
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 5V19M5 12H19"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </Tippy>
-              )}
-              {viewType === CreateDropViewType.COMPACT && (
-                <Tippy content="Break into storm">
-                  <button
-                    onClick={onDropPart}
-                    disabled={!canAddPart}
-                    type="button"
-                    aria-label="Break into storm"
-                    className={`tw-absolute tw-group tw-top-1 tw-right-11 tw-p-2 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-rounded-lg tw-ease-out tw-transition tw-duration-300 
-                    ${
-                      !canAddPart
-                        ? "tw-text-iron-600 tw-cursor-default"
-                        : "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400"
-                    }`}
-                  >
-                    <svg
-                      className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 5V19M5 12H19"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <svg
-                      className="tw-h-5 tw-w-5 tw-flex-shrink-0"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </Tippy>
-              )}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
@@ -316,28 +229,26 @@ const CreateDropContent = forwardRef<
           </div>
         </LexicalComposer>
         <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          <p className="tw-mb-0 tw-mt-1.5 tw-pb-2 ">
-            {!!drop?.parts.length && (
-              <>
-                <span className="tw-font-semibold tw-text-iron-500">
-                  Part:{" "}
-                  <span className="tw-text-iron-50">{currentPartCount}</span>,
-                </span>
-                <span
-                  className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`}
-                >
-                  length: {formatNumberWithCommas(charsCount)}
-                </span>
-              </>
-            )}
-          </p>
+          {!!drop?.parts.length && isStormMode && (
+            <p className="tw-mb-0 tw-mt-1.5 tw-pb-2">
+              <span className="tw-font-semibold tw-text-iron-500">
+                Part:{" "}
+                <span className="tw-text-iron-50">{currentPartCount}</span>,
+              </span>
+              <span
+                className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`}
+              >
+                length: {formatNumberWithCommas(charsCount)}
+              </span>
+            </p>
+          )}
         </div>
-        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-6">
+        <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
           <label>
             <div
               role="button"
               aria-label="Select audio file"
-              className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+              className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
             >
               <svg
                 className="tw-flex-shrink-0 tw-h-5 tw-w-5"
@@ -368,6 +279,48 @@ const CreateDropContent = forwardRef<
               <span className="tw-text-sm tw-font-medium">Upload Media</span>
             </div>
           </label>
+          {canAddPart && (
+            <button
+              onClick={breakIntoStorm}
+              disabled={!canAddPart}
+              type="button"
+              className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+            >
+              <svg
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <svg
+                className="tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="tw-ml-2 tw-text-sm tw-font-medium">
+                Break into storm
+              </span>
+            </button>
+          )}
         </div>
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">

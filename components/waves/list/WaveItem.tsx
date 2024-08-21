@@ -31,7 +31,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
     <div
       style={{
         background:
-          "linear-gradient(77deg, rgba(63, 47, 58, 0.30) -23.26%, rgba(46, 53, 66, 0.30) 48.19%, rgba(26, 34, 49, 0.30) 106.85%)",
+          "linear-gradient(77deg, rgba(63, 47, 58, 0.40) -23.26%, rgba(46, 53, 66, 0.40) 48.19%, rgba(26, 34, 49, 0.40) 106.85%)",
       }}
       className="tw-pb-4 tw-relative tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
     >
@@ -56,7 +56,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
         <div className="tw-mt-2">
           <Link
             href={`/waves/${wave.id}`}
-            className="tw-no-underline tw-text-lg tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-no-underline tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
           >
             {wave.name}
           </Link>
@@ -142,7 +142,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
             <Link
               title="View Wave"
               href={`/waves/${wave.id}`}
-              className="tw-no-underline tw-border-0 tw-rounded-lg tw-bg-iron-700 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-no-underline tw-border-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 tw-px-3 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
                 className="tw-size-5 tw-flex-shrink-0"

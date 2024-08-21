@@ -1,7 +1,4 @@
 import { Wave } from "../../../generated/models/Wave";
-import WaveCreateDrop from "./drop/WaveCreateDrop";
-import WaveDescriptionDrop from "./drops/WaveDescriptionDrop";
-import WaveDrops from "./drops/WaveDrops";
 import WaveHeader from "./header/WaveHeader";
 import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
 import WaveOutcomes from "./outcome/WaveOutcomes";
@@ -14,8 +11,14 @@ import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useSearchParams } from "next/navigation";
-import WaveSingleDrop from "./drops/WaveSingleDrop";
 import { useRouter } from "next/router";
+import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
+import WaveDetailedContent from "./WaveDetailedContent";
+
+enum WaveDetailedView {
+  CONTENT = "CONTENT",
+  FOLLOWERS = "FOLLOWERS",
+}
 
 export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy, showWaves } =
@@ -76,14 +79,38 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
     }
   }, [activeDropId]);
 
+  const [activeView, setActiveView] = useState<WaveDetailedView>(
+    WaveDetailedView.CONTENT
+  );
+
+  const components: Record<WaveDetailedView, JSX.Element> = {
+    [WaveDetailedView.CONTENT]: (
+      <WaveDetailedContent
+        activeDropId={activeDropId}
+        wave={wave}
+        availableRateResponse={availableRateResponse}
+        onBackToList={onBackToList}
+      />
+    ),
+    [WaveDetailedView.FOLLOWERS]: (
+      <WaveDetailedFollowers
+        wave={wave}
+        onBackClick={() => setActiveView(WaveDetailedView.CONTENT)}
+      />
+    ),
+  };
+
   if (!showWaves) {
     return null;
   }
 
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">
-      <WaveHeader wave={wave} />
-      <div className="tw-mt-6 md:tw-mt-12 tw-pb-16 lg:tw-pb-20 tw-max-w-5xl tw-mx-auto tw-px-4 md:tw-px-0">
+      <WaveHeader
+        wave={wave}
+        onFollowersClick={() => setActiveView(WaveDetailedView.FOLLOWERS)}
+      />
+      <div className="tw-mt-6 md:tw-mt-12 tw-pb-16 lg:tw-pb-20 tw-max-w-5xl tw-mx-auto tw-px-4 xl:tw-px-0">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-6">
           <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4">
             <WaveSpecs wave={wave} />
@@ -95,35 +122,12 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
               </>
             )}
           </div>
+
           <div
             className="tw-w-[672px] tw-overflow-hidden"
             ref={contentWrapperRef}
           >
-            {activeDropId ? (
-              <WaveSingleDrop
-                dropId={activeDropId}
-                availableCredit={
-                  availableRateResponse?.available_credit_for_rating ?? null
-                }
-                onBackToList={onBackToList}
-              />
-            ) : (
-              <>
-                <WaveCreateDrop wave={wave} />
-                <WaveDescriptionDrop
-                  wave={wave}
-                  availableCredit={
-                    availableRateResponse?.available_credit_for_rating ?? null
-                  }
-                />
-                <WaveDrops
-                  wave={wave}
-                  availableCredit={
-                    availableRateResponse?.available_credit_for_rating ?? null
-                  }
-                />
-              </>
-            )}
+            {components[activeView]}
           </div>
         </div>
       </div>

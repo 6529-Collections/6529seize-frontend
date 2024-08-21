@@ -67,6 +67,7 @@ export default function NotificationIdentityMentioned({
 
         <DropsListItem
           drop={notification.related_drops[0]}
+          replyToDrop={notification.related_drops[1]}
           showWaveInfo={true}
           availableCredit={0}
         />

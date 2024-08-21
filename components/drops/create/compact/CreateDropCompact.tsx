@@ -27,6 +27,7 @@ export interface CreateDropCompactHandles {
 }
 interface CreateDropCompactProps {
   readonly profile: ProfileMinWithoutSubs;
+  readonly showProfile?: boolean;
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
   readonly title: string | null;
@@ -61,6 +62,7 @@ const CreateDropCompact = forwardRef<
   (
     {
       profile,
+      showProfile = true,
       editorState,
       screenType,
       file,
@@ -92,7 +94,7 @@ const CreateDropCompact = forwardRef<
         case CreateDropType.DROP:
           return `${
             showDropError ? "tw-border-error " : "tw-border-iron-800"
-          } tw-p-2 sm:tw-p-5 tw-rounded-xl tw-border tw-border-solid`;
+          } tw-p-2 sm:tw-px-4 sm:tw-py-3 tw-rounded-xl tw-border tw-border-solid`;
         case CreateDropType.QUOTE:
           return "";
         default:
@@ -123,9 +125,11 @@ const CreateDropCompact = forwardRef<
       <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
         {children}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-          <div className="tw-hidden sm:tw-block">
-            <DropPfp pfpUrl={profile?.pfp} />
-          </div>
+          {showProfile && (
+            <div className="tw-hidden sm:tw-block">
+              <DropPfp pfpUrl={profile?.pfp} />
+            </div>
+          )}
           <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
             <div className="tw-w-full">
               <CreateDropContent

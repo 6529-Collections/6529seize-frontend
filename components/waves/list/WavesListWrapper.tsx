@@ -177,11 +177,11 @@ export default function WavesListWrapper({
         {waves.length >= NORMAL_REQUEST_SIZE && (
           <button
             onClick={onShowAll}
-            className="tw-bg-transparent tw-border-none tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center"
+            className="tw-whitespace-nowrap tw-bg-transparent tw-border-none tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center"
           >
-            {isShowAll ? "Show less" : "Show all"}
+            <span> {isShowAll ? "Show less" : "Show all"}</span>
             <svg
-              className="tw-ml-2 tw-transform tw-transition-transform tw-duration-300 tw-ease-out"
+              className="tw-ml-2 tw-flex-shrink-0 tw-h-5 tw-w-5 tw-transform tw-transition-transform tw-duration-300 tw-ease-out"
               style={{ display: isShowAll ? "inline-block" : "none" }}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

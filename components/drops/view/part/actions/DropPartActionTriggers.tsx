@@ -5,6 +5,7 @@ import { DropVoteState } from "../../item/DropsListItem";
 import DropListItemRateGive from "../../item/rate/give/DropListItemRateGive";
 import DropPartQuoteButton from "../quote/DropPartQuoteButton";
 import DropPartDiscussionButton from "./discussion/DropPartDiscussionButton";
+import DropPartReplyButton from "./discussion/DropPartReplyButton";
 import DropPartActionTriggersVoteVoters from "./vote/DropPartActionTriggersVoteVoters";
 import DropPartActionTriggersVoteVotings from "./vote/DropPartActionTriggersVoteVotings";
 import { useCopyToClipboard } from "react-use";
@@ -12,23 +13,23 @@ import { useCopyToClipboard } from "react-use";
 interface DropPartActionTriggersProps {
   readonly drop: Drop;
   readonly dropPart: DropPart;
-  readonly isDiscussionOpen: boolean;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
-  readonly setIsDiscussionOpen: (open: boolean) => void;
+  readonly onDiscussionButtonClick: () => void;
   readonly onQuote: (dropPartId: number) => void;
+  readonly onReplyButtonClick: () => void;
 }
 
 export default function DropPartActionTriggers({
   drop,
   dropPart,
-  isDiscussionOpen,
   voteState,
   canVote,
   availableCredit,
-  setIsDiscussionOpen,
+  onDiscussionButtonClick,
   onQuote,
+  onReplyButtonClick,
 }: DropPartActionTriggersProps) {
   const [copied, setCopied] = useState(false);
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -42,12 +43,16 @@ export default function DropPartActionTriggers({
 
   return (
     <div className="tw-w-full tw-inline-flex tw-justify-between">
-      <div className="tw-px-4 sm:tw-px-0 tw-gap-x-8 tw-flex tw-items-center ">
-        <DropPartDiscussionButton
-          dropPart={dropPart}
-          isDiscussionOpen={isDiscussionOpen}
-          setIsDiscussionOpen={setIsDiscussionOpen}
-        />
+      <div
+        className="tw-px-4 sm:tw-px-0 tw-gap-x-6 tw-flex tw-items-center"
+      >
+        {!!dropPart.replies_count && (
+          <DropPartDiscussionButton
+            dropPart={dropPart}
+            onDiscussionButtonClick={onDiscussionButtonClick}
+          />
+        )}
+        <DropPartReplyButton onReplyButtonClick={onReplyButtonClick} />
         <DropPartQuoteButton dropPart={dropPart} onQuote={onQuote} />
         <button
           type="button"

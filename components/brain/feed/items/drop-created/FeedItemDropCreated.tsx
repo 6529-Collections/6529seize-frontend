@@ -13,6 +13,7 @@ export default function FeedItemDropCreated({
   return (
     <DropsListItem
       drop={item.item}
+      replyToDrop={null}
       showWaveInfo={showWaveInfo}
       availableCredit={availableCredit}
     />
