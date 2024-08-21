@@ -137,10 +137,7 @@ export default function useManifoldClaim(
         claimData.startDate,
         claimData.endDate
       );
-      const remaining =
-        phase === ManifoldPhase.PUBLIC && status === ManifoldClaimStatus.ENDED
-          ? 0
-          : Number(claimData.totalMax) - Number(claimData.total);
+      const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,
         total: Number(claimData.total),
@@ -153,7 +150,7 @@ export default function useManifoldClaim(
         phase: phase,
         memePhase: memePhase,
         isFetching: false,
-        isFinalized: remaining === 0,
+        isFinalized: remaining === 0 || status === ManifoldClaimStatus.ENDED,
       };
       setClaim(newClaim);
       setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);

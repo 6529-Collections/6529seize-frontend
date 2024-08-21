@@ -346,7 +346,9 @@ export default function Home({
                             <td>
                               <b>
                                 {manifoldClaim?.isFinalized
-                                  ? "Sold Out"
+                                  ? manifoldClaim.remaining > 0
+                                    ? "Ended"
+                                    : "Sold Out"
                                   : capitalizeEveryWord(manifoldClaim?.status)}
                               </b>
                             </td>
