@@ -105,6 +105,22 @@ function SharePopup(props: Readonly<{ show: boolean; onHide: () => void }>) {
     }
   }, [props.show]);
 
+  useEffect(() => {
+    if (props.show) {
+      const handleScroll = () => {
+        props.onHide();
+      };
+
+      window.addEventListener("scroll", handleScroll);
+      window.addEventListener("touchmove", handleScroll);
+
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+        window.removeEventListener("touchmove", handleScroll);
+      };
+    }
+  }, [props.show, props.onHide]);
+
   const getLinkPath = () => {
     let path = window.location.pathname;
     if (path.startsWith("/")) {
@@ -154,14 +170,9 @@ function SharePopup(props: Readonly<{ show: boolean; onHide: () => void }>) {
         </button>
       </div>
       <button
-        onClick={props.onHide}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            e.preventDefault();
-            props.onHide();
-          }
+        onClick={() => {
+          props.onHide();
         }}
-        onDragStart={() => props.onHide()}
         className={styles.sharePopupOverlay}
         aria-label="Close overlay"
         style={{

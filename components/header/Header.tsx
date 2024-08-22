@@ -120,7 +120,7 @@ export default function Header(props: Readonly<Props>) {
   function printBurgerMenu() {
     return (
       <div
-        className={`${styles.burgerMenu} ${
+        className={`inset-safe-area ${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
         }`}>
         <Container className="pt-2 pb-2">
