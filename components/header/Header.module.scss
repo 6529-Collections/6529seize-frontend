@@ -9,17 +9,18 @@
 }
 
 .capacitorMainContainer {
-  height: $header-height-capacitor;
+  height: calc($header-height-capacitor + env(safe-area-inset-top));
   z-index: 600;
   background-color: black;
   position: fixed;
-  top: 0;
+  top: -env(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
   left: 0;
   width: 100%;
 }
 
 .capacitorPlaceholder {
-  height: $header-height-capacitor;
+  height: calc($header-height-capacitor + env(safe-area-inset-top));
   opacity: 0;
 }
 

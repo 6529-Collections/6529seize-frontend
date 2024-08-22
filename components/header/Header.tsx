@@ -30,7 +30,7 @@ export interface HeaderLink {
 }
 
 export default function Header(props: Readonly<Props>) {
-  const isCapacitor = true;
+  const isCapacitor = useIsCapacitor();
 
   const { showWaves } = useContext(AuthContext);
   const router = useRouter();

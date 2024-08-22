@@ -24,7 +24,7 @@ export default function CapacitorWidget() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 500) {
+      if (window.scrollY > window.innerHeight + 300) {
         setEnableScrollTop(true);
       } else {
         setEnableScrollTop(false);
@@ -161,6 +161,7 @@ function SharePopup(props: Readonly<{ show: boolean; onHide: () => void }>) {
             props.onHide();
           }
         }}
+        onDragStart={() => props.onHide()}
         className={styles.sharePopupOverlay}
         aria-label="Close overlay"
         style={{
