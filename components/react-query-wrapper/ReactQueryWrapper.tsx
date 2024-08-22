@@ -17,6 +17,7 @@ import {
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { Drop } from "../../generated/models/Drop";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { Time } from "../../helpers/time";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -938,7 +939,8 @@ export default function ReactQueryWrapper({
           };
         }
         const pages = JSON.parse(JSON.stringify(oldData.pages));
-        pages.at(-1)?.push(replyDrop);
+        pages.at(-1)?.data.push(replyDrop);
+  
         return {
           ...oldData,
           pages,
@@ -947,7 +949,7 @@ export default function ReactQueryWrapper({
     );
   };
 
-  const onDropDiscussionChange = ({
+  const onDropDiscussionChange = async ({
     replyDrop,
     dropId,
     parentDropId,
