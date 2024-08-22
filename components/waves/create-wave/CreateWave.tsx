@@ -367,7 +367,7 @@ export default function CreateWave({
         body,
       }),
     onSuccess: (response) => {
-      onDropCreate({ profile });
+      onDropCreate({ profile, drop: response.description_drop });
       onWaveCreated();
       router.push(`/waves/${response.id}`);
       return response;
