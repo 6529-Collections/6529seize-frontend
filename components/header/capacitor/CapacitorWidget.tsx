@@ -155,16 +155,7 @@ function SharePopup(props: Readonly<{ show: boolean; onHide: () => void }>) {
       </div>
       <div
         onClick={props.onHide}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            e.preventDefault();
-            props.onHide();
-          }
-        }}
         className={styles.sharePopupOverlay}
-        role="button"
-        tabIndex={0}
-        aria-label="Close overlay"
         style={{
           display: props.show ? "block" : "none",
         }}></div>
