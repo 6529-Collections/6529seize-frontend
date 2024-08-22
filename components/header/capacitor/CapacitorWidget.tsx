@@ -89,10 +89,12 @@ export default function CapacitorWidget() {
   );
 }
 
-function SharePopup(props: { show: boolean; onHide: () => void }) {
+function SharePopup(props: Readonly<{ show: boolean; onHide: () => void }>) {
   const [animationClass, setAnimationClass] = useState("");
 
-  const [isDesktopLinkCopied, setIsDesktopLinkCopied] = useState(false);
+  const enableMobileLink = false;
+
+  const [isMobileLinkCopied, setIsMobileLinkCopied] = useState(false);
   const [isWebLinkCopied, setIsWebLinkCopied] = useState(false);
 
   useEffect(() => {
@@ -115,9 +117,9 @@ function SharePopup(props: { show: boolean; onHide: () => void }) {
     const link = `//navigate/${getLinkPath()}`;
     navigator.clipboard.writeText(link).then(() => {
       setIsWebLinkCopied(false);
-      setIsDesktopLinkCopied(true);
+      setIsMobileLinkCopied(true);
       setTimeout(() => {
-        setIsDesktopLinkCopied(false);
+        setIsMobileLinkCopied(false);
       }, 1500);
     });
   };
@@ -125,7 +127,7 @@ function SharePopup(props: { show: boolean; onHide: () => void }) {
   const copyWebLink = () => {
     const link = window.location.href;
     navigator.clipboard.writeText(link).then(() => {
-      setIsDesktopLinkCopied(false);
+      setIsMobileLinkCopied(false);
       setIsWebLinkCopied(true);
       setTimeout(() => {
         setIsWebLinkCopied(false);
@@ -142,16 +144,27 @@ function SharePopup(props: { show: boolean; onHide: () => void }) {
             setAnimationClass("");
           }
         }}>
-        {/* <button className={styles.sharePopupBtn} onClick={copyAppLink}>
-          {isDesktopLinkCopied ? "Copied!" : "Copy Mobile App link"}
-        </button> */}
+        {enableMobileLink && (
+          <button className={styles.sharePopupBtn} onClick={copyAppLink}>
+            {isMobileLinkCopied ? "Copied!" : "Copy Mobile App link"}
+          </button>
+        )}
         <button className={styles.sharePopupBtn} onClick={copyWebLink}>
           {isWebLinkCopied ? "Copied!" : "Copy link"}
         </button>
       </div>
       <div
         onClick={props.onHide}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            props.onHide();
+          }
+        }}
         className={styles.sharePopupOverlay}
+        role="button"
+        tabIndex={0}
+        aria-label="Close overlay"
         style={{
           display: props.show ? "block" : "none",
         }}></div>

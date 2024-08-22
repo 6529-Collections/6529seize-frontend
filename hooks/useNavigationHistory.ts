@@ -19,10 +19,10 @@ export const useNavigationHistory = (): NavigationHistory => {
   const [canGoForward, setCanGoForward] = useState<boolean>(false);
 
   const [backIndex, setBackIndex] = useState<number>(() => {
-    return parseInt(sessionStorage.getItem("backIndex") || "-1");
+    return parseInt(sessionStorage.getItem("backIndex") ?? "-1");
   });
   const [forwardIndex, setForwardIndex] = useState<number>(() => {
-    return parseInt(sessionStorage.getItem("forwardIndex") || "0");
+    return parseInt(sessionStorage.getItem("forwardIndex") ?? "0");
   });
 
   const [isGoingBack, setIsGoingBack] = useState<boolean>(() => {
