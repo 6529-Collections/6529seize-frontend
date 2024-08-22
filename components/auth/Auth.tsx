@@ -46,8 +46,7 @@ type AuthContextType = {
   ) => Promise<void>;
 };
 
-// TODO: change it to 10
-export const WAVES_MIN_ACCESS_LEVEL = 0;
+export const WAVES_MIN_ACCESS_LEVEL = 10;
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
