@@ -14,6 +14,7 @@ interface Query {
   readonly context_profile?: string;
   readonly wave_id: string;
   readonly serial_no_less_than?: string;
+  readonly include_replies: string;
 }
 
 export default function WaveDrops({
@@ -29,6 +30,7 @@ export default function WaveDrops({
     limit: `${REQUEST_SIZE}`,
     context_profile: connectedProfile?.profile?.handle,
     wave_id: wave.id,
+    include_replies: "true",
   };
 
   const {

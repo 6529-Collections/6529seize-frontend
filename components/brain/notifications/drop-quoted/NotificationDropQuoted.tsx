@@ -9,6 +9,7 @@ export default function NotificationDropQuoted({
   return (
     <DropsListItem
       drop={notification.related_drops[0]}
+      replyToDrop={null}
       showWaveInfo={true}
       availableCredit={0}
     />

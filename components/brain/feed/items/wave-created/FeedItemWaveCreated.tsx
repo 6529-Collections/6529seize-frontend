@@ -39,6 +39,7 @@ export default function FeedItemWaveCreated({
 
         <DropsListItem
           drop={item.item.description_drop}
+          replyToDrop={null}
           showWaveInfo={showWaveInfo}
           availableCredit={availableCredit}
         />

@@ -66,6 +66,7 @@ interface CreateDropWrapperProps {
   readonly showDropError?: boolean;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly children: React.ReactNode;
+  readonly showProfile?: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
@@ -102,6 +103,7 @@ const CreateDropWrapper = forwardRef<
       viewType,
       showSubmit,
       showDropError = false,
+      showProfile = true,
       wave: waveProps,
       children,
       setIsStormMode,
@@ -404,6 +406,7 @@ const CreateDropWrapper = forwardRef<
         <CreateDropCompact
           ref={createDropContendCompactRef}
           profile={profile}
+          showProfile={showProfile}
           screenType={screenType}
           editorState={editorState}
           file={file}

@@ -33,6 +33,7 @@ export enum QueryKey {
   PROFILE_DROPS = "PROFILE_DROPS",
   PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
+  IDENTITY_FOLLOWING_ACTIONS = "IDENTITY_FOLLOWING_ACTIONS",
   IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
   IDENTITY_NOTIFICATIONS = "IDENTITY_NOTIFICATIONS",
   WALLET_TDH = "WALLET_TDH",
@@ -63,6 +64,7 @@ export enum QueryKey {
   WAVES = "WAVES",
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVE = "WAVE",
+  WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
   FEED_ITEMS = "FEED_ITEMS",
 }
 
@@ -171,6 +173,7 @@ type ReactQueryWrapperContextType = {
   readonly invalidateDrops: () => void;
   onDropDiscussionChange: (params: {
     readonly dropId: string;
+    readonly parentDropId: string | null;
     readonly dropAuthorHandle: string;
   }) => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
@@ -883,20 +886,28 @@ export default function ReactQueryWrapper({
 
   const onDropDiscussionChange = ({
     dropId,
+    parentDropId,
     dropAuthorHandle,
   }: {
     readonly dropId: string;
-    dropAuthorHandle: string;
+    readonly parentDropId: string | null;
+    readonly dropAuthorHandle: string;
   }) => {
+
+    const dropIdValues = [{ drop_id: dropId }]
+    if (parentDropId) {
+      dropIdValues.push({ drop_id: parentDropId });
+    }
+
     invalidateQueries({
       key: QueryKey.DROP_DISCUSSION,
-      values: [{ drop_id: dropId }],
+      values:  dropIdValues,
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],
     });
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP, { drop_id: dropId }],
+      queryKey: [QueryKey.DROP, dropIdValues],
     });
     queryClient.invalidateQueries({
       queryKey: [
@@ -984,6 +995,9 @@ export default function ReactQueryWrapper({
 
   const onWaveFollowChange = () => invalidateAllWaves();
   const onIdentityFollowChange = () => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWERS],
     });

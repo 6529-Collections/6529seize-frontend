@@ -62,7 +62,7 @@ export default function FeedItem({
       <div className="tw-flex-col tw-items-center tw-relative">
         <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
       </div>
-      <div className="tw-w-full tw-mb-5">{getComponent()}</div>
+      <div className="tw-w-full tw-mb-4">{getComponent()}</div>
     </div>
   );
 }

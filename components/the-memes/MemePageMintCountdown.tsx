@@ -18,6 +18,7 @@ export default function MemePageMintCountdown(
     nft_id: number;
     hide_mint_btn?: boolean;
     setClaim?: (claim: ManifoldClaim) => void;
+    is_full_width?: boolean;
   }>
 ) {
   const manifoldClaim = useManifoldClaim(
@@ -64,23 +65,24 @@ export default function MemePageMintCountdown(
                 : manifoldClaim.endDate
             }
             hide_mint_btn={props.hide_mint_btn}
+            is_full_width={props.is_full_width}
             buttons={[
               {
-                label: "Mint on Manifold",
-                link: MEMES_MINTING_HREF,
-                target: "_blank",
+                label: "Mint on Seize",
+                link: `/the-memes/mint`,
+                target: "_self",
               },
               {
                 label: (
                   <span className="d-flex align-items-center justify-content-center gap-2">
-                    Mint on Seize{" "}
+                    Mint on Manifold{" "}
                     <span className="badge bg-white text-dark font-smaller">
-                      beta
+                      backup
                     </span>
                   </span>
                 ),
-                link: `/the-memes/mint`,
-                target: "_self",
+                link: MEMES_MINTING_HREF,
+                target: "_blank",
               },
             ]}
             additional_elements={

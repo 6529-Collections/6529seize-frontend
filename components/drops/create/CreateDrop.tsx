@@ -40,6 +40,7 @@ interface CreateDropProps {
     partId: number;
   } | null;
   readonly isClient?: boolean;
+  readonly showProfile?: boolean;
   readonly type: CreateDropType;
   readonly onSuccessfulDrop?: () => void;
 }
@@ -49,6 +50,7 @@ export default function CreateDrop({
   quotedDrop,
   wave,
   isClient = false,
+  showProfile = true,
   type,
   onSuccessfulDrop,
 }: CreateDropProps) {
@@ -201,6 +203,7 @@ export default function CreateDrop({
       profile={profileMin}
       isClient={isClient}
       quotedDrop={quotedDrop}
+      showProfile={showProfile}
       type={type}
       loading={submitting}
       dropEditorRefreshKey={dropEditorRefreshKey}

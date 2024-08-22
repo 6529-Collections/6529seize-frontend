@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import DropListItemContent from "./content/DropListItemContent";
-import DropListItemCreateQuote from "./quote/DropListItemCreateQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
 import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
+import DropReply, { DropReplyProps } from "./replies/DropReply";
+import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -13,6 +14,13 @@ export enum DropVoteState {
   CANT_VOTE = "CANT_VOTE",
   NO_CREDIT = "NO_CREDIT",
   CAN_VOTE = "CAN_VOTE",
+}
+
+export enum DropConnectingLineType {
+  NONE = "NONE",
+  TOP = "TOP",
+  FULL = "FULL",
+  BOTTOM = "BOTTOm",
 }
 
 export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
@@ -27,16 +35,29 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
 
 export default function DropsListItem({
   drop,
+  replyToDrop,
   showFull = false,
   showWaveInfo = true,
   availableCredit,
+  isReply = false,
+  dropReplyDepth = 0,
+  connectingLineType = DropConnectingLineType.BOTTOM,
+  initialDiscussionOpen = false,
+  onDiscussionStateChange,
 }: {
   readonly drop: Drop;
+  readonly replyToDrop: Drop | null;
   readonly showFull?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
+  readonly isReply?: boolean;
+  readonly dropReplyDepth?: number;
+  readonly connectingLineType?: DropConnectingLineType | null;
+  readonly initialDiscussionOpen?: boolean;
+  readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const [isDiscussionOpen, setIsDiscussionOpen] = useState(initialDiscussionOpen);
 
   const getVoteState = () => {
     if (!connectedProfile) {
@@ -71,16 +92,6 @@ export default function DropsListItem({
   const [canVote, setCanVote] = useState(getCanVote());
   useEffect(() => setCanVote(getCanVote()), [voteState]);
 
-  const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
-
-  const onQuote = (dropPartId: number | null) => {
-    if (dropPartId === quoteModePartId) {
-      setQuoteModePartId(null);
-    } else {
-      setQuoteModePartId(dropPartId);
-    }
-  };
-
   const getCanFollow = () => {
     if (!connectedProfile?.profile?.handle) {
       return false;
@@ -100,17 +111,54 @@ export default function DropsListItem({
     [connectedProfile, activeProfileProxy, drop]
   );
 
+  const getReplyProps = (): DropReplyProps | null => {
+    if (replyToDrop) {
+      return { reply: replyToDrop };
+    }
+
+    if (drop.reply_to?.drop_id) {
+      return {
+        dropId: drop.reply_to.drop_id,
+        partId: drop.reply_to.drop_part_id,
+      };
+    }
+
+    return null;
+  };
+
+  const replyProps = getReplyProps();
+
+  const [randomKey, setRandomKey] = useState(getRandomObjectId());
+
+  const onDiscussionButtonClick = () => {
+    if (!isDiscussionOpen) {
+      onDiscussionStateChange?.(drop.id);
+      setIsDiscussionOpen(true);
+    }
+    setRandomKey(getRandomObjectId());
+  };
+
   return (
-    <div className="tw-relative tw-bg-iron-900 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 hover:tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out">
-      <DropListItemCreateQuote
-        drop={drop}
-        quotedPartId={quoteModePartId}
-        onSuccessfulQuote={() => setQuoteModePartId(null)}
-      />
-      <div className="tw-pt-2 sm:tw-pt-3">
+    <div
+      className={`${
+        !isReply &&
+        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
+      }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && ""}`}
+      /* not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800 */
+    >
+      <div className={`${dropReplyDepth === 0 && "tw-pb-2 tw-pt-2"}`}>
+        {replyProps && dropReplyDepth === 0 && (
+          <div className="tw-mb-1.5">
+            <div className="tw-relative tw-flex tw-justify-end">
+              <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-8 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
+            </div>
+            <DropReply {...replyProps} />
+          </div>
+        )}
         <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
+              key={randomKey}
               drop={drop}
               showFull={showFull}
               voteState={voteState}
@@ -118,10 +166,13 @@ export default function DropsListItem({
               availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
               smallMenuIsShown={canFollow}
-              onQuote={onQuote}
+              dropReplyDepth={dropReplyDepth}
+              isDiscussionOpen={isDiscussionOpen}
+              connectingLineType={connectingLineType}
+              onDiscussionButtonClick={onDiscussionButtonClick}
             />
             {canFollow && (
-              <div className="tw-absolute tw-right-10">
+              <div className="tw-absolute tw-right-14">
                 <DropsListItemFollowDrop drop={drop} />
               </div>
             )}

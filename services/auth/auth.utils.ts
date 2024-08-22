@@ -9,7 +9,7 @@ export const setAuthJwt = (jwt: string) => {
 export const getAuthJwt = () => {
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
-
+ 
 export const removeAuthJwt = () => {
   Cookies.remove(WALLET_AUTH_COOKIE);
 };
