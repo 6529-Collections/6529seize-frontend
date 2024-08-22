@@ -2,65 +2,116 @@
 
 .capacitorWidget {
   position: fixed;
-  right: 20px;
+  width: 100%;
+  height: 60px;
+  background-color: black;
   bottom: 0;
-  display: flex;
-  align-items: center;
-  transform: translateY(44px);
-  transition: transform 0.2s ease-out;
+  left: 0;
   z-index: 1000;
-}
-
-.slider {
-  background-color: black;
-  padding: 5px;
   display: flex;
   align-items: center;
-}
-
-.buttonContainer {
-  background-color: black;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.expanded {
-  transform: translateY(0);
-}
-
-.expandButton {
-  border: none;
-  background-color: transparent;
-  padding: 0;
-
-  svg {
-    width: 24px;
-    color: white;
-  }
+  justify-content: space-between;
+  gap: 10px;
+  padding-left: 35px;
+  padding-right: 35px;
 }
 
 .button {
   color: black;
-  height: 24px;
-  width: 24px;
+  height: 30px;
+  width: 30px;
   border: none;
-  border-radius: 12px;
+  border-radius: 17px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   svg {
-    width: 18px;
-    height: 18px;
-    margin: 3px;
-    position: absolute;
-    top: 0;
-    left: 0;
+    width: 22px;
+    height: 22px;
   }
 
   &:hover {
     svg {
       color: black;
     }
+  }
+}
+
+.refreshSpin {
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.sharePopup {
+  z-index: 1001;
+  background-color: black;
+  position: absolute;
+  width: fit-content;
+  white-space: nowrap;
+  left: 50%;
+  bottom: 75px;
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.9);
+  transition: visibility 0.2s, opacity 0.2s, transform 0.2s;
+}
+
+.sharePopup.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  animation: fadeInScale 0.2s ease forwards;
+}
+
+.sharePopup.hide {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.9);
+  animation: fadeOutScale 0.2s ease forwards;
+}
+
+.sharePopup::before {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0 10px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.sharePopupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.sharePopupBtn {
+  cursor: pointer;
+  padding: 10px;
+  background-color: black;
+  border: none !important;
+  width: 200px;
+  text-align: center;
+
+  &:hover {
+    background-color: $dark-grey;
   }
 }

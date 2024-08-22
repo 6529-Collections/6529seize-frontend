@@ -1,52 +1,160 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styles from "./CapacitorWidget.module.scss";
 import {
+  faAnglesUp,
   faArrowLeft,
   faArrowRight,
-  faChevronDown,
-  faChevronUp,
   faRefresh,
+  faShare,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
+import { useState, useEffect } from "react";
 
 export default function CapacitorWidget() {
-  const router = useRouter();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
+    useNavigationHistory();
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
+  const [enableScrollTop, setEnableScrollTop] = useState(false);
+
+  const [isShareOpen, setIsShareOpen] = useState(false);
+
+  const toggleShare = () => {
+    setIsShareOpen(!isShareOpen);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        setEnableScrollTop(true);
+      } else {
+        setEnableScrollTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleScrollTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
-    <div
-      className={`${styles.capacitorWidget} ${
-        isExpanded ? styles.expanded : ""
-      }`}>
-      <div className="d-flex flex-column align-items-end">
-        <span className={styles.slider}>
-          <button className={styles.expandButton} onClick={toggleExpand}>
-            <FontAwesomeIcon icon={isExpanded ? faChevronDown : faChevronUp} />
-          </button>
-        </span>
-        <span className={styles.buttonContainer}>
-          <button
-            className={styles.button}
-            disabled={!router.back}
-            onClick={() => router.back()}>
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </button>
-          <button
-            className={styles.button}
-            disabled={!router.forward}
-            onClick={() => router.forward()}>
-            <FontAwesomeIcon icon={faArrowRight} />
-          </button>
-          <button className={styles.button} onClick={() => router.refresh()}>
-            <FontAwesomeIcon icon={faRefresh} />
-          </button>
-        </span>
-      </div>
+    <div className={styles.capacitorWidget}>
+      <span className="d-flex align-items-center gap-3">
+        <button
+          className={styles.button}
+          disabled={!canGoBack || isLoading}
+          onClick={() => goBack()}>
+          <FontAwesomeIcon icon={faArrowLeft} />
+        </button>
+        <button
+          className={styles.button}
+          disabled={!canGoForward || isLoading}
+          onClick={() => goForward()}>
+          <FontAwesomeIcon icon={faArrowRight} />
+        </button>
+      </span>
+
+      <span className="d-flex align-items-center gap-3">
+        <button className={styles.button} onClick={toggleShare}>
+          <FontAwesomeIcon icon={faShare} />
+        </button>
+        <SharePopup show={isShareOpen} onHide={() => setIsShareOpen(false)} />
+      </span>
+      <span className="d-flex align-items-center gap-3">
+        <button
+          className={styles.button}
+          onClick={() => refresh()}
+          disabled={isLoading}>
+          <FontAwesomeIcon
+            icon={faRefresh}
+            className={isLoading ? styles.refreshSpin : ""}
+          />
+        </button>
+        <button
+          className={styles.button}
+          onClick={handleScrollTop}
+          disabled={isLoading || !enableScrollTop}>
+          <FontAwesomeIcon icon={faAnglesUp} />
+        </button>
+      </span>
     </div>
+  );
+}
+
+function SharePopup(props: { show: boolean; onHide: () => void }) {
+  const [animationClass, setAnimationClass] = useState("");
+
+  const [isDesktopLinkCopied, setIsDesktopLinkCopied] = useState(false);
+  const [isWebLinkCopied, setIsWebLinkCopied] = useState(false);
+
+  useEffect(() => {
+    if (props.show) {
+      setAnimationClass(styles.show);
+    } else {
+      setAnimationClass(styles.hide);
+    }
+  }, [props.show]);
+
+  const getLinkPath = () => {
+    let path = window.location.pathname;
+    if (path.startsWith("/")) {
+      path = path.slice(1);
+    }
+    return path;
+  };
+
+  const copyAppLink = () => {
+    const link = `//navigate/${getLinkPath()}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setIsWebLinkCopied(false);
+      setIsDesktopLinkCopied(true);
+      setTimeout(() => {
+        setIsDesktopLinkCopied(false);
+      }, 1500);
+    });
+  };
+
+  const copyWebLink = () => {
+    const link = window.location.href;
+    navigator.clipboard.writeText(link).then(() => {
+      setIsDesktopLinkCopied(false);
+      setIsWebLinkCopied(true);
+      setTimeout(() => {
+        setIsWebLinkCopied(false);
+      }, 1500);
+    });
+  };
+
+  return (
+    <>
+      <div
+        className={`${styles.sharePopup} ${animationClass}`}
+        onAnimationEnd={() => {
+          if (!props.show) {
+            setAnimationClass("");
+          }
+        }}>
+        {/* <button className={styles.sharePopupBtn} onClick={copyAppLink}>
+          {isDesktopLinkCopied ? "Copied!" : "Copy Mobile App link"}
+        </button> */}
+        <button className={styles.sharePopupBtn} onClick={copyWebLink}>
+          {isWebLinkCopied ? "Copied!" : "Copy link"}
+        </button>
+      </div>
+      <div
+        onClick={props.onHide}
+        className={styles.sharePopupOverlay}
+        style={{
+          display: props.show ? "block" : "none",
+        }}></div>
+    </>
   );
 }
