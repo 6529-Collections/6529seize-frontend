@@ -40,6 +40,11 @@
   }
 }
 
+.button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .refreshSpin {
   animation: spin 1s infinite linear;
 }

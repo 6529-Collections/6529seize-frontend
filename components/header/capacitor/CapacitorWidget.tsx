@@ -24,7 +24,7 @@ export default function CapacitorWidget() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > window.innerHeight + 300) {
+      if (window.scrollY > 200) {
         setEnableScrollTop(true);
       } else {
         setEnableScrollTop(false);
@@ -49,13 +49,17 @@ export default function CapacitorWidget() {
     <div className={styles.capacitorWidget}>
       <span className="d-flex align-items-center gap-3">
         <button
-          className={styles.button}
+          className={`${styles.button} ${
+            !canGoBack || isLoading ? styles.disabled : ""
+          }`}
           disabled={!canGoBack || isLoading}
           onClick={() => goBack()}>
           <FontAwesomeIcon icon={faArrowLeft} />
         </button>
         <button
-          className={styles.button}
+          className={`${styles.button} ${
+            !canGoForward || isLoading ? styles.disabled : ""
+          }`}
           disabled={!canGoForward || isLoading}
           onClick={() => goForward()}>
           <FontAwesomeIcon icon={faArrowRight} />
@@ -63,14 +67,17 @@ export default function CapacitorWidget() {
       </span>
 
       <span className="d-flex align-items-center gap-3">
-        <button className={styles.button} onClick={toggleShare}>
+        <button
+          className={`${styles.button} ${isLoading ? styles.disabled : ""}`}
+          disabled={isLoading}
+          onClick={toggleShare}>
           <FontAwesomeIcon icon={faShare} />
         </button>
         <SharePopup show={isShareOpen} onHide={() => setIsShareOpen(false)} />
       </span>
       <span className="d-flex align-items-center gap-3">
         <button
-          className={styles.button}
+          className={`${styles.button} ${isLoading ? styles.disabled : ""}`}
           onClick={() => refresh()}
           disabled={isLoading}>
           <FontAwesomeIcon
@@ -79,7 +86,9 @@ export default function CapacitorWidget() {
           />
         </button>
         <button
-          className={styles.button}
+          className={`${styles.button} ${
+            isLoading || !enableScrollTop ? styles.disabled : ""
+          }`}
           onClick={handleScrollTop}
           disabled={isLoading || !enableScrollTop}>
           <FontAwesomeIcon icon={faAnglesUp} />
@@ -166,7 +175,9 @@ function SharePopup(props: Readonly<{ show: boolean; onHide: () => void }>) {
           </button>
         )}
         <button className={styles.sharePopupBtn} onClick={copyWebLink}>
-          {isWebLinkCopied ? "Copied!" : "Copy link"}
+          <span className="font-larger">
+            {isWebLinkCopied ? "Copied!" : "Copy link"}
+          </span>
         </button>
       </div>
       <button
