@@ -1,12 +1,13 @@
-import useIsCapacitor from "../../hooks/isCapacitor";
+import useCapacitor from "../../hooks/useCapacitor";
 import styles from "./Header.module.scss";
 
 export default function HeaderPlaceholder() {
-  const isCapacitor = useIsCapacitor();
+  const capacitor = useCapacitor();
+
   return (
     <div
       className={
-        isCapacitor
+        capacitor.isCapacitor
           ? styles.headerPlaceholderCapacitor
           : styles.headerPlaceholder
       }></div>

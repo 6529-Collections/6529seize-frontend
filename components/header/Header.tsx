@@ -14,7 +14,7 @@ import HeaderUser from "./user/HeaderUser";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { AuthContext } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
-import useIsCapacitor from "../../hooks/isCapacitor";
+import useCapacitor from "../../hooks/useCapacitor";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 
@@ -30,7 +30,7 @@ export interface HeaderLink {
 }
 
 export default function Header(props: Readonly<Props>) {
-  const isCapacitor = useIsCapacitor();
+  const capacitor = useCapacitor();
 
   const { showWaves } = useContext(AuthContext);
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function Header(props: Readonly<Props>) {
   let logoSrc: string;
   let logoWidth: number;
   let logoHeight: number;
-  if (isCapacitor) {
+  if (capacitor.isCapacitor) {
     logoSrc =
       "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png";
     logoWidth = 40;
@@ -718,18 +718,22 @@ export default function Header(props: Readonly<Props>) {
   return (
     <>
       {printBurgerMenu()}
-      {isCapacitor && <CapacitorWidget />}
+      {capacitor.isCapacitor && <CapacitorWidget />}
       <Container
         fluid
         className={
-          isCapacitor ? styles.capacitorMainContainer : styles.mainContainer
+          capacitor.isCapacitor
+            ? styles.capacitorMainContainer
+            : styles.mainContainer
         }>
         <Row>
           <Col>
             <Container>
               <Row
                 className={
-                  isCapacitor ? styles.capacitorHeaderRow : styles.headerRow
+                  capacitor.isCapacitor
+                    ? styles.capacitorHeaderRow
+                    : styles.headerRow
                 }>
                 <Col
                   xs={{ span: 8 }}
@@ -770,7 +774,7 @@ export default function Header(props: Readonly<Props>) {
                             {showWaves && <HeaderNotifications />}
                             <HeaderSearchButton />
                           </div>
-                          {!isCapacitor ? (
+                          {!capacitor.isCapacitor ? (
                             <Image
                               loading="eager"
                               priority
@@ -1107,7 +1111,7 @@ export default function Header(props: Readonly<Props>) {
                             <HeaderSearchButton />
                           </Nav>
                         </Navbar>
-                        {!isCapacitor && (
+                        {!capacitor.isCapacitor && (
                           <Image
                             loading="eager"
                             priority
@@ -1133,7 +1137,7 @@ export default function Header(props: Readonly<Props>) {
           </Col>
         </Row>
       </Container>
-      {isCapacitor && (
+      {capacitor.isCapacitor && (
         <Container className={styles.capacitorPlaceholder}></Container>
       )}
     </>
