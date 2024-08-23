@@ -17,6 +17,7 @@ import {
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { Drop } from "../../generated/models/Drop";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { Time } from "../../helpers/time";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -164,7 +165,10 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onDropCreate: (params: { profile: IProfileAndConsolidations }) => void;
+  onDropCreate: (params: {
+    profile: IProfileAndConsolidations;
+    drop: Drop;
+  }) => void;
   onRedrop: (params: { readonly reDropId: string }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
@@ -172,6 +176,7 @@ type ReactQueryWrapperContextType = {
   }) => void;
   readonly invalidateDrops: () => void;
   onDropDiscussionChange: (params: {
+    readonly replyDrop: Drop;
     readonly dropId: string;
     readonly parentDropId: string | null;
     readonly dropAuthorHandle: string;
@@ -766,22 +771,54 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const onNewDrop = ({ drop }: { readonly drop: Drop }): void => {
+    queryClient.setQueryData(
+      [
+        QueryKey.DROPS,
+        {
+          limit: `10`,
+          context_profile: drop.author.handle,
+          wave_id: drop.wave.id,
+          include_replies: "true",
+        },
+      ],
+      (
+        oldData:
+          | {
+              pages: Drop[][];
+            }
+          | undefined
+      ) => {
+        if (!oldData?.pages.length) {
+          return oldData;
+        }
+        const pages = JSON.parse(JSON.stringify(oldData.pages));
+        pages.at(0)?.unshift(drop);
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
   const onDropCreate = ({
     profile,
+    drop,
   }: {
-    profile: IProfileAndConsolidations;
+    readonly profile: IProfileAndConsolidations;
+    readonly drop: Drop;
   }) => {
+    onNewDrop({ drop });
     const handles = getHandlesFromProfile(profile);
     invalidateQueries({
       key: QueryKey.PROFILE_DROPS,
       values: handles.map((handle) => ({ handleOrWallet: handle })),
     });
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROPS],
-    });
-    queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
     });
+    queryClient.invalidateQueries({ queryKey: [QueryKey.DROPS] });
   };
 
   const dropChangeMutation = ({
@@ -871,37 +908,67 @@ export default function ReactQueryWrapper({
 
   const onRedrop = ({ reDropId }: { readonly reDropId: string }) => {
     queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROPS],
-    });
-    queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP, { drop_id: reDropId }],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_DROPS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.FEED_ITEMS],
     });
   };
 
-  const onDropDiscussionChange = ({
+  const onNewReply = ({ replyDrop }: { readonly replyDrop: Drop }): void => {
+    queryClient.setQueryData(
+      [
+        QueryKey.DROP_DISCUSSION,
+        {
+          drop_id: replyDrop.reply_to?.drop_id,
+          drop_part_id: replyDrop.reply_to?.drop_part_id,
+          sort_direction: "ASC",
+        },
+      ],
+      (
+        oldData: { pages: Page<Drop>[], pageParams: number[] } | undefined
+      ): { pages: Page<Drop>[], pageParams: number[] } => {
+        if (!oldData?.pages.length) {
+          return {
+            pageParams: [1],
+            pages: [
+              {
+                count: 1,
+                page: 1,
+                next: false,
+                data: [replyDrop],
+              },
+            ],
+          };
+        }
+        const pages = JSON.parse(JSON.stringify(oldData.pages));
+        pages.at(-1)?.data.push(replyDrop);
+  
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
+  const onDropDiscussionChange = async ({
+    replyDrop,
     dropId,
     parentDropId,
     dropAuthorHandle,
   }: {
+    readonly replyDrop: Drop;
     readonly dropId: string;
     readonly parentDropId: string | null;
     readonly dropAuthorHandle: string;
   }) => {
-
-    const dropIdValues = [{ drop_id: dropId }]
+    onNewDrop({ drop: replyDrop });
+    onNewReply({ replyDrop });
+    const dropIdValues = [{ drop_id: dropId }];
     if (parentDropId) {
       dropIdValues.push({ drop_id: parentDropId });
     }
-
     invalidateQueries({
       key: QueryKey.DROP_DISCUSSION,
-      values:  dropIdValues,
+      values: dropIdValues,
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],

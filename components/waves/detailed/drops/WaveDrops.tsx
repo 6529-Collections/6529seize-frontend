@@ -65,14 +65,12 @@ export default function WaveDrops({
   });
 
   const [drops, setDrops] = useState<Drop[]>([]);
-  useEffect(
-    () =>
-      setDrops(
-        data?.pages.flat().filter((d) => d.id !== d.wave.description_drop_id) ??
-          []
-      ),
-    [data]
-  );
+  useEffect(() => {
+    setDrops(
+      data?.pages.flat().filter((d) => d.id !== d.wave.description_drop_id) ??
+        []
+    );
+  }, [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (drops.length < REQUEST_SIZE) {

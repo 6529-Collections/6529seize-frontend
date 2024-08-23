@@ -15,6 +15,7 @@ import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
+import { Drop } from "../../../generated/models/Drop";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -55,7 +56,9 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { onDropCreate, onRedrop } = useContext(ReactQueryWrapperContext);
+  const { onDropCreate, onRedrop, } = useContext(
+    ReactQueryWrapperContext
+  );
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
@@ -68,14 +71,13 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: CreateDropRequest) =>
-      await commonApiPost({
+      await commonApiPost<CreateDropRequest, Drop>({
         endpoint: `drops`,
         body,
       }),
-    onSuccess: (response) => {
+    onSuccess: (response: Drop) => {
       setDropEditorRefreshKey((prev) => prev + 1);
-
-      onDropCreate({ profile });
+       onDropCreate({ profile, drop: response });
       if (quotedDrop?.dropId) {
         onRedrop({ reDropId: quotedDrop.dropId });
       }

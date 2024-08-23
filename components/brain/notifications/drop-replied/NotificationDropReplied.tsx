@@ -66,8 +66,8 @@ export default function NotificationDropReplied({
         </div>
 
         <DropsListItem
-          drop={notification.related_drops[0]}
-          replyToDrop={notification.related_drops[1]}
+          drop={notification.related_drops[1]}
+          replyToDrop={notification.related_drops[0]}
           showWaveInfo={true}
           availableCredit={0}
         />
