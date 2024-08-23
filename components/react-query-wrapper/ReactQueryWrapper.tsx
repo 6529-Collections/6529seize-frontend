@@ -18,6 +18,7 @@ import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileR
 import { Drop } from "../../generated/models/Drop";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { Time } from "../../helpers/time";
+import { wait } from "../../helpers/Helpers";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -802,14 +803,15 @@ export default function ReactQueryWrapper({
     );
   };
 
-  const onDropCreate = ({
+  const onDropCreate = async ({
     profile,
     drop,
   }: {
     readonly profile: IProfileAndConsolidations;
     readonly drop: Drop;
-  }) => {
+  }): Promise<void> => {
     onNewDrop({ drop });
+    await wait(500)
     const handles = getHandlesFromProfile(profile);
     invalidateQueries({
       key: QueryKey.PROFILE_DROPS,
@@ -962,6 +964,7 @@ export default function ReactQueryWrapper({
   }) => {
     onNewDrop({ drop: replyDrop });
     onNewReply({ replyDrop });
+    await wait(500)
     const dropIdValues = [{ drop_id: dropId }];
     if (parentDropId) {
       dropIdValues.push({ drop_id: parentDropId });
