@@ -148,7 +148,7 @@ export default function DropPartWrapper({
           </div>
 
           <div
-            className={`tw-px-4 tw-relative tw-z-10 tw-ml-9 tw-mt-1 ${
+            className={`tw-px-4 tw-ml-9 tw-mt-1 ${
               size === DropPartSize.SMALL
                 ? "sm:tw-ml-[40px]"
                 : "sm:tw-ml-[54px]"

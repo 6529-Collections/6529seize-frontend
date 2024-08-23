@@ -26,7 +26,7 @@ export default function WaveHeader({
     <div>
       <div>
         <div
-          className="tw-h-32 tw-w-full tw-object-cover lg:tw-h-44"
+          className="tw-h-28 sm:tw-h-32 tw-w-full tw-object-cover"
           style={{
             background: `linear-gradient(45deg, ${wave.author.banner1_color} 0%, ${wave.author.banner2_color} 100%)`,
           }}
