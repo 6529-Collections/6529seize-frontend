@@ -850,6 +850,7 @@ export default function ReactQueryWrapper({
                 const modifiedParts = item.item.parts.map((part) => {
                   const isQuoted = quotedDrops.find(
                     (qd) =>
+                      qd &&
                       item.item.id === qd.drop_id &&
                       part.part_id === qd.drop_part_id
                   );
@@ -880,6 +881,7 @@ export default function ReactQueryWrapper({
                 const modifiedParts = item.item.reply.parts.map((part) => {
                   const isQuoted = quotedDrops.find(
                     (qd) =>
+                      qd &&
                       item.item.reply.id === qd.drop_id &&
                       part.part_id === qd.drop_part_id
                   );
@@ -962,7 +964,9 @@ export default function ReactQueryWrapper({
               const modifiedParts = item.parts.map((part) => {
                 const isQuoted = quotedDrops.find(
                   (qd) =>
-                    item.id === qd.drop_id && part.part_id === qd.drop_part_id
+                    qd &&
+                    item.id === qd.drop_id &&
+                    part.part_id === qd.drop_part_id
                 );
                 if (isQuoted) {
                   return {
