@@ -10,11 +10,13 @@ import { useRouter } from "next/router";
 
 interface DropReplyPropsWithDrop {
   readonly reply: Drop;
+  readonly textSize?: "sm" | "md";
 }
 
 interface DropReplyPropsWithDropId {
   readonly dropId: string;
   readonly partId: number;
+  readonly textSize?: "sm" | "md";
 }
 
 export type DropReplyProps = DropReplyPropsWithDrop | DropReplyPropsWithDropId;
@@ -98,7 +100,7 @@ export default function DropReply(props: DropReplyProps) {
 
   return (
     <div>
-      <div className="tw-ml-16 tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer">
+      <div className="tw-ml-16 tw-flex tw-items-center tw-gap-x-1.5 tw-cursor-pointer">
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
             <div className="tw-rounded-md tw-h-full tw-w-full">
@@ -122,6 +124,7 @@ export default function DropReply(props: DropReplyProps) {
             mentionedUsers={finalDrop?.mentioned_users ?? []}
             referencedNfts={finalDrop?.referenced_nfts ?? []}
             onImageLoaded={() => undefined}
+            textSize="sm" 
           />
         </div>
       </div>
