@@ -75,7 +75,6 @@ export default function DropPartWrapper({
     string | null
   >(null);
 
-  const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
 
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
