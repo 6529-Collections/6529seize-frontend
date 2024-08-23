@@ -32,7 +32,7 @@ export default function DropReplyInputWrapper({
   readonly onReply: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { onDropDiscussionChange } = useContext(ReactQueryWrapperContext);
+  const { onDropCreate } = useContext(ReactQueryWrapperContext);
 
   const [mentionedUsers, setMentionedUsers] = useState<
     Omit<MentionedUser, "current_handle">[]
@@ -86,17 +86,15 @@ export default function DropReplyInputWrapper({
   };
 
   const addReplyMutation = useMutation({
-    mutationFn: async (body: CreateDropRequest) => await commonApiPost<CreateDropRequest, Drop>({
-      endpoint: `drops`,
-      body,
-    }),
+    mutationFn: async (body: CreateDropRequest) =>
+      await commonApiPost<CreateDropRequest, Drop>({
+        endpoint: `drops`,
+        body,
+      }),
     onSuccess: (respone: Drop) => {
       setDrop(null);
-      onDropDiscussionChange({
-        replyDrop: respone,
-        dropAuthorHandle: originalDrop.author?.handle,
-        parentDropId: originalDrop.reply_to?.drop_id ?? null,
-        dropId: originalDrop.id,
+      onDropCreate({
+        drop: respone,
       });
       onReply();
     },
