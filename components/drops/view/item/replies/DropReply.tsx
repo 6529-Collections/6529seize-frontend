@@ -118,7 +118,7 @@ export default function DropReply(props: DropReplyProps) {
             {finalDrop?.author.handle}
           </p>
         </div>
-        <div onClick={onReplyClick}>
+        <div onClick={onReplyClick} className="tw-group">
           <DropPartMarkdown
             partContent={replyContent}
             mentionedUsers={finalDrop?.mentioned_users ?? []}
