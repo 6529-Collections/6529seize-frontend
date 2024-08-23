@@ -3,18 +3,17 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 import { Capacitor } from "@capacitor/core";
 
 const useCapacitor = () => {
-  const [isCapacitor, setIsCapacitor] = useState(false);
+  const isCapacitor = Capacitor.isNativePlatform();
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      setIsCapacitor(true);
+    if (isCapacitor) {
       if (!isInitialized) {
         initializePushNotifications();
         setIsInitialized(true);
       }
     }
-  }, []);
+  }, [isCapacitor]);
 
   function sendNotification(id: number, title: string, body: string) {
     if (!isInitialized) {

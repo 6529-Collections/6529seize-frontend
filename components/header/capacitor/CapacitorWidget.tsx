@@ -24,11 +24,7 @@ export default function CapacitorWidget() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 200) {
-        setEnableScrollTop(true);
-      } else {
-        setEnableScrollTop(false);
-      }
+      setEnableScrollTop(window.scrollY > 0);
     };
 
     window.addEventListener("scroll", handleScroll);
