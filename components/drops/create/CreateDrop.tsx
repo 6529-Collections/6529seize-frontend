@@ -56,9 +56,7 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { onDropCreate, onRedrop, } = useContext(
-    ReactQueryWrapperContext
-  );
+  const { onDropCreate } = useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
@@ -77,10 +75,7 @@ export default function CreateDrop({
       }),
     onSuccess: (response: Drop) => {
       setDropEditorRefreshKey((prev) => prev + 1);
-       onDropCreate({ profile, drop: response });
-      if (quotedDrop?.dropId) {
-        onRedrop({ reDropId: quotedDrop.dropId });
-      }
+      onDropCreate({ drop: response });
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
       }
