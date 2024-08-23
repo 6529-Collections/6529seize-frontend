@@ -6,7 +6,6 @@ import { Drop } from "../../../../generated/models/Drop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
 import { DropConnectingLineType, DropVoteState } from "../item/DropsListItem";
-import DropListItemData from "../item/data/DropListItemData";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
 import DropListItemQuote from "../item/quote/DropListItemQuote";
@@ -76,7 +75,6 @@ export default function DropPartWrapper({
     string | null
   >(null);
 
-  const haveData = !!drop.mentioned_users.length || !!drop.metadata.length;
 
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
@@ -149,17 +147,7 @@ export default function DropPartWrapper({
           </div>
 
           <div
-            className={`tw-relative tw-z-10 ${
-              size === DropPartSize.SMALL
-                ? "sm:tw-ml-[40px]"
-                : "sm:tw-ml-[54px]"
-            }`}
-          >
-            {haveData && <DropListItemData drop={drop} />}
-          </div>
-
-          <div
-            className={`tw-px-4 tw-relative tw-z-10 tw-ml-9 tw-mt-2 ${
+            className={`tw-px-4 tw-ml-9 tw-mt-1 ${
               size === DropPartSize.SMALL
                 ? "sm:tw-ml-[40px]"
                 : "sm:tw-ml-[54px]"

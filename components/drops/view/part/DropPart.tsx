@@ -237,12 +237,14 @@ const DropPart = memo(
                     className={`${isStorm && ""} tw-h-full tw-w-full`}
                     ref={contentRef}
                   >
-                    <DropPartMarkdown
-                      mentionedUsers={mentionedUsers}
-                      referencedNfts={referencedNfts}
-                      partContent={partContent}
-                      onImageLoaded={onImageLoaded}
-                    />
+                    <div className="tw-group">
+                      <DropPartMarkdown
+                        mentionedUsers={mentionedUsers}
+                        referencedNfts={referencedNfts}
+                        partContent={partContent}
+                        onImageLoaded={onImageLoaded}
+                      />
+                    </div>
                     {!!partMedia?.mediaSrc && !!partMedia?.mimeType && (
                       <div className={partContent ? "tw-mt-4" : "tw-mt-1"}>
                         <DropListItemContentMedia
