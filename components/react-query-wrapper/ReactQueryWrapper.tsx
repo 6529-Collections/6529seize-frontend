@@ -17,10 +17,8 @@ import {
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { Drop } from "../../generated/models/Drop";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
-import { Time } from "../../helpers/time";
 import { wait } from "../../helpers/Helpers";
 import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import { FeedItemType } from "../../generated/models/FeedItemType";
 
 export enum QueryKey {
@@ -175,12 +173,6 @@ type ReactQueryWrapperContextType = {
     readonly giverHandle: string | null;
   }) => void;
   readonly invalidateDrops: () => void;
-  onDropDiscussionChange: (params: {
-    readonly replyDrop: Drop;
-    readonly dropId: string;
-    readonly parentDropId: string | null;
-    readonly dropAuthorHandle: string;
-  }) => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
   onGroupCreate: () => void;
@@ -209,7 +201,6 @@ export const ReactQueryWrapperContext =
     onDropCreate: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
-    onDropDiscussionChange: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
     onGroupCreate: () => {},
@@ -1041,37 +1032,6 @@ export default function ReactQueryWrapper({
         }
 
         const pages: Page<Drop>[] = JSON.parse(JSON.stringify(oldData.pages));
-        // const modifiedPages: Page<Drop>[] = pages.map((page) => {
-        //   const modifiedDrops = page.data.map((drop) => {
-        //     const modifiedParts = drop.parts.map((part) => {
-        //       const isParentPart =
-        //         drop.id === replyDrop.reply_to?.drop_id &&
-        //         part.part_id === replyDrop.reply_to.drop_part_id;
-        //         console.log(isParentPart)
-        //       if (isParentPart) {
-        //         return {
-        //           ...part,
-        //           replies_count: part.replies_count + 1,
-        //           context_profile_context: {
-        //             replies_count:
-        //               (part.context_profile_context?.replies_count ?? 0) + 1,
-        //             quotes_count:
-        //               part.context_profile_context?.quotes_count ?? 0,
-        //           },
-        //         };
-        //       }
-        //       return part;
-        //     });
-        //     return {
-        //       ...drop,
-        //       parts: modifiedParts,
-        //     };
-        //   });
-        //   return {
-        //     ...page,
-        //     data: modifiedDrops,
-        //   };
-        // });
         pages.at(-1)?.data.push(replyDrop);
 
         return {
@@ -1206,6 +1166,7 @@ export default function ReactQueryWrapper({
       queryKey: [QueryKey.FEED_ITEMS],
     });
     queryClient.invalidateQueries({ queryKey: [QueryKey.DROPS] });
+    queryClient.invalidateQueries({ queryKey: [QueryKey.DROP] });
   };
 
   const dropChangeMutation = ({
@@ -1291,48 +1252,6 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
     });
-  };
-
-  // TODO remove this from everywhere
-  const onDropDiscussionChange = async ({
-    replyDrop,
-    dropId,
-    parentDropId,
-    dropAuthorHandle,
-  }: {
-    readonly replyDrop: Drop;
-    readonly dropId: string;
-    readonly parentDropId: string | null;
-    readonly dropAuthorHandle: string;
-  }) => {
-    // addDropToDrops({ drop: replyDrop });
-    // addReplyToDropDiscussion({ replyDrop });
-    // await wait(500);
-    // const dropIdValues = [{ drop_id: dropId }];
-    // if (parentDropId) {
-    //   dropIdValues.push({ drop_id: parentDropId });
-    // }
-    // invalidateQueries({
-    //   key: QueryKey.DROP_DISCUSSION,
-    //   values: dropIdValues,
-    // });
-    // queryClient.invalidateQueries({
-    //   queryKey: [QueryKey.DROPS],
-    // });
-    // queryClient.invalidateQueries({
-    //   queryKey: [QueryKey.DROP, dropIdValues],
-    // });
-    // queryClient.invalidateQueries({
-    //   queryKey: [
-    //     QueryKey.PROFILE_DROPS,
-    //     {
-    //       handleOrWallet: dropAuthorHandle.toLowerCase(),
-    //     },
-    //   ],
-    // });
-    // queryClient.invalidateQueries({
-    //   queryKey: [QueryKey.FEED_ITEMS],
-    // });
   };
 
   const onIdentityBulkRate = () => {
@@ -1444,7 +1363,6 @@ export default function ReactQueryWrapper({
       onGroupChanged,
       onDropCreate,
       onDropChange,
-      onDropDiscussionChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
@@ -1471,7 +1389,6 @@ export default function ReactQueryWrapper({
       onGroupChanged,
       onDropCreate,
       onDropChange,
-      onDropDiscussionChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
