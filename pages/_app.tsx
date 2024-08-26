@@ -275,17 +275,15 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           <ReactQueryWrapper>
             <Auth>
               <CookieConsentProvider>
-                {getLayout(
-                  <>
-                    <Head>
-                      <meta
-                        name="viewport"
-                        content="width=device-width, initial-scale=1, viewport-fit=cover"
-                      />
-                    </Head>
-                    <Component {...props} />
-                  </>
-                )}
+                <>
+                  <Head>
+                    <meta
+                      name="viewport"
+                      content="width=device-width, initial-scale=1, viewport-fit=cover"
+                    />
+                  </Head>
+                  {getLayout(<Component {...props} />)}
+                </>
                 <CookiesBanner />
               </CookieConsentProvider>
             </Auth>
