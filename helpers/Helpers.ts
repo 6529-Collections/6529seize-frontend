@@ -764,7 +764,6 @@ export const formatLargeNumber = (num: number): string => {
   return isNegative ? "-" + formattedNum : formattedNum;
 };
 
-
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
 
@@ -852,7 +851,10 @@ export function getNameForContract(contract: string) {
   }
 }
 
-
 export const wait = async (ms: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getRandomInt = (max: number = Number.MAX_SAFE_INTEGER) => {
+  return Math.floor(Math.random() * max);
 };
