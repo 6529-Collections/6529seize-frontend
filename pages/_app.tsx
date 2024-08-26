@@ -230,6 +230,9 @@ export const wagmiConfig = defaultWagmiConfig({
   projectId: CW_PROJECT_ID,
   metadata,
   coinbasePreference: "all",
+  auth: {
+    email: false,
+  },
 });
 
 createWeb3Modal({
