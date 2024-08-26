@@ -169,9 +169,9 @@ const CreateDropFullDesktop = forwardRef<
           )}
         </div>
         <div className="tw-flex tw-w-full tw-gap-x-4">
-          <div className="tw-mt-0.5">
+         {/*  <div className="tw-mt-0.5">
             <DropPfp pfpUrl={profile?.pfp} />
-          </div>
+          </div> */}
           <div className="tw-w-full">
             <div className="tw-space-y-4">
               {titleState === TITLE_STATE.INPUT && (

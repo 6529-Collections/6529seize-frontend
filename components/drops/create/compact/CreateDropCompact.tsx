@@ -125,11 +125,11 @@ const CreateDropCompact = forwardRef<
       <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
         {children}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-          {showProfile && (
+         {/*  {showProfile && (
             <div className="tw-hidden sm:tw-block">
               <DropPfp pfpUrl={profile?.pfp} />
             </div>
-          )}
+          )} */}
           <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
             <div className="tw-w-full">
               <CreateDropContent
@@ -149,7 +149,7 @@ const CreateDropCompact = forwardRef<
                 onDropPart={onDropPart}
               />
             </div>
-            {showSubmit && (
+           {/*  {showSubmit && (
               <div>
                 <PrimaryButton
                   onClick={onDrop}
@@ -164,7 +164,7 @@ const CreateDropCompact = forwardRef<
                   {getSubmitText()}
                 </PrimaryButton>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
