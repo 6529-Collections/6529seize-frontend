@@ -17,7 +17,9 @@ import {
 import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { Drop } from "../../generated/models/Drop";
 import { ProfileProxy } from "../../generated/models/ProfileProxy";
-import { Time } from "../../helpers/time";
+import { wait } from "../../helpers/Helpers";
+import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
+import { FeedItemType } from "../../generated/models/FeedItemType";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -165,22 +167,12 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onDropCreate: (params: {
-    profile: IProfileAndConsolidations;
-    drop: Drop;
-  }) => void;
-  onRedrop: (params: { readonly reDropId: string }) => void;
+  onDropCreate: (params: { drop: Drop }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
   }) => void;
   readonly invalidateDrops: () => void;
-  onDropDiscussionChange: (params: {
-    readonly replyDrop: Drop;
-    readonly dropId: string;
-    readonly parentDropId: string | null;
-    readonly dropAuthorHandle: string;
-  }) => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
   onGroupCreate: () => void;
@@ -207,10 +199,8 @@ export const ReactQueryWrapperContext =
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     onDropCreate: () => {},
-    onRedrop: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
-    onDropDiscussionChange: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
     onGroupCreate: () => {},
@@ -771,7 +761,7 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const onNewDrop = ({ drop }: { readonly drop: Drop }): void => {
+  const addDropToDrops = ({ drop }: { readonly drop: Drop }): void => {
     queryClient.setQueryData(
       [
         QueryKey.DROPS,
@@ -802,23 +792,385 @@ export default function ReactQueryWrapper({
     );
   };
 
-  const onDropCreate = ({
-    profile,
+  const addDropToFeedItems = ({ drop }: { readonly drop: Drop }): void => {
+    queryClient.setQueryData(
+      [QueryKey.FEED_ITEMS],
+      (
+        oldData:
+          | {
+              pages: TypedFeedItem[][];
+            }
+          | undefined
+      ) => {
+        if (!oldData?.pages.length) {
+          return oldData;
+        }
+        const pages = JSON.parse(JSON.stringify(oldData.pages));
+        const feedItem: IFeedItemDropCreated = {
+          serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+          item: drop,
+          type: FeedItemType.DropCreated,
+        };
+        pages.at(0)?.unshift(feedItem);
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
+  const increaseFeedItemsDropRedropCount = ({
     drop,
   }: {
-    readonly profile: IProfileAndConsolidations;
     readonly drop: Drop;
-  }) => {
-    onNewDrop({ drop });
-    const handles = getHandlesFromProfile(profile);
-    invalidateQueries({
-      key: QueryKey.PROFILE_DROPS,
-      values: handles.map((handle) => ({ handleOrWallet: handle })),
+  }): void => {
+    queryClient.setQueryData(
+      [QueryKey.FEED_ITEMS],
+      (
+        oldData:
+          | {
+              pages: TypedFeedItem[][];
+            }
+          | undefined
+      ) => {
+        if (!oldData?.pages.length) {
+          return oldData;
+        }
+        const pages: TypedFeedItem[][] = JSON.parse(
+          JSON.stringify(oldData.pages)
+        );
+        const quotedDrops = drop.parts
+          .map((part) => part.quoted_drop)
+          .filter((quotedDrop) => !!quotedDrop);
+        if (quotedDrops.length) {
+          const modifiedPages = pages.map((items) => {
+            const modifiedItems = items.map((item) => {
+              if (item.type === FeedItemType.DropCreated) {
+                const modifiedParts = item.item.parts.map((part) => {
+                  const isQuoted = quotedDrops.find(
+                    (qd) =>
+                      qd &&
+                      item.item.id === qd.drop_id &&
+                      part.part_id === qd.drop_part_id
+                  );
+                  if (isQuoted) {
+                    return {
+                      ...part,
+                      quotes_count: part.quotes_count + 1,
+                      context_profile_context: {
+                        replies_count:
+                          part.context_profile_context?.replies_count ?? 0,
+                        quotes_count:
+                          (part.context_profile_context?.quotes_count ?? 0) + 1,
+                      },
+                    };
+                  } else {
+                    return part;
+                  }
+                });
+                return {
+                  ...item,
+                  item: {
+                    ...item.item,
+                    parts: modifiedParts,
+                  },
+                };
+              }
+              if (item.type === FeedItemType.DropReplied) {
+                const modifiedParts = item.item.reply.parts.map((part) => {
+                  const isQuoted = quotedDrops.find(
+                    (qd) =>
+                      qd &&
+                      item.item.reply.id === qd.drop_id &&
+                      part.part_id === qd.drop_part_id
+                  );
+                  console.log(isQuoted);
+                  if (isQuoted) {
+                    return {
+                      ...part,
+                      quotes_count: part.quotes_count + 1,
+                      context_profile_context: {
+                        replies_count:
+                          part.context_profile_context?.replies_count ?? 0,
+                        quotes_count:
+                          (part.context_profile_context?.quotes_count ?? 0) + 1,
+                      },
+                    };
+                  } else {
+                    return part;
+                  }
+                });
+                return {
+                  ...item,
+                  item: {
+                    ...item.item,
+                    reply: {
+                      ...item.item.reply,
+                      parts: modifiedParts,
+                    },
+                  },
+                };
+              }
+              return item;
+            });
+            return modifiedItems;
+          });
+          return {
+            ...oldData,
+            pages: modifiedPages,
+          };
+        }
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
+  const increaseDropsDropRedropCount = ({
+    drop,
+  }: {
+    readonly drop: Drop;
+  }): void => {
+    queryClient.setQueryData(
+      [
+        QueryKey.DROPS,
+        {
+          limit: `10`,
+          context_profile: drop.author.handle,
+          wave_id: drop.wave.id,
+          include_replies: "true",
+        },
+      ],
+      (
+        oldData:
+          | {
+              pages: Drop[][];
+            }
+          | undefined
+      ) => {
+        if (!oldData?.pages.length) {
+          return oldData;
+        }
+        const pages: Drop[][] = JSON.parse(JSON.stringify(oldData.pages));
+        const quotedDrops = drop.parts
+          .map((part) => part.quoted_drop)
+          .filter((quotedDrop) => !!quotedDrop);
+        if (quotedDrops.length) {
+          const modifiedPages = pages.map((items) => {
+            const modifiedItems = items.map((item) => {
+              const modifiedParts = item.parts.map((part) => {
+                const isQuoted = quotedDrops.find(
+                  (qd) =>
+                    qd &&
+                    item.id === qd.drop_id &&
+                    part.part_id === qd.drop_part_id
+                );
+                if (isQuoted) {
+                  return {
+                    ...part,
+                    quotes_count: part.quotes_count + 1,
+                    context_profile_context: {
+                      replies_count:
+                        part.context_profile_context?.replies_count ?? 0,
+                      quotes_count:
+                        (part.context_profile_context?.quotes_count ?? 0) + 1,
+                    },
+                  };
+                } else {
+                  return part;
+                }
+              });
+
+              return {
+                ...item,
+                parts: modifiedParts,
+              };
+            });
+            return modifiedItems;
+          });
+          return {
+            ...oldData,
+            pages: modifiedPages,
+          };
+        }
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
+  const addReplyToDropDiscussion = ({
+    replyDrop,
+  }: {
+    readonly replyDrop: Drop;
+  }): void => {
+    queryClient.setQueryData(
+      [
+        QueryKey.DROP_DISCUSSION,
+        {
+          drop_id: replyDrop.reply_to?.drop_id,
+          drop_part_id: replyDrop.reply_to?.drop_part_id,
+          sort_direction: "ASC",
+        },
+      ],
+      (
+        oldData: { pages: Page<Drop>[]; pageParams: number[] } | undefined
+      ): { pages: Page<Drop>[]; pageParams: number[] } => {
+        if (!oldData?.pages.length) {
+          return {
+            pageParams: [1],
+            pages: [
+              {
+                count: 1,
+                page: 1,
+                next: false,
+                data: [replyDrop],
+              },
+            ],
+          };
+        }
+
+        const pages: Page<Drop>[] = JSON.parse(JSON.stringify(oldData.pages));
+        pages.at(-1)?.data.push(replyDrop);
+
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
+  const increaseFeedItemsDropDiscussionCount = ({
+    drop,
+  }: {
+    readonly drop: Drop;
+  }): void => {
+    queryClient.setQueryData(
+      [QueryKey.FEED_ITEMS],
+      (
+        oldData:
+          | {
+              pages: TypedFeedItem[][];
+            }
+          | undefined
+      ) => {
+        if (!oldData?.pages.length) {
+          return oldData;
+        }
+        const pages: TypedFeedItem[][] = JSON.parse(
+          JSON.stringify(oldData.pages)
+        );
+        const repliedDrop = drop.reply_to;
+        if (repliedDrop) {
+          const modifiedPages = pages.map((items) => {
+            const modifiedItems = items.map((item) => {
+              if (item.type === FeedItemType.DropCreated) {
+                const modifiedParts = item.item.parts.map((part) => {
+                  const isReplied =
+                    item.item.id === repliedDrop.drop_id &&
+                    part.part_id === repliedDrop.drop_part_id;
+                  if (isReplied) {
+                    return {
+                      ...part,
+                      replies_count: part.replies_count + 1,
+                      context_profile_context: {
+                        replies_count:
+                          (part.context_profile_context?.replies_count ?? 0) +
+                          1,
+                        quotes_count:
+                          part.context_profile_context?.quotes_count ?? 0,
+                      },
+                    };
+                  } else {
+                    return part;
+                  }
+                });
+                return {
+                  ...item,
+                  item: {
+                    ...item.item,
+                    parts: modifiedParts,
+                  },
+                };
+              }
+              if (item.type === FeedItemType.DropReplied) {
+                const modifiedParts = item.item.reply.parts.map((part) => {
+                  const isReplied =
+                    item.item.reply.id === repliedDrop.drop_id &&
+                    part.part_id === repliedDrop.drop_part_id;
+
+                  if (isReplied) {
+                    return {
+                      ...part,
+                      replies_count: part.replies_count + 1,
+                      context_profile_context: {
+                        replies_count:
+                          (part.context_profile_context?.replies_count ?? 0) +
+                          1,
+                        quotes_count:
+                          part.context_profile_context?.quotes_count ?? 0,
+                      },
+                    };
+                  } else {
+                    return part;
+                  }
+                });
+                return {
+                  ...item,
+                  item: {
+                    ...item.item,
+                    reply: {
+                      ...item.item.reply,
+                      parts: modifiedParts,
+                    },
+                  },
+                };
+              }
+              return item;
+            });
+            return modifiedItems;
+          });
+          return {
+            ...oldData,
+            pages: modifiedPages,
+          };
+        }
+        return {
+          ...oldData,
+          pages,
+        };
+      }
+    );
+  };
+
+  const onDropCreate = async ({
+    drop,
+  }: {
+    readonly drop: Drop;
+  }): Promise<void> => {
+    addDropToDrops({ drop });
+    addDropToFeedItems({ drop });
+    increaseFeedItemsDropRedropCount({ drop });
+    increaseDropsDropRedropCount({ drop });
+    if (drop.reply_to) {
+      addReplyToDropDiscussion({ replyDrop: drop });
+      increaseFeedItemsDropDiscussionCount({ drop });
+    }
+    await wait(500);
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_DROPS],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
     });
     queryClient.invalidateQueries({ queryKey: [QueryKey.DROPS] });
+    queryClient.invalidateQueries({ queryKey: [QueryKey.DROP] });
   };
 
   const dropChangeMutation = ({
@@ -900,89 +1252,6 @@ export default function ReactQueryWrapper({
     invalidateQueries({
       key: QueryKey.DROP,
       values: [{ drop_id: drop.id }],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.FEED_ITEMS],
-    });
-  };
-
-  const onRedrop = ({ reDropId }: { readonly reDropId: string }) => {
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP, { drop_id: reDropId }],
-    });
-  };
-
-  const onNewReply = ({ replyDrop }: { readonly replyDrop: Drop }): void => {
-    queryClient.setQueryData(
-      [
-        QueryKey.DROP_DISCUSSION,
-        {
-          drop_id: replyDrop.reply_to?.drop_id,
-          drop_part_id: replyDrop.reply_to?.drop_part_id,
-          sort_direction: "ASC",
-        },
-      ],
-      (
-        oldData: { pages: Page<Drop>[], pageParams: number[] } | undefined
-      ): { pages: Page<Drop>[], pageParams: number[] } => {
-        if (!oldData?.pages.length) {
-          return {
-            pageParams: [1],
-            pages: [
-              {
-                count: 1,
-                page: 1,
-                next: false,
-                data: [replyDrop],
-              },
-            ],
-          };
-        }
-        const pages = JSON.parse(JSON.stringify(oldData.pages));
-        pages.at(-1)?.data.push(replyDrop);
-  
-        return {
-          ...oldData,
-          pages,
-        };
-      }
-    );
-  };
-
-  const onDropDiscussionChange = async ({
-    replyDrop,
-    dropId,
-    parentDropId,
-    dropAuthorHandle,
-  }: {
-    readonly replyDrop: Drop;
-    readonly dropId: string;
-    readonly parentDropId: string | null;
-    readonly dropAuthorHandle: string;
-  }) => {
-    onNewDrop({ drop: replyDrop });
-    onNewReply({ replyDrop });
-    const dropIdValues = [{ drop_id: dropId }];
-    if (parentDropId) {
-      dropIdValues.push({ drop_id: parentDropId });
-    }
-    invalidateQueries({
-      key: QueryKey.DROP_DISCUSSION,
-      values: dropIdValues,
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROPS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP, dropIdValues],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [
-        QueryKey.PROFILE_DROPS,
-        {
-          handleOrWallet: dropAuthorHandle.toLowerCase(),
-        },
-      ],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
@@ -1097,9 +1366,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
-      onRedrop,
       onDropChange,
-      onDropDiscussionChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
@@ -1125,9 +1392,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
-      onRedrop,
       onDropChange,
-      onDropDiscussionChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,

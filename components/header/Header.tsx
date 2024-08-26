@@ -968,7 +968,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                             </NavDropdown>
-                            <NavDropdown
+                            <NavDropdown 
                               title="About"
                               className={`${styles.mainNavLink} ${
                                 styles.mainNavLinkPadding
