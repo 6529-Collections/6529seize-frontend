@@ -6,7 +6,7 @@ import { NotificationsResponse } from "../../../generated/models/NotificationsRe
 import { commonApiFetch } from "../../../services/api/common-api";
 import Link from "next/link";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { randomInt } from "crypto";
+import { getRandomInt } from "../../../helpers/Helpers";
 
 export default function HeaderNotifications() {
   const { connectedProfile } = useContext(AuthContext);
@@ -38,7 +38,7 @@ export default function HeaderNotifications() {
     setHaveUnreadNotifications(hasUnread);
     if (hasUnread) {
       capacitor.sendNotification(
-        randomInt(Number.MAX_SAFE_INTEGER),
+        getRandomInt(Number.MAX_SAFE_INTEGER),
         "New Brain Notification",
         "You have unread notifications!"
       );
