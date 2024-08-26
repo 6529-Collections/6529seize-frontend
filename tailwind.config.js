@@ -57,6 +57,9 @@ module.exports = {
       gridTemplateColumns: {
         13: "repeat(13, minmax(0, 1fr))",
       },
+      zIndex: {
+        1000: "1000",
+      },
     },
   },
   variants: {

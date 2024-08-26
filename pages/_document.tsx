@@ -1,7 +1,10 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import { AboutSection } from "./about/[section]";
+import useCapacitor from "../hooks/useCapacitor";
 
 export default function Document() {
+  const capacitor = useCapacitor();
+
   return (
     <Html lang="en">
       <Head>
@@ -10,13 +13,20 @@ export default function Document() {
         <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
       </Head>
       <body>
         <Main />
         <NextScript />
         <footer
           className="d-flex flex-column align-items-center justify-content-center gap-2"
-          id="footer">
+          id="footer"
+          style={{
+            paddingBottom: capacitor.isCapacitor ? "100px" : "0",
+          }}>
           <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
             <a
               href="https://twitter.com/punk6529"
