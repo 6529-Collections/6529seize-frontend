@@ -6,9 +6,6 @@ import { commonApiFetch } from "../../../../../../../services/api/common-api";
 import { Page } from "../../../../../../../helpers/Types";
 import { Drop } from "../../../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../../../generated/models/DropPart";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../../../../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../../../../../utils/CommonIntersectionElement";
 import DropsListItem, { DropConnectingLineType } from "../../../../item/DropsListItem";
 

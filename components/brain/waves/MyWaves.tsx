@@ -4,8 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
-import Link from "next/link";
-import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import WavesList, { WavesListType } from "./WavesList";
 
 type QueryParams = {

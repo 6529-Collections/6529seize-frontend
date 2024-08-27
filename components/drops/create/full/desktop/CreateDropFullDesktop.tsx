@@ -2,7 +2,6 @@ import { EditorState } from "lexical";
 import CreateDropContent, {
   CreateDropContentHandles,
 } from "../../utils/CreateDropContent";
-import DropPfp from "../../utils/DropPfp";
 import {
   CreateDropConfig,
   DropMetadata,

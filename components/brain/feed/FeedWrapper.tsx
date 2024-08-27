@@ -2,7 +2,6 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import FeedItems from "./FeedItems";
 
 interface FeedWrapperProps {

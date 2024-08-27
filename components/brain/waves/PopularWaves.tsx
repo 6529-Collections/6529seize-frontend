@@ -6,8 +6,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
-import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
-import Link from "next/link";
 import WavesList, { WavesListType } from "./WavesList";
 
 export default function PopularWaves() {

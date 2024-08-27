@@ -23,7 +23,6 @@ import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
-import { WaveMin } from "../../../generated/models/WaveMin";
 import { Wave } from "../../../generated/models/Wave";
 
 export enum CreateDropType {
