@@ -5,10 +5,16 @@ import {
   CreateDropPart,
   CreateDropRequestPart,
 } from "../../../entities/IDrop";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../auth/Auth";
-import { commonApiPost } from "../../../services/api/common-api";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../services/api/common-api";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../react-query-wrapper/ReactQueryWrapper";
 import { DropMedia } from "../../../generated/models/DropMedia";
 import DropEditor from "./DropEditor";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
@@ -16,6 +22,9 @@ import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHe
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
+import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
+import { WaveMin } from "../../../generated/models/WaveMin";
+import { Wave } from "../../../generated/models/Wave";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -56,7 +65,9 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { onDropCreate } = useContext(ReactQueryWrapperContext);
+  const { onDropCreate, addOptimisticDrop, invalidateDrops } = useContext(
+    ReactQueryWrapperContext
+  );
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
@@ -67,6 +78,15 @@ export default function CreateDrop({
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
+  const { data: waveDetailed } = useQuery<Wave>({
+    queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+    queryFn: async () =>
+      await commonApiFetch<Wave>({
+        endpoint: `waves/${wave.id}`,
+      }),
+    enabled: !!wave.id,
+  });
+
   const addDropMutation = useMutation({
     mutationFn: async (body: CreateDropRequest) =>
       await commonApiPost<CreateDropRequest, Drop>({
@@ -75,7 +95,7 @@ export default function CreateDrop({
       }),
     onSuccess: (response: Drop) => {
       setDropEditorRefreshKey((prev) => prev + 1);
-      onDropCreate({ drop: response });
+      onDropCreate();
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
       }
@@ -85,6 +105,7 @@ export default function CreateDrop({
         message: error as unknown as string,
         type: "error",
       });
+      invalidateDrops();
     },
     onSettled: () => {
       setSubmitting(false);
@@ -174,6 +195,57 @@ export default function CreateDrop({
     }
   };
 
+  const getOptimisticDrop = (dropRequest: CreateDropRequest): Drop | null => {
+    if (!profileMin) {
+      return null;
+    }
+
+    if (!waveDetailed) {
+      return null;
+    }
+
+    return {
+      id: getRandomObjectId(),
+      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+      wave: {
+        id: waveDetailed.id,
+        name: waveDetailed.name,
+        picture: waveDetailed.picture ?? "",
+        description_drop_id: waveDetailed.description_drop.id,
+        authenticated_user_eligible_to_participate:
+          waveDetailed.participation.authenticated_user_eligible,
+        authenticated_user_eligible_to_vote:
+          waveDetailed.voting.authenticated_user_eligible,
+      },
+      author: {
+        ...profileMin,
+        subscribed_actions: [],
+      },
+      created_at: Date.now(),
+      title: dropRequest.title ?? null,
+      parts: dropRequest.parts.map((part, i) => ({
+        part_id: i,
+        content: part.content ?? null,
+        media: part.media.map((media) => ({
+          url: media.url,
+          mime_type: media.mime_type,
+        })),
+        quoted_drop: part.quoted_drop ?? null,
+        replies_count: 0,
+        quotes_count: 0,
+      })),
+      parts_count: dropRequest.parts.length,
+      referenced_nfts: dropRequest.referenced_nfts,
+      mentioned_users: dropRequest.mentioned_users,
+      metadata: dropRequest.metadata,
+      rating: 0,
+      top_raters: [],
+      raters_count: 0,
+      context_profile_context: null,
+      subscribed_actions: [],
+    };
+  };
+
   // TODO: add required metadata & media validations for wave participation
   const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
@@ -206,6 +278,10 @@ export default function CreateDrop({
       wave_id: wave.id,
       parts,
     };
+    const optimisticDrop = getOptimisticDrop(requestBody);
+    if (optimisticDrop) {
+      addOptimisticDrop({ drop: optimisticDrop });
+    }
     await addDropMutation.mutateAsync(requestBody);
   };
 

@@ -168,7 +168,8 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onDropCreate: (params: { drop: Drop }) => void;
+  onDropCreate: () => void;
+  addOptimisticDrop: (params: { drop: Drop }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
@@ -200,6 +201,7 @@ export const ReactQueryWrapperContext =
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     onDropCreate: () => {},
+    addOptimisticDrop: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
     onGroupRemoved: () => {},
@@ -1150,7 +1152,7 @@ export default function ReactQueryWrapper({
     );
   };
 
-  const onDropCreate = async ({
+  const addOptimisticDrop = async ({
     drop,
   }: {
     readonly drop: Drop;
@@ -1163,15 +1165,11 @@ export default function ReactQueryWrapper({
       addReplyToDropDiscussion({ replyDrop: drop });
       increaseFeedItemsDropDiscussionCount({ drop });
     }
+  };
+
+  const onDropCreate = async (): Promise<void> => {
     await wait(500);
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_DROPS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.FEED_ITEMS],
-    });
-    queryClient.invalidateQueries({ queryKey: [QueryKey.DROPS] });
-    queryClient.invalidateQueries({ queryKey: [QueryKey.DROP] });
+    invalidateDrops();
   };
 
   const dropChangeMutation = ({
@@ -1326,6 +1324,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP_DISCUSSION],
+    })
   };
 
   const onWaveCreated = () => invalidateAllWaves();
@@ -1367,6 +1368,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
+      addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,
       onGroupCreate,
@@ -1393,6 +1395,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
+      addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,
       onGroupCreate,

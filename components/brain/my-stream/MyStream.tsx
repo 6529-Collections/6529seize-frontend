@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { TypedFeedItem } from "../../../types/feed.types";
@@ -31,6 +31,7 @@ export default function MyStream() {
       });
     },
     initialPageParam: null,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
   });
 

@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useDebounce } from "react-use";
 import { QueryKey } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
@@ -64,6 +64,7 @@ export default function DropPartDiscussionItems({
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
+    placeholderData: keepPreviousData,
     enabled: requestAllowed,
   });
 
@@ -118,9 +119,9 @@ export default function DropPartDiscussionItems({
           />
         ))}
       </div>
-      <div className="tw-text-center">
+      {/* <div className="tw-text-center">
         {isFetching && <CircleLoader size={CircleLoaderSize.SMALL} />}
-      </div>
+      </div> */}
       <CommonIntersectionElement onIntersection={onBottomIntersection} />
     </div>
   );

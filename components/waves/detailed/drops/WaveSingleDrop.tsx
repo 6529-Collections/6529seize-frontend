@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../generated/models/Drop";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -19,6 +19,7 @@ export default function WaveSingleDrop({
       await commonApiFetch<Drop>({
         endpoint: `drops/${dropId}`,
       }),
+    placeholderData: keepPreviousData,
   });
 
   if (!drop) {
