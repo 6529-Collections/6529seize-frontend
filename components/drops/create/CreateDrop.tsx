@@ -158,6 +158,22 @@ export default function CreateDrop({
     };
   };
 
+  const generateParts = async ({
+    parts,
+  }: {
+    readonly parts: CreateDropPart[];
+  }): Promise<CreateDropRequestPart[]> => {
+    try {
+      return await Promise.all(parts.map((part) => generatePart(part)));
+    } catch (error) {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+      return [];
+    }
+  };
+
   // TODO: add required metadata & media validations for wave participation
   const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
@@ -175,9 +191,11 @@ export default function CreateDrop({
       return;
     }
 
-    const parts = await Promise.all(
-      dropRequest.parts.map((part) => generatePart(part))
-    );
+    const parts = await generateParts({ parts: dropRequest.parts });
+    if (!parts.length) {
+      setSubmitting(false);
+      return;
+    }
 
     const requestBody: CreateDropRequest = {
       ...dropRequest,
