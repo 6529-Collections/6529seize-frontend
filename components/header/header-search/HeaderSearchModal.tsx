@@ -173,8 +173,7 @@ export default function HeaderSearchModal({
       return (
         <div
           ref={currentIndex === selectedItemIndex ? activeElementRef : null}
-          key={getRandomObjectId()}
-        >
+          key={getRandomObjectId()}>
           <HeaderSearchModalItem
             content={item}
             searchValue={debouncedValue}
@@ -187,22 +186,20 @@ export default function HeaderSearchModal({
     });
 
   return createPortal(
-    <div className="tailwind-scope tw-cursor-default tw-relative tw-z-50">
+    <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
-      <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
+      <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden"
-          >
+            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area">
             <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4">
               <div className="tw-relative">
                 <svg
                   className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
-                  aria-hidden="true"
-                >
+                  aria-hidden="true">
                   <path
                     fillRule="evenodd"
                     d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"

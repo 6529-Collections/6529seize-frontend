@@ -486,3 +486,7 @@ pre code {
 .float-left {
   float: left;
 }
+
+.inset-safe-area {
+  margin-top: env(safe-area-inset-top);
+}

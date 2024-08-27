@@ -8,17 +8,33 @@
   background-color: $bg-color-1;
 }
 
+.capacitorMainContainer {
+  height: calc($header-height-capacitor + env(safe-area-inset-top));
+  z-index: 600;
+  background-color: black;
+  position: fixed;
+  top: -env(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+  left: 0;
+  width: 100%;
+}
+
+.capacitorPlaceholder {
+  height: calc($header-height-capacitor + env(safe-area-inset-top));
+  opacity: 0;
+}
+
 .headerRow {
   min-height: $header-height;
   z-index: 10;
 }
 
-.headerLeft {
-  height: $header-height;
+.capacitorHeaderRow {
+  min-height: $header-height-capacitor;
+  z-index: 10;
 }
 
 .logoIcon {
-  width: 100%;
   height: auto;
   max-width: min(40vw, 250px);
 }
@@ -140,6 +156,13 @@
   z-index: 10;
   position: relative;
   min-height: $header-height;
+  background-color: $bg-color-1;
+}
+
+.headerPlaceholderCapacitor {
+  z-index: 10;
+  position: relative;
+  min-height: $header-height-capacitor;
   background-color: $bg-color-1;
 }
 
