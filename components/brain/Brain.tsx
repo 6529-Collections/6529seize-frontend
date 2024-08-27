@@ -1,31 +1,17 @@
-import { ReactNode, useContext } from "react";
-import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../auth/Auth";
+import { ReactNode } from "react";
 import Link from "next/link";
 import StreamDiscovery from "./discovery/StreamDiscovery";
 import CreatedWaves from "./created-waves/CreatedWaves";
 import FollowedWaves from "./following/FollowedWaves";
 
 export default function Brain({ children }: { readonly children: ReactNode }) {
-  const { showWaves } = useContext(AuthContext);
-
-  if (!showWaves) {
-    return null;
-  }
-
   return (
     <div>
-      <div className="md:tw-flex tw-justify-center">
-        <div className="tw-text-iron-500 tw-text-[13px] tw-leading-5 tw-pt-4 tw-px-4">
-          These pages are in closed alpha for level {WAVES_MIN_ACCESS_LEVEL} and
-          above. They are not ready for public release. Lots of improvements and
-          bugs to fix. Currently only &quot;chat&quot; waves are active.
-        </div>
-      </div>
-      <div className="tailwind-scope tw-pt-8 tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-        <div className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-center tw-gap-x-5 xl:tw-ml-16 tw-gap-y-4">
-          <div className="tw-order-2 lg:tw-order-1">{children}</div>
-          <div className="tw-order-1 lg:tw-order-2 lg:tw-w-[27%]">
-            <div className="lg:tw-mt-16">
+      <div className="tailwind-scope tw-pt-6 tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+        <div className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-center tw-gap-x-5 tw-gap-y-4">
+          <div>{children}</div>
+          <div className="lg:tw-w-[27%]">
+            <div>
               <Link
                 href="/waves?new=true"
                 className="tw-no-underline tw-w-full tw-justify-center tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white hover:tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"

@@ -81,14 +81,14 @@ export default function StreamDiscovery() {
 
   return (
     <div className="tw-mt-4">
-      <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-via-iron-700 tw-to-iron-800">
-        <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl  tw-py-5 tw-px-5">
+      <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
+        <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-py-5 tw-px-5">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <div className="tw-flex tw-items-center tw-gap-x-3">
-              <div className="tw-h-9 tw-w-9 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-800 tw-via-iron-800 tw-to-iron-900">
+              <div className="tw-h-9 tw-w-9 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-800 tw-via-indigo-300/40 tw-to-iron-800">
                 <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-flex tw-items-center tw-justify-center">
                   <svg
-                    className="tw-inline tw-h-5 tw-w-5 tw-text-indigo-300"
+                    className="tw-flex-shrink-0 tw-inline tw-h-5 tw-w-5 tw-text-indigo-300"
                     viewBox="0 0 48 48"
                     fill="none"
                     aria-hidden="true"
@@ -120,7 +120,7 @@ export default function StreamDiscovery() {
               <Link
                 key={wave.id}
                 href={`/waves/${wave.id}`}
-                className="tw-no-underline tw-flex tw-items-center tw-text-white tw-font-semibold tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-no-underline tw-flex tw-items-center tw-text-white tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
               >
                 {wave.picture && (
                   <img
@@ -129,7 +129,7 @@ export default function StreamDiscovery() {
                       ImageScale.W_100_H_AUTO
                     )}
                     alt="#"
-                    className="tw-mr-3 tw-flex-shrink-0 tw-object-contain tw-h-7 tw-w-7 tw-rounded-full tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/20"
+                    className="tw-mr-3 tw-flex-shrink-0 tw-object-contain tw-h-7 tw-w-7 tw-rounded-full tw-bg-iron-900 tw-ring-1  tw-ring-white/10"
                   />
                 )}
                 <span>{wave.name}</span>
@@ -139,9 +139,25 @@ export default function StreamDiscovery() {
           <div className="tw-mt-2 tw-text-right -tw-mb-2">
             <Link
               href="/waves"
-              className="tw-no-underline tw-inline-flex tw-bg-transparent tw-border-none tw-text-primary-400 hover:tw-text-primary-300 tw-text-xs tw-font-medium tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center"
+              className="tw-group -tw-mr-1 tw-no-underline tw-inline-flex tw-bg-transparent tw-border-none tw-text-primary-400 hover:tw-text-primary-300 tw-text-xs tw-font-medium tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center group"
             >
-              Show more
+              <span className="group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out">
+                Show more
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="tw-w-4 tw-h-4 tw-ml-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300 tw-ease-out"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                />
+              </svg>
             </Link>
           </div>
         </div>

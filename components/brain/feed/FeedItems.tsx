@@ -13,17 +13,15 @@ export default function FeedItems({
   availableCredit,
 }: FeedItemsProps) {
   return (
-    <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-flex tw-flex-col tw-w-[672px]">
-        {items.map((item, i) => (
-          <FeedItem
-            key={`feed-item-${item.serial_no}`}
-            item={item}
-            showWaveInfo={showWaveInfo}
-            availableCredit={availableCredit}
-          />
-        ))}
-      </div>
+    <div className="tw-flex tw-flex-col lg:tw-w-[672px]">
+      {items.map((item, i) => (
+        <FeedItem
+          key={`feed-item-${item.serial_no}`}
+          item={item}
+          showWaveInfo={showWaveInfo}
+          availableCredit={availableCredit}
+        />
+      ))}
     </div>
   );
 }

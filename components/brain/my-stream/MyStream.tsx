@@ -71,13 +71,14 @@ export default function MyStream() {
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
   return (
-    <div className="md:tw-w-[672px] tw-flex-shrink-0">
-      <div className="tw-mt-6">{/*  <CreateDropContent /> */}</div>
-      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 tw-items-center">
-        {/*   active */}
+    <div className="lg:tw-w-[672px] tw-flex-shrink-0">
+      {/*  <CreateDropContent /> */}
+
+      <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2 tw-items-center">
+        {/*  ACTIVE STATE: tw-ring-primary-400 hover:tw-ring-primary-300 hover:tw-to-iron-900 tw-bg-gradient-to-b tw-from-iron-900 tw-to-iron-950 tw-text-iron-50  */}
         <button
           type="button"
-          className="tw-border-0 tw-ring-primary-400 tw-bg-gradient-to-b tw-from-iron-900 tw-to-iron-950 tw-ring-inset tw-ring-1 tw-rounded-full tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-iron-50 tw-font-medium tw-text-sm tw-shadow-md tw-transition tw-duration-300 tw-ease-out"
+          className="tw-ring-primary-400 hover:tw-ring-primary-300 hover:tw-to-iron-900 tw-bg-gradient-to-b tw-from-iron-900 tw-to-iron-950 tw-text-iron-50 tw-ring-inset tw-ring-1 tw-border-0 tw-rounded-full tw-bg-iron-950 tw-px-3 tw-py-2.5 0 tw-font-medium tw-text-sm tw-shadow-md tw-transition tw-duration-300 tw-ease-out"
         >
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <img
@@ -88,10 +89,10 @@ export default function MyStream() {
             <span className="tw-whitespace-nowrap">Memes Chat</span>
           </div>
         </button>
-        {/*    not active  */}
+        {/*  NOT ACTIVE STATE: tw-ring-iron-800 hover:tw-ring-iron-700 hover:tw-bg-iron-900 hover:tw-text-iron-300 tw-text-iron-400  */}
         <button
           type="button"
-          className="tw-border-0 tw-ring-iron-800 tw-ring-inset tw-ring-1 tw-rounded-full tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-iron-400 tw-font-medium tw-text-sm tw-transition tw-duration-300 tw-ease-out"
+          className="tw-ring-iron-800 hover:tw-ring-iron-700 hover:tw-bg-iron-900 hover:tw-text-iron-300 tw-text-iron-400 tw-ring-inset tw-ring-1 tw-border-0 tw-rounded-full tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-font-medium tw-text-sm tw-transition tw-duration-300 tw-ease-out"
         >
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <img

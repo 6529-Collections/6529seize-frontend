@@ -1,14 +1,14 @@
 export default function CreatedWaves() {
   return (
     <div className="tw-mt-4">
-      <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-via-iron-700 tw-to-iron-800">
+      <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
         <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl  tw-py-5 tw-px-5">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <div className="tw-flex tw-items-center tw-gap-x-3">
-              <div className="tw-h-9 tw-w-9 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-800 tw-via-iron-800 tw-to-iron-900">
+              <div className="tw-h-9 tw-w-9 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-800 tw-via-indigo-300/40 tw-to-iron-800">
                 <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-flex tw-items-center tw-justify-center">
                   <svg
-                    className="tw-inline tw-h-5 tw-w-5 tw-text-indigo-300"
+                    className="tw-flex-shrink-0 tw-inline tw-h-5 tw-w-5 tw-text-indigo-300"
                     width="48"
                     height="48"
                     viewBox="0 0 48 48"
@@ -34,11 +34,11 @@ export default function CreatedWaves() {
             </div>
           </div>
           <div className="tw-mt-4 tw-flex tw-flex-col tw-space-y-4">
-            <div className="tw-no-underline tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-font-semibold tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-no-underline tw-flex tw-items-center tw-text-white tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
               <img
                 src="#"
                 alt="#"
-                className="tw-flex-shrink-0 tw-object-contain tw-h-7 tw-w-7 tw-rounded-full tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/20"
+                className="tw-mr-3 tw-flex-shrink-0 tw-object-contain tw-h-7 tw-w-7 tw-rounded-full tw-bg-iron-900 tw-ring-1  tw-ring-white/10"
               />
               <span>Wave name</span>
             </div>

@@ -7,12 +7,10 @@ export interface NotificationItemsProps {
 
 export default function NotificationItems({ items }: NotificationItemsProps) {
   return (
-    <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-flex tw-flex-col tw-w-[672px]">
-        {items.map((item) => (
-          <NotificationItem key={item.id} notification={item} />
-        ))}
-      </div>
+    <div className="tw-flex tw-flex-col lg:tw-w-[672px]">
+      {items.map((item) => (
+        <NotificationItem key={item.id} notification={item} />
+      ))}
     </div>
   );
 }

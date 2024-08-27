@@ -155,7 +155,7 @@ export default function DropsListItem({
             <DropReply {...replyProps} />
           </div>
         )}
-        <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
+        <div className="tw-relative tw-h-full sm:tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
               key={randomKey}
@@ -172,7 +172,7 @@ export default function DropsListItem({
               onDiscussionButtonClick={onDiscussionButtonClick}
             />
             {canFollow && (
-              <div className="tw-absolute tw-right-14">
+              <div className="tw-absolute tw-right-10 sm:tw-right-14">
                 <DropsListItemFollowDrop drop={drop} />
               </div>
             )}
