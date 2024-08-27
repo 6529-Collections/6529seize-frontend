@@ -7,7 +7,6 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import FeedWrapper from "../feed/FeedWrapper";
 import MyStreamNoItems from "./layout/MyStreamNoItems";
-import CreateDropContent from "../../drops/create/utils/CreateDropContent";
 
 export default function MyStream() {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);

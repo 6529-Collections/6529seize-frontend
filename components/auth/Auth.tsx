@@ -47,7 +47,7 @@ type AuthContextType = {
 };
 
 // TODO: change back to 10
-export const WAVES_MIN_ACCESS_LEVEL = 9;
+export const WAVES_MIN_ACCESS_LEVEL = 0;
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,

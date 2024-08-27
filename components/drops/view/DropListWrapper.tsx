@@ -3,7 +3,7 @@ import CircleLoader, {
 } from "../../distribution-plan-tool/common/CircleLoader";
 import DropsList from "./DropsList";
 import { Drop } from "../../../generated/models/Drop";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+
 
 export default function DropListWrapper({
   drops,
@@ -24,13 +24,13 @@ export default function DropListWrapper({
         drops={drops}
         showWaveInfo={showWaveInfo}
         availableCredit={availableCredit}
+        onBottomIntersection={onBottomIntersection}
       />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
         </div>
       )}
-      <CommonIntersectionElement onIntersection={onBottomIntersection} />
     </div>
   );
 }

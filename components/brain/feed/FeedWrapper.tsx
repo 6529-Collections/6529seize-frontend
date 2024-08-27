@@ -26,13 +26,13 @@ export default function FeedWrapper({
         items={items}
         showWaveInfo={showWaveInfo}
         availableCredit={availableCredit}
+        onBottomIntersection={onBottomIntersection}
       />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
         </div>
       )}
-      <CommonIntersectionElement onIntersection={onBottomIntersection} />
     </div>
   );
 }

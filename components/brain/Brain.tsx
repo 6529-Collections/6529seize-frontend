@@ -1,10 +1,22 @@
-import { ReactNode } from "react";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import Link from "next/link";
-import StreamDiscovery from "./discovery/StreamDiscovery";
-import CreatedWaves from "./created-waves/CreatedWaves";
-import FollowedWaves from "./following/FollowedWaves";
+
+import WavesListWrapper, { WavesListType } from "./waves/WavesListWrapper";
+import { AuthContext } from "../auth/Auth";
 
 export default function Brain({ children }: { readonly children: ReactNode }) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const getShowConnectedIdentityWaves = () =>
+    !!connectedProfile?.profile?.handle && !activeProfileProxy;
+  const [showConnectedIdentityWaves, setShowConnectedIdentityWaves] = useState(
+    getShowConnectedIdentityWaves()
+  );
+
+  useEffect(
+    () => setShowConnectedIdentityWaves(getShowConnectedIdentityWaves()),
+    [connectedProfile, activeProfileProxy]
+  );
+
   return (
     <div>
       <div className="tailwind-scope tw-pt-6 tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
@@ -34,9 +46,13 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
                 <span>Create a Wave</span>
               </Link>
             </div>
-            <CreatedWaves />
-            <FollowedWaves />
-            <StreamDiscovery />
+            {showConnectedIdentityWaves && (
+              <>
+                <WavesListWrapper type={WavesListType.MY_WAVES} />
+                <WavesListWrapper type={WavesListType.FOLLOWING} />
+              </>
+            )}
+            <WavesListWrapper type={WavesListType.POPULAR} />
           </div>
         </div>
       </div>

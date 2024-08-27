@@ -55,9 +55,6 @@ import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMi
 import DragDropPastePlugin from "../lexical/plugins/DragDropPastePlugin";
 import { ImageNode } from "../lexical/nodes/ImageNode";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
-import PrimaryButton, {
-  PrimaryButtonSize,
-} from "../../../utils/buttons/PrimaryButton";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -81,6 +78,7 @@ const CreateDropContent = forwardRef<
     readonly onFileChange: (file: File) => void;
     readonly onViewClick: () => void;
     readonly onDropPart: () => void;
+    readonly children?: React.ReactNode;
   }
 >(
   (
@@ -98,6 +96,7 @@ const CreateDropContent = forwardRef<
       onFileChange,
       onViewClick,
       onDropPart,
+      children,
     },
     ref
   ) => {
@@ -229,9 +228,7 @@ const CreateDropContent = forwardRef<
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
             </div>
-            <div>
-              <PrimaryButton>text</PrimaryButton>
-            </div>
+            {children && <div>{children}</div>}
           </div>
         </LexicalComposer>
         <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">

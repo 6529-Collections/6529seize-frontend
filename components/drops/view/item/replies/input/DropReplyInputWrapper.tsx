@@ -251,10 +251,11 @@ export default function DropReplyInputWrapper({
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
         onFileChange={setFile}
-      />
-      <PrimaryButton onClick={onDrop} disabled={!canSubmit} loading={loading}>
-        Reply
-      </PrimaryButton>
+      >
+        <PrimaryButton onClick={onDrop} disabled={!canSubmit} loading={loading}>
+          Reply
+        </PrimaryButton>
+      </DropReplyInput>
     </div>
   );
 }

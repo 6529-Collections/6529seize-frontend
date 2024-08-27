@@ -1,83 +1,26 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../auth/Auth";
-import { WavesOverviewParams } from "../../../types/waves.types";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../services/api/common-api";
+import Link from "next/link";
 import { Wave } from "../../../generated/models/Wave";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
-import Link from "next/link";
 
-export default function StreamDiscovery() {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+export enum WavesListType {
+  MY_WAVES = "MY_WAVES",
+  FOLLOWING = "FOLLOWING",
+  POPULAR = "POPULAR",
+}
 
-  const getUsePublicWaves = () =>
-    !connectedProfile?.profile?.handle || !!activeProfileProxy;
-  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
+export default function WavesList({
+  waves,
+  type,
+}: {
+  readonly waves: Wave[];
+  readonly type: WavesListType;
+}) {
 
-  useEffect(
-    () => setUsePublicWaves(getUsePublicWaves()),
-    [connectedProfile, activeProfileProxy]
-  );
-
-  const getParams = (): Omit<WavesOverviewParams, "offset"> => {
-    return {
-      limit: 10,
-      type: WavesOverviewType.MostSubscribed,
-    };
+  const TITLE: Record<WavesListType, string> = {
+    [WavesListType.MY_WAVES]: "My Waves",
+    [WavesListType.FOLLOWING]: "Following",
+    [WavesListType.POPULAR]: "Popular Waves",
   };
-
-  const params = getParams();
-
-  const { data: wavesAuth } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_OVERVIEW, params],
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
-      const queryParams: Record<string, string> = {
-        limit: `${params.limit}`,
-        offset: `${pageParam}`,
-        type: params.type,
-      };
-      return await commonApiFetch<Wave[]>({
-        endpoint: `waves-overview`,
-        params: queryParams,
-      });
-    },
-    initialPageParam: 0,
-    getNextPageParam: (_, allPages) => allPages.flat().length,
-    enabled: !usePublicWaves,
-  });
-
-  const { data: wavesPublic } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC, params],
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
-      const queryParams: Record<string, string> = {
-        limit: `${params.limit}`,
-        offset: `${pageParam}`,
-        type: params.type,
-      };
-      return await commonApiFetch<Wave[]>({
-        endpoint: `public/waves-overview`,
-        params: queryParams,
-      });
-    },
-    initialPageParam: 0,
-    getNextPageParam: (_, allPages) => allPages.flat().length,
-    enabled: usePublicWaves,
-  });
-
-  const getWaves = (): Wave[] => {
-    if (usePublicWaves) {
-      return wavesPublic?.pages.flat() ?? [];
-    }
-    return wavesAuth?.pages.flat() ?? [];
-  };
-
-  const [waves, setWaves] = useState<Wave[]>(getWaves());
-  useEffect(
-    () => setWaves(getWaves()),
-    [wavesAuth, wavesPublic, usePublicWaves]
-  );
 
   return (
     <div className="tw-mt-4">
@@ -111,7 +54,7 @@ export default function StreamDiscovery() {
               </div>
 
               <p className="-tw-mb-1 tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
-                Popular Waves
+               {TITLE[type]}
               </p>
             </div>
           </div>
@@ -136,30 +79,32 @@ export default function StreamDiscovery() {
               </Link>
             ))}
           </div>
-          <div className="tw-mt-2 tw-text-right -tw-mb-2">
-            <Link
-              href="/waves"
-              className="tw-group -tw-mr-1 tw-no-underline tw-inline-flex tw-bg-transparent tw-border-none tw-text-primary-400 hover:tw-text-primary-300 tw-text-xs tw-font-medium tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center group"
-            >
-              <span className="group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out">
-                Show more
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="tw-w-4 tw-h-4 tw-ml-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300 tw-ease-out"
+          {waves.length >= 10 && (
+            <div className="tw-mt-2 tw-text-right -tw-mb-2">
+              <Link
+                href="/waves"
+                className="tw-group -tw-mr-1 tw-no-underline tw-inline-flex tw-bg-transparent tw-border-none tw-text-primary-400 hover:tw-text-primary-300 tw-text-xs tw-font-medium tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center group"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                />
-              </svg>
-            </Link>
-          </div>
+                <span className="group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out">
+                  Show more
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="tw-w-4 tw-h-4 tw-ml-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300 tw-ease-out"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
