@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItem from "./FeedItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+import { getDropKey } from "../../../helpers/waves/drop.helpers";
+import { FeedItemType } from "../../../generated/models/FeedItemType";
 
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
@@ -34,7 +36,13 @@ export default function FeedItems({
   return (
     <div className="tw-flex tw-flex-col lg:tw-w-[672px]">
       {items.map((item, i) => (
-        <div key={`feed-item-${item.serial_no}`}>
+        <div
+          key={
+            i === 0 && item.type === FeedItemType.DropCreated
+              ? getDropKey({ drop: item.item, index: 0 })
+              : `feed-item-${item.serial_no}`
+          }
+        >
           <FeedItem
             item={item}
             showWaveInfo={showWaveInfo}

@@ -6,15 +6,18 @@ import { timeStamp } from "console";
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
 
-const roundTimestampToNearest10Minutes = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const minutes = date.getMinutes();
-  const roundedMinutes = Math.floor(minutes / 10) * 10;
-  date.setMinutes(roundedMinutes, 0, 0);
-  return date.toISOString();
-};
 
-export const getDropHash = (drop: Drop): string => {
+
+export const getDropKey = ({
+  drop,
+  index,
+}: {
+  readonly drop: Drop;
+  readonly index: number;
+}): string => {
+  if (index !== 0) {
+    return drop.id
+  }
   const input = {
     wave_id: drop.wave.id,
     reply_to_id: drop.reply_to?.drop_id ?? null,
@@ -22,10 +25,11 @@ export const getDropHash = (drop: Drop): string => {
     author_handle: drop.author.handle,
     title: drop.title,
     parts_content: drop.parts.map((part) => part.content).join(""),
-    metadata: drop.metadata.map((metadata) => metadata.data_key + metadata.data_value).join(""),
-    timeStamp: roundTimestampToNearest10Minutes(drop.created_at),
+    metadata: drop.metadata
+      .map((metadata) => metadata.data_key + metadata.data_value)
+      .join(""),
   };
 
-  const decoder = new TextDecoder('utf-8');
-  return decoder.decode(sha256(utf8ToBytes(JSON.stringify(input))))
+  const decoder = new TextDecoder("utf-8");
+  return decoder.decode(sha256(utf8ToBytes(JSON.stringify(input))));
 };

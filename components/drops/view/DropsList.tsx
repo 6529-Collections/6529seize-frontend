@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import DropsListItem from "./item/DropsListItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { getDropHash } from "../../../helpers/waves/drop.helpers";
+import { getDropKey } from "../../../helpers/waves/drop.helpers";
 
 export default function DropsList({
   drops,
@@ -25,15 +25,33 @@ export default function DropsList({
   const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
     number | null
   >(getIntersectionTargetIndex());
+  const listRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef<number>(0);
 
   useEffect(() => {
     setIntersectionTargetIndex(getIntersectionTargetIndex());
   }, [drops]);
 
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTop = scrollPositionRef.current;
+    }
+  });
+
+  const handleScroll = () => {
+    if (listRef.current) {
+      scrollPositionRef.current = listRef.current.scrollTop;
+    }
+  };
+
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-2.5">
+    <div
+      className="tw-flex tw-flex-col tw-gap-y-2.5"
+      ref={listRef}
+      onScroll={handleScroll}
+    >
       {drops.map((drop, i) => (
-        <div key={getDropHash(drop)}>
+        <div key={getDropKey({ drop, index: i })}>
           <DropsListItem
             drop={drop}
             availableCredit={availableCredit}
