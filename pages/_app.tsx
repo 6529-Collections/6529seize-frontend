@@ -229,41 +229,15 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-const connectors = [];
-if (isCapacitor) {
-  const logger = {
-    log: (eventType: string, logProperties?: { [key: string]: any }) => {
-      console.log(`[Coinbase Wallet] Event: ${eventType}`, logProperties || {});
-    },
-    error: (eventType: string, logProperties?: { [key: string]: any }) => {
-      console.error(
-        `[Coinbase Wallet] Error: ${eventType}`,
-        logProperties || {}
-      );
-    },
-  };
-  connectors.push(
-    coinbaseWallet({
-      appName: "6529 Seize",
-      appLogoUrl:
-        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-      headlessMode: true,
-      enableMobileWalletLink: true,
-      overrideIsCoinbaseWallet: true,
-      diagnosticLogger: logger,
-    })
-  );
-}
-
 export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
   metadata,
-  enableCoinbase: !isCapacitor,
+  enableCoinbase: isCapacitor,
+  coinbasePreference: isCapacitor ? "eoaOnly" : "all",
   auth: {
     email: false,
   },
-  connectors,
 });
 
 createWeb3Modal({
@@ -297,12 +271,14 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <Head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1"
-          />
-        </Head>
+        {isCapacitor && (
+          <Head>
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0, maximum-scale=1"
+            />
+          </Head>
+        )}
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <Auth>
