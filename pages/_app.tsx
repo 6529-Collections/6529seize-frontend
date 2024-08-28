@@ -227,10 +227,21 @@ const metadata = {
 
 const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
-const isCapacitor = Capacitor.isNativePlatform();
+const isCapacitor = !Capacitor.isNativePlatform();
 
 const connectors = [];
 if (isCapacitor) {
+  const logger = {
+    log: (eventType: string, logProperties?: { [key: string]: any }) => {
+      console.log(`[Coinbase Wallet] Event: ${eventType}`, logProperties || {});
+    },
+    error: (eventType: string, logProperties?: { [key: string]: any }) => {
+      console.error(
+        `[Coinbase Wallet] Error: ${eventType}`,
+        logProperties || {}
+      );
+    },
+  };
   connectors.push(
     coinbaseWallet({
       appName: "6529 Seize",
@@ -238,6 +249,8 @@ if (isCapacitor) {
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       headlessMode: true,
       version: "3",
+      enableMobileWalletLink: true,
+      diagnosticLogger: logger,
     })
   );
 }
