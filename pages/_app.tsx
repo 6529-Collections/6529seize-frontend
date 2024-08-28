@@ -14,6 +14,7 @@ import {
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
 import { WagmiProvider } from "wagmi";
+import { coinbaseWallet } from "@wagmi/connectors";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -110,6 +111,7 @@ import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
+import { Capacitor } from "@capacitor/core";
 
 library.add(
   faArrowUp,
@@ -225,14 +227,30 @@ const metadata = {
 
 const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
+const isCapacitor = Capacitor.isNativePlatform();
+
+const connectors = [];
+if (isCapacitor) {
+  connectors.push(
+    coinbaseWallet({
+      appName: "6529 Seize",
+      appLogoUrl:
+        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+      headlessMode: true,
+      version: "3",
+    })
+  );
+}
+
 export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
   metadata,
-  coinbasePreference: "all",
+  enableCoinbase: !isCapacitor,
   auth: {
     email: false,
   },
+  connectors,
 });
 
 createWeb3Modal({
@@ -262,6 +280,7 @@ type AppPropsWithLayout = AppProps & {
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout ?? ((page) => page);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
