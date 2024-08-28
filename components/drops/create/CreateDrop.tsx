@@ -22,7 +22,6 @@ import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHe
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
-import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { Wave } from "../../../generated/models/Wave";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 

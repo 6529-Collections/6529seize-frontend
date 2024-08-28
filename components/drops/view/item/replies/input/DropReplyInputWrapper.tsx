@@ -21,7 +21,6 @@ import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { DropMedia } from "../../../../../../generated/models/DropMedia";
-import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
 import { getOptimisticDropId } from "../../../../../../helpers/waves/drop.helpers";
 
 export default function DropReplyInputWrapper({

@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItem from "./FeedItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import {
-  getDropKey,
-  getFeedItemKey,
-} from "../../../helpers/waves/drop.helpers";
-import { FeedItemType } from "../../../generated/models/FeedItemType";
+import { getFeedItemKey } from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 
 export interface FeedItemsProps {
