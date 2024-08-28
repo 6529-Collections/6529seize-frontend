@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItem from "./FeedItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { getDropKey } from "../../../helpers/waves/drop.helpers";
+import {
+  getDropKey,
+  getFeedItemKey,
+} from "../../../helpers/waves/drop.helpers";
 import { FeedItemType } from "../../../generated/models/FeedItemType";
+import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
@@ -36,18 +40,14 @@ export default function FeedItems({
   return (
     <div className="tw-flex tw-flex-col lg:tw-w-[672px]">
       {items.map((item, i) => (
-        <div
-          key={
-            i === 0 && item.type === FeedItemType.DropCreated
-              ? getDropKey({ drop: item.item, index: 0 })
-              : `feed-item-${item.serial_no}`
-          }
-        >
-          <FeedItem
-            item={item}
-            showWaveInfo={showWaveInfo}
-            availableCredit={availableCredit}
-          />
+        <div key={getFeedItemKey({ item, index: i })}>
+          <CommonChangeAnimation>
+            <FeedItem
+              item={item}
+              showWaveInfo={showWaveInfo}
+              availableCredit={availableCredit}
+            />
+          </CommonChangeAnimation>
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (
             <CommonIntersectionElement onIntersection={onBottomIntersection} />
           )}

@@ -7,7 +7,10 @@ import { Page } from "../../../../../../../helpers/Types";
 import { Drop } from "../../../../../../../generated/models/Drop";
 import { DropPart } from "../../../../../../../generated/models/DropPart";
 import CommonIntersectionElement from "../../../../../../utils/CommonIntersectionElement";
-import DropsListItem, { DropConnectingLineType } from "../../../../item/DropsListItem";
+import DropsListItem, {
+  DropConnectingLineType,
+} from "../../../../item/DropsListItem";
+import { getDropKey } from "../../../../../../../helpers/waves/drop.helpers";
 
 export default function DropPartDiscussionItems({
   drop,
@@ -22,7 +25,7 @@ export default function DropPartDiscussionItems({
   readonly dropPart: DropPart;
   readonly dropReplyDepth: number;
   readonly availableCredit: number | null;
-  readonly activeDiscussionDropId: string | null
+  readonly activeDiscussionDropId: string | null;
   readonly setActiveDiscussionDropId: (id: string | null) => void;
   readonly setRepliesOpen: (state: boolean) => void;
 }) {
@@ -43,13 +46,13 @@ export default function DropPartDiscussionItems({
       {
         drop_id: drop.id,
         drop_part_id: dropPart.part_id,
-        sort_direction: "ASC"
+        sort_direction: "ASC",
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: `5`,
-        sort_direction: "ASC"
+        sort_direction: "ASC",
       };
       if (pageParam) {
         params.page = `${pageParam}`;
@@ -64,8 +67,6 @@ export default function DropPartDiscussionItems({
     placeholderData: keepPreviousData,
     enabled: requestAllowed,
   });
-
-
 
   const [replies, setReplies] = useState<Drop[]>([]);
   useEffect(() => {
@@ -102,9 +103,12 @@ export default function DropPartDiscussionItems({
   return (
     <div>
       <div>
-        {replies.map((item) => (
+        {replies.map((item, i) => (
           <DropsListItem
-            key={item.id}
+            key={getDropKey({
+              drop: item,
+              index: i === replies.length - 1 ? 0 : 1,
+            })}
             drop={item}
             replyToDrop={null}
             showWaveInfo={true}
@@ -116,9 +120,6 @@ export default function DropPartDiscussionItems({
           />
         ))}
       </div>
-      {/* <div className="tw-text-center">
-        {isFetching && <CircleLoader size={CircleLoaderSize.SMALL} />}
-      </div> */}
       <CommonIntersectionElement onIntersection={onBottomIntersection} />
     </div>
   );

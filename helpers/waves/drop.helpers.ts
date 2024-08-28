@@ -3,10 +3,10 @@ import { utf8ToBytes } from "ethereum-cryptography/utils.js";
 import { Drop } from "../../generated/models/Drop";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
 import { timeStamp } from "console";
+import { TypedFeedItem } from "../../types/feed.types";
+import { FeedItemType } from "../../generated/models/FeedItemType";
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
-
-
 
 export const getDropKey = ({
   drop,
@@ -16,7 +16,7 @@ export const getDropKey = ({
   readonly index: number;
 }): string => {
   if (index !== 0) {
-    return drop.id
+    return drop.id;
   }
   const input = {
     wave_id: drop.wave.id,
@@ -33,3 +33,14 @@ export const getDropKey = ({
   const decoder = new TextDecoder("utf-8");
   return decoder.decode(sha256(utf8ToBytes(JSON.stringify(input))));
 };
+
+export const getFeedItemKey = ({
+  item,
+  index,
+}: {
+  readonly item: TypedFeedItem;
+  readonly index: number;
+}): string =>
+  index === 0 && item.type === FeedItemType.DropCreated
+    ? getDropKey({ drop: item.item, index: 0 })
+    : `feed-item-${item.serial_no}`;
