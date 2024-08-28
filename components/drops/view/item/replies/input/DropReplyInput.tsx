@@ -53,6 +53,7 @@ const DropReplyInput = forwardRef<
       mentionedUser: Omit<MentionedUser, "current_handle">
     ) => void;
     readonly onFileChange: (file: File) => void;
+    readonly children?: React.ReactNode;
   }
 >(
   (
@@ -63,6 +64,7 @@ const DropReplyInput = forwardRef<
       onReferencedNft,
       onMentionedUser,
       onFileChange,
+      children
     },
     ref
   ) => {
@@ -123,8 +125,8 @@ const DropReplyInput = forwardRef<
     return (
       <div className="tailwind-scope tw-w-full">
         <LexicalComposer initialConfig={editorConfig}>
-          <div>
-            <div className="tw-relative">
+          <div className="tw-flex tw-items-end tw-gap-x-3">
+            <div className="tw-relative tw-w-full">
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
@@ -150,6 +152,7 @@ const DropReplyInput = forwardRef<
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
             </div>
+            {children && <div>{children}</div>}
           </div>
         </LexicalComposer>
       </div>

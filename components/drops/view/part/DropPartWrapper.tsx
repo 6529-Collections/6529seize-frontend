@@ -132,7 +132,7 @@ export default function DropPartWrapper({
             ></div>
           </div>
 
-          <div className="tw-flex-1 tw-px-4 tw-relative tw-z-20">
+          <div className="tw-flex-1 tw-px-2 sm:tw-px-4 tw-relative tw-z-20">
             {children}
             <div>
               {quotedDrop && (
@@ -147,10 +147,10 @@ export default function DropPartWrapper({
           </div>
 
           <div
-            className={`tw-px-4 tw-ml-9 tw-mt-1 ${
+            className={`tw-ml-9 tw-mt-2 sm:tw-mt-1 ${
               size === DropPartSize.SMALL
-                ? "sm:tw-ml-[40px]"
-                : "sm:tw-ml-[54px]"
+                ? "sm:tw-px-4 sm:tw-ml-[40px]"
+                : "tw-px-4 sm:tw-ml-[54px]"
             }`}
           >
             <DropPartActionTriggers

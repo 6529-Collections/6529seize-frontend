@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -48,6 +48,7 @@ export default function Drops() {
       });
     },
     initialPageParam: null,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
   });
 

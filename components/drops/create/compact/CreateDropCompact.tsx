@@ -1,5 +1,4 @@
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
-import DropPfp from "../utils/DropPfp";
 import CreateDropContent, {
   CreateDropContentHandles,
 } from "../utils/CreateDropContent";
@@ -125,11 +124,6 @@ const CreateDropCompact = forwardRef<
       <div className={`${getWrapperClasses()}  tw-bg-iron-900`}>
         {children}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
-          {showProfile && (
-            <div className="tw-hidden sm:tw-block">
-              <DropPfp pfpUrl={profile?.pfp} />
-            </div>
-          )}
           <div className="tw-w-full tw-flex tw-gap-x-2 sm:tw-gap-x-3">
             <div className="tw-w-full">
               <CreateDropContent
@@ -147,24 +141,25 @@ const CreateDropCompact = forwardRef<
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}
                 onFileChange={onFileChange}
                 onDropPart={onDropPart}
-              />
+              >
+                {showSubmit && (
+                  <div>
+                    <PrimaryButton
+                      onClick={onDrop}
+                      disabled={!canSubmit}
+                      loading={loading}
+                      size={
+                        screenType === CreateDropScreenType.MOBILE
+                          ? PrimaryButtonSize.SMALL
+                          : PrimaryButtonSize.MEDIUM
+                      }
+                    >
+                      {getSubmitText()}
+                    </PrimaryButton>
+                  </div>
+                )}
+              </CreateDropContent>
             </div>
-            {showSubmit && (
-              <div>
-                <PrimaryButton
-                  onClick={onDrop}
-                  disabled={!canSubmit}
-                  loading={loading}
-                  size={
-                    screenType === CreateDropScreenType.MOBILE
-                      ? PrimaryButtonSize.SMALL
-                      : PrimaryButtonSize.MEDIUM
-                  }
-                >
-                  {getSubmitText()}
-                </PrimaryButton>
-              </div>
-            )}
           </div>
         </div>
 

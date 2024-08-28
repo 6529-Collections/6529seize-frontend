@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { QuotedDrop } from "../../../../../generated/models/QuotedDrop";
 import { AuthContext } from "../../../../auth/Auth";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../../generated/models/Drop";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -33,6 +33,7 @@ export default function DropPartQuote({
           ? { context_profile: connectedProfile.profile.handle }
           : {},
       }),
+    placeholderData: keepPreviousData,
   });
 
   const [quotedPart, setQuotedPart] = useState<IDropPart | null>(null);

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../../generated/models/Drop";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -40,6 +40,7 @@ export default function DropReply(props: DropReplyProps) {
         endpoint: `drops/${params?.dropId}`,
       }),
     enabled: !!params,
+    placeholderData: keepPreviousData,
   });
 
   const getFinalDrop = (): Drop | null => {
