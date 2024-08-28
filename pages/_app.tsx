@@ -233,6 +233,7 @@ export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
   metadata,
+  enableCoinbase: !isCapacitor,
   coinbasePreference: isCapacitor ? "eoaOnly" : "all",
   auth: {
     email: false,
