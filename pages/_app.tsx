@@ -14,7 +14,6 @@ import {
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
 import { WagmiProvider } from "wagmi";
-import { coinbaseWallet } from "@wagmi/connectors";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -233,7 +232,6 @@ export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
   metadata,
-  enableCoinbase: !isCapacitor,
   coinbasePreference: isCapacitor ? "eoaOnly" : "all",
   auth: {
     email: false,
