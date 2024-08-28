@@ -248,8 +248,8 @@ if (isCapacitor) {
       appLogoUrl:
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       headlessMode: true,
-      version: "3",
       enableMobileWalletLink: true,
+      overrideIsCoinbaseWallet: true,
       diagnosticLogger: logger,
     })
   );
