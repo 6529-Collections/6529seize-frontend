@@ -22,6 +22,7 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { DropMedia } from "../../../../../../generated/models/DropMedia";
 import { getRandomObjectId } from "../../../../../../helpers/AllowlistToolHelpers";
+import { getOptimisticDropId } from "../../../../../../helpers/waves/drop.helpers";
 
 export default function DropReplyInputWrapper({
   drop: originalDrop,
@@ -239,7 +240,7 @@ export default function DropReplyInputWrapper({
     }
 
     return {
-      id: getRandomObjectId(),
+      id: getOptimisticDropId(),
       serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
       wave: originalDrop.wave,
       reply_to: {

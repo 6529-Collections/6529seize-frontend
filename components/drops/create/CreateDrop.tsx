@@ -24,6 +24,7 @@ import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { Wave } from "../../../generated/models/Wave";
+import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -204,7 +205,7 @@ export default function CreateDrop({
     }
 
     return {
-      id: getRandomObjectId(),
+      id: getOptimisticDropId(),
       serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
       wave: {
         id: waveDetailed.id,

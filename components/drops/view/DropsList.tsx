@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import DropsListItem from "./item/DropsListItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+import { getDropHash } from "../../../helpers/waves/drop.helpers";
 
 export default function DropsList({
   drops,
@@ -32,7 +33,7 @@ export default function DropsList({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2.5">
       {drops.map((drop, i) => (
-        <div key={drop.id}>
+        <div key={getDropHash(drop)}>
           <DropsListItem
             drop={drop}
             availableCredit={availableCredit}

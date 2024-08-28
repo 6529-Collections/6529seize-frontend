@@ -57,7 +57,9 @@ export default function DropsListItem({
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [isDiscussionOpen, setIsDiscussionOpen] = useState(initialDiscussionOpen);
+  const [isDiscussionOpen, setIsDiscussionOpen] = useState(
+    initialDiscussionOpen
+  );
 
   const getVoteState = () => {
     if (!connectedProfile) {
@@ -142,8 +144,10 @@ export default function DropsListItem({
     <div
       className={`${
         !isReply &&
-        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
-      }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && ""}`}
+        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800"
+      }  tw-relative tw-bg-iron-900 ${
+        dropReplyDepth < 2 && ""
+      }  tw-transition tw-duration-300 tw-ease-out`}
       /* not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800 */
     >
       <div className={`${dropReplyDepth === 0 && "tw-pb-2 tw-pt-2"}`}>

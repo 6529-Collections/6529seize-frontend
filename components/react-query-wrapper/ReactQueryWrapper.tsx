@@ -1008,16 +1008,16 @@ export default function ReactQueryWrapper({
   };
 
   const addReplyToDropDiscussion = ({
-    replyDrop,
+    drop,
   }: {
-    readonly replyDrop: Drop;
+    readonly drop: Drop;
   }): void => {
     queryClient.setQueryData(
       [
         QueryKey.DROP_DISCUSSION,
         {
-          drop_id: replyDrop.reply_to?.drop_id,
-          drop_part_id: replyDrop.reply_to?.drop_part_id,
+          drop_id: drop.reply_to?.drop_id,
+          drop_part_id: drop.reply_to?.drop_part_id,
           sort_direction: "ASC",
         },
       ],
@@ -1032,14 +1032,14 @@ export default function ReactQueryWrapper({
                 count: 1,
                 page: 1,
                 next: false,
-                data: [replyDrop],
+                data: [drop],
               },
             ],
           };
         }
 
         const pages: Page<Drop>[] = JSON.parse(JSON.stringify(oldData.pages));
-        pages.at(-1)?.data.push(replyDrop);
+        pages.at(-1)?.data.push(drop);
 
         return {
           ...oldData,
@@ -1162,7 +1162,7 @@ export default function ReactQueryWrapper({
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {
-      addReplyToDropDiscussion({ replyDrop: drop });
+      addReplyToDropDiscussion({ drop });
       increaseFeedItemsDropDiscussionCount({ drop });
     }
   };
@@ -1326,7 +1326,7 @@ export default function ReactQueryWrapper({
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_DISCUSSION],
-    })
+    });
   };
 
   const onWaveCreated = () => invalidateAllWaves();
