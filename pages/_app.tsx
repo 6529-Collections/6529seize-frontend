@@ -227,7 +227,7 @@ const metadata = {
 
 const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
-const isCapacitor = !Capacitor.isNativePlatform();
+const isCapacitor = Capacitor.isNativePlatform();
 
 const connectors = [];
 if (isCapacitor) {
