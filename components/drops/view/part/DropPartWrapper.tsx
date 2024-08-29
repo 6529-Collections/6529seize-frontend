@@ -19,10 +19,11 @@ export interface DropPartWrapperProps {
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
+  readonly showWaveInfo?: boolean;
   readonly size?: DropPartSize;
   readonly connectingLineType?: DropConnectingLineType | null;
-  readonly onContentClick?: () => void;
   readonly onDiscussionButtonClick: () => void;
+  readonly onRedropClick?: (redropId: string) => void;
   readonly children: React.ReactNode;
 }
 
@@ -34,9 +35,10 @@ export default function DropPartWrapper({
   availableCredit,
   dropReplyDepth,
   isDiscussionOpen,
+  showWaveInfo = true,
   size = DropPartSize.MEDIUM,
   connectingLineType = DropConnectingLineType.NONE,
-  onContentClick,
+  onRedropClick,
   onDiscussionButtonClick,
   children,
 }: DropPartWrapperProps) {
@@ -74,7 +76,6 @@ export default function DropPartWrapper({
   const [activeDiscussionDropId, setActiveDiscussionDropId] = useState<
     string | null
   >(null);
-
 
   const [repliesOpen, setRepliesOpen] = useState(false);
   const [repliesIntent, setRepliesIntent] = useState<"tw-pl-12" | "tw-pl-0">(
@@ -139,7 +140,7 @@ export default function DropPartWrapper({
                 <div>
                   <DropPartQuote
                     quotedDrop={quotedDrop}
-                    onContentClick={onContentClick}
+                    onRedropClick={onRedropClick}
                   />
                 </div>
               )}
@@ -217,6 +218,7 @@ export default function DropPartWrapper({
                 availableCredit={availableCredit}
                 dropReplyDepth={dropReplyDepth}
                 activeDiscussionDropId={activeDiscussionDropId}
+                showWaveInfo={showWaveInfo}
                 setActiveDiscussionDropId={setActiveDiscussionDropId}
                 setRepliesOpen={setRepliesOpen}
               />

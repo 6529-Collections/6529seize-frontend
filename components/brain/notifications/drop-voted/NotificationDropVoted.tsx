@@ -10,8 +10,10 @@ import DropsListItem from "../../../drops/view/item/DropsListItem";
 
 export default function NotificationDropVoted({
   notification,
+  availableCredit,
 }: {
   readonly notification: INotificationDropVoted;
+  readonly availableCredit: number | null;
 }) {
   const getVoteColor = (vote: number) => {
     if (vote > 0) {
@@ -75,7 +77,7 @@ export default function NotificationDropVoted({
           drop={notification.related_drops[0]}
           replyToDrop={null}
           showWaveInfo={true}
-          availableCredit={0}
+          availableCredit={availableCredit}
         />
       </div>
     </div>

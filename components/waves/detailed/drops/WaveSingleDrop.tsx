@@ -51,7 +51,7 @@ export default function WaveSingleDrop({
       <DropsListItem
         drop={drop}
         replyToDrop={null}
-        showWaveInfo={true}
+        showWaveInfo={false}
         initialDiscussionOpen={true}
         availableCredit={availableCredit}
       />

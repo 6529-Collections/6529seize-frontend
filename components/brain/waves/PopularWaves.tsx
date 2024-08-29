@@ -31,8 +31,6 @@ export default function PopularWaves() {
 
   const params = getParams();
 
-  useEffect(() => console.log(params), [params]);
-
   const { data: wavesAuth } = useInfiniteQuery({
     queryKey: [QueryKey.WAVES_OVERVIEW, params],
     queryFn: async ({ pageParam }: { pageParam: number }) => {

@@ -31,7 +31,7 @@ export default function WavePage() {
   const getBreadCrumbs = (): Crumb[] => {
     return [
       { display: "Home", href: "/" },
-      { display: "Waves", href: "/waves" },
+      { display: "My Stream", href: "/my-stream" },
       { display: wave?.name ?? "" },
     ];
   };

@@ -9,8 +9,10 @@ import DropsListItem from "../../../drops/view/item/DropsListItem";
 
 export default function NotificationDropReplied({
   notification,
+  availableCredit
 }: {
   readonly notification: INotificationDropReplied;
+  readonly availableCredit: number | null;
 }) {
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
@@ -69,7 +71,7 @@ export default function NotificationDropReplied({
           drop={notification.related_drops[1]}
           replyToDrop={notification.related_drops[0]}
           showWaveInfo={true}
-          availableCredit={0}
+          availableCredit={availableCredit}
         />
       </div>
     </div>

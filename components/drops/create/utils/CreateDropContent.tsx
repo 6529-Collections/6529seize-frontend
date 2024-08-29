@@ -320,7 +320,7 @@ const CreateDropContent = forwardRef<
                 />
               </svg>
               <span className="tw-ml-2 tw-text-sm tw-font-medium">
-                Break into storm
+                {isStormMode ? "Continue storm" : "Break into storm"}
               </span>
             </button>
           )}

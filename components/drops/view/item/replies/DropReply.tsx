@@ -74,7 +74,7 @@ export default function DropReply(props: DropReplyProps) {
       return "Media";
     }
 
-    const content = part.content?.slice(0, 50) ?? "";
+    const content = part.content?.slice(0, 50).replace(/\n/g, ' ') ?? "";
 
     return part.content?.length > 50 ? content + "..." : content;
   };
