@@ -11,14 +11,16 @@ import DropPart, { DropPartSize } from "../DropPart";
 
 export default function DropPartQuote({
   quotedDrop,
+  marginLeft = true,
   onRedropClick,
 }: {
   readonly quotedDrop: QuotedDrop;
+  readonly marginLeft?: boolean;
   readonly onRedropClick?: (redropId: string) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
-  const { data: drop } = useQuery<Drop>({
+  const { data: drop, error } = useQuery<Drop>({
     queryKey: [
       QueryKey.DROP,
       {
@@ -36,6 +38,8 @@ export default function DropPartQuote({
     placeholderData: keepPreviousData,
   });
 
+  useEffect(() => console.log(error), [error]);
+
   const [quotedPart, setQuotedPart] = useState<IDropPart | null>(null);
   useEffect(() => {
     if (!drop) {
@@ -50,12 +54,28 @@ export default function DropPartQuote({
     setQuotedPart(part);
   }, [drop]);
 
+  if (error) {
+    return (
+      <div
+        className={`${
+          marginLeft && "tw-ml-[54px]"
+        } tw-mt-2 tw-px-4 tw-py-2 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid`}
+      >
+        Drop not found
+      </div>
+    );
+  }
+
   if (!quotedPart || !drop) {
     return null;
   }
 
   return (
-    <div className="tw-ml-[54px] tw-mt-2 tw-px-4 tw-pb-4 tw-pt-1 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid">
+    <div
+      className={`${
+        marginLeft && "tw-ml-[54px]"
+      } tw-mt-2 tw-px-4 tw-pb-4 tw-pt-1 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid`}
+    >
       <DropPart
         profile={drop.author}
         mentionedUsers={drop.mentioned_users}
