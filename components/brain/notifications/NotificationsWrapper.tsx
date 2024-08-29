@@ -37,8 +37,6 @@ export default function NotificationsWrapper({
     });
 
 
-    useEffect(() => console.log(availableRateResponse), [availableRateResponse]);
-
   return (
     <div className="tw-relative">
       <NotificationItems

@@ -38,8 +38,6 @@ export default function DropPartQuote({
     placeholderData: keepPreviousData,
   });
 
-  useEffect(() => console.log(error), [error]);
-
   const [quotedPart, setQuotedPart] = useState<IDropPart | null>(null);
   useEffect(() => {
     if (!drop) {
