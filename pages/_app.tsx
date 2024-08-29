@@ -110,6 +110,7 @@ import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
+import { Capacitor } from "@capacitor/core";
 
 library.add(
   faArrowUp,
@@ -225,11 +226,14 @@ const metadata = {
 
 const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
+const isCapacitor = Capacitor.isNativePlatform();
+
 export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
   metadata,
-  coinbasePreference: "all",
+  enableCoinbase: !isCapacitor,
+  coinbasePreference: isCapacitor ? "eoaOnly" : "all",
   auth: {
     email: false,
   },
@@ -262,15 +266,18 @@ type AppPropsWithLayout = AppProps & {
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout ?? ((page) => page);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <Head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1"
-          />
-        </Head>
+        {isCapacitor && (
+          <Head>
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0, maximum-scale=1"
+            />
+          </Head>
+        )}
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <Auth>
