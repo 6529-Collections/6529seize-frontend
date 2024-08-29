@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
 import { useState, useEffect } from "react";
+import { Share } from "@capacitor/share";
 
 export default function CapacitorWidget() {
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
@@ -18,8 +19,16 @@ export default function CapacitorWidget() {
 
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const toggleShare = () => {
-    setIsShareOpen(!isShareOpen);
+  const toggleShare = async () => {
+    try {
+      await Share.share({
+        title: document.title,
+        text: window.location.href,
+      });
+    } catch (error) {
+      console.error("Share failed:", error);
+      setIsShareOpen(!isShareOpen);
+    }
   };
 
   useEffect(() => {
@@ -69,7 +78,7 @@ export default function CapacitorWidget() {
           onClick={toggleShare}>
           <FontAwesomeIcon icon={faShare} />
         </button>
-        <SharePopup show={isShareOpen} onHide={() => setIsShareOpen(false)} />
+        {/* <SharePopup show={isShareOpen} onHide={() => setIsShareOpen(false)} /> */}
       </span>
       <span className="d-flex align-items-center gap-3">
         <button
