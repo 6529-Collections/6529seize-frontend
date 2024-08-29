@@ -121,16 +121,12 @@ export default function DropPartMarkdown({
     const { href } = props;
 
     const baseEndpoint = process.env.BASE_ENDPOINT || "";
-    const baseEndpointPattern = baseEndpoint.replace(/https?:\/\//, "").replace(/\./g, "\\.");
-  
-    const regex = new RegExp(`^(https?:\\/\\/)?(www\\.)?(${baseEndpointPattern})\\/waves\\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$`);
+    const regex = /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
     const match = href ? href.match(regex) : null;
     const isSeizeLink = !!match;
-    const waveId = match ? match[4] : null;
-    const dropId = match ? match[5] : null;
-    console.log(match)
-    const isExternalLink =
-      href && baseEndpoint && !href.startsWith(baseEndpoint);
+    const waveId = match ? match[1] : null;
+    const dropId = match ? match[2] : null;
+
     if (isSeizeLink && dropId && waveId) {
       const onRedropClick = (redropId: string) => {
         router.push(`/waves/${waveId}?drop=${redropId}`, undefined, {
@@ -157,6 +153,10 @@ export default function DropPartMarkdown({
     if (isValidLink) {
       return <p>[invalid link]</p>;
     }
+
+
+    const isExternalLink =
+      href && baseEndpoint && !href.startsWith(baseEndpoint);
 
     if (isExternalLink) {
       props.rel = "noopener noreferrer nofollow";
