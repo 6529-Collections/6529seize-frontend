@@ -52,7 +52,7 @@ export default function WavesList({
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g clip-path="url(#clip0_9330_1241)">
+        <g clipPath="url(#clip0_9330_1241)">
           <path
             d="M36 2V22M26 12H46"
             stroke="currentColor"
