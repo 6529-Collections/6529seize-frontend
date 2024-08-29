@@ -24,9 +24,13 @@ export default function CapacitorWidget() {
       title: document.title,
       text: window.location.href,
     }).catch((error) => {
-      console.warn("Error sharing", error);
-      console.warn("Falling back to custom share popup");
-      setIsShareOpen(!isShareOpen);
+      console.log("Error sharing", error);
+      if (error.message?.includes("not implemented")) {
+        console.warn("Falling back to custom share popup");
+        setIsShareOpen(!isShareOpen);
+      } else {
+        console.log("Error sharing", error);
+      }
     });
   };
 
