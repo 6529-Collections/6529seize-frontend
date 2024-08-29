@@ -9,17 +9,19 @@ import NotificationIdentitySubscribed from "./identity-subscribed/NotificationId
 
 export default function NotificationItem({
   notification,
+  availableCredit,
 }: {
   readonly notification: TypedNotification;
+  readonly availableCredit: number | null;
 }) {
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
       case NotificationCause.DropQuoted:
-        return <NotificationDropQuoted notification={notification} />;
+        return <NotificationDropQuoted notification={notification} availableCredit={availableCredit}/>;
       case NotificationCause.DropReplied:
-        return <NotificationDropReplied notification={notification} />;
+        return <NotificationDropReplied notification={notification} availableCredit={availableCredit}/>;
       case NotificationCause.DropVoted:
-        return <NotificationDropVoted notification={notification} />;
+        return <NotificationDropVoted notification={notification} availableCredit={availableCredit}/>;
       case NotificationCause.IdentityMentioned:
         return <NotificationIdentityMentioned notification={notification} />;
       case NotificationCause.IdentitySubscribed:

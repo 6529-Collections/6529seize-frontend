@@ -112,6 +112,7 @@ export default function DropListItemContent({
           dropReplyDepth={dropReplyDepth}
           isDiscussionOpen={isDiscussionOpen}
           connectingLineType={connectingLineType}
+          showWaveInfo={showWaveInfo}
           onContentClick={onContentClick}
           onDiscussionButtonClick={onDiscussionButtonClick}
         >

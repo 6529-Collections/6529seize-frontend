@@ -19,6 +19,7 @@ export interface DropPartWrapperProps {
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
+  readonly showWaveInfo?: boolean;
   readonly size?: DropPartSize;
   readonly connectingLineType?: DropConnectingLineType | null;
   readonly onContentClick?: () => void;
@@ -34,6 +35,7 @@ export default function DropPartWrapper({
   availableCredit,
   dropReplyDepth,
   isDiscussionOpen,
+  showWaveInfo = true,
   size = DropPartSize.MEDIUM,
   connectingLineType = DropConnectingLineType.NONE,
   onContentClick,
@@ -217,6 +219,7 @@ export default function DropPartWrapper({
                 availableCredit={availableCredit}
                 dropReplyDepth={dropReplyDepth}
                 activeDiscussionDropId={activeDiscussionDropId}
+                showWaveInfo={showWaveInfo}
                 setActiveDiscussionDropId={setActiveDiscussionDropId}
                 setRepliesOpen={setRepliesOpen}
               />

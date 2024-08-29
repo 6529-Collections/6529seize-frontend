@@ -1255,6 +1255,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+    })
   };
 
   const onIdentityBulkRate = () => {
