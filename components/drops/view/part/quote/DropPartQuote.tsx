@@ -11,10 +11,10 @@ import DropPart, { DropPartSize } from "../DropPart";
 
 export default function DropPartQuote({
   quotedDrop,
-  onContentClick,
+  onRedropClick,
 }: {
   readonly quotedDrop: QuotedDrop;
-  readonly onContentClick?: () => void;
+  readonly onRedropClick?: (redropId: string) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
@@ -79,7 +79,9 @@ export default function DropPartQuote({
           id: drop.wave.id,
         }}
         size={DropPartSize.SMALL}
-        onContentClick={onContentClick}
+        onContentClick={() =>
+          onRedropClick && onRedropClick(quotedDrop.drop_id)
+        }
       />
     </div>
   );

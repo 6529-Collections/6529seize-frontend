@@ -134,7 +134,7 @@ const DropPart = memo(
             <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
               <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
                 <DropPfp pfpUrl={profile.pfp} size={size} />
-                <div className="tw-w-full tw-h-10 tw-flex tw-flex-col tw-justify-between">
+                <div className={`tw-w-full tw-flex tw-flex-col ${wave?.id ? "tw-justify-between" : "tw-justify-center"} ${size === DropPartSize.SMALL && !wave?.id ? "tw-h-8" : "tw-h-10"}`}>
                   <DropAuthor
                     profile={profile}
                     timestamp={createdAt}

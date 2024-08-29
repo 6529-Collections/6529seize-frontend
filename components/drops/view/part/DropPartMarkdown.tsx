@@ -164,58 +164,68 @@ export default function DropPartMarkdown({
       className="tw-w-full"
       components={{
         h5: (params) => (
-          <h5 className="tw-text-iron-50 tw-break-words word-break">
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </h5>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         h4: (params) => (
-          <h4 className="tw-text-iron-50 tw-break-words word-break">
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </h4>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         h3: (params) => (
-          <h3 className="tw-text-iron-50 tw-break-words word-break">
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </h3>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         h2: (params) => (
-          <h2 className="tw-text-iron-50 tw-break-words word-break">
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </h2>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         h1: (params) => (
-          <h1 className="tw-text-iron-50 tw-break-words word-break">
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </h1>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         p: (params) => (
           <p
-            className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+            className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out  ${textSizeClass}`}
           >
             {customRenderer({
               content: params.children,
@@ -226,27 +236,40 @@ export default function DropPartMarkdown({
           </p>
         ),
         li: (params) => (
-          <li className="tw-text-iron-50 tw-break-words word-break">
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </li>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
+        ),
+        pre: (params) => (
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         code: (params) => (
-          <code
-            style={{ textOverflow: "unset" }}
-            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
-          >
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-              onImageLoaded,
-            })}
-          </code>
+          <p
+          className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 group-hover:tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          })}
+        </p>
         ),
         a: (params) => aHrefRenderer(params),
         img: (params) => (
