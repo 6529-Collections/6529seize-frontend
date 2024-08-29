@@ -6,7 +6,7 @@ import CircleLoader, {
 import NotificationItems from "./NotificationItems";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiFetch } from "../../../services/api/common-api";
 
