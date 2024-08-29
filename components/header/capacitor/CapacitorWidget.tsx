@@ -20,15 +20,14 @@ export default function CapacitorWidget() {
   const [isShareOpen, setIsShareOpen] = useState(false);
 
   const toggleShare = async () => {
-    try {
-      await Share.share({
-        title: document.title,
-        text: window.location.href,
-      });
-    } catch (error) {
-      console.error("Share failed:", error);
+    await Share.share({
+      title: document.title,
+      text: window.location.href,
+    }).catch((error) => {
+      console.warn("Error sharing", error);
+      console.warn("Falling back to custom share popup");
       setIsShareOpen(!isShareOpen);
-    }
+    });
   };
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export default function CapacitorWidget() {
           onClick={toggleShare}>
           <FontAwesomeIcon icon={faShare} />
         </button>
-        {/* <SharePopup show={isShareOpen} onHide={() => setIsShareOpen(false)} /> */}
+        <SharePopup show={isShareOpen} onHide={() => setIsShareOpen(false)} />
       </span>
       <span className="d-flex align-items-center gap-3">
         <button
