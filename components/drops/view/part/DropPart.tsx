@@ -77,10 +77,11 @@ const DropPart = memo(
     const contentRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const checkOverflow = () => {
-      setIsOverflowing(
-        !!contentRef.current &&
-          contentRef.current.scrollHeight > contentRef.current.clientHeight
-      );
+      const tolerance = 2; // Adjust this value as needed
+    if (containerRef.current) {
+      const { scrollHeight, clientHeight } = containerRef.current;
+      setIsOverflowing(scrollHeight > clientHeight + tolerance);
+    }
     };
 
     useEffect(() => {
