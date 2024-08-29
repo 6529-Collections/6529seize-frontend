@@ -97,7 +97,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="md:tw-w-[672px] tw-flex-shrink-0">
+    <div className="lg:tw-w-[672px] tw-flex-shrink-0">
       <div>
         {!items.length && !isFetching ? (
           <div className="tw-mt-20">
@@ -105,7 +105,7 @@ export default function Notifications() {
           </div>
         ) : (
           <>
-            <div className="tw-mt-8">
+            <div>
               <NotificationsWrapper
                 items={items}
                 loading={isFetching}

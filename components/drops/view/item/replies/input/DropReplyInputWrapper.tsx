@@ -21,6 +21,7 @@ import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { DropMedia } from "../../../../../../generated/models/DropMedia";
+import { getOptimisticDropId } from "../../../../../../helpers/waves/drop.helpers";
 
 export default function DropReplyInputWrapper({
   drop: originalDrop,
@@ -31,8 +32,10 @@ export default function DropReplyInputWrapper({
   readonly dropPart: DropPart;
   readonly onReply: () => void;
 }) {
-  const { setToast, requestAuth } = useContext(AuthContext);
-  const { onDropCreate } = useContext(ReactQueryWrapperContext);
+  const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
+  const { onDropCreate, addOptimisticDrop, invalidateDrops } = useContext(
+    ReactQueryWrapperContext
+  );
 
   const [mentionedUsers, setMentionedUsers] = useState<
     Omit<MentionedUser, "current_handle">[]
@@ -93,9 +96,7 @@ export default function DropReplyInputWrapper({
       }),
     onSuccess: (respone: Drop) => {
       setDrop(null);
-      onDropCreate({
-        drop: respone,
-      });
+      onDropCreate();
       onReply();
     },
     onError: (error) => {
@@ -103,6 +104,7 @@ export default function DropReplyInputWrapper({
         message: error as unknown as string,
         type: "error",
       });
+      invalidateDrops();
     },
     onSettled: () => {
       setLoading(false);
@@ -215,6 +217,73 @@ export default function DropReplyInputWrapper({
     };
   };
 
+  const generateParts = async ({
+    parts,
+  }: {
+    readonly parts: CreateDropPart[];
+  }): Promise<CreateDropRequestPart[]> => {
+    try {
+      return await Promise.all(parts.map((part) => generatePart(part)));
+    } catch (error) {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+      return [];
+    }
+  };
+
+  const getOptimisticDrop = (dropRequest: CreateDropRequest): Drop | null => {
+    if (!connectedProfile?.profile) {
+      return null;
+    }
+
+    return {
+      id: getOptimisticDropId(),
+      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+      wave: originalDrop.wave,
+      reply_to: {
+        drop_id: originalDrop.id,
+        drop_part_id: dropPart.part_id,
+      },
+      author: {
+        id: connectedProfile.profile.external_id,
+        handle: connectedProfile.profile.handle,
+        pfp: connectedProfile.profile.pfp_url ?? null,
+        banner1_color: connectedProfile.profile.banner_1 ?? null,
+        banner2_color: connectedProfile.profile.banner_2 ?? null,
+        cic: connectedProfile.cic.cic_rating,
+        rep: connectedProfile.rep,
+        tdh: connectedProfile.consolidation.tdh,
+        level: connectedProfile.level,
+        subscribed_actions: [],
+        archived: false,
+      },
+      created_at: Date.now(),
+      title: dropRequest.title ?? null,
+      parts: dropRequest.parts.map((part, i) => ({
+        part_id: i,
+        content: part.content ?? null,
+        media: part.media.map((media) => ({
+          url: media.url,
+          mime_type: media.mime_type,
+        })),
+        quoted_drop: part.quoted_drop ?? null,
+        replies_count: 0,
+        quotes_count: 0,
+      })),
+      parts_count: dropRequest.parts.length,
+      referenced_nfts: dropRequest.referenced_nfts,
+      mentioned_users: dropRequest.mentioned_users,
+      metadata: dropRequest.metadata,
+      rating: 0,
+      top_raters: [],
+      raters_count: 0,
+      context_profile_context: null,
+      subscribed_actions: [],
+    };
+  };
+
   const onDrop = async (): Promise<void> => {
     const currentDrop = onDropPart();
     setLoading(true);
@@ -224,10 +293,13 @@ export default function DropReplyInputWrapper({
       return;
     }
 
-    const parts = await Promise.all(
-      currentDrop.parts.map((part) => generatePart(part))
-    );
-    await addReplyMutation.mutateAsync({
+    const parts = await generateParts({ parts: currentDrop.parts });
+    if (!parts.length) {
+      setLoading(false);
+      return;
+    }
+
+    const requestBody: CreateDropRequest = {
       wave_id: originalDrop.wave.id,
       reply_to: {
         drop_id: originalDrop.id,
@@ -238,7 +310,12 @@ export default function DropReplyInputWrapper({
       referenced_nfts: currentDrop.referenced_nfts,
       mentioned_users: currentDrop.mentioned_users,
       metadata: currentDrop.metadata,
-    });
+    }
+    const optimisticDrop = getOptimisticDrop(requestBody);
+    if (optimisticDrop) {
+      addOptimisticDrop({ drop: optimisticDrop });
+    }
+    await addReplyMutation.mutateAsync(requestBody);
   };
 
   return (
@@ -251,10 +328,11 @@ export default function DropReplyInputWrapper({
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
         onFileChange={setFile}
-      />
-      <PrimaryButton onClick={onDrop} disabled={!canSubmit} loading={loading}>
-        Reply
-      </PrimaryButton>
+      >
+        <PrimaryButton onClick={onDrop} disabled={!canSubmit} loading={loading}>
+          Reply
+        </PrimaryButton>
+      </DropReplyInput>
     </div>
   );
 }

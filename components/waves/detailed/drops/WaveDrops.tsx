@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import DropListWrapper from "../../../drops/view/DropListWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -61,6 +61,7 @@ export default function WaveDrops({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
+    placeholderData: keepPreviousData,
     enabled: !!connectedProfile?.profile?.handle,
   });
 

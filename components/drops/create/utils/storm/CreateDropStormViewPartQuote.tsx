@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QuotedDrop } from "../../../../../generated/models/QuotedDrop";
 import { Drop } from "../../../../../generated/models/Drop";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -39,6 +39,7 @@ export default function CreateDropStormViewPartQuote({
         endpoint: `/drops/${quotedDrop.drop_id}`,
       }),
     enabled: typeof quotedDrop.drop_id === "string",
+    placeholderData: keepPreviousData,
   });
 
   const getPartConfig = (): PartConfig | null => {

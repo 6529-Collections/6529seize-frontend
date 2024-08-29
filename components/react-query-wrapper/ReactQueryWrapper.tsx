@@ -68,6 +68,7 @@ export enum QueryKey {
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVE = "WAVE",
   WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
+  FOLLOWING_WAVES = "FOLLOWING_WAVES",
   FEED_ITEMS = "FEED_ITEMS",
 }
 
@@ -167,7 +168,8 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onDropCreate: (params: { drop: Drop }) => void;
+  onDropCreate: () => void;
+  addOptimisticDrop: (params: { drop: Drop }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
@@ -199,6 +201,7 @@ export const ReactQueryWrapperContext =
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     onDropCreate: () => {},
+    addOptimisticDrop: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
     onGroupRemoved: () => {},
@@ -1005,16 +1008,16 @@ export default function ReactQueryWrapper({
   };
 
   const addReplyToDropDiscussion = ({
-    replyDrop,
+    drop,
   }: {
-    readonly replyDrop: Drop;
+    readonly drop: Drop;
   }): void => {
     queryClient.setQueryData(
       [
         QueryKey.DROP_DISCUSSION,
         {
-          drop_id: replyDrop.reply_to?.drop_id,
-          drop_part_id: replyDrop.reply_to?.drop_part_id,
+          drop_id: drop.reply_to?.drop_id,
+          drop_part_id: drop.reply_to?.drop_part_id,
           sort_direction: "ASC",
         },
       ],
@@ -1029,14 +1032,14 @@ export default function ReactQueryWrapper({
                 count: 1,
                 page: 1,
                 next: false,
-                data: [replyDrop],
+                data: [drop],
               },
             ],
           };
         }
 
         const pages: Page<Drop>[] = JSON.parse(JSON.stringify(oldData.pages));
-        pages.at(-1)?.data.push(replyDrop);
+        pages.at(-1)?.data.push(drop);
 
         return {
           ...oldData,
@@ -1149,7 +1152,7 @@ export default function ReactQueryWrapper({
     );
   };
 
-  const onDropCreate = async ({
+  const addOptimisticDrop = async ({
     drop,
   }: {
     readonly drop: Drop;
@@ -1159,18 +1162,14 @@ export default function ReactQueryWrapper({
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {
-      addReplyToDropDiscussion({ replyDrop: drop });
+      addReplyToDropDiscussion({ drop });
       increaseFeedItemsDropDiscussionCount({ drop });
     }
+  };
+
+  const onDropCreate = async (): Promise<void> => {
     await wait(500);
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_DROPS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.FEED_ITEMS],
-    });
-    queryClient.invalidateQueries({ queryKey: [QueryKey.DROPS] });
-    queryClient.invalidateQueries({ queryKey: [QueryKey.DROP] });
+    invalidateDrops();
   };
 
   const dropChangeMutation = ({
@@ -1325,6 +1324,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP_DISCUSSION],
+    });
   };
 
   const onWaveCreated = () => invalidateAllWaves();
@@ -1366,6 +1368,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
+      addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,
       onGroupCreate,
@@ -1392,6 +1395,7 @@ export default function ReactQueryWrapper({
       onGroupRemoved,
       onGroupChanged,
       onDropCreate,
+      addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,
       onGroupCreate,

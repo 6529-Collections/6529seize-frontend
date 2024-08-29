@@ -57,7 +57,9 @@ export default function DropsListItem({
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [isDiscussionOpen, setIsDiscussionOpen] = useState(initialDiscussionOpen);
+  const [isDiscussionOpen, setIsDiscussionOpen] = useState(
+    initialDiscussionOpen
+  );
 
   const getVoteState = () => {
     if (!connectedProfile) {
@@ -142,8 +144,10 @@ export default function DropsListItem({
     <div
       className={`${
         !isReply &&
-        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-transition tw-duration-300 tw-ease-out"
-      }  tw-relative tw-bg-iron-900 ${dropReplyDepth < 2 && ""}`}
+        "tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800"
+      }  tw-relative tw-bg-iron-900 ${
+        dropReplyDepth < 2 && ""
+      }  tw-transition tw-duration-300 tw-ease-out`}
       /* not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800 */
     >
       <div className={`${dropReplyDepth === 0 && "tw-pb-2 tw-pt-2"}`}>
@@ -155,7 +159,7 @@ export default function DropsListItem({
             <DropReply {...replyProps} />
           </div>
         )}
-        <div className="tw-relative tw-h-full tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
+        <div className="tw-relative tw-h-full sm:tw-flex tw-justify-between tw-gap-x-4 md:tw-gap-x-6">
           <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col tw-justify-between">
             <DropListItemContent
               key={randomKey}
@@ -172,7 +176,7 @@ export default function DropsListItem({
               onDiscussionButtonClick={onDiscussionButtonClick}
             />
             {canFollow && (
-              <div className="tw-absolute tw-right-14">
+              <div className="tw-absolute tw-right-10 sm:tw-right-14">
                 <DropsListItemFollowDrop drop={drop} />
               </div>
             )}

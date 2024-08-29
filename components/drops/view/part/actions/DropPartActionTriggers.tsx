@@ -42,9 +42,9 @@ export default function DropPartActionTriggers({
   };
 
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between">
+    <div className="tw-w-full tw-inline-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-y-2 tw-justify-between">
       <div
-        className="tw-px-4 sm:tw-px-0 tw-gap-x-6 tw-flex tw-items-center"
+        className="tw-px-2 sm:tw-px-0 tw-gap-x-6 tw-flex tw-items-center"
       >
         {!!dropPart.replies_count && (
           <DropPartDiscussionButton
@@ -79,7 +79,7 @@ export default function DropPartActionTriggers({
           )}
         </button>
       </div>
-      <div className="tw-inline-flex tw-space-x-4 tw-items-center">
+      <div className="tw-px-2 sm:tw-px-0 tw-inline-flex tw-space-x-4 tw-items-center">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           {!!drop.raters_count && (
             <DropPartActionTriggersVoteVoters drop={drop} />

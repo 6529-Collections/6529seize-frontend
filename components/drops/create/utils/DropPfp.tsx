@@ -19,10 +19,10 @@ export default function DropPfp({
 
   return (
     <div
-      className={`${SIZE_CLASSES[size]} tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg`}
+      className={`${SIZE_CLASSES[size]} tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg`}
     >
       <div className="tw-rounded-lg tw-h-full tw-w-full">
-        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
+        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900">
           <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
             {pfpUrl && (
               <img
