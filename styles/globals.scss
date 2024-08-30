@@ -30,10 +30,8 @@ body {
   font-family: $main-font !important;
   overflow: auto;
 
-  &.capacitor-native {
-    footer {
-      padding-bottom: 100px;
-    }
+  &.capacitor-native footer {
+    padding-bottom: 100px !important;
   }
 }
 
