@@ -38,7 +38,7 @@ export default function DropListItemContent({
   dropReplyDepth,
   isDiscussionOpen,
   connectingLineType = DropConnectingLineType.NONE,
-  onDiscussionButtonClick
+  onDiscussionButtonClick,
 }: DropListItemContentProps) {
   const router = useRouter();
   const partsCount = drop.parts.length;
@@ -98,9 +98,12 @@ export default function DropListItemContent({
     router.push(`/waves/${drop.wave.id}?drop=${redropId}`, undefined, {
       shallow: true,
     });
-  }
+  };
 
-  const size = dropReplyDepth > 0 && !isDiscussionOpen ? DropPartSize.SMALL : DropPartSize.MEDIUM;
+  const size =
+    dropReplyDepth > 0 && !isDiscussionOpen
+      ? DropPartSize.SMALL
+      : DropPartSize.MEDIUM;
 
   return (
     <DropListItemContentWrapper
@@ -130,14 +133,10 @@ export default function DropListItemContent({
             partContent={activePart.content ?? null}
             totalPartsCount={partsCount}
             smallMenuIsShown={smallMenuIsShown}
-            partMedia={
-              activePart.media.length
-                ? {
-                    mimeType: activePart.media[0].mime_type,
-                    mediaSrc: activePart.media[0].url,
-                  }
-                : null
-            }
+            partMedias={activePart.media.map((media) => ({
+              mimeType: media.mime_type,
+              mediaSrc: media.url,
+            }))}
             showFull={showFull}
             wave={
               showWaveInfo

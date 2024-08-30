@@ -34,7 +34,7 @@ export interface CreateDropFullProps {
   readonly title: string | null;
   readonly metadata: DropMetadata[];
   readonly editorState: EditorState | null;
-  readonly file: File | null;
+  readonly files: File[];
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
   readonly loading: boolean;
@@ -54,7 +54,8 @@ export interface CreateDropFullProps {
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
-  readonly onFileChange: (file: File | null) => void;
+  readonly onFileRemove: (file: File) => void;
+  readonly setFiles: (files: File[]) => void;
   readonly onDrop: () => void;
   readonly onDropPart: () => void;
 }
@@ -67,7 +68,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       title,
       editorState,
       metadata,
-      file,
+      files,
       canSubmit,
       canAddPart,
       loading,
@@ -85,7 +86,8 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       onEditorState,
       onMentionedUser,
       onReferencedNft,
-      onFileChange,
+      onFileRemove,
+      setFiles,
       onDrop,
       onDropPart,
     },
@@ -110,10 +112,10 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           title={title}
           editorState={editorState}
           metadata={metadata}
-          file={file}
           canSubmit={canSubmit}
           canAddPart={canAddPart}
           type={type}
+          files={files}
           loading={loading}
           showSubmit={showSubmit}
           drop={drop}
@@ -126,7 +128,8 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onEditorState={onEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
-          onFileChange={onFileChange}
+          setFiles={setFiles}
+          onFileRemove={onFileRemove}
           onViewChange={onViewChange}
           onDrop={onDrop}
           onDropPart={onDropPart}
@@ -139,9 +142,9 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           ref={mobileEditorRef}
           profile={profile}
           title={title}
+          files={files}
           editorState={editorState}
           metadata={metadata}
-          file={file}
           canSubmit={canSubmit}
           canAddPart={canAddPart}
           type={type}
@@ -156,7 +159,8 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
           onTitle={onTitle}
-          onFileChange={onFileChange}
+          setFiles={setFiles}
+          onFileRemove={onFileRemove}
           onViewChange={onViewChange}
           onDrop={onDrop}
           onDropPart={onDropPart}

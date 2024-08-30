@@ -34,7 +34,7 @@ interface CreateDropFullMobileProps {
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
-  readonly file: File | null;
+  readonly files: File[];
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
   readonly type: CreateDropType;
@@ -52,7 +52,8 @@ interface CreateDropFullMobileProps {
   ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onTitle: (newV: string | null) => void;
-  readonly onFileChange: (file: File | null) => void;
+  readonly setFiles: (files: File[]) => void;
+  readonly onFileRemove: (file: File) => void;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onDrop: () => void;
   readonly onDropPart: () => void;
@@ -68,7 +69,7 @@ const CreateDropFullMobile = forwardRef<
       title,
       editorState,
       metadata,
-      file,
+      files,
       canSubmit,
       canAddPart,
       type,
@@ -84,7 +85,8 @@ const CreateDropFullMobile = forwardRef<
       onMentionedUser,
       onReferencedNft,
       onTitle,
-      onFileChange,
+      onFileRemove,
+      setFiles,
       onViewChange,
       onDrop,
       onDropPart,
@@ -178,11 +180,11 @@ const CreateDropFullMobile = forwardRef<
               onMentionedUser={onMentionedUser}
               onReferencedNft={onReferencedNft}
               onViewClick={onViewClick}
-              onFileChange={onFileChange}
+              setFiles={setFiles}
               onDropPart={onDropPart}
             />
-            {file && (
-              <div className="tw-mt-3">
+            {files.map((file, i) => (
+              <div className="tw-mt-3" key={`full-mobile-file-${i}`}>
                 <div className="tw-w-full">
                   <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-650 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
                     <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
@@ -192,7 +194,7 @@ const CreateDropFullMobile = forwardRef<
                       </p>
                     </div>
                     <button
-                      onClick={() => onFileChange(null)}
+                      onClick={() => onFileRemove(file)}
                       type="button"
                       aria-label="Remove file"
                       className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
@@ -217,7 +219,7 @@ const CreateDropFullMobile = forwardRef<
                   <CreateDropSelectedFilePreview file={file} />
                 </div>
               </div>
-            )}
+            ))}
             <CreateDropFullMobileMetadata
               metadata={metadata}
               onMetadataEdit={onMetadataEdit}

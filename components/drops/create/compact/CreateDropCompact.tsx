@@ -30,7 +30,7 @@ interface CreateDropCompactProps {
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
   readonly title: string | null;
-  readonly file: File | null;
+  readonly files: File[];
   readonly metadata: DropMetadata[];
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
@@ -49,7 +49,8 @@ interface CreateDropCompactProps {
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
-  readonly onFileChange: (file: File | null) => void;
+  readonly onFileRemove: (file: File) => void;
+  readonly setFiles: (files: File[]) => void;
   readonly onDrop?: () => void;
   readonly onDropPart: () => void;
 }
@@ -64,7 +65,7 @@ const CreateDropCompact = forwardRef<
       showProfile = true,
       editorState,
       screenType,
-      file,
+      files,
       title,
       metadata,
       canSubmit,
@@ -82,7 +83,8 @@ const CreateDropCompact = forwardRef<
       onEditorState,
       onMentionedUser,
       onReferencedNft,
-      onFileChange,
+      onFileRemove,
+      setFiles,
       onDrop,
       onDropPart,
     },
@@ -139,7 +141,7 @@ const CreateDropCompact = forwardRef<
                 onMentionedUser={onMentionedUser}
                 onReferencedNft={onReferencedNft}
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}
-                onFileChange={onFileChange}
+                setFiles={setFiles}
                 onDropPart={onDropPart}
               >
                 {showSubmit && (
@@ -163,8 +165,8 @@ const CreateDropCompact = forwardRef<
           </div>
         </div>
 
-        {file && (
-          <div className="tw-mt-3 sm:tw-ml-[3.25rem]">
+        {files.map((file, i) => (
+          <div key={`drop-compact-file-${i}`} className="tw-mt-3 sm:tw-ml-[3.25rem]">
             <div className="tw-w-full">
               <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-650 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
                 <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
@@ -174,7 +176,7 @@ const CreateDropCompact = forwardRef<
                   </p>
                 </div>
                 <button
-                  onClick={() => onFileChange(null)}
+                  onClick={() => onFileRemove(file)}
                   type="button"
                   aria-label="Remove file"
                   className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
@@ -199,7 +201,7 @@ const CreateDropCompact = forwardRef<
               <CreateDropSelectedFilePreview file={file} />
             </div>
           </div>
-        )}
+        ))}
       </div>
     );
   }

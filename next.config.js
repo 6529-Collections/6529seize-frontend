@@ -61,6 +61,7 @@ const nextConfig = {
     unoptimized: true,
     minimumCacheTTL: 86400,
   },
+  transpilePackages: ["react-tweet"],
   env: {
     API_ENDPOINT: process.env.API_ENDPOINT,
     ALLOWLIST_API_ENDPOINT: process.env.ALLOWLIST_API_ENDPOINT,

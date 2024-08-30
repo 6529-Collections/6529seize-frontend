@@ -141,7 +141,12 @@ const CreateDropWrapper = forwardRef<
     });
 
     const [editorState, setEditorState] = useState<EditorState | null>(null);
-    const [file, setFile] = useState<File | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
+
+    const onFileRemove = (file: File) => {
+      setFiles(prev => prev.filter(f => f !== file));
+    }
+
     const onMetadataEdit = ({ data_key, data_value }: DropMetadata) => {
       const index = metadata.findIndex((m) => m.data_key === data_key);
       if (index === -1) {
@@ -220,13 +225,10 @@ const CreateDropWrapper = forwardRef<
       if (drop?.parts.length) {
         return drop.parts.reduce<File[]>(
           (acc, part) => [...acc, ...(part.media ?? [])],
-          file ? [file] : []
+          files
         );
       }
-      if (file) {
-        return [file];
-      }
-      return [];
+      return files
     };
 
     const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
@@ -237,7 +239,7 @@ const CreateDropWrapper = forwardRef<
       if (!wave) {
         return [];
       }
-      if (!drop?.parts.length && !file) {
+      if (!drop?.parts.length && !files.length) {
         return wave.participation.required_media;
       }
       const medias = getMedias();
@@ -264,7 +266,7 @@ const CreateDropWrapper = forwardRef<
 
     useEffect(() => {
       setMissingMedia(getMissingRequiredMedia());
-    }, [waveProps, wave, drop, file]);
+    }, [waveProps, wave, drop, files]);
 
     const getCanSubmitStorm = () => {
       const markdown = getMarkdown();
@@ -275,14 +277,14 @@ const CreateDropWrapper = forwardRef<
     };
 
     const getCanSubmit = () =>
-      !!(!!getMarkdown() || !!file || !!drop?.parts.length) &&
+      !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
       !missingMedia.length &&
       !missingMetadata.length &&
       !!(drop?.parts.length ? getCanSubmitStorm() : true);
 
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
-    const getHaveMarkdownOrFile = () => !!getMarkdown() || !!file;
+    const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
     const getIsDropLimit = () =>
       (drop?.parts.reduce(
         (acc, part) => acc + (part.content?.length ?? 0),
@@ -303,7 +305,7 @@ const CreateDropWrapper = forwardRef<
     useEffect(() => {
       setCanSubmit(getCanSubmit());
       setCanAddPart(getCanAddPart());
-    }, [editorState, file, drop, missingMedia, missingMetadata]);
+    }, [editorState, files, drop, missingMedia, missingMetadata]);
 
     useEffect(() => {
       if (!onCanSubmitChange) {
@@ -319,11 +321,11 @@ const CreateDropWrapper = forwardRef<
     const clearInputState = () => {
       createDropContentFullRef.current?.clearEditorState();
       createDropContendCompactRef.current?.clearEditorState();
-      setFile(null);
+      setFiles([]);
     };
     const onDropPart = (): CreateDropConfig => {
       const markdown = getMarkdown();
-      if (!markdown?.length && !file) {
+      if (!markdown?.length && !files.length) {
         const currentDrop: CreateDropConfig = {
           title,
           parts: drop?.parts.length ? drop.parts : [],
@@ -379,7 +381,7 @@ const CreateDropWrapper = forwardRef<
                 drop_part_id: quotedDrop.partId,
               }
             : null,
-        media: file ? [file] : [],
+        media: files,
       });
       setDrop(currentDrop);
       clearInputState();
@@ -409,7 +411,7 @@ const CreateDropWrapper = forwardRef<
           showProfile={showProfile}
           screenType={screenType}
           editorState={editorState}
-          file={file}
+          files={files}
           title={title}
           metadata={metadata}
           canSubmit={canSubmit}
@@ -426,7 +428,8 @@ const CreateDropWrapper = forwardRef<
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
-          onFileChange={setFile}
+          setFiles={setFiles}
+          onFileRemove={onFileRemove}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
         >
@@ -439,9 +442,9 @@ const CreateDropWrapper = forwardRef<
           screenType={screenType}
           profile={profile}
           title={title}
+          files={files}
           metadata={metadata}
           editorState={editorState}
-          file={file}
           canSubmit={canSubmit}
           canAddPart={canAddPart}
           loading={loading}
@@ -458,7 +461,8 @@ const CreateDropWrapper = forwardRef<
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
-          onFileChange={setFile}
+          setFiles={setFiles}
+          onFileRemove={onFileRemove}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
         >

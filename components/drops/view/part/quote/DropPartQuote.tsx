@@ -80,14 +80,11 @@ export default function DropPartQuote({
         referencedNfts={drop.referenced_nfts}
         partContent={quotedPart.content ?? null}
         smallMenuIsShown={false}
-        partMedia={
-          quotedPart.media.length
-            ? {
-                mimeType: quotedPart.media[0].mime_type,
-                mediaSrc: quotedPart.media[0].url,
-              }
-            : null
-        }
+        partMedias={
+          quotedPart.media.map(media => ({
+            mimeType: media.mime_type,
+            mediaSrc: media.url,
+          }))}
         showFull={false}
         createdAt={drop.created_at}
         dropTitle={drop.title}

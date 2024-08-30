@@ -115,14 +115,7 @@ export default function CreateDrop({
     return null;
   }
 
-  const generateMediaForPart = async (
-    part: CreateDropPart
-  ): Promise<Array<DropMedia>> => {
-    if (!part.media.length) {
-      return [];
-    }
-
-    const media = part.media[0];
+  const generateMediaForPart = async (media: File): Promise<DropMedia> => {
     const prep = await commonApiPost<
       {
         content_type: string;
@@ -148,12 +141,10 @@ export default function CreateDrop({
       headers: myHeaders,
       body: media,
     });
-    return [
-      {
-        url: prep.media_url,
-        mime_type: prep.content_type,
-      },
-    ];
+    return {
+      url: prep.media_url,
+      mime_type: prep.content_type,
+    };
   };
 
   const filterMentionedUsers = ({
@@ -172,9 +163,12 @@ export default function CreateDrop({
   const generatePart = async (
     part: CreateDropPart
   ): Promise<CreateDropRequestPart> => {
+    const media = await Promise.all(
+      part.media.map((media) => generateMediaForPart(media))
+    );
     return {
       ...part,
-      media: await generateMediaForPart(part),
+      media,
     };
   };
 

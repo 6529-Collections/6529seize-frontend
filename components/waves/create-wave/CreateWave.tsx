@@ -272,14 +272,7 @@ export default function CreateWave({
     null
   );
 
-  const generateMediaForPart = async (
-    part: CreateDropPart
-  ): Promise<Array<DropMedia>> => {
-    if (!part.media.length) {
-      return [];
-    }
-
-    const media = part.media[0];
+  const generateMediaForPart = async (media: File): Promise<DropMedia> => {
     const prep = await commonApiPost<
       {
         content_type: string;
@@ -305,12 +298,10 @@ export default function CreateWave({
       headers: myHeaders,
       body: media,
     });
-    return [
-      {
-        url: prep.media_url,
-        mime_type: prep.content_type,
-      },
-    ];
+    return {
+      url: prep.media_url,
+      mime_type: prep.content_type,
+    };
   };
 
   const generateMediaForOverview = async (
@@ -354,9 +345,12 @@ export default function CreateWave({
   const generateDropPart = async (
     part: CreateDropPart
   ): Promise<CreateDropRequestPart> => {
+    const media = await Promise.all(
+      part.media.map((media) => generateMediaForPart(media))
+    );
     return {
       ...part,
-      media: await generateMediaForPart(part),
+      media,
     };
   };
 

@@ -12,6 +12,8 @@ import { DropMentionedUser } from "../../../../generated/models/DropMentionedUse
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
 import DropPartQuote from "./quote/DropPartQuote";
 import { useRouter } from "next/router";
+import { Tweet } from "react-tweet";
+import Link from "next/link";
 
 interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -28,8 +30,7 @@ export default function DropPartMarkdown({
   onImageLoaded,
   textSize = "md",
 }: DropPartMarkdownProps) {
-
-  const router = useRouter()
+  const router = useRouter();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -120,19 +121,25 @@ export default function DropPartMarkdown({
     ExtraProps) => {
     const { href } = props;
 
+    if (!href) {
+      return null;
+    }
+
     const baseEndpoint = process.env.BASE_ENDPOINT || "";
-    const regex = /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
+    const regex =
+      /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
     const match = href ? href.match(regex) : null;
     const isSeizeLink = !!match;
     const waveId = match ? match[1] : null;
     const dropId = match ? match[2] : null;
+    
 
     if (isSeizeLink && dropId && waveId) {
       const onRedropClick = (redropId: string) => {
         router.push(`/waves/${waveId}?drop=${redropId}`, undefined, {
           shallow: true,
         });
-      }
+      };
       return (
         <div>
           <DropPartQuote
@@ -147,13 +154,25 @@ export default function DropPartMarkdown({
       );
     }
 
+    const twitterRegex =
+      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
+    const twitterMatch = href ? href.match(twitterRegex) : null;
+
+    if (twitterMatch) {
+      const tweetId = twitterMatch[3];
+      return (
+        <Link className="tw-no-underline" target="_blank" href={href}>
+          <Tweet id={tweetId} />
+        </Link>
+      );
+    }
+
     const isValidLink =
       href?.startsWith("..") || href?.startsWith("/") || !href?.includes(".");
 
     if (isValidLink) {
       return <p>[invalid link]</p>;
     }
-
 
     const isExternalLink =
       href && baseEndpoint && !href.startsWith(baseEndpoint);

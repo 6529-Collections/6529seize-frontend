@@ -38,12 +38,10 @@ const CreateDropStormViewPart = memo(
     partIndex,
     removePart,
   }: CreateDropStormViewPartProps) => {
-    const partMedia = part.media.length
-      ? {
-          mimeType: part.media[0].type,
-          mediaSrc: URL.createObjectURL(part.media[0]),
-        }
-      : null;
+    const partMedias = part.media.map(media => ({
+      mimeType: media.type,
+      mediaSrc: URL.createObjectURL(media),
+    }))
 
     const quotedDrop = part.quoted_drop;
 
@@ -57,7 +55,7 @@ const CreateDropStormViewPart = memo(
                 mentionedUsers={mentionedUsers}
                 referencedNfts={referencedNfts}
                 partContent={part.content}
-                partMedia={partMedia}
+                partMedias={partMedias}
                 createdAt={createdAt}
                 smallMenuIsShown={false}
                 wave={wave}
