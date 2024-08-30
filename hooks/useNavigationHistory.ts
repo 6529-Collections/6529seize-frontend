@@ -76,18 +76,24 @@ export const useNavigationHistory = (): NavigationHistory => {
   }, []);
 
   const goBack = () => {
+    console.log("Going back", canGoBack, backIndex);
     if (canGoBack) {
       setIsGoingBack(true);
       sessionStorage.setItem("isGoingBack", "true");
       navRouter.back();
+    } else {
+      console.log("Cannot go back", backIndex);
     }
   };
 
   const goForward = () => {
+    console.log("Going forward", canGoForward, forwardIndex);
     if (canGoForward) {
       setIsGoingForward(true);
       sessionStorage.setItem("isGoingForward", "true");
       navRouter.forward();
+    } else {
+      console.log("Cannot go forward", forwardIndex);
     }
   };
 

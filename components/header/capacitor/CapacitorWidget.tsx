@@ -53,23 +53,14 @@ export default function CapacitorWidget() {
   useEffect(() => {
     const hammer = new Hammer(document.body);
 
-    hammer.on("swiperight", (ev) => {
-      alert("swipe right");
-      console.log("swipe right", ev);
-      goBack();
-    });
-
-    hammer.on("swipeleft", (ev) => {
-      alert("swipe left");
-      console.log("swipe left", ev);
-      goForward();
-    });
+    hammer.on("swiperight", goBack);
+    hammer.on("swipeleft", goForward);
 
     return () => {
-      hammer.off("swiperight");
-      hammer.off("swipeleft");
+      hammer.off("swiperight", goBack);
+      hammer.off("swipeleft", goForward);
     };
-  }, []);
+  }, [canGoBack, canGoForward]);
 
   return (
     <div className={styles.capacitorWidget}>
