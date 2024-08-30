@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { Capacitor } from "@capacitor/core";
-import { ScreenOrientation } from "@capacitor/screen-orientation";
 
 export enum CapacitorOrientationType {
   PORTRAIT,
