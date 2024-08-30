@@ -54,10 +54,14 @@ export default function CapacitorWidget() {
     const hammer = new Hammer(document.body);
 
     hammer.on("swiperight", (ev) => {
+      alert("swipe right");
+      console.log("swipe right", ev);
       goBack();
     });
 
     hammer.on("swipeleft", (ev) => {
+      alert("swipe left");
+      console.log("swipe left", ev);
       goForward();
     });
 
