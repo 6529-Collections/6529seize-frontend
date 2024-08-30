@@ -29,6 +29,10 @@ body {
   font-size: $font-size !important;
   font-family: $main-font !important;
   overflow: auto;
+
+  &.capacitor-native footer {
+    padding-bottom: 100px !important;
+  }
 }
 
 textarea,

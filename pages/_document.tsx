@@ -1,10 +1,7 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import { AboutSection } from "./about/[section]";
-import useCapacitor from "../hooks/useCapacitor";
 
 export default function Document() {
-  const capacitor = useCapacitor();
-
   return (
     <Html lang="en">
       <Head>
@@ -19,10 +16,7 @@ export default function Document() {
         <NextScript />
         <footer
           className="d-flex flex-column align-items-center justify-content-center gap-2"
-          id="footer"
-          style={{
-            paddingBottom: capacitor.isCapacitor ? "100px" : "0",
-          }}>
+          id="footer">
           <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
             <a
               href="https://twitter.com/punk6529"

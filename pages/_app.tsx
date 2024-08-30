@@ -100,7 +100,7 @@ import Head from "next/head";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
-import { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
@@ -267,6 +267,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout ?? ((page) => page);
 
+  useEffect(() => {
+    if (isCapacitor) {
+      document.body.classList.add("capacitor-native");
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -274,7 +280,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           <Head>
             <meta
               name="viewport"
-              content="width=device-width, initial-scale=1.0, maximum-scale=1"
+              content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
             />
           </Head>
         )}
@@ -282,15 +288,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           <ReactQueryWrapper>
             <Auth>
               <CookieConsentProvider>
-                <>
-                  <Head>
-                    <meta
-                      name="viewport"
-                      content="width=device-width, initial-scale=1, viewport-fit=cover"
-                    />
-                  </Head>
-                  {getLayout(<Component {...props} />)}
-                </>
+                {getLayout(<Component {...props} />)}
                 <CookiesBanner />
               </CookieConsentProvider>
             </Auth>
