@@ -79,14 +79,10 @@ export default function CreateDropStormViewPartQuote({
           referencedNfts={partConfig.referencedNfts}
           smallMenuIsShown={false}
           partContent={partConfig.part.content ?? null}
-          partMedia={
-            partConfig.part.media.length
-              ? {
-                  mimeType: partConfig.part.media[0].mime_type,
-                  mediaSrc: partConfig.part.media[0].url,
-                }
-              : null
-          }
+          partMedias={partConfig.part.media.map((media) => ({
+            mimeType: media.mime_type,
+            mediaSrc: media.url,
+          }))}
           createdAt={partConfig.createdAt}
           wave={partConfig.wave}
           showFull={false}

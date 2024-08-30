@@ -40,6 +40,7 @@ import ClearEditorPlugin, {
 } from "../lexical/plugins/ClearEditorPlugin";
 import {
   forwardRef,
+  useContext,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -55,6 +56,7 @@ import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMi
 import DragDropPastePlugin from "../lexical/plugins/DragDropPastePlugin";
 import { ImageNode } from "../lexical/nodes/ImageNode";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
+import { AuthContext } from "../../../auth/Auth";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -75,7 +77,7 @@ const CreateDropContent = forwardRef<
     readonly onMentionedUser: (
       mentionedUser: Omit<MentionedUser, "current_handle">
     ) => void;
-    readonly onFileChange: (file: File) => void;
+    readonly setFiles: (files: File[]) => void;
     readonly onViewClick: () => void;
     readonly onDropPart: () => void;
     readonly children?: React.ReactNode;
@@ -93,13 +95,14 @@ const CreateDropContent = forwardRef<
       onEditorState,
       onReferencedNft,
       onMentionedUser,
-      onFileChange,
+      setFiles,
       onViewClick,
       onDropPart,
       children,
     },
     ref
   ) => {
+    const { setToast } = useContext(AuthContext);
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -272,10 +275,18 @@ const CreateDropContent = forwardRef<
                 type="file"
                 className="tw-hidden"
                 accept="image/*,video/*,audio/*"
+                multiple
                 onChange={(e: any) => {
                   if (e.target.files) {
-                    const f = e.target.files[0];
-                    onFileChange(f);
+                    const files: File[] = Array.from(e.target.files);
+                    if (files.length > 4) {
+                      setToast({
+                        message: "You can only upload up to 4 files at a time",
+                        type: "error",
+                      });
+                      return;
+                    }
+                    setFiles(files);
                   }
                 }}
               />

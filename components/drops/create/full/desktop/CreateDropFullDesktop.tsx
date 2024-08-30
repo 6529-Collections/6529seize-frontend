@@ -33,10 +33,10 @@ interface CreateDropFullDesktopProps {
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
-  readonly file: File | null;
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
   readonly type: CreateDropType;
+  readonly files: File[];
   readonly loading: boolean;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
@@ -53,7 +53,8 @@ interface CreateDropFullDesktopProps {
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
-  readonly onFileChange: (file: File | null) => void;
+  readonly setFiles: (files: File[]) => void;
+  readonly onFileRemove: (file: File) => void;
   readonly onDrop: () => void;
   readonly onDropPart: () => void;
 }
@@ -68,10 +69,10 @@ const CreateDropFullDesktop = forwardRef<
       title,
       editorState,
       metadata,
-      file,
       canSubmit,
       canAddPart,
       type,
+      files,
       loading,
       drop,
       showSubmit,
@@ -86,7 +87,8 @@ const CreateDropFullDesktop = forwardRef<
       onEditorState,
       onMentionedUser,
       onReferencedNft,
-      onFileChange,
+      onFileRemove,
+      setFiles,
       onDrop,
       onDropPart,
     },
@@ -168,9 +170,6 @@ const CreateDropFullDesktop = forwardRef<
           )}
         </div>
         <div className="tw-flex tw-w-full tw-gap-x-4">
-         {/*  <div className="tw-mt-0.5">
-            <DropPfp pfpUrl={profile?.pfp} />
-          </div> */}
           <div className="tw-w-full">
             <div className="tw-space-y-4">
               {titleState === TITLE_STATE.INPUT && (
@@ -199,13 +198,13 @@ const CreateDropFullDesktop = forwardRef<
                 onMentionedUser={onMentionedUser}
                 onReferencedNft={onReferencedNft}
                 onViewClick={() => onViewChange(CreateDropViewType.COMPACT)}
-                onFileChange={onFileChange}
+                setFiles={setFiles}
                 onDropPart={onDropPart}
               />
             </div>
 
-            {file && (
-              <div className="tw-mt-3">
+            {files.map((file, i) => (
+              <div className="tw-mt-3" key={`full-desktop-file-${i}`}>
                 <div className="tw-w-full">
                   <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
                     <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -215,7 +214,7 @@ const CreateDropFullDesktop = forwardRef<
                       </p>
                     </div>
                     <button
-                      onClick={() => onFileChange(null)}
+                      onClick={() => onFileRemove(file)}
                       type="button"
                       aria-label="Remove file"
                       className="-tw-mr-1 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
@@ -240,7 +239,7 @@ const CreateDropFullDesktop = forwardRef<
                   <CreateDropSelectedFilePreview file={file} />
                 </div>
               </div>
-            )}
+            ))}
             <div className="tw-mt-6">
               <CreateDropFullDesktopMetadata
                 metadata={metadata}
