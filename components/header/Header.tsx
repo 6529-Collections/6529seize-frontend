@@ -14,9 +14,7 @@ import HeaderUser from "./user/HeaderUser";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { AuthContext } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
-import useCapacitor, {
-  CapacitorOrientationType,
-} from "../../hooks/useCapacitor";
+import useCapacitor from "../../hooks/useCapacitor";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 
