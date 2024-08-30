@@ -4,6 +4,7 @@ import { Capacitor } from "@capacitor/core";
 
 const useCapacitor = () => {
   const isCapacitor = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform();
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const useCapacitor = () => {
     });
   }
 
-  return { isCapacitor, sendNotification };
+  return { isCapacitor, platform, sendNotification };
 };
 
 export default useCapacitor;

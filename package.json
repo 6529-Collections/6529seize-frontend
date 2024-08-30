@@ -32,6 +32,7 @@
     "ethereum-cryptography": "^2.2.0",
     "framer-motion": "^11.2.11",
     "fs": "^0.0.1-security",
+    "hammerjs": "^2.0.8",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lexical": "^0.14.2",
@@ -64,6 +65,7 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.4",
     "@tanstack/eslint-plugin-query": "^5.43.1",
+    "@types/hammerjs": "^2.0.45",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.14.6",
     "@types/react": "^18.3.3",

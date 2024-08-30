@@ -10,6 +10,7 @@ import {
 import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
 import { useState, useEffect } from "react";
 import { Share } from "@capacitor/share";
+import Hammer from "hammerjs";
 
 export default function CapacitorWidget() {
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
@@ -48,6 +49,23 @@ export default function CapacitorWidget() {
       behavior: "smooth",
     });
   };
+
+  useEffect(() => {
+    const hammer = new Hammer(document.body);
+
+    hammer.on("swiperight", (ev) => {
+      goBack();
+    });
+
+    hammer.on("swipeleft", (ev) => {
+      goForward();
+    });
+
+    return () => {
+      hammer.off("swiperight");
+      hammer.off("swipeleft");
+    };
+  }, []);
 
   return (
     <div className={styles.capacitorWidget}>
