@@ -44,7 +44,7 @@ export default function WaveDescriptionDrop({
         <DropsListItem
           drop={drop}
           replyToDrop={null}
-          showWaveInfo={true}
+          showWaveInfo={false}
           availableCredit={availableCredit}
         />
       )}

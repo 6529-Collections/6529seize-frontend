@@ -18,6 +18,7 @@ export default function DropPartDiscussionItems({
   dropReplyDepth,
   availableCredit,
   activeDiscussionDropId,
+  showWaveInfo = true,
   setActiveDiscussionDropId,
   setRepliesOpen,
 }: {
@@ -26,6 +27,7 @@ export default function DropPartDiscussionItems({
   readonly dropReplyDepth: number;
   readonly availableCredit: number | null;
   readonly activeDiscussionDropId: string | null;
+  readonly showWaveInfo?: boolean;
   readonly setActiveDiscussionDropId: (id: string | null) => void;
   readonly setRepliesOpen: (state: boolean) => void;
 }) {
@@ -111,7 +113,7 @@ export default function DropPartDiscussionItems({
             })}
             drop={item}
             replyToDrop={null}
-            showWaveInfo={true}
+            showWaveInfo={showWaveInfo}
             availableCredit={availableCredit}
             isReply={true}
             dropReplyDepth={activeDiscussionDropId ? 1 : dropReplyDepth + 1}

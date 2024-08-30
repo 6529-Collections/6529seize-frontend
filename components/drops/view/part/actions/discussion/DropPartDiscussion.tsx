@@ -8,6 +8,7 @@ export default function DropPartDiscussion({
   availableCredit,
   dropReplyDepth,
   activeDiscussionDropId,
+  showWaveInfo = true,
   setActiveDiscussionDropId,
   setRepliesOpen,
 }: {
@@ -16,6 +17,7 @@ export default function DropPartDiscussion({
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly activeDiscussionDropId: string | null
+  readonly showWaveInfo?: boolean;
   readonly setActiveDiscussionDropId: (id: string | null) => void;
   readonly setRepliesOpen: (state: boolean) => void;
 }) {
@@ -26,6 +28,7 @@ export default function DropPartDiscussion({
       availableCredit={availableCredit}
       dropReplyDepth={dropReplyDepth}
       activeDiscussionDropId={activeDiscussionDropId}
+      showWaveInfo={showWaveInfo}
       setActiveDiscussionDropId={setActiveDiscussionDropId}
       setRepliesOpen={setRepliesOpen}
     />

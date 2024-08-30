@@ -9,17 +9,19 @@ import NotificationIdentitySubscribed from "./identity-subscribed/NotificationId
 
 export default function NotificationItem({
   notification,
+  availableCredit,
 }: {
   readonly notification: TypedNotification;
+  readonly availableCredit: number | null;
 }) {
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
       case NotificationCause.DropQuoted:
-        return <NotificationDropQuoted notification={notification} />;
+        return <NotificationDropQuoted notification={notification} availableCredit={availableCredit}/>;
       case NotificationCause.DropReplied:
-        return <NotificationDropReplied notification={notification} />;
+        return <NotificationDropReplied notification={notification} availableCredit={availableCredit}/>;
       case NotificationCause.DropVoted:
-        return <NotificationDropVoted notification={notification} />;
+        return <NotificationDropVoted notification={notification} availableCredit={availableCredit}/>;
       case NotificationCause.IdentityMentioned:
         return <NotificationIdentityMentioned notification={notification} />;
       case NotificationCause.IdentitySubscribed:
@@ -35,7 +37,7 @@ export default function NotificationItem({
       <div className="tw-relative">
         <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
       </div>
-      <div className="tw-w-full tw-mb-2">{getComponent()}</div>
+      <div className="tw-w-full tw-mb-4">{getComponent()}</div>
     </div>
   );
 }

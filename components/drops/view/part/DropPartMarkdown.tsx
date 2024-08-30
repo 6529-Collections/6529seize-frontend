@@ -10,6 +10,8 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
+import DropPartQuote from "./quote/DropPartQuote";
+import { useRouter } from "next/router";
 
 interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -26,6 +28,8 @@ export default function DropPartMarkdown({
   onImageLoaded,
   textSize = "md",
 }: DropPartMarkdownProps) {
+
+  const router = useRouter()
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -115,6 +119,34 @@ export default function DropPartMarkdown({
     AnchorHTMLAttributes<HTMLAnchorElement> &
     ExtraProps) => {
     const { href } = props;
+
+    const baseEndpoint = process.env.BASE_ENDPOINT || "";
+    const regex = /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
+    const match = href ? href.match(regex) : null;
+    const isSeizeLink = !!match;
+    const waveId = match ? match[1] : null;
+    const dropId = match ? match[2] : null;
+
+    if (isSeizeLink && dropId && waveId) {
+      const onRedropClick = (redropId: string) => {
+        router.push(`/waves/${waveId}?drop=${redropId}`, undefined, {
+          shallow: true,
+        });
+      }
+      return (
+        <div>
+          <DropPartQuote
+            quotedDrop={{
+              drop_id: dropId,
+              drop_part_id: 1,
+            }}
+            marginLeft={false}
+            onRedropClick={onRedropClick}
+          />
+        </div>
+      );
+    }
+
     const isValidLink =
       href?.startsWith("..") || href?.startsWith("/") || !href?.includes(".");
 
@@ -122,7 +154,6 @@ export default function DropPartMarkdown({
       return <p>[invalid link]</p>;
     }
 
-    const baseEndpoint = process.env.BASE_ENDPOINT || "";
 
     const isExternalLink =
       href && baseEndpoint && !href.startsWith(baseEndpoint);

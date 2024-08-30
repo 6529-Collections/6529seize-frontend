@@ -94,6 +94,12 @@ export default function DropListItemContent({
     });
   };
 
+  const onRedropClick = (redropId: string) => {
+    router.push(`/waves/${drop.wave.id}?drop=${redropId}`, undefined, {
+      shallow: true,
+    });
+  }
+
   const size = dropReplyDepth > 0 && !isDiscussionOpen ? DropPartSize.SMALL : DropPartSize.MEDIUM;
 
   return (
@@ -112,7 +118,8 @@ export default function DropListItemContent({
           dropReplyDepth={dropReplyDepth}
           isDiscussionOpen={isDiscussionOpen}
           connectingLineType={connectingLineType}
-          onContentClick={onContentClick}
+          showWaveInfo={showWaveInfo}
+          onRedropClick={onRedropClick}
           onDiscussionButtonClick={onDiscussionButtonClick}
         >
           <DropPart
