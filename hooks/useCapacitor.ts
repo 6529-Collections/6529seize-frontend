@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { Capacitor } from "@capacitor/core";
+import { ScreenOrientation } from "@capacitor/screen-orientation";
+
+export enum CapacitorOrientationType {
+  PORTRAIT,
+  LANDSCAPE,
+}
 
 const useCapacitor = () => {
   const isCapacitor = Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
+
+  const [orientation, setOrientation] = useState<CapacitorOrientationType>(
+    CapacitorOrientationType.PORTRAIT
+  );
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -15,6 +25,28 @@ const useCapacitor = () => {
       }
     }
   }, [isCapacitor]);
+
+  useEffect(() => {
+    function isPortrait() {
+      return window.matchMedia("(orientation: portrait)").matches;
+    }
+
+    function handleOrientationchange() {
+      if (isPortrait()) {
+        setOrientation(CapacitorOrientationType.PORTRAIT);
+      } else {
+        setOrientation(CapacitorOrientationType.LANDSCAPE);
+      }
+    }
+
+    handleOrientationchange();
+
+    window.addEventListener("orientationchange", handleOrientationchange);
+
+    return () => {
+      window.removeEventListener("orientationchange", handleOrientationchange);
+    };
+  }, []);
 
   function sendNotification(id: number, title: string, body: string) {
     if (!isInitialized) {
@@ -35,7 +67,7 @@ const useCapacitor = () => {
     });
   }
 
-  return { isCapacitor, platform, sendNotification };
+  return { isCapacitor, platform, orientation, sendNotification };
 };
 
 export default useCapacitor;

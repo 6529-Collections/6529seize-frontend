@@ -11,8 +11,12 @@ import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
 import { useState, useEffect } from "react";
 import { Share } from "@capacitor/share";
 import Hammer from "hammerjs";
+import useCapacitor, {
+  CapacitorOrientationType,
+} from "../../../hooks/useCapacitor";
 
 export default function CapacitorWidget() {
+  const capacitor = useCapacitor();
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
     useNavigationHistory();
 
@@ -63,7 +67,12 @@ export default function CapacitorWidget() {
   }, [canGoBack, canGoForward]);
 
   return (
-    <div className={styles.capacitorWidget}>
+    <div
+      className={`${styles.capacitorWidget} ${
+        capacitor.orientation === CapacitorOrientationType.LANDSCAPE
+          ? styles.capacitorWidgetLandscape
+          : styles.capacitorWidgetPortrait
+      }`}>
       <span className="d-flex align-items-center gap-3">
         <button
           className={`${styles.button} ${

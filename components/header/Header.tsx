@@ -14,7 +14,9 @@ import HeaderUser from "./user/HeaderUser";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { AuthContext } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor, {
+  CapacitorOrientationType,
+} from "../../hooks/useCapacitor";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 
@@ -728,7 +730,7 @@ export default function Header(props: Readonly<Props>) {
         }>
         <Row>
           <Col>
-            <Container>
+            <Container className={styles.capacitorHeaderRowContainerLandscape}>
               <Row
                 className={
                   capacitor.isCapacitor
@@ -763,7 +765,7 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 9 }}
                   xl={{ span: 10 }}
                   xxl={{ span: 9 }}
-                  className={`no-padding d-flex align-items-center justify-content-end ${styles.headerRight}`}>
+                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
@@ -968,7 +970,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                             </NavDropdown>
-                            <NavDropdown 
+                            <NavDropdown
                               title="About"
                               className={`${styles.mainNavLink} ${
                                 styles.mainNavLinkPadding

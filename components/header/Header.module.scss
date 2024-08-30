@@ -11,12 +11,14 @@
 .capacitorMainContainer {
   height: calc($header-height-capacitor + env(safe-area-inset-top));
   z-index: 600;
-  background-color: black;
+  background-color: #000000;
   position: fixed;
   top: -env(safe-area-inset-top);
   padding-top: env(safe-area-inset-top);
   left: 0;
   width: 100%;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .capacitorPlaceholder {
@@ -32,6 +34,17 @@
 .capacitorHeaderRow {
   min-height: $header-height-capacitor;
   z-index: 10;
+}
+
+.capacitorHeaderRowContainerLandscape {
+  padding-right: max(
+    calc(env(safe-area-inset-left) - calc(var(--bs-gutter-x) * 0.5)),
+    calc(var(--bs-gutter-x) * 0.5)
+  );
+  padding-left: max(
+    calc(env(safe-area-inset-right) - calc(var(--bs-gutter-x) * 0.5)),
+    calc(var(--bs-gutter-x) * 0.5)
+  );
 }
 
 .logoIcon {
