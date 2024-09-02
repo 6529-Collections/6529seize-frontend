@@ -6,7 +6,14 @@ import {
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import { TextNode } from "lexical";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
@@ -160,14 +167,23 @@ export class MentionTypeaheadOption extends MenuOption {
   }
 }
 
-export default function NewMentionsPlugin({
-  onSelect,
-}: {
-  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
-}): JSX.Element | null {
+export interface NewMentionsPluginHandles {
+  readonly isMentionsOpen: () => boolean;
+}
+
+const NewMentionsPlugin = forwardRef<
+  NewMentionsPluginHandles,
+  { readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void }
+>(({ onSelect }, ref) => {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const results = useMentionLookupService(queryString);
+  const [isOpen, setIsOpen] = useState(false);
+  const isMentionsOpen = () => isOpen;
+
+  useImperativeHandle(ref, () => ({
+    isMentionsOpen,
+  }));
 
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
     minLength: 0,
@@ -228,6 +244,8 @@ export default function NewMentionsPlugin({
       onSelectOption={onSelectOption}
       triggerFn={checkForMentionMatch}
       options={options}
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
       menuRenderFn={(
         anchorElementRef,
         { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
@@ -246,4 +264,8 @@ export default function NewMentionsPlugin({
       }}
     />
   );
-}
+});
+
+NewMentionsPlugin.displayName = "NewMentionsPlugin";
+
+export default NewMentionsPlugin;

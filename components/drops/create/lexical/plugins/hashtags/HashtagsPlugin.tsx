@@ -6,7 +6,14 @@ import {
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import { TextNode } from "lexical";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
@@ -167,15 +174,23 @@ export class HashtagsTypeaheadOption extends MenuOption {
   }
 }
 
-export default function NewHashtagsPlugin({
-  onSelect,
-}: {
-  readonly onSelect: (nft: ReferencedNft) => void;
-}): JSX.Element | null {
+export interface NewHastagsPluginHandles {
+  readonly isHashtagsOpen: () => boolean;
+}
+
+const NewHashtagsPlugin = forwardRef<
+  NewHastagsPluginHandles,
+  { readonly onSelect: (nft: ReferencedNft) => void }
+>(({ onSelect }, ref) => {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const results = useHashtagLookupService(queryString);
+  const [isOpen, setIsOpen] = useState(false)
+  const isHashtagsOpen = () => isOpen;
 
+  useImperativeHandle(ref, () => ({
+    isHashtagsOpen,
+  }));
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
     minLength: 0,
   });
@@ -235,6 +250,8 @@ export default function NewHashtagsPlugin({
       onQueryChange={setQueryString}
       onSelectOption={onSelectOption}
       triggerFn={checkForHashtagMatch}
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
       options={options}
       menuRenderFn={(
         anchorElementRef,
@@ -254,4 +271,7 @@ export default function NewHashtagsPlugin({
       }}
     />
   );
-}
+});
+
+NewHashtagsPlugin.displayName = "NewHashtagsPlugin";
+export default NewHashtagsPlugin;

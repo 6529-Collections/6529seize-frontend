@@ -135,11 +135,13 @@ const CreateDropCompact = forwardRef<
                 type={type}
                 drop={drop}
                 canAddPart={canAddPart}
+                canSubmit={canSubmit}
                 missingMedia={missingMedia}
                 missingMetadata={missingMetadata}
                 onEditorState={onEditorState}
                 onMentionedUser={onMentionedUser}
                 onReferencedNft={onReferencedNft}
+                onDrop={onDrop}
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}
                 setFiles={setFiles}
                 onDropPart={onDropPart}
