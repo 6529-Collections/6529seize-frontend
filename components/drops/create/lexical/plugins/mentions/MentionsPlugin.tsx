@@ -6,7 +6,14 @@ import {
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import { TextNode } from "lexical";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
@@ -168,97 +175,95 @@ const NewMentionsPlugin = forwardRef<
   NewMentionsPluginHandles,
   { readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void }
 >(({ onSelect }, ref) => {
-  {
-    const [editor] = useLexicalComposerContext();
-    const [queryString, setQueryString] = useState<string | null>(null);
-    const results = useMentionLookupService(queryString);
-    const [isOpen, setIsOpen] = useState(false);
-    const isMentionsOpen = () => isOpen
+  const [editor] = useLexicalComposerContext();
+  const [queryString, setQueryString] = useState<string | null>(null);
+  const results = useMentionLookupService(queryString);
+  const [isOpen, setIsOpen] = useState(false);
+  const isMentionsOpen = () => isOpen;
 
-    useImperativeHandle(ref, () => ({
-      isMentionsOpen,
-    }));
+  useImperativeHandle(ref, () => ({
+    isMentionsOpen,
+  }));
 
-    const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
-      minLength: 0,
-    });
+  const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
+    minLength: 0,
+  });
 
-    const options = useMemo(
-      () =>
-        results
-          .map(
-            (result) =>
-              new MentionTypeaheadOption({
-                id: result.profile_id ?? "",
-                handle: result.handle ?? result.wallet,
-                display: result.display,
-                picture: result.pfp,
-              })
-          )
-          .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
-      [results]
-    );
+  const options = useMemo(
+    () =>
+      results
+        .map(
+          (result) =>
+            new MentionTypeaheadOption({
+              id: result.profile_id ?? "",
+              handle: result.handle ?? result.wallet,
+              display: result.display,
+              picture: result.pfp,
+            })
+        )
+        .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
+    [results]
+  );
 
-    const onSelectOption = useCallback(
-      (
-        selectedOption: MentionTypeaheadOption,
-        nodeToReplace: TextNode | null,
-        closeMenu: () => void
-      ) => {
-        editor.update(() => {
-          const mentionNode = $createMentionNode(`@${selectedOption.handle}`);
-          if (nodeToReplace) {
-            nodeToReplace.replace(mentionNode);
-          }
-          mentionNode.select();
-          onSelect({
-            mentioned_profile_id: selectedOption.id,
-            handle_in_content: selectedOption.handle,
-          });
-          closeMenu();
-        });
-      },
-      [editor]
-    );
-
-    const checkForMentionMatch = useCallback(
-      (text: string) => {
-        const slashMatch = checkForSlashTriggerMatch(text, editor);
-        if (slashMatch !== null) {
-          return null;
+  const onSelectOption = useCallback(
+    (
+      selectedOption: MentionTypeaheadOption,
+      nodeToReplace: TextNode | null,
+      closeMenu: () => void
+    ) => {
+      editor.update(() => {
+        const mentionNode = $createMentionNode(`@${selectedOption.handle}`);
+        if (nodeToReplace) {
+          nodeToReplace.replace(mentionNode);
         }
-        return getPossibleQueryMatch(text);
-      },
-      [checkForSlashTriggerMatch, editor]
-    );
+        mentionNode.select();
+        onSelect({
+          mentioned_profile_id: selectedOption.id,
+          handle_in_content: selectedOption.handle,
+        });
+        closeMenu();
+      });
+    },
+    [editor]
+  );
 
-    return (
-      <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
-        onQueryChange={setQueryString}
-        onSelectOption={onSelectOption}
-        triggerFn={checkForMentionMatch}
-        options={options}
-        onOpen={() => setIsOpen(true)}
-        onClose={() => setIsOpen(false)}
-        menuRenderFn={(
-          anchorElementRef,
-          { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
-        ) => {
-          return anchorElementRef.current && results.length
-            ? ReactDOM.createPortal(
-                <MentionsTypeaheadMenu
-                  selectedIndex={selectedIndex}
-                  options={options}
-                  setHighlightedIndex={setHighlightedIndex}
-                  selectOptionAndCleanUp={selectOptionAndCleanUp}
-                />,
-                anchorElementRef.current
-              )
-            : null;
-        }}
-      />
-    );
-  }
+  const checkForMentionMatch = useCallback(
+    (text: string) => {
+      const slashMatch = checkForSlashTriggerMatch(text, editor);
+      if (slashMatch !== null) {
+        return null;
+      }
+      return getPossibleQueryMatch(text);
+    },
+    [checkForSlashTriggerMatch, editor]
+  );
+
+  return (
+    <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
+      onQueryChange={setQueryString}
+      onSelectOption={onSelectOption}
+      triggerFn={checkForMentionMatch}
+      options={options}
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
+      menuRenderFn={(
+        anchorElementRef,
+        { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
+      ) => {
+        return anchorElementRef.current && results.length
+          ? ReactDOM.createPortal(
+              <MentionsTypeaheadMenu
+                selectedIndex={selectedIndex}
+                options={options}
+                setHighlightedIndex={setHighlightedIndex}
+                selectOptionAndCleanUp={selectOptionAndCleanUp}
+              />,
+              anchorElementRef.current
+            )
+          : null;
+      }}
+    />
+  );
 });
 
 NewMentionsPlugin.displayName = "NewMentionsPlugin";
