@@ -21,6 +21,7 @@ export class GroupFull {
     'created_at': number;
     'created_by': ProfileMin;
     'visible': boolean;
+    'is_private': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -58,6 +59,12 @@ export class GroupFull {
         {
             "name": "visible",
             "baseName": "visible",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "is_private",
+            "baseName": "is_private",
             "type": "boolean",
             "format": ""
         }    ];

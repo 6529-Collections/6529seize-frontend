@@ -260,6 +260,7 @@ export default function DropReplyInputWrapper({
         archived: false,
       },
       created_at: Date.now(),
+      updated_at: null,
       title: dropRequest.title ?? null,
       parts: dropRequest.parts.map((part, i) => ({
         part_id: i,

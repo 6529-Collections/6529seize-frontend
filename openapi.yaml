@@ -28,12 +28,12 @@ paths:
           schema:
             type: boolean
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NonceResponse"
+                $ref: '#/components/schemas/NonceResponse'
   /auth/login:
     post:
       tags:
@@ -52,16 +52,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: '#/components/schemas/LoginRequest'
       responses:
-        "201":
+        '201':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
-        "400":
-          description: "Invalid request"
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 'Invalid request'
 
   /nfts:
     get:
@@ -427,7 +427,7 @@ paths:
           description: "Invalid request"
     get:
       tags:
-        - ProfileREP
+          - ProfileREP
       summary: Get profile REP rating
       operationId: getProfileRepRating
       parameters:
@@ -647,9 +647,10 @@ paths:
           description: Profile not found
   /public/drops:
     get:
+      deprecated: true
       tags:
         - Drops
-      summary: Get latest drops viewable to anyone.
+      summary: Get latest drops viewable to anyone. /drops now works with and without auth token so use this instead.
       operationId: getLatestPublicDrops
       parameters:
         - name: limit
@@ -717,11 +718,13 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Drop"
+
   /public/drops/{dropId}:
     get:
+      deprecated: true
       tags:
         - Drops
-      summary: Get a public drop by ID
+      summary: Get a public drop by ID. /drops/{id} now works with and without auth token so use this instead.
       operationId: getPublicDropById
       parameters:
         - name: dropId
@@ -756,9 +759,10 @@ paths:
           description: Drop not found
   /public/drops/{dropId}/parts/{dropPartId}/replies:
     get:
+      deprecated: true
       tags:
         - Drops
-      summary: Get public reply drops
+      summary: Get public reply drops. /drops/{dropId}/parts/{dropPartId}/replies now works with and without auth token so use this instead.
       operationId: getPublicReplyDrops
       parameters:
         - name: dropId
@@ -819,7 +823,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get latest drops. Needs authentication. Use /public/drops for public drops.
+      summary: Get latest drops.
       operationId: getLatestDrops
       parameters:
         - name: limit
@@ -912,7 +916,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get drop by ID. Needs authenticated user. Use /public/drops/{dropId} for public drops.
+      summary: Get drop by ID.
       operationId: getDropById
       parameters:
         - name: dropId
@@ -943,6 +947,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Drop"
+        "404":
+          description: Drop not found
+    post:
+      tags:
+        - Drops
+      summary: Update drop by ID
+      operationId: updateDropById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDropRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drop"
+        "404":
+          description: Drop not found
+        "400":
+          description: "Invalid request"
+    delete:
+      tags:
+        - Drops
+      summary: Delete drop by ID
+      operationId: deleteDropById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
         "404":
           description: Drop not found
 
@@ -1103,14 +1151,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateMediaUploadUrlRequest"
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateMediaUrlResponse"
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
         "400":
           description: "Invalid request"
   /proxies:
@@ -1276,22 +1324,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateMediaUploadUrlRequest"
+              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateMediaUrlResponse"
+                $ref: '#/components/schemas/CreateMediaUrlResponse'
         "400":
           description: "Invalid request"
 
   /public/waves:
     get:
+      deprecated: true
       tags:
         - Waves
-      summary: Get public waves
+      summary: Get public waves. /waves now works with and without auth token so use this instead.
       operationId: getPublicWaves
       parameters:
         - name: name
@@ -1340,9 +1389,10 @@ paths:
 
   /public/waves/{id}:
     get:
+      deprecated: true
       tags:
         - Waves
-      summary: Get public wave by ID
+      summary: Get public wave by ID. /waves/{id} now works with and without auth token so use this instead.
       operationId: getPublicWaveById
       parameters:
         - name: id
@@ -1362,9 +1412,10 @@ paths:
 
   /public/waves-overview:
     get:
+      deprecated: true
       tags:
         - Waves
-      summary: Get overview of waves by different criteria.
+      summary: Get overview of waves by different criteria. /waves-overview now works with and without auth token so use this instead.
       operationId: getPublicWavesOverview
       parameters:
         - name: limit
@@ -1450,7 +1501,7 @@ paths:
     get:
       tags:
         - Waves
-      summary: Get waves. Needs authentication. Use /public/waves for public waves.
+      summary: Get waves.
       operationId: getWaves
       parameters:
         - name: name
@@ -1522,7 +1573,7 @@ paths:
     get:
       tags:
         - Waves
-      summary: Get wave by ID. Needs authenticated user. Use /public/waves/{id} for public waves.
+      summary: Get wave by ID.
       operationId: getWaveById
       parameters:
         - name: id
@@ -1539,6 +1590,50 @@ paths:
                 $ref: "#/components/schemas/Wave"
         "404":
           description: Wave not found
+    delete:
+        tags:
+            - Waves
+        summary: Delete wave by ID
+        operationId: deleteWaveById
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+                type: string
+        responses:
+          "201":
+            description: successful operation
+          "404":
+            description: Wave not found
+    post:
+      tags:
+        - Waves
+      summary: Update wave by ID
+      operationId: updateWaveById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWaveRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wave"
+        "404":
+          description: Drop not found
+        "400":
+          description: "Invalid request"
 
   /waves/{id}/subscriptions:
     post:
@@ -1866,6 +1961,7 @@ components:
           items:
             $ref: "#/components/schemas/RatingWithProfileInfoAndLevel"
 
+
     DropsPage:
       type: object
       required:
@@ -1881,10 +1977,7 @@ components:
     Group:
       type: object
       required:
-        - id
-        - name
-        - author
-        - created_at
+        - is_hidden
       properties:
         id:
           type: string
@@ -1895,6 +1988,8 @@ components:
         created_at:
           type: number
           format: int64
+        is_hidden:
+          type: boolean
 
     GroupFull:
       type: object
@@ -1905,6 +2000,7 @@ components:
         - created_at
         - created_by
         - visible
+        - is_private
       properties:
         id:
           type: string
@@ -1918,6 +2014,8 @@ components:
         created_by:
           $ref: "#/components/schemas/ProfileMin"
         visible:
+          type: boolean
+        is_private:
           type: boolean
 
     GroupDescription:
@@ -2109,22 +2207,23 @@ components:
           nullable: true
 
     GroupFilterDirection:
-      type: string
-      enum:
-        - RECEIVED
-        - SENT
+        type: string
+        enum:
+          - RECEIVED
+          - SENT
 
     CreateGroup:
       type: object
       required:
         - name
         - group
-        - visible
       properties:
         name:
           type: string
         group:
           $ref: "#/components/schemas/CreateGroupDescription"
+        is_private:
+          type: boolean
 
     ChangeGroupVisibility:
       type: object
@@ -2180,6 +2279,7 @@ components:
         - wave
         - author
         - created_at
+        - updated_at
         - referenced_nfts
         - mentioned_users
         - metadata
@@ -2208,6 +2308,11 @@ components:
           description: Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
           type: number
           format: int64
+        updated_at:
+          description: Time when the drop was updated in milliseconds since 1-1-1970 00:00:00.0 UTC
+          type: number
+          format: int64
+          nullable: true
         title:
           type: string
           maxLength: 250
@@ -2419,17 +2524,17 @@ components:
           format: int64
 
     UpdateProxyActionRequest:
-      type: object
-      properties:
-        credit_amount:
-          type: number
-          format: int64
-          example: 1000
-        end_time:
-          type: number
-          format: int64
-          nullable: true
-          example: 1719850339996
+        type: object
+        properties:
+          credit_amount:
+            type: number
+            format: int64
+            example: 1000
+          end_time:
+            type: number
+            format: int64
+            nullable: true
+            example: 1719850339996
 
     DropContextProfileContext:
       type: object
@@ -2512,6 +2617,12 @@ components:
           type: string
         reply_to:
           $ref: "#/components/schemas/ReplyToDrop"
+
+    UpdateDropRequest:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/CreateWaveDropRequest"
+
 
     DropMedia:
       type: object
@@ -2606,6 +2717,7 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/WaveMetadataType"
+
 
     CreateNewWaveVotingConfig:
       type: object
@@ -2798,7 +2910,7 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
-          example: { "min": 1719850339996, "max": 1719850339996 }
+          example: {"min": 1719850339996, "max": 1719850339996}
         authenticated_user_eligible_for_admin:
           type: boolean
 
@@ -2841,6 +2953,7 @@ components:
             - $ref: "#/components/schemas/IntRange"
           example: { "min": 1719850339996, "max": 1719850339996 }
 
+
     WaveOutcomeType:
       type: string
       enum:
@@ -2881,6 +2994,7 @@ components:
           type: array
           items:
             type: number
+
 
     WaveParticipationRequirement:
       type: string
@@ -2962,6 +3076,39 @@ components:
           type: string
         contributor_pfp:
           type: string
+
+    UpdateWaveRequest:
+      type: object
+      required:
+        - name
+        - picture
+        - voting
+        - visibility
+        - participation
+        - wave
+        - outcomes
+      properties:
+        name:
+          description: The name of the wave
+          type: string
+          maxLength: 250
+        picture:
+          description: The picture of the wave
+          type: string
+          example: "https://example.com/picture.jpg"
+          nullable: true
+        voting:
+          $ref: "#/components/schemas/CreateNewWaveVotingConfig"
+        visibility:
+          $ref: "#/components/schemas/CreateNewWaveVisibilityConfig"
+        participation:
+          $ref: "#/components/schemas/CreateNewWaveParticipationConfig"
+        wave:
+          $ref: "#/components/schemas/CreateWaveConfig"
+        outcomes:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveOutcome"
 
     CreateNewWave:
       type: object
@@ -3379,20 +3526,21 @@ components:
           type: number
           format: int64
 
+
     ChangeProfileRepRating:
-      type: object
-      required:
-        - amount
-        - category
-      properties:
-        amount:
-          type: number
-          format: int64
-        category:
-          type: string
-          maxLength: 100
-          minLength: 1
-          pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
+        type: object
+        required:
+            - amount
+            - category
+        properties:
+          amount:
+            type: number
+            format: int64
+          category:
+            type: string
+            maxLength: 100
+            minLength: 1
+            pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
 
     ChangeProfileRepRatingResponse:
       type: object
@@ -3498,14 +3646,14 @@ components:
         - DROP_CREATED
 
     WaveSubscriptionActions:
-      type: object
-      required:
-        - actions
-      properties:
-        actions:
-          type: array
-          items:
-            $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+        type: object
+        required:
+          - actions
+        properties:
+          actions:
+            type: array
+            items:
+              $ref: "#/components/schemas/WaveSubscriptionTargetAction"
 
     DropSubscriptionTargetAction:
       type: string
@@ -3635,49 +3783,50 @@ components:
         - DROP_VOTED
 
     Notification:
-      type: object
-      required:
-        - id
-        - cause
-        - created_at
-        - read_at
-        - related_identity
-        - related_drops
-        - additional_context
-      properties:
-        id:
-          type: number
-          format: int64
-        cause:
-          $ref: "#/components/schemas/NotificationCause"
-        created_at:
-          type: number
-          format: int64
-        read_at:
-          type: number
-          format: int64
-          nullable: true
-        related_identity:
-          $ref: "#/components/schemas/ProfileMin"
-        related_drops:
-          type: array
-          items:
-            $ref: "#/components/schemas/Drop"
-        additional_context:
-          type: object
+        type: object
+        required:
+          - id
+          - cause
+          - created_at
+          - read_at
+          - related_identity
+          - related_drops
+          - additional_context
+        properties:
+          id:
+            type: number
+            format: int64
+          cause:
+            $ref: "#/components/schemas/NotificationCause"
+          created_at:
+            type: number
+            format: int64
+          read_at:
+            type: number
+            format: int64
+            nullable: true
+          related_identity:
+            $ref: "#/components/schemas/ProfileMin"
+          related_drops:
+            type: array
+            items:
+              $ref: "#/components/schemas/Drop"
+          additional_context:
+            type: object
+
 
     IdentityAndSubscriptionActions:
-      type: object
-      required:
-        - identity
-        - actions
-      properties:
-        identity:
-          $ref: "#/components/schemas/ProfileMin"
-        actions:
-          type: array
-          items:
-            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+        type: object
+        required:
+          - identity
+          - actions
+        properties:
+          identity:
+            $ref: "#/components/schemas/ProfileMin"
+          actions:
+            type: array
+            items:
+              $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
 
     TargetAndSubscriptionActions:
       type: object
@@ -3686,7 +3835,7 @@ components:
         - actions
       properties:
         target:
-          description: "Wave or drop or identity"
+          description: 'Wave or drop or identity'
           type: object
         actions:
           type: array
