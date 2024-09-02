@@ -310,7 +310,7 @@ export default function DropReplyInputWrapper({
       referenced_nfts: currentDrop.referenced_nfts,
       mentioned_users: currentDrop.mentioned_users,
       metadata: currentDrop.metadata,
-    }
+    };
     const optimisticDrop = getOptimisticDrop(requestBody);
     if (optimisticDrop) {
       addOptimisticDrop({ drop: optimisticDrop });
@@ -324,6 +324,8 @@ export default function DropReplyInputWrapper({
         ref={dropReplyInputRef}
         editorState={editorState}
         drop={drop}
+        canSubmit={canSubmit}
+        onDrop={onDrop}
         onEditorState={setEditorState}
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}

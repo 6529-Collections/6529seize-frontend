@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import { EditorState, RootNode } from "lexical";
 import {
   CreateDropConfig,
@@ -27,16 +27,17 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import NewMentionsPlugin from "../../../../create/lexical/plugins/mentions/MentionsPlugin";
-import NewHashtagsPlugin from "../../../../create/lexical/plugins/hashtags/HashtagsPlugin";
+import NewMentionsPlugin, { NewMentionsPluginHandles } from "../../../../create/lexical/plugins/mentions/MentionsPlugin";
+import NewHashtagsPlugin, { NewHastagsPluginHandles } from "../../../../create/lexical/plugins/hashtags/HashtagsPlugin";
 import { MaxLengthPlugin } from "../../../../create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../../../../create/lexical/plugins/DragDropPastePlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import EnterKeyPlugin from "../../../../create/lexical/plugins/enter/EnterKeyPlugin";
+import AutoFocusPlugin from "../../../../create/lexical/plugins/AutoFocusPlugin";
 
 export interface DropReplyInputHandles {
   clearEditorState: () => void;
@@ -47,6 +48,8 @@ const DropReplyInput = forwardRef<
   {
     readonly editorState: EditorState | null;
     readonly drop: CreateDropConfig | null;
+    readonly canSubmit: boolean;
+    readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -60,6 +63,8 @@ const DropReplyInput = forwardRef<
     {
       editorState,
       drop,
+      canSubmit,
+      onDrop,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
@@ -122,6 +127,32 @@ const DropReplyInput = forwardRef<
       clearEditorState,
     }));
 
+    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
+    const isMentionsOpen = () => !!mentionsPluginRef.current?.isMentionsOpen();
+
+    const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
+    const isHashtagsOpen = () => !!hashtagPluginRef.current?.isHashtagsOpen();
+
+    const canSubmitWithEnter = () => !isMentionsOpen() && !isHashtagsOpen();
+
+    const canSubmitRef = useRef(canSubmit);
+    const onDropRef = useRef(onDrop);
+
+    useEffect(() => {
+      canSubmitRef.current = canSubmit;
+    }, [canSubmit]);
+
+    useEffect(() => {
+      onDropRef.current = onDrop;
+    }, [onDrop]);
+
+    const handleSubmit = useCallback(() => {
+      if (!canSubmitRef.current || !onDropRef.current) {
+        return;
+      }
+      onDropRef.current();
+    }, []);
+
     return (
       <div className="tailwind-scope tw-w-full">
         <LexicalComposer initialConfig={editorConfig}>
@@ -140,10 +171,16 @@ const DropReplyInput = forwardRef<
                 ErrorBoundary={LexicalErrorBoundary}
               />
               <HistoryPlugin />
-              <AutoFocusPlugin defaultSelection="rootStart" />
+
               <OnChangePlugin onChange={onEditorStateChange} />
-              <NewMentionsPlugin onSelect={onMentionedUserAdded} />
-              <NewHashtagsPlugin onSelect={onHashtagAdded} />
+              <NewMentionsPlugin
+                onSelect={onMentionedUserAdded}
+                ref={mentionsPluginRef}
+              />
+              <NewHashtagsPlugin
+                onSelect={onHashtagAdded}
+                ref={hashtagPluginRef}
+              />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
               <ListPlugin />
@@ -151,6 +188,11 @@ const DropReplyInput = forwardRef<
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
+              <EnterKeyPlugin
+                handleSubmit={handleSubmit}
+                canSubmitWithEnter={canSubmitWithEnter}
+              />
+               <AutoFocusPlugin />
             </div>
             {children && <div>{children}</div>}
           </div>

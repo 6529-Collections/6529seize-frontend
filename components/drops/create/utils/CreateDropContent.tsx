@@ -10,10 +10,13 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import NewMentionsPlugin from "../lexical/plugins/mentions/MentionsPlugin";
-import NewHashtagsPlugin from "../lexical/plugins/hashtags/HashtagsPlugin";
+import NewMentionsPlugin, {
+  NewMentionsPluginHandles,
+} from "../lexical/plugins/mentions/MentionsPlugin";
+import NewHashtagsPlugin, {
+  NewHastagsPluginHandles,
+} from "../lexical/plugins/hashtags/HashtagsPlugin";
 import {
   CreateDropConfig,
   MentionedUser,
@@ -40,7 +43,7 @@ import ClearEditorPlugin, {
 } from "../lexical/plugins/ClearEditorPlugin";
 import {
   forwardRef,
-  useContext,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -48,15 +51,18 @@ import {
 } from "react";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
 import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
 import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMissingMetadataWarning";
 import DragDropPastePlugin from "../lexical/plugins/DragDropPastePlugin";
 import { ImageNode } from "../lexical/nodes/ImageNode";
+
+import CreateDropParts from "./storm/CreateDropParts";
+import CreateDropActionsRow from "./CreateDropActionsRow";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
-import { AuthContext } from "../../../auth/Auth";
+import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
+import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -70,8 +76,10 @@ const CreateDropContent = forwardRef<
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
     readonly canAddPart: boolean;
+    readonly canSubmit: boolean;
     readonly missingMedia: WaveParticipationRequirement[];
     readonly missingMetadata: WaveRequiredMetadata[];
+    readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -90,11 +98,13 @@ const CreateDropContent = forwardRef<
       type,
       drop,
       canAddPart,
+      canSubmit,
       missingMedia,
       missingMetadata,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
+      onDrop,
       setFiles,
       onViewClick,
       onDropPart,
@@ -102,7 +112,6 @@ const CreateDropContent = forwardRef<
     },
     ref
   ) => {
-    const { setToast } = useContext(AuthContext);
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -192,6 +201,32 @@ const CreateDropContent = forwardRef<
       setIsStormMode(true);
     };
 
+    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
+    const isMentionsOpen = () => !!mentionsPluginRef.current?.isMentionsOpen();
+
+    const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
+    const isHashtagsOpen = () => !!hashtagPluginRef.current?.isHashtagsOpen();
+
+    const canSubmitWithEnter = () => !isMentionsOpen() && !isHashtagsOpen();
+
+    const canSubmitRef = useRef(canSubmit);
+    const onDropRef = useRef(onDrop);
+
+    useEffect(() => {
+      canSubmitRef.current = canSubmit;
+    }, [canSubmit]);
+
+    useEffect(() => {
+      onDropRef.current = onDrop;
+    }, [onDrop]);
+
+    const handleSubmit = useCallback(() => {
+      if (!canSubmitRef.current || !onDropRef.current) {
+        return;
+      }
+      onDropRef.current();
+    }, []);
+
     return (
       <div className="tailwind-scope">
         <LexicalComposer initialConfig={editorConfig}>
@@ -216,10 +251,16 @@ const CreateDropContent = forwardRef<
                 ErrorBoundary={LexicalErrorBoundary}
               />
               <HistoryPlugin />
-              <AutoFocusPlugin defaultSelection="rootStart" />
+
               <OnChangePlugin onChange={onEditorStateChange} />
-              <NewMentionsPlugin onSelect={onMentionedUserAdded} />
-              <NewHashtagsPlugin onSelect={onHashtagAdded} />
+              <NewMentionsPlugin
+                onSelect={onMentionedUserAdded}
+                ref={mentionsPluginRef}
+              />
+              <NewHashtagsPlugin
+                onSelect={onHashtagAdded}
+                ref={hashtagPluginRef}
+              />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
               {showToggleViewButton && (
@@ -230,112 +271,27 @@ const CreateDropContent = forwardRef<
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
+              <EnterKeyPlugin
+                handleSubmit={handleSubmit}
+                canSubmitWithEnter={canSubmitWithEnter}
+              />
+              <AutoFocusPlugin />
             </div>
             {children && <div>{children}</div>}
           </div>
         </LexicalComposer>
-        <div className="tw-flex tw-w-full tw-justify-between tw-items-center tw-gap-x-6 tw-text-xs tw-font-medium tw-text-iron-400">
-          {!!drop?.parts.length && isStormMode && (
-            <p className="tw-mb-0 tw-mt-1.5 tw-pb-2">
-              <span className="tw-font-semibold tw-text-iron-500">
-                Part:{" "}
-                <span className="tw-text-iron-50">{currentPartCount}</span>,
-              </span>
-              <span
-                className={`${charsCount > 240 && "tw-text-error"} tw-pl-1`}
-              >
-                length: {formatNumberWithCommas(charsCount)}
-              </span>
-            </p>
-          )}
-        </div>
-        <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
-          <label>
-            <div
-              role="button"
-              aria-label="Select audio file"
-              className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
-            >
-              <svg
-                className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                />
-              </svg>
-              <input
-                type="file"
-                className="tw-hidden"
-                accept="image/*,video/*,audio/*"
-                multiple
-                onChange={(e: any) => {
-                  if (e.target.files) {
-                    const files: File[] = Array.from(e.target.files);
-                    if (files.length > 4) {
-                      setToast({
-                        message: "You can only upload up to 4 files at a time",
-                        type: "error",
-                      });
-                      return;
-                    }
-                    setFiles(files);
-                  }
-                }}
-              />
-              <span className="tw-text-sm tw-font-medium">Upload Media</span>
-            </div>
-          </label>
-          {canAddPart && (
-            <button
-              onClick={breakIntoStorm}
-              disabled={!canAddPart}
-              type="button"
-              className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
-            >
-              <svg
-                className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 5V19M5 12H19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <svg
-                className="tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="tw-ml-2 tw-text-sm tw-font-medium">
-                {isStormMode ? "Continue storm" : "Break into storm"}
-              </span>
-            </button>
-          )}
-        </div>
+        <CreateDropParts
+          partsCount={drop?.parts.length ?? 0}
+          currentPartCount={currentPartCount}
+          charsCount={charsCount}
+          isStormMode={isStormMode}
+        />
+        <CreateDropActionsRow
+          canAddPart={canAddPart}
+          isStormMode={isStormMode}
+          setFiles={setFiles}
+          breakIntoStorm={breakIntoStorm}
+        />
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
             {!!missingMedia.length && (
