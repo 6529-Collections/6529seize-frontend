@@ -1,18 +1,13 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import {
-  $getSelection,
-  $isRangeSelection,
-  COMMAND_PRIORITY_HIGH,
-  KEY_ENTER_COMMAND,
-} from "lexical";
+import { COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND } from "lexical";
 import { useEffect } from "react";
 
 export default function EnterKeyPlugin({
   handleSubmit,
-  canSubmitWithEnter
+  canSubmitWithEnter,
 }: {
   readonly handleSubmit: () => void;
-  readonly canSubmitWithEnter: () => boolean
+  readonly canSubmitWithEnter: () => boolean;
 }) {
   const [editor] = useLexicalComposerContext();
 
@@ -26,13 +21,6 @@ export default function EnterKeyPlugin({
         }
 
         if (event?.shiftKey) {
-          // Handle Shift + Enter (New Line)
-          editor.update(() => {
-            const selection = $getSelection();
-            if ($isRangeSelection(selection)) {
-              selection.insertParagraph();
-            }
-          });
           return true; // Prevents the default behavior
         } else {
           // Handle Enter (Submit)
