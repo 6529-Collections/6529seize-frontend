@@ -54,6 +54,7 @@ export default function WaveSingleDrop({
         showWaveInfo={false}
         initialDiscussionOpen={true}
         availableCredit={availableCredit}
+        onDropDeleted={onBackToList}
       />
     </div>
   );

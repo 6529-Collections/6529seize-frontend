@@ -52,7 +52,7 @@ export default function WaveGroup({
             href={`/community?page=1&group=${scope.group.id}`}
             className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
           >
-            {scope.group.author.pfp ? (
+            {scope.group.author?.pfp ? (
               <img
                 className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
                 src={getScaledImageUri(
