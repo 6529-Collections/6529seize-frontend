@@ -2,9 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import DropListItemContent from "./content/DropListItemContent";
 import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
-import DropsListItemFollowDrop from "./DropsListItemFollowDrop";
+
 import DropReply, { DropReplyProps } from "./replies/DropReply";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import DropsListItemOptions from "./options/DropsListItemOptions";
 
 export enum DropVoteState {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
@@ -44,6 +45,7 @@ export default function DropsListItem({
   connectingLineType = DropConnectingLineType.BOTTOM,
   initialDiscussionOpen = false,
   onDiscussionStateChange,
+  onDropDeleted,
 }: {
   readonly drop: Drop;
   readonly replyToDrop: Drop | null;
@@ -55,6 +57,7 @@ export default function DropsListItem({
   readonly connectingLineType?: DropConnectingLineType | null;
   readonly initialDiscussionOpen?: boolean;
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
+  readonly onDropDeleted?: () => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(
@@ -94,23 +97,29 @@ export default function DropsListItem({
   const [canVote, setCanVote] = useState(getCanVote());
   useEffect(() => setCanVote(getCanVote()), [voteState]);
 
-  const getCanFollow = () => {
+  const getShowOptions = () => {
     if (!connectedProfile?.profile?.handle) {
       return false;
     }
     if (activeProfileProxy) {
       return false;
     }
-    if (drop.author.handle === connectedProfile.profile.handle) {
+
+    if (
+      connectedProfile.profile.handle === drop.author.handle &&
+      drop.id === drop.wave.description_drop_id
+    ) {
       return false;
     }
+
     return true;
   };
 
-  const [canFollow, setCanFollow] = useState(getCanFollow());
+  const [showOptions, setShowOptions] = useState(getShowOptions());
+
   useEffect(
-    () => setCanFollow(getCanFollow()),
-    [connectedProfile, activeProfileProxy, drop]
+    () => setShowOptions(getShowOptions()),
+    [connectedProfile, activeProfileProxy]
   );
 
   const getReplyProps = (): DropReplyProps | null => {
@@ -148,7 +157,6 @@ export default function DropsListItem({
       }  tw-relative tw-bg-iron-900 ${
         dropReplyDepth < 2 && ""
       }  tw-transition tw-duration-300 tw-ease-out`}
-      /* not-first:tw-border-t tw-border-b-0 tw-border-solid tw-border-x-0 tw-border-iron-800 */
     >
       <div className={`${dropReplyDepth === 0 && "tw-pb-2 tw-pt-2"}`}>
         {replyProps && dropReplyDepth === 0 && (
@@ -169,15 +177,19 @@ export default function DropsListItem({
               canVote={canVote}
               availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
-              smallMenuIsShown={canFollow}
+              smallMenuIsShown={showOptions}
               dropReplyDepth={dropReplyDepth}
               isDiscussionOpen={isDiscussionOpen}
               connectingLineType={connectingLineType}
               onDiscussionButtonClick={onDiscussionButtonClick}
             />
-            {canFollow && (
+
+            {showOptions && (
               <div className="tw-absolute tw-right-10 sm:tw-right-14">
-                <DropsListItemFollowDrop drop={drop} />
+                <DropsListItemOptions
+                  drop={drop}
+                  onDropDeleted={onDropDeleted}
+                />
               </div>
             )}
           </div>

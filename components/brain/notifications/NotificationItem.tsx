@@ -17,13 +17,33 @@ export default function NotificationItem({
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
       case NotificationCause.DropQuoted:
-        return <NotificationDropQuoted notification={notification} availableCredit={availableCredit}/>;
+        return (
+          <NotificationDropQuoted
+            notification={notification}
+            availableCredit={availableCredit}
+          />
+        );
       case NotificationCause.DropReplied:
-        return <NotificationDropReplied notification={notification} availableCredit={availableCredit}/>;
+        return (
+          <NotificationDropReplied
+            notification={notification}
+            availableCredit={availableCredit}
+          />
+        );
       case NotificationCause.DropVoted:
-        return <NotificationDropVoted notification={notification} availableCredit={availableCredit}/>;
+        return (
+          <NotificationDropVoted
+            notification={notification}
+            availableCredit={availableCredit}
+          />
+        );
       case NotificationCause.IdentityMentioned:
-        return <NotificationIdentityMentioned notification={notification} />;
+        return (
+          <NotificationIdentityMentioned
+            notification={notification}
+            availableCredit={availableCredit}
+          />
+        );
       case NotificationCause.IdentitySubscribed:
         return <NotificationIdentitySubscribed notification={notification} />;
       default:

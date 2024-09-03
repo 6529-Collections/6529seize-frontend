@@ -35,6 +35,10 @@ export class Drop {
     * Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
     */
     'created_at': number;
+    /**
+    * Time when the drop was updated in milliseconds since 1-1-1970 00:00:00.0 UTC
+    */
+    'updated_at': number | null;
     'title': string | null;
     'parts': Array<DropPart>;
     /**
@@ -86,6 +90,12 @@ export class Drop {
         {
             "name": "created_at",
             "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
             "type": "number",
             "format": "int64"
         },
