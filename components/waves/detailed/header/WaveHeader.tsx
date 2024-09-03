@@ -8,6 +8,7 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
+import WaveHeaderOptions from "./options/WaveHeaderOptions";
 
 export default function WaveHeader({
   wave,
@@ -140,7 +141,12 @@ export default function WaveHeader({
               )}
             </div>
             {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
-              <WaveHeaderFollow wave={wave} />
+              <div className="tw-inline-flex tw-space-x-2 tw-items-center">
+                <WaveHeaderFollow wave={wave} />
+                {connectedProfile.profile.handle === wave.author.handle && (
+                  <WaveHeaderOptions wave={wave} />
+                )}
+              </div>
             )}
           </div>
         </div>
