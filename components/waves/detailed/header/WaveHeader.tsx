@@ -9,6 +9,7 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
+import WaveHeaderName from "./name/WaveHeaderName";
 
 export default function WaveHeader({
   wave,
@@ -51,11 +52,7 @@ export default function WaveHeader({
 
           <div className="tw-mt-4 md:tw-mt-8 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-space-x-6 tw-pb-1">
             <div className="md:tw-mt-6 tw-min-w-0 tw-flex-1 tw-hidden md:tw-block">
-              <Link href={`/waves/${wave.id}`} className="tw-no-underline">
-                <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold  tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                  {wave.name}
-                </h1>
-              </Link>
+              <WaveHeaderName wave={wave} />
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 {!!firstXContributors.length && (
                   <div className="tw-flex tw-items-center">
