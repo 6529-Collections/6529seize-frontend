@@ -14,10 +14,11 @@ import { ProfileMin } from '../models/ProfileMin';
 import { HttpFile } from '../http/http';
 
 export class Group {
-    'id': string;
-    'name': string;
-    'author': ProfileMin;
-    'created_at': number;
+    'id'?: string;
+    'name'?: string;
+    'author'?: ProfileMin;
+    'created_at'?: number;
+    'is_hidden': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -45,6 +46,12 @@ export class Group {
             "baseName": "created_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "is_hidden",
+            "baseName": "is_hidden",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
