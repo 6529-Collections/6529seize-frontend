@@ -2006,7 +2006,7 @@ components:
         wave:
           $ref: "#/components/schemas/WaveMin"
         reply_to:
-          $ref: "#/components/schemas/ReplyToDrop"
+          $ref: "#/components/schemas/ReplyToDropResponse"
         author:
           $ref: "#/components/schemas/ProfileMin"
         created_at:
@@ -2073,17 +2073,50 @@ components:
           type: number
           format: int64
 
-    ReplyToDrop:
+    QuotedDropResponse:
       type: object
       required:
         - drop_id
         - drop_part_id
+        - is_deleted
       properties:
         drop_id:
           type: string
         drop_part_id:
           type: number
           format: int64
+        is_deleted:
+          type: boolean
+
+    ReplyToDrop:
+      type: object
+      required:
+        - drop_id
+        - drop_part_id
+        - is_deleted
+      properties:
+        drop_id:
+          type: string
+        drop_part_id:
+          type: number
+          format: int64
+        is_deleted:
+          type: boolean
+
+    ReplyToDropResponse:
+      type: object
+      required:
+        - drop_id
+        - drop_part_id
+        - is_deleted
+      properties:
+        drop_id:
+          type: string
+        drop_part_id:
+          type: number
+          format: int64
+        is_deleted:
+          type: boolean
 
     DropPart:
       type: object
@@ -2109,7 +2142,7 @@ components:
             $ref: "#/components/schemas/DropMedia"
         quoted_drop:
           anyOf:
-            - $ref: "#/components/schemas/QuotedDrop"
+            - $ref: "#/components/schemas/QuotedDropResponse"
             - type: "null"
         replies_count:
           type: number
@@ -3364,7 +3397,6 @@ components:
       type: string
       enum:
         - DROP_REPLIED
-        - DROP_VOTED
 
     DropSubscriptionActions:
       type: object
@@ -3382,7 +3414,6 @@ components:
         - WAVE_CREATED
         - DROP_CREATED
         - DROP_REPLIED
-        - DROP_VOTED
 
     IdentitySubscriptionActions:
       type: object
@@ -3427,7 +3458,6 @@ components:
         - WAVE_CREATED
         - DROP_CREATED
         - DROP_REPLIED
-        - DROP_VOTED
 
     FeedItem:
       type: object

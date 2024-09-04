@@ -224,9 +224,13 @@ export default function CreateDrop({
           url: media.url,
           mime_type: media.mime_type,
         })),
-        quoted_drop: part.quoted_drop ?? null,
+        quoted_drop: part.quoted_drop ? {
+          ...part.quoted_drop,
+          is_deleted: false,
+        }: null,
         replies_count: 0,
         quotes_count: 0,
+        
       })),
       parts_count: dropRequest.parts.length,
       referenced_nfts: dropRequest.referenced_nfts,

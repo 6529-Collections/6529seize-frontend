@@ -34,17 +34,11 @@ export type IFeedItemDropVotedItem = {
   readonly vote: DropVote;
 };
 
-export type IFeedItemDropVoted = {
-  readonly serial_no: number;
-  readonly item: IFeedItemDropVotedItem;
-  readonly type: FeedItemType.DropVoted;
-};
 
 export type TypedFeedItem =
   | IFeedItemWaveCreated
   | IFeedItemDropCreated
   | IFeedItemDropReplied
-  | IFeedItemDropVoted;
 
 export type INotificationIdentitySubscribed = {
   readonly id: number;

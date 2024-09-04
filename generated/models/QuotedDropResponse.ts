@@ -12,7 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export class ReplyToDrop {
+export class QuotedDropResponse {
     'drop_id': string;
     'drop_part_id': number;
     'is_deleted': boolean;
@@ -40,7 +40,7 @@ export class ReplyToDrop {
         }    ];
 
     static getAttributeTypeMap() {
-        return ReplyToDrop.attributeTypeMap;
+        return QuotedDropResponse.attributeTypeMap;
     }
 
     public constructor() {

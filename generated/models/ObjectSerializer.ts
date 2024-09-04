@@ -77,11 +77,13 @@ export * from '../models/ProfileProxy';
 export * from '../models/ProfileProxyAction';
 export * from '../models/ProfileProxyActionType';
 export * from '../models/QuotedDrop';
+export * from '../models/QuotedDropResponse';
 export * from '../models/RateMatter';
 export * from '../models/RatingWithProfileInfoAndLevel';
 export * from '../models/RatingWithProfileInfoAndLevelPage';
 export * from '../models/RepRating';
 export * from '../models/ReplyToDrop';
+export * from '../models/ReplyToDropResponse';
 export * from '../models/TargetAndSubscriptionActions';
 export * from '../models/UpdateDropRequest';
 export * from '../models/UpdateProxyActionRequest';
@@ -188,11 +190,13 @@ import { ProfileProxy } from '../models/ProfileProxy';
 import { ProfileProxyAction             } from '../models/ProfileProxyAction';
 import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
 import { QuotedDrop } from '../models/QuotedDrop';
+import { QuotedDropResponse } from '../models/QuotedDropResponse';
 import { RateMatter } from '../models/RateMatter';
 import { RatingWithProfileInfoAndLevel } from '../models/RatingWithProfileInfoAndLevel';
 import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileInfoAndLevelPage';
 import { RepRating } from '../models/RepRating';
 import { ReplyToDrop } from '../models/ReplyToDrop';
+import { ReplyToDropResponse } from '../models/ReplyToDropResponse';
 import { TargetAndSubscriptionActions } from '../models/TargetAndSubscriptionActions';
 import { UpdateDropRequest } from '../models/UpdateDropRequest';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
@@ -329,10 +333,12 @@ let typeMap: {[index: string]: any} = {
     "ProfileProxy": ProfileProxy,
     "ProfileProxyAction": ProfileProxyAction,
     "QuotedDrop": QuotedDrop,
+    "QuotedDropResponse": QuotedDropResponse,
     "RatingWithProfileInfoAndLevel": RatingWithProfileInfoAndLevel,
     "RatingWithProfileInfoAndLevelPage": RatingWithProfileInfoAndLevelPage,
     "RepRating": RepRating,
     "ReplyToDrop": ReplyToDrop,
+    "ReplyToDropResponse": ReplyToDropResponse,
     "TargetAndSubscriptionActions": TargetAndSubscriptionActions,
     "UpdateDropRequest": UpdateDropRequest,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
