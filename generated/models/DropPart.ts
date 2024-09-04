@@ -12,7 +12,7 @@
 
 import { DropMedia } from '../models/DropMedia';
 import { DropPartContextProfileContext } from '../models/DropPartContextProfileContext';
-import { QuotedDrop } from '../models/QuotedDrop';
+import { QuotedDropResponse } from '../models/QuotedDropResponse';
 import { HttpFile } from '../http/http';
 
 export class DropPart {
@@ -22,7 +22,7 @@ export class DropPart {
     'part_id': number;
     'content': string | null;
     'media': Array<DropMedia>;
-    'quoted_drop': QuotedDrop | null;
+    'quoted_drop': QuotedDropResponse | null;
     'replies_count': number;
     'quotes_count': number;
     'context_profile_context'?: DropPartContextProfileContext | null;
@@ -51,7 +51,7 @@ export class DropPart {
         {
             "name": "quoted_drop",
             "baseName": "quoted_drop",
-            "type": "QuotedDrop",
+            "type": "QuotedDropResponse",
             "format": ""
         },
         {

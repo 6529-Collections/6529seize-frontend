@@ -15,6 +15,5 @@ import { HttpFile } from '../http/http';
 export enum FeedItemType {
     WaveCreated = 'WAVE_CREATED',
     DropCreated = 'DROP_CREATED',
-    DropReplied = 'DROP_REPLIED',
-    DropVoted = 'DROP_VOTED'
+    DropReplied = 'DROP_REPLIED'
 }

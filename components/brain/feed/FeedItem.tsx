@@ -3,7 +3,6 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
-import FeedItemDropVoted from "./items/drop-voted/FeedItemDropVoted";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 
 export interface FeedItemProps {
@@ -38,14 +37,6 @@ export default function FeedItem({
       case FeedItemType.DropReplied:
         return (
           <FeedItemDropReplied
-            item={item}
-            availableCredit={availableCredit}
-            showWaveInfo={showWaveInfo}
-          />
-        );
-      case FeedItemType.DropVoted:
-        return (
-          <FeedItemDropVoted
             item={item}
             availableCredit={availableCredit}
             showWaveInfo={showWaveInfo}

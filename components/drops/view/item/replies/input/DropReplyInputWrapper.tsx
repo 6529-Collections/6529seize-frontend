@@ -245,6 +245,7 @@ export default function DropReplyInputWrapper({
       reply_to: {
         drop_id: originalDrop.id,
         drop_part_id: dropPart.part_id,
+        is_deleted: false,
       },
       author: {
         id: connectedProfile.profile.external_id,
@@ -269,7 +270,12 @@ export default function DropReplyInputWrapper({
           url: media.url,
           mime_type: media.mime_type,
         })),
-        quoted_drop: part.quoted_drop ?? null,
+        quoted_drop: part.quoted_drop
+          ? {
+              ...part.quoted_drop,
+              is_deleted: false,
+            }
+          : null,
         replies_count: 0,
         quotes_count: 0,
       })),
