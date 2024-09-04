@@ -16,7 +16,7 @@ export default function SelectGroupModalWrapper({
     <CommonAnimationWrapper mode="sync" initial={true}>
       {isOpen && (
         <CommonAnimationOpacity
-          elementClasses="tw-absolute tw-z-10"
+          elementClasses="tw-absolute tw-z-50"
           elementRole="dialog"
           onClicked={(e) => e.stopPropagation()}
         >

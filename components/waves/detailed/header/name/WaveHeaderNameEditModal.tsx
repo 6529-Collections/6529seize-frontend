@@ -35,9 +35,9 @@ export default function WaveHeaderNameEditModal({
         endpoint: `waves/${wave.id}`,
         body,
       }),
-    onSuccess: (response) => {
+    onSuccess: () => {
       onWaveCreated();
-      return response;
+      onClose();
     },
     onError: (error) => {
       setToast({
@@ -67,6 +67,7 @@ export default function WaveHeaderNameEditModal({
       ...originalBody,
       name,
     };
+    await editNameMutation.mutateAsync(body);
   };
   return (
     <div className="tw-relative tw-z-10">

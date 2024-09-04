@@ -14,6 +14,8 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
+import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
+import WaveRequiredTypes from "./types/WaveRequiredTypes";
 
 enum WaveDetailedView {
   CONTENT = "CONTENT",
@@ -115,6 +117,8 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
           <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4">
             <WaveSpecs wave={wave} />
             <WaveGroups wave={wave} />
+            <WaveRequiredMetadata wave={wave} />
+            <WaveRequiredTypes wave={wave} />
             {false && (
               <>
                 <WaveLeaderboard wave={wave} />
