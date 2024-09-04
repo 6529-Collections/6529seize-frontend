@@ -15,7 +15,6 @@ import { HttpFile } from '../http/http';
 export class ReplyToDrop {
     'drop_id': string;
     'drop_part_id': number;
-    'is_deleted': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,12 +30,6 @@ export class ReplyToDrop {
             "baseName": "drop_part_id",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "is_deleted",
-            "baseName": "is_deleted",
-            "type": "boolean",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

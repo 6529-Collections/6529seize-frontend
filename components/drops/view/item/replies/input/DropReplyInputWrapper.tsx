@@ -311,7 +311,6 @@ export default function DropReplyInputWrapper({
       reply_to: {
         drop_id: originalDrop.id,
         drop_part_id: dropPart.part_id,
-        is_deleted: false,
       },
       title: currentDrop.title,
       parts,
