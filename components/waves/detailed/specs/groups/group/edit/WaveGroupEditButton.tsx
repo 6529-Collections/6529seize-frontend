@@ -19,7 +19,7 @@ export default function WaveGroupEditButton({
     <div>
       <button
         onClick={() => setIsEditOpen(true)}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center group-hover:tw-block tw-hidden tw-text-neutral-400"
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center group-hover:tw-block tw-hidden tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all"
       >
         <PencilIcon />
       </button>

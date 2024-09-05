@@ -86,7 +86,7 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: Wave }) {
       onClick={onFollow}
       disabled={mutating}
       type="button"
-      className={`tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-px-3.5 tw-py-2.5 sm:tw-text-sm tw-rounded-lg tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset ${
+      className={`tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer tw-px-3.5 tw-py-2.5 tw-text-sm tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset ${
         following
           ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
           : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
@@ -115,7 +115,7 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: Wave }) {
         </svg>
       ) : (
         <svg
-          className="tw-h-5 tw-w-5 -tw-ml-1"
+          className="tw-h-5 tw-w-5 -tw-ml-0.5"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

@@ -25,9 +25,9 @@ export default function WaveHeaderName({ wave }: { readonly wave: Wave }) {
   const [showEdit, setShowEdit] = useState(getShowEdit());
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
   return (
-    <div className="tw-group tw-inline-flex tw-space-x-2">
+    <div className="tw-group tw-flex tw-items-center tw-space-x-2">
       <Link href={`/waves/${wave.id}`} className="tw-no-underline">
-        <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold  tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+        <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
           {wave.name}
         </h1>
       </Link>

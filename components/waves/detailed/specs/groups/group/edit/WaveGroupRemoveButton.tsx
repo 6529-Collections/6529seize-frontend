@@ -18,10 +18,10 @@ export default function WaveGroupRemoveButton({
     <div>
       <button
         onClick={() => setIsEditOpen(true)}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center group-hover:tw-block tw-hidden tw-text-neutral-400"
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center group-hover:tw-block tw-hidden"
       >
         <svg
-          className="tw-flex-shrink-0 tw-w-6 tw-h-6 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
+          className="tw-flex-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

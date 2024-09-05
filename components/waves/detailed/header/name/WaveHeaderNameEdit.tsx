@@ -11,7 +11,7 @@ export default function WaveHeaderNameEdit({ wave }: { readonly wave: Wave }) {
     <div>
       <button
         onClick={() => setIsEditNameOpen(true)}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-pb-3 group-hover:tw-block tw-hidden tw-text-neutral-400"
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-pb-3 group-hover:tw-block tw-hidden tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all"
       >
         <PencilIcon />
       </button>
@@ -19,7 +19,7 @@ export default function WaveHeaderNameEdit({ wave }: { readonly wave: Wave }) {
         {isEditNameOpen && (
           <CommonAnimationOpacity
             key="modal"
-            elementClasses="tw-absolute tw-z-10"
+            elementClasses="tw-absolute tw-z-50"
             elementRole="dialog"
             onClicked={(e) => e.stopPropagation()}
           >

@@ -43,7 +43,7 @@ export default function WaveHeader({
               <img
                 className="tw-h-24 tw-w-24 tw-object-contain tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900"
                 src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
-                alt=""
+                alt="Wave image"
               />
             ) : (
               <div className="tw-h-24 tw-w-24 tw-rounded-full tw-ring-4 tw-ring-iron-950 sm:tw-h-32 sm:tw-w-32 tw-bg-iron-900" />
@@ -138,7 +138,7 @@ export default function WaveHeader({
               )}
             </div>
             {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
-              <div className="tw-inline-flex tw-space-x-2 tw-items-center">
+              <div className="tw-inline-flex tw-space-x-3 tw-items-center">
                 <WaveHeaderFollow wave={wave} />
                 {connectedProfile.profile.handle === wave.author.handle && (
                   <WaveHeaderOptions wave={wave} />
@@ -149,9 +149,28 @@ export default function WaveHeader({
         </div>
 
         <div className="tw-mt-2 sm:tw-mt-4 md:tw-hidden tw-min-w-0 tw-flex-1">
-          <h1 className="tw-truncate tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-white">
-            {wave.name}
-          </h1>
+          <WaveHeaderName wave={wave} />
+          <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2">
+            <div className="tw-text-xs">
+              <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+                Created
+              </span>
+              <span className="tw-font-normal tw-text-iron-400">{created}</span>
+            </div>
+            {ending && (
+              <>
+                <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
+                <div className="tw-text-xs">
+                  <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+                    Ending
+                  </span>
+                  <span className="tw-font-normal tw-text-iron-400">
+                    {ending}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
           <div className="tw-flex tw-items-center tw-gap-x-2">
             {!!firstXContributors.length && (
               <div className="tw-flex tw-items-center">

@@ -14,7 +14,7 @@ export default function WaveHeaderOptions({ wave }: { readonly wave: Wave }) {
     <div className="tw-relative tw-z-20" ref={listRef}>
       <button
         type="button"
-        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-800 tw-rounded-full tw-h-8 tw-w-8 tw-border-0 tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-py-2.5 tw-px-2.5 tw-border-0 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
         id="options-menu-0-button"
         aria-expanded="false"
         aria-haspopup="true"
@@ -25,7 +25,7 @@ export default function WaveHeaderOptions({ wave }: { readonly wave: Wave }) {
       >
         <span className="tw-sr-only">Open options</span>
         <svg
-          className="tw-h-5 tw-w-5"
+          className="tw-size-5 tw-flex-shrink-0"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
