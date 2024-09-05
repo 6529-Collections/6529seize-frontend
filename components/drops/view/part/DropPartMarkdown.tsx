@@ -40,7 +40,7 @@ export default function DropPartMarkdown({
     }
   })();
 
-  const customRenderer = ({
+  const customPartRenderer = ({
     content,
     mentionedUsers,
     referencedNfts,
@@ -90,7 +90,6 @@ export default function DropPartMarkdown({
         `${splitter}${token.match}${splitter}`
       );
     }
-
     const parts = currentContent
       .split(splitter)
       .filter((part) => part !== "")
@@ -113,6 +112,44 @@ export default function DropPartMarkdown({
     return parts;
   };
 
+  const customRenderer = ({
+    content,
+    mentionedUsers,
+    referencedNfts,
+    onImageLoaded,
+  }: {
+    readonly content: ReactNode | undefined;
+    readonly mentionedUsers: Array<DropMentionedUser>;
+    readonly referencedNfts: Array<DropReferencedNFT>;
+    readonly onImageLoaded: () => void;
+  }) => {
+    if (typeof content === "string") {
+      return customPartRenderer({
+        content,
+        mentionedUsers,
+        referencedNfts,
+        onImageLoaded,
+      });
+    }
+
+    if (Array.isArray(content)) {
+      return content.map((child) => {
+        if (typeof child === "string") {
+          return customPartRenderer({
+            content: child,
+            mentionedUsers,
+            referencedNfts,
+            onImageLoaded,
+          });
+        }
+
+        return child;
+      });
+    }
+
+    return content;
+  };
+
   const aHrefRenderer = ({
     node,
     ...props
@@ -132,7 +169,6 @@ export default function DropPartMarkdown({
     const isSeizeLink = !!match;
     const waveId = match ? match[1] : null;
     const dropId = match ? match[2] : null;
-    
 
     if (isSeizeLink && dropId && waveId) {
       const onRedropClick = (redropId: string) => {
