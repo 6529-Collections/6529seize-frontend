@@ -1158,7 +1158,7 @@ export default function ReactQueryWrapper({
     readonly drop: Drop;
   }): Promise<void> => {
     addDropToDrops({ drop });
-    addDropToFeedItems({ drop });
+    // addDropToFeedItems({ drop });
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {
@@ -1257,7 +1257,7 @@ export default function ReactQueryWrapper({
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-    })
+    });
   };
 
   const onIdentityBulkRate = () => {
