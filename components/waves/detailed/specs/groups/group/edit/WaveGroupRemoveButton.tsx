@@ -17,6 +17,7 @@ export default function WaveGroupRemoveButton({
   return (
     <div>
       <button
+        title="Remove"
         onClick={() => setIsEditOpen(true)}
         className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center group-hover:tw-block tw-hidden"
       >
