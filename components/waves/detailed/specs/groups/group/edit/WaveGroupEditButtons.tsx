@@ -58,7 +58,7 @@ export default function WaveGroupEditButtons({
 
   return (
     <div className="tw-inline-flex tw-space-x-3">
-      {!haveGroup && type !== WaveGroupType.ADMIN && (
+      {haveGroup && type !== WaveGroupType.ADMIN && (
         <WaveGroupRemoveButton wave={wave} type={type} onEdit={onEdit} />
       )}
       <WaveGroupEditButton wave={wave} type={type} onEdit={onEdit} />
