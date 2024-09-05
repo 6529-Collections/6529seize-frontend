@@ -89,9 +89,13 @@ export default function DropReply(props: DropReplyProps) {
       return "Media";
     }
 
-    const content = part.content?.slice(0, 50).replace(/\n/g, " ") ?? "";
-
-    return part.content?.length > 50 ? content + "..." : content;
+    const urlRegex = /https?:\/\/[^\s]+/g;
+    const content = part.content
+      .replace(urlRegex, "[link]")
+      .slice(0, 50)
+      .replace(/\n/g, " ");
+  
+    return part.content.length > 50 ? content + "..." : content;
   };
 
   const [replyContent, setReplyContent] = useState<string>(getReplyContent());
