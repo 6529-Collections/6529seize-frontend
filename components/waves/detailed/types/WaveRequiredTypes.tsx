@@ -44,7 +44,7 @@ export default function WaveRequiredTypes({ wave }: { readonly wave: Wave }) {
                 Required Types
               </p>
             </div>
-            <div className="tw-px-6 tw-py-6 tw-flex tw-flex-col tw-gap-y-6">
+            <div className="tw-px-6 tw-py-6 tw-flex tw-flex-col tw-gap-y-2">
               {types.map((type) => (
                 <WaveRequiredType key={type} wave={wave} type={type} />
               ))}

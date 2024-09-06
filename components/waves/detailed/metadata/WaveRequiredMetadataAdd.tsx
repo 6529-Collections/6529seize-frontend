@@ -95,14 +95,18 @@ export default function WaveRequiredMetadataAdd({
   return (
     <>
       {mode === Mode.IDLE ? (
-        <WaveRequiredMetadataAddButton onAdd={() => setMode(Mode.ADD)} />
+        <div>
+          <WaveRequiredMetadataAddButton onAdd={() => setMode(Mode.ADD)} />
+        </div>
       ) : (
         <>
+          <div className="tw-mt-2">
           <WaveRequiredMetadataAddInput
             metadata={metadata}
             setMetadata={setMetadata}
           />
-          <div className="tw-mt-2 sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-2">
+          </div>
+          <div className="tw-mt-3 sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
             <button
               onClick={onMetadataAdd}
               disabled={mutating || !metadata.key.length}

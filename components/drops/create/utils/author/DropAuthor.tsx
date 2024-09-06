@@ -37,7 +37,7 @@ export default function DropAuthor({
 
   const textClasses = getTextClasses();
   return (
-    <div className="tw-flex tw-items-center tw-w-full tw-justify-between">
+    <div className="tw-flex tw-items-center tw-w-full tw-gap-x-2">
       <div className="tw-flex tw-items-center">
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
           <UserCICAndLevel

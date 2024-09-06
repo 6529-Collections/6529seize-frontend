@@ -37,7 +37,7 @@ export default function WaveRequiredMetadata({
               Required Metadata
             </p>
           </div>
-          <div className="tw-px-6 tw-py-6 tw-flex tw-flex-col tw-gap-y-2">
+          <div className="tw-px-6 tw-pt-6 tw-pb-4 tw-flex tw-flex-col">
             <WaveRequiredMetadatItems wave={wave} />
             {showEdit && <WaveRequiredMetadataAdd wave={wave} />}
           </div>

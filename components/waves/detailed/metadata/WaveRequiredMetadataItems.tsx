@@ -8,7 +8,7 @@ export default function WaveRequiredMetadatItems({
   readonly wave: Wave;
 }) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-6">
+    <div className="tw-flex tw-flex-col">
       {wave.participation.required_metadata.map((metadata) => (
         <WaveRequiredMetadataItem
           key={metadata.name}
