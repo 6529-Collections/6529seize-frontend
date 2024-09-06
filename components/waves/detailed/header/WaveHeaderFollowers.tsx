@@ -9,9 +9,9 @@ export default function WaveHeaderFollowers({
   readonly onFollowersClick: () => void;
 }) {
   return (
-    <div
+    <button
       onClick={onFollowersClick}
-      className="tw-cursor-pointer tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+      className="tw-bg-transparent tw-border-none tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
       <svg
         className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
@@ -36,6 +36,6 @@ export default function WaveHeaderFollowers({
           {wave.metrics.subscribers_count === 1 ? "Follower" : "Followers"}
         </span>
       </span>
-    </div>
+    </button>
   );
 }

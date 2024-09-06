@@ -5,7 +5,7 @@ import { Wave } from "../../../../generated/models/Wave";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
+import { canEditWave, convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import WaveRequiredMetadataItemIcon from "./WaveRequiredMetadataItemIcon";
@@ -27,21 +27,8 @@ export default function WaveRequiredMetadataItem({
     useContext(AuthContext);
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState(false);
-  const getShowEdit = () => {
-    if (!connectedProfile?.profile?.handle) {
-      return false;
-    }
-    if (!!activeProfileProxy) {
-      return false;
-    }
-    if (wave.author.handle === connectedProfile.profile.handle) {
-      return true;
-    }
-    if (!!wave.wave.authenticated_user_eligible_for_admin) {
-      return true;
-    }
-    return false;
-  };
+  const getShowEdit = () =>
+    canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   const [showEdit, setShowEdit] = useState(getShowEdit());
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);

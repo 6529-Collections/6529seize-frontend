@@ -6,7 +6,10 @@ import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQuer
 import { useMutation } from "@tanstack/react-query";
 import { CreateNewWave } from "../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../services/api/common-api";
-import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
+import {
+  canEditWave,
+  convertWaveToUpdateWave,
+} from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
 
@@ -27,21 +30,8 @@ export default function WaveRequiredType({
     [WaveParticipationRequirement.Video]: "Video",
   };
 
-  const getShowEdit = () => {
-    if (!connectedProfile?.profile?.handle) {
-      return false;
-    }
-    if (!!activeProfileProxy) {
-      return false;
-    }
-    if (wave.author.handle === connectedProfile.profile.handle) {
-      return true;
-    }
-    if (!!wave.wave.authenticated_user_eligible_for_admin) {
-      return true;
-    }
-    return false;
-  };
+  const getShowEdit = () =>
+    canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   const [showEdit, setShowEdit] = useState(getShowEdit());
 

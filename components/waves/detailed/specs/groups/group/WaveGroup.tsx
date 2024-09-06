@@ -10,6 +10,7 @@ import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { Wave } from "../../../../../../generated/models/Wave";
+import { canEditWave } from "../../../../../../helpers/waves/waves.helpers";
 
 export enum WaveGroupType {
   VIEW = "VIEW",
@@ -30,22 +31,8 @@ export default function WaveGroup({
   readonly wave: Wave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowEdit = () => {
-    if (!connectedProfile?.profile?.handle) {
-      return false;
-    }
-    if (!!activeProfileProxy) {
-      return false;
-    }
-    if (wave.author.handle === connectedProfile.profile.handle) {
-      return true;
-    }
-    if (!!wave.wave.authenticated_user_eligible_for_admin) {
-      return true;
-    }
-    return false;
-  };
-
+  const getShowEdit = () =>
+    canEditWave({ connectedProfile, activeProfileProxy, wave });
   const [showEdit, setShowEdit] = useState(getShowEdit());
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
   return (

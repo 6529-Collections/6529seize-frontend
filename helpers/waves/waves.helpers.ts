@@ -1,3 +1,5 @@
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { UpdateWaveRequest } from "../../generated/models/UpdateWaveRequest";
 import { Wave } from "../../generated/models/Wave";
 import { CreateWaveStepStatus } from "../../types/waves.types";
@@ -63,3 +65,27 @@ export const convertWaveToUpdateWave = (wave: Wave): UpdateWaveRequest => ({
   },
   outcomes: wave.outcomes,
 });
+
+export const canEditWave = ({
+  connectedProfile,
+  activeProfileProxy,
+  wave,
+}: {
+  readonly connectedProfile: IProfileAndConsolidations | null;
+  readonly activeProfileProxy: ProfileProxy | null;
+  readonly wave: Wave;
+}): boolean => {
+  if (!connectedProfile?.profile?.handle) {
+    return false;
+  }
+  if (!!activeProfileProxy) {
+    return false;
+  }
+  if (wave.author.handle === connectedProfile.profile.handle) {
+    return true;
+  }
+  if (wave.wave.authenticated_user_eligible_for_admin) {
+    return true;
+  }
+  return false;
+};

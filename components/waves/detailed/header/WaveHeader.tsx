@@ -3,7 +3,6 @@ import { Wave } from "../../../../generated/models/Wave";
 import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
 import { AuthContext } from "../../../auth/Auth";
-import Link from "next/link";
 import {
   getScaledImageUri,
   ImageScale,

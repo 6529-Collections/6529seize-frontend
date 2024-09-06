@@ -3,24 +3,12 @@ import { Wave } from "../../../../../generated/models/Wave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";
+import { canEditWave } from "../../../../../helpers/waves/waves.helpers";
 
 export default function WaveHeaderName({ wave }: { readonly wave: Wave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowEdit = () => {
-    if (!connectedProfile?.profile?.handle) {
-      return false;
-    }
-    if (!!activeProfileProxy) {
-      return false;
-    }
-    if (wave.author.handle === connectedProfile.profile.handle) {
-      return true;
-    }
-    if (!!wave.wave.authenticated_user_eligible_for_admin) {
-      return true;
-    }
-    return false;
-  };
+  const getShowEdit = () =>
+    canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   const [showEdit, setShowEdit] = useState(getShowEdit());
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
