@@ -14,6 +14,8 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
+import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
+import WaveRequiredTypes from "./types/WaveRequiredTypes";
 
 enum WaveDetailedView {
   CONTENT = "CONTENT",
@@ -79,6 +81,38 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
     }
   }, [activeDropId]);
 
+  const getIsAuthorAndNotProxy = () =>
+    connectedProfile?.profile?.handle === wave.author.handle &&
+    !activeProfileProxy;
+
+  const [isAuthorAndNotProxy, setIsAuthorAndNotProxy] = useState(
+    getIsAuthorAndNotProxy()
+  );
+
+  useEffect(
+    () => setIsAuthorAndNotProxy(getIsAuthorAndNotProxy()),
+    [connectedProfile, wave]
+  );
+
+  const getShowRequiredMetadata = () =>
+    isAuthorAndNotProxy || !!wave.participation.required_metadata.length;
+
+  const [showRequiredMetadata, setShowRequiredMetadata] = useState(
+    getShowRequiredMetadata()
+  );
+
+  const getShowRequiredTypes = () =>
+    isAuthorAndNotProxy || !!wave.participation.required_media.length;
+
+  const [showRequiredTypes, setShowRequiredTypes] = useState(
+    getShowRequiredTypes()
+  );
+
+  useEffect(() => {
+    setShowRequiredMetadata(getShowRequiredMetadata());
+    setShowRequiredTypes(getShowRequiredTypes());
+  }, [wave, isAuthorAndNotProxy]);
+
   const [activeView, setActiveView] = useState<WaveDetailedView>(
     WaveDetailedView.CONTENT
   );
@@ -115,6 +149,8 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
           <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4">
             <WaveSpecs wave={wave} />
             <WaveGroups wave={wave} />
+            {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
+            {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
             {false && (
               <>
                 <WaveLeaderboard wave={wave} />

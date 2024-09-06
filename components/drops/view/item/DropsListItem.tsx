@@ -185,7 +185,7 @@ export default function DropsListItem({
             />
 
             {showOptions && (
-              <div className="tw-absolute tw-right-10 sm:tw-right-14">
+              <div className="tw-absolute tw-right-4 tw-top-2.5">
                 <DropsListItemOptions
                   drop={drop}
                   onDropDeleted={onDropDeleted}

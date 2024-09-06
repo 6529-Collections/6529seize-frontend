@@ -202,7 +202,7 @@ const DropPart = memo(
                 }}
                 className={`${
                   onContentClick && "tw-cursor-pointer"
-                } tw-mt-2 tw-h-full ${
+                } tw-h-full ${
                   size === DropPartSize.SMALL ? "tw-ml-[40px]" : "tw-ml-[54px]"
                 }`}
               >
