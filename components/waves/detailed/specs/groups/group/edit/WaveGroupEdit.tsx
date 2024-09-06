@@ -17,9 +17,13 @@ export default function WaveGroupEdit({
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: UpdateWaveRequest) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
 }) {
-  const getBody = ({ group }: { readonly group: GroupFull }): UpdateWaveRequest => {
+  const getBody = ({
+    group,
+  }: {
+    readonly group: GroupFull;
+  }): UpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
     switch (type) {
       case WaveGroupType.VIEW:

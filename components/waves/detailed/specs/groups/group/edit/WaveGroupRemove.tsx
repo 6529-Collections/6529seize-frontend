@@ -18,7 +18,7 @@ export default function WaveGroupRemove({
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: UpdateWaveRequest) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
 }) {
   const getBody = (): UpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);

@@ -5,8 +5,10 @@ import { Wave } from "../../../../generated/models/Wave";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { canEditWave, convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
+import {
+  canEditWave,
+  convertWaveToUpdateWave,
+} from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import WaveRequiredMetadataItemIcon from "./WaveRequiredMetadataItemIcon";
 import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
@@ -18,11 +20,6 @@ export default function WaveRequiredMetadataItem({
   readonly metadata: WaveRequiredMetadata;
   readonly wave: Wave;
 }) {
-  const TYPES: Record<WaveMetadataType, string> = {
-    [WaveMetadataType.String]: "Text",
-    [WaveMetadataType.Number]: "Number",
-  };
-
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
     useContext(AuthContext);
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);

@@ -1,5 +1,4 @@
 import { Wave } from "../../../../generated/models/Wave";
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import WaveRequiredMetadataItem from "./WaveRequiredMetadataItem";
 
 export default function WaveRequiredMetadatItems({

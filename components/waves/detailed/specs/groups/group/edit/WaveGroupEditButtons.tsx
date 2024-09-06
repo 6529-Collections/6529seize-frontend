@@ -8,6 +8,7 @@ import { AuthContext } from "../../../../../../auth/Auth";
 import WaveGroupEditButton from "./WaveGroupEditButton";
 import WaveGroupRemoveButton from "./WaveGroupRemoveButton";
 import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
+import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function WaveGroupEditButtons({
   haveGroup,
@@ -55,6 +56,10 @@ export default function WaveGroupEditButtons({
     }
     await editWaveMutation.mutateAsync(body);
   };
+
+  if (mutating) {
+    return <CircleLoader />;
+  }
 
   return (
     <div className="tw-inline-flex tw-space-x-3">

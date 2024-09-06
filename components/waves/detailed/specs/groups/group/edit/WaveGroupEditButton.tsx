@@ -12,7 +12,7 @@ export default function WaveGroupEditButton({
 }: {
   readonly wave: Wave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: UpdateWaveRequest) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   return (
@@ -29,9 +29,9 @@ export default function WaveGroupEditButton({
         isEditOpen={isEditOpen}
         type={type}
         setIsEditOpen={setIsEditOpen}
-        onEdit={(body) => {
+        onEdit={async (body) => {
           setIsEditOpen(false);
-          onEdit(body);
+          await onEdit(body);
         }}
       />
     </div>

@@ -5,7 +5,6 @@ import WaveRequiredMetadataAddInput from "./WaveRequiredMetadataAddInput";
 import { CreateWaveDropsRequiredMetadata } from "../../../../types/waves.types";
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import { useMutation } from "@tanstack/react-query";
-import { CreateNewWave } from "../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";

@@ -4,7 +4,6 @@ import { WaveParticipationRequirement } from "../../../../generated/models/WaveP
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import { CreateNewWave } from "../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../services/api/common-api";
 import {
   canEditWave,
