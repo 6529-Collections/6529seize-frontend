@@ -168,7 +168,7 @@ const CreateDropCompact = forwardRef<
         </div>
 
         {files.map((file, i) => (
-          <div key={`drop-compact-file-${i}`} className="tw-mt-3 sm:tw-ml-[3.25rem]">
+          <div key={`drop-compact-file-${i}`} className="tw-mt-3">
             <div className="tw-w-full">
               <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-650 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
                 <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
