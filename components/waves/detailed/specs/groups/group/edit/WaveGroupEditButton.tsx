@@ -3,7 +3,7 @@ import PencilIcon from "../../../../../../utils/icons/PencilIcon";
 import WaveGroupEdit from "./WaveGroupEdit";
 import { Wave } from "../../../../../../../generated/models/Wave";
 import { WaveGroupType } from "../WaveGroup";
-import { CreateNewWave } from "../../../../../../../generated/models/CreateNewWave";
+import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveGroupEditButton({
   wave,
@@ -12,7 +12,7 @@ export default function WaveGroupEditButton({
 }: {
   readonly wave: Wave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: CreateNewWave) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => void;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   return (

@@ -9,8 +9,9 @@ import { CreateNewWave } from "../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { convertWaveToCreateNewWave } from "../../../../helpers/waves/waves.helpers";
+import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
 
 enum Mode {
   IDLE = "IDLE",
@@ -40,8 +41,8 @@ export default function WaveRequiredMetadataAdd({
   };
 
   const addMetadataMutation = useMutation({
-    mutationFn: async (body: CreateNewWave) =>
-      await commonApiPost<CreateNewWave, Wave>({
+    mutationFn: async (body: UpdateWaveRequest) =>
+      await commonApiPost<UpdateWaveRequest, Wave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -71,7 +72,7 @@ export default function WaveRequiredMetadataAdd({
       setMutating(false);
       return;
     }
-    const originalBody = convertWaveToCreateNewWave(wave);
+    const originalBody = convertWaveToUpdateWave(wave);
 
     const metadatas = originalBody.participation.required_metadata.filter(
       (md) => md.name.toLowerCase() !== metadata.key.toLowerCase()
@@ -82,7 +83,7 @@ export default function WaveRequiredMetadataAdd({
       type: metadata.type,
     });
 
-    const body: CreateNewWave = {
+    const body: UpdateWaveRequest = {
       ...originalBody,
       participation: {
         ...originalBody.participation,

@@ -2,12 +2,12 @@ import { useContext, useState } from "react";
 import { Wave } from "../../../../../../../generated/models/Wave";
 import { WaveGroupType } from "../WaveGroup";
 import { useMutation } from "@tanstack/react-query";
-import { CreateNewWave } from "../../../../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../../../../../auth/Auth";
 import WaveGroupEditButton from "./WaveGroupEditButton";
 import WaveGroupRemoveButton from "./WaveGroupRemoveButton";
+import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveGroupEditButtons({
   haveGroup,
@@ -23,8 +23,8 @@ export default function WaveGroupEditButtons({
   const [mutating, setMutating] = useState(false);
 
   const editWaveMutation = useMutation({
-    mutationFn: async (body: CreateNewWave) =>
-      await commonApiPost<CreateNewWave, Wave>({
+    mutationFn: async (body: UpdateWaveRequest) =>
+      await commonApiPost<UpdateWaveRequest, Wave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -42,7 +42,7 @@ export default function WaveGroupEditButtons({
     },
   });
 
-  const onEdit = async (body: CreateNewWave) => {
+  const onEdit = async (body: UpdateWaveRequest) => {
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {

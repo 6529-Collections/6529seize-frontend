@@ -92,7 +92,7 @@ export default function DropListItemContentNft({
         <div className="tw-w-full tw-h-full">
           {nft && (
             <img
-              src={nft.token.imageSmall}
+              src={nft.token.imageLarge}
               alt="NFT token"
               className="tw-w-full tw-h-full tw-object-center tw-object-contain lg:tw-max-h-[516px]"
               onLoad={handleImageLoad}

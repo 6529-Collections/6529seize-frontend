@@ -3,11 +3,12 @@ import { Wave } from "../../../../../generated/models/Wave";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../../auth/Auth";
 import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
-import { convertWaveToCreateNewWave } from "../../../../../helpers/waves/waves.helpers";
+import { convertWaveToUpdateWave } from "../../../../../helpers/waves/waves.helpers";
 import { useMutation } from "@tanstack/react-query";
 import { CreateNewWave } from "../../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { UpdateWaveRequest } from "../../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveHeaderNameEditModal({
   wave,
@@ -30,8 +31,8 @@ export default function WaveHeaderNameEditModal({
   useEffect(() => setIsDisabled(getIsDisabled()), [wave, mutating, name]);
 
   const editNameMutation = useMutation({
-    mutationFn: async (body: CreateNewWave) =>
-      await commonApiPost<CreateNewWave, Wave>({
+    mutationFn: async (body: UpdateWaveRequest) =>
+      await commonApiPost<UpdateWaveRequest, Wave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -62,7 +63,7 @@ export default function WaveHeaderNameEditModal({
       setMutating(false);
       return;
     }
-    const originalBody = convertWaveToCreateNewWave(wave);
+    const originalBody = convertWaveToUpdateWave(wave);
     const body = {
       ...originalBody,
       name,

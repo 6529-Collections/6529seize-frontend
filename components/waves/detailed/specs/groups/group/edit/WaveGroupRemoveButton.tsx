@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { CreateNewWave } from "../../../../../../../generated/models/CreateNewWave";
 import { Wave } from "../../../../../../../generated/models/Wave";
 import { WaveGroupType } from "../WaveGroup";
 import WaveGroupRemove from "./WaveGroupRemove";
+import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveGroupRemoveButton({
   wave,
@@ -11,7 +11,7 @@ export default function WaveGroupRemoveButton({
 }: {
   readonly wave: Wave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: CreateNewWave) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => void;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   return (

@@ -3,12 +3,13 @@ import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredM
 import { AuthContext } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { useMutation } from "@tanstack/react-query";
-import { CreateNewWave } from "../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { convertWaveToCreateNewWave } from "../../../../helpers/waves/waves.helpers";
+import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
 import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import WaveRequiredMetadataItemIcon from "./WaveRequiredMetadataItemIcon";
+import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveRequiredMetadataItem({
   metadata,
@@ -46,8 +47,8 @@ export default function WaveRequiredMetadataItem({
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
 
   const removeMetadataMutation = useMutation({
-    mutationFn: async (body: CreateNewWave) =>
-      await commonApiPost<CreateNewWave, Wave>({
+    mutationFn: async (body: UpdateWaveRequest) =>
+      await commonApiPost<UpdateWaveRequest, Wave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -76,13 +77,13 @@ export default function WaveRequiredMetadataItem({
       setMutating(false);
       return;
     }
-    const originalBody = convertWaveToCreateNewWave(wave);
+    const originalBody = convertWaveToUpdateWave(wave);
 
     const metadatas = originalBody.participation.required_metadata.filter(
       (md) => md.name.toLowerCase() !== metadata.name.toLowerCase()
     );
 
-    const body: CreateNewWave = {
+    const body: UpdateWaveRequest = {
       ...originalBody,
       participation: {
         ...originalBody.participation,
@@ -94,40 +95,9 @@ export default function WaveRequiredMetadataItem({
   return (
     <div className="tw-h-5 tw-mb-2 tw-group tw-text-sm tw-flex tw-w-full tw-justify-between">
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        {metadata.type === WaveMetadataType.Number ? (
-          <svg
-            className="tw-size-4 tw-flex-shrink-0"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 256 512"
-            aria-hidden="true"
-          >
-            <path
-              fill="currentColor"
-              d="M160 64c0-11.8-6.5-22.6-16.9-28.2s-23-5-32.8 1.6l-96 64C-.5 111.2-4.4 131 5.4 145.8s29.7 18.7 44.4 8.9L96 123.8V416H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H160V64z"
-            />
-          </svg>
-        ) : (
-          <svg
-            className="tw-size-4 tw-flex-shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M4 7C4 6.06812 4 5.60218 4.15224 5.23463C4.35523 4.74458 4.74458 4.35523 5.23463 4.15224C5.60218 4 6.06812 4 7 4H17C17.9319 4 18.3978 4 18.7654 4.15224C19.2554 4.35523 19.6448 4.74458 19.8478 5.23463C20 5.60218 20 6.06812 20 7M9 20H15M12 4V20"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
-        <span className="tw-font-medium tw-text-iron-400">
-          {TYPES[metadata.type]}:
-          <span className="tw-pl-1 tw-font-medium tw-text-white">
-            {metadata.name}
-          </span>
+        <WaveRequiredMetadataItemIcon type={metadata.type} />
+        <span className="tw-pl-1 tw-font-medium tw-text-white">
+          {metadata.name}
         </span>
       </div>
       {showEdit && (

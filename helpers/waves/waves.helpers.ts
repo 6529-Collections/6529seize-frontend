@@ -1,4 +1,4 @@
-import { CreateNewWave } from "../../generated/models/CreateNewWave";
+import { UpdateWaveRequest } from "../../generated/models/UpdateWaveRequest";
 import { Wave } from "../../generated/models/Wave";
 import { CreateWaveStepStatus } from "../../types/waves.types";
 
@@ -18,16 +18,9 @@ export const getCreateWaveStepStatus = ({
   return CreateWaveStepStatus.PENDING;
 };
 
-export const convertWaveToCreateNewWave = (wave: Wave): CreateNewWave => ({
+export const convertWaveToUpdateWave = (wave: Wave): UpdateWaveRequest => ({
   name: wave.name,
   picture: wave.picture,
-  description_drop: {
-    title: wave.description_drop.title,
-    parts: wave.description_drop.parts,
-    referenced_nfts: wave.description_drop.referenced_nfts,
-    mentioned_users: wave.description_drop.mentioned_users,
-    metadata: wave.description_drop.metadata,
-  },
   voting: {
     scope: {
       group_id: wave.voting.scope.group?.id ?? null,
@@ -36,7 +29,7 @@ export const convertWaveToCreateNewWave = (wave: Wave): CreateNewWave => ({
     credit_scope: wave.voting.credit_scope,
     credit_category: wave.voting.credit_category,
     creditor_id: wave.voting.creditor?.id ?? null,
-    signature_required: wave.voting.signature_required,
+    signature_required: !!wave.voting.signature_required,
     period: wave.voting.period,
   },
   visibility: {
@@ -52,12 +45,15 @@ export const convertWaveToCreateNewWave = (wave: Wave): CreateNewWave => ({
       wave.participation.no_of_applications_allowed_per_participant,
     required_media: wave.participation.required_media,
     required_metadata: wave.participation.required_metadata,
-    signature_required: wave.participation.signature_required,
+    signature_required: !!wave.participation.signature_required,
     period: wave.participation.period,
   },
   wave: {
     type: wave.wave.type,
-    winning_thresholds: wave.wave.winning_thresholds,
+    winning_thresholds:
+      wave.wave.winning_thresholds?.max || wave.wave.winning_thresholds?.min
+        ? wave.wave.winning_thresholds
+        : null,
     max_winners: wave.wave.max_winners,
     time_lock_ms: wave.wave.time_lock_ms,
     admin_group: {

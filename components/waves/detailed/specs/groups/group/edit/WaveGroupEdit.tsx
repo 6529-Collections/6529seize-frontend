@@ -2,9 +2,9 @@ import { GroupFull } from "../../../../../../../generated/models/GroupFull";
 import { Wave } from "../../../../../../../generated/models/Wave";
 import SelectGroupModalWrapper from "../../../../../../utils/select-group/SelectGroupModalWrapper";
 import { WaveGroupType } from "../WaveGroup";
-import { convertWaveToCreateNewWave } from "../../../../../../../helpers/waves/waves.helpers";
-import { CreateNewWave } from "../../../../../../../generated/models/CreateNewWave";
+import { convertWaveToUpdateWave } from "../../../../../../../helpers/waves/waves.helpers";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
+import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveGroupEdit({
   wave,
@@ -17,10 +17,10 @@ export default function WaveGroupEdit({
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: CreateNewWave) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => void;
 }) {
-  const getBody = ({ group }: { readonly group: GroupFull }): CreateNewWave => {
-    const originalBody = convertWaveToCreateNewWave(wave);
+  const getBody = ({ group }: { readonly group: GroupFull }): UpdateWaveRequest => {
+    const originalBody = convertWaveToUpdateWave(wave);
     switch (type) {
       case WaveGroupType.VIEW:
         return {

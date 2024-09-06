@@ -1,8 +1,7 @@
-import { CreateNewWave } from "../../../../../../../generated/models/CreateNewWave";
-import { GroupFull } from "../../../../../../../generated/models/GroupFull";
+import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
 import { Wave } from "../../../../../../../generated/models/Wave";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { convertWaveToCreateNewWave } from "../../../../../../../helpers/waves/waves.helpers";
+import { convertWaveToUpdateWave } from "../../../../../../../helpers/waves/waves.helpers";
 import CommonAnimationOpacity from "../../../../../../utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "../../../../../../utils/animation/CommonAnimationWrapper";
 import { WaveGroupType } from "../WaveGroup";
@@ -19,10 +18,10 @@ export default function WaveGroupRemove({
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: CreateNewWave) => void;
+  readonly onEdit: (body: UpdateWaveRequest) => void;
 }) {
-  const getBody = (): CreateNewWave => {
-    const originalBody = convertWaveToCreateNewWave(wave);
+  const getBody = (): UpdateWaveRequest => {
+    const originalBody = convertWaveToUpdateWave(wave);
     switch (type) {
       case WaveGroupType.VIEW:
         return {

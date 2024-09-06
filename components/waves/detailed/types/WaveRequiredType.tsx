@@ -6,8 +6,9 @@ import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQuer
 import { useMutation } from "@tanstack/react-query";
 import { CreateNewWave } from "../../../../generated/models/CreateNewWave";
 import { commonApiPost } from "../../../../services/api/common-api";
-import { convertWaveToCreateNewWave } from "../../../../helpers/waves/waves.helpers";
+import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
+import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
 
 export default function WaveRequiredType({
   wave,
@@ -52,8 +53,8 @@ export default function WaveRequiredType({
   const [mutating, setMutating] = useState(false);
 
   const changeRequiredTypeMutation = useMutation({
-    mutationFn: async (body: CreateNewWave) =>
-      await commonApiPost<CreateNewWave, Wave>({
+    mutationFn: async (body: UpdateWaveRequest) =>
+      await commonApiPost<UpdateWaveRequest, Wave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -82,12 +83,12 @@ export default function WaveRequiredType({
       setMutating(false);
       return;
     }
-    const originalBody = convertWaveToCreateNewWave(wave);
+    const originalBody = convertWaveToUpdateWave(wave);
     const types = isRequired
       ? wave.participation.required_media.filter((t) => t !== type)
       : [...wave.participation.required_media, type];
 
-    const body: CreateNewWave = {
+    const body: UpdateWaveRequest = {
       ...originalBody,
       participation: {
         ...originalBody.participation,
