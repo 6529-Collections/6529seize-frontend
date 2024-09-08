@@ -30,7 +30,7 @@ export default function GroupCreateWalletsCount({
             />
           </svg>
           <span className="tw-inline-flex tw-gap-x-1.5">
-            <span className="tw-text-iron-400 tw-font-medium">Wallets:</span>
+            <span className="tw-text-iron-400 tw-font-medium">Identities:</span>
             <GroupCreateWalletsCountText
               loading={loading}
               walletsCount={walletsCount}

@@ -1,4 +1,7 @@
+import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
+import GroupCreateIdentitiesIncludeHero from "../include-hero/GroupCreateIdentitiesIncludeHero";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useEffect, useState } from "react";
@@ -20,14 +23,37 @@ export default function GroupCreateWallets({
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
   const LABELS: Record<GroupCreateWalletsType, string> = {
-    [GroupCreateWalletsType.INCLUDE]: "Include Wallets",
-    [GroupCreateWalletsType.EXCLUDE]: "Exclude Wallets",
+    [GroupCreateWalletsType.INCLUDE]: "Include Identities",
+    [GroupCreateWalletsType.EXCLUDE]: "Exclude Identities",
   };
 
   const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(
     wallets
   );
   const [emmaWallets, setEmmaWallets] = useState<string[] | null>(null);
+
+  const [selectedIdentities, setSelectedIdentities] = useState<
+    CommunityMemberMinimal[]
+  >([]);
+
+  const getSelectedWallets = () => selectedIdentities.map((i) => i.wallet);
+  const [selectedWallets, setSelectedWallets] = useState<string[]>(
+    getSelectedWallets()
+  );
+
+  useEffect(
+    () => setSelectedWallets(getSelectedWallets()),
+    [selectedIdentities]
+  );
+
+  const onIdentitySelect = (identity: CommunityMemberMinimal) => {
+    setSelectedIdentities((prev) => {
+      if (prev.some((i) => i.wallet === identity.wallet)) {
+        return prev.filter((i) => i.wallet !== identity.wallet);
+      }
+      return [...prev, identity];
+    });
+  };
 
   const onUploadedWalletsChange = (newV: string[] | null) =>
     setUploadedWallets(newV ? Array.from(new Set(newV)) : null);
@@ -38,13 +64,15 @@ export default function GroupCreateWallets({
   useEffect(() => {
     const uploaded = uploadedWallets ?? [];
     const emma = emmaWallets ?? [];
-    const all = Array.from(new Set([...uploaded, ...emma]));
+    const selected = selectedWallets ?? [];
+    const all = Array.from(new Set([...uploaded, ...emma, ...selected]));
     setWallets(all.length ? all : null);
-  }, [uploadedWallets, emmaWallets]);
+  }, [uploadedWallets, emmaWallets, selectedWallets]);
 
   const removeWallets = () => {
     setUploadedWallets(null);
     setEmmaWallets(null);
+    setSelectedIdentities([]);
   };
 
   const isOverLimit = wallets?.length && wallets.length > walletsLimit;
@@ -74,6 +102,12 @@ export default function GroupCreateWallets({
         </p>
       </div>
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
+        <GroupCreateIdentitiesSelect
+          onIdentitySelect={onIdentitySelect}
+          selectedIdentities={selectedIdentities}
+          selectedWallets={selectedWallets}
+        />
+        <GroupCreateIdentitiesIncludeHero />
         <CreateGroupWalletsUpload
           type={type}
           setWallets={onUploadedWalletsChange}

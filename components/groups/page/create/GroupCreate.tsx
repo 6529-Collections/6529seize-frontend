@@ -138,7 +138,6 @@ export default function GroupCreate({
           </div>
         </div>
         <div className="tw-space-y-5">
-          <GroupCreateConfigHeader />
           <div>
             <GroupCreateConfig
               level={groupConfig.group.level}
