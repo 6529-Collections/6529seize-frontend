@@ -30,17 +30,17 @@ export default function IdentitySearch({
 }) {
   const INPUT_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-py-3 tw-text-sm",
-    [IdentitySearchSize.MD]: "tw-pb-3 tw-pt-4 tw-text-base",
+    [IdentitySearchSize.MD]: "tw-pb-3 tw-pt-3 tw-text-md",
   };
 
   const LABEL_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-text-sm",
-    [IdentitySearchSize.MD]: "tw-text-base",
+    [IdentitySearchSize.MD]: "tw-text-md",
   };
 
   const ICON_CLASSES: Record<IdentitySearchSize, string> = {
     [IdentitySearchSize.SM]: "tw-top-3",
-    [IdentitySearchSize.MD]: "tw-top-4",
+    [IdentitySearchSize.MD]: "tw-top-3.5",
   };
 
   const randomId = getRandomObjectId();
@@ -107,8 +107,8 @@ export default function IdentitySearch({
         className={`${INPUT_CLASSES[size]} ${
           error
             ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error"
-            : "tw-ring-iron-650 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400"
-        } tw-form-input tw-block tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-650 tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 focus:tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+            : "tw-ring-iron-700 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400 hover:tw-ring-iron-650"
+        } tw-form-input tw-block tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-700 tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
           searchCriteria
             ? "focus:tw-text-white tw-text-primary-400"
             : "tw-text-white"
@@ -149,8 +149,7 @@ export default function IdentitySearch({
         htmlFor={randomId}
         className={`${LABEL_CLASSES[size]} ${
           error ? "peer-focus:tw-text-error peer-placeholder-shown:-tw-translate-y-1/4 peer-placeholder-shown:tw-top-1/4" : "peer-focus:tw-text-primary-400 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2"
-        } tw-absolute tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 
-        tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 tw-rounded-lg peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
+        } tw-absolute tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900  peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100  peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
       >
         {label}
       </label>

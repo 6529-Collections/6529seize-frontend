@@ -13,7 +13,7 @@ export default function GroupCreateWalletsCountText({
 
   if (typeof walletsCount === "number") {
     return (
-      <span className="tw-text-iron-50 tw-font-semibold">
+      <span className="tw-text-primary-400 tw-font-semibold">
         {formatNumberWithCommas(walletsCount)}
       </span>
     );

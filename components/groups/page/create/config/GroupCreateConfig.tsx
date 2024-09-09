@@ -41,13 +41,15 @@ export default function GroupCreateConfig({
   ) => void;
 }) {
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-8">
-      <GroupCreateConfigHeader />
-      <div className="tw-col-span-full tw-gap-x-8 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-y-6 lg:tw-gap-y-8">
-        <GroupCreateLevel level={level} setLevel={setLevel} />
-        <GroupCreateTDH tdh={tdh} setTDH={setTDH} />
-        <GroupCreateCIC cic={cic} setCIC={setCIC} />
-        <GroupCreateRep rep={rep} setRep={setRep} />
+    <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 sm:tw-gap-y-8">
+      <div className="tw-space-y-4 sm:tw-space-y-5 tw-col-span-full">
+        <GroupCreateConfigHeader />
+        <div className="tw-gap-x-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-y-4 sm:tw-gap-y-6">
+          <GroupCreateLevel level={level} setLevel={setLevel} />
+          <GroupCreateTDH tdh={tdh} setTDH={setTDH} />
+          <GroupCreateCIC cic={cic} setCIC={setCIC} />
+          <GroupCreateRep rep={rep} setRep={setRep} />
+        </div>
       </div>
       <GroupCreateNfts />
       <GroupCreateWallets

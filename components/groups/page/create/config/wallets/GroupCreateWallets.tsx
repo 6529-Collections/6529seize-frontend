@@ -79,10 +79,10 @@ export default function GroupCreateWallets({
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-inline-flex tw-items-center tw-space-x-4">
-        <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
+      <div className="tw-inline-flex tw-items-center tw-space-x-3 sm:tw-space-x-4">
+        <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-size-10 sm:tw-size-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
           <svg
-            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-6"
+            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-5 sm:tw-size-6"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -97,11 +97,11 @@ export default function GroupCreateWallets({
             />
           </svg>
         </span>
-        <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-iron-50">
           {LABELS[type]}
         </p>
       </div>
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4 sm:tw-gap-6">
         <GroupCreateIdentitiesSelect
           onIdentitySelect={onIdentitySelect}
           selectedIdentities={selectedIdentities}
@@ -119,11 +119,11 @@ export default function GroupCreateWallets({
         />
       </div>
       {!!wallets?.length && (
-        <div className="tw-mt-4">
+        <div className="tw-mt-4 tw-w-full md:tw-w-1/2 sm:tw-pr-4">
           <div className="tw-w-full tw-flex tw-items-center tw-gap-x-4">
             <div
-              className={`tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl ${
-                isOverLimit ? " tw-border-error" : " tw-border-primary-400"
+              className={`tw-w-full tw-px-4 tw-py-3 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl ${
+                isOverLimit ? " tw-border-error" : " tw-border-iron-400"
               } tw-bg-iron-950 tw-border tw-border-solid`}
             >
               <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
@@ -143,7 +143,7 @@ export default function GroupCreateWallets({
                   />
                 </svg>
                 <span className="tw-inline-flex tw-gap-x-1.5">
-                  <span className="tw-text-iron-400 tw-font-medium">
+                  <span className="tw-text-iron-50 tw-font-medium">
                     Total unique wallets:
                   </span>
                   <span
@@ -160,7 +160,7 @@ export default function GroupCreateWallets({
               onClick={removeWallets}
               type="button"
               aria-label="Remove wallets"
-              className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-650 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-900 tw-ring-iron-700 hover:tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
                 className="tw-h-4 tw-w-4 tw-text-error tw-transition tw-duration-300 tw-ease-out"

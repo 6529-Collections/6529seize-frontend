@@ -116,19 +116,19 @@ export default function CreateGroupWalletsUpload({
 
   return (
     <div>
-      <div className="tw-p-5 tw-bg-iron-900 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+      <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+        <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
           Add wallets manually
         </p>
         <label
-          className="tw-group tw-mt-3
+          className="tw-group tw-mt-2 sm:tw-mt-3
         tw-bg-iron-900 tw-border-iron-650 tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-32 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragEnter={handleDragEnter}
         >
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-5 lg:tw-p-6">
-            <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 group-hover:tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out">
               <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                 <svg
                   className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
@@ -147,7 +147,7 @@ export default function CreateGroupWalletsUpload({
                 </svg>
               </div>
             </div>
-            <p className="tw-mt-4 tw-mb-0 tw-text-sm tw-text-center tw-text-pretty tw-text-iron-500">
+            <p className="tw-mt-4 tw-mb-0 tw-text-sm tw-text-center tw-text-balance tw-text-iron-500">
               Drag and drop your CSV file here, or click to select a file
             </p>
           </div>
@@ -165,31 +165,30 @@ export default function CreateGroupWalletsUpload({
             }}
           />
         </label>
-        <div className="tw-w-full tw-inline-flex tw-justify-between">
+        <div className="tw-mt-4 tw-gap-y-2 tw-w-full tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between">
           <GroupCreateWalletsCount
             walletsCount={wallets?.length ?? null}
             loading={false}
             removeWallets={() => setWallets(null)}
           />
-          <div className="tw-mt-4">
-            <div className="tw-relative tw-flex tw-items-start">
-              <div className="tw-flex tw-h-6 tw-items-center">
-                <input
-                  type="checkbox"
-                  checked={isMyPrimaryWalletAdded}
-                  onChange={includePrimaryWalletChange}
-                  id={`${type}_my_primary_wallet`}
-                  className="tw-cursor-pointer tw-form-checkbox tw-w-4 tw-h-4 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
-                />
-              </div>
-              <div className="tw-ml-3 tw-text-sm tw-leading-6">
-                <label
-                  htmlFor={`${type}_my_primary_wallet`}
-                  className="tw-cursor-pointer tw-font-medium tw-text-iron-50"
-                >
-                  Include my primary wallet
-                </label>
-              </div>
+
+          <div className="tw-relative tw-flex tw-items-start">
+            <div className="tw-flex tw-h-6 tw-items-center">
+              <input
+                type="checkbox"
+                checked={isMyPrimaryWalletAdded}
+                onChange={includePrimaryWalletChange}
+                id={`${type}_my_primary_wallet`}
+                className="tw-cursor-pointer tw-form-checkbox tw-w-5 tw-h-5 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
+              />
+            </div>
+            <div className="tw-ml-3 tw-text-sm tw-leading-6">
+              <label
+                htmlFor={`${type}_my_primary_wallet`}
+                className="tw-cursor-pointer tw-font-medium tw-text-iron-50"
+              >
+                Include my primary wallet
+              </label>
             </div>
           </div>
         </div>

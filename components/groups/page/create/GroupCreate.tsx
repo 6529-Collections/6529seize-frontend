@@ -122,10 +122,10 @@ export default function GroupCreate({
 
   return (
     <GroupCreateWrapper>
-      <div className="tw-flex tw-flex-col tw-gap-y-8">
-        <div className="tw-space-y-5">
+      <div className="tw-flex tw-flex-col tw-gap-y-6 sm:tw-gap-y-8">
+        <div className="tw-space-y-4 sm:tw-space-y-5">
           <GroupCreateHeader />
-          <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-x-8">
+          <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6">
             <GroupCreateName
               name={groupConfig.name}
               setName={(name) =>

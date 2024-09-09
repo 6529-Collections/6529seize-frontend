@@ -65,7 +65,7 @@ export default function Groups() {
 
   return (
     <div>
-      <div className="tailwind-scope tw-mb-4 lg:tw-mb-8">
+      <div className="tailwind-scope tw-mb-4">
         {viewMode === GroupsViewMode.CREATE && (
           <button
             onClick={() => onViewModeChange(GroupsViewMode.VIEW)}
@@ -91,9 +91,8 @@ export default function Groups() {
           </button>
         )}
       </div>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
-        <h1 className="tw-float-none">Groups</h1>
-      </div>
+
+      <h1 className="tw-float-none">Groups</h1>
 
       {components[viewMode]}
     </div>

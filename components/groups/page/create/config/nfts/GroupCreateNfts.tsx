@@ -53,10 +53,10 @@ export default function GroupCreateNfts() {
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-inline-flex tw-items-center tw-space-x-4">
-        <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
+      <div className="tw-inline-flex tw-items-center tw-space-x-3 sm:tw-space-x-4">
+        <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-size-10 sm:tw-size-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
           <svg
-            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-6"
+            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-5 sm:tw-size-6"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -71,11 +71,11 @@ export default function GroupCreateNfts() {
             />
           </svg>
         </span>
-        <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-iron-50">
           Owns NFT&apos;s
         </p>
       </div>
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4 sm:tw-gap-6">
         <GroupCreateNftsSelect onSelect={onSelect} selected={selected} />
       </div>
     </div>
