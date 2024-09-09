@@ -67,7 +67,7 @@ export default function GroupCreateNftSearchItem({
                 </div>
               </div>
             </div>
-            <div className="tw-w-[12rem] tw-truncate">
+            <div className="tw-truncate">
               <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
                 {item.name}
               </p>
