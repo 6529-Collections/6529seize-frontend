@@ -146,6 +146,7 @@ export default function GroupCreate({
               rep={groupConfig.group.rep}
               wallets={groupConfig.group.identity_addresses}
               excludeWallets={groupConfig.group.excluded_identity_addresses}
+              nfts={groupConfig.group.owns_nfts}
               setLevel={(level) =>
                 setGroupConfig((prev) => ({
                   ...prev,
@@ -186,6 +187,12 @@ export default function GroupCreate({
                     ...prev.group,
                     excluded_identity_addresses: wallets,
                   },
+                }))
+              }
+              setNfts={(nfts) =>
+                setGroupConfig((prev) => ({
+                  ...prev,
+                  group: { ...prev.group, owns_nfts: nfts },
                 }))
               }
             />

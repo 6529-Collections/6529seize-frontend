@@ -11,15 +11,16 @@ import {
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "../../../../../../constants";
+import { CreateGroupDescription } from "../../../../../../generated/models/CreateGroupDescription";
+import GroupCreateNftsSelected from "./GroupCreateNftsSelected";
 
-export default function GroupCreateNfts() {
-  const CONTRACTS: Record<GroupOwnsNftNameEnum, string> = {
-    [GroupOwnsNftNameEnum.Gradients]: GRADIENT_CONTRACT.toLowerCase(),
-    [GroupOwnsNftNameEnum.Memes]: MEMES_CONTRACT.toLowerCase(),
-    [GroupOwnsNftNameEnum.Memelab]: MEMELAB_CONTRACT.toLowerCase(),
-    [GroupOwnsNftNameEnum.Nextgen]: NEXTGEN_CONTRACT.toLowerCase(),
-  };
-
+export default function GroupCreateNfts({
+  nfts,
+  setNfts,
+}: {
+  readonly nfts: CreateGroupDescription["owns_nfts"];
+  readonly setNfts: (nfts: CreateGroupDescription["owns_nfts"]) => void;
+}) {
   const NAME_ENUMS: Record<string, GroupOwnsNftNameEnum> = {
     [GRADIENT_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Gradients,
     [MEMES_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Memes,
@@ -27,14 +28,12 @@ export default function GroupCreateNfts() {
     [NEXTGEN_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Nextgen,
   };
 
-  const [selected, setSelected] = useState<GroupOwnsNft[]>([]);
-
   const onSelect = (item: NFTSearchResult) => {
     const nameEnum = NAME_ENUMS[item.contract.toLowerCase()];
     if (!nameEnum) {
       return;
     }
-    const group: GroupOwnsNft = selected.find((g) => g.name === nameEnum) ?? {
+    const group: GroupOwnsNft = nfts.find((g) => g.name === nameEnum) ?? {
       name: nameEnum,
       tokens: [],
     };
@@ -46,9 +45,31 @@ export default function GroupCreateNfts() {
       group.tokens.push(`${item.id}`);
     }
 
-    const newSelected = selected.filter((g) => g.name !== nameEnum);
+    const newSelected = nfts.filter((g) => g.name !== nameEnum);
     newSelected.push(group);
-    setSelected(newSelected);
+    setNfts(newSelected);
+  };
+
+  const onRemove = ({
+    name,
+    token,
+  }: {
+    name: GroupOwnsNftNameEnum;
+    token: string;
+  }) => {
+    const updatedNfts = nfts
+      .map((group) => {
+        if (group.name === name) {
+          return {
+            ...group,
+            tokens: group.tokens.filter((t) => t !== token),
+          };
+        }
+        return group;
+      })
+      .filter((group) => group.tokens.length > 0);
+
+    setNfts(updatedNfts);
   };
 
   return (
@@ -76,7 +97,15 @@ export default function GroupCreateNfts() {
         </p>
       </div>
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4 sm:tw-gap-6">
-        <GroupCreateNftsSelect onSelect={onSelect} selected={selected} />
+        <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+          <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+            Search NFT&apos;s
+          </p>
+          <div className="tw-mt-2 sm:tw-mt-3">
+            <GroupCreateNftsSelect onSelect={onSelect} selected={nfts} />
+          </div>
+          <GroupCreateNftsSelected selected={nfts} onRemove={onRemove} />
+        </div>
       </div>
     </div>
   );

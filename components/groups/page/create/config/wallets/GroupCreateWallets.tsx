@@ -75,6 +75,10 @@ export default function GroupCreateWallets({
     setSelectedIdentities([]);
   };
 
+  const onRemove = (wallet: string) => {
+    setSelectedIdentities((prev) => prev.filter((i) => i.wallet !== wallet));
+  };
+
   const isOverLimit = wallets?.length && wallets.length > walletsLimit;
 
   return (
@@ -106,6 +110,7 @@ export default function GroupCreateWallets({
           onIdentitySelect={onIdentitySelect}
           selectedIdentities={selectedIdentities}
           selectedWallets={selectedWallets}
+          onRemove={onRemove}
         />
         <GroupCreateIdentitiesIncludeHero />
         <CreateGroupWalletsUpload

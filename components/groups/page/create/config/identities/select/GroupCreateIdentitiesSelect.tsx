@@ -6,10 +6,12 @@ export default function GroupCreateIdentitiesSelect({
   onIdentitySelect,
   selectedIdentities,
   selectedWallets,
+  onRemove,
 }: {
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
   readonly selectedIdentities: CommunityMemberMinimal[];
   readonly selectedWallets: string[];
+  readonly onRemove: (wallet: string) => void;
 }) {
   return (
     <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
@@ -25,6 +27,7 @@ export default function GroupCreateIdentitiesSelect({
         </div>
         <GroupCreateIdentitySelectedItems
           selectedIdentities={selectedIdentities}
+          onRemove={onRemove}
         />
       </div>
     </div>

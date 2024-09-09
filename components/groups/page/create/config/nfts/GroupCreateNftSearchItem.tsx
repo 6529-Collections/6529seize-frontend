@@ -30,8 +30,17 @@ export default function GroupCreateNftSearchItem({
     [NEXTGEN_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Nextgen,
   };
 
+  const labels: Record<GroupOwnsNftNameEnum, string> = {
+    [GroupOwnsNftNameEnum.Gradients]: "Gradients",
+    [GroupOwnsNftNameEnum.Memes]: "The Memes",
+    [GroupOwnsNftNameEnum.Memelab]: "Meme Lab",
+    [GroupOwnsNftNameEnum.Nextgen]: "NextGen",
+  };
+
+  const nameEnum = NAME_ENUMS[item.contract.toLowerCase()];
+  const contractName = labels[nameEnum];
+
   const getIsSelected = (): boolean => {
-    const nameEnum = NAME_ENUMS[item.contract.toLowerCase()];
     if (!nameEnum) {
       return false;
     }
@@ -72,7 +81,7 @@ export default function GroupCreateNftSearchItem({
                 {item.name}
               </p>
               <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
-                {item.contract}
+                {contractName}
               </p>
             </div>
           </div>

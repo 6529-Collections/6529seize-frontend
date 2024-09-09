@@ -78,31 +78,33 @@ export default function GroupCreateTest({
   );
 
   const onTest = async (): Promise<void> => {
-    if (mutating) {
-      return;
-    }
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
-    }
-    setParams((prev) => ({
-      ...prev,
-      group_id: undefined,
-    }));
-    const response = await createNewFilterMutation.mutateAsync({
-      name: groupConfig.name.length
-        ? groupConfig.name
-        : `${connectedProfile?.profile?.handle} Test Run`,
-      group: groupConfig.group,
-    });
-    if (response) {
-      setParams((prev) => ({
-        ...prev,
-        group_id: response.id,
-      }));
-    }
+    console.log(groupConfig.group);
+    //  if (mutating) {
+    //   return;
+    // }
+    // setMutating(true);
+    // const { success } = await requestAuth();
+    // if (!success) {
+    //   setMutating(false);
+    //   return;
+    // }
+    // setParams((prev) => ({
+    //   ...prev,
+    //   group_id: undefined,
+    // }));
+
+    // const response = await createNewFilterMutation.mutateAsync({
+    //   name: groupConfig.name.length
+    //     ? groupConfig.name
+    //     : `${connectedProfile?.profile?.handle} Test Run`,
+    //   group: groupConfig.group,
+    // });
+    // if (response) {
+    //   setParams((prev) => ({
+    //     ...prev,
+    //     group_id: response.id,
+    //   }));
+    // }
   };
 
   const [loading, setLoading] = useState<boolean>(false);

@@ -16,12 +16,14 @@ export default function GroupCreateConfig({
   rep,
   wallets,
   excludeWallets,
+  nfts,
   setLevel,
   setTDH,
   setCIC,
   setRep,
   setWallets,
   setExcludeWallets,
+  setNfts,
 }: {
   readonly level: CreateGroupDescription["level"];
   readonly tdh: CreateGroupDescription["tdh"];
@@ -29,6 +31,7 @@ export default function GroupCreateConfig({
   readonly rep: CreateGroupDescription["rep"];
   readonly wallets: CreateGroupDescription["identity_addresses"];
   readonly excludeWallets: CreateGroupDescription["excluded_identity_addresses"];
+  readonly nfts: CreateGroupDescription["owns_nfts"];
   readonly setLevel: (level: CreateGroupDescription["level"]) => void;
   readonly setTDH: (tdh: CreateGroupDescription["tdh"]) => void;
   readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
@@ -39,6 +42,7 @@ export default function GroupCreateConfig({
   readonly setExcludeWallets: (
     wallets: CreateGroupDescription["excluded_identity_addresses"]
   ) => void;
+  readonly setNfts: (nfts: CreateGroupDescription["owns_nfts"]) => void;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 sm:tw-gap-y-8">
@@ -51,7 +55,7 @@ export default function GroupCreateConfig({
           <GroupCreateRep rep={rep} setRep={setRep} />
         </div>
       </div>
-      <GroupCreateNfts />
+      <GroupCreateNfts nfts={nfts} setNfts={setNfts} />
       <GroupCreateWallets
         type={GroupCreateWalletsType.INCLUDE}
         wallets={wallets}
