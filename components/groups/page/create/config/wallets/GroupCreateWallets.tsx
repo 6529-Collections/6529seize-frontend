@@ -1,10 +1,10 @@
 import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import { AuthContext } from "../../../../../auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
-import GroupCreateIdentitiesIncludeHero from "../include-hero/GroupCreateIdentitiesIncludeHero";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
@@ -15,13 +15,16 @@ export default function GroupCreateWallets({
   type,
   wallets,
   walletsLimit,
+  iAmIncluded,
   setWallets,
 }: {
   readonly type: GroupCreateWalletsType;
   readonly wallets: string[] | null;
   readonly walletsLimit: number;
+  readonly iAmIncluded: boolean;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
+  const { connectedProfile } = useContext(AuthContext);
   const LABELS: Record<GroupCreateWalletsType, string> = {
     [GroupCreateWalletsType.INCLUDE]: "Include Identities",
     [GroupCreateWalletsType.EXCLUDE]: "Exclude Identities",
@@ -46,6 +49,19 @@ export default function GroupCreateWallets({
     [selectedIdentities]
   );
 
+  useEffect(() => {
+    if (type === GroupCreateWalletsType.EXCLUDE || iAmIncluded) {
+      return;
+    }
+    const myWallets =
+      connectedProfile?.consolidation.wallets.map((w) =>
+        w.wallet.address.toLowerCase()
+      ) ?? [];
+    setSelectedIdentities((prev) =>
+      prev.filter((i) => !myWallets.includes(i.wallet.toLowerCase()))
+    );
+  }, [iAmIncluded, connectedProfile]);
+
   const onIdentitySelect = (identity: CommunityMemberMinimal) => {
     setSelectedIdentities((prev) => {
       if (prev.some((i) => i.wallet === identity.wallet)) {
@@ -66,7 +82,14 @@ export default function GroupCreateWallets({
     const emma = emmaWallets ?? [];
     const selected = selectedWallets ?? [];
     const all = Array.from(new Set([...uploaded, ...emma, ...selected]));
-    setWallets(all.length ? all : null);
+    if (
+      iAmIncluded &&
+      connectedProfile?.profile?.primary_wallet &&
+      type === GroupCreateWalletsType.INCLUDE
+    ) {
+      all.push(connectedProfile.profile.primary_wallet);
+    }
+    setWallets(all.length ? Array.from(new Set(all)) : null);
   }, [uploadedWallets, emmaWallets, selectedWallets]);
 
   const removeWallets = () => {
@@ -112,7 +135,6 @@ export default function GroupCreateWallets({
           selectedWallets={selectedWallets}
           onRemove={onRemove}
         />
-        <GroupCreateIdentitiesIncludeHero />
         <CreateGroupWalletsUpload
           type={type}
           setWallets={onUploadedWalletsChange}

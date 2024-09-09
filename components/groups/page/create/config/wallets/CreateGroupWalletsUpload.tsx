@@ -1,6 +1,5 @@
-import { useRef, useCallback, useContext, useState, useEffect } from "react";
+import { useRef, useCallback } from "react";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
-import { AuthContext } from "../../../../../auth/Auth";
 import { GroupCreateWalletsType } from "./GroupCreateWallets";
 
 export default function CreateGroupWalletsUpload({
@@ -12,50 +11,6 @@ export default function CreateGroupWalletsUpload({
   readonly wallets: string[] | null;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
-  const { connectedProfile } = useContext(AuthContext);
-
-  const getMyPrimaryWallet = (): string | null =>
-    connectedProfile?.profile?.primary_wallet?.toLowerCase() ?? null;
-
-  const getIsMyPrimaryWalletAdded = (): boolean => {
-    const myPrimaryWallet = getMyPrimaryWallet();
-    if (!myPrimaryWallet) {
-      return false;
-    }
-    if (
-      wallets?.map((wallet) => wallet.toLowerCase()).includes(myPrimaryWallet)
-    ) {
-      return true;
-    }
-    return false;
-  };
-
-  const [isMyPrimaryWalletAdded, setIsMyPrimaryWalletAdded] = useState(
-    getIsMyPrimaryWalletAdded()
-  );
-
-  useEffect(() => {
-    setIsMyPrimaryWalletAdded(getIsMyPrimaryWalletAdded());
-  }, [connectedProfile, wallets]);
-
-  const includePrimaryWalletChange = () => {
-    const primaryWallet = getMyPrimaryWallet();
-    if (!primaryWallet) {
-      return;
-    }
-    if (isMyPrimaryWalletAdded) {
-      const myPrimaryWalletRemoved =
-        wallets?.filter((wallet) => wallet.toLowerCase() !== primaryWallet) ??
-        null;
-      setWallets(myPrimaryWalletRemoved);
-    } else {
-      const myPrimaryWalletAdded = wallets
-        ? [primaryWallet, ...wallets]
-        : [primaryWallet];
-      setWallets(myPrimaryWalletAdded);
-    }
-  };
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getAddresses = (lines: string[]): string[] => {
@@ -171,26 +126,6 @@ export default function CreateGroupWalletsUpload({
             loading={false}
             removeWallets={() => setWallets(null)}
           />
-
-          <div className="tw-relative tw-flex tw-items-start">
-            <div className="tw-flex tw-h-6 tw-items-center">
-              <input
-                type="checkbox"
-                checked={isMyPrimaryWalletAdded}
-                onChange={includePrimaryWalletChange}
-                id={`${type}_my_primary_wallet`}
-                className="tw-cursor-pointer tw-form-checkbox tw-w-5 tw-h-5 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
-              />
-            </div>
-            <div className="tw-ml-3 tw-text-sm tw-leading-6">
-              <label
-                htmlFor={`${type}_my_primary_wallet`}
-                className="tw-cursor-pointer tw-font-medium tw-text-iron-50"
-              >
-                Include my primary wallet
-              </label>
-            </div>
-          </div>
         </div>
       </div>
     </div>

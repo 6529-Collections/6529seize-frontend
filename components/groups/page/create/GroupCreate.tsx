@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import GroupCreateConfig from "./config/GroupCreateConfig";
 import GroupCreateActions from "./actions/GroupCreateActions";
-import GroupCreateConfigHeader from "./GroupCreateConfigHeader";
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
@@ -11,6 +10,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { GroupFull } from "../../../../generated/models/GroupFull";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
+import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
+import { AuthContext } from "../../../auth/Auth";
 
 export default function GroupCreate({
   edit,
@@ -20,7 +21,7 @@ export default function GroupCreate({
   readonly onCompleted: () => void;
 }) {
   const isEditMode = !!edit && edit !== "new";
-
+  const { connectedProfile } = useContext(AuthContext);
   const { data: originalGroup, isFetching: loadingOriginalGroup } =
     useQuery<GroupFull>({
       queryKey: [QueryKey.GROUP, edit],
@@ -79,7 +80,10 @@ export default function GroupCreate({
       identity_addresses: null,
       excluded_identity_addresses: null,
     },
+    is_private: false,
   });
+
+  const [iAmIncluded, setIAmIncluded] = useState(false);
 
   useEffect(() => {
     if (!originalGroup) {
@@ -113,8 +117,55 @@ export default function GroupCreate({
         identity_addresses: originalGroupWallets ?? [],
         excluded_identity_addresses: [],
       },
+      is_private: originalGroup.is_private ?? false,
     });
   }, [originalGroup, originalGroupWallets]);
+
+  const getMyAddresses = () => {
+    if (!connectedProfile) {
+      return [];
+    }
+    return connectedProfile.consolidation.wallets.map((w) =>
+      w.wallet.address.toLowerCase()
+    );
+  };
+
+  useEffect(() => {
+    if (!connectedProfile) {
+      return;
+    }
+
+    const myAddresses = getMyAddresses();
+
+    setIAmIncluded(
+      groupConfig.group.identity_addresses?.some((address) =>
+        myAddresses.includes(address.toLowerCase())
+      ) ?? false
+    );
+  }, [connectedProfile, groupConfig]);
+
+  const onSetIAmIncluded = (newState: boolean) => {
+    const primaryWallet =
+      connectedProfile?.profile?.primary_wallet?.toLowerCase();
+    if (!primaryWallet) {
+      return;
+    }
+    const consolidatedAddresses =
+      connectedProfile?.consolidation.wallets.map((w) =>
+        w.wallet.address.toLowerCase()
+      ) ?? [];
+    const currentAddresses = groupConfig.group.identity_addresses ?? [];
+    const newAddresses = currentAddresses.filter(
+      (address) => !consolidatedAddresses.includes(address.toLowerCase())
+    );
+    if (newState) {
+      newAddresses.push(primaryWallet);
+    }
+    setGroupConfig((prev) => ({
+      ...prev,
+      group: { ...prev.group, identity_addresses: newAddresses },
+    }));
+  };
 
   if (isFetching) {
     return <div>Loading...</div>;
@@ -135,6 +186,17 @@ export default function GroupCreate({
                 }))
               }
             />
+            <GroupCreateIncludeMeAndPrivate
+              isPrivate={groupConfig.is_private ?? false}
+              iAmIncluded={iAmIncluded}
+              setIsPrivate={(isPrivate) =>
+                setGroupConfig((prev) => ({
+                  ...prev,
+                  is_private: isPrivate,
+                }))
+              }
+              setIAmIncluded={onSetIAmIncluded}
+            />
           </div>
         </div>
         <div className="tw-space-y-5">
@@ -147,6 +209,7 @@ export default function GroupCreate({
               wallets={groupConfig.group.identity_addresses}
               excludeWallets={groupConfig.group.excluded_identity_addresses}
               nfts={groupConfig.group.owns_nfts}
+              iAmIncluded={iAmIncluded}
               setLevel={(level) =>
                 setGroupConfig((prev) => ({
                   ...prev,

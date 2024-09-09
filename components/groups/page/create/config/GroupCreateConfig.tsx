@@ -17,6 +17,7 @@ export default function GroupCreateConfig({
   wallets,
   excludeWallets,
   nfts,
+  iAmIncluded,
   setLevel,
   setTDH,
   setCIC,
@@ -32,6 +33,7 @@ export default function GroupCreateConfig({
   readonly wallets: CreateGroupDescription["identity_addresses"];
   readonly excludeWallets: CreateGroupDescription["excluded_identity_addresses"];
   readonly nfts: CreateGroupDescription["owns_nfts"];
+  readonly iAmIncluded: boolean;
   readonly setLevel: (level: CreateGroupDescription["level"]) => void;
   readonly setTDH: (tdh: CreateGroupDescription["tdh"]) => void;
   readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
@@ -58,6 +60,7 @@ export default function GroupCreateConfig({
       <GroupCreateNfts nfts={nfts} setNfts={setNfts} />
       <GroupCreateWallets
         type={GroupCreateWalletsType.INCLUDE}
+        iAmIncluded={iAmIncluded}
         wallets={wallets}
         setWallets={setWallets}
         walletsLimit={10000}
@@ -65,6 +68,7 @@ export default function GroupCreateConfig({
       <GroupCreateWallets
         type={GroupCreateWalletsType.EXCLUDE}
         wallets={excludeWallets}
+        iAmIncluded={iAmIncluded}
         setWallets={setExcludeWallets}
         walletsLimit={1000}
       />

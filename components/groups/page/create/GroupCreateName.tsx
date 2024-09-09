@@ -26,22 +26,6 @@ export default function GroupCreateName({
           Name
         </label>
       </div>
-      <div className="tw-mt-3 tw-relative tw-flex tw-items-start">
-        <div className="tw-flex tw-h-6 tw-items-center">
-          <input
-            type="checkbox"
-            className="tw-cursor-pointer tw-form-checkbox tw-w-5 tw-h-5 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
-          />
-        </div>
-        <div className="tw-ml-3 tw-text-sm tw-leading-6">
-          <label
-            htmlFor=""
-            className="tw-cursor-pointer tw-font-medium tw-text-iron-50"
-          >
-            Private group
-          </label>
-        </div>
-      </div>
     </div>
   );
 }

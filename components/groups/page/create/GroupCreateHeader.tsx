@@ -19,7 +19,7 @@ export default function GroupCreateHeader() {
         </svg>
       </span>
       <p className="tw-mb-0 tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-iron-50">
-        Please name your group
+        Group configuration
       </p>
     </div>
   );
