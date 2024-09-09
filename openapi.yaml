@@ -1531,6 +1531,47 @@ paths:
         "404":
           description: Group not found
 
+  /blocks:
+    get:
+      tags:
+        - Other
+      summary: Get blocks and related timestamps
+      operationId: getBlocks
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlocksPage'
+
+  /settings:
+    get:
+      tags:
+        - Other
+      summary: Seize settings
+      operationId: getSettings
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeizeSettings'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -3595,5 +3636,42 @@ components:
           items:
             $ref: "#/components/schemas/TargetAndSubscriptionActions"
 
+    BlockItem:
+        type: object
+        required:
+          - block_number
+          - created_at
+          - timestamp
+        properties:
+          block_number:
+            type: integer
+            format: int64
+          created_at:
+            type: string
+            format: 'date-time'
+          timestamp:
+            type: string
+            format: 'date-time'
+
+    BlocksPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlockItem"
+
+    SeizeSettings:
+      type: object
+      required:
+        - rememes_submission_tdh_threshold
+      properties:
+        rememes_submission_tdh_threshold:
+          type: integer
+          format: int64
 security:
   - bearerAuth: []

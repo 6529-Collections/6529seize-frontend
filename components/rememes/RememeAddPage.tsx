@@ -10,10 +10,10 @@ import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { ConsolidatedTDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
-import { SeizeSettings } from "../../entities/ISeizeSettings";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthContext } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
+import { SeizeSettings } from "../../generated/models/SeizeSettings";
 
 interface CheckList {
   status: boolean;

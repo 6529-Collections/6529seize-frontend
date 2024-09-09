@@ -1,6 +1,8 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
 export * from '../models/AvailableRatingCredit';
+export * from '../models/BlockItem';
+export * from '../models/BlocksPage';
 export * from '../models/BulkRateRequest';
 export * from '../models/BulkRateResponse';
 export * from '../models/BulkRateSkippedIdentity';
@@ -84,6 +86,7 @@ export * from '../models/RatingWithProfileInfoAndLevelPage';
 export * from '../models/RepRating';
 export * from '../models/ReplyToDrop';
 export * from '../models/ReplyToDropResponse';
+export * from '../models/SeizeSettings';
 export * from '../models/TargetAndSubscriptionActions';
 export * from '../models/UpdateDropRequest';
 export * from '../models/UpdateProxyActionRequest';
@@ -114,6 +117,8 @@ export * from '../models/WavesOverviewType';
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
 import { AvailableRatingCredit } from '../models/AvailableRatingCredit';
+import { BlockItem } from '../models/BlockItem';
+import { BlocksPage } from '../models/BlocksPage';
 import { BulkRateRequest     } from '../models/BulkRateRequest';
 import { BulkRateResponse } from '../models/BulkRateResponse';
 import { BulkRateSkippedIdentity } from '../models/BulkRateSkippedIdentity';
@@ -197,6 +202,7 @@ import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileIn
 import { RepRating } from '../models/RepRating';
 import { ReplyToDrop } from '../models/ReplyToDrop';
 import { ReplyToDropResponse } from '../models/ReplyToDropResponse';
+import { SeizeSettings } from '../models/SeizeSettings';
 import { TargetAndSubscriptionActions } from '../models/TargetAndSubscriptionActions';
 import { UpdateDropRequest } from '../models/UpdateDropRequest';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
@@ -264,6 +270,8 @@ let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
     "AvailableRatingCredit": AvailableRatingCredit,
+    "BlockItem": BlockItem,
+    "BlocksPage": BlocksPage,
     "BulkRateRequest": BulkRateRequest,
     "BulkRateResponse": BulkRateResponse,
     "BulkRateSkippedIdentity": BulkRateSkippedIdentity,
@@ -339,6 +347,7 @@ let typeMap: {[index: string]: any} = {
     "RepRating": RepRating,
     "ReplyToDrop": ReplyToDrop,
     "ReplyToDropResponse": ReplyToDropResponse,
+    "SeizeSettings": SeizeSettings,
     "TargetAndSubscriptionActions": TargetAndSubscriptionActions,
     "UpdateDropRequest": UpdateDropRequest,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
