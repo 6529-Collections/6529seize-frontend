@@ -1,5 +1,10 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/ArtistItem';
+export * from '../models/ArtistNameItem';
+export * from '../models/ArtistsNft';
+export * from '../models/ArtistsPage';
+export * from '../models/ArtistsWork';
 export * from '../models/AvailableRatingCredit';
 export * from '../models/BlockItem';
 export * from '../models/BlocksPage';
@@ -91,6 +96,8 @@ export * from '../models/TargetAndSubscriptionActions';
 export * from '../models/UpdateDropRequest';
 export * from '../models/UpdateProxyActionRequest';
 export * from '../models/UpdateWaveRequest';
+export * from '../models/UploadItem';
+export * from '../models/UploadsPage';
 export * from '../models/Wave';
 export * from '../models/WaveConfig';
 export * from '../models/WaveContributorOverview';
@@ -116,6 +123,11 @@ export * from '../models/WavesOverviewType';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { ArtistItem } from '../models/ArtistItem';
+import { ArtistNameItem } from '../models/ArtistNameItem';
+import { ArtistsNft } from '../models/ArtistsNft';
+import { ArtistsPage } from '../models/ArtistsPage';
+import { ArtistsWork } from '../models/ArtistsWork';
 import { AvailableRatingCredit } from '../models/AvailableRatingCredit';
 import { BlockItem } from '../models/BlockItem';
 import { BlocksPage } from '../models/BlocksPage';
@@ -207,6 +219,8 @@ import { TargetAndSubscriptionActions } from '../models/TargetAndSubscriptionAct
 import { UpdateDropRequest } from '../models/UpdateDropRequest';
 import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
 import { UpdateWaveRequest } from '../models/UpdateWaveRequest';
+import { UploadItem } from '../models/UploadItem';
+import { UploadsPage } from '../models/UploadsPage';
 import { Wave } from '../models/Wave';
 import { WaveConfig        } from '../models/WaveConfig';
 import { WaveContributorOverview } from '../models/WaveContributorOverview';
@@ -269,6 +283,11 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "ArtistItem": ArtistItem,
+    "ArtistNameItem": ArtistNameItem,
+    "ArtistsNft": ArtistsNft,
+    "ArtistsPage": ArtistsPage,
+    "ArtistsWork": ArtistsWork,
     "AvailableRatingCredit": AvailableRatingCredit,
     "BlockItem": BlockItem,
     "BlocksPage": BlocksPage,
@@ -352,6 +371,8 @@ let typeMap: {[index: string]: any} = {
     "UpdateDropRequest": UpdateDropRequest,
     "UpdateProxyActionRequest": UpdateProxyActionRequest,
     "UpdateWaveRequest": UpdateWaveRequest,
+    "UploadItem": UploadItem,
+    "UploadsPage": UploadsPage,
     "Wave": Wave,
     "WaveConfig": WaveConfig,
     "WaveContributorOverview": WaveContributorOverview,

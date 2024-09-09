@@ -12,6 +12,7 @@ import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import router from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
+import {ArtistNameItem} from "../../generated/models/ArtistNameItem";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
@@ -76,7 +77,7 @@ export function getUrlParams(
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
-  const [artists, setArtists] = useState<{ name: string; cards: number[] }[]>(
+  const [artists, setArtists] = useState<ArtistNameItem[]>(
     []
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -115,10 +116,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
     fetchUrl(`${process.env.API_ENDPOINT}/api/${path}/artists_names`).then(
       (
-        res: {
-          name: string;
-          cards: number[];
-        }[]
+        res: ArtistNameItem[]
       ) => {
         setArtists(res);
       }

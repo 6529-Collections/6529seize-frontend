@@ -1,11 +1,12 @@
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
 import styles from "./CommunityDownloads.module.scss";
 import Pagination from "../pagination/Pagination";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import {UploadsPage} from "../../generated/models/UploadsPage";
+import {UploadItem} from "../../generated/models/UploadItem";
 
 const PAGE_SIZE = 25;
 
@@ -54,13 +55,13 @@ interface Props {
 export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   const router = useRouter();
 
-  const [downloads, setDownloads] = useState<any[]>();
+  const [downloads, setDownloads] = useState<UploadItem[]>();
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
   function fetchResults(mypage: number) {
     let url = `${props.url}?page_size=${PAGE_SIZE}&page=${mypage}`;
-    fetchUrl(url).then((response: DBResponse) => {
+    fetchUrl(url).then((response: UploadsPage) => {
       setTotalResults(response.count);
       setDownloads(response.data);
     });
@@ -89,8 +90,8 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
                     <tbody>
                       {downloads.map((download) => (
                         <CommunityDownloadsComponentRow
-                          key={download.date}
-                          date={download.date}
+                          key={download.date.toString()}
+                          date={download.date.toString()}
                           url={download.url}
                         />
                       ))}
