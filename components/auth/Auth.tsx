@@ -28,8 +28,7 @@ import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
-import { useIsMounted } from "../../hooks/isMounted";
-import { useSeizeDisconnect } from "../../hooks/useSeizeDisconnect";
+import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
@@ -70,8 +69,7 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { address } = useAccount();
-  const { seizeDisconnect } = useSeizeDisconnect();
-  const isMounted = useIsMounted();
+  const { seizeDisconnect } = useSeizeConnect();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -388,56 +386,54 @@ export default function Auth({
       }}>
       {children}
       <ToastContainer />
-      {address && (
-        <Modal
-          show={showSignModal}
-          onHide={() => setShowSignModal(false)}
-          backdrop="static"
-          keyboard={false}
-          centered>
-          <Modal.Header className={styles.signModalHeader}>
-            <Modal.Title>Sign Authentication Request</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className={styles.signModalContent}>
-            <p className="mt-2 mb-2">
-              To connect your wallet, you will need to sign a message to confirm
-              your identity.
-            </p>
-            <ul className="font-lighter">
-              <li className="mt-1 mb-1">
-                This signature will be used to generate a secure token (JWT) to
-                authenticate your session.
-              </li>
-              <li className="mt-1 mb-1">
-                Your signature will not cost any gas and is purely for
-                authentication purposes.
-              </li>
-            </ul>
-          </Modal.Body>
-          <Modal.Footer className={styles.signModalContent}>
-            <Button
-              variant="danger"
-              onClick={() => {
-                setShowSignModal(false);
-                seizeDisconnect();
-              }}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => requestAuth()}
-              disabled={signMessage.isPending}>
-              {signMessage.isPending ? (
-                <>
-                  Confirm in your wallet <DotLoader />
-                </>
-              ) : (
-                "Sign"
-              )}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      )}
+      <Modal
+        show={showSignModal}
+        onHide={() => setShowSignModal(false)}
+        backdrop="static"
+        keyboard={false}
+        centered>
+        <Modal.Header className={styles.signModalHeader}>
+          <Modal.Title>Sign Authentication Request</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={styles.signModalContent}>
+          <p className="mt-2 mb-2">
+            To connect your wallet, you will need to sign a message to confirm
+            your identity.
+          </p>
+          <ul className="font-lighter">
+            <li className="mt-1 mb-1">
+              This signature will be used to generate a secure token (JWT) to
+              authenticate your session.
+            </li>
+            <li className="mt-1 mb-1">
+              Your signature will not cost any gas and is purely for
+              authentication purposes.
+            </li>
+          </ul>
+        </Modal.Body>
+        <Modal.Footer className={styles.signModalContent}>
+          <Button
+            variant="danger"
+            onClick={() => {
+              setShowSignModal(false);
+              seizeDisconnect();
+            }}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => requestAuth()}
+            disabled={signMessage.isPending}>
+            {signMessage.isPending ? (
+              <>
+                Confirm in your wallet <DotLoader />
+              </>
+            ) : (
+              "Sign"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </AuthContext.Provider>
   );
 }
