@@ -54,11 +54,11 @@ export default function GroupCreateNftsSelectedItem({
     },
   });
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700">
+    <div className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-950 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700">
       <div className="tw-py-1 tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-h-7 tw-w-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
-          <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900">
-            <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
+        <div className="tw-h-7 tw-w-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-sm">
+          <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-sm tw-overflow-hidden tw-bg-iron-800">
+            <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-sm tw-overflow-hidden">
               {data?.data?.[0]?.image ? (
                 <img
                   src={getScaledImageUri(
@@ -66,7 +66,7 @@ export default function GroupCreateNftsSelectedItem({
                     ImageScale.W_AUTO_H_50
                   )}
                   alt={data.data[0].name}
-                  className="tw-h-full tw-w-full tw-object-cover"
+                  className="tw-h-full tw-w-full tw-object-contain"
                 />
               ) : (
                 <div className="tw-h-full tw-w-full tw-bg-iron-900"></div>
@@ -78,7 +78,7 @@ export default function GroupCreateNftsSelectedItem({
           {data?.data?.[0]?.name}
         </span>
         <span className="tw-bg-iron-600 tw-rounded-full tw-h-1 tw-w-1"></span>
-        <span className="text-xs tw-font-semibold tw-text-iron-50">
+        <span className="text-xs tw-font-medium tw-text-iron-300">
           {NAME_TO_NAME_MAP[nft.name]}
         </span>
       </div>

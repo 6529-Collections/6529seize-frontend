@@ -16,21 +16,26 @@ export default function GroupCreateIdentitySelectedItems({
       {selectedIdentities.map((identity) => (
         <div
           key={identity.wallet}
-          className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700"
+          className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-950 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700"
         >
           <div className="tw-py-1 tw-flex tw-items-center tw-gap-x-2">
             <div className="tw-h-7 tw-w-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
               <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900">
                 <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
-                  <img
-                    src={identity.pfp || "#"}
-                    alt="Profile picture"
-                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
-                  />
+                  {identity.pfp ? (
+                    <img
+                      src={identity.pfp}
+                      alt="Profile picture"
+                      className="tw-bg-transparent tw-bg-iron-900 tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                    />
+                  ) : (
+                    <div className="tw-bg-iron-800 tw-h-full tw-w-full tw-flex tw-items-center tw-justify-center tw-text-iron-400"></div>
+                  )}
                 </div>
               </div>
             </div>
-            <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
+
+            <span className="tw-truncate tw-max-w-[12rem] sm:tw-max-w-full tw-text-xs tw-font-semibold tw-text-iron-50">
               {identity.handle}
             </span>
           </div>

@@ -135,14 +135,14 @@ export default function GroupCreateWallets({
           selectedWallets={selectedWallets}
           onRemove={onRemove}
         />
+        <CreateGroupWalletsEmma
+          setWallets={onEmmaWalletsChange}
+          wallets={emmaWallets}
+        />
         <CreateGroupWalletsUpload
           type={type}
           setWallets={onUploadedWalletsChange}
           wallets={uploadedWallets}
-        />
-        <CreateGroupWalletsEmma
-          setWallets={onEmmaWalletsChange}
-          wallets={emmaWallets}
         />
       </div>
       {!!wallets?.length && (
