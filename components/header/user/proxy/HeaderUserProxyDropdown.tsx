@@ -4,10 +4,9 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
-import { disconnect } from "@wagmi/core";
-import { useAccount } from "wagmi";
-import { wagmiConfig } from "../../../../pages/_app";
+import { useAccount, useConnections, useDisconnect } from "wagmi";
 import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
+import { useSeizeDisconnect } from "../../../../hooks/useSeizeDisconnect";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -19,6 +18,7 @@ export default function HeaderUserProxyDropdown({
   readonly onClose: () => void;
 }) {
   const { address } = useAccount();
+  const { seizeDisconnect } = useSeizeDisconnect();
 
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
@@ -27,8 +27,6 @@ export default function HeaderUserProxyDropdown({
     await setActiveProfileProxy(profileProxy);
     onClose();
   };
-
-  const onDisconnect = () => disconnect(wagmiConfig);
 
   const getLabel = (): string => {
     if (profile.profile?.handle) {
@@ -123,7 +121,7 @@ export default function HeaderUserProxyDropdown({
                   <HeaderUserProxyDropdownChains />
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     <button
-                      onClick={onDisconnect}
+                      onClick={seizeDisconnect}
                       type="button"
                       aria-label="Disconnect"
                       title="Disconnect"
