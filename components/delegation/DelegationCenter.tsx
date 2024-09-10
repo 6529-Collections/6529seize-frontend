@@ -2,7 +2,6 @@ import styles from "./Delegation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import { useAccount } from "wagmi";
 import Image from "next/image";
-import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 
 import { SUPPORTED_COLLECTIONS } from "../../pages/delegation/[...section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,6 +14,7 @@ import {
   GRADIENT_CONTRACT,
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
+import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -23,16 +23,14 @@ interface Props {
 export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const accountResolution = useAccount();
-  const web3Modal = useWeb3Modal();
-  const web3ModalState = useWeb3ModalState();
-
+  const { seizeConnect, seizeConnectOpen } = useSeizeConnect();
   const [openConnect, setOpenConnect] = useState(false);
 
   useEffect(() => {
     if (redirect) {
       if (!accountResolution.isConnected) {
         setOpenConnect(true);
-        web3Modal.open();
+        seizeConnect();
       } else {
         props.setSection(redirect);
       }
@@ -40,7 +38,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   }, [redirect]);
 
   useEffect(() => {
-    if (!web3ModalState.open) {
+    if (!seizeConnectOpen) {
       if (openConnect) {
         if (accountResolution.isConnected && redirect) {
           props.setSection(redirect);
@@ -48,7 +46,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       }
       setRedirect(undefined);
     }
-  }, [web3ModalState.open]);
+  }, [seizeConnectOpen]);
 
   function printCollectionSelection() {
     return (
