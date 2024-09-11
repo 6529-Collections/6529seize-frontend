@@ -1,12 +1,24 @@
 import PrimaryButton from "../../utils/buttons/PrimaryButton";
-import CreateDropReplying from "../CreateDropReplying";
+import { ActiveDropState } from "./WaveDetailedContent";
+import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 
-export default function CreateDrop() {
+interface CreateDropProps {
+  activeDrop: ActiveDropState | null;
+  onCancelReplyQuote: () => void;
+}
+
+export default function CreateDrop({
+  activeDrop,
+  onCancelReplyQuote,
+}: CreateDropProps) {
   return (
     <div className="tw-py-4 tw-px-2">
       <div className="tw-flex tw-items-end tw-gap-x-3">
         <div className="tw-w-full">
-          <CreateDropReplying />
+          <CreateDropReplyingWrapper
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+          />
           <div className="tw-relative tw-w-full">
             <input
               placeholder="Drop a post"

@@ -10,10 +10,11 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
-import DropPartQuote from "./quote/DropPartQuote";
+
 import { useRouter } from "next/router";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
+import DropPartQuote from "./quote/DropPartQuote";
 
 interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -177,15 +178,8 @@ export default function DropPartMarkdown({
         });
       };
       return (
-        <div>
-          <DropPartQuote
-            quotedDrop={{
-              drop_id: dropId,
-              drop_part_id: 1,
-            }}
-            marginLeft={false}
-            onRedropClick={onRedropClick}
-          />
+        <div className="tw-bg-red">
+          This is a quote
         </div>
       );
     }

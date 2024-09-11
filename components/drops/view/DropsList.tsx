@@ -1,20 +1,27 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Drop } from "../../../generated/models/Drop";
-import DropsListItem from "./item/DropsListItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { getDropKey } from "../../../helpers/waves/drop.helpers";
+import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
+import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+
+interface DropsListProps {
+  readonly drops: Drop[];
+  readonly showWaveInfo: boolean;
+  readonly activeDrop: ActiveDropState | null;
+  readonly onBottomIntersection: (state: boolean) => void;
+  readonly onReply: ({ drop }: { drop: Drop }) => void;
+  readonly onQuote: ({ drop }: { drop: Drop }) => void;
+}
 
 export default function DropsList({
   drops,
   showWaveInfo,
-  availableCredit,
+  activeDrop,
   onBottomIntersection,
-}: {
-  readonly drops: Drop[];
-  readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
-  readonly onBottomIntersection: (state: boolean) => void;
-}) {
+  onReply,
+  onQuote,
+}: DropsListProps) {
   const getIntersectionTargetIndex = () => {
     if (drops.length < 5) {
       return null;
@@ -52,11 +59,12 @@ export default function DropsList({
     >
       {drops.map((drop, i) => (
         <div key={getDropKey({ drop, index: i })}>
-          <DropsListItem
+          <WaveDetailedDrop
             drop={drop}
-            availableCredit={availableCredit}
-            replyToDrop={null}
             showWaveInfo={showWaveInfo}
+            activeDrop={activeDrop}
+            onReply={() => onReply({ drop })}
+            onQuote={() => onQuote({ drop })}
           />
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (
             <CommonIntersectionElement onIntersection={onBottomIntersection} />

@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
+import { ActiveDropState } from "../WaveDetailedContent";
 
 const REQUEST_SIZE = 10;
 
@@ -17,13 +18,19 @@ interface Query {
   readonly include_replies: string;
 }
 
+interface WaveDropsProps {
+  readonly wave: Wave;
+  readonly onReply: ({ drop }: { drop: Drop }) => void;
+  readonly onQuote: ({ drop }: { drop: Drop }) => void;
+  readonly activeDrop: ActiveDropState | null;
+}
+
 export default function WaveDrops({
   wave,
-  availableCredit,
-}: {
-  readonly wave: Wave;
-  readonly availableCredit: number | null;
-}) {
+  onReply,
+  onQuote,
+  activeDrop,
+}: WaveDropsProps) {
   const { connectedProfile } = useContext(AuthContext);
 
   const query: Query = {
@@ -100,8 +107,10 @@ export default function WaveDrops({
       drops={drops}
       loading={isFetching}
       showWaveInfo={false}
-      availableCredit={availableCredit}
       onBottomIntersection={onBottomIntersection}
+      onReply={onReply}
+      onQuote={onQuote}
+      activeDrop={activeDrop}
     />
   );
 }

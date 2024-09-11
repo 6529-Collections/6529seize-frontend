@@ -6,27 +6,23 @@ import WaveSpecs from "./specs/WaveSpecs";
 import WaveGroups from "./groups/WaveGroups";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useQuery } from "@tanstack/react-query";
-import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../services/api/common-api";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
 import WaveRequiredTypes from "./types/WaveRequiredTypes";
-import PrimaryButton from "../../utils/buttons/PrimaryButton";
-import DropPfp from "../../drops/create/utils/DropPfp";
-import CreateDrop from "./CreateDrop";
-import WaveDetailedDrop from "./WaveDetailedDrop";
 
 enum WaveDetailedView {
   CONTENT = "CONTENT",
   FOLLOWERS = "FOLLOWERS",
 }
 
-export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
+interface WaveDetailedProps {
+  readonly wave: Wave;
+}
+
+export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
   const router = useRouter();
@@ -41,19 +37,6 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
     getActiveDropId()
   );
   useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
-
-  const { data: availableRateResponse } =
-    useQuery<ProfileAvailableDropRateResponse>({
-      queryKey: [
-        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
-        connectedProfile?.profile?.handle,
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ProfileAvailableDropRateResponse>({
-          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
-        }),
-      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
-    });
 
   const onBackToList = () => {
     const updatedQuery = { ...router.query };
@@ -126,7 +109,6 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
       <WaveDetailedContent
         activeDropId={activeDropId}
         wave={wave}
-        availableRateResponse={availableRateResponse}
         onBackToList={onBackToList}
       />
     ),
@@ -163,21 +145,13 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
             )}
           </div>
           <div className="tw-flex-1">
-            <div className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-px-2 tw-pb-2">
-
-              <CreateDrop />
-
-              <WaveDetailedDrop />
-              
+            <div
+              ref={contentWrapperRef}
+              className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-px-2 tw-pb-2"
+            >
+              {components[activeView]}
             </div>
           </div>
-          {/* 
-        <div
-            className="tw-w-[672px] tw-overflow-hidden"
-            ref={contentWrapperRef}
-          >
-            {components[activeView]}
-          </div>  */}
         </div>
       </div>
     </div>
