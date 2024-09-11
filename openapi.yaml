@@ -1531,6 +1531,187 @@ paths:
         "404":
           description: Group not found
 
+  /blocks:
+    get:
+      tags:
+        - Other
+      summary: Get blocks and related timestamps
+      operationId: getBlocks
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlocksPage'
+
+  /uploads:
+    get:
+      tags:
+        - Other
+      summary: Get TDH snapshots links
+      operationId: getUploads
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: block
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: 'date-time'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadsPage'
+
+  /consolidated_uploads:
+    get:
+      tags:
+        - Other
+      summary: Get consolidated TDH snapshots links
+      operationId: getConsolidatedUploads
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: block
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: 'date-time'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadsPage'
+
+  /settings:
+    get:
+      tags:
+        - Other
+      summary: Seize settings
+      operationId: getSettings
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeizeSettings'
+  /artists:
+    get:
+      tags:
+        - Other
+      summary: Artists info
+      operationId: getArtists
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: meme_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtistsPage'
+  /memes/artists_names:
+    get:
+      tags:
+        - Other
+      summary: meme artists names
+      operationId: getMemeArtistsNames
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArtistNameItem'
+  /memelab/artists_names:
+    get:
+      tags:
+        - Other
+      summary: memelab artists names
+      operationId: getMemelabArtistsNames
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArtistNameItem'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -3594,6 +3775,165 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TargetAndSubscriptionActions"
+
+    BlockItem:
+        type: object
+        required:
+          - block_number
+          - created_at
+          - timestamp
+        properties:
+          block_number:
+            type: integer
+            format: int64
+          created_at:
+            type: string
+            format: 'date-time'
+          timestamp:
+            type: string
+            format: 'date-time'
+
+    BlocksPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlockItem"
+
+    SeizeSettings:
+      type: object
+      required:
+        - rememes_submission_tdh_threshold
+      properties:
+        rememes_submission_tdh_threshold:
+          type: integer
+          format: int64
+
+    UploadItem:
+      type: object
+      required:
+        - date
+        - block
+        - url
+      properties:
+        date:
+          type: string
+          format: 'date-time'
+        block:
+          type: integer
+          format: int64
+        url:
+          type: string
+
+    UploadsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UploadItem"
+
+    ArtistsNft:
+      type: object
+      required:
+        - id
+        - collaboration_with
+      properties:
+        id:
+          type: integer
+          format: int64
+        collaboration_with:
+          type: array
+          items:
+            type: string
+
+    ArtistsWork:
+      type: object
+      required:
+        - title
+        - link
+      properties:
+        title:
+          type: string
+        link:
+          type: string
+
+    ArtistItem:
+      type: object
+      required:
+        - name
+        - bio
+        - pfp
+        - memes
+        - memelab
+        - gradients
+        - work
+        - social_links
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+          nullable: true
+        pfp:
+          type: string
+          nullable: true
+        memes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistsNft"
+        memelab:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistsNft"
+        gradients:
+          type: array
+          items:
+            type: integer
+            format: int64
+        work:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistsWork"
+        social_links:
+          type: array
+          items:
+            type: object
+
+    ArtistsPage:
+        type: object
+        required:
+          - data
+        allOf:
+          - $ref: "#/components/schemas/PageWithNextUriBase"
+        properties:
+          data:
+            type: array
+            items:
+              $ref: "#/components/schemas/ArtistItem"
+
+    ArtistNameItem:
+      type: object
+      required:
+        - name
+        - cards
+      properties:
+        name:
+          type: string
+        cards:
+          type: array
+          items:
+            type: integer
+            format: int64
 
 security:
   - bearerAuth: []
