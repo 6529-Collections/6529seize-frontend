@@ -3,8 +3,8 @@ import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
 import React from "react";
 
 interface GroupCreateIdentitySelectedItemsProps {
-  selectedIdentities: CommunityMemberMinimal[];
-  onRemove: (id: string) => void;
+  readonly selectedIdentities: CommunityMemberMinimal[];
+  readonly onRemove: (id: string) => void;
 }
 
 export default function GroupCreateIdentitySelectedItems({

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { WaveScope } from "../../../../../../generated/models/WaveScope";
 import { Group } from "../../../../../../generated/models/Group";
 import {
   getScaledImageUri,
@@ -9,9 +8,7 @@ import {
 export default function WaveGroupScope({ group }: { readonly group: Group }) {
   if (group.is_hidden) {
     return (
-      <span className="tw-font-medium tw-text-md tw-text-iron-400">
-        Hidden
-      </span>
+      <span className="tw-font-medium tw-text-md tw-text-iron-400">Hidden</span>
     );
   }
   return (

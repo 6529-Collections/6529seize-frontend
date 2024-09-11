@@ -17,7 +17,7 @@ export default function GroupCreateNftSearchItems({
   readonly selected: GroupOwnsNft[];
   readonly onSelect: (item: NFTSearchResult) => void;
 }) {
-  const { isFetching: isFetching, data: nfts } = useQuery({
+  const { isFetching, data: nfts } = useQuery({
     queryKey: [QueryKey.NFTS_SEARCH, searchCriteria],
     queryFn: async () => {
       return await commonApiFetch<NFTSearchResult[]>({

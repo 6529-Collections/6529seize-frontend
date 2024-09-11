@@ -1,4 +1,3 @@
-import { useState } from "react";
 import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
 import {
   GroupOwnsNft,

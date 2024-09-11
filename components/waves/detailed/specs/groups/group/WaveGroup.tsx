@@ -1,10 +1,4 @@
-import Link from "next/link";
 import { WaveScope } from "../../../../../../generated/models/WaveScope";
-
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../../../helpers/image.helpers";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext, useEffect, useState } from "react";
