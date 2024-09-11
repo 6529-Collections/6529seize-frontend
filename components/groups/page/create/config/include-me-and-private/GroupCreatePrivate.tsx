@@ -7,7 +7,7 @@ export default function GroupCreatePrivate({
 }) {
   return (
     <div>
-      <label className="tw-flex tw-cursor-pointer">
+      <label htmlFor="private-group-toggle" className="tw-flex tw-cursor-pointer">
         <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
           <div
             className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px]  ${
