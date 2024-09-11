@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import useCapacitor from "../../../../../../hooks/useCapacitor";
 
 export default function DropListItemContentMediaVideo({
   src,
@@ -6,6 +7,8 @@ export default function DropListItemContentMediaVideo({
   readonly src: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const capacitor = useCapacitor();
 
   const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
     if (videoRef.current) {
@@ -25,12 +28,11 @@ export default function DropListItemContentMediaVideo({
       <video
         ref={videoRef}
         controls
-        autoPlay
+        autoPlay={!capacitor.isCapacitor}
         muted
         loop
         className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-[516px]"
-        onClick={handleVideoClick}
-      >
+        onClick={handleVideoClick}>
         <source src={src} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
