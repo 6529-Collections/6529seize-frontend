@@ -60,10 +60,10 @@ export default function WaveTypeIcon({
 
   return (
     <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-font-medium tw-text-iron-400">Type</span>
+      <span className="tw-font-medium tw-text-iron-500">Type</span>
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
         {iconComponents[waveType]}
-        <span className="tw-font-medium tw-text-white tw-text-md">
+        <span className="tw-font-medium tw-text-iron-200 tw-text-md">
           {WAVE_LABELS[waveType]}
         </span>
       </div>

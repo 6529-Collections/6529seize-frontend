@@ -43,7 +43,7 @@ export default function WaveGroup({
           {scope.group ? (
             <Link
               href={`/community?page=1&group=${scope.group.id}`}
-              className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
+              className="tw-no-underline hover:tw-underline tw-text-primary-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
             >
               {scope.group.author?.pfp ? (
                 <img
@@ -57,12 +57,12 @@ export default function WaveGroup({
               ) : (
                 <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
               )}
-              <span className="tw-font-medium tw-text-md tw-text-primary-300">
+              <span className="tw-font-medium tw-text-md">
                 {scope.group.name}
               </span>
             </Link>
           ) : (
-            <span className="tw-font-medium tw-text-white tw-text-md">
+            <span className="tw-font-medium tw-text-iron-200 tw-text-md">
               Anyone
             </span>
           )}

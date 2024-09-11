@@ -56,11 +56,12 @@ export default function WavePage() {
         />
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
-      <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+      <main className="tailwind-scope tw-min-h-screen tw-bg-black tw-overflow-x-hidden">
         <div>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
+
         {wave && !isError && <WaveDetailed wave={wave} />}
       </main>
     </>

@@ -3,5 +3,7 @@
     "connectionId": "VSCode",
     "projectKey": "6529-Collections_6529seize-frontend"
   },
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "window.autoDetectColorScheme": false,
+  "workbench.colorTheme": "Visual Studio Dark"
 }

@@ -16,6 +16,10 @@ import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
 import WaveRequiredTypes from "./types/WaveRequiredTypes";
+import PrimaryButton from "../../utils/buttons/PrimaryButton";
+import DropPfp from "../../drops/create/utils/DropPfp";
+import CreateDrop from "./CreateDrop";
+import WaveDetailedDrop from "./WaveDetailedDrop";
 
 enum WaveDetailedView {
   CONTENT = "CONTENT",
@@ -139,14 +143,14 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
   }
 
   return (
-    <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen">
-      <WaveHeader
-        wave={wave}
-        onFollowersClick={() => setActiveView(WaveDetailedView.FOLLOWERS)}
-      />
-      <div className="tw-mt-6 md:tw-mt-12 tw-pb-16 lg:tw-pb-20 tw-max-w-5xl tw-mx-auto tw-px-4 xl:tw-px-0">
-        <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-6">
-          <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4">
+    <div className="tailwind-scope tw-bg-black tw-min-h-screen">
+      <div className="tw-mt-6 md:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+        <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
+          <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4 tw-max-w-[20.5rem]">
+            <WaveHeader
+              wave={wave}
+              onFollowersClick={() => setActiveView(WaveDetailedView.FOLLOWERS)}
+            />
             <WaveSpecs wave={wave} />
             <WaveGroups wave={wave} />
             {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
@@ -158,13 +162,22 @@ export default function WaveDetailed({ wave }: { readonly wave: Wave }) {
               </>
             )}
           </div>
+          <div className="tw-flex-1">
+            <div className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-px-2 tw-pb-2">
 
-          <div
+              <CreateDrop />
+
+              <WaveDetailedDrop />
+              
+            </div>
+          </div>
+          {/* 
+        <div
             className="tw-w-[672px] tw-overflow-hidden"
             ref={contentWrapperRef}
           >
             {components[activeView]}
-          </div>
+          </div>  */}
         </div>
       </div>
     </div>

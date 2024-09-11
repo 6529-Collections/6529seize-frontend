@@ -26,7 +26,7 @@ export default function WaveGroupTitle({
     <div className="tw-flex tw-items-center">
       {ICONS[type]}
 
-      <span className="tw-font-medium tw-text-iron-400">{LABELS[type]}</span>
+      <span className="tw-font-medium tw-text-iron-500">{LABELS[type]}</span>
     </div>
   );
 }
