@@ -1,7 +1,4 @@
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-} from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { useContext, useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";

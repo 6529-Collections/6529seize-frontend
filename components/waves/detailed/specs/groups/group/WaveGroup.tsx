@@ -1,16 +1,11 @@
-import Link from "next/link";
 import { WaveScope } from "../../../../../../generated/models/WaveScope";
-
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../../../helpers/image.helpers";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
 import { Wave } from "../../../../../../generated/models/Wave";
 import { canEditWave } from "../../../../../../helpers/waves/waves.helpers";
+import WaveGroupScope from "./WaveGroupScope";
 
 export enum WaveGroupType {
   VIEW = "VIEW",
@@ -35,32 +30,14 @@ export default function WaveGroup({
     canEditWave({ connectedProfile, activeProfileProxy, wave });
   const [showEdit, setShowEdit] = useState(getShowEdit());
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
+
   return (
     <div className="tw-group tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
       <WaveGroupTitle type={type} />
       <div className="tw-inline-flex tw-w-full tw-justify-between">
         <div className="tw-inline-flex tw-items-center tw-gap-x-2">
           {scope.group ? (
-            <Link
-              href={`/community?page=1&group=${scope.group.id}`}
-              className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
-            >
-              {scope.group.author?.pfp ? (
-                <img
-                  className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
-                  src={getScaledImageUri(
-                    scope.group.author.pfp,
-                    ImageScale.W_AUTO_H_50
-                  )}
-                  alt="Profile Picture"
-                />
-              ) : (
-                <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
-              )}
-              <span className="tw-font-medium tw-text-md tw-text-primary-300">
-                {scope.group.name}
-              </span>
-            </Link>
+            <WaveGroupScope group={scope.group} />
           ) : (
             <span className="tw-font-medium tw-text-white tw-text-md">
               Anyone

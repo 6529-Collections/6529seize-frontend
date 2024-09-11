@@ -18,7 +18,7 @@ export default function CommonTabsTab<T, U = unknown>(
   const getDynamicClasses = (): string => {
     let response = "";
     if (isActive) {
-      response += " tw-bg-iron-800 tw-text-iron-100";
+      response += "tw-bg-iron-800 tw-text-iron-100";
     } else {
       response +=
         " tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100";
@@ -41,21 +41,23 @@ export default function CommonTabsTab<T, U = unknown>(
   };
 
   return (
-    <button
-      type="button"
-      onClick={onSelected}
-      onMouseEnter={() => setShouldRotate(true)}
-      onMouseLeave={() => setShouldRotate(false)}
-      className={`${dynamicClasses} tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}
-    >
-      {item.label}
-      {sortDirection && (
-        <CommonTableSortIcon
-          direction={isActive ? sortDirection : SortDirection.DESC}
-          isActive={isActive}
-          shouldRotate={isActive && shouldRotate}
-        />
-      )}
-    </button>
+    <div className={isActive ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800" : "tw-p-[1px] tw-flex tw-rounded-lg"}>
+      <button
+        type="button"
+        onClick={onSelected}
+        onMouseEnter={() => setShouldRotate(true)}
+        onMouseLeave={() => setShouldRotate(false)}
+        className={`${dynamicClasses} tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}
+      >
+        {item.label}
+        {sortDirection && (
+          <CommonTableSortIcon
+            direction={isActive ? sortDirection : SortDirection.DESC}
+            isActive={isActive}
+            shouldRotate={isActive && shouldRotate}
+          />
+        )}
+      </button>
+    </div>
   );
 }
