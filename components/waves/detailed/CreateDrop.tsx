@@ -1,6 +1,7 @@
 import PrimaryButton from "../../utils/buttons/PrimaryButton";
 import { ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
+import CreateDropInput from "./CreateDropInput";
 
 interface CreateDropProps {
   activeDrop: ActiveDropState | null;
@@ -68,6 +69,7 @@ export default function CreateDrop({
               </svg>
             </button>
           </div>
+          {/* <CreateDropInput/> */}
         </div>
         <PrimaryButton>Drop</PrimaryButton>
       </div>
