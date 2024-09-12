@@ -26,8 +26,8 @@ export default function WaveDetailedDrop({
   
   return (
     <div 
-      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-p-2 tw-transition-colors tw-duration-300 ${
-        isActiveDrop ? 'tw-bg-iron-900' : 'tw-bg-iron-950'
+      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-2 tw-transition-colors tw-duration-300 ${
+        isActiveDrop ? 'tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0' : 'tw-bg-iron-950'
       }`}
     >
       {!!drop.reply_to && (
@@ -38,10 +38,10 @@ export default function WaveDetailedDrop({
       )}
       <div className="tw-flex tw-gap-x-3">
         <WaveDetailedDropAuthorPfp drop={drop} />
-        <div className="-tw-mt-0.5 tw-flex tw-flex-col">
+        <div className="tw-mt-1 tw-flex tw-flex-col">
           <WaveDetailedDropHeader drop={drop} showWaveInfo={showWaveInfo} />
 
-          <div className="tw-mt-1">
+          <div className="tw-mt-0.5">
             <WaveDetailedDropContent drop={drop} />
           </div>
         </div>

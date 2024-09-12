@@ -3,7 +3,7 @@ import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
-import WaveSingleDrop from "./drops/WaveSingleDrop";
+import WaveDropThread from "./drops/WaveDropThread";
 
 export enum ActiveDropAction {
   REPLY,
@@ -46,9 +46,8 @@ export default function WaveDetailedContent({
 
   if (activeDropId) {
     return (
-      <WaveSingleDrop
-        dropId={activeDropId}
-        availableCredit={0}
+      <WaveDropThread
+        rootDropId={activeDropId}
         onBackToList={onBackToList}
       />
     );

@@ -11,9 +11,9 @@ export default function Follower({
   const cicType = cicToType(follower.identity.cic);
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
-      <div className="tw-h-10 tw-w-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg">
+      <div className="tw-h-10 tw-w-10 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg">
         <div className="tw-rounded-lg tw-h-full tw-w-full">
-          <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
+          <div className="tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
             <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
               {follower.identity.pfp ? (
                 <img

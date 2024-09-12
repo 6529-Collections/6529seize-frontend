@@ -2,16 +2,20 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../generated/models/Drop";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import DropsListItem from "../../../drops/view/item/DropsListItem";
+import WaveDetailedDropActions from "./WaveDetailedDropActions";
+import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
+import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
+import WaveDetailedDropContent from "./WaveDetailedDropContent";
+import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 
 export default function WaveSingleDrop({
   dropId,
   availableCredit,
-  onBackToList,
+  isThreaded = false,
 }: {
   readonly dropId: string;
   readonly availableCredit: number | null;
-  readonly onBackToList: () => void;
+  readonly isThreaded?: boolean;
 }) {
   const { data: drop } = useQuery<Drop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
@@ -25,37 +29,34 @@ export default function WaveSingleDrop({
   if (!drop) {
     return null;
   }
+
+  function onReply(): void {
+    throw new Error("Function not implemented.");
+  }
+
+  function onQuote(): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
-    <div className="tw-space-y-2">
-      <button
-        onClick={onBackToList}
-        className="-tw-mt-2 tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
-      >
-        <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M20 12H4M4 12L10 18M4 12L10 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          ></path>
-        </svg>
-        <span>Back</span>
-      </button>
-      <DropsListItem
-        drop={drop}
-        replyToDrop={null}
-        showWaveInfo={false}
-        initialDiscussionOpen={true}
-        availableCredit={availableCredit}
-        onDropDeleted={onBackToList}
-      />
+    <div className="tw-px-4 tw-py-2 tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-transition-colors tw-duration-300">
+      <div className="tw-flex tw-gap-x-3">
+        <WaveDetailedDropAuthorPfp drop={drop} />
+        <div className="tw-mt-1 tw-flex tw-flex-col tw-flex-grow">
+          <WaveDetailedDropHeader drop={drop} showWaveInfo={false} />
+
+          <div className="tw-mt-0.5">
+            <WaveDetailedDropContent drop={drop} />
+          </div>
+
+          <WaveDetailedDropActions
+            drop={drop}
+            onReply={onReply}
+            onQuote={onQuote}
+          />
+          <WaveDetailedDropRatings drop={drop} />
+        </div>
+      </div>
     </div>
   );
 }

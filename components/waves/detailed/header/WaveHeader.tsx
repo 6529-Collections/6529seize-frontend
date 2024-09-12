@@ -27,7 +27,7 @@ export default function WaveHeader({
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   return (
     <div className="tw-bg-iron-950 tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl tw-overflow-auto">
-      <div>
+      <div className="tw-border tw-border-b-0 tw-border-solid tw-border-iron-900 tw-rounded-t-xl tw-overflow-hidden">
         <div
           className="tw-h-14 tw-w-full tw-object-cover"
           style={{
@@ -40,12 +40,12 @@ export default function WaveHeader({
         <div className="tw-flex">
           {wave.picture ? (
             <img
-              className="tw-h-[78px] tw-w-[78px] tw-object-contain tw-rounded-full tw-ring-[3px] tw-ring-iron-950 tw-bg-iron-900"
+              className="tw-h-20 tw-w-20 tw-object-contain tw-rounded-full tw-ring-[3px] tw-ring-iron-950 tw-bg-iron-900"
               src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
               alt="Wave image"
             />
           ) : (
-            <div className="tw-h-16 tw-w-16 tw-rounded-full tw-ring-[3px] tw-ring-iron-950 tw-bg-iron-950" />
+            <div className="tw-h-20 tw-w-20 tw-rounded-full tw-ring-[3px] tw-ring-iron-950 tw-bg-iron-900" />
           )}
         </div>
 

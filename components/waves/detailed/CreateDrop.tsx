@@ -1,4 +1,4 @@
-import PrimaryButton from "../../utils/buttons/PrimaryButton";
+import PrimaryButton from "../../utils/button/PrimaryButton";
 import { ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput from "./CreateDropInput";
@@ -13,7 +13,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
 }: CreateDropProps) {
   return (
-    <div className="tw-py-4 tw-px-2">
+    <div className="tw-py-4 tw-px-4">
       <div className="tw-flex tw-items-end tw-gap-x-3">
         <div className="tw-w-full">
           <CreateDropReplyingWrapper
@@ -28,7 +28,7 @@ export default function CreateDrop({
             />
             <button
               type="button"
-              aria-label="Attach file"
+              aria-label="Attach a file"
               className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-11 tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
             >
               <svg
