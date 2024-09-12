@@ -7,7 +7,7 @@ interface WaveDetailedDropRatingsProps {
 
 const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({ drop }) => {
   return (
-    <div className="tw-flex tw-justify-end">
+    <div className="tw-flex tw-justify-end tw-mt-2">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center -tw-space-x-2">
           <img

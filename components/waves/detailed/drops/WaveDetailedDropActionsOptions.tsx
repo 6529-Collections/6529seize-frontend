@@ -2,7 +2,7 @@ import React from 'react';
 
 const WaveDetailedDropActionsOptions: React.FC = () => {
   return (
-    <button className="tw-text-iron-500 icon tw-px-2 tw-py-1 tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2  tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300">
+    <button className="tw-text-iron-500 icon tw-px-2 tw-py-1.5 tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2  tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
