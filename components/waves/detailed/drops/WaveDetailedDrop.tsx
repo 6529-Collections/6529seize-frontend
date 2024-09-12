@@ -38,7 +38,7 @@ export default function WaveDetailedDrop({
       )}
       <div className="tw-flex tw-gap-x-3">
         <WaveDetailedDropAuthorPfp drop={drop} />
-        <div className="tw-mt-1 tw-flex tw-flex-col">
+        <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
           <WaveDetailedDropHeader drop={drop} showWaveInfo={showWaveInfo} />
 
           <div className="tw-mt-0.5">

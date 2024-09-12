@@ -53,7 +53,7 @@ export default function DropsList({
 
   return (
     <div
-      className="tw-flex tw-flex-col tw-gap-y-2.5"
+      className="tw-flex tw-flex-col"
       ref={listRef}
       onScroll={handleScroll}
     >

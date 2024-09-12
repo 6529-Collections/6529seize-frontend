@@ -155,7 +155,7 @@ export default function WaveDetailedDropFollowAuthor({
           onFollow();
         }}
         disabled={mutating}
-        className={`${classes[followState]} tw-flex tw-border-none tw-bg-transparent tw-py-0 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
+        className={`${classes[followState]} tw-flex tw-border-none tw-bg-transparent -tw-mx-1 tw-px-1 tw-py-0 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
       >
         {mutating ? (
           <CircleLoader size={CircleLoaderSize.SMALL} />

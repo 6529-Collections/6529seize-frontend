@@ -61,7 +61,7 @@ const WaveDetailedDropPartContent: React.FC<
     }
   };
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
+    <div className="tw-w-full tw-flex tw-justify-between tw-space-x-2">
       {showPrevButton && (
         <button
           disabled={!showPrevButton}
@@ -101,14 +101,14 @@ const WaveDetailedDropPartContent: React.FC<
             onImageLoaded={onImageLoaded}
           />
           {activePart.quoted_drop?.drop_id && (
-            <div className="tw-bg-red">This is a quote</div>
+            <div className="tw-bg-iron-900 tw-rounded-lg tw-p-2 tw-w-full mt-1">This is a quote</div>
           )}
         </div>
         {!!activePart.media.length && (
           <div
             className={`${
-              activePart.content ? "tw-mt-4" : "tw-mt-1"
-            } tw-space-y-2`}
+              activePart.content ? "tw-mt-3" : "tw-mt-1"
+            } tw-space-y-3`}
           >
             {activePart.media.map((media: any, i: number) => (
               <DropListItemContentMedia

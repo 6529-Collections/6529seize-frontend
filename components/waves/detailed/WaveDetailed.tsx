@@ -147,7 +147,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
           <div className="tw-flex-1">
             <div
               ref={contentWrapperRef}
-              className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-pb-2"
+              className="tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-pb-2"
             >
               {components[activeView]}
             </div>

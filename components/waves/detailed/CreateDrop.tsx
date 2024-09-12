@@ -13,7 +13,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
 }: CreateDropProps) {
   return (
-    <div className="tw-py-4 tw-px-4">
+    <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-t-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-lg:border-b tw-lg:border-slate-900/10 tw-border-slate-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
       <div className="tw-flex tw-items-end tw-gap-x-3">
         <div className="tw-w-full">
           <CreateDropReplyingWrapper

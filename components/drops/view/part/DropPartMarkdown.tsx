@@ -178,7 +178,7 @@ export default function DropPartMarkdown({
         });
       };
       return (
-        <div className="tw-bg-red">
+        <div className="tw-bg-iron-900 tw-rounded-lg tw-p-2 tw-w-full mt-1">
           This is a quote
         </div>
       );
@@ -244,7 +244,7 @@ export default function DropPartMarkdown({
       className="tw-w-full"
       components={{
         h5: (params) => (
-          <h5 className="tw-text-iron-50 tw-break-words word-break">
+          <h5 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -254,7 +254,7 @@ export default function DropPartMarkdown({
           </h5>
         ),
         h4: (params) => (
-          <h4 className="tw-text-iron-50 tw-break-words word-break">
+          <h4 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -264,7 +264,7 @@ export default function DropPartMarkdown({
           </h4>
         ),
         h3: (params) => (
-          <h3 className="tw-text-iron-50 tw-break-words word-break">
+          <h3 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -274,7 +274,7 @@ export default function DropPartMarkdown({
           </h3>
         ),
         h2: (params) => (
-          <h2 className="tw-text-iron-50 tw-break-words word-break">
+          <h2 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -284,7 +284,7 @@ export default function DropPartMarkdown({
           </h2>
         ),
         h1: (params) => (
-          <h1 className="tw-text-iron-50 tw-break-words word-break">
+          <h1 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -295,7 +295,7 @@ export default function DropPartMarkdown({
         ),
         p: (params) => (
           <p
-            className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+            className={`last:tw-mb-0 tw-leading-5 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
           >
             {customRenderer({
               content: params.children,
@@ -306,7 +306,7 @@ export default function DropPartMarkdown({
           </p>
         ),
         li: (params) => (
-          <li className="tw-text-iron-50 tw-break-words word-break">
+          <li className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -318,7 +318,7 @@ export default function DropPartMarkdown({
         code: (params) => (
           <code
             style={{ textOverflow: "unset" }}
-            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
+            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words"
           >
             {customRenderer({
               content: params.children,

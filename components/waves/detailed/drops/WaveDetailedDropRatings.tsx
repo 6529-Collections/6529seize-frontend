@@ -19,7 +19,7 @@ const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({ drop 
         <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
           {drop.raters_count} raters
         </span>
-        <div className="tw-h-1 tw-w-1 tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
         <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
           {drop.rating} ratings
         </span>

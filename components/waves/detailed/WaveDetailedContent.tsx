@@ -67,7 +67,7 @@ export default function WaveDetailedContent({
 
   return (
     <>
-      <div ref={createDropRef}>
+      <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
         <CreateDrop
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}
