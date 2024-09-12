@@ -1,7 +1,10 @@
+import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
+import { AuthContext } from "../../../../../auth/Auth";
+import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
@@ -12,22 +15,61 @@ export default function GroupCreateWallets({
   type,
   wallets,
   walletsLimit,
+  iAmIncluded,
   setWallets,
 }: {
   readonly type: GroupCreateWalletsType;
   readonly wallets: string[] | null;
   readonly walletsLimit: number;
+  readonly iAmIncluded: boolean;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
+  const { connectedProfile } = useContext(AuthContext);
   const LABELS: Record<GroupCreateWalletsType, string> = {
-    [GroupCreateWalletsType.INCLUDE]: "Include Wallets",
-    [GroupCreateWalletsType.EXCLUDE]: "Exclude Wallets",
+    [GroupCreateWalletsType.INCLUDE]: "Include Identities",
+    [GroupCreateWalletsType.EXCLUDE]: "Exclude Identities",
   };
 
   const [uploadedWallets, setUploadedWallets] = useState<string[] | null>(
     wallets
   );
   const [emmaWallets, setEmmaWallets] = useState<string[] | null>(null);
+
+  const [selectedIdentities, setSelectedIdentities] = useState<
+    CommunityMemberMinimal[]
+  >([]);
+
+  const getSelectedWallets = () => selectedIdentities.map((i) => i.wallet);
+  const [selectedWallets, setSelectedWallets] = useState<string[]>(
+    getSelectedWallets()
+  );
+
+  useEffect(
+    () => setSelectedWallets(getSelectedWallets()),
+    [selectedIdentities]
+  );
+
+  useEffect(() => {
+    if (type === GroupCreateWalletsType.EXCLUDE || iAmIncluded) {
+      return;
+    }
+    const myWallets =
+      connectedProfile?.consolidation.wallets.map((w) =>
+        w.wallet.address.toLowerCase()
+      ) ?? [];
+    setSelectedIdentities((prev) =>
+      prev.filter((i) => !myWallets.includes(i.wallet.toLowerCase()))
+    );
+  }, [iAmIncluded, connectedProfile]);
+
+  const onIdentitySelect = (identity: CommunityMemberMinimal) => {
+    setSelectedIdentities((prev) => {
+      if (prev.some((i) => i.wallet === identity.wallet)) {
+        return prev.filter((i) => i.wallet !== identity.wallet);
+      }
+      return [...prev, identity];
+    });
+  };
 
   const onUploadedWalletsChange = (newV: string[] | null) =>
     setUploadedWallets(newV ? Array.from(new Set(newV)) : null);
@@ -38,23 +80,36 @@ export default function GroupCreateWallets({
   useEffect(() => {
     const uploaded = uploadedWallets ?? [];
     const emma = emmaWallets ?? [];
-    const all = Array.from(new Set([...uploaded, ...emma]));
-    setWallets(all.length ? all : null);
-  }, [uploadedWallets, emmaWallets]);
+    const selected = selectedWallets ?? [];
+    const all = Array.from(new Set([...uploaded, ...emma, ...selected]));
+    if (
+      iAmIncluded &&
+      connectedProfile?.profile?.primary_wallet &&
+      type === GroupCreateWalletsType.INCLUDE
+    ) {
+      all.push(connectedProfile.profile.primary_wallet);
+    }
+    setWallets(all.length ? Array.from(new Set(all)) : null);
+  }, [uploadedWallets, emmaWallets, selectedWallets]);
 
   const removeWallets = () => {
     setUploadedWallets(null);
     setEmmaWallets(null);
+    setSelectedIdentities([]);
+  };
+
+  const onRemove = (wallet: string) => {
+    setSelectedIdentities((prev) => prev.filter((i) => i.wallet !== wallet));
   };
 
   const isOverLimit = wallets?.length && wallets.length > walletsLimit;
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-inline-flex tw-items-center tw-space-x-4">
-        <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
+      <div className="tw-inline-flex tw-items-center tw-space-x-3 sm:tw-space-x-4">
+        <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-size-10 sm:tw-size-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
           <svg
-            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-6"
+            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-5 sm:tw-size-6"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -69,27 +124,33 @@ export default function GroupCreateWallets({
             />
           </svg>
         </span>
-        <p className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-iron-50">
           {LABELS[type]}
         </p>
       </div>
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 lg:tw-gap-8">
-        <CreateGroupWalletsUpload
-          type={type}
-          setWallets={onUploadedWalletsChange}
-          wallets={uploadedWallets}
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4 sm:tw-gap-6">
+        <GroupCreateIdentitiesSelect
+          onIdentitySelect={onIdentitySelect}
+          selectedIdentities={selectedIdentities}
+          selectedWallets={selectedWallets}
+          onRemove={onRemove}
         />
         <CreateGroupWalletsEmma
           setWallets={onEmmaWalletsChange}
           wallets={emmaWallets}
         />
+        <CreateGroupWalletsUpload
+          type={type}
+          setWallets={onUploadedWalletsChange}
+          wallets={uploadedWallets}
+        />
       </div>
       {!!wallets?.length && (
-        <div className="tw-mt-4">
+        <div className="tw-mt-4 tw-w-full md:tw-w-1/2 sm:tw-pr-4">
           <div className="tw-w-full tw-flex tw-items-center tw-gap-x-4">
             <div
-              className={`tw-px-4 tw-py-4 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl ${
-                isOverLimit ? " tw-border-error" : " tw-border-primary-400"
+              className={`tw-w-full tw-px-4 tw-py-3 tw-flex tw-justify-between tw-gap-x-4 tw-items-center tw-rounded-xl ${
+                isOverLimit ? " tw-border-error" : " tw-border-iron-400"
               } tw-bg-iron-950 tw-border tw-border-solid`}
             >
               <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
@@ -109,7 +170,7 @@ export default function GroupCreateWallets({
                   />
                 </svg>
                 <span className="tw-inline-flex tw-gap-x-1.5">
-                  <span className="tw-text-iron-400 tw-font-medium">
+                  <span className="tw-text-iron-50 tw-font-medium">
                     Total unique wallets:
                   </span>
                   <span
@@ -126,7 +187,7 @@ export default function GroupCreateWallets({
               onClick={removeWallets}
               type="button"
               aria-label="Remove wallets"
-              className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-650 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-900 tw-ring-iron-700 hover:tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
                 className="tw-h-4 tw-w-4 tw-text-error tw-transition tw-duration-300 tw-ease-out"
