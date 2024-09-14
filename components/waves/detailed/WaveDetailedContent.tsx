@@ -95,6 +95,7 @@ export default function WaveDetailedContent({
           onCancelReplyQuote={onCancelReplyQuote}
           wave={wave}
           onDropCreate={onDropCreate}
+          rootDropId={null}
         />
       </div>
       <WaveDrops
