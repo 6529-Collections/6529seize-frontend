@@ -53,6 +53,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
     setQuotedPart(part);
   }, [drop]);
 
+
   return (
     <div className="tw-bg-iron-950 tw-rounded-xl tw-px-4 tw-py-2 tw-mt-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
       <div className="tw-relative tw-group tw-w-full tw-flex tw-flex-col">

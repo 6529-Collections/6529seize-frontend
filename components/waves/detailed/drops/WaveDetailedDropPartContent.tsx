@@ -63,6 +63,7 @@ const WaveDetailedDropPartContent: React.FC<
       }
     }
   };
+
   return (
     <div className="tw-w-full tw-flex tw-justify-between tw-space-x-2">
       {showPrevButton && (

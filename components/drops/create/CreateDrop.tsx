@@ -218,7 +218,7 @@ export default function CreateDrop({
       updated_at: null,
       title: dropRequest.title ?? null,
       parts: dropRequest.parts.map((part, i) => ({
-        part_id: i,
+        part_id: i + 1,
         content: part.content ?? null,
         media: part.media.map((media) => ({
           url: media.url,
@@ -278,7 +278,7 @@ export default function CreateDrop({
     };
     const optimisticDrop = getOptimisticDrop(requestBody);
     if (optimisticDrop) {
-      addOptimisticDrop({ drop: optimisticDrop });
+      addOptimisticDrop({ drop: optimisticDrop, rootDropId: null });
     }
     await addDropMutation.mutateAsync(requestBody);
   };

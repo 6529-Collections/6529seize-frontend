@@ -27,6 +27,7 @@ import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import FilePreview from "./FilePreview";
+import CreateDropStormParts from "./CreateDropStormParts";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -339,7 +340,7 @@ export default function CreateDrop({
       updated_at: null,
       title: dropRequest.title ?? null,
       parts: dropRequest.parts.map((part, i) => ({
-        part_id: i,
+        part_id: i + 1,
         content: part.content ?? null,
         media: part.media.map((media) => ({
           url: media.url,
@@ -433,7 +434,7 @@ export default function CreateDrop({
     };
     const optimisticDrop = getOptimisticDrop(requestBody);
     if (optimisticDrop) {
-      addOptimisticDrop({ drop: optimisticDrop });
+      addOptimisticDrop({ drop: optimisticDrop, rootDropId });
     }
     await addDropMutation.mutateAsync(requestBody);
   };
@@ -475,8 +476,17 @@ export default function CreateDrop({
     setFiles(newFiles);
   };
 
+  const [isStormMode, setIsStormMode] = useState(false);
+
   return (
     <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-t-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-lg:border-b tw-lg:border-slate-900/10 tw-border-slate-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
+      {isStormMode && (
+        <CreateDropStormParts
+          parts={drop?.parts ?? []}
+          mentionedUsers={drop?.mentioned_users ?? []}
+          referencedNfts={drop?.referenced_nfts ?? []}
+        />
+      )}
       <div className="tw-flex tw-items-start tw-gap-x-3">
         <div className="tw-flex-grow">
           <CreateDropReplyingWrapper
@@ -491,6 +501,7 @@ export default function CreateDrop({
                 editorState={editorState}
                 type={activeDrop?.action ?? null}
                 drop={drop}
+                setIsStormMode={setIsStormMode}
                 canSubmit={canSubmit}
                 canAddPart={canAddPart}
                 onEditorState={setEditorState}

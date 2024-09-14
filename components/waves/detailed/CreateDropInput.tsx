@@ -75,6 +75,7 @@ const CreateDropInput = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly canSubmit: boolean;
     readonly canAddPart: boolean;
+    readonly setIsStormMode: (isStormMode: boolean) => void;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
@@ -98,6 +99,7 @@ const CreateDropInput = forwardRef<
       onDrop,
       setFiles,
       onDropPart,
+      setIsStormMode,
     },
     ref
   ) => {
@@ -190,7 +192,6 @@ const CreateDropInput = forwardRef<
       );
     }, [editorState]);
 
-    const [isStormMode, setIsStormMode] = useState(false);
     const breakIntoStorm = () => {
       onDropPart();
       setIsStormMode(true);

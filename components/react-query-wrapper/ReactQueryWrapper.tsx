@@ -171,7 +171,10 @@ type ReactQueryWrapperContextType = {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
   waitAndInvalidateDrops: () => void;
-  addOptimisticDrop: (params: { drop: Drop }) => void;
+  addOptimisticDrop: (params: {
+    readonly drop: Drop;
+    readonly rootDropId: string | null;
+  }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
@@ -766,14 +769,20 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const addDropToDrops = ({ drop }: { readonly drop: Drop }): void => {
+  const addDropToDrops = ({
+    drop,
+    rootDropId,
+  }: {
+    readonly drop: Drop;
+    readonly rootDropId: string | null;
+  }): void => {
     queryClient.setQueryData(
       [
         QueryKey.DROPS,
         {
           limit: 20,
           waveId: drop.wave.id,
-          dropId: null,
+          dropId: rootDropId,
         },
       ],
       (
@@ -1158,10 +1167,12 @@ export default function ReactQueryWrapper({
 
   const addOptimisticDrop = async ({
     drop,
+    rootDropId,
   }: {
     readonly drop: Drop;
+    readonly rootDropId: string | null;
   }): Promise<void> => {
-    addDropToDrops({ drop });
+    addDropToDrops({ drop, rootDropId });
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {
@@ -1175,7 +1186,7 @@ export default function ReactQueryWrapper({
     invalidateDrops();
   };
 
-  const dropChangeMutation = ({
+  const profileDropChangeMutation = ({
     oldData,
     drop,
   }: {
@@ -1202,6 +1213,36 @@ export default function ReactQueryWrapper({
     };
   };
 
+  const dropsDropChangeMutation = ({
+    oldData,
+    drop,
+  }: {
+    oldData:
+      | {
+          pages:WaveDropsFeed[];
+        }
+      | undefined;
+    drop: Drop;
+  }) => {
+    if (!oldData) {
+      return oldData;
+    }
+    return {
+      ...oldData,
+      pages: oldData.pages.map((page) => {
+        return {
+          ...page,
+          drops: page.drops.map((d) => {
+            if (d.id === drop.id) {
+              return drop;
+            }
+            return d;
+          }),
+        };
+      }),
+    };
+  };
+
   const onDropChange = ({
     drop,
     giverHandle,
@@ -1223,7 +1264,7 @@ export default function ReactQueryWrapper({
               pages: Drop[][];
             }
           | undefined
-      ) => dropChangeMutation({ oldData, drop })
+      ) => profileDropChangeMutation({ oldData, drop })
     );
     queryClient.setQueriesData(
       {
@@ -1232,10 +1273,10 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: Drop[][];
+              pages: WaveDropsFeed[];
             }
           | undefined
-      ) => dropChangeMutation({ oldData, drop })
+      ) => dropsDropChangeMutation({ oldData, drop })
     );
     if (giverHandle) {
       queryClient.invalidateQueries({

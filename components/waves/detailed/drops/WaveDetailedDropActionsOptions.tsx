@@ -17,11 +17,6 @@ const WaveDetailedDropActionsOptions: React.FC<
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const handleDelete = () => {
-    // Implement delete functionality here
-    console.log("Delete drop:", drop.id);
-  };
-
   return (
     <div className="tw-relative" ref={listRef}>
       <button
