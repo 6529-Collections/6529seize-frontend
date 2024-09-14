@@ -20,6 +20,7 @@ import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { wait } from "../../helpers/Helpers";
 import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
 import { FeedItemType } from "../../generated/models/FeedItemType";
+import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -770,24 +771,26 @@ export default function ReactQueryWrapper({
       [
         QueryKey.DROPS,
         {
-          limit: `10`,
-          context_profile: drop.author.handle,
-          wave_id: drop.wave.id,
-          include_replies: "true",
+          limit: 20,
+          waveId: drop.wave.id,
+          dropId: null,
         },
       ],
       (
         oldData:
           | {
-              pages: Drop[][];
+              pages: WaveDropsFeed[];
             }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
           return oldData;
         }
-        const pages = JSON.parse(JSON.stringify(oldData.pages));
-        pages.at(0)?.unshift(drop);
+        const pages: WaveDropsFeed[] = JSON.parse(
+          JSON.stringify(oldData.pages)
+        );
+
+        pages.at(0)?.drops.unshift(drop);
         return {
           ...oldData,
           pages,
@@ -1315,7 +1318,6 @@ export default function ReactQueryWrapper({
   };
 
   const invalidateDrops = () => {
-    console.log('yes here')
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],
     });
