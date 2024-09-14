@@ -169,7 +169,7 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onDropCreate: () => void;
+  waitAndInvalidateDrops: () => void;
   addOptimisticDrop: (params: { drop: Drop }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
@@ -201,7 +201,7 @@ export const ReactQueryWrapperContext =
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
-    onDropCreate: () => {},
+    waitAndInvalidateDrops: () => {},
     addOptimisticDrop: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
@@ -1167,7 +1167,7 @@ export default function ReactQueryWrapper({
     }
   };
 
-  const onDropCreate = async (): Promise<void> => {
+  const waitAndInvalidateDrops = async (): Promise<void> => {
     await wait(500);
     invalidateDrops();
   };
@@ -1315,6 +1315,7 @@ export default function ReactQueryWrapper({
   };
 
   const invalidateDrops = () => {
+    console.log('yes here')
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],
     });
@@ -1370,7 +1371,7 @@ export default function ReactQueryWrapper({
       initCommunityActivityPage,
       onGroupRemoved,
       onGroupChanged,
-      onDropCreate,
+      waitAndInvalidateDrops,
       addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,
@@ -1397,7 +1398,7 @@ export default function ReactQueryWrapper({
       initCommunityActivityPage,
       onGroupRemoved,
       onGroupChanged,
-      onDropCreate,
+      waitAndInvalidateDrops,
       addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,

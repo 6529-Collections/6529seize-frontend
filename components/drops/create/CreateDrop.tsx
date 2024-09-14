@@ -64,7 +64,7 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { onDropCreate, addOptimisticDrop, invalidateDrops } = useContext(
+  const { waitAndInvalidateDrops, addOptimisticDrop, invalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
   const [init, setInit] = useState(isClient);
@@ -94,7 +94,7 @@ export default function CreateDrop({
       }),
     onSuccess: (response: Drop) => {
       setDropEditorRefreshKey((prev) => prev + 1);
-      onDropCreate();
+      waitAndInvalidateDrops();
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
       }

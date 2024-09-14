@@ -83,7 +83,7 @@ export default function WaveDetailedContent({
     setActiveDrop(null);
   };
 
-  const onDropCreate = () => {
+  const onDropCreated = () => {
     setActiveDrop(null);
   };
 
@@ -94,7 +94,7 @@ export default function WaveDetailedContent({
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}
           wave={wave}
-          onDropCreate={onDropCreate}
+          onDropCreated={onDropCreated}
           rootDropId={null}
         />
       </div>

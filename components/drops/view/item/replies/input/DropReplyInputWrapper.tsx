@@ -33,7 +33,7 @@ export default function DropReplyInputWrapper({
   readonly onReply: () => void;
 }) {
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
-  const { onDropCreate, addOptimisticDrop, invalidateDrops } = useContext(
+  const { waitAndInvalidateDrops, addOptimisticDrop, invalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
 
@@ -96,7 +96,7 @@ export default function DropReplyInputWrapper({
       }),
     onSuccess: (respone: Drop) => {
       setDrop(null);
-      onDropCreate();
+      waitAndInvalidateDrops();
       onReply();
     },
     onError: (error) => {

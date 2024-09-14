@@ -55,7 +55,7 @@ export default function CreateWave({
 }) {
   const router = useRouter();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
+  const { waitAndInvalidateDrops, onWaveCreated } = useContext(ReactQueryWrapperContext);
   const initialType = WaveType.Chat;
   const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
@@ -361,7 +361,7 @@ export default function CreateWave({
         body,
       }),
     onSuccess: (response) => {
-      onDropCreate();
+      waitAndInvalidateDrops();
       onWaveCreated();
       router.push(`/waves/${response.id}`);
       return response;

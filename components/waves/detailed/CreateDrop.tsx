@@ -33,7 +33,7 @@ interface CreateDropProps {
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: Wave;
-  readonly onDropCreate: () => void;
+  readonly onDropCreated: () => void;
 }
 
 export default function CreateDrop({
@@ -41,10 +41,10 @@ export default function CreateDrop({
   rootDropId,
   onCancelReplyQuote,
   wave,
-  onDropCreate,
+  onDropCreated,
 }: CreateDropProps) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { addOptimisticDrop, invalidateDrops } = useContext(
+  const { addOptimisticDrop, waitAndInvalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
   const [submitting, setSubmitting] = useState(false);
@@ -376,8 +376,6 @@ export default function CreateDrop({
     setDrop(null);
   };
 
-  useEffect(() => {}, [dropEditorRefreshKey]);
-
   const addDropMutation = useMutation({
     mutationFn: async (body: CreateDropRequest) =>
       await commonApiPost<CreateDropRequest, Drop>({
@@ -386,14 +384,15 @@ export default function CreateDrop({
       }),
     onSuccess: (response: Drop) => {
       refreshState();
-      onDropCreate();
+      onDropCreated();
+      waitAndInvalidateDrops();
     },
     onError: (error) => {
       setToast({
         message: error as unknown as string,
         type: "error",
       });
-      invalidateDrops();
+      waitAndInvalidateDrops();
     },
     onSettled: () => {
       setSubmitting(false);
