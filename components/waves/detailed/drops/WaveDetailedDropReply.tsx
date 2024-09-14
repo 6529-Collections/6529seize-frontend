@@ -4,8 +4,8 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
-import Link from "next/link";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
+import { useRouter } from "next/router";
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
@@ -16,6 +16,7 @@ export default function WaveDetailedDropReply({
   dropId,
   dropPartId,
 }: WaveDetailedDropReplyProps) {
+  const router = useRouter();
   const {
     data: drop,
     isFetching,
@@ -80,13 +81,19 @@ export default function WaveDetailedDropReply({
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5 tw-cursor-pointer">
         <WaveDetailedDropReplyAuthor isFetching={isFetching} drop={drop} />
         <div>
-          <DropPartMarkdown
-            partContent={content}
-            mentionedUsers={drop?.mentioned_users ?? []}
-            referencedNfts={drop?.referenced_nfts ?? []}
-            onImageLoaded={() => undefined}
-            textSize="sm"
-          />
+          <div
+            onClick={() =>
+              router.push(`/waves/${drop?.wave.id}?drop=${drop?.id}`)
+            }
+          >
+            <DropPartMarkdown
+              partContent={content}
+              mentionedUsers={drop?.mentioned_users ?? []}
+              referencedNfts={drop?.referenced_nfts ?? []}
+              onImageLoaded={() => undefined}
+              textSize="sm"
+            />
+          </div>
         </div>
       </div>
     </div>

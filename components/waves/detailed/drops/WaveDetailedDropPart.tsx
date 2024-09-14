@@ -3,6 +3,7 @@ import { Drop } from "../../../../generated/models/Drop";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
 import WaveDetailedDropPartOverflow from "./WaveDetailedDropPartOverflow";
+import { useRouter } from "next/router";
 
 interface WaveDetailedDropPartProps {
   drop: Drop;
@@ -12,6 +13,7 @@ interface WaveDetailedDropPartProps {
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
   ({ drop, activePartIndex, setActivePartIndex }) => {
+    const router = useRouter();
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
     useEffect(() => {
@@ -19,9 +21,8 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     }, [activePartIndex, drop.parts]);
 
     const isStorm = drop.parts.length && drop.parts.length > 1;
-    const showPrevButton = !!activePartIndex && activePartIndex > 1;
-    const showNextButton =
-      !!activePartIndex && activePartIndex < drop.parts.length - 1;
+    const showPrevButton = activePartIndex > 0;
+    const showNextButton = activePartIndex < drop.parts.length - 1;
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const checkOverflow = () => {
@@ -33,13 +34,14 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     };
     const [showMore, setShowMore] = useState(false);
 
-
-
-
-
-
     return (
-      <div>
+      <div 
+        className="tw-cursor-pointer"
+        onClick={() => router.push(`/waves/${drop.wave.id}?drop=${drop.id}`)}
+        role="button"
+        tabIndex={0}
+  
+      >
         <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
           <div
             ref={containerRef}

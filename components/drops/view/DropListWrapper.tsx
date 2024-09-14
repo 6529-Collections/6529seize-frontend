@@ -10,9 +10,10 @@ interface DropListWrapperProps {
   readonly loading: boolean;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
+  readonly rootDropId: string | null;
   readonly onBottomIntersection: (state: boolean) => void;
-  readonly onReply: ({ drop }: { drop: Drop }) => void;
-  readonly onQuote: ({ drop }: { drop: Drop }) => void;
+  readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
+  readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
 }
 
 export default function DropListWrapper({
@@ -20,6 +21,7 @@ export default function DropListWrapper({
   loading,
   showWaveInfo,
   activeDrop,
+  rootDropId,
   onBottomIntersection,
   onReply,
   onQuote,
@@ -33,6 +35,7 @@ export default function DropListWrapper({
         onReply={onReply}
         onQuote={onQuote}
         activeDrop={activeDrop}
+        rootDropId={rootDropId}
       />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">

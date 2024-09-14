@@ -1,77 +1,521 @@
 import PrimaryButton from "../../utils/button/PrimaryButton";
-import { ActiveDropState } from "./WaveDetailedContent";
+import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
-import CreateDropInput from "./CreateDropInput";
+import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
+import { useContext, useEffect, useRef, useState } from "react";
+import { EditorState } from "lexical";
+import {
+  CreateDropConfig,
+  CreateDropPart,
+  CreateDropRequestPart,
+  DropMedia,
+  DropMetadata,
+  MentionedUser,
+  ReferencedNft,
+} from "../../../entities/IDrop";
+import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
+import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
+import { IMAGE_TRANSFORMER } from "../../drops/create/lexical/transformers/ImageTransformer";
+import { AuthContext } from "../../auth/Auth";
+import { commonApiPost } from "../../../services/api/common-api";
+import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
+import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
+import { Drop } from "../../../generated/models/Drop";
+import { Wave } from "../../../generated/models/Wave";
+import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
+import { useMutation } from "@tanstack/react-query";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import FilePreview from "./FilePreview";
 
 interface CreateDropProps {
-  activeDrop: ActiveDropState | null;
-  onCancelReplyQuote: () => void;
+  readonly activeDrop: ActiveDropState | null;
+  readonly rootDropId: string | null;
+  readonly onCancelReplyQuote: () => void;
+  readonly wave: Wave;
+  readonly onDropCreate: () => void;
 }
 
 export default function CreateDrop({
   activeDrop,
+  rootDropId,
   onCancelReplyQuote,
+  wave,
+  onDropCreate,
 }: CreateDropProps) {
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { addOptimisticDrop, invalidateDrops } = useContext(
+    ReactQueryWrapperContext
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const [editorState, setEditorState] = useState<EditorState | null>(null);
+  const [drop, setDrop] = useState<CreateDropConfig | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+
+  const getMarkdown = () =>
+    editorState?.read(() =>
+      $convertToMarkdownString([
+        ...TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        HASHTAG_TRANSFORMER,
+        IMAGE_TRANSFORMER,
+      ])
+    ) ?? null;
+
+  const getCanSubmitStorm = () => {
+    const markdown = getMarkdown();
+    if (markdown?.length && markdown.length > 240) {
+      return false;
+    }
+    return true;
+  };
+
+  const getCanSubmit = () =>
+    !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
+    !!(drop?.parts.length ? getCanSubmitStorm() : true);
+
+  const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
+
+  const getIsDropLimit = () =>
+    (drop?.parts.reduce(
+      (acc, part) => acc + (part.content?.length ?? 0),
+      getMarkdown()?.length ?? 0
+    ) ?? 0) >= 24000;
+
+  const getIsCharsLimit = () => {
+    const markDown = getMarkdown();
+    if (!!markDown?.length && markDown.length > 240) {
+      return true;
+    }
+    return false;
+  };
+
+  const [canSubmit, setCanSubmit] = useState(getCanSubmit());
+  const getCanAddPart = () =>
+    getHaveMarkdownOrFile() && !getIsDropLimit() && !getIsCharsLimit();
+  const [canAddPart, setCanAddPart] = useState(getCanAddPart());
+
+  useEffect(() => {
+    setCanSubmit(getCanSubmit());
+    setCanAddPart(getCanAddPart());
+  }, [editorState, files, drop]);
+
+  const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
+
+  const onReferencedNft = (newNft: ReferencedNft) => {
+    setReferencedNfts([
+      ...referencedNfts.filter(
+        (i) => !(i.token === newNft.token && i.contract === newNft.contract)
+      ),
+      newNft,
+    ]);
+  };
+
+  const [mentionedUsers, setMentionedUsers] = useState<
+    Omit<MentionedUser, "current_handle">[]
+  >([]);
+
+  const onMentionedUser = (newUser: Omit<MentionedUser, "current_handle">) => {
+    setMentionedUsers((curr) => {
+      return [...curr, newUser];
+    });
+  };
+
+  const [metadata, setMetadata] = useState<DropMetadata[]>([]);
+
+  const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
+
+  const clearInputState = () => {
+    createDropInputRef.current?.clearEditorState();
+    setFiles([]);
+  };
+
+  const onDropPart = (): CreateDropConfig => {
+    const markdown = getMarkdown();
+    if (!markdown?.length && !files.length) {
+      const currentDrop: CreateDropConfig = {
+        title: null,
+        reply_to:
+          activeDrop?.action === ActiveDropAction.REPLY
+            ? {
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
+            : rootDropId
+            ? {
+                drop_id: rootDropId,
+                drop_part_id: 1,
+              }
+            : undefined,
+        parts: drop?.parts.length ? drop.parts : [],
+        mentioned_users: drop?.mentioned_users ?? [],
+        referenced_nfts: drop?.referenced_nfts ?? [],
+        metadata,
+      };
+      setDrop(currentDrop);
+      clearInputState();
+      return currentDrop;
+    }
+    const mentions = mentionedUsers.filter((user) =>
+      markdown?.includes(`@[${user.handle_in_content}]`)
+    );
+    const partMentions = mentions.map((mention) => ({
+      ...mention,
+    }));
+    const notAddedMentions = partMentions.filter(
+      (mention) =>
+        !drop?.mentioned_users.some(
+          (existing) =>
+            existing.mentioned_profile_id === mention.mentioned_profile_id
+        )
+    );
+    const allMentions = [...(drop?.mentioned_users ?? []), ...notAddedMentions];
+    const partNfts = referencedNfts.filter((nft) =>
+      markdown?.includes(`#[${nft.name}]`)
+    );
+    const notAddedNfts = partNfts.filter(
+      (nft) =>
+        !drop?.referenced_nfts.some(
+          (existing) =>
+            existing.contract === nft.contract && existing.token === nft.token
+        )
+    );
+    const allNfts = [...(drop?.referenced_nfts ?? []), ...notAddedNfts];
+    const currentDrop: CreateDropConfig = {
+      title: null,
+      reply_to:
+        activeDrop?.action === ActiveDropAction.REPLY
+          ? {
+              drop_id: activeDrop.drop.id,
+              drop_part_id: activeDrop.partId,
+            }
+          : rootDropId
+          ? {
+              drop_id: rootDropId,
+              drop_part_id: 1,
+            }
+          : undefined,
+      parts: drop?.parts.length ? drop.parts : [],
+      mentioned_users: allMentions,
+      referenced_nfts: allNfts,
+      metadata,
+    };
+
+    currentDrop.parts.push({
+      content: markdown?.length ? markdown : null,
+      quoted_drop:
+        activeDrop?.action === ActiveDropAction.QUOTE
+          ? {
+              drop_id: activeDrop.drop.id,
+              drop_part_id: activeDrop.partId,
+            }
+          : null,
+      media: files,
+    });
+    setDrop(currentDrop);
+    clearInputState();
+    return currentDrop;
+  };
+
+  const generateMediaForPart = async (media: File): Promise<DropMedia> => {
+    const prep = await commonApiPost<
+      {
+        content_type: string;
+        file_name: string;
+        file_size: number;
+      },
+      {
+        upload_url: string;
+        content_type: string;
+        media_url: string;
+      }
+    >({
+      endpoint: "drop-media/prep",
+      body: {
+        content_type: media.type,
+        file_name: media.name,
+        file_size: media.size,
+      },
+    });
+    const myHeaders = new Headers({ "Content-Type": prep.content_type });
+    await fetch(prep.upload_url, {
+      method: "PUT",
+      headers: myHeaders,
+      body: media,
+    });
+    return {
+      url: prep.media_url,
+      mime_type: prep.content_type,
+    };
+  };
+
+  const generatePart = async (
+    part: CreateDropPart
+  ): Promise<CreateDropRequestPart> => {
+    const media = await Promise.all(
+      part.media.map((media) => generateMediaForPart(media))
+    );
+    return {
+      ...part,
+      media,
+    };
+  };
+
+  const generateParts = async ({
+    parts,
+  }: {
+    readonly parts: CreateDropPart[];
+  }): Promise<CreateDropRequestPart[]> => {
+    try {
+      return await Promise.all(parts.map((part) => generatePart(part)));
+    } catch (error) {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+      return [];
+    }
+  };
+
+  const filterMentionedUsers = ({
+    mentionedUsers,
+    parts,
+  }: {
+    readonly mentionedUsers: DropMentionedUser[];
+    readonly parts: CreateDropPart[];
+  }): DropMentionedUser[] =>
+    mentionedUsers.filter((user) =>
+      parts.some((part) =>
+        part.content?.includes(`@[${user.handle_in_content}]`)
+      )
+    );
+
+  const getOptimisticDrop = (dropRequest: CreateDropRequest): Drop | null => {
+    if (!connectedProfile?.profile) {
+      return null;
+    }
+
+    return {
+      id: getOptimisticDropId(),
+      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+      reply_to:
+        activeDrop?.action === ActiveDropAction.REPLY
+          ? {
+              drop_id: activeDrop.drop.id,
+              drop_part_id: activeDrop.partId,
+              is_deleted: false,
+            }
+          : rootDropId
+          ? {
+              drop_id: rootDropId,
+              drop_part_id: 1,
+              is_deleted: false,
+            }
+          : undefined,
+      wave: {
+        id: wave.id,
+        name: wave.name,
+        picture: wave.picture ?? "",
+        description_drop_id: wave.description_drop.id,
+        authenticated_user_eligible_to_participate:
+          wave.participation.authenticated_user_eligible,
+        authenticated_user_eligible_to_vote:
+          wave.voting.authenticated_user_eligible,
+      },
+      author: {
+        id: connectedProfile.profile.external_id,
+        handle: connectedProfile.profile.handle,
+        pfp: connectedProfile.profile.pfp_url ?? null,
+        banner1_color: connectedProfile.profile.banner_1 ?? null,
+        banner2_color: connectedProfile.profile.banner_2 ?? null,
+        cic: connectedProfile.cic.cic_rating,
+        rep: connectedProfile.rep,
+        tdh: connectedProfile.consolidation.tdh,
+        level: connectedProfile.level,
+        subscribed_actions: [],
+        archived: false,
+      },
+      created_at: Date.now(),
+      updated_at: null,
+      title: dropRequest.title ?? null,
+      parts: dropRequest.parts.map((part, i) => ({
+        part_id: i,
+        content: part.content ?? null,
+        media: part.media.map((media) => ({
+          url: media.url,
+          mime_type: media.mime_type,
+        })),
+        quoted_drop: part.quoted_drop
+          ? {
+              ...part.quoted_drop,
+              is_deleted: false,
+            }
+          : null,
+        replies_count: 0,
+        quotes_count: 0,
+      })),
+      parts_count: dropRequest.parts.length,
+      referenced_nfts: dropRequest.referenced_nfts,
+      mentioned_users: dropRequest.mentioned_users,
+      metadata: dropRequest.metadata,
+      rating: 0,
+      top_raters: [],
+      raters_count: 0,
+      context_profile_context: null,
+      subscribed_actions: [],
+    };
+  };
+
+  const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
+
+  const refreshState = () => {
+    setDropEditorRefreshKey((prev) => prev + 1);
+    setMetadata([]);
+    setMentionedUsers([]);
+    setReferencedNfts([]);
+    setDrop(null);
+  };
+
+  useEffect(() => {}, [dropEditorRefreshKey]);
+
+  const addDropMutation = useMutation({
+    mutationFn: async (body: CreateDropRequest) =>
+      await commonApiPost<CreateDropRequest, Drop>({
+        endpoint: `drops`,
+        body,
+      }),
+    onSuccess: (response: Drop) => {
+      refreshState();
+      onDropCreate();
+    },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+      invalidateDrops();
+    },
+    onSettled: () => {
+      setSubmitting(false);
+    },
+  });
+
+  // TODO: add required metadata & media validations for wave participation
+  const submitDrop = async (dropRequest: CreateDropConfig) => {
+    if (submitting) {
+      return;
+    }
+    setSubmitting(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      setSubmitting(false);
+      return;
+    }
+
+    if (!dropRequest.parts.length) {
+      setSubmitting(false);
+      return;
+    }
+
+    const parts = await generateParts({ parts: dropRequest.parts });
+    if (!parts.length) {
+      setSubmitting(false);
+      return;
+    }
+
+    const requestBody: CreateDropRequest = {
+      ...dropRequest,
+      mentioned_users: filterMentionedUsers({
+        mentionedUsers: dropRequest.mentioned_users,
+        parts: dropRequest.parts,
+      }),
+      wave_id: wave.id,
+      parts,
+    };
+    const optimisticDrop = getOptimisticDrop(requestBody);
+    if (optimisticDrop) {
+      addOptimisticDrop({ drop: optimisticDrop });
+    }
+    await addDropMutation.mutateAsync(requestBody);
+  };
+
+  const onDrop = async (): Promise<void> => {
+    const currentDrop = onDropPart();
+    await submitDrop(currentDrop);
+  };
+
+  // Focus the editor on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      createDropInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Focus the editor when activeDrop changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      createDropInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeDrop]);
+
+  const handleFileChange = (newFiles: File[]) => {
+    if (newFiles.length > 4) {
+      setToast({
+        message: "You can only upload up to 4 files at a time",
+        type: "error",
+      });
+      return;
+    }
+    setFiles(newFiles);
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
+  };
+
   return (
     <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-t-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-lg:border-b tw-lg:border-slate-900/10 tw-border-slate-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
-      <div className="tw-flex tw-items-end tw-gap-x-3">
-        <div className="tw-w-full">
+      <div className="tw-flex tw-items-start tw-gap-x-3">
+        <div className="tw-flex-grow">
           <CreateDropReplyingWrapper
             activeDrop={activeDrop}
             onCancelReplyQuote={onCancelReplyQuote}
           />
-          <div className="tw-relative tw-w-full">
-            <input
-              placeholder="Drop a post"
-              className="tw-pr-24 tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-      tw-pl-3 tw-py-2.5"
-            />
-            <button
-              type="button"
-              aria-label="Attach a file"
-              className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-11 tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                aria-hidden="true"
-                stroke="currentColor"
-                className="tw-size-6"
+          <div className="tw-flex tw-items-end">
+            <div className="tw-flex-grow">
+              <CreateDropInput
+                key={dropEditorRefreshKey}
+                ref={createDropInputRef}
+                editorState={editorState}
+                type={activeDrop?.action ?? null}
+                drop={drop}
+                canSubmit={canSubmit}
+                canAddPart={canAddPart}
+                onEditorState={setEditorState}
+                onReferencedNft={onReferencedNft}
+                onMentionedUser={onMentionedUser}
+                setFiles={handleFileChange}
+                onDropPart={onDropPart}
+                onDrop={onDrop}
+              />
+            </div>
+            <div className="tw-ml-3">
+              <PrimaryButton
+                onClicked={onDrop}
+                loading={submitting}
+                disabled={!canSubmit}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Expand view"
-              className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-1 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
-            >
-              <svg
-                className="tw-h-5 tw-w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21 14V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H14M10 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V10M15 9L21 3M21 3H15M21 3V9M9 15L3 21M3 21H9M3 21L3 15"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+                Drop
+              </PrimaryButton>
+            </div>
           </div>
-          {/* <CreateDropInput/> */}
+          {!!files.length && (
+            <FilePreview files={files} removeFile={removeFile} />
+          )}
         </div>
-        <PrimaryButton>Drop</PrimaryButton>
       </div>
     </div>
   );

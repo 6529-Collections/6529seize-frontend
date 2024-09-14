@@ -686,22 +686,6 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: min_part_id
-          in: query
-          description: Minimum ID of the parts wrapped in drops
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
-        - name: max_part_id
-          in: query
-          description: Maximum ID of the parts wrapped in drops
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
         - name: include_replies
           in: query
           description: If true then reply drops will be included in top level (false by default)
@@ -750,22 +734,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: min_part_id
-          in: query
-          description: Minimum ID of the parts wrapped in drops
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
-        - name: max_part_id
-          in: query
-          description: Maximum ID of the parts wrapped in drops
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
       responses:
         "200":
           description: successful operation
@@ -1339,6 +1307,46 @@ paths:
           description: Drop not found
         "400":
           description: "Invalid request"
+
+  /waves/{id}/drops:
+    get:
+      tags:
+        - Waves
+      summary: Get drops related to wave or parent drop
+      operationId: getDropsOfWave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: drop_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 50
+            default: 20
+        - name: serial_no_less_than
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaveDropsFeed"
 
   /waves/{id}/subscriptions:
     post:
@@ -2156,6 +2164,88 @@ components:
         next:
           type: string
           nullable: true
+
+    DropWithoutWave:
+      type: object
+      required:
+        - id
+        - serial_no
+        - author
+        - created_at
+        - updated_at
+        - referenced_nfts
+        - mentioned_users
+        - metadata
+        - parts
+        - parts_count
+        - rating
+        - top_raters
+        - raters_count
+        - title
+        - subscribed_actions
+        - context_profile_context
+      properties:
+        id:
+          type: string
+        serial_no:
+          description: Sequence number of the drop in Seize
+          type: number
+          format: int64
+        reply_to:
+          $ref: "#/components/schemas/ReplyToDropResponse"
+        author:
+          $ref: "#/components/schemas/ProfileMin"
+        created_at:
+          description: Time when the drop was created in milliseconds since 1-1-1970 00:00:00.0 UTC
+          type: number
+          format: int64
+        updated_at:
+          description: Time when the drop was updated in milliseconds since 1-1-1970 00:00:00.0 UTC
+          type: number
+          format: int64
+          nullable: true
+        title:
+          type: string
+          maxLength: 250
+          nullable: true
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropPart"
+        parts_count:
+          description: "Number of drops in the storm"
+          type: number
+          format: int64
+        referenced_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropReferencedNFT"
+        mentioned_users:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMentionedUser"
+        metadata:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropMetadata"
+        rating:
+          type: number
+          format: int64
+        top_raters:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropRater"
+        raters_count:
+          type: number
+          format: int64
+        context_profile_context:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DropContextProfileContext"
+        subscribed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropSubscriptionTargetAction"
 
     Drop:
       type: object
@@ -3572,6 +3662,7 @@ components:
       type: string
       enum:
         - DROP_REPLIED
+        - DROP_VOTED
 
     DropSubscriptionActions:
       type: object
@@ -3589,6 +3680,7 @@ components:
         - WAVE_CREATED
         - DROP_CREATED
         - DROP_REPLIED
+        - DROP_VOTED
 
     IdentitySubscriptionActions:
       type: object
@@ -3934,6 +4026,38 @@ components:
           items:
             type: integer
             format: int64
+
+    DropTraceItem:
+      type: object
+      required:
+        - drop_id
+        - is_deleted
+      properties:
+        drop_id:
+          type: string
+        is_deleted:
+          type: boolean
+
+    WaveDropsFeed:
+      type: object
+      required:
+        - wave
+        - drops
+      properties:
+        wave:
+          $ref: "#/components/schemas/WaveMin"
+        drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/DropWithoutWave"
+        root_drop:
+          $ref: "#/components/schemas/DropWithoutWave"
+        trace:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropTraceItem'
+
+
 
 security:
   - bearerAuth: []

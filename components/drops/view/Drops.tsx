@@ -87,12 +87,11 @@ export default function Drops() {
     );
   }
 
-  return (
-    <DropListWrapper
-      drops={drops}
-      loading={isFetching}
-      showWaveInfo={true}
-      onBottomIntersection={onBottomIntersection}
-    />
-  );
+  return null;
+  // <DropListWrapper
+  //   drops={drops}
+  //   loading={isFetching}
+  //   showWaveInfo={true}
+  //   onBottomIntersection={onBottomIntersection}
+  // />
 }

@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
 import DropPartQuote from "./quote/DropPartQuote";
+import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
 
 interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -172,16 +173,7 @@ export default function DropPartMarkdown({
     const dropId = match ? match[2] : null;
 
     if (isSeizeLink && dropId && waveId) {
-      const onRedropClick = (redropId: string) => {
-        router.push(`/waves/${waveId}?drop=${redropId}`, undefined, {
-          shallow: true,
-        });
-      };
-      return (
-        <div className="tw-bg-iron-900 tw-rounded-lg tw-p-2 tw-w-full mt-1">
-          This is a quote
-        </div>
-      );
+      return <WaveDetailedDropQuote dropId={dropId} partId={0} />;
     }
 
     const twitterRegex =

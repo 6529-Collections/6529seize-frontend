@@ -4,13 +4,15 @@ import { useState } from "react";
 import WaveDetailedDropPart from "./WaveDetailedDropPart";
 interface WaveDetailedDropContentProps {
   drop: Drop;
+  activePartIndex: number;
+  setActivePartIndex: (index: number) => void;
 }
 
 const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
   drop,
+  activePartIndex,
+  setActivePartIndex,
 }) => {
-  const [activePartIndex, setActivePartIndex] = useState<number>(0);
-
   return (
     <div>
       <WaveDetailedDropPart

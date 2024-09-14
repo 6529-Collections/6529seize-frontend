@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import WaveSingleDrop from "./WaveSingleDrop";
 import CreateDrop from "../CreateDrop";
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
@@ -7,21 +7,79 @@ import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import WaveDetailedDrop from "./WaveDetailedDrop";
+import { AuthContext } from "../../../auth/Auth";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { Wave } from "../../../../generated/models/Wave";
+import { commonApiFetch } from "../../../../services/api/common-api";
+import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
+import { Drop } from "../../../../generated/models/Drop";
+import WaveDrops from "./WaveDrops";
+import { ActiveDropAction, ActiveDropState } from "../WaveDetailedContent";
+import WaveDropThreadTrace from "./WaveDropThreadTrace";
 
 interface WaveDropThreadProps {
   rootDropId: string;
   onBackToList: () => void;
+  wave: Wave;
 }
+
+const REQUEST_SIZE = 20;
 
 export default function WaveDropThread({
   rootDropId,
   onBackToList,
+  wave,
 }: WaveDropThreadProps) {
-  // Add state to track the number of drops in the thread
-  const [dropCount, setDropCount] = React.useState(1);
+  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const createDropRef = useRef<HTMLDivElement>(null);
 
-  // Function to update drop count (to be passed to child components)
-  const updateDropCount = (count: number) => setDropCount(count);
+  useEffect(() => {
+    if (activeDrop && createDropRef.current) {
+      const rect = createDropRef.current.getBoundingClientRect();
+      const isFullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+      if (!isFullyVisible) {
+        const scrollTarget = window.scrollY + rect.top - 20; // 20px extra space
+        window.scrollTo({
+          top: scrollTarget,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [activeDrop]);
+
+  const onReply = (drop: Drop, partId: number) => {
+    setActiveDrop({
+      action: ActiveDropAction.REPLY,
+      drop,
+      partId,
+    });
+  };
+
+  const onQuote = (drop: Drop, partId: number) => {
+    setActiveDrop({
+      action: ActiveDropAction.QUOTE,
+      drop,
+      partId,
+    });
+  };
+
+  const handleReply = ({ drop, partId }: { drop: Drop; partId: number }) => {
+    onReply(drop, partId);
+  };
+
+  const handleQuote = ({ drop, partId }: { drop: Drop; partId: number }) => {
+    onQuote(drop, partId);
+  };
+
+  const onCancelReplyQuote = () => {
+    setActiveDrop(null);
+  };
+
+  const onDropCreate = () => {
+    setActiveDrop(null);
+  };
 
   return (
     <div>
@@ -50,18 +108,25 @@ export default function WaveDropThread({
         </button>
       </div>
 
-      <div className="tw-relative">
-        <div className="tw-absolute tw-left-9 tw-top-2 tw-bottom-0 tw-w-[1px] tw-bg-iron-700"></div>
-        <WaveSingleDrop
-          dropId={rootDropId}
-          availableCredit={null}
-          isThreaded={true}
-        />
-      </div>
+      <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
 
       <div className="tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
-        <CreateDrop />
-        {/*  <WaveDetailedDrop /> */}
+        <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
+          <CreateDrop
+            rootDropId={rootDropId}
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+            wave={wave}
+            onDropCreate={onDropCreate}
+          />
+        </div>
+        <WaveDrops
+          wave={wave}
+          onReply={handleReply}
+          onQuote={handleQuote}
+          activeDrop={activeDrop}
+          rootDropId={rootDropId}
+        />
       </div>
     </div>
   );

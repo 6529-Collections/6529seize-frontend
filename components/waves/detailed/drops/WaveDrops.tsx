@@ -7,22 +7,16 @@ import { AuthContext } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
 import { ActiveDropState } from "../WaveDetailedContent";
+import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 
-const REQUEST_SIZE = 10;
-
-interface Query {
-  readonly limit: string;
-  readonly context_profile?: string;
-  readonly wave_id: string;
-  readonly serial_no_less_than?: string;
-  readonly include_replies: string;
-}
+const REQUEST_SIZE = 20;
 
 interface WaveDropsProps {
   readonly wave: Wave;
-  readonly onReply: ({ drop }: { drop: Drop }) => void;
-  readonly onQuote: ({ drop }: { drop: Drop }) => void;
+  readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
+  readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly activeDrop: ActiveDropState | null;
+  readonly rootDropId: string | null;
 }
 
 export default function WaveDrops({
@@ -30,15 +24,9 @@ export default function WaveDrops({
   onReply,
   onQuote,
   activeDrop,
+  rootDropId,
 }: WaveDropsProps) {
   const { connectedProfile } = useContext(AuthContext);
-
-  const query: Query = {
-    limit: `${REQUEST_SIZE}`,
-    context_profile: connectedProfile?.profile?.handle,
-    wave_id: wave.id,
-    include_replies: "true",
-  };
 
   const {
     data,
@@ -51,23 +39,28 @@ export default function WaveDrops({
     queryKey: [
       QueryKey.DROPS,
       {
-        ...query,
+        waveId: wave.id,
+        limit: REQUEST_SIZE,
+        dropId: rootDropId,
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
-        ...query,
+        limit: REQUEST_SIZE.toString(),
       };
+      if (rootDropId) {
+        params.drop_id = rootDropId;
+      }
       if (pageParam) {
         params.serial_no_less_than = `${pageParam}`;
       }
-      return await commonApiFetch<Drop[]>({
-        endpoint: `drops/`,
+      return await commonApiFetch<WaveDropsFeed>({
+        endpoint: `waves/${wave.id}/drops`,
         params,
       });
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
+    getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfile?.profile?.handle,
   });
@@ -75,8 +68,12 @@ export default function WaveDrops({
   const [drops, setDrops] = useState<Drop[]>([]);
   useEffect(() => {
     setDrops(
-      data?.pages.flat().filter((d) => d.id !== d.wave.description_drop_id) ??
-        []
+      data?.pages.flatMap((page) =>
+        page.drops.map((drop) => ({
+          ...drop,
+          wave: page.wave,
+        }))
+      ) ?? []
     );
   }, [data]);
 
@@ -107,6 +104,7 @@ export default function WaveDrops({
       drops={drops}
       loading={isFetching}
       showWaveInfo={false}
+      rootDropId={rootDropId}
       onBottomIntersection={onBottomIntersection}
       onReply={onReply}
       onQuote={onQuote}

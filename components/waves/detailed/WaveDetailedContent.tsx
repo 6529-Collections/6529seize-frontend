@@ -6,13 +6,14 @@ import WaveDrops from "./drops/WaveDrops";
 import WaveDropThread from "./drops/WaveDropThread";
 
 export enum ActiveDropAction {
-  REPLY,
-  QUOTE,
+  REPLY = "REPLY",
+  QUOTE = "QUOTE",
 }
 
 export interface ActiveDropState {
-  drop: Drop;
   action: ActiveDropAction;
+  drop: Drop;
+  partId: number; // Add this line
 }
 
 interface WaveDetailedContentProps {
@@ -49,19 +50,40 @@ export default function WaveDetailedContent({
       <WaveDropThread
         rootDropId={activeDropId}
         onBackToList={onBackToList}
+        wave={wave}
       />
     );
   }
 
-  const handleReply = ({ drop }: { drop: Drop }) => {
-    setActiveDrop({ drop, action: ActiveDropAction.REPLY });
+  const onReply = (drop: Drop, partId: number) => {
+    setActiveDrop({
+      action: ActiveDropAction.REPLY,
+      drop,
+      partId,
+    });
   };
 
-  const handleQuote = ({ drop }: { drop: Drop }) => {
-    setActiveDrop({ drop, action: ActiveDropAction.QUOTE });
+  const onQuote = (drop: Drop, partId: number) => {
+    setActiveDrop({
+      action: ActiveDropAction.QUOTE,
+      drop,
+      partId,
+    });
+  };
+
+  const handleReply = ({ drop, partId }: { drop: Drop; partId: number }) => {
+    onReply(drop, partId);
+  };
+
+  const handleQuote = ({ drop, partId }: { drop: Drop; partId: number }) => {
+    onQuote(drop, partId);
   };
 
   const onCancelReplyQuote = () => {
+    setActiveDrop(null);
+  };
+
+  const onDropCreate = () => {
     setActiveDrop(null);
   };
 
@@ -71,6 +93,8 @@ export default function WaveDetailedContent({
         <CreateDrop
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}
+          wave={wave}
+          onDropCreate={onDropCreate}
         />
       </div>
       <WaveDrops
@@ -78,6 +102,7 @@ export default function WaveDetailedContent({
         onReply={handleReply}
         onQuote={handleQuote}
         activeDrop={activeDrop}
+        rootDropId={null}
       />
     </>
   );
