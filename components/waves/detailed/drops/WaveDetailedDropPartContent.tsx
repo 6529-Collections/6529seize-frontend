@@ -3,8 +3,6 @@ import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
-import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 
 interface WaveDetailedDropPartContentProps {
