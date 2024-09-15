@@ -12,6 +12,7 @@ import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
 import WaveRequiredTypes from "./types/WaveRequiredTypes";
+import { AnimatePresence, motion } from "framer-motion";
 
 enum WaveDetailedView {
   CONTENT = "CONTENT",
@@ -149,7 +150,17 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
               ref={contentWrapperRef}
               className="tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-pb-2"
             >
-              {components[activeView]}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeView}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {components[activeView]}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </div>

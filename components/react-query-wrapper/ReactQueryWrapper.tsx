@@ -1186,6 +1186,7 @@ export default function ReactQueryWrapper({
     invalidateDrops();
   };
 
+
   const profileDropChangeMutation = ({
     oldData,
     drop,
@@ -1219,27 +1220,31 @@ export default function ReactQueryWrapper({
   }: {
     oldData:
       | {
-          pages:WaveDropsFeed[];
+          pages: WaveDropsFeed[];
         }
+      | WaveDropsFeed
       | undefined;
     drop: Drop;
   }) => {
     if (!oldData) {
       return oldData;
     }
+
+    // Handle infinite query data structure
+    if ('pages' in oldData) {
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page) => ({
+          ...page,
+          drops: page.drops.map((d) => (d.id === drop.id ? drop : d)),
+        })),
+      };
+    }
+
+    // Handle regular query data structure
     return {
       ...oldData,
-      pages: oldData.pages.map((page) => {
-        return {
-          ...page,
-          drops: page.drops.map((d) => {
-            if (d.id === drop.id) {
-              return drop;
-            }
-            return d;
-          }),
-        };
-      }),
+      drops: oldData.drops.map((d) => (d.id === drop.id ? drop : d)),
     };
   };
 
@@ -1270,13 +1275,7 @@ export default function ReactQueryWrapper({
       {
         queryKey: [QueryKey.DROPS],
       },
-      (
-        oldData:
-          | {
-              pages: WaveDropsFeed[];
-            }
-          | undefined
-      ) => dropsDropChangeMutation({ oldData, drop })
+      (oldData: any) => dropsDropChangeMutation({ oldData, drop })
     );
     if (giverHandle) {
       queryClient.invalidateQueries({

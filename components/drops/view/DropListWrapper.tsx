@@ -2,8 +2,9 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import DropsList from "./DropsList";
-import { Drop } from "../../../generated/models/Drop";
+
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { Drop } from "../../../generated/models/Drop";
 
 interface DropListWrapperProps {
   readonly drops: Drop[];
@@ -12,6 +13,7 @@ interface DropListWrapperProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onBottomIntersection: (state: boolean) => void;
+  readonly showReplyAndQuote: boolean;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
 }
@@ -25,6 +27,7 @@ export default function DropListWrapper({
   onBottomIntersection,
   onReply,
   onQuote,
+  showReplyAndQuote,
 }: DropListWrapperProps) {
   return (
     <div className="tw-overflow-hidden">
@@ -34,6 +37,7 @@ export default function DropListWrapper({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
+        showReplyAndQuote={showReplyAndQuote}
         activeDrop={activeDrop}
         rootDropId={rootDropId}
       />

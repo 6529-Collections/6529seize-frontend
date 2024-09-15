@@ -4,6 +4,7 @@ import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import WaveDropThread from "./drops/WaveDropThread";
+import { AnimatePresence, motion } from "framer-motion";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -29,6 +30,7 @@ export default function WaveDetailedContent({
 }: WaveDetailedContentProps) {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const createDropRef = useRef<HTMLDivElement>(null);
+  const canDrop = wave.participation.authenticated_user_eligible;
 
   useEffect(() => {
     if (activeDrop && createDropRef.current) {
@@ -44,16 +46,6 @@ export default function WaveDetailedContent({
       }
     }
   }, [activeDrop]);
-
-  if (activeDropId) {
-    return (
-      <WaveDropThread
-        rootDropId={activeDropId}
-        onBackToList={onBackToList}
-        wave={wave}
-      />
-    );
-  }
 
   const onReply = (drop: Drop, partId: number) => {
     setActiveDrop({
@@ -88,23 +80,58 @@ export default function WaveDetailedContent({
   };
 
   return (
-    <>
-      <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
-        <CreateDrop
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-          wave={wave}
-          onDropCreated={onDropCreated}
-          rootDropId={null}
-        />
-      </div>
-      <WaveDrops
-        wave={wave}
-        onReply={handleReply}
-        onQuote={handleQuote}
-        activeDrop={activeDrop}
-        rootDropId={null}
-      />
-    </>
+    <AnimatePresence mode="wait">
+      {activeDropId ? (
+        <motion.div
+          key="thread"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <WaveDropThread
+            rootDropId={activeDropId}
+            onBackToList={onBackToList}
+            wave={wave}
+          />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="drops"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {canDrop && (
+            <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
+              <CreateDrop
+                activeDrop={activeDrop}
+                onCancelReplyQuote={onCancelReplyQuote}
+                wave={{
+                  id: wave.id,
+                  name: wave.name,
+                  picture: wave.picture ?? "",
+                  description_drop_id: wave.description_drop.id,
+                  authenticated_user_eligible_to_participate:
+                    wave.participation.authenticated_user_eligible,
+                  authenticated_user_eligible_to_vote:
+                    wave.voting.authenticated_user_eligible,
+                }}
+                onDropCreated={onDropCreated}
+                rootDropId={null}
+              />
+            </div>
+          )}
+          <WaveDrops
+            wave={wave}
+            onReply={handleReply}
+            onQuote={handleQuote}
+            activeDrop={activeDrop}
+            rootDropId={null}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -1,18 +1,8 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import WaveSingleDrop from "./WaveSingleDrop";
+import React, { useEffect, useRef, useState } from "react";
 import CreateDrop from "../CreateDrop";
-import WaveDetailedDropActions from "./WaveDetailedDropActions";
-import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
-import WaveDetailedDropContent from "./WaveDetailedDropContent";
-import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
-import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import WaveDetailedDrop from "./WaveDetailedDrop";
-import { AuthContext } from "../../../auth/Auth";
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+
 import { Wave } from "../../../../generated/models/Wave";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
+
 import { Drop } from "../../../../generated/models/Drop";
 import WaveDrops from "./WaveDrops";
 import { ActiveDropAction, ActiveDropState } from "../WaveDetailedContent";
@@ -24,8 +14,6 @@ interface WaveDropThreadProps {
   wave: Wave;
 }
 
-const REQUEST_SIZE = 20;
-
 export default function WaveDropThread({
   rootDropId,
   onBackToList,
@@ -33,6 +21,7 @@ export default function WaveDropThread({
 }: WaveDropThreadProps) {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const createDropRef = useRef<HTMLDivElement>(null);
+  const canDrop = wave.participation.authenticated_user_eligible;
 
   useEffect(() => {
     if (activeDrop && createDropRef.current) {
@@ -111,15 +100,26 @@ export default function WaveDropThread({
       <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
 
       <div className="tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800">
-        <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
-          <CreateDrop
-            rootDropId={rootDropId}
-            activeDrop={activeDrop}
-            onCancelReplyQuote={onCancelReplyQuote}
-            wave={wave}
-            onDropCreated={onDropCreated}
-          />
-        </div>
+        {canDrop && (
+          <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
+            <CreateDrop
+              rootDropId={rootDropId}
+              activeDrop={activeDrop}
+              onCancelReplyQuote={onCancelReplyQuote}
+              wave={{
+                id: wave.id,
+                name: wave.name,
+                picture: wave.picture ?? "",
+                description_drop_id: wave.description_drop.id,
+                authenticated_user_eligible_to_participate:
+                  wave.participation.authenticated_user_eligible,
+                authenticated_user_eligible_to_vote:
+                  wave.voting.authenticated_user_eligible,
+              }}
+              onDropCreated={onDropCreated}
+            />
+          </div>
+        )}
         <WaveDrops
           wave={wave}
           onReply={handleReply}

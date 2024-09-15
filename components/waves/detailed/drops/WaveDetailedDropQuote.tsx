@@ -1,16 +1,18 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Drop } from "../../../../generated/models/Drop";
 import React, { useContext, useEffect, useState } from "react";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
-import { DropPart } from "../../../../generated/models/DropPart";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Drop } from "../../../../generated/models/Drop";
+import { DropPart } from "../../../../generated/models/DropPart";
+import { useRouter } from "next/router";
 
 interface WaveDetailedDropQuoteProps {
   readonly dropId: string;
@@ -22,7 +24,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
   partId,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-
+  const router = useRouter();
   const { data: drop } = useQuery<Drop>({
     queryKey: [
       QueryKey.DROP,
@@ -52,7 +54,6 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
     }
     setQuotedPart(part);
   }, [drop]);
-
 
   return (
     <div className="tw-bg-iron-950 tw-rounded-xl tw-px-4 tw-py-2 tw-mt-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
@@ -111,7 +112,17 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 {drop?.wave.name}
               </Link>
             </div>
-            <div className="tw-mt-0.5">
+            <div
+              className="tw-mt-0.5 tw-cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (drop?.wave.id && drop?.id) {
+                  router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
               <DropPartMarkdown
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}

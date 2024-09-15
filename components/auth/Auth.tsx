@@ -326,6 +326,7 @@ export default function Auth({
         message: "Please connect your wallet",
         type: "error",
       });
+      invalidateAll();
       return { success: false };
     }
     const isAuth = validateJwt({
@@ -339,7 +340,9 @@ export default function Auth({
         signerAddress: address,
         role: activeProfileProxy?.created_by.id ?? null,
       });
+      invalidateAll();
     }
+
     return { success: !!getAuthJwt() };
   };
 

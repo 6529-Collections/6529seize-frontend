@@ -10,6 +10,7 @@ interface DropsListProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
+  readonly showReplyAndQuote: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
@@ -20,6 +21,7 @@ export default function DropsList({
   showWaveInfo,
   activeDrop,
   rootDropId,
+  showReplyAndQuote,
   onBottomIntersection,
   onReply,
   onQuote,
@@ -68,6 +70,7 @@ export default function DropsList({
             onReply={onReply}
             onQuote={onQuote}
             rootDropId={rootDropId}
+            showReplyAndQuote={showReplyAndQuote}
           />
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (
             <CommonIntersectionElement onIntersection={onBottomIntersection} />

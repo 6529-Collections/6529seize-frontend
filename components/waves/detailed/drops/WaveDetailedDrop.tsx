@@ -13,6 +13,7 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
+  readonly showReplyAndQuote: boolean;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
 }
@@ -24,6 +25,7 @@ export default function WaveDetailedDrop({
   rootDropId,
   onReply,
   onQuote,
+  showReplyAndQuote,
 }: WaveDetailedDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
@@ -57,15 +59,17 @@ export default function WaveDetailedDrop({
         </div>
       </div>
 
-      <WaveDetailedDropActions
-        drop={drop}
-        onReply={() =>
-          onReply({ drop, partId: drop.parts[activePartIndex].part_id })
-        }
-        onQuote={() =>
-          onQuote({ drop, partId: drop.parts[activePartIndex].part_id })
-        }
-      />
+      {showReplyAndQuote && (
+        <WaveDetailedDropActions
+          drop={drop}
+          onReply={() =>
+            onReply({ drop, partId: drop.parts[activePartIndex].part_id })
+          }
+          onQuote={() =>
+            onQuote({ drop, partId: drop.parts[activePartIndex].part_id })
+          }
+        />
+      )}
       <WaveDetailedDropRatings drop={drop} />
     </div>
   );

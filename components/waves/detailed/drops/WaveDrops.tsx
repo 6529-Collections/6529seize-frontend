@@ -1,4 +1,8 @@
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import DropListWrapper from "../../../drops/view/DropListWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -10,6 +14,7 @@ import { ActiveDropState } from "../WaveDetailedContent";
 import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 
 const REQUEST_SIZE = 20;
+const POLLING_DELAY = 3000; // 3 seconds delay
 
 interface WaveDropsProps {
   readonly wave: Wave;
@@ -27,6 +32,11 @@ export default function WaveDrops({
   rootDropId,
 }: WaveDropsProps) {
   const { connectedProfile } = useContext(AuthContext);
+  const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
+  const [delayedPollingResult, setDelayedPollingResult] = useState<
+    WaveDropsFeed | undefined
+  >(undefined);
+  
 
   const {
     data,
@@ -35,6 +45,7 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     status,
+    refetch,
   } = useInfiniteQuery({
     queryKey: [
       QueryKey.DROPS,
@@ -45,6 +56,7 @@ export default function WaveDrops({
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+      console.log('ym running')
       const params: Record<string, string> = {
         limit: REQUEST_SIZE.toString(),
       };
@@ -75,7 +87,72 @@ export default function WaveDrops({
         }))
       ) ?? []
     );
+    if (data) {
+      setIsInitialQueryDone(true);
+    }
   }, [data]);
+
+  const [haveNewDrops, setHaveNewDrops] = useState(false);
+
+  const { data: pollingResult } = useQuery({
+    queryKey: [
+      QueryKey.DROPS,
+      {
+        waveId: wave.id,
+        limit: 1,
+        dropId: rootDropId,
+      },
+    ],
+    queryFn: async () => {
+      const params: Record<string, string> = {
+        limit: "1",
+      };
+      if (rootDropId) {
+        params.drop_id = rootDropId;
+      }
+      return await commonApiFetch<WaveDropsFeed>({
+        endpoint: `waves/${wave.id}/drops`,
+        params,
+      });
+    },
+    enabled: isInitialQueryDone && !haveNewDrops,
+    refetchInterval: 30000,
+  });
+
+  useEffect(() => {
+    if (pollingResult) {
+      const timer = setTimeout(() => {
+        setDelayedPollingResult(pollingResult);
+      }, POLLING_DELAY);
+
+      return () => clearTimeout(timer);
+    }
+  }, [pollingResult]);
+
+  useEffect(() => {
+    if (isInitialQueryDone && delayedPollingResult !== undefined) {
+      if (delayedPollingResult.drops.length > 0) {
+        const latestPolledDrop = delayedPollingResult.drops[0];
+
+        if (drops.length > 0) {
+          const latestExistingDrop = drops[0];
+
+          const polledCreatedAt = new Date(
+            latestPolledDrop.created_at
+          ).getTime();
+          const existingCreatedAt = new Date(
+            latestExistingDrop.created_at
+          ).getTime();
+
+          setHaveNewDrops(polledCreatedAt > existingCreatedAt);
+        } else {
+          setHaveNewDrops(true);
+        }
+      } else {
+        setHaveNewDrops(false);
+      }
+    }
+  }, [delayedPollingResult, drops, isInitialQueryDone]);
 
   const onBottomIntersection = (state: boolean) => {
     if (drops.length < REQUEST_SIZE) {
@@ -99,16 +176,33 @@ export default function WaveDrops({
     fetchNextPage();
   };
 
+  const onRefresh = () => {
+    refetch();
+  };
+
   return (
-    <DropListWrapper
-      drops={drops}
-      loading={isFetching}
-      showWaveInfo={false}
-      rootDropId={rootDropId}
-      onBottomIntersection={onBottomIntersection}
-      onReply={onReply}
-      onQuote={onQuote}
-      activeDrop={activeDrop}
-    />
+    <div>
+      {haveNewDrops && (
+        <div className="tw-sticky tw-top-20 tw-left-0 tw-right-0 tw-z-10 tw-flex tw-justify-center">
+          <button
+            onClick={onRefresh}
+            className="tw-border-none tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-full tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-blue-600"
+          >
+            New drops available
+          </button>
+        </div>
+      )}
+      <DropListWrapper
+        drops={drops}
+        loading={isFetching}
+        showWaveInfo={false}
+        rootDropId={rootDropId}
+        onBottomIntersection={onBottomIntersection}
+        showReplyAndQuote={true}
+        onReply={onReply}
+        onQuote={onQuote}
+        activeDrop={activeDrop}
+      />
+    </div>
   );
 }

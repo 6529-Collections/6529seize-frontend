@@ -173,7 +173,7 @@ export default function DropPartMarkdown({
     const dropId = match ? match[2] : null;
 
     if (isSeizeLink && dropId && waveId) {
-      return <WaveDetailedDropQuote dropId={dropId} partId={0} />;
+      return <WaveDetailedDropQuote dropId={dropId} partId={1} />;
     }
 
     const twitterRegex =

@@ -22,18 +22,18 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
-import { Wave } from "../../../generated/models/Wave";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import FilePreview from "./FilePreview";
 import CreateDropStormParts from "./CreateDropStormParts";
+import { WaveMin } from "../../../generated/models/WaveMin";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
-  readonly wave: Wave;
+  readonly wave: WaveMin;
   readonly onDropCreated: () => void;
 }
 
@@ -317,11 +317,11 @@ export default function CreateDrop({
         id: wave.id,
         name: wave.name,
         picture: wave.picture ?? "",
-        description_drop_id: wave.description_drop.id,
+        description_drop_id: wave.description_drop_id,
         authenticated_user_eligible_to_participate:
-          wave.participation.authenticated_user_eligible,
+          wave.authenticated_user_eligible_to_participate,
         authenticated_user_eligible_to_vote:
-          wave.voting.authenticated_user_eligible,
+          wave.authenticated_user_eligible_to_vote,
       },
       author: {
         id: connectedProfile.profile.external_id,
@@ -386,16 +386,15 @@ export default function CreateDrop({
     onSuccess: (response: Drop) => {
       refreshState();
       onDropCreated();
-      waitAndInvalidateDrops();
     },
     onError: (error) => {
       setToast({
         message: error as unknown as string,
         type: "error",
       });
-      waitAndInvalidateDrops();
     },
     onSettled: () => {
+      waitAndInvalidateDrops();
       setSubmitting(false);
     },
   });

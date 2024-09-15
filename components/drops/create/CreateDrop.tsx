@@ -64,9 +64,8 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { waitAndInvalidateDrops, addOptimisticDrop, invalidateDrops } = useContext(
-    ReactQueryWrapperContext
-  );
+  const { waitAndInvalidateDrops, addOptimisticDrop } =
+    useContext(ReactQueryWrapperContext);
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
@@ -94,7 +93,6 @@ export default function CreateDrop({
       }),
     onSuccess: (response: Drop) => {
       setDropEditorRefreshKey((prev) => prev + 1);
-      waitAndInvalidateDrops();
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
       }
@@ -104,9 +102,9 @@ export default function CreateDrop({
         message: error as unknown as string,
         type: "error",
       });
-      invalidateDrops();
     },
     onSettled: () => {
+      waitAndInvalidateDrops();
       setSubmitting(false);
     },
   });
@@ -224,13 +222,14 @@ export default function CreateDrop({
           url: media.url,
           mime_type: media.mime_type,
         })),
-        quoted_drop: part.quoted_drop ? {
-          ...part.quoted_drop,
-          is_deleted: false,
-        }: null,
+        quoted_drop: part.quoted_drop
+          ? {
+              ...part.quoted_drop,
+              is_deleted: false,
+            }
+          : null,
         replies_count: 0,
         quotes_count: 0,
-        
       })),
       parts_count: dropRequest.parts.length,
       referenced_nfts: dropRequest.referenced_nfts,
