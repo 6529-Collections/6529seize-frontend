@@ -458,6 +458,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                     .filter((v) => v != Sort.VOLUME)
                     .map((v) => (
                       <SortButton
+                        key={v}
                         currentSort={sort}
                         sort={v}
                         setSort={setSort}

@@ -81,7 +81,7 @@ export function printSortButtons(
   return (
     <>
       {enumValues.map((v) => (
-        <SortButton currentSort={sort} sort={v} setSort={setSort} />
+        <SortButton key={v} currentSort={sort} sort={v} setSort={setSort} />
       ))}
       <span>
         <Dropdown

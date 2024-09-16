@@ -22,6 +22,9 @@ import {
   parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
+import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import DotLoader from "../dotLoader/DotLoader";
+import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 
 interface Props {
   contract: string;
@@ -32,6 +35,81 @@ enum Tabs {
   LIVE = "Live",
   METADATA = "Metadata",
   REFERENCES = "References",
+}
+
+export function printMemeReferences(memes: NFT[], memesLoaded: boolean = true) {
+  return (
+    <Row className="pt-4">
+      <Col xs={12}>
+        <h1>
+          <span className="font-lightest">The Memes</span> References
+        </h1>
+      </Col>
+      {memesLoaded ? (
+        <>
+          {memes.length > 0 ? (
+            <Row className="pt-2 pb-2">
+              {memes.map((nft) => {
+                return (
+                  <Col
+                    key={`${nft.contract}-${nft.id}`}
+                    className="pt-3 pb-3"
+                    xs={{ span: 6 }}
+                    sm={{ span: 4 }}
+                    md={{ span: 3 }}
+                    lg={{ span: 3 }}>
+                    <a
+                      href={`/the-memes/${nft.id}`}
+                      className="decoration-none scale-hover">
+                      <Container fluid className="no-padding">
+                        <Row>
+                          <Col>
+                            <NFTImage
+                              nft={nft}
+                              animation={false}
+                              height={300}
+                              balance={0}
+                              showThumbnail={true}
+                              showUnseized={false}
+                            />
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-center pt-2">
+                            <b>
+                              #{nft.id} - {nft.name}
+                            </b>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-center pt-2">
+                            Artist Name: {nft.artist}
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-center pt-2">
+                            Artist Profile: <ArtistProfileHandle nft={nft} />
+                          </Col>
+                        </Row>
+                      </Container>
+                    </a>
+                  </Col>
+                );
+              })}
+            </Row>
+          ) : (
+            <Col>
+              <NothingHereYetSummer />
+            </Col>
+          )}
+        </>
+      ) : (
+        <Col>
+          Fetching references <DotLoader />
+        </Col>
+      )}
+    </Row>
+  );
 }
 
 export default function RememePage(props: Readonly<Props>) {
@@ -88,7 +166,7 @@ export default function RememePage(props: Readonly<Props>) {
       case Tabs.METADATA:
         return printMetadata();
       case Tabs.REFERENCES:
-        return printReferences();
+        return printMemeReferences(memes);
     }
   }
 
@@ -404,56 +482,6 @@ export default function RememePage(props: Readonly<Props>) {
         </>
       );
     }
-  }
-
-  function printReferences() {
-    return (
-      <Row className="pt-4">
-        <Col xs={12}>
-          <h1>
-            <span className="font-lightest">The Memes</span> References
-          </h1>
-        </Col>
-        {memes.map((nft) => (
-          <Col
-            key={`${nft.contract}-${nft.id}`}
-            className="pt-3 pb-3"
-            xs={{ span: 6 }}
-            sm={{ span: 4 }}
-            md={{ span: 3 }}
-            lg={{ span: 3 }}>
-            <a
-              href={`/the-memes/${nft.id}`}
-              className="decoration-none scale-hover">
-              <Container fluid className="no-padding">
-                <Row>
-                  <Col>
-                    <NFTImage
-                      nft={nft}
-                      animation={false}
-                      height={300}
-                      balance={0}
-                      showThumbnail={true}
-                      showUnseized={false}
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col className="text-center pt-2">
-                    <b>
-                      #{nft.id} - {nft.name}
-                    </b>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col className="text-center pt-2">Artist: {nft.artist}</Col>
-                </Row>
-              </Container>
-            </a>
-          </Col>
-        ))}
-      </Row>
-    );
   }
 
   return (
