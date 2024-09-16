@@ -63,6 +63,75 @@ export function getInitialRouterValues(router: NextRouter) {
   return { initialSortDir, initialSort };
 }
 
+export function printNftContent(
+  nft: LabNFT,
+  sort: Sort,
+  nftMetas: LabExtendedData[],
+  volumeType: VolumeType
+) {
+  return (
+    <>
+      {sort &&
+        (sort === Sort.AGE || sort === Sort.ARTISTS) &&
+        printMintDate(nft.mint_date)}
+      {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
+      {sort === Sort.EDITION_SIZE &&
+        `Edition Size: ${numberWithCommas(nft.supply)}`}
+      {sort === Sort.HODLERS &&
+        `Collectors: ${numberWithCommas(
+          nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
+        )}`}
+      {sort === Sort.UNIQUE_PERCENT &&
+        `Unique: ${
+          Math.round(
+            nftMetas.find((nftm) => nftm.id === nft.id)?.percent_unique! *
+              100 *
+              10
+          ) / 10
+        }%`}
+      {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+        `Unique Ex-Museum: ${
+          Math.round(
+            nftMetas.find((nftm) => nftm.id === nft.id)
+              ?.percent_unique_cleaned! *
+              100 *
+              10
+          ) / 10
+        }%`}
+      {sort === Sort.FLOOR_PRICE &&
+        (nft.floor_price > 0
+          ? `Floor Price: ${numberWithCommas(
+              Math.round(nft.floor_price * 100) / 100
+            )} ETH`
+          : `Floor Price: N/A`)}
+      {sort === Sort.MARKET_CAP &&
+        (nft.market_cap > 0
+          ? `Market Cap: ${numberWithCommas(
+              Math.round(nft.market_cap * 100) / 100
+            )} ETH`
+          : `Market Cap: N/A`)}
+      {sort === Sort.HIGHEST_OFFER &&
+        (nft.highest_offer > 0
+          ? `Highest Offer: ${numberWithCommas(
+              Math.round(nft.highest_offer * 1000) / 1000
+            )} ETH`
+          : `Highest Offer: N/A`)}
+      {sort === Sort.VOLUME &&
+        `Volume (${volumeType}): ${numberWithCommas(
+          Math.round(
+            (volumeType === VolumeType.HOURS_24
+              ? nft.total_volume_last_24_hours
+              : volumeType === VolumeType.DAYS_7
+              ? nft.total_volume_last_7_days
+              : volumeType === VolumeType.DAYS_30
+              ? nft.total_volume_last_1_month
+              : nft.total_volume) * 100
+          ) / 100
+        )} ETH`}
+    </>
+  );
+}
+
 export function sortChanged(
   router: NextRouter,
   sort: Sort,
@@ -70,15 +139,24 @@ export function sortChanged(
   volumeType: VolumeType,
   nfts: LabNFT[],
   nftMetas: LabExtendedData[],
+  collectionName: string | undefined,
   setNfts: (nfts: LabNFT[]) => void,
   labArtists?: string[],
   labCollections?: string[],
   setLabArtists?: (artists: string[]) => void,
   setLabCollections?: (collections: string[]) => void
 ) {
+  const newQuery: any = {
+    sort: sort,
+    sort_dir: sortDir,
+  };
+  if (collectionName) {
+    newQuery.collection = collectionName?.replaceAll(" ", "-");
+  }
+
   router.replace(
     {
-      query: { sort: sort, sort_dir: sortDir },
+      query: newQuery,
     },
     undefined,
     { shallow: true }
@@ -415,6 +493,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         volumeType,
         nfts,
         nftMetas,
+        undefined,
         setNfts,
         labArtists,
         labCollections,
@@ -454,75 +533,13 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               </Col>
             </Row>
             <Row>
-              <Col className="text-center pt-1">{printNftContent(nft)}</Col>
+              <Col className="text-center pt-1">
+                {printNftContent(nft, sort, nftMetas, volumeType)}
+              </Col>
             </Row>
           </Container>
         </a>
       </Col>
-    );
-  }
-
-  function printNftContent(nft: LabNFT) {
-    return (
-      <>
-        {sort &&
-          (sort === Sort.AGE || sort === Sort.ARTISTS) &&
-          printMintDate(nft.mint_date)}
-        {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
-        {sort === Sort.EDITION_SIZE &&
-          `Edition Size: ${numberWithCommas(nft.supply)}`}
-        {sort === Sort.HODLERS &&
-          `Collectors: ${numberWithCommas(
-            nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
-          )}`}
-        {sort === Sort.UNIQUE_PERCENT &&
-          `Unique: ${
-            Math.round(
-              nftMetas.find((nftm) => nftm.id === nft.id)?.percent_unique! *
-                100 *
-                10
-            ) / 10
-          }%`}
-        {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
-          `Unique Ex-Museum: ${
-            Math.round(
-              nftMetas.find((nftm) => nftm.id === nft.id)
-                ?.percent_unique_cleaned! *
-                100 *
-                10
-            ) / 10
-          }%`}
-        {sort === Sort.FLOOR_PRICE &&
-          (nft.floor_price > 0
-            ? `Floor Price: ${numberWithCommas(
-                Math.round(nft.floor_price * 100) / 100
-              )} ETH`
-            : `Floor Price: N/A`)}
-        {sort === Sort.MARKET_CAP &&
-          (nft.market_cap > 0
-            ? `Market Cap: ${numberWithCommas(
-                Math.round(nft.market_cap * 100) / 100
-              )} ETH`
-            : `Market Cap: N/A`)}
-        {sort === Sort.HIGHEST_OFFER &&
-          (nft.highest_offer > 0
-            ? `Highest Offer: ${numberWithCommas(
-                Math.round(nft.highest_offer * 1000) / 1000
-              )} ETH`
-            : `Highest Offer: N/A`)}
-        {sort === Sort.VOLUME &&
-          `Volume (${volumeType}): ${numberWithCommas(
-            Math.round(
-              (volumeType === VolumeType.HOURS_24
-                ? nft.total_volume_last_24_hours
-                : volumeType === VolumeType.DAYS_7
-                ? nft.total_volume_last_7_days
-                : volumeType === VolumeType.DAYS_30
-                ? nft.total_volume_last_1_month
-                : nft.total_volume) * 100
-            ) / 100
-          )} ETH`}
-      </>
     );
   }
 
@@ -724,7 +741,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
   );
 }
 
-function SortButton(
+export function SortButton(
   props: Readonly<{
     name: string;
     currentSort: Sort;

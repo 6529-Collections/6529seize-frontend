@@ -17,7 +17,13 @@ import NFTImage from "../nft-image/NFTImage";
 import { MEMES_CONTRACT } from "../../constants";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-import { getInitialRouterValues, Sort, sortChanged } from "./MemeLab";
+import {
+  getInitialRouterValues,
+  printNftContent,
+  Sort,
+  SortButton,
+  sortChanged,
+} from "./MemeLab";
 
 interface Props {
   wallets: string[];
@@ -104,7 +110,16 @@ export default function LabCollection(props: Readonly<Props>) {
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
+      sortChanged(
+        router,
+        sort,
+        sortDir,
+        volumeType,
+        nfts,
+        nftMetas,
+        collectionName,
+        setNfts
+      );
     }
   }, [sort, sortDir, nftsLoaded]);
 
@@ -152,57 +167,7 @@ export default function LabCollection(props: Readonly<Props>) {
           </Row>
           <Row>
             <Col className="text-center pt-1">
-              {sort && sort === Sort.AGE && printMintDate(nft.mint_date)}
-              {sort === Sort.EDITION_SIZE &&
-                `Edition Size: ${numberWithCommas(nft.supply)}`}
-              {sort === Sort.HODLERS &&
-                `Collectors: ${numberWithCommas(
-                  nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
-                )}`}
-              {sort === Sort.UNIQUE_PERCENT &&
-                `Unique: ${
-                  Math.round(
-                    nftMetas.find((nftm) => nftm.id === nft.id)
-                      ?.percent_unique! *
-                      100 *
-                      10
-                  ) / 10
-                }%`}
-              {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
-                `Unique Ex-Museum: ${
-                  Math.round(
-                    nftMetas.find((nftm) => nftm.id === nft.id)
-                      ?.percent_unique_cleaned! *
-                      100 *
-                      10
-                  ) / 10
-                }%`}
-              {sort === Sort.FLOOR_PRICE &&
-                (nft.floor_price > 0
-                  ? `Floor Price: ${numberWithCommas(
-                      Math.round(nft.floor_price * 100) / 100
-                    )} ETH`
-                  : `Floor Price: N/A`)}
-              {sort === Sort.MARKET_CAP &&
-                (nft.market_cap > 0
-                  ? `Market Cap: ${numberWithCommas(
-                      Math.round(nft.market_cap * 100) / 100
-                    )} ETH`
-                  : `Market Cap: N/A`)}
-              {sort === Sort.VOLUME &&
-                (nft.total_volume_last_7_days > 0
-                  ? `Volume (${volumeType}): ${numberWithCommas(
-                      Math.round(
-                        (volumeType === VolumeType.HOURS_24
-                          ? nft.total_volume_last_24_hours
-                          : volumeType === VolumeType.DAYS_7
-                          ? nft.total_volume_last_7_days
-                          : volumeType === VolumeType.DAYS_30
-                          ? nft.total_volume_last_1_month
-                          : nft.total_volume) * 100
-                      ) / 100
-                    )} ETH`
-                  : `Volume: N/A`)}
+              {printNftContent(nft, sort, nftMetas, volumeType)}
             </Col>
           </Row>
         </Container>
@@ -270,57 +235,54 @@ export default function LabCollection(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  <span
-                    onClick={() => setSort(Sort.AGE)}
-                    className={`${styles.sort} ${
-                      sort != Sort.AGE ? styles.disabled : ""
-                    }`}>
-                    Age
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.EDITION_SIZE)}
-                    className={`${styles.sort} ${
-                      sort != Sort.EDITION_SIZE ? styles.disabled : ""
-                    }`}>
-                    Edition Size
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.HODLERS)}
-                    className={`${styles.sort} ${
-                      sort != Sort.HODLERS ? styles.disabled : ""
-                    }`}>
-                    Collectors
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.UNIQUE_PERCENT)}
-                    className={`${styles.sort} ${
-                      sort != Sort.UNIQUE_PERCENT ? styles.disabled : ""
-                    }`}>
-                    Unique %
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.UNIQUE_PERCENT_EX_MUSEUM)}
-                    className={`${styles.sort} ${
-                      sort != Sort.UNIQUE_PERCENT_EX_MUSEUM
-                        ? styles.disabled
-                        : ""
-                    }`}>
-                    Unique % Ex-Museum
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.FLOOR_PRICE)}
-                    className={`${styles.sort} ${
-                      sort != Sort.FLOOR_PRICE ? styles.disabled : ""
-                    }`}>
-                    Floor Price
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.MARKET_CAP)}
-                    className={`${styles.sort} ${
-                      sort != Sort.MARKET_CAP ? styles.disabled : ""
-                    }`}>
-                    Market Cap
-                  </span>
+                  <SortButton
+                    name="Age"
+                    currentSort={sort}
+                    sort={Sort.AGE}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Edition Size"
+                    currentSort={sort}
+                    sort={Sort.EDITION_SIZE}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Collectors"
+                    currentSort={sort}
+                    sort={Sort.HODLERS}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Unique %"
+                    currentSort={sort}
+                    sort={Sort.UNIQUE_PERCENT}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Unique % Ex-Museum"
+                    currentSort={sort}
+                    sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Floor Price"
+                    currentSort={sort}
+                    sort={Sort.FLOOR_PRICE}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Market Cap"
+                    currentSort={sort}
+                    sort={Sort.MARKET_CAP}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Highest Offer"
+                    currentSort={sort}
+                    sort={Sort.HIGHEST_OFFER}
+                    setSort={setSort}
+                  />
                   <span>
                     <Dropdown
                       className={`${styles.volumeDropdown} ${
