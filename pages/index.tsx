@@ -44,7 +44,7 @@ import {
 } from "../helpers/nft.helpers";
 import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 import { ManifoldClaim } from "../hooks/useManifoldClaim";
-import { NftStatTableRow } from "../components/nftAttributes/NftStatTableRow";
+import { NftPageStats } from "../components/nftAttributes/NftStats";
 
 export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
@@ -361,18 +361,10 @@ export default function Home({
                             <b>{renderManifoldClaimCost()}</b>
                           </td>
                         </tr>
-                        <NftStatTableRow
-                          label="Floor Price"
-                          value={pageProps.nft.floor_price}
-                        />
-                        <NftStatTableRow
-                          label="Market Cap"
-                          value={pageProps.nft.market_cap}
-                          decimals={100}
-                        />
-                        <NftStatTableRow
-                          label="Highest Offer"
-                          value={pageProps.nft.highest_offer}
+                        <NftPageStats
+                          nft={pageProps.nft}
+                          hide_mint_price={true}
+                          hide_hodl_rate={true}
                         />
                       </tbody>
                     </Table>

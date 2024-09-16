@@ -46,7 +46,7 @@ import {
 } from "../../helpers/nft.helpers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
-import { NftStatTableRow } from "../nftAttributes/NftStatTableRow";
+import { NftPageStats } from "../nftAttributes/NftStats";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -479,24 +479,7 @@ export default function LabPage(props: Readonly<Props>) {
                       <td>Mint Date</td>
                       <td>{printMintDate(nft.mint_date)}</td>
                     </tr>
-                    <NftStatTableRow
-                      label="Mint Price"
-                      value={nft.mint_price}
-                      decimals={100000}
-                    />
-                    <NftStatTableRow
-                      label="Floor Price"
-                      value={nft.floor_price}
-                    />
-                    <NftStatTableRow
-                      label="Market Cap"
-                      value={nft.market_cap}
-                      decimals={100}
-                    />
-                    <NftStatTableRow
-                      label="Highest Offer"
-                      value={nft.highest_offer}
-                    />
+                    <NftPageStats nft={nft} />
                   </tbody>
                 </Table>
               </Col>

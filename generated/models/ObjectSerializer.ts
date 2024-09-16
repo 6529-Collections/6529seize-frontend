@@ -1,5 +1,8 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/AggregatedActivity';
+export * from '../models/AggregatedActivityMemes';
+export * from '../models/AggregatedActivityPage';
 export * from '../models/ArtistItem';
 export * from '../models/ArtistNameItem';
 export * from '../models/ArtistsNft';
@@ -79,6 +82,8 @@ export * from '../models/Notification';
 export * from '../models/NotificationCause';
 export * from '../models/NotificationsResponse';
 export * from '../models/OutgoingIdentitySubscriptionsPage';
+export * from '../models/OwnerBalance';
+export * from '../models/OwnerBalanceMemes';
 export * from '../models/PageBase';
 export * from '../models/PageWithNextUriBase';
 export * from '../models/ProfileMin';
@@ -126,6 +131,9 @@ export * from '../models/WavesOverviewType';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { AggregatedActivity } from '../models/AggregatedActivity';
+import { AggregatedActivityMemes } from '../models/AggregatedActivityMemes';
+import { AggregatedActivityPage } from '../models/AggregatedActivityPage';
 import { ArtistItem } from '../models/ArtistItem';
 import { ArtistNameItem } from '../models/ArtistNameItem';
 import { ArtistsNft } from '../models/ArtistsNft';
@@ -205,6 +213,8 @@ import { Notification        } from '../models/Notification';
 import { NotificationCause } from '../models/NotificationCause';
 import { NotificationsResponse } from '../models/NotificationsResponse';
 import { OutgoingIdentitySubscriptionsPage } from '../models/OutgoingIdentitySubscriptionsPage';
+import { OwnerBalance } from '../models/OwnerBalance';
+import { OwnerBalanceMemes } from '../models/OwnerBalanceMemes';
 import { PageBase } from '../models/PageBase';
 import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
 import { ProfileMin } from '../models/ProfileMin';
@@ -289,6 +299,9 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "AggregatedActivity": AggregatedActivity,
+    "AggregatedActivityMemes": AggregatedActivityMemes,
+    "AggregatedActivityPage": AggregatedActivityPage,
     "ArtistItem": ArtistItem,
     "ArtistNameItem": ArtistNameItem,
     "ArtistsNft": ArtistsNft,
@@ -362,6 +375,8 @@ let typeMap: {[index: string]: any} = {
     "Notification": Notification,
     "NotificationsResponse": NotificationsResponse,
     "OutgoingIdentitySubscriptionsPage": OutgoingIdentitySubscriptionsPage,
+    "OwnerBalance": OwnerBalance,
+    "OwnerBalanceMemes": OwnerBalanceMemes,
     "PageBase": PageBase,
     "PageWithNextUriBase": PageWithNextUriBase,
     "ProfileMin": ProfileMin,
