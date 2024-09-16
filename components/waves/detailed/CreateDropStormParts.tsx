@@ -20,7 +20,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   referencedNfts,
 }) => {
   return (
-    <div className="tw-space-y-4">
+    <div className="tw-space-y-4 tw-pb-3">
       {parts.map((part, index) => (
         <DropPartMarkdown
           key={`drop-part-${index}-${
