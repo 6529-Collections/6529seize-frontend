@@ -7,7 +7,7 @@ import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function WaveSingleDrop({
   dropId,
@@ -27,6 +27,8 @@ export default function WaveSingleDrop({
     placeholderData: keepPreviousData,
   });
 
+  useEffect(() => console.log(drop), [drop]);
+
   if (!drop) {
     return null;
   }
@@ -45,7 +47,7 @@ export default function WaveSingleDrop({
               setActivePartIndex={setActivePartIndex}
             />
           </div>
-          <WaveDetailedDropRatings drop={drop} />
+          {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
         </div>
       </div>
     </div>

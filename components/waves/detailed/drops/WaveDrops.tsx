@@ -56,7 +56,6 @@ export default function WaveDrops({
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      console.log('ym running')
       const params: Record<string, string> = {
         limit: REQUEST_SIZE.toString(),
       };
@@ -117,6 +116,10 @@ export default function WaveDrops({
     },
     enabled: isInitialQueryDone && !haveNewDrops,
     refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: true,
   });
 
   useEffect(() => {

@@ -20,9 +20,9 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
       setActivePart(drop.parts[activePartIndex]);
     }, [activePartIndex, drop.parts]);
 
-    const isStorm = drop.parts.length && drop.parts.length > 1;
-    const showPrevButton = activePartIndex > 0;
-    const showNextButton = activePartIndex < drop.parts.length - 1;
+    const isStorm = !!drop.parts.length && drop.parts.length > 1;
+    const havePreviousPart = activePartIndex > 0;
+    const haveNextPart = activePartIndex < drop.parts.length - 1;
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const checkOverflow = () => {
@@ -50,8 +50,9 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
             <WaveDetailedDropPartDrop
               drop={drop}
               activePart={activePart}
-              showPrevButton={showPrevButton}
-              showNextButton={showNextButton}
+              havePreviousPart={havePreviousPart}
+              haveNextPart={haveNextPart}
+              isStorm={isStorm}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
               checkOverflow={checkOverflow}
