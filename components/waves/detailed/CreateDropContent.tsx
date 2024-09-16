@@ -26,15 +26,36 @@ import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import FilePreview from "./FilePreview";
-import CreateDropStormParts from "./CreateDropStormParts";
-import { WaveMin } from "../../../generated/models/WaveMin";
 import { AnimatePresence, motion } from "framer-motion";
+import CreateDropMetadata from "./CreateDropMetadata";
+import { Wave } from "../../../generated/models/Wave";
+import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
+
+export type CreateDropMetadataType =
+  | {
+      key: string;
+      readonly type: WaveMetadataType.String;
+      value: string | null;
+      readonly required: boolean;
+    }
+  | {
+      key: string;
+      readonly type: WaveMetadataType.Number;
+      value: number | null;
+      readonly required: boolean;
+    }
+  | {
+      key: string;
+      readonly type: null;
+      value: string | null;
+      readonly required: boolean;
+    };
 
 interface CreateDropContent {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
-  readonly wave: WaveMin;
+  readonly wave: Wave;
   readonly drop: CreateDropConfig | null;
   readonly setDrop: (drop: CreateDropConfig | null) => void;
   readonly setIsStormMode: (isStormMode: boolean) => void;
@@ -126,13 +147,43 @@ export default function CreateDropContent({
     });
   };
 
-  const [metadata, setMetadata] = useState<DropMetadata[]>([]);
+  const initialMetadata = useMemo(() => {
+    return wave.participation.required_metadata.map((md) => ({
+      key: md.name,
+      type: md.type,
+      value: null,
+      required: true,
+    }));
+  }, [wave.participation.required_metadata]);
+
+  const [metadata, setMetadata] =
+    useState<CreateDropMetadataType[]>(initialMetadata);
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
 
   const clearInputState = () => {
     createDropInputRef.current?.clearEditorState();
     setFiles([]);
+  };
+
+  const convertMetadataToDropMetadata = (): DropMetadata[] => {
+    return metadata
+      .filter(
+        (
+          md
+        ): md is CreateDropMetadataType & {
+          key: NonNullable<CreateDropMetadataType["key"]>;
+          value: NonNullable<CreateDropMetadataType["value"]>;
+        } =>
+          md.key !== null &&
+          md.key !== undefined &&
+          md.value !== null &&
+          md.value !== undefined
+      )
+      .map((md) => ({
+        data_key: md.key,
+        data_value: `${md.value}`,
+      }));
   };
 
   const onDropPart = (): CreateDropConfig => {
@@ -155,7 +206,7 @@ export default function CreateDropContent({
         parts: drop?.parts.length ? drop.parts : [],
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
-        metadata,
+        metadata: convertMetadataToDropMetadata(),
       };
       setDrop(currentDrop);
       clearInputState();
@@ -203,7 +254,7 @@ export default function CreateDropContent({
       parts: drop?.parts.length ? drop.parts : [],
       mentioned_users: allMentions,
       referenced_nfts: allNfts,
-      metadata,
+      metadata: convertMetadataToDropMetadata(),
     };
 
     currentDrop.parts.push({
@@ -321,11 +372,11 @@ export default function CreateDropContent({
         id: wave.id,
         name: wave.name,
         picture: wave.picture ?? "",
-        description_drop_id: wave.description_drop_id,
+        description_drop_id: wave.description_drop.id,
         authenticated_user_eligible_to_participate:
-          wave.authenticated_user_eligible_to_participate,
+          wave.participation.authenticated_user_eligible,
         authenticated_user_eligible_to_vote:
-          wave.authenticated_user_eligible_to_vote,
+          wave.voting.authenticated_user_eligible,
       },
       author: {
         id: connectedProfile.profile.external_id,
@@ -375,7 +426,7 @@ export default function CreateDropContent({
 
   const refreshState = () => {
     setDropEditorRefreshKey((prev) => prev + 1);
-    setMetadata([]);
+    setMetadata(initialMetadata);
     setMentionedUsers([]);
     setReferencedNfts([]);
     setDrop(null);
@@ -442,7 +493,27 @@ export default function CreateDropContent({
     await addDropMutation.mutateAsync(requestBody);
   };
 
+  const [missingRequiredMetadataKeys, setMissingRequiredMetadataKeys] =
+    useState<string[]>([]);
+
+  const validateMetadata = (): string[] => {
+    const missingRequiredFields = metadata.filter(
+      (item) =>
+        item.required &&
+        (item.value === null || item.value === undefined || item.value === "")
+    );
+
+    const missingKeys = missingRequiredFields.map((item) => item.key as string);
+
+    return missingKeys;
+  };
+
   const onDrop = async (): Promise<void> => {
+    const missingKeys = validateMetadata();
+    if (missingKeys.length > 0) {
+      setMissingRequiredMetadataKeys(missingKeys);
+      return;
+    }
     const currentDrop = onDropPart();
     await submitDrop(currentDrop);
   };
@@ -491,130 +562,127 @@ export default function CreateDropContent({
     }
   }, [drop?.parts]);
 
+  const [isMetadataOpen, setIsMetadataOpen] = useState(
+    !!wave.participation.required_metadata.length
+  );
+
+  const onAddMetadataClick = () => {
+    setIsMetadataOpen(true);
+  };
+
+  const closeMetadata = () => {
+    setIsMetadataOpen(false);
+  };
+
+  const onChangeKey = (params: { index: number; newKey: string }) => {
+    setMetadata((prev) => {
+      const newMetadata = [...prev];
+      newMetadata[params.index].key = params.newKey;
+      return newMetadata;
+    });
+  };
+
+  const onChangeValue = (params: {
+    index: number;
+    newValue: string | number | null;
+  }) => {
+    setMetadata((prev) => {
+      const newMetadata = [...prev];
+      newMetadata[params.index].value = params.newValue;
+      return newMetadata;
+    });
+    const key = metadata[params.index].key;
+    if (key) {
+      setMissingRequiredMetadataKeys((prev) => {
+        const newMissingRequiredMetadataKeys = [...prev];
+        newMissingRequiredMetadataKeys.splice(
+          newMissingRequiredMetadataKeys.indexOf(key),
+          1
+        );
+        return newMissingRequiredMetadataKeys;
+      });
+    }
+  };
+
+  const onAddMetadata = () => {
+    setMetadata([
+      ...metadata,
+      {
+        key: "",
+        type: null,
+        value: null,
+        required: false,
+      },
+    ]);
+  };
+
   return (
-    <motion.div
-      layout
-      transition={{ duration: 0.3 }}
-      className="tw-flex tw-items-start tw-gap-x-3"
-    >
-      <div className="tw-flex-grow">
-        <CreateDropReplyingWrapper
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-        />
-        <div className="tw-flex tw-items-end">
-          <div className="tw-flex-grow">
-            <CreateDropInput
-              key={dropEditorRefreshKey}
-              ref={createDropInputRef}
-              editorState={editorState}
-              type={activeDrop?.action ?? null}
-              drop={drop}
-              setIsStormMode={setIsStormMode}
-              canSubmit={canSubmit}
-              canAddPart={canAddPart}
-              onEditorState={setEditorState}
-              onReferencedNft={onReferencedNft}
-              onMentionedUser={onMentionedUser}
-              setFiles={handleFileChange}
-              onDropPart={onDropPart}
-              onDrop={onDrop}
-            />
-          </div>
-          <div className="tw-ml-3">
-            <PrimaryButton
-              onClicked={onDrop}
-              loading={submitting}
-              disabled={!canSubmit}
-            >
-              Drop
-            </PrimaryButton>
-          </div>
+    <div className="tw-flex-grow">
+      <CreateDropReplyingWrapper
+        activeDrop={activeDrop}
+        onCancelReplyQuote={onCancelReplyQuote}
+      />
+      <div className="tw-flex tw-items-end">
+        <div className="tw-flex-grow">
+          <CreateDropInput
+            key={dropEditorRefreshKey}
+            ref={createDropInputRef}
+            editorState={editorState}
+            type={activeDrop?.action ?? null}
+            drop={drop}
+            setIsStormMode={setIsStormMode}
+            canSubmit={canSubmit}
+            canAddPart={canAddPart}
+            onEditorState={setEditorState}
+            onReferencedNft={onReferencedNft}
+            onMentionedUser={onMentionedUser}
+            setFiles={handleFileChange}
+            onDropPart={onDropPart}
+            onDrop={onDrop}
+            onAddMetadataClick={onAddMetadataClick}
+          />
         </div>
-        <div className="tw-mt-2 tw-space-y-1.5">
-          <div>
-            <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
-              <span className="tw-text-xs tw-text-iron-400">Add Metadata</span>
-              <button
-                type="button"
-                className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out "
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="tw-size-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18 18 6M6 6l12 12"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-            <div className="tw-gap-y-2 tw-w-full">
-              <form
-                id="metadata-form"
-                className="tw-flex tw-items-center tw-gap-x-3 tw-w-full"
-              >
-                <div className="tw-w-full">
-                  <input
-                    type="text"
-                    placeholder="Category"
-                    maxLength={100}
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-                  tw-pl-3 tw-py-2.5"
-                  />
-                </div>
-                <div className="tw-w-full">
-                  <input
-                    type="text"
-                    placeholder="Value"
-                    maxLength={500}
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-                  tw-pl-3 tw-py-2.5"
-                  />
-                </div>
-              </form>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-semibold tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+        <div className="tw-ml-3">
+          <PrimaryButton
+            onClicked={onDrop}
+            loading={submitting}
+            disabled={!canSubmit}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="tw-size-5 tw-flex-shrink-0"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              ></path>
-            </svg>
-            <span>Add new</span>
-          </button>
+            Drop
+          </PrimaryButton>
         </div>
-        <AnimatePresence>
-          {!!files.length && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <FilePreview files={files} removeFile={removeFile} />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
-    </motion.div>
+      <AnimatePresence>
+        {isMetadataOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <CreateDropMetadata
+              closeMetadata={closeMetadata}
+              metadata={metadata}
+              missingRequiredMetadataKeys={missingRequiredMetadataKeys}
+              onChangeKey={onChangeKey}
+              onChangeValue={onChangeValue}
+              onAddMetadata={onAddMetadata}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {!!files.length && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <FilePreview files={files} removeFile={removeFile} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

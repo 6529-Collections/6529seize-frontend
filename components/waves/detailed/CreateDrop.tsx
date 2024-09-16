@@ -1,41 +1,21 @@
-import PrimaryButton from "../../utils/button/PrimaryButton";
-import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
-import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
-import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { EditorState } from "lexical";
-import {
-  CreateDropConfig,
-  CreateDropPart,
-  CreateDropRequestPart,
-  DropMedia,
-  DropMetadata,
-  MentionedUser,
-  ReferencedNft,
-} from "../../../entities/IDrop";
-import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
-import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../../drops/create/lexical/transformers/ImageTransformer";
-import { AuthContext } from "../../auth/Auth";
-import { commonApiPost } from "../../../services/api/common-api";
-import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
-import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
-import { Drop } from "../../../generated/models/Drop";
-import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
-import { useMutation } from "@tanstack/react-query";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import FilePreview from "./FilePreview";
+import { ActiveDropState } from "./WaveDetailedContent";
+import { useState } from "react";
+import { CreateDropConfig } from "../../../entities/IDrop";
+
 import CreateDropStormParts from "./CreateDropStormParts";
 import { WaveMin } from "../../../generated/models/WaveMin";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
+import { useQuery } from "@tanstack/react-query";
+import { Wave } from "../../../generated/models/Wave";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
-  readonly wave: WaveMin;
+  readonly waveId: string;
   readonly onDropCreated: () => void;
 }
 
@@ -43,7 +23,7 @@ export default function CreateDrop({
   activeDrop,
   rootDropId,
   onCancelReplyQuote,
-  wave,
+  waveId,
   onDropCreated,
 }: CreateDropProps) {
   const [isStormMode, setIsStormMode] = useState(false);
@@ -62,6 +42,15 @@ export default function CreateDrop({
       };
     });
   };
+
+  const { data: wave, isFetching, isError, error } = useQuery<Wave>({
+    queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+    queryFn: async () =>
+      await commonApiFetch<Wave>({
+        endpoint: `waves/${waveId}`,
+      }),
+  });
+
   return (
     <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-t-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 lg:tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
       <AnimatePresence>
@@ -81,16 +70,28 @@ export default function CreateDrop({
           </motion.div>
         )}
       </AnimatePresence>
-      <CreateDropContent
-        activeDrop={activeDrop}
-        rootDropId={rootDropId}
-        onCancelReplyQuote={onCancelReplyQuote}
-        wave={wave}
-        drop={drop}
-        setDrop={setDrop}
-        setIsStormMode={setIsStormMode}
-        onDropCreated={onDropCreated}
-      />
+      {isFetching ? (
+        <div className="tw-animate-pulse tw-flex tw-items-center tw-space-x-4">
+          <div className="tw-h-[45px] tw-flex-grow tw-bg-iron-800 tw-rounded-lg"></div>
+          <div className="tw-h-[45px] tw-w-[100px] tw-bg-iron-800 tw-rounded-lg"></div>
+        </div>
+      ) : isError ? (
+        <div className="tw-text-red-500 tw-text-center tw-py-4">
+          <p>Error loading wave data</p>
+          <p className="tw-text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
+        </div>
+      ) : wave ? (
+        <CreateDropContent
+          activeDrop={activeDrop}
+          rootDropId={rootDropId}
+          onCancelReplyQuote={onCancelReplyQuote}
+          wave={wave}
+          drop={drop}
+          setDrop={setDrop}
+          setIsStormMode={setIsStormMode}
+          onDropCreated={onDropCreated}
+        />
+      ) : null}
     </div>
   );
 }

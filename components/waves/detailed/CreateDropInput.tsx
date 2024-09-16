@@ -389,7 +389,10 @@ const CreateDropInput = forwardRef<
 
                       <div
                         className="tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 hover:tw-bg-primary-500 tw-rounded-md tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50 tw-transition-all tw-duration-300 tw-ease-out"
-                        onClick={onAddMetadataClick}
+                        onClick={() => {
+                          onAddMetadataClick();
+                          setIsDropdownOpen(false);
+                        }}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
