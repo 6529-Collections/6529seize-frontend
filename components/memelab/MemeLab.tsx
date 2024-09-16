@@ -618,6 +618,38 @@ export default function MemeLabComponent(props: Readonly<Props>) {
     });
   }
 
+  function printNftsContent() {
+    let content;
+
+    if (nftsLoaded) {
+      if (nfts.length > 0) {
+        if (sort === MemeLabSort.ARTISTS) {
+          content = printArtists();
+        } else if (sort === MemeLabSort.COLLECTIONS) {
+          content = printCollections();
+        } else {
+          content = printNfts();
+        }
+      } else {
+        content = (
+          <Col>
+            <NothingHereYetSummer />
+          </Col>
+        );
+      }
+    } else {
+      content = (
+        <Row>
+          <Col className="pt-3">
+            Fetching <DotLoader />
+          </Col>
+        </Row>
+      );
+    }
+
+    return content;
+  }
+
   return (
     <Container fluid className={styles.mainContainer}>
       <Row>
@@ -653,27 +685,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               <Row className="pt-2">
                 <Col>{printSortButtons(sort, setSort, setVolumeType)}</Col>
               </Row>
-              {nftsLoaded ? (
-                nfts.length > 0 ? (
-                  sort === MemeLabSort.ARTISTS ? (
-                    printArtists()
-                  ) : sort === MemeLabSort.COLLECTIONS ? (
-                    printCollections()
-                  ) : (
-                    printNfts()
-                  )
-                ) : (
-                  <Col>
-                    <NothingHereYetSummer />
-                  </Col>
-                )
-              ) : (
-                <Row>
-                  <Col className="pt-3">
-                    Fetching <DotLoader />
-                  </Col>
-                </Row>
-              )}
+              {printNftsContent()}
             </>
           </Container>
         </Col>
