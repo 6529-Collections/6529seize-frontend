@@ -36,7 +36,6 @@ export default function WaveDrops({
   const [delayedPollingResult, setDelayedPollingResult] = useState<
     WaveDropsFeed | undefined
   >(undefined);
-  
 
   const {
     data,
@@ -189,7 +188,8 @@ export default function WaveDrops({
         <div className="tw-sticky tw-top-20 tw-left-0 tw-right-0 tw-z-10 tw-flex tw-justify-center">
           <button
             onClick={onRefresh}
-            className="tw-border-none tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-full tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-blue-600"
+            type="button"
+            className="tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
           >
             New drops available
           </button>
