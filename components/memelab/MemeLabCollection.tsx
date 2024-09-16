@@ -5,7 +5,6 @@ import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import {
   addProtocol,
-  getValuesForVolumeType,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
@@ -18,18 +17,7 @@ import NFTImage from "../nft-image/NFTImage";
 import { MEMES_CONTRACT } from "../../constants";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-
-enum Sort {
-  AGE = "age",
-  EDITION_SIZE = "edition-size",
-  HODLERS = "collectors",
-  UNIQUE_PERCENT = "unique",
-  UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
-  FLOOR_PRICE = "floor-price",
-  MARKET_CAP = "market-cap",
-  VOLUME = "volume",
-  HIGHEST_OFFER = "highest-offer",
-}
+import { getInitialRouterValues, Sort, sortChanged } from "./MemeLab";
 
 interface Props {
   wallets: string[];
@@ -48,7 +36,7 @@ export default function LabCollection(props: Readonly<Props>) {
   const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<Sort>();
+  const [sort, setSort] = useState<Sort>(Sort.AGE);
 
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
@@ -59,31 +47,10 @@ export default function LabCollection(props: Readonly<Props>) {
         c = c.replaceAll("-", " ");
         setCollectionName(c);
 
-        let initialSortDir = SortDirection.ASC;
-        let initialSort = Sort.AGE;
+        const { initialSortDir, initialSort } = getInitialRouterValues(router);
 
-        const routerSortDir = router.query.sort_dir;
-        if (routerSortDir) {
-          const resolvedRouterSortDir = Object.values(SortDirection).find(
-            (sd) => sd === routerSortDir
-          );
-          if (resolvedRouterSortDir) {
-            initialSortDir = resolvedRouterSortDir;
-          }
-        }
-
-        const routerSort = router.query.sort;
-        if (routerSort) {
-          const resolvedRouterSort = Object.values(Sort).find(
-            (sd) => sd === routerSort
-          );
-          if (resolvedRouterSort) {
-            initialSort = resolvedRouterSort;
-          }
-        }
-
-        setSort(initialSort);
         setSortDir(initialSortDir);
+        setSort(initialSort);
       }
     }
   }, [router.isReady]);
@@ -137,231 +104,7 @@ export default function LabCollection(props: Readonly<Props>) {
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      router.replace(
-        {
-          query: {
-            collection: collectionName?.replaceAll(" ", "-"),
-            sort: sort,
-            sort_dir: sortDir,
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
-
-      if (sort === Sort.AGE) {
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => (a.mint_date > b.mint_date ? -1 : 1))
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
-          );
-        }
-      }
-      if (sort === Sort.EDITION_SIZE) {
-        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.supply > b.supply) return 1;
-              if (a.supply < b.supply) return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.supply > b.supply) return -1;
-              if (a.supply < b.supply) return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.HODLERS) {
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.hodlers >
-                nftMetas.find((t2) => b.id === t2.id)!.hodlers
-              )
-                return 1;
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.hodlers <
-                nftMetas.find((t2) => b.id === t2.id)!.hodlers
-              )
-                return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.hodlers >
-                nftMetas.find((t2) => b.id === t2.id)!.hodlers
-              )
-                return -1;
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.hodlers <
-                nftMetas.find((t2) => b.id === t2.id)!.hodlers
-              )
-                return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.UNIQUE_PERCENT) {
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique >
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-              )
-                return 1;
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique <
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-              )
-                return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique >
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-              )
-                return -1;
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique <
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-              )
-                return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.UNIQUE_PERCENT_EX_MUSEUM) {
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned >
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-              )
-                return 1;
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned <
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-              )
-                return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned >
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-              )
-                return -1;
-              if (
-                nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned <
-                nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-              )
-                return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.FLOOR_PRICE) {
-        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.floor_price > b.floor_price) return 1;
-              if (a.floor_price < b.floor_price) return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.floor_price > b.floor_price) return -1;
-              if (a.floor_price < b.floor_price) return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.MARKET_CAP) {
-        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.market_cap > b.market_cap) return 1;
-              if (a.market_cap < b.market_cap) return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.market_cap > b.market_cap) return -1;
-              if (a.market_cap < b.market_cap) return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.HIGHEST_OFFER) {
-        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              if (a.highest_offer > b.highest_offer) return 1;
-              if (a.highest_offer < b.highest_offer) return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
-      if (sort === Sort.VOLUME) {
-        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
-        if (sortDir === SortDirection.ASC) {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              const aVolume = getValuesForVolumeType(volumeType, a);
-              const bVolume = getValuesForVolumeType(volumeType, b);
-
-              if (aVolume > bVolume) return -1;
-              if (aVolume < bVolume) return 1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        } else {
-          setNfts(
-            [...nfts].sort((a, b) => {
-              const aVolume = getValuesForVolumeType(volumeType, a);
-              const bVolume = getValuesForVolumeType(volumeType, b);
-              if (aVolume > bVolume) return 1;
-              if (aVolume < bVolume) return -1;
-              return a.mint_date > b.mint_date ? 1 : -1;
-            })
-          );
-        }
-      }
+      sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
     }
   }, [sort, sortDir, nftsLoaded]);
 
