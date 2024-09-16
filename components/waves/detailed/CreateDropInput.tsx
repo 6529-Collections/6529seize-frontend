@@ -230,6 +230,12 @@ const CreateDropInput = forwardRef<
       }
     };
 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    const toggleDropdown = () => {
+      setIsDropdownOpen(!isDropdownOpen);
+    };
+
     return (
       <div className="tailwind-scope" ref={editorRef}>
         <LexicalComposer initialConfig={editorConfig}>
@@ -310,30 +316,75 @@ const CreateDropInput = forwardRef<
                   </svg>
                 </button>
               </div>
-              <label className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-1 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300">
-                <svg
-                  className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
+
+              <div>
+                <div
+                  className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+                  onClick={toggleDropdown}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                  />
-                </svg>
-                <input
-                  type="file"
-                  className="tw-hidden"
-                  accept="image/*,video/*,audio/*"
-                  multiple
-                  onChange={handleFileChange}
-                />
-              </label>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="tw-size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                </div>
+                {isDropdownOpen && (
+                  <div className="tw-absolute tw-right-0 tw-top-10 tw-z-10 tw-w-40 tw-origin-top-right tw-rounded-lg tw-bg-iron-950 tw-py-2 tw-px-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none tw-space-y-1">
+                    <label className="tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 hover:tw-bg-primary-500 tw-rounded-md tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50 tw-transition-all tw-duration-300 tw-ease-out">
+                      <svg
+                        className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                        />
+                      </svg>
+                      <input
+                        type="file"
+                        className="tw-hidden"
+                        accept="image/*,video/*,audio/*"
+                        multiple
+                        onChange={handleFileChange}
+                      />
+                      <span>Upload a file</span>
+                    </label>
+
+                    <div className="tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 hover:tw-bg-primary-500 tw-rounded-md tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50 tw-transition-all tw-duration-300 tw-ease-out">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                        />
+                      </svg>
+                      <span className="tw-text-sm">Add metadata</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </LexicalComposer>

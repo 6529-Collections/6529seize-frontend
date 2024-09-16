@@ -27,7 +27,7 @@ const WaveDetailedDropActionsQuote: React.FC<WaveDetailedDropActionsQuoteProps> 
     >
       <div>
         <button
-          className={`tw-text-iron-500 icon tw-px-2 tw-py-1.5 tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
+          className={`tw-text-iron-500 icon tw-px-2 tw-py-1.5 tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
             !canQuote ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
           }`}
           onClick={canQuote ? onQuote : undefined}
@@ -50,6 +50,7 @@ const WaveDetailedDropActionsQuote: React.FC<WaveDetailedDropActionsQuoteProps> 
               fill="currentColor"
             />
           </svg>
+          <span>12</span>
         </button>
       </div>
     </Tippy>

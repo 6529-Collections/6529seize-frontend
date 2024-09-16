@@ -478,7 +478,7 @@ export default function CreateDrop({
   const [isStormMode, setIsStormMode] = useState(false);
 
   return (
-    <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-t-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-lg:border-b tw-lg:border-slate-900/10 tw-border-slate-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
+    <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-t-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 lg:tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
       {isStormMode && (
         <CreateDropStormParts
           parts={drop?.parts ?? []}
@@ -492,34 +492,107 @@ export default function CreateDrop({
             activeDrop={activeDrop}
             onCancelReplyQuote={onCancelReplyQuote}
           />
-          <div className="tw-flex tw-items-end">
-            <div className="tw-flex-grow">
-              <CreateDropInput
-                key={dropEditorRefreshKey}
-                ref={createDropInputRef}
-                editorState={editorState}
-                type={activeDrop?.action ?? null}
-                drop={drop}
-                setIsStormMode={setIsStormMode}
-                canSubmit={canSubmit}
-                canAddPart={canAddPart}
-                onEditorState={setEditorState}
-                onReferencedNft={onReferencedNft}
-                onMentionedUser={onMentionedUser}
-                setFiles={handleFileChange}
-                onDropPart={onDropPart}
-                onDrop={onDrop}
-              />
+          <div className="tw-flex tw-flex-col tw-space-y-2">
+            <div className="tw-flex tw-items-end">
+              <div className="tw-flex-grow">
+                <CreateDropInput
+                  key={dropEditorRefreshKey}
+                  ref={createDropInputRef}
+                  editorState={editorState}
+                  type={activeDrop?.action ?? null}
+                  drop={drop}
+                  setIsStormMode={setIsStormMode}
+                  canSubmit={canSubmit}
+                  canAddPart={canAddPart}
+                  onEditorState={setEditorState}
+                  onReferencedNft={onReferencedNft}
+                  onMentionedUser={onMentionedUser}
+                  setFiles={handleFileChange}
+                  onDropPart={onDropPart}
+                  onDrop={onDrop}
+                />
+              </div>
+              <div className="tw-ml-3">
+                <PrimaryButton
+                  onClicked={onDrop}
+                  loading={submitting}
+                  disabled={!canSubmit}
+                >
+                  Drop
+                </PrimaryButton>
+              </div>
             </div>
-            <div className="tw-ml-3">
-              <PrimaryButton
-                onClicked={onDrop}
-                loading={submitting}
-                disabled={!canSubmit}
+            <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-42">
+              <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
+                <span className="tw-text-xs tw-text-iron-400">
+                  Add Metadata
+                </span>
+                <button
+                  type="button"
+                  className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out "
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="tw-size-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18 18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <div className="tw-gap-y-2 tw-w-full">
+                <form
+                  id="metadata-form"
+                  className="tw-flex tw-items-center tw-gap-x-3 tw-w-full"
+                >
+                  <div className="tw-w-full">
+                    <input
+                      type="text"
+                      placeholder="Category"
+                      maxLength={100}
+                      className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                  tw-pl-3 tw-py-2.5"
+                    />
+                  </div>
+                  <div className="tw-w-full">
+                    <input
+                      type="text"
+                      placeholder="Value"
+                      maxLength={500}
+                      className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                  tw-pl-3 tw-py-2.5"
+                    />
+                  </div>
+                </form>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-semibold tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="tw-size-5 tw-flex-shrink-0"
               >
-                Drop
-              </PrimaryButton>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                ></path>
+              </svg>
+              <span>Add new</span>
+            </button>
           </div>
           {!!files.length && (
             <FilePreview files={files} removeFile={removeFile} />

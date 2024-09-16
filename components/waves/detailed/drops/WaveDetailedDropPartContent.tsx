@@ -63,15 +63,15 @@ const WaveDetailedDropPartContent: React.FC<
     }
   };
   return (
-    <div className="tw-w-full tw-flex tw-justify-between tw-space-x-2">
+    <div className="tw-w-full tw-flex tw-justify-between tw-space-x-3">
       {isStorm && (
         <button
           disabled={!havePreviousPart}
           className={`${
             havePreviousPart
-              ? "tw-text-iron-300"
-              : "tw-text-iron-700 tw-cursor-default"
-          } tw-bg-iron-950 tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out`}
+              ? "tw-text-primary-300 tw-border-primary-300 hover:tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
+              : "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
+          } tw-bg-transparent tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid  tw-transition tw-duration-300 tw-ease-out`}
           onClick={(e) => {
             e.stopPropagation();
             setActivePartIndex(activePartIndex - 1);
@@ -94,7 +94,7 @@ const WaveDetailedDropPartContent: React.FC<
           </svg>
         </button>
       )}
-      <div className="tw-h-full tw-w-full" ref={contentRef}>
+      <div className="tw-mt-1 tw-h-full tw-w-full" ref={contentRef}>
         <div className="tw-group tw-w-full">
           <DropPartMarkdown
             mentionedUsers={drop.mentioned_users}
@@ -179,9 +179,9 @@ const WaveDetailedDropPartContent: React.FC<
         <button
           className={`${
             haveNextPart
-              ? "tw-text-iron-300"
-              : "tw-text-iron-700 tw-cursor-default"
-          } tw-bg-iron-950 tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out`}
+              ? "tw-text-primary-300 tw-border-primary-300 hover:tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
+              : "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
+          } tw-bg-transparent tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out`}
           disabled={!haveNextPart}
           onClick={(e) => {
             e.stopPropagation();
