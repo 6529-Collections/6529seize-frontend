@@ -3,11 +3,7 @@ import styles from "./MemeLab.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
-import {
-  addProtocol,
-  numberWithCommas,
-  printMintDate,
-} from "../../helpers/Helpers";
+import { addProtocol } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages } from "../../services/6529api";
 import { NftOwner } from "../../entities/IOwner";
@@ -20,6 +16,7 @@ import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import {
   getInitialRouterValues,
   printNftContent,
+  printSortButtons,
   Sort,
   SortButton,
   sortChanged,
@@ -235,77 +232,7 @@ export default function LabCollection(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  <SortButton
-                    name="Age"
-                    currentSort={sort}
-                    sort={Sort.AGE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Edition Size"
-                    currentSort={sort}
-                    sort={Sort.EDITION_SIZE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Collectors"
-                    currentSort={sort}
-                    sort={Sort.HODLERS}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Unique %"
-                    currentSort={sort}
-                    sort={Sort.UNIQUE_PERCENT}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Unique % Ex-Museum"
-                    currentSort={sort}
-                    sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Floor Price"
-                    currentSort={sort}
-                    sort={Sort.FLOOR_PRICE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Market Cap"
-                    currentSort={sort}
-                    sort={Sort.MARKET_CAP}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Highest Offer"
-                    currentSort={sort}
-                    sort={Sort.HIGHEST_OFFER}
-                    setSort={setSort}
-                  />
-                  <span>
-                    <Dropdown
-                      className={`${styles.volumeDropdown} ${
-                        sort === Sort.VOLUME ? styles.volumeDropdownEnabled : ""
-                      }`}
-                      drop={"down-centered"}>
-                      <Dropdown.Toggle>Volume</Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {Object.values(VolumeType).map((vol) => (
-                          <Dropdown.Item
-                            key={vol}
-                            onClick={() => {
-                              setVolumeType(vol);
-                              if (sort != Sort.VOLUME) {
-                                setSort(Sort.VOLUME);
-                              }
-                            }}>
-                            {vol}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </span>
+                  {printSortButtons(sort, setSort, setVolumeType, true)}
                 </Col>
               </Row>
               {nftsLoaded &&

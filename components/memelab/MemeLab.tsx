@@ -63,6 +63,105 @@ export function getInitialRouterValues(router: NextRouter) {
   return { initialSortDir, initialSort };
 }
 
+export function printSortButtons(
+  sort: Sort,
+  setSort: (sort: Sort) => void,
+  setVolumeType: (volumeType: VolumeType) => void,
+  isCollection?: boolean
+) {
+  return (
+    <>
+      <SortButton
+        name="Age"
+        currentSort={sort}
+        sort={Sort.AGE}
+        setSort={setSort}
+      />
+      <SortButton
+        name="Edition Size"
+        currentSort={sort}
+        sort={Sort.EDITION_SIZE}
+        setSort={setSort}
+      />
+      <SortButton
+        name="Collectors"
+        currentSort={sort}
+        sort={Sort.HODLERS}
+        setSort={setSort}
+      />
+      {!isCollection && (
+        <>
+          <SortButton
+            name="Artists"
+            currentSort={sort}
+            sort={Sort.ARTISTS}
+            setSort={setSort}
+          />
+          <SortButton
+            name="Collections"
+            currentSort={sort}
+            sort={Sort.COLLECTIONS}
+            setSort={setSort}
+          />
+        </>
+      )}
+      <SortButton
+        name="Unique %"
+        currentSort={sort}
+        sort={Sort.UNIQUE_PERCENT}
+        setSort={setSort}
+      />
+      <SortButton
+        name="Unique % Ex-Museum"
+        currentSort={sort}
+        sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
+        setSort={setSort}
+      />
+      <SortButton
+        name="Floor Price"
+        currentSort={sort}
+        sort={Sort.FLOOR_PRICE}
+        setSort={setSort}
+      />
+      <SortButton
+        name="Market Cap"
+        currentSort={sort}
+        sort={Sort.MARKET_CAP}
+        setSort={setSort}
+      />
+      <SortButton
+        name="Highest Offer"
+        currentSort={sort}
+        sort={Sort.HIGHEST_OFFER}
+        setSort={setSort}
+      />
+      <span>
+        <Dropdown
+          className={`${styles.volumeDropdown} ${
+            sort === Sort.VOLUME ? styles.volumeDropdownEnabled : ""
+          }`}
+          drop={"down-centered"}>
+          <Dropdown.Toggle>Volume</Dropdown.Toggle>
+          <Dropdown.Menu>
+            {Object.values(VolumeType).map((vol) => (
+              <Dropdown.Item
+                key={vol}
+                onClick={() => {
+                  setVolumeType(vol);
+                  if (sort != Sort.VOLUME) {
+                    setSort(Sort.VOLUME);
+                  }
+                }}>
+                {vol}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+      </span>
+    </>
+  );
+}
+
 export function printNftContent(
   nft: LabNFT,
   sort: Sort,
@@ -626,91 +725,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col>
-                  <SortButton
-                    name="Age"
-                    currentSort={sort}
-                    sort={Sort.AGE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Edition Size"
-                    currentSort={sort}
-                    sort={Sort.EDITION_SIZE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Collectors"
-                    currentSort={sort}
-                    sort={Sort.HODLERS}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Artists"
-                    currentSort={sort}
-                    sort={Sort.ARTISTS}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Collections"
-                    currentSort={sort}
-                    sort={Sort.COLLECTIONS}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Unique %"
-                    currentSort={sort}
-                    sort={Sort.UNIQUE_PERCENT}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Unique % Ex-Museum"
-                    currentSort={sort}
-                    sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Floor Price"
-                    currentSort={sort}
-                    sort={Sort.FLOOR_PRICE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Market Cap"
-                    currentSort={sort}
-                    sort={Sort.MARKET_CAP}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Highest Offer"
-                    currentSort={sort}
-                    sort={Sort.HIGHEST_OFFER}
-                    setSort={setSort}
-                  />
-                  <span>
-                    <Dropdown
-                      className={`${styles.volumeDropdown} ${
-                        sort === Sort.VOLUME ? styles.volumeDropdownEnabled : ""
-                      }`}
-                      drop={"down-centered"}>
-                      <Dropdown.Toggle>Volume</Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {Object.values(VolumeType).map((vol) => (
-                          <Dropdown.Item
-                            key={vol}
-                            onClick={() => {
-                              setVolumeType(vol);
-                              if (sort != Sort.VOLUME) {
-                                setSort(Sort.VOLUME);
-                              }
-                            }}>
-                            {vol}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </span>
-                </Col>
+                <Col>{printSortButtons(sort, setSort, setVolumeType)}</Col>
               </Row>
               {nftsLoaded ? (
                 nfts.length > 0 ? (
