@@ -1,4 +1,3 @@
-import styles from "./NFTImage.module.scss";
 import "@google/model-viewer";
 import { BaseNFT } from "../../entities/INFT";
 

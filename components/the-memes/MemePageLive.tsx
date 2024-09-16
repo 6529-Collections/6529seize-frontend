@@ -19,6 +19,7 @@ import { RememeSort } from "../rememes/Rememes";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ArtistProfileHandle from "./ArtistProfileHandle";
+import { NftStatTableRow } from "../nftAttributes/NftStatTableRow";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -188,40 +189,29 @@ export function MemePageLiveRightMenu(props: {
                     <td>Mint Date</td>
                     <td>{printMintDate(props.nft.mint_date)}</td>
                   </tr>
-                  <tr>
-                    <td>TDH Rate</td>
-                    <td>{Math.round(props.nft.hodl_rate * 100) / 100}</td>
-                  </tr>
-                  <tr>
-                    <td>Floor Price</td>
-                    <td>
-                      {props.nft.floor_price > 0
-                        ? `${numberWithCommas(
-                            Math.round(props.nft.floor_price * 1000) / 1000
-                          )} ETH`
-                        : `N/A`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Market Cap</td>
-                    <td>
-                      {props.nft.market_cap > 0
-                        ? `${numberWithCommas(
-                            Math.round(props.nft.market_cap * 100) / 100
-                          )} ETH`
-                        : `N/A`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Highest Offer</td>
-                    <td>
-                      {props.nft.highest_offer > 0
-                        ? `${numberWithCommas(
-                            Math.round(props.nft.highest_offer * 1000) / 1000
-                          )} ETH`
-                        : `N/A`}
-                    </td>
-                  </tr>
+                  <NftStatTableRow
+                    label="Mint Price"
+                    value={props.nft.mint_price}
+                    decimals={100000}
+                  />
+                  <NftStatTableRow
+                    label="TDH Rate"
+                    value={props.nft.hodl_rate}
+                    decimals={100}
+                  />
+                  <NftStatTableRow
+                    label="Floor Price"
+                    value={props.nft.floor_price}
+                  />
+                  <NftStatTableRow
+                    label="Market Cap"
+                    value={props.nft.market_cap}
+                    decimals={100}
+                  />
+                  <NftStatTableRow
+                    label="Highest Offer"
+                    value={props.nft.highest_offer}
+                  />
                 </tbody>
               </Table>
             </Col>

@@ -425,70 +425,75 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               </Col>
             </Row>
             <Row>
-              <Col className="text-center pt-1">
-                {sort &&
-                  (sort === Sort.AGE || sort === Sort.ARTISTS) &&
-                  printMintDate(nft.mint_date)}
-                {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
-                {sort === Sort.EDITION_SIZE &&
-                  `Edition Size: ${numberWithCommas(nft.supply)}`}
-                {sort === Sort.HODLERS &&
-                  `Collectors: ${numberWithCommas(
-                    nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
-                  )}`}
-                {sort === Sort.UNIQUE_PERCENT &&
-                  `Unique: ${
-                    Math.round(
-                      nftMetas.find((nftm) => nftm.id === nft.id)
-                        ?.percent_unique! *
-                        100 *
-                        10
-                    ) / 10
-                  }%`}
-                {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
-                  `Unique Ex-Museum: ${
-                    Math.round(
-                      nftMetas.find((nftm) => nftm.id === nft.id)
-                        ?.percent_unique_cleaned! *
-                        100 *
-                        10
-                    ) / 10
-                  }%`}
-                {sort === Sort.FLOOR_PRICE &&
-                  (nft.floor_price > 0
-                    ? `Floor Price: ${numberWithCommas(
-                        Math.round(nft.floor_price * 100) / 100
-                      )} ETH`
-                    : `Floor Price: N/A`)}
-                {sort === Sort.MARKET_CAP &&
-                  (nft.market_cap > 0
-                    ? `Market Cap: ${numberWithCommas(
-                        Math.round(nft.market_cap * 100) / 100
-                      )} ETH`
-                    : `Market Cap: N/A`)}
-                {sort === Sort.HIGHEST_OFFER &&
-                  (nft.highest_offer > 0
-                    ? `Highest Offer: ${numberWithCommas(
-                        Math.round(nft.highest_offer * 1000) / 1000
-                      )} ETH`
-                    : `Highest Offer: N/A`)}
-                {sort === Sort.VOLUME &&
-                  `Volume (${volumeType}): ${numberWithCommas(
-                    Math.round(
-                      (volumeType === VolumeType.HOURS_24
-                        ? nft.total_volume_last_24_hours
-                        : volumeType === VolumeType.DAYS_7
-                        ? nft.total_volume_last_7_days
-                        : volumeType === VolumeType.DAYS_30
-                        ? nft.total_volume_last_1_month
-                        : nft.total_volume) * 100
-                    ) / 100
-                  )} ETH`}
-              </Col>
+              <Col className="text-center pt-1">{printNftContent(nft)}</Col>
             </Row>
           </Container>
         </a>
       </Col>
+    );
+  }
+
+  function printNftContent(nft: LabNFT) {
+    return (
+      <>
+        {sort &&
+          (sort === Sort.AGE || sort === Sort.ARTISTS) &&
+          printMintDate(nft.mint_date)}
+        {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
+        {sort === Sort.EDITION_SIZE &&
+          `Edition Size: ${numberWithCommas(nft.supply)}`}
+        {sort === Sort.HODLERS &&
+          `Collectors: ${numberWithCommas(
+            nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
+          )}`}
+        {sort === Sort.UNIQUE_PERCENT &&
+          `Unique: ${
+            Math.round(
+              nftMetas.find((nftm) => nftm.id === nft.id)?.percent_unique! *
+                100 *
+                10
+            ) / 10
+          }%`}
+        {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+          `Unique Ex-Museum: ${
+            Math.round(
+              nftMetas.find((nftm) => nftm.id === nft.id)
+                ?.percent_unique_cleaned! *
+                100 *
+                10
+            ) / 10
+          }%`}
+        {sort === Sort.FLOOR_PRICE &&
+          (nft.floor_price > 0
+            ? `Floor Price: ${numberWithCommas(
+                Math.round(nft.floor_price * 100) / 100
+              )} ETH`
+            : `Floor Price: N/A`)}
+        {sort === Sort.MARKET_CAP &&
+          (nft.market_cap > 0
+            ? `Market Cap: ${numberWithCommas(
+                Math.round(nft.market_cap * 100) / 100
+              )} ETH`
+            : `Market Cap: N/A`)}
+        {sort === Sort.HIGHEST_OFFER &&
+          (nft.highest_offer > 0
+            ? `Highest Offer: ${numberWithCommas(
+                Math.round(nft.highest_offer * 1000) / 1000
+              )} ETH`
+            : `Highest Offer: N/A`)}
+        {sort === Sort.VOLUME &&
+          `Volume (${volumeType}): ${numberWithCommas(
+            Math.round(
+              (volumeType === VolumeType.HOURS_24
+                ? nft.total_volume_last_24_hours
+                : volumeType === VolumeType.DAYS_7
+                ? nft.total_volume_last_7_days
+                : volumeType === VolumeType.DAYS_30
+                ? nft.total_volume_last_1_month
+                : nft.total_volume) * 100
+            ) / 100
+          )} ETH`}
+      </>
     );
   }
 

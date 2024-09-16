@@ -44,6 +44,7 @@ import {
 } from "../helpers/nft.helpers";
 import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 import { ManifoldClaim } from "../hooks/useManifoldClaim";
+import { NftStatTableRow } from "../components/nftAttributes/NftStatTableRow";
 
 export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
@@ -360,47 +361,19 @@ export default function Home({
                             <b>{renderManifoldClaimCost()}</b>
                           </td>
                         </tr>
-                        <tr>
-                          <td>Floor Price</td>
-                          <td>
-                            <b>
-                              {pageProps.nft.floor_price > 0
-                                ? `${numberWithCommas(
-                                    Math.round(
-                                      pageProps.nft.floor_price * 1000
-                                    ) / 1000
-                                  )} ETH`
-                                : `N/A`}
-                            </b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Market Cap</td>
-                          <td>
-                            <b>
-                              {pageProps.nft.market_cap > 0
-                                ? `${numberWithCommas(
-                                    Math.round(pageProps.nft.market_cap * 100) /
-                                      100
-                                  )} ETH`
-                                : `N/A`}
-                            </b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Highest Offer</td>
-                          <td>
-                            <b>
-                              {pageProps.nft.highest_offer > 0
-                                ? `${numberWithCommas(
-                                    Math.round(
-                                      pageProps.nft.highest_offer * 1000
-                                    ) / 1000
-                                  )} ETH`
-                                : `N/A`}
-                            </b>
-                          </td>
-                        </tr>
+                        <NftStatTableRow
+                          label="Floor Price"
+                          value={pageProps.nft.floor_price}
+                        />
+                        <NftStatTableRow
+                          label="Market Cap"
+                          value={pageProps.nft.market_cap}
+                          decimals={100}
+                        />
+                        <NftStatTableRow
+                          label="Highest Offer"
+                          value={pageProps.nft.highest_offer}
+                        />
                       </tbody>
                     </Table>
                     <Row className="pt-3">

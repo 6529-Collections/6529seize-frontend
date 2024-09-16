@@ -23,6 +23,7 @@ import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
+import { NftStatTableRow } from "../nftAttributes/NftStatTableRow";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -187,44 +188,24 @@ export default function GradientPage() {
                             <ArtistProfileHandle nft={nft} />
                           </td>
                         </tr>
-                        <tr>
-                          <td>TDH Rate</td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(nft.hodl_rate * 100) / 100
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Floor Price</td>
-                          <td>
-                            {nft.floor_price > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 1000) / 1000
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Market Cap</td>
-                          <td>
-                            {nft.market_cap > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.market_cap * 100) / 100
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Highest Offer</td>
-                          <td>
-                            {nft.highest_offer > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.highest_offer * 1000) / 1000
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
+                        <NftStatTableRow
+                          label="TDH Rate"
+                          value={nft.hodl_rate}
+                          decimals={100}
+                        />
+                        <NftStatTableRow
+                          label="Floor Price"
+                          value={nft.floor_price}
+                        />
+                        <NftStatTableRow
+                          label="Market Cap"
+                          value={nft.market_cap}
+                          decimals={100}
+                        />
+                        <NftStatTableRow
+                          label="Highest Offer"
+                          value={nft.highest_offer}
+                        />
                       </tbody>
                     </Table>
                     <Row className="pt-2">

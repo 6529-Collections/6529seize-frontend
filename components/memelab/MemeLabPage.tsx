@@ -46,6 +46,7 @@ import {
 } from "../../helpers/nft.helpers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
+import { NftStatTableRow } from "../nftAttributes/NftStatTableRow";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -478,46 +479,24 @@ export default function LabPage(props: Readonly<Props>) {
                       <td>Mint Date</td>
                       <td>{printMintDate(nft.mint_date)}</td>
                     </tr>
-                    <tr>
-                      <td>Mint Price</td>
-                      <td>
-                        {nft.mint_price
-                          ? `${numberWithCommas(
-                              Math.round(nft.mint_price * 100000) / 100000
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Floor Price</td>
-                      <td>
-                        {nft.floor_price
-                          ? `${numberWithCommas(
-                              Math.round(nft.floor_price * 1000) / 1000
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Market Cap</td>
-                      <td>
-                        {nft.market_cap
-                          ? `${numberWithCommas(
-                              Math.round(nft.market_cap * 100) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Highest Offer</td>
-                      <td>
-                        {nft.highest_offer
-                          ? `${numberWithCommas(
-                              Math.round(nft.highest_offer * 1000) / 1000
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
+                    <NftStatTableRow
+                      label="Mint Price"
+                      value={nft.mint_price}
+                      decimals={100000}
+                    />
+                    <NftStatTableRow
+                      label="Floor Price"
+                      value={nft.floor_price}
+                    />
+                    <NftStatTableRow
+                      label="Market Cap"
+                      value={nft.market_cap}
+                      decimals={100}
+                    />
+                    <NftStatTableRow
+                      label="Highest Offer"
+                      value={nft.highest_offer}
+                    />
                   </tbody>
                 </Table>
               </Col>
