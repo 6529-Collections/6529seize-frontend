@@ -2,7 +2,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../generated/models/Drop";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";

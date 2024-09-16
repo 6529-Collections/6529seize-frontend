@@ -6,11 +6,15 @@ import { Drop } from "../../../../generated/models/Drop";
 interface WaveDetailedDropActionsQuoteProps {
   readonly drop: Drop;
   readonly onQuote: () => void;
+  readonly activePartIndex: number;
 }
 
-const WaveDetailedDropActionsQuote: React.FC<WaveDetailedDropActionsQuoteProps> = ({ onQuote, drop }) => {
+const WaveDetailedDropActionsQuote: React.FC<
+  WaveDetailedDropActionsQuoteProps
+> = ({ onQuote, drop, activePartIndex }) => {
   const canQuote = drop.wave.authenticated_user_eligible_to_participate;
-
+  const quotesCount = drop.parts[activePartIndex].quotes_count;
+  const contextProfileQuoted = !!drop.parts[activePartIndex].context_profile_context?.quotes_count;
   return (
     <Tippy
       content={
@@ -50,7 +54,11 @@ const WaveDetailedDropActionsQuote: React.FC<WaveDetailedDropActionsQuoteProps> 
               fill="currentColor"
             />
           </svg>
-          <span>12</span>
+          {!!quotesCount && (
+            <span className={contextProfileQuoted ? "tw-text-blue-500" : ""}>
+              {quotesCount}
+            </span>
+          )}
         </button>
       </div>
     </Tippy>

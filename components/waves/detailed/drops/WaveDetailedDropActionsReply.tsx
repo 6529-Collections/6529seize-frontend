@@ -5,13 +5,18 @@ import "tippy.js/dist/tippy.css";
 
 interface WaveDetailedDropActionsReplyProps {
   readonly drop: Drop;
+  readonly activePartIndex: number;
   readonly onReply: () => void;
 }
 
 const WaveDetailedDropActionsReply: React.FC<
   WaveDetailedDropActionsReplyProps
-> = ({ onReply, drop }) => {
+> = ({ onReply, drop, activePartIndex }) => {
   const canReply = drop.wave.authenticated_user_eligible_to_participate;
+  const repliesCount = drop.parts[activePartIndex].replies_count;
+  const contextProfileReplied =
+    !!drop.parts[activePartIndex].context_profile_context?.replies_count;
+
   return (
     <Tippy
       content={
@@ -50,7 +55,11 @@ const WaveDetailedDropActionsReply: React.FC<
               d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5"
             />
           </svg>
-          <span>8</span>
+          {!!repliesCount && (
+            <span className={contextProfileReplied ? "tw-text-blue-500" : ""}>
+              {repliesCount}
+            </span>
+          )}
         </button>
       </div>
     </Tippy>

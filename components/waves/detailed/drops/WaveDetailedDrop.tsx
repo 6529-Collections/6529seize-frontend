@@ -62,6 +62,7 @@ export default function WaveDetailedDrop({
       {showReplyAndQuote && (
         <WaveDetailedDropActions
           drop={drop}
+          activePartIndex={activePartIndex}
           onReply={() =>
             onReply({ drop, partId: drop.parts[activePartIndex].part_id })
           }
