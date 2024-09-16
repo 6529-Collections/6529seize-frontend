@@ -12,7 +12,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import NFTImage from "../nft-image/NFTImage";
 import RememeImage from "../nft-image/RememeImage";
 import Pagination from "../pagination/Pagination";
 import { RememeSort } from "../rememes/Rememes";
