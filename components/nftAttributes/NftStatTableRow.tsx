@@ -10,7 +10,7 @@ export function NftStatTableRow(props: {
   return (
     <tr>
       <td>{props.label}</td>
-      <td>{value > 0 ? `${value} ETH` : `N/A`}</td>
+      <td>{value > 0 ? `${numberWithCommas(value)} ETH` : `N/A`}</td>
     </tr>
   );
 }

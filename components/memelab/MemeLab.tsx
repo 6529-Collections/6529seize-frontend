@@ -71,7 +71,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
   }, [router.isReady]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<Sort>();
+  const [sort, setSort] = useState<Sort>(Sort.AGE);
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -581,78 +581,66 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  <span
-                    onClick={() => setSort(Sort.AGE)}
-                    className={`${styles.sort} ${
-                      sort != Sort.AGE ? styles.disabled : ""
-                    }`}>
-                    Age
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.EDITION_SIZE)}
-                    className={`${styles.sort} ${
-                      sort != Sort.EDITION_SIZE ? styles.disabled : ""
-                    }`}>
-                    Edition Size
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.HODLERS)}
-                    className={`${styles.sort} ${
-                      sort != Sort.HODLERS ? styles.disabled : ""
-                    }`}>
-                    Collectors
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.ARTISTS)}
-                    className={`${styles.sort} ${
-                      sort != Sort.ARTISTS ? styles.disabled : ""
-                    }`}>
-                    Artists
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.COLLECTIONS)}
-                    className={`${styles.sort} ${
-                      sort != Sort.COLLECTIONS ? styles.disabled : ""
-                    }`}>
-                    Collections
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.UNIQUE_PERCENT)}
-                    className={`${styles.sort} ${
-                      sort != Sort.UNIQUE_PERCENT ? styles.disabled : ""
-                    }`}>
-                    Unique %
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.UNIQUE_PERCENT_EX_MUSEUM)}
-                    className={`${styles.sort} ${
-                      sort != Sort.UNIQUE_PERCENT_EX_MUSEUM
-                        ? styles.disabled
-                        : ""
-                    }`}>
-                    Unique % Ex-Museum
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.FLOOR_PRICE)}
-                    className={`${styles.sort} ${
-                      sort != Sort.FLOOR_PRICE ? styles.disabled : ""
-                    }`}>
-                    Floor Price
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.MARKET_CAP)}
-                    className={`${styles.sort} ${
-                      sort != Sort.MARKET_CAP ? styles.disabled : ""
-                    }`}>
-                    Market Cap
-                  </span>
-                  <span
-                    onClick={() => setSort(Sort.HIGHEST_OFFER)}
-                    className={`${styles.sort} ${
-                      sort != Sort.HIGHEST_OFFER ? styles.disabled : ""
-                    }`}>
-                    Highest Offer
-                  </span>
+                  <SortButton
+                    name="Age"
+                    currentSort={sort}
+                    sort={Sort.AGE}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Edition Size"
+                    currentSort={sort}
+                    sort={Sort.EDITION_SIZE}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Collectors"
+                    currentSort={sort}
+                    sort={Sort.HODLERS}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Artists"
+                    currentSort={sort}
+                    sort={Sort.ARTISTS}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Collections"
+                    currentSort={sort}
+                    sort={Sort.COLLECTIONS}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Unique %"
+                    currentSort={sort}
+                    sort={Sort.UNIQUE_PERCENT}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Unique % Ex-Museum"
+                    currentSort={sort}
+                    sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Floor Price"
+                    currentSort={sort}
+                    sort={Sort.FLOOR_PRICE}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Market Cap"
+                    currentSort={sort}
+                    sort={Sort.MARKET_CAP}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Highest Offer"
+                    currentSort={sort}
+                    sort={Sort.HIGHEST_OFFER}
+                    setSort={setSort}
+                  />
                   <span>
                     <Dropdown
                       className={`${styles.volumeDropdown} ${
@@ -704,5 +692,24 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         </Col>
       </Row>
     </Container>
+  );
+}
+
+function SortButton(
+  props: Readonly<{
+    name: string;
+    currentSort: Sort;
+    sort: Sort;
+    setSort: (sort: Sort) => void;
+  }>
+) {
+  return (
+    <button
+      onClick={() => props.setSort(props.sort)}
+      className={`btn-link ${styles.sort} ${
+        props.currentSort != props.sort ? styles.disabled : ""
+      }`}>
+      {props.name}
+    </button>
   );
 }
