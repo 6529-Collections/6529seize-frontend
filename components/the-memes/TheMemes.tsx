@@ -7,7 +7,11 @@ import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import { Crumb } from "../breadcrumb/Breadcrumb";
-import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
+import {
+  capitalizeEveryWord,
+  numberWithCommas,
+  printMintDate,
+} from "../../helpers/Helpers";
 import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import NFTImage from "../nft-image/NFTImage";
@@ -450,66 +454,15 @@ export default function TheMemesComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  <SortButton
-                    name="Age"
-                    currentSort={sort}
-                    sort={Sort.AGE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Edition Size"
-                    currentSort={sort}
-                    sort={Sort.EDITION_SIZE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Meme"
-                    currentSort={sort}
-                    sort={Sort.MEME}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Hodlers"
-                    currentSort={sort}
-                    sort={Sort.HODLERS}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="TDH"
-                    currentSort={sort}
-                    sort={Sort.TDH}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Unique %"
-                    currentSort={sort}
-                    sort={Sort.UNIQUE_PERCENT}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Unique % Ex-Museum"
-                    currentSort={sort}
-                    sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Floor Price"
-                    currentSort={sort}
-                    sort={Sort.FLOOR_PRICE}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Market Cap"
-                    currentSort={sort}
-                    sort={Sort.MARKET_CAP}
-                    setSort={setSort}
-                  />
-                  <SortButton
-                    name="Highest Offer"
-                    currentSort={sort}
-                    sort={Sort.HIGHEST_OFFER}
-                    setSort={setSort}
-                  />
+                  {Object.values(Sort)
+                    .filter((v) => v != Sort.VOLUME)
+                    .map((v) => (
+                      <SortButton
+                        currentSort={sort}
+                        sort={v}
+                        setSort={setSort}
+                      />
+                    ))}
                   <span>
                     <Dropdown
                       className={`${styles.volumeDropdown} ${
@@ -555,19 +508,20 @@ export default function TheMemesComponent(props: Readonly<Props>) {
 
 function SortButton(
   props: Readonly<{
-    name: string;
     currentSort: Sort;
     sort: Sort;
     setSort: (sort: Sort) => void;
   }>
 ) {
+  const name = capitalizeEveryWord(props.sort.replace("_", " "));
+
   return (
     <button
       onClick={() => props.setSort(props.sort)}
       className={`btn-link ${styles.sort} ${
         props.currentSort != props.sort ? styles.disabled : ""
       }`}>
-      {props.name}
+      {name}
     </button>
   );
 }

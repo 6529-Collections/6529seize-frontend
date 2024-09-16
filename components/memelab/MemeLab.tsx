@@ -6,6 +6,7 @@ import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
 import {
+  capitalizeEveryWord,
   getValuesForVolumeType,
   numberWithCommas,
   printMintDate,
@@ -69,72 +70,19 @@ export function printSortButtons(
   setVolumeType: (volumeType: VolumeType) => void,
   isCollection?: boolean
 ) {
+  let enumValues = Object.values(Sort).filter((v) => v != Sort.VOLUME);
+
+  if (isCollection) {
+    enumValues = enumValues.filter(
+      (v) => v != Sort.ARTISTS && v != Sort.COLLECTIONS
+    );
+  }
+
   return (
     <>
-      <SortButton
-        name="Age"
-        currentSort={sort}
-        sort={Sort.AGE}
-        setSort={setSort}
-      />
-      <SortButton
-        name="Edition Size"
-        currentSort={sort}
-        sort={Sort.EDITION_SIZE}
-        setSort={setSort}
-      />
-      <SortButton
-        name="Collectors"
-        currentSort={sort}
-        sort={Sort.HODLERS}
-        setSort={setSort}
-      />
-      {!isCollection && (
-        <>
-          <SortButton
-            name="Artists"
-            currentSort={sort}
-            sort={Sort.ARTISTS}
-            setSort={setSort}
-          />
-          <SortButton
-            name="Collections"
-            currentSort={sort}
-            sort={Sort.COLLECTIONS}
-            setSort={setSort}
-          />
-        </>
-      )}
-      <SortButton
-        name="Unique %"
-        currentSort={sort}
-        sort={Sort.UNIQUE_PERCENT}
-        setSort={setSort}
-      />
-      <SortButton
-        name="Unique % Ex-Museum"
-        currentSort={sort}
-        sort={Sort.UNIQUE_PERCENT_EX_MUSEUM}
-        setSort={setSort}
-      />
-      <SortButton
-        name="Floor Price"
-        currentSort={sort}
-        sort={Sort.FLOOR_PRICE}
-        setSort={setSort}
-      />
-      <SortButton
-        name="Market Cap"
-        currentSort={sort}
-        sort={Sort.MARKET_CAP}
-        setSort={setSort}
-      />
-      <SortButton
-        name="Highest Offer"
-        currentSort={sort}
-        sort={Sort.HIGHEST_OFFER}
-        setSort={setSort}
-      />
+      {enumValues.map((v) => (
+        <SortButton currentSort={sort} sort={v} setSort={setSort} />
+      ))}
       <span>
         <Dropdown
           className={`${styles.volumeDropdown} ${
@@ -758,19 +706,20 @@ export default function MemeLabComponent(props: Readonly<Props>) {
 
 function SortButton(
   props: Readonly<{
-    name: string;
     currentSort: Sort;
     sort: Sort;
     setSort: (sort: Sort) => void;
   }>
 ) {
+  const name = capitalizeEveryWord(props.sort.replace("_", " "));
+
   return (
     <button
       onClick={() => props.setSort(props.sort)}
       className={`btn-link ${styles.sort} ${
         props.currentSort != props.sort ? styles.disabled : ""
       }`}>
-      {props.name}
+      {name}
     </button>
   );
 }
