@@ -531,7 +531,7 @@ export default function CreateDropContent({
             </PrimaryButton>
           </div>
         </div>
-        <div className="tw-mt-3 tw-mb-3 tw-space-y-1.5">
+        <div className="tw-mt-2 tw-mb-3 tw-space-y-1.5">
           <div>
             <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
               <span className="tw-text-xs tw-text-iron-400">Add Metadata</span>
