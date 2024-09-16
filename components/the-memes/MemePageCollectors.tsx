@@ -53,7 +53,7 @@ export function MemePageCollectorsRightMenu(props: {
                     <td>
                       {props.nft.floor_price > 0
                         ? `${numberWithCommas(
-                            Math.round(props.nft.floor_price * 100) / 100
+                            Math.round(props.nft.floor_price * 1000) / 1000
                           )} ETH`
                         : `N/A`}
                     </td>
@@ -64,6 +64,16 @@ export function MemePageCollectorsRightMenu(props: {
                       {props.nft.market_cap > 0
                         ? `${numberWithCommas(
                             Math.round(props.nft.market_cap * 100) / 100
+                          )} ETH`
+                        : `N/A`}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Highest Offer</td>
+                    <td>
+                      {props.nft.highest_offer > 0
+                        ? `${numberWithCommas(
+                            Math.round(props.nft.highest_offer * 1000) / 1000
                           )} ETH`
                         : `N/A`}
                     </td>

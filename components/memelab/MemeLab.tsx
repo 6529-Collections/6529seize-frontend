@@ -29,6 +29,7 @@ enum Sort {
   FLOOR_PRICE = "floor-price",
   MARKET_CAP = "market-cap",
   VOLUME = "volume",
+  HIGHEST_OFFER = "highest-offer",
 }
 
 interface Props {
@@ -346,6 +347,26 @@ export default function MemeLabComponent(props: Readonly<Props>) {
           );
         }
       }
+      if (sort === Sort.HIGHEST_OFFER) {
+        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+        if (sortDir === SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.highest_offer > b.highest_offer) return 1;
+              if (a.highest_offer < b.highest_offer) return -1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        } else {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.highest_offer > b.highest_offer) return -1;
+              if (a.highest_offer < b.highest_offer) return 1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        }
+      }
       if (sort === Sort.VOLUME) {
         setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
         if (sortDir === SortDirection.ASC) {
@@ -445,6 +466,12 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                         Math.round(nft.market_cap * 100) / 100
                       )} ETH`
                     : `Market Cap: N/A`)}
+                {sort === Sort.HIGHEST_OFFER &&
+                  (nft.highest_offer > 0
+                    ? `Highest Offer: ${numberWithCommas(
+                        Math.round(nft.highest_offer * 1000) / 1000
+                      )} ETH`
+                    : `Highest Offer: N/A`)}
                 {sort === Sort.VOLUME &&
                   `Volume (${volumeType}): ${numberWithCommas(
                     Math.round(
@@ -613,6 +640,13 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                       sort != Sort.MARKET_CAP ? styles.disabled : ""
                     }`}>
                     Market Cap
+                  </span>
+                  <span
+                    onClick={() => setSort(Sort.HIGHEST_OFFER)}
+                    className={`${styles.sort} ${
+                      sort != Sort.HIGHEST_OFFER ? styles.disabled : ""
+                    }`}>
+                    Highest Offer
                   </span>
                   <span>
                     <Dropdown

@@ -29,6 +29,7 @@ enum Sort {
   FLOOR_PRICE = "floor_price",
   MARKET_CAP = "market_cap",
   VOLUME = "volume",
+  HIGHEST_OFFER = "highest_offer",
 }
 
 interface Meme {
@@ -351,9 +352,15 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                 {sort === Sort.FLOOR_PRICE &&
                   (nft.floor_price > 0
                     ? `Floor Price: ${numberWithCommas(
-                        Math.round(nft.floor_price * 100) / 100
+                        Math.round(nft.floor_price * 1000) / 1000
                       )} ETH`
                     : `Floor Price: N/A`)}
+                {sort === Sort.HIGHEST_OFFER &&
+                  (nft.highest_offer > 0
+                    ? `Highest Offer: ${numberWithCommas(
+                        Math.round(nft.highest_offer * 1000) / 1000
+                      )} ETH`
+                    : `Highest Offer: N/A`)}
                 {sort === Sort.MARKET_CAP &&
                   (nft.market_cap > 0
                     ? `Market Cap: ${numberWithCommas(
@@ -495,6 +502,12 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                     name="Market Cap"
                     currentSort={sort}
                     sort={Sort.MARKET_CAP}
+                    setSort={setSort}
+                  />
+                  <SortButton
+                    name="Highest Offer"
+                    currentSort={sort}
+                    sort={Sort.HIGHEST_OFFER}
                     setSort={setSort}
                   />
                   <span>

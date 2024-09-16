@@ -367,8 +367,8 @@ export default function Home({
                               {pageProps.nft.floor_price > 0
                                 ? `${numberWithCommas(
                                     Math.round(
-                                      pageProps.nft.floor_price * 100
-                                    ) / 100
+                                      pageProps.nft.floor_price * 1000
+                                    ) / 1000
                                   )} ETH`
                                 : `N/A`}
                             </b>
@@ -382,6 +382,20 @@ export default function Home({
                                 ? `${numberWithCommas(
                                     Math.round(pageProps.nft.market_cap * 100) /
                                       100
+                                  )} ETH`
+                                : `N/A`}
+                            </b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Highest Offer</td>
+                          <td>
+                            <b>
+                              {pageProps.nft.highest_offer > 0
+                                ? `${numberWithCommas(
+                                    Math.round(
+                                      pageProps.nft.highest_offer * 1000
+                                    ) / 1000
                                   )} ETH`
                                 : `N/A`}
                             </b>

@@ -200,7 +200,7 @@ export default function GradientPage() {
                           <td>
                             {nft.floor_price > 0
                               ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 100) / 100
+                                  Math.round(nft.floor_price * 1000) / 1000
                                 )} ETH`
                               : `N/A`}
                           </td>
@@ -211,6 +211,16 @@ export default function GradientPage() {
                             {nft.market_cap > 0
                               ? `${numberWithCommas(
                                   Math.round(nft.market_cap * 100) / 100
+                                )} ETH`
+                              : `N/A`}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Highest Offer</td>
+                          <td>
+                            {nft.highest_offer > 0
+                              ? `${numberWithCommas(
+                                  Math.round(nft.highest_offer * 1000) / 1000
                                 )} ETH`
                               : `N/A`}
                           </td>

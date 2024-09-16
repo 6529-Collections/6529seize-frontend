@@ -5,12 +5,12 @@
   padding: 0;
   position: relative;
 
-  .modelViewer {
+  model-viewer {
     background-color: $bg-color-1;
   }
 
   iframe,
-  .modelViewer {
+  model-viewer {
     width: 100%;
   }
 
@@ -28,7 +28,7 @@
 
   iframe,
   video,
-  .modelViewer {
+  model-viewer {
     max-height: calc(90vh - $header-height) !important;
     max-width: 90vw;
   }
@@ -40,7 +40,7 @@
 
   iframe,
   video,
-  .modelViewer {
+  model-viewer {
     height: 650px;
   }
 }
@@ -51,7 +51,7 @@
 
   iframe,
   video,
-  .modelViewer {
+  model-viewer {
     height: 300px;
   }
 }

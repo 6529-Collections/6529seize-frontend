@@ -28,6 +28,7 @@ enum Sort {
   FLOOR_PRICE = "floor-price",
   MARKET_CAP = "market-cap",
   VOLUME = "volume",
+  HIGHEST_OFFER = "highest-offer",
 }
 
 interface Props {
@@ -319,6 +320,18 @@ export default function LabCollection(props: Readonly<Props>) {
             [...nfts].sort((a, b) => {
               if (a.market_cap > b.market_cap) return -1;
               if (a.market_cap < b.market_cap) return 1;
+              return a.mint_date > b.mint_date ? 1 : -1;
+            })
+          );
+        }
+      }
+      if (sort === Sort.HIGHEST_OFFER) {
+        setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+        if (sortDir === SortDirection.ASC) {
+          setNfts(
+            [...nfts].sort((a, b) => {
+              if (a.highest_offer > b.highest_offer) return 1;
+              if (a.highest_offer < b.highest_offer) return -1;
               return a.mint_date > b.mint_date ? 1 : -1;
             })
           );
