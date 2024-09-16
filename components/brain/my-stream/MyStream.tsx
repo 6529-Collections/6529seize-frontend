@@ -14,7 +14,7 @@ import MyStreamNoItems from "./layout/MyStreamNoItems";
 
 export default function MyStream() {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-
+  const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
   const {
     data,
     fetchNextPage,
@@ -42,7 +42,10 @@ export default function MyStream() {
 
   const [items, setItems] = useState<TypedFeedItem[]>([]);
 
-  useEffect(() => setItems(data?.pages.flat() ?? []), [data]);
+  useEffect(() => {
+    setItems(data?.pages.flat() ?? []);
+    setIsInitialQueryDone(true);
+  }, [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (!state) {
@@ -76,8 +79,12 @@ export default function MyStream() {
         params,
       });
     },
-    enabled: !haveNewItems,
+    enabled: !haveNewItems && isInitialQueryDone,
     refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: true,
   });
 
   useEffect(() => {

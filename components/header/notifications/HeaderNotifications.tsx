@@ -27,6 +27,10 @@ export default function HeaderNotifications() {
       }),
     enabled: !!connectedProfile?.profile?.handle,
     refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: true,
   });
 
   const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(

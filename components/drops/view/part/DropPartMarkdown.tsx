@@ -329,6 +329,16 @@ export default function DropPartMarkdown({
             className="tw-w-full"
           />
         ),
+        blockquote: (params) => (
+          <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+              onImageLoaded,
+            })}
+          </blockquote>
+        ),
       }}
     >
       {partContent}

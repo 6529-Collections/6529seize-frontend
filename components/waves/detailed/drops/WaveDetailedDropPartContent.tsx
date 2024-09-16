@@ -3,14 +3,13 @@ import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
-import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 
 interface WaveDetailedDropPartContentProps {
   readonly drop: Drop;
   readonly activePart: DropPart;
-  readonly showPrevButton: boolean;
-  readonly showNextButton: boolean;
+  readonly havePreviousPart: boolean;
+  readonly haveNextPart: boolean;
+  readonly isStorm: boolean;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly checkOverflow: () => void;
@@ -22,8 +21,9 @@ const WaveDetailedDropPartContent: React.FC<
 > = ({
   drop,
   activePart,
-  showPrevButton,
-  showNextButton,
+  havePreviousPart,
+  haveNextPart,
+  isStorm,
   activePartIndex,
   setActivePartIndex,
   checkOverflow,
@@ -64,11 +64,11 @@ const WaveDetailedDropPartContent: React.FC<
   };
   return (
     <div className="tw-w-full tw-flex tw-justify-between tw-space-x-2">
-      {showPrevButton && (
+      {isStorm && (
         <button
-          disabled={!showPrevButton}
+          disabled={!havePreviousPart}
           className={`${
-            showPrevButton
+            havePreviousPart
               ? "tw-text-iron-300"
               : "tw-text-iron-700 tw-cursor-default"
           } tw-bg-iron-950 tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out`}
@@ -175,14 +175,14 @@ const WaveDetailedDropPartContent: React.FC<
           </div>
         )}
       </div>
-      {showNextButton && (
+      {isStorm && (
         <button
           className={`${
-            showNextButton
+            haveNextPart
               ? "tw-text-iron-300"
               : "tw-text-iron-700 tw-cursor-default"
           } tw-bg-iron-950 tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out`}
-          disabled={!showNextButton}
+          disabled={!haveNextPart}
           onClick={(e) => {
             e.stopPropagation();
             setActivePartIndex(activePartIndex + 1);

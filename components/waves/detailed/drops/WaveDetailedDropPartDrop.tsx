@@ -7,8 +7,9 @@ import WaveDetailedDropPartContent from './WaveDetailedDropPartContent';
 interface WaveDetailedDropPartDropProps {
   drop: Drop;
   activePart: DropPart;
-  showPrevButton: boolean;
-  showNextButton: boolean;
+  havePreviousPart: boolean;
+  haveNextPart: boolean;
+  isStorm: boolean;
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
   checkOverflow: () => void;
@@ -18,8 +19,9 @@ interface WaveDetailedDropPartDropProps {
 const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
   drop,
   activePart,
-  showPrevButton,
-  showNextButton,
+  havePreviousPart,
+  haveNextPart,
+  isStorm,
   activePartIndex,
   setActivePartIndex,
   checkOverflow,
@@ -33,8 +35,9 @@ const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
           <WaveDetailedDropPartContent
             drop={drop}
             activePart={activePart}
-            showPrevButton={showPrevButton}
-            showNextButton={showNextButton}
+            havePreviousPart={havePreviousPart}
+            haveNextPart={haveNextPart}
+            isStorm={isStorm}
             activePartIndex={activePartIndex}
             setActivePartIndex={setActivePartIndex}
             checkOverflow={checkOverflow}

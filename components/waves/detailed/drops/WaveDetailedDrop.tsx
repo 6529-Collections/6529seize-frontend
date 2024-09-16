@@ -70,7 +70,7 @@ export default function WaveDetailedDrop({
           }
         />
       )}
-      <WaveDetailedDropRatings drop={drop} />
+      {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
     </div>
   );
 }
