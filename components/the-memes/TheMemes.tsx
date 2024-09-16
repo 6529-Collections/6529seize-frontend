@@ -21,20 +21,7 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { MemeSeason } from "../../entities/ISeason";
 import { commonApiFetch } from "../../services/api/common-api";
 import { AuthContext } from "../auth/Auth";
-
-enum Sort {
-  AGE = "age",
-  EDITION_SIZE = "edition_size",
-  MEME = "meme",
-  HODLERS = "hodlers",
-  TDH = "tdh",
-  UNIQUE_PERCENT = "percent_unique",
-  UNIQUE_PERCENT_EX_MUSEUM = "percent_unique_cleaned",
-  FLOOR_PRICE = "floor_price",
-  MARKET_CAP = "market_cap",
-  VOLUME = "volume",
-  HIGHEST_OFFER = "highest_offer",
-}
+import { MemeLabSort, MemesSort } from "../../enums";
 
 interface Meme {
   meme: number;
@@ -90,7 +77,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   useEffect(() => {
     if (router.isReady) {
       let initialSortDir = SortDirection.ASC;
-      let initialSort = Sort.AGE;
+      let initialSort = MemesSort.AGE;
       let initialSzn = 0;
 
       const routerSortDir = router.query.sort_dir;
@@ -105,7 +92,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
 
       const routerSort = router.query.sort;
       if (routerSort) {
-        const resolvedRouterSort = Object.values(Sort).find(
+        const resolvedRouterSort = Object.values(MemesSort).find(
           (sd) => sd === routerSort
         );
         if (resolvedRouterSort) {
@@ -131,7 +118,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
 
   const getNftsNextPage = () => {
     let mySort: string = sort;
-    if (sort === Sort.VOLUME) {
+    if (sort === MemesSort.VOLUME) {
       switch (volumeType) {
         case VolumeType.HOURS_24:
           mySort = "total_volume_last_24_hours";
@@ -155,7 +142,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   };
 
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
-  const [sort, setSort] = useState<Sort>(Sort.AGE);
+  const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
 
   const [fetching, setFetching] = useState(true);
@@ -369,39 +356,39 @@ export default function TheMemesComponent(props: Readonly<Props>) {
             <Row>
               <Col className="text-center pt-1">
                 {sort &&
-                  (sort === Sort.AGE || sort === Sort.MEME) &&
+                  (sort === MemesSort.AGE || sort === MemesSort.MEME) &&
                   printMintDate(nft.mint_date)}
-                {sort === Sort.EDITION_SIZE &&
+                {sort === MemesSort.EDITION_SIZE &&
                   `Edition Size: ${numberWithCommas(nft.supply)}`}
-                {sort === Sort.TDH &&
+                {sort === MemesSort.TDH &&
                   `TDH: ${numberWithCommas(Math.round(nft.boosted_tdh))}`}
-                {sort === Sort.HODLERS &&
+                {sort === MemesSort.HODLERS &&
                   `Collectors: ${numberWithCommas(nft.hodlers)}`}
-                {sort === Sort.UNIQUE_PERCENT &&
+                {sort === MemesSort.UNIQUE_PERCENT &&
                   `Unique: ${Math.round(nft.percent_unique * 100 * 10) / 10}%`}
-                {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+                {sort === MemesSort.UNIQUE_PERCENT_EX_MUSEUM &&
                   `Unique Ex-Museum: ${
                     Math.round(nft.percent_unique_cleaned * 100 * 10) / 10
                   }%`}
-                {sort === Sort.FLOOR_PRICE &&
+                {sort === MemesSort.FLOOR_PRICE &&
                   (nft.floor_price > 0
                     ? `Floor Price: ${numberWithCommas(
                         Math.round(nft.floor_price * 1000) / 1000
                       )} ETH`
                     : `Floor Price: N/A`)}
-                {sort === Sort.HIGHEST_OFFER &&
+                {sort === MemesSort.HIGHEST_OFFER &&
                   (nft.highest_offer > 0
                     ? `Highest Offer: ${numberWithCommas(
                         Math.round(nft.highest_offer * 1000) / 1000
                       )} ETH`
                     : `Highest Offer: N/A`)}
-                {sort === Sort.MARKET_CAP &&
+                {sort === MemesSort.MARKET_CAP &&
                   (nft.market_cap > 0
                     ? `Market Cap: ${numberWithCommas(
                         Math.round(nft.market_cap * 100) / 100
                       )} ETH`
                     : `Market Cap: N/A`)}
-                {sort === Sort.VOLUME &&
+                {sort === MemesSort.VOLUME &&
                   `Volume (${volumeType}): ${getVolume(nft)}`}
               </Col>
             </Row>
@@ -463,7 +450,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  Sort by&nbsp;&nbsp;
+                  MemesSort by&nbsp;&nbsp;
                   <FontAwesomeIcon
                     icon="chevron-circle-up"
                     onClick={() => setSortDir(SortDirection.ASC)}
@@ -484,26 +471,26 @@ export default function TheMemesComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  {Object.values(Sort)
-                    .filter((v) => v != Sort.VOLUME)
+                  {Object.values(MemesSort)
+                    .filter((v) => v != MemesSort.VOLUME)
                     .map((v) => (
                       <SortButton
                         key={v}
                         currentSort={sort}
                         sort={v}
-                        setSort={setSort}
+                        select={() => setSort(v)}
                       />
                     ))}
                   {printVolumeTypeDropdown(
-                    sort === Sort.VOLUME,
+                    sort === MemesSort.VOLUME,
                     setVolumeType,
                     () => {
-                      setSort(Sort.VOLUME);
+                      setSort(MemesSort.VOLUME);
                     }
                   )}
                 </Col>
               </Row>
-              {nfts.length > 0 && sort === Sort.MEME
+              {nfts.length > 0 && sort === MemesSort.MEME
                 ? printMemes()
                 : printNfts()}
               {fetching && nftsNextPage && (
@@ -521,18 +508,18 @@ export default function TheMemesComponent(props: Readonly<Props>) {
   );
 }
 
-function SortButton(
+export function SortButton(
   props: Readonly<{
-    currentSort: Sort;
-    sort: Sort;
-    setSort: (sort: Sort) => void;
+    currentSort: MemesSort | MemeLabSort;
+    sort: MemesSort | MemeLabSort;
+    select: () => void;
   }>
 ) {
   const name = capitalizeEveryWord(props.sort.replace("_", " "));
 
   return (
     <button
-      onClick={() => props.setSort(props.sort)}
+      onClick={() => props.select()}
       className={`btn-link ${styles.sort} ${
         props.currentSort != props.sort ? styles.disabled : ""
       }`}>

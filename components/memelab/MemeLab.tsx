@@ -18,21 +18,8 @@ import DotLoader from "../dotLoader/DotLoader";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { MEMELAB_CONTRACT } from "../../constants";
-import { printVolumeTypeDropdown } from "../the-memes/TheMemes";
-
-export enum Sort {
-  AGE = "age",
-  EDITION_SIZE = "edition-size",
-  HODLERS = "collectors",
-  ARTISTS = "artists",
-  COLLECTIONS = "collections",
-  UNIQUE_PERCENT = "unique",
-  UNIQUE_PERCENT_EX_MUSEUM = "unique-ex-museum",
-  FLOOR_PRICE = "floor-price",
-  MARKET_CAP = "market-cap",
-  VOLUME = "volume",
-  HIGHEST_OFFER = "highest-offer",
-}
+import { printVolumeTypeDropdown, SortButton } from "../the-memes/TheMemes";
+import { MemeLabSort } from "../../enums";
 
 interface Props {
   wallets: string[];
@@ -40,7 +27,7 @@ interface Props {
 
 export function getInitialRouterValues(router: NextRouter) {
   let initialSortDir = SortDirection.ASC;
-  let initialSort = Sort.AGE;
+  let initialSort = MemeLabSort.AGE;
 
   const routerSortDir = router.query.sort_dir;
   if (routerSortDir) {
@@ -54,7 +41,7 @@ export function getInitialRouterValues(router: NextRouter) {
 
   const routerSort = router.query.sort;
   if (routerSort) {
-    const resolvedRouterSort = Object.values(Sort).find(
+    const resolvedRouterSort = Object.values(MemeLabSort).find(
       (sd) => sd === routerSort
     );
     if (resolvedRouterSort) {
@@ -66,50 +53,61 @@ export function getInitialRouterValues(router: NextRouter) {
 }
 
 export function printSortButtons(
-  sort: Sort,
-  setSort: (sort: Sort) => void,
+  sort: MemeLabSort,
+  setSort: (sort: MemeLabSort) => void,
   setVolumeType: (volumeType: VolumeType) => void,
   isCollection?: boolean
 ) {
-  let enumValues = Object.values(Sort).filter((v) => v != Sort.VOLUME);
+  let enumValues = Object.values(MemeLabSort).filter(
+    (v) => v != MemeLabSort.VOLUME
+  );
 
   if (isCollection) {
     enumValues = enumValues.filter(
-      (v) => v != Sort.ARTISTS && v != Sort.COLLECTIONS
+      (v) => v != MemeLabSort.ARTISTS && v != MemeLabSort.COLLECTIONS
     );
   }
 
   return (
     <>
       {enumValues.map((v) => (
-        <SortButton key={v} currentSort={sort} sort={v} setSort={setSort} />
+        <SortButton
+          key={v}
+          currentSort={sort}
+          sort={v}
+          select={() => setSort(v)}
+        />
       ))}
-      {printVolumeTypeDropdown(sort === Sort.VOLUME, setVolumeType, () => {
-        setSort(Sort.VOLUME);
-      })}
+      {printVolumeTypeDropdown(
+        sort === MemeLabSort.VOLUME,
+        setVolumeType,
+        () => {
+          setSort(MemeLabSort.VOLUME);
+        }
+      )}
     </>
   );
 }
 
 export function printNftContent(
   nft: LabNFT,
-  sort: Sort,
+  sort: MemeLabSort,
   nftMetas: LabExtendedData[],
   volumeType: VolumeType
 ) {
   return (
     <>
       {sort &&
-        (sort === Sort.AGE || sort === Sort.ARTISTS) &&
+        (sort === MemeLabSort.AGE || sort === MemeLabSort.ARTISTS) &&
         printMintDate(nft.mint_date)}
-      {sort === Sort.COLLECTIONS && `Artists: ${nft.artist}`}
-      {sort === Sort.EDITION_SIZE &&
+      {sort === MemeLabSort.COLLECTIONS && `Artists: ${nft.artist}`}
+      {sort === MemeLabSort.EDITION_SIZE &&
         `Edition Size: ${numberWithCommas(nft.supply)}`}
-      {sort === Sort.HODLERS &&
+      {sort === MemeLabSort.HODLERS &&
         `Collectors: ${numberWithCommas(
           nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
         )}`}
-      {sort === Sort.UNIQUE_PERCENT &&
+      {sort === MemeLabSort.UNIQUE_PERCENT &&
         `Unique: ${
           Math.round(
             nftMetas.find((nftm) => nftm.id === nft.id)?.percent_unique! *
@@ -117,7 +115,7 @@ export function printNftContent(
               10
           ) / 10
         }%`}
-      {sort === Sort.UNIQUE_PERCENT_EX_MUSEUM &&
+      {sort === MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM &&
         `Unique Ex-Museum: ${
           Math.round(
             nftMetas.find((nftm) => nftm.id === nft.id)
@@ -126,25 +124,25 @@ export function printNftContent(
               10
           ) / 10
         }%`}
-      {sort === Sort.FLOOR_PRICE &&
+      {sort === MemeLabSort.FLOOR_PRICE &&
         (nft.floor_price > 0
           ? `Floor Price: ${numberWithCommas(
               Math.round(nft.floor_price * 100) / 100
             )} ETH`
           : `Floor Price: N/A`)}
-      {sort === Sort.MARKET_CAP &&
+      {sort === MemeLabSort.MARKET_CAP &&
         (nft.market_cap > 0
           ? `Market Cap: ${numberWithCommas(
               Math.round(nft.market_cap * 100) / 100
             )} ETH`
           : `Market Cap: N/A`)}
-      {sort === Sort.HIGHEST_OFFER &&
+      {sort === MemeLabSort.HIGHEST_OFFER &&
         (nft.highest_offer > 0
           ? `Highest Offer: ${numberWithCommas(
               Math.round(nft.highest_offer * 1000) / 1000
             )} ETH`
           : `Highest Offer: N/A`)}
-      {sort === Sort.VOLUME &&
+      {sort === MemeLabSort.VOLUME &&
         `Volume (${volumeType}): ${numberWithCommas(
           Math.round(
             (volumeType === VolumeType.HOURS_24
@@ -162,7 +160,7 @@ export function printNftContent(
 
 export function sortChanged(
   router: NextRouter,
-  sort: Sort,
+  sort: MemeLabSort,
   sortDir: SortDirection,
   volumeType: VolumeType,
   nfts: LabNFT[],
@@ -190,14 +188,14 @@ export function sortChanged(
     { shallow: true }
   );
 
-  if (sort === Sort.AGE) {
+  if (sort === MemeLabSort.AGE) {
     if (sortDir === SortDirection.ASC) {
       setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? -1 : 1)));
     } else {
       setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
     }
   }
-  if (sort === Sort.EDITION_SIZE) {
+  if (sort === MemeLabSort.EDITION_SIZE) {
     setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
     if (sortDir === SortDirection.ASC) {
       setNfts(
@@ -217,7 +215,7 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.HODLERS) {
+  if (sort === MemeLabSort.HODLERS) {
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
@@ -252,21 +250,21 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.ARTISTS && labArtists && setLabArtists) {
+  if (sort === MemeLabSort.ARTISTS && labArtists && setLabArtists) {
     if (sortDir === SortDirection.ASC) {
       setLabArtists([...labArtists].sort());
     } else {
       setLabArtists([...labArtists].reverse());
     }
   }
-  if (sort === Sort.COLLECTIONS && labCollections && setLabCollections) {
+  if (sort === MemeLabSort.COLLECTIONS && labCollections && setLabCollections) {
     if (sortDir === SortDirection.ASC) {
       setLabCollections([...labCollections].sort());
     } else {
       setLabCollections([...labCollections].reverse());
     }
   }
-  if (sort === Sort.UNIQUE_PERCENT) {
+  if (sort === MemeLabSort.UNIQUE_PERCENT) {
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
@@ -301,7 +299,7 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.UNIQUE_PERCENT_EX_MUSEUM) {
+  if (sort === MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM) {
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
@@ -336,7 +334,7 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.FLOOR_PRICE) {
+  if (sort === MemeLabSort.FLOOR_PRICE) {
     setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
     if (sortDir === SortDirection.ASC) {
       setNfts(
@@ -356,7 +354,7 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.MARKET_CAP) {
+  if (sort === MemeLabSort.MARKET_CAP) {
     setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
     if (sortDir === SortDirection.ASC) {
       setNfts(
@@ -376,7 +374,7 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.HIGHEST_OFFER) {
+  if (sort === MemeLabSort.HIGHEST_OFFER) {
     setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
     if (sortDir === SortDirection.ASC) {
       setNfts(
@@ -396,7 +394,7 @@ export function sortChanged(
       );
     }
   }
-  if (sort === Sort.VOLUME) {
+  if (sort === MemeLabSort.VOLUME) {
     setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
     if (sortDir === SortDirection.ASC) {
       setNfts(
@@ -436,7 +434,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
   }, [router.isReady]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<Sort>(Sort.AGE);
+  const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -636,7 +634,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  Sort by&nbsp;&nbsp;
+                  MemeLabSort by&nbsp;&nbsp;
                   <FontAwesomeIcon
                     icon="chevron-circle-up"
                     onClick={() => setSortDir(SortDirection.ASC)}
@@ -658,9 +656,9 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               </Row>
               {nftsLoaded ? (
                 nfts.length > 0 ? (
-                  sort === Sort.ARTISTS ? (
+                  sort === MemeLabSort.ARTISTS ? (
                     printArtists()
-                  ) : sort === Sort.COLLECTIONS ? (
+                  ) : sort === MemeLabSort.COLLECTIONS ? (
                     printCollections()
                   ) : (
                     printNfts()
@@ -682,25 +680,5 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         </Col>
       </Row>
     </Container>
-  );
-}
-
-function SortButton(
-  props: Readonly<{
-    currentSort: Sort;
-    sort: Sort;
-    setSort: (sort: Sort) => void;
-  }>
-) {
-  const name = capitalizeEveryWord(props.sort.replace("_", " "));
-
-  return (
-    <button
-      onClick={() => props.setSort(props.sort)}
-      className={`btn-link ${styles.sort} ${
-        props.currentSort != props.sort ? styles.disabled : ""
-      }`}>
-      {name}
-    </button>
   );
 }

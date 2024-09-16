@@ -17,9 +17,9 @@ import {
   getInitialRouterValues,
   printNftContent,
   printSortButtons,
-  Sort,
   sortChanged,
 } from "./MemeLab";
+import { MemeLabSort } from "../../enums";
 
 interface Props {
   wallets: string[];
@@ -38,7 +38,7 @@ export default function LabCollection(props: Readonly<Props>) {
   const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<Sort>(Sort.AGE);
+  const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
 
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
