@@ -20,6 +20,7 @@ import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import { NftPageStats } from "../nftAttributes/NftStats";
+import { printMemeReferences } from "../rememes/RememePage";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -337,57 +338,7 @@ export function MemePageLiveSubMenu(props: {
             related to The Meme Cards.
           </Col>
         </Row>
-        {memeLabNftsLoaded && memeLabNfts.length === 0 && (
-          <Row className="pt-2 pb-4">
-            <Col>Meme Lab NFTs that reference this NFT will appear here.</Col>
-          </Row>
-        )}
-        {memeLabNfts.length > 0 && (
-          <Row className="pt-2 pb-2">
-            {memeLabNfts.map((nft) => {
-              return (
-                <Col
-                  key={`${nft.contract}-${nft.id}`}
-                  className="pt-3 pb-3"
-                  xs={{ span: 6 }}
-                  sm={{ span: 4 }}
-                  md={{ span: 3 }}
-                  lg={{ span: 3 }}>
-                  <a
-                    href={`/meme-lab/${nft.id}`}
-                    className="decoration-none scale-hover">
-                    <Container fluid className="no-padding">
-                      <Row>
-                        <Col>
-                          <NFTImage
-                            nft={nft}
-                            animation={false}
-                            height={300}
-                            balance={0}
-                            showThumbnail={true}
-                            showUnseized={false}
-                          />
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col className="text-center pt-2">
-                          <b>
-                            #{nft.id} - {nft.name}
-                          </b>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col className="text-center pt-2">
-                          Artists: {nft.artist}
-                        </Col>
-                      </Row>
-                    </Container>
-                  </a>
-                </Col>
-              );
-            })}
-          </Row>
-        )}
+        {printMemeReferences(memeLabNfts, memeLabNftsLoaded, true)}
         <Row className="pt-3" ref={rememesTarget}>
           <Col className="d-flex flex-wrap align-items-center justify-content-between">
             <h1 className="mb-0 pt-2">

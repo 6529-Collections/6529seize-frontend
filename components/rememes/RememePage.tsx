@@ -37,14 +37,20 @@ enum Tabs {
   REFERENCES = "References",
 }
 
-export function printMemeReferences(memes: NFT[], memesLoaded: boolean = true) {
+export function printMemeReferences(
+  memes: NFT[],
+  memesLoaded: boolean = true,
+  hideTitle: boolean = false
+) {
   return (
-    <Row className="pt-4">
-      <Col xs={12}>
-        <h1>
-          <span className="font-lightest">The Memes</span> References
-        </h1>
-      </Col>
+    <Row className="pt-2">
+      {!hideTitle && (
+        <Col xs={12} className="pt-2">
+          <h1>
+            <span className="font-lightest">The Memes</span> References
+          </h1>
+        </Col>
+      )}
       {memesLoaded ? (
         <>
           {memes.length > 0 ? (
