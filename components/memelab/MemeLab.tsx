@@ -18,6 +18,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import { AuthContext } from "../auth/Auth";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { MEMELAB_CONTRACT } from "../../constants";
+import { printVolumeTypeDropdown } from "../the-memes/TheMemes";
 
 export enum Sort {
   AGE = "age",
@@ -83,29 +84,9 @@ export function printSortButtons(
       {enumValues.map((v) => (
         <SortButton key={v} currentSort={sort} sort={v} setSort={setSort} />
       ))}
-      <span>
-        <Dropdown
-          className={`${styles.volumeDropdown} ${
-            sort === Sort.VOLUME ? styles.volumeDropdownEnabled : ""
-          }`}
-          drop={"down-centered"}>
-          <Dropdown.Toggle>Volume</Dropdown.Toggle>
-          <Dropdown.Menu>
-            {Object.values(VolumeType).map((vol) => (
-              <Dropdown.Item
-                key={vol}
-                onClick={() => {
-                  setVolumeType(vol);
-                  if (sort != Sort.VOLUME) {
-                    setSort(Sort.VOLUME);
-                  }
-                }}>
-                {vol}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
-      </span>
+      {printVolumeTypeDropdown(sort === Sort.VOLUME, setVolumeType, () => {
+        setSort(Sort.VOLUME);
+      })}
     </>
   );
 }

@@ -45,6 +45,36 @@ interface Props {
   setCrumbs(crumbs: Crumb[]): any;
 }
 
+export function printVolumeTypeDropdown(
+  isVolumeSort: boolean,
+  setVolumeType: (volumeType: VolumeType) => void,
+  setVolumeSort: () => void
+) {
+  return (
+    <Dropdown
+      className={`${styles.volumeDropdown} ${
+        isVolumeSort ? styles.volumeDropdownEnabled : ""
+      }`}
+      drop={"down-centered"}>
+      <Dropdown.Toggle>Volume</Dropdown.Toggle>
+      <Dropdown.Menu>
+        {Object.values(VolumeType).map((vol) => (
+          <Dropdown.Item
+            key={vol}
+            onClick={() => {
+              setVolumeType(vol);
+              if (!isVolumeSort) {
+                setVolumeSort();
+              }
+            }}>
+            {vol}
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
 export default function TheMemesComponent(props: Readonly<Props>) {
   const router = useRouter();
 
@@ -464,29 +494,13 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                         setSort={setSort}
                       />
                     ))}
-                  <span>
-                    <Dropdown
-                      className={`${styles.volumeDropdown} ${
-                        sort === Sort.VOLUME ? styles.volumeDropdownEnabled : ""
-                      }`}
-                      drop={"down-centered"}>
-                      <Dropdown.Toggle>Volume</Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {Object.values(VolumeType).map((vol) => (
-                          <Dropdown.Item
-                            key={vol}
-                            onClick={() => {
-                              setVolumeType(vol);
-                              if (sort != Sort.VOLUME) {
-                                setSort(Sort.VOLUME);
-                              }
-                            }}>
-                            {vol}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </span>
+                  {printVolumeTypeDropdown(
+                    sort === Sort.VOLUME,
+                    setVolumeType,
+                    () => {
+                      setSort(Sort.VOLUME);
+                    }
+                  )}
                 </Col>
               </Row>
               {nfts.length > 0 && sort === Sort.MEME
