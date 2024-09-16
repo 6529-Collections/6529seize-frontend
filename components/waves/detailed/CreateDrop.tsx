@@ -87,6 +87,7 @@ export default function CreateDrop({
           onCancelReplyQuote={onCancelReplyQuote}
           wave={wave}
           drop={drop}
+          isStormMode={isStormMode}
           setDrop={setDrop}
           setIsStormMode={setIsStormMode}
           onDropCreated={onDropCreated}

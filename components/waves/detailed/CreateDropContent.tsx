@@ -56,8 +56,9 @@ interface CreateDropContent {
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: Wave;
-  readonly drop: CreateDropConfig | null;
+  readonly drop: CreateDropConfig | null; 
   readonly setDrop: (drop: CreateDropConfig | null) => void;
+  readonly isStormMode: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly onDropCreated: () => void;
 }
@@ -67,6 +68,7 @@ export default function CreateDropContent({
   rootDropId,
   onCancelReplyQuote,
   wave,
+  isStormMode,
   onDropCreated,
   drop,
   setDrop,
@@ -630,6 +632,7 @@ export default function CreateDropContent({
             editorState={editorState}
             type={activeDrop?.action ?? null}
             drop={drop}
+            isStormMode={isStormMode}
             setIsStormMode={setIsStormMode}
             canSubmit={canSubmit}
             canAddPart={canAddPart}

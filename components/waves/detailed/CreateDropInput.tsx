@@ -61,6 +61,7 @@ import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlu
 import { ActiveDropAction } from "./WaveDetailedContent";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import Tippy from "@tippyjs/react";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -75,6 +76,7 @@ const CreateDropInput = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly canSubmit: boolean;
     readonly canAddPart: boolean;
+    readonly isStormMode: boolean;
     readonly setIsStormMode: (isStormMode: boolean) => void;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
@@ -94,6 +96,7 @@ const CreateDropInput = forwardRef<
       drop,
       canSubmit,
       canAddPart,
+      isStormMode,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
@@ -293,43 +296,65 @@ const CreateDropInput = forwardRef<
                 canSubmitWithEnter={canSubmitWithEnter}
               />
               <div className="tw-flex tw-items-center tw-absolute tw-top-3 tw-right-9">
-                <button
-                  onClick={breakIntoStorm}
-                  disabled={!canAddPart}
-                  type="button"
-                  className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300 tw-mr-2"
+                <Tippy
+                  content={
+                    <div className="tw-text-center">
+                      <span
+                        className={`tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+                      >
+                        {isStormMode ? "Add a part" : "Break into storm"}
+                      </span>
+                    </div>
+                  }
+                  placement="top"
+                  disabled={false}
                 >
-                  <svg
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <button
+                    onClick={breakIntoStorm}
+                    disabled={!canAddPart}
+                    type="button"
+                    className={`tw-border-0 tw-bg-transparent tw-flex tw-items-center tw-ease-out tw-transition tw-duration-300 tw-mr-2 ${
+                      canAddPart
+                        ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50"
+                        : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600"
+                    }`}
                   >
-                    <path
-                      d="M12 5V19M5 12H19"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <svg
-                    className="tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      className={`tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5 ${
+                        !canAddPart ? "tw-opacity-50" : ""
+                      }`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 5V19M5 12H19"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <svg
+                      className={`tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0 ${
+                        !canAddPart ? "tw-opacity-50" : ""
+                      }`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </Tippy>
               </div>
 
               <div ref={dropdownRef}>
