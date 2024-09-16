@@ -756,7 +756,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
   );
 }
 
-export function SortButton(
+function SortButton(
   props: Readonly<{
     name: string;
     currentSort: Sort;

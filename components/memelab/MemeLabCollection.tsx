@@ -1,7 +1,7 @@
 import styles from "./MemeLab.module.scss";
 
 import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { LabNFT, LabExtendedData, VolumeType } from "../../entities/INFT";
 import { addProtocol } from "../../helpers/Helpers";
 import { useRouter } from "next/router";
@@ -18,7 +18,6 @@ import {
   printNftContent,
   printSortButtons,
   Sort,
-  SortButton,
   sortChanged,
 } from "./MemeLab";
 
