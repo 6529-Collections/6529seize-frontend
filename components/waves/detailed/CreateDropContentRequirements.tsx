@@ -3,12 +3,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Wave } from "../../../generated/models/Wave";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
 import { WaveRequiredMetadata } from "../../../generated/models/WaveRequiredMetadata";
+import CreateDropContentRequirementsItem from "./CreateDropContentRequirementsItem";
+
+export enum DropRequirementType {
+  MEDIA = "MEDIA",
+  METADATA = "METADATA",
+}
 
 interface CreateDropContentRequirementsProps {
   canSubmit: boolean;
   wave: Wave;
   missingMedia: WaveParticipationRequirement[];
-  missingMetadata: WaveRequiredMetadata[];
+  missingMetadata: string[];
 }
 
 const CreateDropContentRequirements: React.FC<
@@ -26,16 +32,16 @@ const CreateDropContentRequirements: React.FC<
             transition={{ duration: 0.3 }}
             className="tw-w-full tw-inline-flex tw-space-x-4"
           >
-            {!!missingMedia.length && (
-              <div className="tw-text-sm tw-text-iron-400">
-                Missing media: {missingMedia.join(", ")}
-              </div>
-            )}
-            {!!missingMetadata.length && (
-              <div className="tw-text-sm tw-text-iron-400">
-                Missing metadata
-              </div>
-            )}
+            <CreateDropContentRequirementsItem
+              isValid={!missingMedia.length}
+              missingItems={missingMedia.map((m) => m.toLowerCase())}
+              requirementType={DropRequirementType.MEDIA}
+            />
+            <CreateDropContentRequirementsItem
+              isValid={!missingMetadata.length}
+              missingItems={missingMetadata}
+              requirementType={DropRequirementType.METADATA}
+            />
           </motion.div>
         )}
     </AnimatePresence>

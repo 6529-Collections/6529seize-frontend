@@ -500,7 +500,7 @@ export default function CreateDropContent({
   const [missingRequiredMetadataKeys, setMissingRequiredMetadataKeys] =
     useState<string[]>([]);
 
-  const validateMetadata = (): string[] => {
+  const getMissingRequiredMetadataKeys = (): string[] => {
     const missingRequiredFields = metadata.filter(
       (item) =>
         item.required &&
@@ -508,23 +508,14 @@ export default function CreateDropContent({
     );
 
     const missingKeys = missingRequiredFields.map((item) => item.key as string);
-
     return missingKeys;
   };
 
-  const getIsRequiredMetadataMissing = () => {
-    const missingKeys = validateMetadata();
-    return missingKeys.length > 0;
-  };
-  const [isRequiredMetadataMissing, setIsRequiredMetadataMissing] = useState(
-    getIsRequiredMetadataMissing()
-  );
-
   useEffect(() => {
-    setIsRequiredMetadataMissing(getIsRequiredMetadataMissing());
+    setMissingRequiredMetadataKeys(getMissingRequiredMetadataKeys());
   }, [metadata]);
 
-  const getIsRequiredMediaMissing = (): WaveParticipationRequirement[] => {
+  const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
     if (!wave.participation.required_media.length) {
       return [];
     }
@@ -544,20 +535,16 @@ export default function CreateDropContent({
         })
     );
   };
-  const [isRequiredMediaMissing, setIsRequiredMediaMissing] = useState<
+  const [missingRequiredMedia, setMissingRequiredMedia] = useState<
     WaveParticipationRequirement[]
-  >(getIsRequiredMediaMissing());
+  >(getMissingRequiredMedia());
 
   useEffect(() => {
-    setIsRequiredMediaMissing(getIsRequiredMediaMissing());
+    setMissingRequiredMedia(getMissingRequiredMedia());
   }, [files]);
 
   const onDrop = async (): Promise<void> => {
-    if (isRequiredMetadataMissing) {
-      setMissingRequiredMetadataKeys(validateMetadata());
-      return;
-    }
-    if (isRequiredMediaMissing.length) {
+    if (missingRequiredMedia.length || missingRequiredMetadataKeys.length) {
       return;
     }
     const currentDrop = onDropPart();
@@ -635,17 +622,6 @@ export default function CreateDropContent({
       newMetadata[params.index].value = params.newValue;
       return newMetadata;
     });
-    const key = metadata[params.index].key;
-    if (key) {
-      setMissingRequiredMetadataKeys((prev) => {
-        const newMissingRequiredMetadataKeys = [...prev];
-        newMissingRequiredMetadataKeys.splice(
-          newMissingRequiredMetadataKeys.indexOf(key),
-          1
-        );
-        return newMissingRequiredMetadataKeys;
-      });
-    }
   };
 
   const onAddMetadata = () => {
@@ -677,8 +653,8 @@ export default function CreateDropContent({
             isStormMode={isStormMode}
             setIsStormMode={setIsStormMode}
             canSubmit={canSubmit}
-            isRequiredMetadataMissing={isRequiredMetadataMissing}
-            isRequiredMediaMissing={!!isRequiredMediaMissing.length}
+            isRequiredMetadataMissing={!!missingRequiredMetadataKeys.length}
+            isRequiredMediaMissing={!!missingRequiredMedia.length}
             canAddPart={canAddPart}
             onEditorState={setEditorState}
             onReferencedNft={onReferencedNft}
@@ -702,10 +678,8 @@ export default function CreateDropContent({
       <CreateDropContentRequirements
         canSubmit={canSubmit}
         wave={wave}
-        missingMedia={isRequiredMediaMissing}
-        missingMetadata={wave.participation.required_metadata.filter((md) =>
-          missingRequiredMetadataKeys.includes(md.name)
-        )}
+        missingMedia={missingRequiredMedia}
+        missingMetadata={missingRequiredMetadataKeys}
       />
       <AnimatePresence>
         {isMetadataOpen && (
