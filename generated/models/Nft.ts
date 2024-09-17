@@ -45,6 +45,7 @@ export class Nft {
     'boosted_tdh': number;
     'artist_seize_handle': string | null;
     'has_distribution': boolean;
+    'highest_offer': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -240,6 +241,12 @@ export class Nft {
             "baseName": "has_distribution",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "highest_offer",
+            "baseName": "highest_offer",
+            "type": "number",
+            "format": "float"
         }    ];
 
     static getAttributeTypeMap() {

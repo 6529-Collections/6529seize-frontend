@@ -28,12 +28,12 @@ paths:
           schema:
             type: boolean
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NonceResponse'
+                $ref: "#/components/schemas/NonceResponse"
   /auth/login:
     post:
       tags:
@@ -52,16 +52,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
       responses:
-        '201':
+        "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
-        '400':
-          description: 'Invalid request'
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: "Invalid request"
 
   /nfts:
     get:
@@ -117,6 +117,239 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/NftsPage"
+
+  /owners-balances:
+    get:
+      tags:
+        - Owners Balances
+      summary: Get owner balances
+      operationId: getOwnerBalances
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OwnerBalance"
+
+  /owners-balances/consolidation/{consolidation_key}:
+    get:
+      tags:
+        - Owners Balances
+      summary: Get owner balance by consolidation key.
+      operationId: getOwnerBalanceByConsolidationKey
+      parameters:
+        - name: consolidation_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnerBalance"
+        "404":
+          description: Owner Balance for consolidation key not found
+
+  /owners-balances/consolidation/{consolidation_key}/memes:
+    get:
+      tags:
+        - Owners Balances
+      summary: Get memes owner balance by consolidation key.
+      operationId: getMemesOwnerBalanceByConsolidationKey
+      parameters:
+        - name: consolidation_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OwnerBalanceMemes"
+        "404":
+          description: Memes Owner Balance for consolidation key not found
+
+  /aggregated-activity:
+    get:
+      tags:
+        - Aggregated Activity
+      summary: Get aggregated activity
+      operationId: getAggregatedActivity
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is ASC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          description: Default is primary_purchases_count
+          required: false
+          schema:
+            type: string
+            enum:
+              - primary_purchases_count
+              - primary_purchases_value
+              - secondary_purchases_count
+              - secondary_purchases_value
+              - sales_count
+              - sales_value
+              - transfers_in
+              - transfers_out
+              - airdrops
+              - burns
+        - name: search
+          in: query
+          description: Search by wallet address, profile handle or ENS
+          required: false
+          schema:
+            type: string
+        - name: content
+          in: query
+          description: Filter by content
+          required: false
+          schema:
+            type: string
+            enum:
+              - Memes
+              - Gradient
+              - MemeLab
+              - NextGen
+        - name: season
+          in: query
+          description: Filter by season
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: collector
+          in: query
+          description: Filter by collector type
+          required: false
+          schema:
+            type: string
+            enum:
+              - All
+              - Memes
+              - Meme SZN Set
+              - Genesis Set
+              - Gradient
+              - MemeLab
+              - NextGen
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AggregatedActivityPage"
+
+  /aggregated-activity/consolidation/{consolidation_key}:
+    get:
+      tags:
+        - Aggregated Activity
+      summary: Get aggregated activity by consolidation key.
+      operationId: getAggregatedActivityByConsolidationKey
+      parameters:
+        - name: consolidation_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AggregatedActivity"
+        "404":
+          description: Aggregated Activity for consolidation key not found
+
+  /aggregated-activity/consolidation/{consolidation_key}/memes:
+    get:
+      tags:
+        - Aggregated Activity
+      summary: Get memes aggregated activity by consolidation key per season.
+      operationId: getMemesAggregatedActivityByConsolidationKey
+      parameters:
+        - name: consolidation_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AggregatedActivityMemes"
+        "404":
+          description: Memes Aggregated Activity for consolidation key not found
 
   /notifications:
     get:
@@ -427,7 +660,7 @@ paths:
           description: "Invalid request"
     get:
       tags:
-          - ProfileREP
+        - ProfileREP
       summary: Get profile REP rating
       operationId: getProfileRepRating
       parameters:
@@ -945,14 +1178,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+              $ref: "#/components/schemas/CreateMediaUploadUrlRequest"
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateMediaUrlResponse'
+                $ref: "#/components/schemas/CreateMediaUrlResponse"
         "400":
           description: "Invalid request"
   /proxies:
@@ -1118,14 +1351,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMediaUploadUrlRequest'
+              $ref: "#/components/schemas/CreateMediaUploadUrlRequest"
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateMediaUrlResponse'
+                $ref: "#/components/schemas/CreateMediaUrlResponse"
         "400":
           description: "Invalid request"
 
@@ -1264,21 +1497,21 @@ paths:
         "404":
           description: Wave not found
     delete:
-        tags:
-            - Waves
-        summary: Delete wave by ID
-        operationId: deleteWaveById
-        parameters:
-          - name: id
-            in: path
-            required: true
-            schema:
-                type: string
-        responses:
-          "201":
-            description: successful operation
-          "404":
-            description: Wave not found
+      tags:
+        - Waves
+      summary: Delete wave by ID
+      operationId: deleteWaveById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+        "404":
+          description: Wave not found
     post:
       tags:
         - Waves
@@ -1564,7 +1797,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BlocksPage'
+                $ref: "#/components/schemas/BlocksPage"
 
   /uploads:
     get:
@@ -1596,14 +1829,14 @@ paths:
           required: false
           schema:
             type: string
-            format: 'date-time'
+            format: "date-time"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UploadsPage'
+                $ref: "#/components/schemas/UploadsPage"
 
   /consolidated_uploads:
     get:
@@ -1635,14 +1868,14 @@ paths:
           required: false
           schema:
             type: string
-            format: 'date-time'
+            format: "date-time"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UploadsPage'
+                $ref: "#/components/schemas/UploadsPage"
 
   /settings:
     get:
@@ -1656,7 +1889,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SeizeSettings'
+                $ref: "#/components/schemas/SeizeSettings"
   /artists:
     get:
       tags:
@@ -1688,7 +1921,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArtistsPage'
+                $ref: "#/components/schemas/ArtistsPage"
   /memes/artists_names:
     get:
       tags:
@@ -1703,7 +1936,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ArtistNameItem'
+                  $ref: "#/components/schemas/ArtistNameItem"
   /memelab/artists_names:
     get:
       tags:
@@ -1718,7 +1951,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ArtistNameItem'
+                  $ref: "#/components/schemas/ArtistNameItem"
 
 components:
   securitySchemes:
@@ -1854,7 +2087,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RatingWithProfileInfoAndLevel"
-
 
     DropsPage:
       type: object
@@ -2101,10 +2333,10 @@ components:
           nullable: true
 
     GroupFilterDirection:
-        type: string
-        enum:
-          - RECEIVED
-          - SENT
+      type: string
+      enum:
+        - RECEIVED
+        - SENT
 
     CreateGroup:
       type: object
@@ -2527,17 +2759,17 @@ components:
           format: int64
 
     UpdateProxyActionRequest:
-        type: object
-        properties:
-          credit_amount:
-            type: number
-            format: int64
-            example: 1000
-          end_time:
-            type: number
-            format: int64
-            nullable: true
-            example: 1719850339996
+      type: object
+      properties:
+        credit_amount:
+          type: number
+          format: int64
+          example: 1000
+        end_time:
+          type: number
+          format: int64
+          nullable: true
+          example: 1719850339996
 
     DropContextProfileContext:
       type: object
@@ -2625,7 +2857,6 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/CreateWaveDropRequest"
-
 
     DropMedia:
       type: object
@@ -2720,7 +2951,6 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/WaveMetadataType"
-
 
     CreateNewWaveVotingConfig:
       type: object
@@ -2913,7 +3143,7 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/IntRange"
-          example: {"min": 1719850339996, "max": 1719850339996}
+          example: { "min": 1719850339996, "max": 1719850339996 }
         authenticated_user_eligible_for_admin:
           type: boolean
 
@@ -2956,7 +3186,6 @@ components:
             - $ref: "#/components/schemas/IntRange"
           example: { "min": 1719850339996, "max": 1719850339996 }
 
-
     WaveOutcomeType:
       type: string
       enum:
@@ -2997,7 +3226,6 @@ components:
           type: array
           items:
             type: number
-
 
     WaveParticipationRequirement:
       type: string
@@ -3386,6 +3614,7 @@ components:
         - boosted_tdh
         - artist_seize_handle
         - has_distribution
+        - highest_offer
       properties:
         id:
           type: integer
@@ -3475,6 +3704,9 @@ components:
           nullable: true
         has_distribution:
           type: boolean
+        highest_offer:
+          type: number
+          format: float
 
     NftsPage:
       type: object
@@ -3529,21 +3761,20 @@ components:
           type: number
           format: int64
 
-
     ChangeProfileRepRating:
-        type: object
-        required:
-            - amount
-            - category
-        properties:
-          amount:
-            type: number
-            format: int64
-          category:
-            type: string
-            maxLength: 100
-            minLength: 1
-            pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
+      type: object
+      required:
+        - amount
+        - category
+      properties:
+        amount:
+          type: number
+          format: int64
+        category:
+          type: string
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9?!,.'() ]{1,100}$"
 
     ChangeProfileRepRatingResponse:
       type: object
@@ -3649,14 +3880,14 @@ components:
         - DROP_CREATED
 
     WaveSubscriptionActions:
-        type: object
-        required:
-          - actions
-        properties:
-          actions:
-            type: array
-            items:
-              $ref: "#/components/schemas/WaveSubscriptionTargetAction"
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaveSubscriptionTargetAction"
 
     DropSubscriptionTargetAction:
       type: string
@@ -3785,50 +4016,49 @@ components:
         - DROP_VOTED
 
     Notification:
-        type: object
-        required:
-          - id
-          - cause
-          - created_at
-          - read_at
-          - related_identity
-          - related_drops
-          - additional_context
-        properties:
-          id:
-            type: number
-            format: int64
-          cause:
-            $ref: "#/components/schemas/NotificationCause"
-          created_at:
-            type: number
-            format: int64
-          read_at:
-            type: number
-            format: int64
-            nullable: true
-          related_identity:
-            $ref: "#/components/schemas/ProfileMin"
-          related_drops:
-            type: array
-            items:
-              $ref: "#/components/schemas/Drop"
-          additional_context:
-            type: object
-
+      type: object
+      required:
+        - id
+        - cause
+        - created_at
+        - read_at
+        - related_identity
+        - related_drops
+        - additional_context
+      properties:
+        id:
+          type: number
+          format: int64
+        cause:
+          $ref: "#/components/schemas/NotificationCause"
+        created_at:
+          type: number
+          format: int64
+        read_at:
+          type: number
+          format: int64
+          nullable: true
+        related_identity:
+          $ref: "#/components/schemas/ProfileMin"
+        related_drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/Drop"
+        additional_context:
+          type: object
 
     IdentityAndSubscriptionActions:
-        type: object
-        required:
-          - identity
-          - actions
-        properties:
-          identity:
-            $ref: "#/components/schemas/ProfileMin"
-          actions:
-            type: array
-            items:
-              $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
+      type: object
+      required:
+        - identity
+        - actions
+      properties:
+        identity:
+          $ref: "#/components/schemas/ProfileMin"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentitySubscriptionTargetAction"
 
     TargetAndSubscriptionActions:
       type: object
@@ -3837,7 +4067,7 @@ components:
         - actions
       properties:
         target:
-          description: 'Wave or drop or identity'
+          description: "Wave or drop or identity"
           type: object
         actions:
           type: array
@@ -3869,21 +4099,21 @@ components:
             $ref: "#/components/schemas/TargetAndSubscriptionActions"
 
     BlockItem:
-        type: object
-        required:
-          - block_number
-          - created_at
-          - timestamp
-        properties:
-          block_number:
-            type: integer
-            format: int64
-          created_at:
-            type: string
-            format: 'date-time'
-          timestamp:
-            type: string
-            format: 'date-time'
+      type: object
+      required:
+        - block_number
+        - created_at
+        - timestamp
+      properties:
+        block_number:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: "date-time"
+        timestamp:
+          type: string
+          format: "date-time"
 
     BlocksPage:
       type: object
@@ -3915,7 +4145,7 @@ components:
       properties:
         date:
           type: string
-          format: 'date-time'
+          format: "date-time"
         block:
           type: integer
           format: int64
@@ -4002,16 +4232,16 @@ components:
             type: object
 
     ArtistsPage:
-        type: object
-        required:
-          - data
-        allOf:
-          - $ref: "#/components/schemas/PageWithNextUriBase"
-        properties:
-          data:
-            type: array
-            items:
-              $ref: "#/components/schemas/ArtistItem"
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/PageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistItem"
 
     ArtistNameItem:
       type: object
@@ -4055,9 +4285,528 @@ components:
         trace:
           type: array
           items:
-            $ref: '#/components/schemas/DropTraceItem'
+            $ref: "#/components/schemas/DropTraceItem"
 
+    OwnerBalance:
+      type: object
+      required:
+        - consolidation_key
+        - created_at
+        - updated_at
+        - total_balance
+        - gradients_balance
+        - nextgen_balance
+        - memelab_balance
+        - unique_memelab
+        - memes_balance
+        - unique_memes
+        - genesis
+        - nakamoto
+        - memes_cards_sets
+        - memes_cards_sets_minus1
+        - memes_cards_sets_minus2
+        - boost
+        - boosted_tdh
+        - boosted_memes_tdh
+        - boosted_gradients_tdh
+        - boosted_nextgen_tdh
+        - total_balance_rank
+        - memes_balance_rank
+        - unique_memes_rank
+        - gradients_balance_rank
+        - nextgen_balance_rank
+        - memelab_balance_rank
+        - unique_memelab_rank
+        - boosted_tdh_rank
+        - boosted_memes_tdh_rank
+        - boosted_gradients_tdh_rank
+        - boosted_nextgen_tdh_rank
+      properties:
+        consolidation_key:
+          type: string
+        created_at:
+          type: string
+          format: "date-time"
+        updated_at:
+          type: string
+          format: "date-time"
+        total_balance:
+          type: integer
+          format: int64
+        gradients_balance:
+          type: integer
+          format: int64
+        nextgen_balance:
+          type: integer
+          format: int64
+        memelab_balance:
+          type: integer
+          format: int64
+        unique_memelab:
+          type: integer
+          format: int64
+        memes_balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        genesis:
+          type: integer
+          format: int64
+        nakamoto:
+          type: integer
+          format: int64
+        memes_cards_sets:
+          type: integer
+          format: int64
+        memes_cards_sets_minus1:
+          type: integer
+          format: int64
+        memes_cards_sets_minus2:
+          type: integer
+          format: int64
+        boost:
+          type: number
+          format: double
+        boosted_tdh:
+          type: integer
+          format: int64
+        boosted_memes_tdh:
+          type: integer
+          format: int64
+        boosted_gradients_tdh:
+          type: integer
+          format: int64
+        boosted_nextgen_tdh:
+          type: integer
+          format: int64
+        total_balance_rank:
+          type: integer
+          format: int64
+        memes_balance_rank:
+          type: integer
+          format: int64
+        unique_memes_rank:
+          type: integer
+          format: int64
+        gradients_balance_rank:
+          type: integer
+          format: int64
+        nextgen_balance_rank:
+          type: integer
+          format: int64
+        memelab_balance_rank:
+          type: integer
+          format: int64
+        unique_memelab_rank:
+          type: integer
+          format: int64
+        boosted_tdh_rank:
+          type: integer
+          format: int64
+        boosted_memes_tdh_rank:
+          type: integer
+          format: int64
+        boosted_gradients_tdh_rank:
+          type: integer
+          format: int64
+        boosted_nextgen_tdh_rank:
+          type: integer
+          format: int64
 
+    OwnerBalanceMemes:
+      type: object
+      required:
+        - consolidation_key
+        - created_at
+        - updated_at
+        - season
+        - balance
+        - unique
+        - sets
+        - boosted_tdh
+        - rank
+      properties:
+        consolidation_key:
+          type: string
+        created_at:
+          type: string
+          format: "date-time"
+        updated_at:
+          type: string
+          format: "date-time"
+        season:
+          type: integer
+          format: int64
+        balance:
+          type: integer
+          format: int64
+        unique:
+          type: integer
+          format: int64
+        sets:
+          type: integer
+          format: int64
+        boosted_tdh:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+          format: int64
+
+    AggregatedActivityPage:
+      type: object
+      required:
+        - consolidation_key
+        - primary_purchases_count
+        - primary_purchases_value
+        - secondary_purchases_count
+        - secondary_purchases_value
+        - sales_count
+        - sales_value
+        - transfers_in
+        - transfers_out
+        - airdrops
+        - burns
+        - handle
+        - pfp_url
+        - rep_score
+        - cic_score
+        - primary_wallet
+        - consolidation_display
+        - boosted_tdh
+        - level
+      properties:
+        consolidation_key:
+          type: string
+        primary_purchases_count:
+          type: integer
+          format: int64
+        primary_purchases_value:
+          type: integer
+          format: int64
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: integer
+          format: int64
+        sales_count:
+          type: integer
+          format: int64
+        sales_value:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        handle:
+          type: string
+        pfp_url:
+          type: string
+          nullable: true
+        rep_score:
+          type: integer
+          format: int64
+        cic_score:
+          type: integer
+          format: int64
+        primary_wallet:
+          type: string
+        consolidation_display:
+          type: string
+        boosted_tdh:
+          type: integer
+          format: int64
+        level:
+          type: integer
+          format: int64
+
+    AggregatedActivity:
+      type: object
+      required:
+        - consolidation_key
+        - created_at
+        - updated_at
+        - primary_purchases_value
+        - primary_purchases_count
+        - secondary_purchases_value
+        - secondary_purchases_count
+        - burns
+        - sales_value
+        - sales_count
+        - airdrops
+        - transfers_in
+        - transfers_out
+        - primary_purchases_value_memes
+        - primary_purchases_count_memes
+        - secondary_purchases_value_memes
+        - secondary_purchases_count_memes
+        - burns_memes
+        - sales_value_memes
+        - sales_count_memes
+        - airdrops_memes
+        - transfers_in_memes
+        - transfers_out_memes
+        - primary_purchases_value_memelab
+        - primary_purchases_count_memelab
+        - secondary_purchases_value_memelab
+        - secondary_purchases_count_memelab
+        - burns_memelab
+        - sales_value_memelab
+        - sales_count_memelab
+        - airdrops_memelab
+        - transfers_in_memelab
+        - transfers_out_memelab
+        - primary_purchases_value_gradients
+        - primary_purchases_count_gradients
+        - secondary_purchases_value_gradients
+        - secondary_purchases_count_gradients
+        - burns_gradients
+        - sales_value_gradients
+        - sales_count_gradients
+        - airdrops_gradients
+        - transfers_in_gradients
+        - transfers_out_gradients
+        - primary_purchases_value_nextgen
+        - primary_purchases_count_nextgen
+        - secondary_purchases_value_nextgen
+        - secondary_purchases_count_nextgen
+        - burns_nextgen
+        - sales_value_nextgen
+        - sales_count_nextgen
+        - airdrops_nextgen
+        - transfers_in_nextgen
+        - transfers_out_nextgen
+      properties:
+        consolidation_key:
+          type: string
+        created_at:
+          type: string
+          format: "date-time"
+        updated_at:
+          type: string
+          format: "date-time"
+        primary_purchases_value:
+          type: integer
+          format: int64
+        primary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: integer
+          format: int64
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        sales_value:
+          type: integer
+          format: int64
+        sales_count:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
+        primary_purchases_value_memes:
+          type: integer
+          format: int64
+        primary_purchases_count_memes:
+          type: integer
+          format: int64
+        secondary_purchases_value_memes:
+          type: integer
+          format: int64
+        secondary_purchases_count_memes:
+          type: integer
+          format: int64
+        burns_memes:
+          type: integer
+          format: int64
+        sales_value_memes:
+          type: integer
+          format: int64
+        sales_count_memes:
+          type: integer
+          format: int64
+        airdrops_memes:
+          type: integer
+          format: int64
+        transfers_in_memes:
+          type: integer
+          format: int64
+        transfers_out_memes:
+          type: integer
+          format: int64
+        primary_purchases_value_memelab:
+          type: integer
+          format: int64
+        primary_purchases_count_memelab:
+          type: integer
+          format: int64
+        secondary_purchases_value_memelab:
+          type: integer
+          format: int64
+        secondary_purchases_count_memelab:
+          type: integer
+          format: int64
+        burns_memelab:
+          type: integer
+          format: int64
+        sales_value_memelab:
+          type: integer
+          format: int64
+        sales_count_memelab:
+          type: integer
+          format: int64
+        airdrops_memelab:
+          type: integer
+          format: int64
+        transfers_in_memelab:
+          type: integer
+          format: int64
+        transfers_out_memelab:
+          type: integer
+          format: int64
+        primary_purchases_value_gradients:
+          type: integer
+          format: int64
+        primary_purchases_count_gradients:
+          type: integer
+          format: int64
+        secondary_purchases_value_gradients:
+          type: integer
+          format: int64
+        secondary_purchases_count_gradients:
+          type: integer
+          format: int64
+        burns_gradients:
+          type: integer
+          format: int64
+        sales_value_gradients:
+          type: integer
+          format: int64
+        sales_count_gradients:
+          type: integer
+          format: int64
+        airdrops_gradients:
+          type: integer
+          format: int64
+        transfers_in_gradients:
+          type: integer
+          format: int64
+        transfers_out_gradients:
+          type: integer
+          format: int64
+        primary_purchases_value_nextgen:
+          type: integer
+          format: int64
+        primary_purchases_count_nextgen:
+          type: integer
+          format: int64
+        secondary_purchases_value_nextgen:
+          type: integer
+          format: int64
+        secondary_purchases_count_nextgen:
+          type: integer
+          format: int64
+        burns_nextgen:
+          type: integer
+          format: int64
+        sales_value_nextgen:
+          type: integer
+          format: int64
+        sales_count_nextgen:
+          type: integer
+          format: int64
+        airdrops_nextgen:
+          type: integer
+          format: int64
+        transfers_in_nextgen:
+          type: integer
+          format: int64
+        transfers_out_nextgen:
+          type: integer
+          format: int64
+
+    AggregatedActivityMemes:
+      type: object
+      required:
+        - consolidation_key
+        - created_at
+        - updated_at
+        - primary_purchases_value
+        - primary_purchases_count
+        - secondary_purchases_value
+        - secondary_purchases_count
+        - burns
+        - sales_value
+        - sales_count
+        - airdrops
+        - transfers_in
+        - transfers_out
+        - season
+      properties:
+        consolidation_key:
+          type: string
+        created_at:
+          type: string
+          format: "date-time"
+        updated_at:
+          type: string
+          format: "date-time"
+        primary_purchases_value:
+          type: integer
+          format: int64
+        primary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: integer
+          format: int64
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        sales_value:
+          type: integer
+          format: int64
+        sales_count:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
+        season:
+          type: integer
+          format: int64
 
 security:
   - bearerAuth: []
