@@ -26,6 +26,7 @@ export interface BaseNFT {
   total_volume_last_1_month: number;
   total_volume: number;
   has_distribution?: boolean;
+  highest_offer: number;
 }
 
 export interface NFTLite {
