@@ -77,6 +77,8 @@ const CreateDropInput = forwardRef<
     readonly canSubmit: boolean;
     readonly canAddPart: boolean;
     readonly isStormMode: boolean;
+    readonly isRequiredMetadataMissing: boolean;
+    readonly isRequiredMediaMissing: boolean;
     readonly setIsStormMode: (isStormMode: boolean) => void;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
@@ -97,6 +99,8 @@ const CreateDropInput = forwardRef<
       canSubmit,
       canAddPart,
       isStormMode,
+      isRequiredMetadataMissing,
+      isRequiredMediaMissing,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
@@ -359,7 +363,11 @@ const CreateDropInput = forwardRef<
 
               <div ref={dropdownRef}>
                 <div
-                  className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300"
+                  className={`tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-ease-out tw-transition tw-duration-300 ${
+                    isRequiredMetadataMissing || isRequiredMediaMissing
+                      ? "tw-text-yellow"
+                      : "tw-text-iron-400 hover:tw-text-iron-50"
+                  }`}
                   onClick={toggleDropdown}
                 >
                   <svg
@@ -386,7 +394,13 @@ const CreateDropInput = forwardRef<
                       transition={{ duration: 0.2 }}
                       className="tw-absolute tw-right-0 tw-top-10 tw-z-10 tw-w-40 tw-origin-top-right tw-rounded-lg tw-bg-iron-950 tw-py-2 tw-px-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none tw-space-y-1"
                     >
-                      <label className="tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 hover:tw-bg-primary-500 tw-rounded-md tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50 tw-transition-all tw-duration-300 tw-ease-out">
+                      <label
+                        className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
+                          isRequiredMediaMissing
+                            ? "tw-text-yellow hover:tw-bg-amber-800"
+                            : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
+                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out`}
+                      >
                         <svg
                           className="tw-flex-shrink-0 tw-h-5 tw-w-5"
                           xmlns="http://www.w3.org/2000/svg"
@@ -413,7 +427,11 @@ const CreateDropInput = forwardRef<
                       </label>
 
                       <div
-                        className="tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 hover:tw-bg-primary-500 tw-rounded-md tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50 tw-transition-all tw-duration-300 tw-ease-out"
+                        className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
+                          isRequiredMetadataMissing
+                            ? "tw-text-yellow hover:tw-bg-amber-800"
+                            : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
+                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out`}
                         onClick={() => {
                           onAddMetadataClick();
                           setIsDropdownOpen(false);
@@ -433,7 +451,7 @@ const CreateDropInput = forwardRef<
                             d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
                           />
                         </svg>
-                        <span className="tw-text-sm">Add metadata</span>
+                        <span>Add metadata</span>
                       </div>
                     </motion.div>
                   )}
