@@ -94,7 +94,7 @@ const WaveDetailedDropPartContent: React.FC<
               d="M15.75 19.5 8.25 12l7.5-7.5"
             />
           </svg>
-          {activePartIndex > 0 && <span>{activePartIndex +1}</span>}
+          {activePartIndex > 0 && <span>{activePartIndex}</span>}
         </button>
       )}
       <div
@@ -155,7 +155,9 @@ const WaveDetailedDropPartContent: React.FC<
             setActivePartIndex(activePartIndex + 1);
           }}
         >
-           {haveNextPart && <span>{havePreviousPart ? activePartIndex + 2 : 2}</span>}
+          {haveNextPart && (
+            <span>{havePreviousPart ? activePartIndex + 2 : 2}</span>
+          )}
           <svg
             className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
             xmlns="http://www.w3.org/2000/svg"
