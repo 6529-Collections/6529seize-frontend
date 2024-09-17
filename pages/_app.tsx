@@ -111,6 +111,7 @@ import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
+import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 import { coinbaseWallet } from "wagmi/connectors";
 
 library.add(
@@ -229,11 +230,15 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-const connectors = [];
+const connectors: any[] = [];
+
 if (isCapacitor) {
   connectors.push(
-    coinbaseWallet({
+    new CoinbaseWalletSDK({
       appName: "6529 CORE",
+      appLogoUrl:
+        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+      appChainIds: chains.map((chain) => chain.id),
     })
   );
 }
@@ -242,6 +247,7 @@ export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
   metadata,
+  enableCoinbase: !isCapacitor,
   coinbasePreference: isCapacitor ? "eoaOnly" : "all",
   auth: {
     email: false,
