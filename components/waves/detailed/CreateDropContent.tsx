@@ -30,6 +30,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
 import { Wave } from "../../../generated/models/Wave";
 import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
+import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
 
 export type CreateDropMetadataType =
   | {
@@ -56,7 +57,7 @@ interface CreateDropContent {
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: Wave;
-  readonly drop: CreateDropConfig | null; 
+  readonly drop: CreateDropConfig | null;
   readonly setDrop: (drop: CreateDropConfig | null) => void;
   readonly isStormMode: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
@@ -510,10 +511,52 @@ export default function CreateDropContent({
     return missingKeys;
   };
 
-  const onDrop = async (): Promise<void> => {
+  const getIsRequiredMetadataMissing = () => {
     const missingKeys = validateMetadata();
-    if (missingKeys.length > 0) {
-      setMissingRequiredMetadataKeys(missingKeys);
+    return missingKeys.length > 0;
+  };
+  const [isRequiredMetadataMissing, setIsRequiredMetadataMissing] = useState(
+    getIsRequiredMetadataMissing()
+  );
+
+  useEffect(() => {
+    setIsRequiredMetadataMissing(getIsRequiredMetadataMissing());
+  }, [metadata]);
+
+  const getIsRequiredMediaMissing = (): WaveParticipationRequirement[] => {
+    if (!wave.participation.required_media.length) {
+      return [];
+    }
+    return wave.participation.required_media.filter(
+      (media) =>
+        !files.some((file) => {
+          switch (media) {
+            case WaveParticipationRequirement.Image:
+              return file.type.startsWith("image/");
+            case WaveParticipationRequirement.Audio:
+              return file.type.startsWith("audio/");
+            case WaveParticipationRequirement.Video:
+              return file.type.startsWith("video/");
+            default:
+              return false;
+          }
+        })
+    );
+  };
+  const [isRequiredMediaMissing, setIsRequiredMediaMissing] = useState<
+    WaveParticipationRequirement[]
+  >(getIsRequiredMediaMissing());
+
+  useEffect(() => {
+    setIsRequiredMediaMissing(getIsRequiredMediaMissing());
+  }, [files]);
+
+  const onDrop = async (): Promise<void> => {
+    if (isRequiredMetadataMissing) {
+      setMissingRequiredMetadataKeys(validateMetadata());
+      return;
+    }
+    if (isRequiredMediaMissing.length) {
       return;
     }
     const currentDrop = onDropPart();
@@ -564,9 +607,7 @@ export default function CreateDropContent({
     }
   }, [drop?.parts]);
 
-  const [isMetadataOpen, setIsMetadataOpen] = useState(
-    !!wave.participation.required_metadata.length
-  );
+  const [isMetadataOpen, setIsMetadataOpen] = useState(false);
 
   const onAddMetadataClick = () => {
     setIsMetadataOpen(true);
@@ -635,6 +676,8 @@ export default function CreateDropContent({
             isStormMode={isStormMode}
             setIsStormMode={setIsStormMode}
             canSubmit={canSubmit}
+            isRequiredMetadataMissing={isRequiredMetadataMissing}
+            isRequiredMediaMissing={!!isRequiredMediaMissing.length}
             canAddPart={canAddPart}
             onEditorState={setEditorState}
             onReferencedNft={onReferencedNft}
@@ -655,6 +698,29 @@ export default function CreateDropContent({
           </PrimaryButton>
         </div>
       </div>
+      <AnimatePresence>
+        {canSubmit &&
+          (!!isRequiredMediaMissing.length || isRequiredMetadataMissing) && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="tw-w-full tw-inline-flex tw-space-x-4"
+            >
+              {!!isRequiredMediaMissing.length && (
+                <div className="tw-text-sm tw-text-iron-400">
+                  Missing media: {isRequiredMediaMissing.join(", ")}
+                </div>
+              )}
+              {isRequiredMetadataMissing && (
+                <div className="tw-text-sm tw-text-iron-400">
+                  Missing metadata
+                </div>
+              )}
+            </motion.div>
+          )}
+      </AnimatePresence>
       <AnimatePresence>
         {isMetadataOpen && (
           <motion.div
