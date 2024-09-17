@@ -25,7 +25,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   onAddMetadata,
 }) => {
   return (
-    <div className="tw-mt-3">
+    <div className="tw-mt-3 tw-space-y-2">
       <div>
         <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
           <span>
@@ -93,6 +93,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
+          aria-hidden="true"
           className="tw-size-5 tw-flex-shrink-0"
         >
           <path

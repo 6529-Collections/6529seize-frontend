@@ -365,7 +365,7 @@ const CreateDropInput = forwardRef<
                 <div
                   className={`tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-ease-out tw-transition tw-duration-300 ${
                     isRequiredMetadataMissing || isRequiredMediaMissing
-                      ? "tw-text-yellow"
+                      ? "tw-text-yellow hover:tw-text-opacity-80"
                       : "tw-text-iron-400 hover:tw-text-iron-50"
                   }`}
                   onClick={toggleDropdown}
@@ -397,9 +397,9 @@ const CreateDropInput = forwardRef<
                       <label
                         className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
                           isRequiredMediaMissing
-                            ? "tw-text-yellow hover:tw-bg-amber-800"
+                            ? "tw-text-yellow hover:tw-bg-[#FDB022]/50"
                             : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
-                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out`}
+                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out hover:tw-font-medium`}
                       >
                         <svg
                           className="tw-flex-shrink-0 tw-h-5 tw-w-5"
@@ -429,9 +429,9 @@ const CreateDropInput = forwardRef<
                       <div
                         className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
                           isRequiredMetadataMissing
-                            ? "tw-text-yellow hover:tw-bg-amber-800"
+                            ? "tw-text-yellow hover:tw-bg-[#FDB022]/40"
                             : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
-                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out`}
+                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out hover:tw-font-medium`}
                         onClick={() => {
                           onAddMetadataClick();
                           setIsDropdownOpen(false);
