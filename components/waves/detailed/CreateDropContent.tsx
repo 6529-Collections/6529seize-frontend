@@ -31,6 +31,7 @@ import CreateDropMetadata from "./CreateDropMetadata";
 import { Wave } from "../../../generated/models/Wave";
 import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
+import CreateDropContentRequirements from "./CreateDropContentRequirements";
 
 export type CreateDropMetadataType =
   | {
@@ -698,29 +699,14 @@ export default function CreateDropContent({
           </PrimaryButton>
         </div>
       </div>
-      <AnimatePresence>
-        {canSubmit &&
-          (!!isRequiredMediaMissing.length || isRequiredMetadataMissing) && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="tw-w-full tw-inline-flex tw-space-x-4"
-            >
-              {!!isRequiredMediaMissing.length && (
-                <div className="tw-text-sm tw-text-iron-400">
-                  Missing media: {isRequiredMediaMissing.join(", ")}
-                </div>
-              )}
-              {isRequiredMetadataMissing && (
-                <div className="tw-text-sm tw-text-iron-400">
-                  Missing metadata
-                </div>
-              )}
-            </motion.div>
-          )}
-      </AnimatePresence>
+      <CreateDropContentRequirements
+        canSubmit={canSubmit}
+        wave={wave}
+        missingMedia={isRequiredMediaMissing}
+        missingMetadata={wave.participation.required_metadata.filter((md) =>
+          missingRequiredMetadataKeys.includes(md.name)
+        )}
+      />
       <AnimatePresence>
         {isMetadataOpen && (
           <motion.div
