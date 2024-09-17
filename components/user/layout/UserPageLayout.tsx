@@ -17,6 +17,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "../../auth/Auth";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -33,6 +34,7 @@ export default function UserPageLayout({
   readonly profile: IProfileAndConsolidations;
   readonly children: ReactNode;
 }) {
+  const { setTitle, title } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const router = useRouter();
   const { setProfile } = useContext(ReactQueryWrapperContext);
@@ -70,9 +72,12 @@ export default function UserPageLayout({
     return formatAddress(handleOrWallet);
   };
 
-  const title = getTitle();
-
-  const pagenameFull = `${title} | 6529 SEIZE`;
+  const pagenameFull = `${getTitle()} | 6529 SEIZE`;
+  useEffect(() => {
+    setTitle({
+      title: pagenameFull,
+    });
+  }, []);
 
   const descriptionArray = [];
 
@@ -120,7 +125,7 @@ export default function UserPageLayout({
   return (
     <>
       <Head>
-        <title>{pagenameFull}</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content={title} />
         <meta
@@ -140,9 +145,7 @@ export default function UserPageLayout({
 
       <main className="tw-min-h-[100dvh]">
         <Header />
-        <div
-          className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20"
-        >
+        <div className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20">
           <UserPageHeader profile={profile} mainAddress={mainAddress} />
           <div className="tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
             <UserPageTabs />

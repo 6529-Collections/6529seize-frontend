@@ -2,6 +2,8 @@ import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import { AuthContext } from "../components/auth/Auth";
+import { useContext, useEffect } from "react";
 
 const Gas = dynamic(() => import("../components/gas-royalties/Gas"), {
   ssr: false,
@@ -13,10 +15,17 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function GasPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Meme Gas | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Meme Gas | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Meme Gas | 6529 SEIZE" />
         <meta

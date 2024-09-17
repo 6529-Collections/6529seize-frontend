@@ -4,6 +4,8 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { AuthContext } from "../../components/auth/Auth";
+import { useContext, useEffect } from "react";
 
 const PrenodesStatus = dynamic(
   () => import("../../components/prenodes/PrenodesStatus"),
@@ -16,6 +18,13 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function PrenodesPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Prenodes | 6529 SEIZE",
+    });
+  }, []);
+
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Prenodes" },
@@ -24,7 +33,7 @@ export default function PrenodesPage() {
   return (
     <>
       <Head>
-        <title>Prenodes | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Prenodes | 6529 SEIZE" />
         <meta

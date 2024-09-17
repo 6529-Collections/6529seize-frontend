@@ -2,6 +2,8 @@ import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../components/auth/Auth";
 
 const Royalties = dynamic(
   () => import("../components/gas-royalties/Royalties"),
@@ -16,10 +18,17 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function MemeAccountingPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Meme Accounting | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Meme Accounting | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Meme Accounting | 6529 SEIZE" />
         <meta

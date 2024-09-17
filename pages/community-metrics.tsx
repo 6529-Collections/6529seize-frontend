@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb from "../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../components/auth/Auth";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -11,6 +13,13 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function CommunityMetrics() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Community Metrics | 6529 SEIZE",
+    });
+  }, []);
+
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Community Metrics" },
@@ -19,7 +28,7 @@ export default function CommunityMetrics() {
   return (
     <>
       <Head>
-        <title>Community Metrics | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Community Metrics | 6529 SEIZE" />
         <meta

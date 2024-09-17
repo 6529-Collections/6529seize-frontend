@@ -9,7 +9,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { GroupFull } from "../generated/models/GroupFull";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../components/auth/Auth";
 
 export enum CommunityMembersSortOption {
   DISPLAY = "display",
@@ -25,6 +26,13 @@ export interface CommunityMembersQuery
 }
 
 export default function CommunityPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Community | 6529 SEIZE",
+    });
+  }, []);
+
   const activeGroupId = useSelector(selectActiveGroupId);
   const { data: activeGroup } = useQuery<GroupFull>({
     queryKey: [QueryKey.GROUP, activeGroupId],
@@ -56,7 +64,7 @@ export default function CommunityPage() {
   return (
     <>
       <Head>
-        <title>Community | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Community | 6529 SEIZE" />
         <meta

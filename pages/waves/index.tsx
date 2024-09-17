@@ -3,21 +3,30 @@ import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import Waves from "../../components/waves/Waves";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { AuthContext } from "../../components/auth/Auth";
+import { useContext, useEffect } from "react";
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
 export default function WavesPage() {
+  const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Waves" },
   ];
 
+  useEffect(() => {
+    setTitle({
+      title: "Waves | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Waves | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Waves | 6529 SEIZE" />
         <meta
