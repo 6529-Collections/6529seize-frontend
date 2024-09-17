@@ -111,6 +111,7 @@ import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
+import { coinbaseWallet } from "wagmi/connectors";
 
 library.add(
   faArrowUp,
@@ -228,6 +229,15 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
+const connectors = [];
+if (isCapacitor) {
+  connectors.push(
+    coinbaseWallet({
+      appName: "6529 CORE",
+    })
+  );
+}
+
 export const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId: CW_PROJECT_ID,
@@ -237,6 +247,7 @@ export const wagmiConfig = defaultWagmiConfig({
   auth: {
     email: false,
   },
+  connectors,
 });
 
 createWeb3Modal({
