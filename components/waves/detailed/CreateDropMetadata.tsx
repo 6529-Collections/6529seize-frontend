@@ -96,7 +96,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
             </button>
           </Tippy>
         </div>
-        <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4 tw-w-full">
+        <div className="tw-space-y-2 tw-w-full">
           {metadata.map((item, index) => (
             <CreateDropMetadataRow
               key={index}
