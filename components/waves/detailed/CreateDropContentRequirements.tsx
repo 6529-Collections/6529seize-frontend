@@ -14,11 +14,20 @@ interface CreateDropContentRequirementsProps {
   readonly wave: Wave;
   readonly missingMedia: WaveParticipationRequirement[];
   readonly missingMetadata: string[];
+  readonly onOpenMetadata: () => void;
+  readonly setFiles: (files: File[]) => void;
 }
 
 const CreateDropContentRequirements: React.FC<
   CreateDropContentRequirementsProps
-> = ({ canSubmit, wave, missingMedia, missingMetadata }) => {
+> = ({
+  canSubmit,
+  wave,
+  missingMedia,
+  missingMetadata,
+  onOpenMetadata,
+  setFiles,
+}) => {
   return (
     <AnimatePresence>
       {canSubmit &&
@@ -36,6 +45,8 @@ const CreateDropContentRequirements: React.FC<
                 isValid={!missingMedia.length}
                 missingItems={missingMedia.map((m) => m.toLowerCase())}
                 requirementType={DropRequirementType.MEDIA}
+                onOpenMetadata={onOpenMetadata}
+                setFiles={setFiles}
               />
             )}
             {wave.participation.required_metadata.length > 0 && (
@@ -43,6 +54,8 @@ const CreateDropContentRequirements: React.FC<
                 isValid={!missingMetadata.length}
                 missingItems={missingMetadata}
                 requirementType={DropRequirementType.METADATA}
+                onOpenMetadata={onOpenMetadata}
+                setFiles={setFiles}
               />
             )}
           </motion.div>

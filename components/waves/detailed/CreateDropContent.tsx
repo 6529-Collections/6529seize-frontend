@@ -568,14 +568,20 @@ export default function CreateDropContent({
   }, [activeDrop]);
 
   const handleFileChange = (newFiles: File[]) => {
-    if (newFiles.length > 4) {
+    let updatedFiles = [...files, ...newFiles];
+    let removedCount = 0;
+
+    if (updatedFiles.length > 4) {
+      removedCount = updatedFiles.length - 4;
+      updatedFiles = updatedFiles.slice(-4);
+      
       setToast({
-        message: "You can only upload up to 4 files at a time",
-        type: "error",
+        message: `File limit exceeded. The ${removedCount} oldest file${removedCount > 1 ? 's were' : ' was'} removed to maintain the 4-file limit. New files have been added.`,
+        type: "warning",
       });
-      return;
     }
-    setFiles(newFiles);
+
+    setFiles(updatedFiles);
   };
 
   const removeFile = (index: number) => {
@@ -688,6 +694,8 @@ export default function CreateDropContent({
         wave={wave}
         missingMedia={missingRequiredMedia}
         missingMetadata={missingRequiredMetadataKeys}
+        onOpenMetadata={() => setIsMetadataOpen(true)}
+        setFiles={handleFileChange}
       />
       <AnimatePresence>
         {isMetadataOpen && (

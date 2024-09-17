@@ -1,9 +1,7 @@
 import { ActiveDropState } from "./WaveDetailedContent";
 import { useState } from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
-
 import CreateDropStormParts from "./CreateDropStormParts";
-import { WaveMin } from "../../../generated/models/WaveMin";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import { useQuery } from "@tanstack/react-query";
@@ -43,7 +41,12 @@ export default function CreateDrop({
     });
   };
 
-  const { data: wave, isFetching, isError, error } = useQuery<Wave>({
+  const {
+    data: wave,
+    isFetching,
+    isError,
+    error,
+  } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
@@ -78,7 +81,9 @@ export default function CreateDrop({
       ) : isError ? (
         <div className="tw-text-red-500 tw-text-center tw-py-4">
           <p>Error loading wave data</p>
-          <p className="tw-text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
+          <p className="tw-text-sm">
+            {error instanceof Error ? error.message : "Unknown error"}
+          </p>
         </div>
       ) : wave ? (
         <CreateDropContent
