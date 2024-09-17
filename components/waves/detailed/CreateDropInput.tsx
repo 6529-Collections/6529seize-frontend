@@ -299,7 +299,7 @@ const CreateDropInput = forwardRef<
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
               />
-              <div className="tw-flex tw-items-center tw-absolute tw-top-3 tw-right-9">
+              <div className="tw-flex tw-items-center tw-absolute tw-top-3 tw-right-10">
                 <Tippy
                   content={
                     <div className="tw-text-center">
@@ -319,7 +319,7 @@ const CreateDropInput = forwardRef<
                     type="button"
                     className={`tw-border-0 tw-bg-transparent tw-flex tw-items-center tw-ease-out tw-transition tw-duration-300 tw-mr-2 ${
                       canAddPart
-                        ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-iron-50"
+                        ? "tw-cursor-pointer tw-text-primary-400 hover:tw-text-primary-300"
                         : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600"
                     }`}
                   >

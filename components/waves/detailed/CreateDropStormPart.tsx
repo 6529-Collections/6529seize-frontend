@@ -32,7 +32,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
           onImageLoaded={() => {}}
         />
       </div>
-      <div className="tw-absolute tw-right-0 tw-top-4 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
+      <div className="tw-absolute tw-right-0 tw-top-1 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
             type="button"

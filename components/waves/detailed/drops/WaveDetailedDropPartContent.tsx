@@ -65,7 +65,7 @@ const WaveDetailedDropPartContent: React.FC<
     }
   };
   return (
-    <div className="tw-mt-1 tw-w-full tw-inline-flex tw-items-center tw-justify-between tw-space-x-3">
+    <div className="tw-mt-1 tw-mb-2 tw-w-full tw-inline-flex tw-justify-between tw-space-x-3">
       {isStorm && (
         <button
           disabled={!havePreviousPart}
@@ -73,14 +73,14 @@ const WaveDetailedDropPartContent: React.FC<
             havePreviousPart
               ? "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
               : "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
-          } tw-bg-transparent tw-h-6 tw-w-auto tw-min-w-6 tw-text-xs tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+          } tw-bg-transparent tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
           onClick={(e) => {
             e.stopPropagation();
             setActivePartIndex(activePartIndex - 1);
           }}
         >
           <svg
-            className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-ml-0.5"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             aria-hidden="true"
@@ -94,13 +94,10 @@ const WaveDetailedDropPartContent: React.FC<
               d="M15.75 19.5 8.25 12l7.5-7.5"
             />
           </svg>
-          {activePartIndex > 0 && <span>{activePartIndex}</span>}
         </button>
       )}
       <div
-        className={`tw-h-full tw-w-full ${
-          isStorm ? "tw-min-h-16 tw-flex tw-items-center" : ""
-        }`}
+        className="tw-h-full tw-w-full"
         ref={contentRef}
       >
         <div className="tw-group tw-w-full">
@@ -148,18 +145,15 @@ const WaveDetailedDropPartContent: React.FC<
             haveNextPart
               ? "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
               : "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
-          } tw-bg-transparent tw-h-6 tw-w-auto tw-min-w-6 tw-text-xs tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+          } tw-bg-transparent tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
           disabled={!haveNextPart}
           onClick={(e) => {
             e.stopPropagation();
             setActivePartIndex(activePartIndex + 1);
           }}
         >
-          {haveNextPart && (
-            <span>{havePreviousPart ? activePartIndex + 2 : 2}</span>
-          )}
           <svg
-            className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             aria-hidden="true"

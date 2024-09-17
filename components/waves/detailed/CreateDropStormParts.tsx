@@ -32,7 +32,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   
   return (
     <div className="tw-space-y-4 tw-pb-3">
-      <div className="tw-bg-transparent tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-2 tw-transition-colors tw-duration-300">
+      <div className="tw-bg-transparent tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-py-2 tw-transition-colors tw-duration-300">
         <div className="tw-flex tw-gap-x-3">
           <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
             {connectedProfile?.profile?.pfp_url ? (
