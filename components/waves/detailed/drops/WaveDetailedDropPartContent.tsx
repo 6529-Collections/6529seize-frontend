@@ -65,22 +65,22 @@ const WaveDetailedDropPartContent: React.FC<
     }
   };
   return (
-    <div className="tw-w-full tw-flex tw-justify-between tw-space-x-3">
+    <div className="tw-mt-1 tw-w-full tw-inline-flex tw-items-center tw-justify-between tw-space-x-3">
       {isStorm && (
         <button
           disabled={!havePreviousPart}
           className={`${
             havePreviousPart
-              ? "tw-text-primary-300 tw-border-primary-300 hover:tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
+              ? "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
               : "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
-          } tw-bg-transparent tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid  tw-transition tw-duration-300 tw-ease-out`}
+          } tw-bg-transparent tw-h-6 tw-w-auto tw-min-w-6 tw-text-xs tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
           onClick={(e) => {
             e.stopPropagation();
             setActivePartIndex(activePartIndex - 1);
           }}
         >
           <svg
-            className="tw-size-4 tw-flex-shrink-0"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-ml-0.5"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             aria-hidden="true"
@@ -94,9 +94,15 @@ const WaveDetailedDropPartContent: React.FC<
               d="M15.75 19.5 8.25 12l7.5-7.5"
             />
           </svg>
+          {activePartIndex > 0 && <span>{activePartIndex +1}</span>}
         </button>
       )}
-      <div className="tw-mt-1 tw-h-full tw-w-full" ref={contentRef}>
+      <div
+        className={`tw-h-full tw-w-full ${
+          isStorm ? "tw-min-h-16 tw-flex tw-items-center" : ""
+        }`}
+        ref={contentRef}
+      >
         <div className="tw-group tw-w-full">
           <motion.div
             key={activePartIndex}
@@ -140,17 +146,18 @@ const WaveDetailedDropPartContent: React.FC<
         <button
           className={`${
             haveNextPart
-              ? "tw-text-primary-300 tw-border-primary-300 hover:tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
+              ? "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
               : "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
-          } tw-bg-transparent tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-650 tw-transition tw-duration-300 tw-ease-out`}
+          } tw-bg-transparent tw-h-6 tw-w-auto tw-min-w-6 tw-text-xs tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
           disabled={!haveNextPart}
           onClick={(e) => {
             e.stopPropagation();
             setActivePartIndex(activePartIndex + 1);
           }}
         >
+           {haveNextPart && <span>{havePreviousPart ? activePartIndex + 2 : 2}</span>}
           <svg
-            className="tw-size-4 tw-flex-shrink-0"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             aria-hidden="true"

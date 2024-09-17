@@ -65,10 +65,10 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
             value={metadata.key}
             onChange={metadata.required ? undefined : handleKeyChange}
             readOnly={metadata.required}
-            className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out tw-pl-3 tw-py-2.5 ${
+            className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset focus:tw-ring-1 focus:tw-ring-inset placeholder:tw-text-iron-500 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out tw-pl-3 tw-py-2.5 ${
               metadata.required
-                ? "tw-opacity-50 tw-cursor-not-allowed focus:tw-outline-none focus:tw-ring-0 focus:tw-bg-iron-900"
-                : "focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+                ? "tw-cursor-not-allowed focus:tw-ring-iron-800 tw-bg-iron-800 tw-ring-iron-800"
+                : "focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-primary-400 tw-bg-iron-900 tw-ring-iron-700"
             }`}
           />
         </div>
@@ -86,6 +86,26 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
             } placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out tw-pl-3 tw-py-2.5`}
           />
         </div>
+        <button
+          type="button"
+          aria-label="Remove"
+          className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-error tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            className="tw-size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18 18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
       </div>
     </div>
   );

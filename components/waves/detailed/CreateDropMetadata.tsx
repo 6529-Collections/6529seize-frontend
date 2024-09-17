@@ -25,7 +25,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   onAddMetadata,
 }) => {
   return (
-    <div className="tw-mt-2 tw-space-y-1.5">
+    <div className="tw-mt-2 tw-space-y-2">
       <div>
         <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
           <span className="tw-text-xs tw-text-iron-400">Add Metadata</span>
@@ -80,7 +80,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
       <button
         type="button"
         onClick={onAddMetadata}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-semibold tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-medium tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
