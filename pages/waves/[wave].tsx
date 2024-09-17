@@ -8,7 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Wave } from "../../generated/models/Wave";
 import { commonApiFetch } from "../../services/api/common-api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext, TitleType } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -16,6 +17,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function WavePage() {
+  const { setTitle, title } = useContext(AuthContext);
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
@@ -38,11 +40,18 @@ export default function WavePage() {
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(getBreadCrumbs());
   useEffect(() => setBreadcrumbs(getBreadCrumbs()), [wave]);
+  useEffect(
+    () =>
+      setTitle({
+        title: `${wave?.name ?? "Waves"} | 6529 SEIZE`,
+      }),
+    [wave]
+  );
 
   return (
     <>
       <Head>
-        <title>Waves | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Waves | 6529 SEIZE" />
         <meta

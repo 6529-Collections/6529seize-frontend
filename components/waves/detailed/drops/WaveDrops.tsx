@@ -7,7 +7,7 @@ import { Wave } from "../../../../generated/models/Wave";
 import DropListWrapper from "../../../drops/view/DropListWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext, TitleType } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
 import { ActiveDropState } from "../WaveDetailedContent";
@@ -31,7 +31,7 @@ export default function WaveDrops({
   activeDrop,
   rootDropId,
 }: WaveDropsProps) {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, setTitle } = useContext(AuthContext);
   const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
     WaveDropsFeed | undefined
@@ -181,6 +181,22 @@ export default function WaveDrops({
   const onRefresh = () => {
     refetch();
   };
+
+  useEffect(() => {
+    // Set the title when the component mounts or when haveNewDrops changes
+    setTitle({
+      title: haveNewDrops ? "New Drops Available | 6529 SEIZE" : null,
+      type: TitleType.WAVE,
+    });
+
+    // Cleanup function to reset the title when the component unmounts
+    return () => {
+      setTitle({
+        title: null,
+        type: TitleType.WAVE,
+      });
+    };
+  }, [haveNewDrops]);
 
   return (
     <div>

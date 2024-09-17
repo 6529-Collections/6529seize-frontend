@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext, TitleType } from "../../auth/Auth";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -10,10 +10,10 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import FeedWrapper from "../feed/FeedWrapper";
-import MyStreamNoItems from "./layout/MyStreamNoItems";
 
 export default function MyStream() {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy, setTitle } =
+    useContext(AuthContext);
   const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
   const {
     data,
@@ -132,6 +132,23 @@ export default function MyStream() {
         }),
       enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
     });
+
+  useEffect(() => {
+    // Set the title when the component mounts or when haveNewItems changes
+    setTitle({
+      title: haveNewItems ? "New Stream Items Available | 6529 SEIZE" : null,
+      type: TitleType.MY_STREAM,
+    });
+
+    // Cleanup function to reset the title when the component unmounts
+    return () => {
+      setTitle({
+        title: null,
+        type: TitleType.MY_STREAM,
+      });
+    };
+  }, [haveNewItems]);
+
   return (
     <div className="lg:tw-w-[672px] tw-flex-shrink-0">
       {/*  <CreateDropContent /> */}

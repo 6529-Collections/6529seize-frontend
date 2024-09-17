@@ -1,11 +1,15 @@
-import { ReactNode, useContext } from "react";
+import { ReactNode, useContext, useEffect } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import MyStreamLayoutTabs from "./MyStreamLayoutTabs";
-import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../../../auth/Auth";
+import {
+  AuthContext,
+  TitleType,
+  WAVES_MIN_ACCESS_LEVEL,
+} from "../../../auth/Auth";
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -17,12 +21,14 @@ export default function MyStreamLayout({
 }: {
   readonly children: ReactNode;
 }) {
+  const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "My Stream" },
   ];
 
   const { showWaves } = useContext(AuthContext);
+  useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
 
   if (!showWaves) {
     return null;
@@ -31,7 +37,7 @@ export default function MyStreamLayout({
   return (
     <>
       <Head>
-        <title>My Stream | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="My Stream | 6529 SEIZE" />
         <meta
