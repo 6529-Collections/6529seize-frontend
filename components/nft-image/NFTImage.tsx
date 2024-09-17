@@ -32,6 +32,7 @@ export default function NFTImage(props: Readonly<Props>) {
     heightStyle = styles.height300;
     imageStyle = "";
   }
+
   let bgStyle = props.transparentBG ? styles.transparentBG : "";
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export default function NFTImage(props: Readonly<Props>) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} ${heightStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
+        className={`${styles.nftAnimation} ${imageStyle} ${bgStyle} d-flex justify-content-center align-items-center`}>
         <NFTImageBalance {...props} />
         <NFTModel nft={props.nft} id={props.id} />
       </Col>

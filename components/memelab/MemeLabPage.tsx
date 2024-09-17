@@ -46,6 +46,8 @@ import {
 } from "../../helpers/nft.helpers";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
+import { NftPageStats } from "../nftAttributes/NftStats";
+import { printMemeReferences } from "../rememes/RememePage";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -316,8 +318,7 @@ export default function LabPage(props: Readonly<Props>) {
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`${styles.nftImageWrapper} pt-2 pb-5`}
-                >
+                  className={`${styles.nftImageWrapper} pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -332,90 +333,12 @@ export default function LabPage(props: Readonly<Props>) {
             )}
         </Row>
         <Row>
-          {activeTab === MEME_FOCUS.LIVE && <>{printLiveSub()}</>}
+          {activeTab === MEME_FOCUS.LIVE && (
+            <>{printMemeReferences(originalMemes, originalMemesLoaded)}</>
+          )}
           {activeTab === MEME_FOCUS.YOUR_CARDS && <>{printYourCardsSub()}</>}
         </Row>
       </Container>
-    );
-  }
-
-  function printLiveSub() {
-    return (
-      <>
-        <Row className="pt-3">
-          <Col>
-            <h1>
-              <span className="font-lightest">The</span> Memes
-            </h1>
-          </Col>
-        </Row>
-        <Row className="pt-2 pb-2">
-          <Col>
-            References from <a href="/the-memes">The Memes</a> collection
-          </Col>
-        </Row>
-        {originalMemesLoaded && (
-          <>
-            {originalMemes.length > 0 ? (
-              <Row className="pt-2 pb-2">
-                {originalMemes.map((nft) => {
-                  return (
-                    <Col
-                      key={`${nft.contract}-${nft.id}`}
-                      className="pt-3 pb-3"
-                      xs={{ span: 6 }}
-                      sm={{ span: 4 }}
-                      md={{ span: 3 }}
-                      lg={{ span: 3 }}
-                    >
-                      <a
-                        href={`/the-memes/${nft.id}`}
-                        className="decoration-none scale-hover"
-                      >
-                        <Container fluid className="no-padding">
-                          <Row>
-                            <Col>
-                              <NFTImage
-                                nft={nft}
-                                animation={false}
-                                height={300}
-                                balance={0}
-                                showThumbnail={true}
-                                showUnseized={false}
-                              />
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-center pt-2">
-                              <b>
-                                #{nft.id} - {nft.name}
-                              </b>
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-center pt-2">
-                              Artist Name: {nft.artist}
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-center pt-2">
-                              Artist Profile: <ArtistProfileHandle nft={nft} />
-                            </Col>
-                          </Row>
-                        </Container>
-                      </a>
-                    </Col>
-                  );
-                })}
-              </Row>
-            ) : (
-              <Col>
-                <NothingHereYetSummer />
-              </Col>
-            )}
-          </>
-        )}
-      </>
     );
   }
 
@@ -427,8 +350,7 @@ export default function LabPage(props: Readonly<Props>) {
           sm={{ span: 12 }}
           md={{ span: 6 }}
           lg={{ span: 6 }}
-          className="pt-2"
-        >
+          className="pt-2">
           <Container className="p-0">
             <Row className="pt-3">
               <Col>
@@ -455,8 +377,7 @@ export default function LabPage(props: Readonly<Props>) {
                         <a
                           href={`/meme-lab/collection/${encodeURIComponent(
                             nftMeta.metadata_collection.replace(" ", "-")
-                          )}`}
-                        >
+                          )}`}>
                           {nftMeta.metadata_collection}
                         </a>
                       </td>
@@ -470,8 +391,7 @@ export default function LabPage(props: Readonly<Props>) {
                               <a
                                 href={addProtocol(w)}
                                 target="_blank"
-                                rel="noreferrer"
-                              >
+                                rel="noreferrer">
                                 {w}
                               </a>
                               &nbsp;&nbsp;
@@ -484,36 +404,7 @@ export default function LabPage(props: Readonly<Props>) {
                       <td>Mint Date</td>
                       <td>{printMintDate(nft.mint_date)}</td>
                     </tr>
-                    <tr>
-                      <td>Mint Price</td>
-                      <td>
-                        {nft.mint_price
-                          ? `${numberWithCommas(
-                              Math.round(nft.mint_price * 100000) / 100000
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Floor Price</td>
-                      <td>
-                        {nft.floor_price
-                          ? `${numberWithCommas(
-                              Math.round(nft.floor_price * 100) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Market Cap</td>
-                      <td>
-                        {nft.market_cap
-                          ? `${numberWithCommas(
-                              Math.round(nft.market_cap * 100) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
+                    <NftPageStats nft={nft} />
                   </tbody>
                 </Table>
               </Col>
@@ -663,8 +554,7 @@ export default function LabPage(props: Readonly<Props>) {
                 <a
                   href={`https://opensea.io/assets/ethereum/${MEMELAB_CONTRACT}/${nft.id}`}
                   target="_blank"
-                  rel="noreferrer"
-                >
+                  rel="noreferrer">
                   <Image
                     className={styles.marketplace}
                     src="/opensea.png"
@@ -688,8 +578,7 @@ export default function LabPage(props: Readonly<Props>) {
                 <a
                   href={`https://x2y2.io/eth/${MEMELAB_CONTRACT}/${nft.id}`}
                   target="_blank"
-                  rel="noreferrer"
-                >
+                  rel="noreferrer">
                   <Image
                     className={styles.marketplace}
                     src="/x2y2.png"
@@ -805,8 +694,7 @@ export default function LabPage(props: Readonly<Props>) {
         xs={{ span: 12 }}
         sm={{ span: 12 }}
         md={{ span: 6 }}
-        lg={{ span: 6 }}
-      >
+        lg={{ span: 6 }}>
         <Container className="p-0">
           <Row>
             {props.wallets.length === 0 && (
@@ -835,8 +723,7 @@ export default function LabPage(props: Readonly<Props>) {
                         xs={{ span: 12 }}
                         sm={{ span: 12 }}
                         md={{ span: 12 }}
-                        lg={{ span: 8 }}
-                      >
+                        lg={{ span: 8 }}>
                         <Table bordered={false}>
                           <tbody>
                             <tr className={`${styles.overviewColumn}`}>
@@ -948,8 +835,7 @@ export default function LabPage(props: Readonly<Props>) {
                   interval={null}
                   indicators={false}
                   wrap={false}
-                  onSlide={carouselHandlerSlide}
-                >
+                  onSlide={carouselHandlerSlide}>
                   <Carousel.Item className="text-center">
                     <div className="pt-4 pb-3">
                       {nft.metadata.animation_details.format}
@@ -1018,8 +904,7 @@ export default function LabPage(props: Readonly<Props>) {
                             className={styles.arweaveLink}
                             href={nft.metadata.image}
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             {nft.metadata.image}
                           </a>
                           <Download
@@ -1042,8 +927,7 @@ export default function LabPage(props: Readonly<Props>) {
                                   : nft.metadata.animation_url
                               }
                               target="_blank"
-                              rel="noreferrer"
-                            >
+                              rel="noreferrer">
                               {nft.metadata.animation
                                 ? nft.metadata.animation
                                 : nft.metadata.animation_url}
@@ -1072,8 +956,7 @@ export default function LabPage(props: Readonly<Props>) {
                 xs={{ span: 12 }}
                 sm={{ span: 6 }}
                 md={{ span: 6 }}
-                lg={{ span: 6 }}
-              >
+                lg={{ span: 6 }}>
                 <Container>
                   <Row>
                     <Col>
@@ -1130,8 +1013,7 @@ export default function LabPage(props: Readonly<Props>) {
                   xs={{ span: 12 }}
                   sm={{ span: 6 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}
-                >
+                  lg={{ span: 6 }}>
                   <Container>
                     <Row>
                       <Col>
@@ -1179,8 +1061,7 @@ export default function LabPage(props: Readonly<Props>) {
                     <Col
                       dangerouslySetInnerHTML={{
                         __html: parseNftDescriptionToHtml(nft.description),
-                      }}
-                    ></Col>
+                      }}></Col>
                   </Row>
                 </Container>
               </Col>
@@ -1303,20 +1184,17 @@ export default function LabPage(props: Readonly<Props>) {
             xs={{ span: 7 }}
             sm={{ span: 7 }}
             md={{ span: 9 }}
-            lg={{ span: 10 }}
-          >
+            lg={{ span: 10 }}>
             <h3>Card Activity</h3>
           </Col>
           <Col
             xs={{ span: 5 }}
             sm={{ span: 5 }}
             md={{ span: 3 }}
-            lg={{ span: 2 }}
-          >
+            lg={{ span: 2 }}>
             <Dropdown
               className={styles.activityFilterDropdown}
-              drop={"down-centered"}
-            >
+              drop={"down-centered"}>
               <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
               <Dropdown.Menu>
                 {Object.values(TypeFilter).map((filter) => (
@@ -1325,8 +1203,7 @@ export default function LabPage(props: Readonly<Props>) {
                     onClick={() => {
                       setActivityPage(1);
                       setActivityTypeFilter(filter);
-                    }}
-                  >
+                    }}>
                     {filter}
                   </Dropdown.Item>
                 ))}
@@ -1419,8 +1296,7 @@ export default function LabPage(props: Readonly<Props>) {
                                 parseInt(nftId) === 1
                                   ? styles.nftPreviousdisabled
                                   : ""
-                              }`}
-                            >
+                              }`}>
                               <FontAwesomeIcon icon="chevron-circle-left" />
                             </a>
                           </h2>
@@ -1434,8 +1310,7 @@ export default function LabPage(props: Readonly<Props>) {
                                 parseInt(nftId) === nftMeta.collection_size
                                   ? styles.nftNextdisabled
                                   : ""
-                              }`}
-                            >
+                              }`}>
                               <FontAwesomeIcon icon="chevron-circle-right" />
                             </a>
                           </h2>
@@ -1459,8 +1334,7 @@ export default function LabPage(props: Readonly<Props>) {
                           }`}
                           onClick={() => {
                             setActiveTab(tab.focus);
-                          }}
-                        >
+                          }}>
                           {tab.title}
                         </span>
                       ))}
