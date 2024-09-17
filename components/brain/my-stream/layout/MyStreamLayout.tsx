@@ -52,7 +52,7 @@ export default function MyStreamLayout({
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950">
         <div>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -88,7 +88,7 @@ export default function MyStreamLayout({
             <MyStreamLayoutTabs />
           </div>
         </div>
-        <div className="tw-overflow-hidden tw-h-full tw-w-full">
+        <div className="tw-h-full tw-w-full">
           <Brain>
             <div>{children}</div>
           </Brain>

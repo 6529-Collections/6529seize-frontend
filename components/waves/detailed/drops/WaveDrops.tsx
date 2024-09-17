@@ -201,7 +201,7 @@ export default function WaveDrops({
   return (
     <div>
       {haveNewDrops && (
-        <div className="tw-sticky tw-top-[5rem] tw-left-0 -tw-mb-10 tw-right-0 tw-z-10 tw-flex tw-justify-center">
+        <div className="tw-sticky tw-top-[5rem] tw-left-0 -tw-mb-10 tw-right-0 tw-z-50 tw-flex tw-justify-center">
           <button
             onClick={onRefresh}
             type="button"

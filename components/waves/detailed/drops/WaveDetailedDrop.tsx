@@ -71,6 +71,8 @@ export default function WaveDetailedDrop({
           }
         />
       )}
+
+      
       {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
     </div>
   );
