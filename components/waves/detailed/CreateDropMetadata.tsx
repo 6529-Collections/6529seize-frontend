@@ -14,6 +14,7 @@ interface CreateDropMetadataProps {
     newValue: string | number | null;
   }) => void;
   readonly onAddMetadata: () => void;
+  readonly onRemoveMetadata: (index: number) => void;
 }
 
 const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
@@ -23,6 +24,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   onChangeKey,
   onChangeValue,
   onAddMetadata,
+  onRemoveMetadata,
 }) => {
   return (
     <div className="tw-mt-3 tw-space-y-2">
@@ -74,6 +76,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
             <CreateDropMetadataRow
               key={index}
               isError={missingRequiredMetadataKeys.includes(item.key)}
+              onRemove={onRemoveMetadata}
               metadata={item}
               index={index}
               onChangeKey={onChangeKey}

@@ -45,7 +45,7 @@ const CreateDropContentRequirementsItem: React.FC<
       }
     >
       <div
-        className={`tw-flex tw-items-center tw-gap-x-2 tw-cursor-pointer ${
+        className={`tw-flex tw-items-center tw-gap-x-2 ${
           isValid ? "tw-text-green" : "tw-text-yellow"
         }`}
       >

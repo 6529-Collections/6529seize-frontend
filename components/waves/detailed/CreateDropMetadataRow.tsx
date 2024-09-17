@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CreateDropMetadataType } from "./CreateDropContent";
+import Tippy from "@tippyjs/react";
 
 interface CreateDropMetadataRowProps {
   readonly metadata: CreateDropMetadataType;
@@ -10,6 +11,7 @@ interface CreateDropMetadataRowProps {
     index: number;
     newValue: string | number | null;
   }) => void;
+  readonly onRemove: (index: number) => void;
 }
 
 const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
@@ -18,6 +20,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
   onChangeKey,
   onChangeValue,
   isError,
+  onRemove,
 }) => {
   const [tempValue, setTempValue] = useState<string>(
     metadata.value !== null ? String(metadata.value) : ""
@@ -87,28 +90,36 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
           />
         </div>
       </div>
-      {!metadata.required && (
-        <button
-          type="button"
-          aria-label="Remove"
-          className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 -tw-ml-2 tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-error tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="tw-size-4"
+      <Tippy content={metadata.required ? "Required field" : "Remove"}>
+        <div>
+          <button
+            type="button"
+            onClick={() => onRemove(index)}
+            aria-label={metadata.required ? "Required field" : "Remove"}
+            disabled={metadata.required}
+            className={`tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 -tw-ml-2 tw-text-xs tw-font-medium tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out ${
+              metadata.required
+                ? "tw-text-iron-600 tw-cursor-default"
+                : "tw-text-iron-400 hover:tw-text-error"
+            }`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18 18 6M6 6l12 12"
-            ></path>
-          </svg>
-        </button>
-      )}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="tw-size-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18 18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </Tippy>
     </div>
   );
 };

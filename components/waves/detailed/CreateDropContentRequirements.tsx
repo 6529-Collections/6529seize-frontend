@@ -2,7 +2,6 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Wave } from "../../../generated/models/Wave";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
-import { WaveRequiredMetadata } from "../../../generated/models/WaveRequiredMetadata";
 import CreateDropContentRequirementsItem from "./CreateDropContentRequirementsItem";
 
 export enum DropRequirementType {
@@ -11,10 +10,10 @@ export enum DropRequirementType {
 }
 
 interface CreateDropContentRequirementsProps {
-  canSubmit: boolean;
-  wave: Wave;
-  missingMedia: WaveParticipationRequirement[];
-  missingMetadata: string[];
+  readonly canSubmit: boolean;
+  readonly wave: Wave;
+  readonly missingMedia: WaveParticipationRequirement[];
+  readonly missingMetadata: string[];
 }
 
 const CreateDropContentRequirements: React.FC<
@@ -32,16 +31,20 @@ const CreateDropContentRequirements: React.FC<
             transition={{ duration: 0.3 }}
             className="tw-w-full tw-inline-flex tw-space-x-4"
           >
-            <CreateDropContentRequirementsItem
-              isValid={!missingMedia.length}
-              missingItems={missingMedia.map((m) => m.toLowerCase())}
-              requirementType={DropRequirementType.MEDIA}
-            />
-            <CreateDropContentRequirementsItem
-              isValid={!missingMetadata.length}
-              missingItems={missingMetadata}
-              requirementType={DropRequirementType.METADATA}
-            />
+            {wave.participation.required_media.length > 0 && (
+              <CreateDropContentRequirementsItem
+                isValid={!missingMedia.length}
+                missingItems={missingMedia.map((m) => m.toLowerCase())}
+                requirementType={DropRequirementType.MEDIA}
+              />
+            )}
+            {wave.participation.required_metadata.length > 0 && (
+              <CreateDropContentRequirementsItem
+                isValid={!missingMetadata.length}
+                missingItems={missingMetadata}
+                requirementType={DropRequirementType.METADATA}
+              />
+            )}
           </motion.div>
         )}
     </AnimatePresence>

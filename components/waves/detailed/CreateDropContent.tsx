@@ -636,6 +636,14 @@ export default function CreateDropContent({
     ]);
   };
 
+  const onRemoveMetadata = (index: number) => {
+    setMetadata((prev) => {
+      const newMetadata = [...prev];
+      newMetadata.splice(index, 1);
+      return newMetadata;
+    });
+  };
+
   return (
     <div className="tw-flex-grow">
       <CreateDropReplyingWrapper
@@ -690,6 +698,7 @@ export default function CreateDropContent({
             transition={{ duration: 0.3 }}
           >
             <CreateDropMetadata
+              onRemoveMetadata={onRemoveMetadata}
               closeMetadata={closeMetadata}
               metadata={metadata}
               missingRequiredMetadataKeys={missingRequiredMetadataKeys}
