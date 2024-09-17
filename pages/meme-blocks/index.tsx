@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Head from "next/head";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
@@ -14,6 +14,7 @@ import { distributionPlanApiPost } from "../../services/distribution-plan-api";
 
 import AllowlistToolLoader from "../../components/allowlist-tool/common/AllowlistToolLoader";
 import BlockPickerResult from "../../components/block-picker/result/BlockPickerResult";
+import { AuthContext } from "../../components/auth/Auth";
 
 export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumberIncludes: number;
@@ -64,6 +65,7 @@ const BlockPickerTimeWindowToMilliseconds = {
 };
 
 export default function BlockPicker() {
+  const { setTitle, title } = useContext(AuthContext);
   const [defaultBreadCrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Meme Blocks" },
@@ -200,10 +202,16 @@ export default function BlockPicker() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    setTitle({
+      title: "Meme Blocks | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Meme Blocks | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Meme Blocks | 6529 SEIZE" />
         <meta

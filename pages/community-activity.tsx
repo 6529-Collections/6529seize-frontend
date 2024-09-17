@@ -10,11 +10,12 @@ import ProfileActivityLogs, {
   convertActivityLogParams,
 } from "../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { Crumb } from "../components/breadcrumb/Breadcrumb";
 import SidebarLayout from "../components/utils/sidebar/SidebarLayout";
 import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
+import { AuthContext } from "../components/auth/Auth";
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
@@ -37,6 +38,13 @@ export default function CommunityActivityPage({
 }: {
   readonly pageProps: CommunityActivityPage;
 }) {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Community Activity | 6529 SEIZE",
+    });
+  }, []);
+
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Community Activity" },
@@ -53,7 +61,7 @@ export default function CommunityActivityPage({
   return (
     <>
       <Head>
-        <title>Profiles Activity | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Profiles Activity | 6529 SEIZE" />
         <meta

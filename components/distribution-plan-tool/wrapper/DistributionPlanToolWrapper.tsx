@@ -2,12 +2,13 @@ import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import Head from "next/head";
+import { AuthContext } from "../../auth/Auth";
 
 const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
@@ -25,6 +26,7 @@ export default function DistributionPlanToolWrapper({
 }: {
   children: React.ReactNode;
 }) {
+  const { setTitle, title } = useContext(AuthContext);
   const { address } = useAccount();
   const router = useRouter();
   const [defaultBreadCrumbs] = useState<Crumb[]>([
@@ -41,10 +43,17 @@ export default function DistributionPlanToolWrapper({
     }
     router.push("/emma");
   }, [address]);
+
+  useEffect(() => {
+    setTitle({
+      title: "EMMA | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>EMMA | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="EMMA | 6529 SEIZE" />
         <meta property="og:url" content={`${process.env.BASE_ENDPOINT}/emma`} />

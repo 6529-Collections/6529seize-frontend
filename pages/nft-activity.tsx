@@ -4,6 +4,8 @@ import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../components/auth/Auth";
 
 const LatestActivity = dynamic(
   () => import("../components/latest-activity/LatestActivity"),
@@ -16,6 +18,13 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function TheMemesPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "NFT Activity | 6529 SEIZE",
+    });
+  }, []);
+
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "NFT Activity" },
@@ -24,7 +33,7 @@ export default function TheMemesPage() {
   return (
     <>
       <Head>
-        <title>NFT Activity | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="NFT Activity | 6529 SEIZE" />
         <meta

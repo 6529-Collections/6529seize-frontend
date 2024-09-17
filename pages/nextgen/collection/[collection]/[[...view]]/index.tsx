@@ -7,10 +7,11 @@ import { NextGenCollection } from "../../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
+import { AuthContext } from "../../../../../components/auth/Auth";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -31,15 +32,22 @@ const NextGenCollectionComponent = dynamic(
 );
 
 export default function NextGenCollectionPage(props: any) {
+  const { setTitle, title } = useContext(AuthContext);
   const collection: NextGenCollection = props.pageProps.collection;
   const view: ContentView = props.pageProps.view;
   useShallowRedirect(collection.name);
   const pagenameFull = `${collection.name}`;
 
+  useEffect(() => {
+    setTitle({
+      title: `${collection.name} | NEXTGEN | 6529 SEIZE`,
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>{pagenameFull}</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content={pagenameFull} />
         <meta
