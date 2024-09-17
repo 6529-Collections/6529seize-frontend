@@ -25,10 +25,42 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   onAddMetadata,
 }) => {
   return (
-    <div className="tw-mt-2 tw-space-y-2">
+    <div className="tw-mt-3 tw-space-y-2">
+      <div className="tw-flex tw-flex-col tw-gap-y-1.5 tw-items-start">
+        <span className="tw-text-xs tw-text-iron-400">Required Media</span>
+        <label className="tw-px-2 tw-py-1.5 tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-gap-x-2 tw-bg-primary-500 hover:tw-bg-primary-600 tw-rounded-lg tw-cursor-pointer tw-text-iron-50 tw-transition-all tw-duration-300 tw-ease-out">
+          <svg
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+            />
+          </svg>
+          <input
+            type="file"
+            className="tw-hidden"
+            accept="image/*,video/*,audio/*"
+            multiple
+          />
+          <span>Upload a file</span>
+        </label>
+      </div>
       <div>
         <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
-          <span className="tw-text-xs tw-text-iron-400">Add Metadata</span>
+          <span>
+            <span className="tw-text-xs tw-text-iron-400">Add Metadata</span>{" "}
+            <span className="tw-text-xs tw-text-iron-400">
+              Required Metadata
+            </span>
+          </span>
           <Tippy
             content={
               <div className="tw-text-center">
@@ -64,7 +96,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
             </button>
           </Tippy>
         </div>
-        <div className="tw-grid tw-grid-cols-2 tw-gap-y-3 tw-gap-x-6 tw-w-full">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4 tw-w-full">
           {metadata.map((item, index) => (
             <CreateDropMetadataRow
               key={index}
