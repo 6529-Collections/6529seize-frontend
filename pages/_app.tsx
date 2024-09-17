@@ -112,7 +112,6 @@ import { CookieConsentProvider } from "../components/cookies/CookieConsentContex
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
 import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
-import { coinbaseWallet } from "wagmi/connectors";
 
 library.add(
   faArrowUp,
