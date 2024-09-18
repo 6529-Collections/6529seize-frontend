@@ -7,9 +7,6 @@ export default function HeaderUserConnect(
   }>
 ) {
   const { open: onConnect } = useWeb3Modal();
-  const connectors = useConnectors();
-
-  console.log("i am connectors", connectors);
 
   return (
     <button
