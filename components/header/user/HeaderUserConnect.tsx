@@ -7,7 +7,6 @@ export default function HeaderUserConnect(
   }>
 ) {
   const { open: onConnect } = useWeb3Modal();
-
   return (
     <button
       onClick={() => {
