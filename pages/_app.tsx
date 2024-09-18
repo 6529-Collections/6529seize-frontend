@@ -238,18 +238,18 @@ const connectors: any[] = [
   injected(),
 ];
 
-if (isCapacitor) {
-  connectors.push(
-    coinbaseWallet({
-      appName: "6529 CORE",
-      appLogoUrl:
-        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-      enableMobileWalletLink: true,
-      version: "3",
-      headlessMode: true,
-    })
-  );
-}
+// if (isCapacitor) {
+//   connectors.push(
+//     coinbaseWallet({
+//       appName: "6529 CORE",
+//       appLogoUrl:
+//         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+//       enableMobileWalletLink: true,
+//       version: "3",
+//       headlessMode: true,
+//     })
+//   );
+// }
 
 export const wagmiConfig = createConfig({
   chains,
