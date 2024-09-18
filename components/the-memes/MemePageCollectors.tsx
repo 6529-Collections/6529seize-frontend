@@ -3,6 +3,7 @@ import { Col, Container, Row, Table } from "react-bootstrap";
 import { NFT } from "../../entities/INFT";
 import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
 import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
+import { NftPageStats } from "../nftAttributes/NftStats";
 
 export function MemePageCollectorsRightMenu(props: {
   show: boolean;
@@ -30,44 +31,7 @@ export function MemePageCollectorsRightMenu(props: {
                     <td>Mint Date</td>
                     <td>{printMintDate(props.nft.mint_date)}</td>
                   </tr>
-                  <tr>
-                    <td>Mint Price</td>
-                    <td>
-                      {props.nft.mint_price > 0
-                        ? `${numberWithCommas(
-                            Math.round(props.nft.mint_price * 100000) / 100000
-                          )} ETH`
-                        : `N/A`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>TDH Rate</td>
-                    <td>
-                      {numberWithCommas(
-                        Math.round(props.nft.hodl_rate * 100) / 100
-                      )}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Floor Price</td>
-                    <td>
-                      {props.nft.floor_price > 0
-                        ? `${numberWithCommas(
-                            Math.round(props.nft.floor_price * 100) / 100
-                          )} ETH`
-                        : `N/A`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Market Cap</td>
-                    <td>
-                      {props.nft.market_cap > 0
-                        ? `${numberWithCommas(
-                            Math.round(props.nft.market_cap * 100) / 100
-                          )} ETH`
-                        : `N/A`}
-                    </td>
-                  </tr>
+                  <NftPageStats nft={props.nft} />
                 </tbody>
               </Table>
               <Row className="pt-2">

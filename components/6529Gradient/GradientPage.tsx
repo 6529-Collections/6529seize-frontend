@@ -23,6 +23,7 @@ import NFTImage from "../nft-image/NFTImage";
 import Address from "../address/Address";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
+import { NftPageStats } from "../nftAttributes/NftStats";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -187,34 +188,7 @@ export default function GradientPage() {
                             <ArtistProfileHandle nft={nft} />
                           </td>
                         </tr>
-                        <tr>
-                          <td>TDH Rate</td>
-                          <td>
-                            {numberWithCommas(
-                              Math.round(nft.hodl_rate * 100) / 100
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Floor Price</td>
-                          <td>
-                            {nft.floor_price > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.floor_price * 100) / 100
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Market Cap</td>
-                          <td>
-                            {nft.market_cap > 0
-                              ? `${numberWithCommas(
-                                  Math.round(nft.market_cap * 100) / 100
-                                )} ETH`
-                              : `N/A`}
-                          </td>
-                        </tr>
+                        <NftPageStats nft={nft} hide_mint_price={true} />
                       </tbody>
                     </Table>
                     <Row className="pt-2">
