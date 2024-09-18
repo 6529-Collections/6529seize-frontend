@@ -229,12 +229,9 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-export let wagmiConfig: Config;
-if (isCapacitor) {
-  wagmiConfig = wagmiConfigCapacitor(chains, metadata);
-} else {
-  wagmiConfig = wagmiConfigWeb(chains, metadata);
-}
+export const wagmiConfig = isCapacitor
+  ? wagmiConfigCapacitor(chains, metadata)
+  : wagmiConfigWeb(chains, metadata);
 
 createWeb3Modal({
   wagmiConfig,
