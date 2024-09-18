@@ -13,7 +13,7 @@ import {
 } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { WagmiProvider } from "wagmi";
+import { createConfig, http, WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -111,7 +111,7 @@ import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
-import { coinbaseWallet } from "wagmi/connectors";
+import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors";
 
 library.add(
   faArrowUp,
@@ -229,27 +229,36 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-const connectors: any[] = [];
+const connectors: any[] = [
+  walletConnect({
+    projectId: CW_PROJECT_ID,
+    metadata,
+    showQrModal: false,
+  }),
+  injected(),
+];
 
 if (isCapacitor) {
   connectors.push(
     coinbaseWallet({
       appName: "6529 CORE",
+      appLogoUrl:
+        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       enableMobileWalletLink: true,
       version: "3",
+      headlessMode: true,
     })
   );
 }
 
-export const wagmiConfig = defaultWagmiConfig({
+export const wagmiConfig = createConfig({
   chains,
-  projectId: CW_PROJECT_ID,
-  metadata,
-  coinbasePreference: isCapacitor ? "eoaOnly" : "all",
-  auth: {
-    email: false,
-  },
   connectors,
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+    [goerli.id]: http(),
+  },
 });
 
 createWeb3Modal({
