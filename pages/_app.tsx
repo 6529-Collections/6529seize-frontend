@@ -111,7 +111,7 @@ import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
-import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
+import { coinbaseWallet } from "wagmi/connectors";
 
 library.add(
   faArrowUp,
@@ -233,11 +233,10 @@ const connectors: any[] = [];
 
 if (isCapacitor) {
   connectors.push(
-    new CoinbaseWalletSDK({
+    coinbaseWallet({
       appName: "6529 CORE",
-      appLogoUrl:
-        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-      appChainIds: chains.map((chain) => chain.id),
+      enableMobileWalletLink: true,
+      version: "3",
     })
   );
 }
