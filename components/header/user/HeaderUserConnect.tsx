@@ -1,5 +1,4 @@
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { useConnectors } from "wagmi";
 
 export default function HeaderUserConnect(
   props: Readonly<{
@@ -7,10 +6,6 @@ export default function HeaderUserConnect(
   }>
 ) {
   const { open: onConnect } = useWeb3Modal();
-  const connectors = useConnectors();
-
-  console.log("i am connectors", connectors);
-
   return (
     <button
       onClick={() => {
