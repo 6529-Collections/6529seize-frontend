@@ -229,7 +229,7 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-export const wagmiConfig = isCapacitor
+export const wagmiConfig: Config = isCapacitor
   ? wagmiConfigCapacitor(chains, metadata)
   : wagmiConfigWeb(chains, metadata);
 
