@@ -36,10 +36,10 @@ export default function WaveDetailedDropActions({
   return (
     <div className="tw-absolute tw-right-2 tw-top-1 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-flex tw-items-center tw-shadow tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
+        <div className="tw-h-7 tw-flex tw-items-center tw-shadow tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           <button
             type="button"
-            className="tw-text-iron-500 icon tw-px-2 tw-py-1.5 tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
+            className="tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
           >
             <svg
               className="tw-flex-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
