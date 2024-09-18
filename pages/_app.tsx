@@ -13,7 +13,7 @@ import {
 } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { createConfig, http, WagmiProvider } from "wagmi";
+import { Config, WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -105,13 +105,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
-import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
-import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors";
+import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
+import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 
 library.add(
   faArrowUp,
@@ -229,37 +229,12 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-const connectors: any[] = [
-  walletConnect({
-    projectId: CW_PROJECT_ID,
-    metadata,
-    showQrModal: false,
-  }),
-  injected(),
-];
-
-// if (isCapacitor) {
-//   connectors.push(
-//     coinbaseWallet({
-//       appName: "6529 CORE",
-//       appLogoUrl:
-//         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-//       enableMobileWalletLink: true,
-//       version: "3",
-//       headlessMode: true,
-//     })
-//   );
-// }
-
-export const wagmiConfig = createConfig({
-  chains,
-  connectors,
-  transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
-    [goerli.id]: http(),
-  },
-});
+export let wagmiConfig: Config;
+if (isCapacitor) {
+  wagmiConfig = wagmiConfigCapacitor(chains, metadata);
+} else {
+  wagmiConfig = wagmiConfigWeb(chains, metadata);
+}
 
 createWeb3Modal({
   wagmiConfig,
