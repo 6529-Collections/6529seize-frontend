@@ -1,5 +1,4 @@
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { useConnectors } from "wagmi";
 
 export default function HeaderUserConnect(
   props: Readonly<{
