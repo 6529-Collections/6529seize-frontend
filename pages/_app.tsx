@@ -13,7 +13,7 @@ import {
 } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { WagmiProvider } from "wagmi";
+import { Config, WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -105,12 +105,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
-import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
+import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
+import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 
 library.add(
   faArrowUp,
@@ -228,16 +229,9 @@ const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
 const isCapacitor = Capacitor.isNativePlatform();
 
-export const wagmiConfig = defaultWagmiConfig({
-  chains,
-  projectId: CW_PROJECT_ID,
-  metadata,
-  enableCoinbase: !isCapacitor,
-  coinbasePreference: isCapacitor ? "eoaOnly" : "all",
-  auth: {
-    email: false,
-  },
-});
+export const wagmiConfig: Config = isCapacitor
+  ? wagmiConfigCapacitor(chains, metadata)
+  : wagmiConfigWeb(chains, metadata);
 
 createWeb3Modal({
   wagmiConfig,
