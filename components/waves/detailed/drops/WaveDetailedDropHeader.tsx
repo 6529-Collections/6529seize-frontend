@@ -37,9 +37,9 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
             </Link>
           </p>
         </div>
-        {connectedProfile?.profile?.handle !== drop.author.handle && (
+       {/*  {connectedProfile?.profile?.handle !== drop.author.handle && (
           <WaveDetailedDropFollowAuthor drop={drop} />
-        )}
+        )} */}
         <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
         <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
           {getTimeAgoShort(drop.created_at)}
@@ -54,6 +54,11 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
             {drop.wave.name}
           </Link>
         )}
+      </div>
+      <div className="tw-mt-2 tw-inline-flex tw-relative">
+        <span className="tw-text-xs tw-text-iron-50">
+          0 / <span className="tw-text-iron-400">3</span>
+        </span>
       </div>
     </>
   );

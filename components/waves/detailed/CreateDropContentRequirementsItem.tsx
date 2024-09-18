@@ -39,12 +39,14 @@ const CreateDropContentRequirementsItem: React.FC<
   return (
     <Tippy
       content={
-        <div className="tw-p-2 tw-bg-gray-800 tw-rounded-md tw-shadow-lg">
+        <div className="tw-p-2 tw-bg-iron-900 tw-rounded-md tw-shadow-lg">
           {isValid ? (
-            <p className="tw-text-green-400">All requirements met. Good job!</p>
+            <p className="tw-text-green tw-text-sm tw-font-medium">
+              All requirements met. Good job!
+            </p>
           ) : (
             <div>
-              <p className="tw-text-yellow-400 tw-font-semibold tw-mb-2">
+              <p className="tw-text-yellow tw-font-medium tw-mb-2">
                 {requirementType === DropRequirementType.MEDIA
                   ? "Missing required media:"
                   : "Missing required metadata:"}
@@ -56,7 +58,7 @@ const CreateDropContentRequirementsItem: React.FC<
                   </li>
                 ))}
               </ul>
-              <p className="tw-text-gray-300 tw-mt-2 tw-text-sm">
+              <p className="tw-text-iron-300 tw-mt-2 tw-text-sm">
                 Please add the missing {requirementType.toLowerCase()} to
                 proceed.
               </p>
@@ -66,10 +68,11 @@ const CreateDropContentRequirementsItem: React.FC<
       }
     >
       <button
-        className={`tw-flex tw-bg-transparent tw-border-none tw-items-center tw-gap-x-2 ${
+        className={`tw-flex tw-bg-transparent tw-border-none tw-items-center tw-gap-x-1.5 ${
           isValid ? "tw-text-green" : "tw-text-yellow"
         }`}
         onClick={handleClick}
+        type="button"
       >
         {isValid ? (
           <svg
@@ -78,6 +81,7 @@ const CreateDropContentRequirementsItem: React.FC<
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
+            aria-hidden="true"
             className="tw-size-4"
           >
             <path
@@ -92,6 +96,7 @@ const CreateDropContentRequirementsItem: React.FC<
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
+            aria-hidden="true"
             stroke="currentColor"
             className="tw-size-4"
           >
@@ -102,7 +107,7 @@ const CreateDropContentRequirementsItem: React.FC<
             />
           </svg>
         )}
-        <span className="tw-text-sm">{LABELS[requirementType]}</span>
+        <span className="tw-text-xs">{LABELS[requirementType]}</span>
       </button>
     </Tippy>
   );

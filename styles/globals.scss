@@ -28,7 +28,8 @@ body {
   color: $font-color !important;
   font-size: $font-size !important;
   font-family: $main-font !important;
-  overflow: auto;
+  // TODO: change it back to auto
+  overflow: hidden;
 
   &.capacitor-native footer {
     padding-bottom: 100px !important;

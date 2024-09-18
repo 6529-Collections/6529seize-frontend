@@ -319,7 +319,7 @@ const CreateDropInput = forwardRef<
                     type="button"
                     className={`tw-border-0 tw-bg-transparent tw-flex tw-items-center tw-ease-out tw-transition tw-duration-300 tw-mr-2 ${
                       canAddPart
-                        ? "tw-cursor-pointer tw-text-primary-400 hover:tw-text-primary-300"
+                        ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400"
                         : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600"
                     }`}
                   >
@@ -388,11 +388,11 @@ const CreateDropInput = forwardRef<
                 <AnimatePresence>
                   {isDropdownOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
+                      exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="tw-absolute tw-right-0 tw-top-10 tw-z-10 tw-w-40 tw-origin-top-right tw-rounded-lg tw-bg-iron-950 tw-py-2 tw-px-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none tw-space-y-1"
+                      className="tw-absolute tw-right-0 tw-bottom-10 tw-z-10 tw-w-40 tw-origin-bottom-right tw-rounded-lg tw-bg-iron-950 tw-py-2 tw-px-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none tw-space-y-1"
                     >
                       <label
                         className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${

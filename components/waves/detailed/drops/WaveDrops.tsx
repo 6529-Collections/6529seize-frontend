@@ -199,7 +199,7 @@ export default function WaveDrops({
   }, [haveNewDrops]);
 
   return (
-    <div>
+    <div className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto">
       {haveNewDrops && (
         <div className="tw-sticky tw-top-[5rem] tw-left-0 -tw-mb-10 tw-right-0 tw-z-50 tw-flex tw-justify-center">
           <button

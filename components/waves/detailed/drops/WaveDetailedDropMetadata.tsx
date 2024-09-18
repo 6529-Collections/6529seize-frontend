@@ -35,7 +35,7 @@ export default function WaveDetailedDropMetadata({
         <button
           type="button"
           onClick={toggleDropdown}
-          className="tw-p-0 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-iron-300 hover:tw-text-iron-500 tw-text-xs tw-font-normal"
+          className="tw-p-0 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-iron-400 hover:tw-text-iron-500 tw-text-xs tw-font-normal"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

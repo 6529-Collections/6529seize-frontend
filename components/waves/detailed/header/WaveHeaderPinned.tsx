@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import WaveDetailedDrop from "../drops/WaveDetailedDrop";
 
 interface WaveHeaderPinnedProps {
-  wave: Wave;
+  readonly wave: Wave;
 }
 
 const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
@@ -55,16 +55,16 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
           {isOpen && (
             <motion.div
               ref={portalRef}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
               style={{
                 position: "absolute",
-                top: buttonRef.current?.getBoundingClientRect().bottom ?? 0,
-                left: buttonRef.current?.getBoundingClientRect().left ?? 0,
+                top: buttonRef.current?.getBoundingClientRect().top ?? 0,
+                left: (buttonRef.current?.getBoundingClientRect().right ?? 0) + 8,
               }}
-              className="tw-mt-4 tw-z-50 tw-origin-top-right tw-rounded-lg tw-bg-iron-950 tw-py-2 tw-px-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none tw-space-y-1"
+              className="tw-z-50 tw-max-w-[672px] tw-w-full tw-origin-top-left tw-rounded-lg tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1"
             >
               <WaveDetailedDrop
                 drop={wave.description_drop}

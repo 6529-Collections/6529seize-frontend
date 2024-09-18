@@ -38,7 +38,7 @@ const CreateDropContentRequirements: React.FC<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="tw-w-full tw-inline-flex tw-space-x-4"
+            className="tw-mt-2 tw-w-full tw-inline-flex tw-space-x-2"
           >
             {wave.participation.required_media.length > 0 && (
               <CreateDropContentRequirementsItem

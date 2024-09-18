@@ -127,28 +127,33 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
 
   return (
     <div className="tailwind-scope tw-bg-black tw-min-h-screen">
-      <div className="tw-mt-6 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
-          <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4 tw-max-w-[20.5rem]">
-            <WaveHeader
-              wave={wave}
-              onFollowersClick={() => setActiveView(WaveDetailedView.FOLLOWERS)}
-            />
-            <WaveSpecs wave={wave} />
-            <WaveGroups wave={wave} />
-            {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
-            {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
-            {false && (
-              <>
-                <WaveLeaderboard wave={wave} />
-                <WaveOutcomes wave={wave} />{" "}
-              </>
-            )}
+          <div className="tw-h-[calc(100vh-160px)] tw-overflow-y-auto no-scrollbar tw-max-w-[20.5rem] tw-w-full">
+            <div className="tw-hidden tw-flex-1 lg:tw-flex tw-flex-col tw-gap-y-4 tw-mb-4">
+              <WaveHeader
+                wave={wave}
+                onFollowersClick={() =>
+                  setActiveView(WaveDetailedView.FOLLOWERS)
+                }
+              />
+              <WaveSpecs wave={wave} />
+              <WaveGroups wave={wave} />
+              {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
+              {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
+              {false && (
+                <>
+                  <WaveLeaderboard wave={wave} />
+                  <WaveOutcomes wave={wave} />{" "}
+                </>
+              )}
+            </div>
           </div>
+
           <div className="tw-flex-1">
             <div
               ref={contentWrapperRef}
-              className="tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-pb-2"
+              className="tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-iron-800"
             >
               <AnimatePresence mode="wait">
                 <motion.div

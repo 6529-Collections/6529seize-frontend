@@ -17,9 +17,6 @@ const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({
   return (
     <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-      </div>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center -tw-space-x-2">
           {drop.top_raters.map((rater) => (
             <Tippy

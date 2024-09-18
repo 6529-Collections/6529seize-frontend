@@ -103,8 +103,15 @@ export default function WaveDetailedContent({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
+          <WaveDrops
+            wave={wave}
+            onReply={handleReply}
+            onQuote={handleQuote}
+            activeDrop={activeDrop}
+            rootDropId={null}
+          />
           {canDrop && (
-            <div ref={createDropRef} className="tw-sticky tw-top-0 tw-z-10">
+            <div ref={createDropRef}>
               <CreateDrop
                 activeDrop={activeDrop}
                 onCancelReplyQuote={onCancelReplyQuote}
@@ -114,13 +121,6 @@ export default function WaveDetailedContent({
               />
             </div>
           )}
-          <WaveDrops
-            wave={wave}
-            onReply={handleReply}
-            onQuote={handleQuote}
-            activeDrop={activeDrop}
-            rootDropId={null}
-          />
         </motion.div>
       )}
     </AnimatePresence>

@@ -27,14 +27,11 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   onRemoveMetadata,
 }) => {
   return (
-    <div className="tw-mt-3 tw-space-y-2">
+    <div className="tw-mt-2 tw-space-y-2">
       <div>
-        <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
+        <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
           <span>
-            <span className="tw-text-xs tw-text-iron-400">Add Metadata</span>{" "}
-            <span className="tw-text-xs tw-text-iron-400">
-              Required Metadata
-            </span>
+            <span className="tw-text-xs tw-text-iron-300">Add Metadata</span>
           </span>
           <Tippy
             content={

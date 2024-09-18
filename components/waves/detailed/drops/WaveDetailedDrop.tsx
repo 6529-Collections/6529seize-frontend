@@ -52,7 +52,7 @@ export default function WaveDetailedDrop({
         <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
           <WaveDetailedDropHeader drop={drop} showWaveInfo={showWaveInfo} />
 
-          <div className="tw-mt-0.5">
+          <div>
             <WaveDetailedDropContent
               drop={drop}
               activePartIndex={activePartIndex}
@@ -75,7 +75,7 @@ export default function WaveDetailedDrop({
         />
       )}
 
-      <div className="tw-flex tw-w-full tw-justify-end  tw-gap-x-2">
+      <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
         {drop.metadata.length > 0 && (
           <WaveDetailedDropMetadata metadata={drop.metadata} />
         )}
