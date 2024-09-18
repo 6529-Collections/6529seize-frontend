@@ -64,14 +64,21 @@ export default function WavePage() {
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
+        <style>{`
+          body {
+            overflow: hidden !important;
+          }
+        `}</style>
       </Head>
-      <main className="tailwind-scope tw-min-h-screen tw-bg-black">
+      <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col">
         <div>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
 
-        {wave && !isError && <WaveDetailed wave={wave} />}
+        <div className="tw-flex-1">
+          {wave && !isError && <WaveDetailed wave={wave} />}
+        </div>
       </main>
     </>
   );

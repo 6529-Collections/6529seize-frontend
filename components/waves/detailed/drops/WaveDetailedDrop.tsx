@@ -35,7 +35,7 @@ export default function WaveDetailedDrop({
 
   return (
     <div
-      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-4 tw-transition-colors tw-duration-300 ${
+      className={`first:tw-rounded-t-xl tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-4 tw-transition-colors tw-duration-300 ${
         isActiveDrop
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
           : "tw-bg-iron-950"
