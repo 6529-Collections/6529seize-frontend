@@ -17,6 +17,7 @@ import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 
 interface Props {
   onLoad?: () => void;
@@ -31,6 +32,7 @@ export interface HeaderLink {
 
 export default function Header(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  const { seizeConnectOpen } = useSeizeConnect();
 
   const { showWaves } = useContext(AuthContext);
   const router = useRouter();
@@ -105,6 +107,12 @@ export default function Header(props: Readonly<Props>) {
     }
   }, [account.address]);
 
+  useEffect(() => {
+    if (seizeConnectOpen) {
+      setBurgerMenuOpen(false);
+    }
+  }, [seizeConnectOpen]);
+
   function printMobileRow(name: string, path: string) {
     return (
       <Row className="pt-3">
@@ -158,7 +166,7 @@ export default function Header(props: Readonly<Props>) {
             <Col>
               <h3
                 className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
-                <HeaderUser onConnectClick={() => setBurgerMenuOpen(false)} />
+                <HeaderUser />
               </h3>
             </Col>
           </Row>
@@ -1104,9 +1112,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                             </NavDropdown>
-                            <HeaderUser
-                              onConnectClick={() => setBurgerMenuOpen(false)}
-                            />
+                            <HeaderUser />
                             {showWaves && <HeaderNotifications />}
                             <HeaderSearchButton />
                           </Nav>

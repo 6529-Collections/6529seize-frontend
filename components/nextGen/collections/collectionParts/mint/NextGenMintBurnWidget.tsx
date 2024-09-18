@@ -21,7 +21,6 @@ import {
 import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../../../../services/6529api";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
 import {
   getStatusFromDates,
@@ -30,6 +29,7 @@ import {
 import { NextGenMintingFor } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
+import { useSeizeConnect } from "../../../../../hooks/useSeizeConnect";
 
 interface Props {
   collection: NextGenCollection;
@@ -46,7 +46,7 @@ interface Props {
 export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
-  const web3Modal = useWeb3Modal();
+  const { seizeConnect } = useSeizeConnect();
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -165,10 +165,10 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           setIsMinting(true);
         }
       } else {
-        web3Modal.open();
+        seizeConnect();
       }
     } else {
-      web3Modal.open();
+      seizeConnect();
     }
   };
 

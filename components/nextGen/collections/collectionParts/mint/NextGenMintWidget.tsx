@@ -26,7 +26,6 @@ import {
 import { useEffect, useState } from "react";
 import { NULL_ADDRESS } from "../../../../../constants";
 import { fetchUrl } from "../../../../../services/6529api";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
 import {
   getStatusFromDates,
   useMintSharedState,
@@ -35,6 +34,7 @@ import { NextGenMintingFor } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
 import DotLoader from "../../../../dotLoader/DotLoader";
+import { useSeizeConnect } from "../../../../../hooks/useSeizeConnect";
 
 export function getJsonData(keccak: string, data: string) {
   const parsed = JSON.parse(data);
@@ -77,7 +77,7 @@ function getMintValue(mintCount: number, mintPrice: number) {
 export default function NextGenMintWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
-  const web3Modal = useWeb3Modal();
+  const { seizeConnect } = useSeizeConnect();
 
   const [currentProof, setCurrentProof] = useState<
     | {
@@ -208,10 +208,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           setIsMinting(true);
         }
       } else {
-        web3Modal.open();
+        seizeConnect();
       }
     } else {
-      web3Modal.open();
+      seizeConnect();
     }
   };
 

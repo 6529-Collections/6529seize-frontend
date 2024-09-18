@@ -206,7 +206,7 @@ import { IncomingIdentitySubscriptionsPage } from '../models/IncomingIdentitySub
 import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
-import { Nft      , NftTokenTypeEnum                             } from '../models/Nft';
+import { Nft      , NftTokenTypeEnum                               } from '../models/Nft';
 import { NftsPage } from '../models/NftsPage';
 import { NonceResponse } from '../models/NonceResponse';
 import { Notification        } from '../models/Notification';
