@@ -22,7 +22,6 @@ export const wagmiConfigCapacitor = (
           "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
         enableMobileWalletLink: true,
         version: "3",
-        headlessMode: true,
       }),
       injected(),
     ],
