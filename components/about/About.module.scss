@@ -45,15 +45,26 @@
 }
 
 .calendarTable {
-  th {
-    padding-top: 25px;
-    padding-bottom: 25px;
+  border: 1px solid $almost-very-dark-grey !important;
+  tr td {
+    vertical-align: middle;
   }
+
   td {
-    border: 1px solid white !important;
-    width: 50%;
-    padding: 10px;
+    line-height: 40px;
   }
+
+  tr:nth-child(odd) {
+    background-color: $almost-very-dark-grey;
+  }
+}
+
+.calendarTable > :not(caption) > * > * {
+  padding: 0.5rem 1.5rem !important;
+}
+
+.activeSection {
+  border: 1px solid $off-white !important;
 }
 
 .cookiePolicyTable {

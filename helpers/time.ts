@@ -248,10 +248,19 @@ export class Time {
   };
 
   public toMonthAndDayString(): string {
-    return this.toDate().toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-    });
+    const isoDateString = this.toIsoDateString();
+    const date = new Date(isoDateString);
+    const month = date.toLocaleString("default", { month: "long" });
+    const day = date.getDate();
+    const dayWithSuffix =
+      day === 1 || day === 21 || day === 31
+        ? `${day}st`
+        : day === 2 || day === 22
+        ? `${day}nd`
+        : day === 3 || day === 23
+        ? `${day}rd`
+        : `${day}th`;
+    return `${this.toDayName()}, ${month} ${dayWithSuffix}`;
   }
 
   public toDayName() {

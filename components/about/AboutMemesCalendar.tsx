@@ -1,7 +1,14 @@
-import { Col, Container, Row } from "react-bootstrap";
+import styles from "./About.module.scss";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import { MEMES_CALENDARS } from "../../helpers/meme_calendar.helpers";
+import { Time } from "../../helpers/time";
 
 export default function AboutMemesCalendar() {
+  function isActiveSection(start: Time, end: Time) {
+    const now = Time.now();
+    return start.lte(now) && end.gte(now);
+  }
+
   return (
     <Container>
       <Row>
@@ -12,52 +19,49 @@ export default function AboutMemesCalendar() {
         </Col>
       </Row>
       {MEMES_CALENDARS.map((calendar) => (
-        <Row key={calendar.year}>
-          <Col sm={12} md={{ span: 8, offset: 2 }}>
-            <table
-              className="table table-bordered"
-              style={{
-                borderColor: "white",
-              }}
-            >
-              <thead>
-                <tr>
-                  <th
-                    colSpan={2}
-                    style={{ paddingTop: "25px", paddingBottom: "25px" }}
-                  >
-                    {calendar.year}: {calendar.title}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {calendar.blocks.map((block) => (
-                  <tr key={block.title}>
-                    <td
-                      style={{
-                        border: "1px solid white",
-                        width: "50%",
-                        padding: "10px",
-                      }}
-                    >
-                      {block.start.toMonthAndDayString()} to{" "}
-                      {block.end.toMonthAndDayString()}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid white",
-                        width: "50%",
-                        padding: "10px",
-                      }}
-                    >
-                      {block.title}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Col>
-        </Row>
+        <>
+          <Row key={calendar.year} className="pt-3">
+            <Col className="font-bolder font-larger">
+              {calendar.year}: {calendar.title}
+            </Col>
+          </Row>
+          <Row className="pt-2">
+            <Col>
+              <Table bordered={false} className={styles.calendarTable}>
+                <tbody>
+                  {calendar.blocks.map((block) => (
+                    <tr
+                      key={block.title}
+                      className={
+                        isActiveSection(block.start, block.end)
+                          ? styles.activeSection
+                          : ""
+                      }>
+                      <td className="no-wrap">
+                        <b>{block.title}</b>
+                      </td>
+                      <td>
+                        <span className="no-wrap">
+                          {block.start.toMonthAndDayString()}
+                        </span>
+                        <span
+                          style={{
+                            paddingLeft: "10px",
+                            paddingRight: "10px",
+                          }}>
+                          -
+                        </span>
+                        <span className="no-wrap">
+                          {block.end.toMonthAndDayString()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        </>
       ))}
     </Container>
   );
