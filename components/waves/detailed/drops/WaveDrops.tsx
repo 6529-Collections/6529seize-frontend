@@ -235,7 +235,7 @@ export default function WaveDrops({
         )}
       </div>
       <div>
-        {!haveNewDrops && (
+        {haveNewDrops && (
           <div className="tw-sticky tw-top-0 tw-left-0 tw-right-0 tw-z-50 tw-flex tw-justify-center">
             <button
               onClick={onRefresh}
