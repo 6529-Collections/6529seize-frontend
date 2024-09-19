@@ -5,14 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
@@ -50,7 +43,6 @@ export default function WaveDrops({
   >(undefined);
 
   const scrollInfo = useRef({ scrollTop: 0, scrollHeight: 0 });
-  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     data,
@@ -137,8 +129,6 @@ export default function WaveDrops({
     refetchIntervalInBackground: true,
   });
 
-
-
   useEffect(() => {
     if (pollingResult) {
       const timer = setTimeout(() => {
@@ -187,42 +177,46 @@ export default function WaveDrops({
     }
   }, []);
 
-  // const debouncedMaintainScrollPosition = useCallback(() => {
-  //   if (resizeTimeoutRef.current) {
-  //     clearTimeout(resizeTimeoutRef.current);
-  //   }
-  //   resizeTimeoutRef.current = setTimeout(() => {
-  //     maintainScrollPosition();
-  //   }, 50);
-  // }, [maintainScrollPosition]);
+  const [loadedMediaCount, setLoadedMediaCount] = useState(0);
 
-  // useEffect(() => {
-  //   const container = containerRef.current;
-  //   if (container) {
-  //     const resizeObserver = new ResizeObserver(
-  //       debouncedMaintainScrollPosition
-  //     );
-  //     resizeObserver.observe(container);
+  const checkMediaLoading = useCallback(() => {
+    if (containerRef.current) {
+      const mediaElements = containerRef.current.querySelectorAll("img, video");
 
-  //     const mutationObserver = new MutationObserver(
-  //       debouncedMaintainScrollPosition
-  //     );
-  //     mutationObserver.observe(container, {
-  //       childList: true,
-  //       subtree: true,
-  //       attributes: true,
-  //       characterData: true,
-  //     });
+      setLoadedMediaCount(0);
+      console.log("mediaElements", mediaElements);
+      Array.from(mediaElements).map((element) => {
+        if (
+          (element as HTMLImageElement).complete ||
+          (element instanceof HTMLVideoElement && element.readyState >= 3)
+        ) {
+          setTimeout(() => {
+            setLoadedMediaCount((prev) => prev + 1);
+          }, 500);
+          return Promise.resolve();
+        } else {
+          return new Promise<void>((resolve) => {
+            const handleLoad = () => {
+              setTimeout(() => {
+                setLoadedMediaCount((prev) => prev + 1);
+                resolve();
+              }, 500);
+            };
+            element.addEventListener("load", handleLoad, { once: true });
+            element.addEventListener("error", handleLoad, { once: true });
+          });
+        }
+      });
+    }
+  }, []);
 
-  //     return () => {
-  //       resizeObserver.disconnect();
-  //       mutationObserver.disconnect();
-  //       if (resizeTimeoutRef.current) {
-  //         clearTimeout(resizeTimeoutRef.current);
-  //       }
-  //     };
-  //   }
-  // }, [debouncedMaintainScrollPosition]);
+  useEffect(() => {
+    checkMediaLoading();
+  }, [drops, checkMediaLoading]);
+
+  useEffect(() => {
+    maintainScrollPosition();
+  }, [loadedMediaCount, maintainScrollPosition]);
 
   useEffect(() => {
     const container = containerRef.current;

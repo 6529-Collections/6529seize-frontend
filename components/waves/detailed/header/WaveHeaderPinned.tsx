@@ -74,6 +74,8 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
                 showReplyAndQuote={false}
                 onReply={() => {}}
                 onQuote={() => {}}
+                previousDrop={null}
+                nextDrop={null}
               />
             </motion.div>
           )}

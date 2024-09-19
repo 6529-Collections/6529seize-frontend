@@ -37,7 +37,13 @@ export default function WaveSingleDrop({
       <div className="tw-flex tw-gap-x-3">
         <WaveDetailedDropAuthorPfp drop={drop} />
         <div className="tw-mt-1 tw-flex tw-flex-col tw-flex-grow">
-          <WaveDetailedDropHeader drop={drop} showWaveInfo={false} />
+          <WaveDetailedDropHeader
+            drop={drop}
+            showWaveInfo={false}
+            isStorm={drop.parts.length > 1}
+            currentPartIndex={activePartIndex}
+            partsCount={drop.parts.length}
+          />
 
           <div className="tw-mt-0.5">
             <WaveDetailedDropContent

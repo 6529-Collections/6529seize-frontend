@@ -16,6 +16,7 @@ import { Tweet } from "react-tweet";
 import Link from "next/link";
 import DropPartQuote from "./quote/DropPartQuote";
 import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
+import DropPartMarkdownImage from "./DropPartMarkdownImage";
 
 interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -173,7 +174,7 @@ export default function DropPartMarkdown({
     const dropId = match ? match[2] : null;
 
     if (isSeizeLink && dropId && waveId) {
-      return <WaveDetailedDropQuote dropId={dropId} partId={1} />;
+      return <WaveDetailedDropQuote dropId={dropId} partId={1} maybeDrop={null}/>;
     }
 
     const twitterRegex =
@@ -322,11 +323,10 @@ export default function DropPartMarkdown({
         ),
         a: (params) => aHrefRenderer(params),
         img: (params) => (
-          <img
+          <DropPartMarkdownImage
             {...params}
-            alt="Seize"
-            onLoad={onImageLoaded}
-            className="tw-w-full"
+            src={params.src ?? ""}
+            onImageLoaded={onImageLoaded}
           />
         ),
         blockquote: (params) => (

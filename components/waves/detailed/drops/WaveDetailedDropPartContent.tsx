@@ -5,6 +5,7 @@ import DropListItemContentMedia from "../../../drops/view/item/content/media/Dro
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
+import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
 
 interface WaveDetailedDropPartContentProps {
   readonly drop: Drop;
@@ -119,16 +120,10 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
           )}
         </motion.div>
         {!!activePart.media.length && (
-          <div className={`${activePart.content ? "tw-mt-3" : "tw-mt-1"} tw-space-y-3`}>
-            {activePart.media.map((media: any, i: number) => (
-              <DropListItemContentMedia
-                key={`part-${i}-media-${media.url}`}
-                media_mime_type={media.mime_type}
-                media_url={media.url}
-                onImageLoaded={updateContainerHeight}
-              />
-            ))}
-          </div>
+          <WaveDetailedDropPartContentMedias
+            activePart={activePart}
+            updateContainerHeight={updateContainerHeight}
+          />
         )}
       </div>
       {isStorm && renderNavigationButton("next")}

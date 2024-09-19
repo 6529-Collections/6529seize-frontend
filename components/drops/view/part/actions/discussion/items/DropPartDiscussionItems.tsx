@@ -109,7 +109,7 @@ export default function DropPartDiscussionItems({
           <DropsListItem
             key={getDropKey({
               drop: item,
-              index: i === replies.length - 1 ? 0 : 1,
+              returnOriginal: i !== replies.length - 1,
             })}
             drop={item}
             replyToDrop={null}

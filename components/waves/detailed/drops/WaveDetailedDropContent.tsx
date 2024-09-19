@@ -1,6 +1,5 @@
 import React from "react";
 import { Drop } from "../../../../generated/models/Drop";
-import { useState } from "react";
 import WaveDetailedDropPart from "./WaveDetailedDropPart";
 interface WaveDetailedDropContentProps {
   drop: Drop;
