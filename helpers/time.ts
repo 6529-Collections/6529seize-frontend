@@ -248,18 +248,22 @@ export class Time {
   };
 
   public toMonthAndDayString(): string {
+    function getDayWithSuffix(day: number): string {
+      if (day === 1 || day === 21 || day === 31) {
+        return `${day}st`;
+      } else if (day === 2 || day === 22) {
+        return `${day}nd`;
+      } else if (day === 3 || day === 23) {
+        return `${day}rd`;
+      } else {
+        return `${day}th`;
+      }
+    }
     const isoDateString = this.toIsoDateString();
     const date = new Date(isoDateString);
     const month = date.toLocaleString("default", { month: "long" });
     const day = date.getDate();
-    const dayWithSuffix =
-      day === 1 || day === 21 || day === 31
-        ? `${day}st`
-        : day === 2 || day === 22
-        ? `${day}nd`
-        : day === 3 || day === 23
-        ? `${day}rd`
-        : `${day}th`;
+    const dayWithSuffix = getDayWithSuffix(day);
     return `${this.toDayName()}, ${month} ${dayWithSuffix}`;
   }
 

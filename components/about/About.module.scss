@@ -47,6 +47,7 @@
 .calendarTable {
   border: 1px solid $almost-very-dark-grey !important;
   tr td {
+    padding: 10px;
     vertical-align: middle;
   }
 
@@ -57,10 +58,6 @@
   tr:nth-child(odd) {
     background-color: $almost-very-dark-grey;
   }
-}
-
-.calendarTable > :not(caption) > * > * {
-  padding: 0.5rem 1.5rem !important;
 }
 
 .activeSection {
