@@ -64,11 +64,11 @@ export default function WavePage() {
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
-        <style>{`
+       {/*  <style>{`
           body {
             overflow: hidden !important;
           }
-        `}</style>
+        `}</style> */}
       </Head>
       <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col">
         <div>

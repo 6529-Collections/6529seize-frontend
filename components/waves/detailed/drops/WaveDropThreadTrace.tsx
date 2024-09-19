@@ -45,15 +45,17 @@ const WaveDropThreadTrace: React.FC<WaveDropThreadTraceProps> = ({
 
   return (
     <>
-      {data.trace.map((drop) => (
+      {data.trace?.map((drop, index) => (
         <div
           className="tw-relative"
           key={`wave-drop-thread-trace-${drop.drop_id}`}
         >
-          <div className="tw-absolute tw-left-9 tw-top-2 tw-bottom-0 tw-w-[1px] tw-bg-iron-700"></div>
+          {index !== (data.trace?.length ?? 0) - 1 && (
+            <div className="tw-absolute tw-left-9 tw-top-2 tw-bottom-0 tw-w-[1px] tw-bg-iron-700"></div>
+          )}
           <WaveSingleDrop dropId={drop.drop_id} availableCredit={null} />
         </div>
-      ))}
+      )) ?? null}
     </>
   );
 };

@@ -12,6 +12,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
+import WaveDropThreadTrace from "./WaveDropThreadTrace";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -22,6 +23,7 @@ interface WaveDropsProps {
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
+  readonly onBackToList?: () => void;
 }
 
 export default function WaveDrops({
@@ -30,6 +32,7 @@ export default function WaveDrops({
   onQuote,
   activeDrop,
   rootDropId,
+  onBackToList,
 }: WaveDropsProps) {
   const { connectedProfile, setTitle } = useContext(AuthContext);
   const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
@@ -199,29 +202,62 @@ export default function WaveDrops({
   }, [haveNewDrops]);
 
   return (
-    <div className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto">
-      {haveNewDrops && (
-        <div className="tw-sticky tw-top-[5rem] tw-left-0 -tw-mb-10 tw-right-0 tw-z-50 tw-flex tw-justify-center">
-          <button
-            onClick={onRefresh}
-            type="button"
-            className="tw-mt-2 tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
-          >
-            New drops available
-          </button>
-        </div>
-      )}
-      <DropListWrapper
-        drops={drops}
-        loading={isFetching}
-        showWaveInfo={false}
-        rootDropId={rootDropId}
-        onBottomIntersection={onBottomIntersection}
-        showReplyAndQuote={true}
-        onReply={onReply}
-        onQuote={onQuote}
-        activeDrop={activeDrop}
-      />
+    <div className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
+      <div>
+        {rootDropId && onBackToList && (
+          <div className="tw-px-4 tw-py-2 tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950">
+            <button
+              onClick={onBackToList}
+              type="button"
+              className="tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
+            >
+              <svg
+                className="tw-flex-shrink-0 tw-w-5 tw-h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M20 12H4M4 12L10 18M4 12L10 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></path>
+              </svg>
+              <span>Back</span>
+            </button>
+          </div>
+        )}
+        {rootDropId && (
+          <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
+        )}
+      </div>
+      <div>
+        {!haveNewDrops && (
+          <div className="tw-sticky tw-top-0 tw-left-0 tw-right-0 tw-z-50 tw-flex tw-justify-center">
+            <button
+              onClick={onRefresh}
+              type="button"
+              className="tw-mt-2 tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
+            >
+              New drops available
+            </button>
+          </div>
+        )}
+        <DropListWrapper
+          drops={drops}
+          loading={isFetching}
+          showWaveInfo={false}
+          rootDropId={rootDropId}
+          onBottomIntersection={onBottomIntersection}
+          showReplyAndQuote={true}
+          onReply={onReply}
+          onQuote={onQuote}
+          activeDrop={activeDrop}
+        />
+      </div>
     </div>
   );
 }
