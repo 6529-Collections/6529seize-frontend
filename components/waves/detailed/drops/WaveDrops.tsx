@@ -5,7 +5,14 @@ import {
 } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
@@ -13,6 +20,7 @@ import { ActiveDropState } from "../WaveDetailedContent";
 import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 import WaveDropThreadTrace from "./WaveDropThreadTrace";
 import DropsList from "../../../drops/view/DropsList";
+import { useDebounce } from "react-use";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -37,7 +45,6 @@ export default function WaveDrops({
   const { connectedProfile, setTitle } = useContext(AuthContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialLoadRef = useRef<boolean>(true);
-  const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
     WaveDropsFeed | undefined
   >(undefined);
@@ -94,13 +101,13 @@ export default function WaveDrops({
         )
         .reverse() ?? []
     );
-    if (data) {
-      setIsInitialQueryDone(true);
-    }
   }, [data]);
 
   const [haveNewDrops, setHaveNewDrops] = useState(false);
 
+  const [canPoll, setCanPoll] = useState(false);
+  useDebounce(() => setCanPoll(true), 10000, [data]);
+  useEffect(() => setCanPoll(false), [data]);
   const { data: pollingResult } = useQuery({
     queryKey: [
       QueryKey.DROPS,
@@ -122,13 +129,15 @@ export default function WaveDrops({
         params,
       });
     },
-    enabled: isInitialQueryDone && !haveNewDrops,
+    enabled: !haveNewDrops && canPoll,
     refetchInterval: 30000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: true,
   });
+
+
 
   useEffect(() => {
     if (pollingResult) {
@@ -141,7 +150,7 @@ export default function WaveDrops({
   }, [pollingResult]);
 
   useEffect(() => {
-    if (isInitialQueryDone && delayedPollingResult !== undefined) {
+    if (delayedPollingResult !== undefined) {
       if (delayedPollingResult.drops.length > 0) {
         const latestPolledDrop = delayedPollingResult.drops[0];
 
@@ -163,7 +172,7 @@ export default function WaveDrops({
         setHaveNewDrops(false);
       }
     }
-  }, [delayedPollingResult, drops, isInitialQueryDone]);
+  }, [delayedPollingResult, drops]);
 
   const maintainScrollPosition = useCallback(() => {
     if (containerRef.current) {
@@ -178,38 +187,42 @@ export default function WaveDrops({
     }
   }, []);
 
-  const debouncedMaintainScrollPosition = useCallback(() => {
-    if (resizeTimeoutRef.current) {
-      clearTimeout(resizeTimeoutRef.current);
-    }
-    resizeTimeoutRef.current = setTimeout(() => {
-      maintainScrollPosition();
-    }, 50);
-  }, [maintainScrollPosition]);
+  // const debouncedMaintainScrollPosition = useCallback(() => {
+  //   if (resizeTimeoutRef.current) {
+  //     clearTimeout(resizeTimeoutRef.current);
+  //   }
+  //   resizeTimeoutRef.current = setTimeout(() => {
+  //     maintainScrollPosition();
+  //   }, 50);
+  // }, [maintainScrollPosition]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      const resizeObserver = new ResizeObserver(debouncedMaintainScrollPosition);
-      resizeObserver.observe(container);
+  // useEffect(() => {
+  //   const container = containerRef.current;
+  //   if (container) {
+  //     const resizeObserver = new ResizeObserver(
+  //       debouncedMaintainScrollPosition
+  //     );
+  //     resizeObserver.observe(container);
 
-      const mutationObserver = new MutationObserver(debouncedMaintainScrollPosition);
-      mutationObserver.observe(container, { 
-        childList: true, 
-        subtree: true, 
-        attributes: true, 
-        characterData: true 
-      });
+  //     const mutationObserver = new MutationObserver(
+  //       debouncedMaintainScrollPosition
+  //     );
+  //     mutationObserver.observe(container, {
+  //       childList: true,
+  //       subtree: true,
+  //       attributes: true,
+  //       characterData: true,
+  //     });
 
-      return () => {
-        resizeObserver.disconnect();
-        mutationObserver.disconnect();
-        if (resizeTimeoutRef.current) {
-          clearTimeout(resizeTimeoutRef.current);
-        }
-      };
-    }
-  }, [debouncedMaintainScrollPosition]);
+  //     return () => {
+  //       resizeObserver.disconnect();
+  //       mutationObserver.disconnect();
+  //       if (resizeTimeoutRef.current) {
+  //         clearTimeout(resizeTimeoutRef.current);
+  //       }
+  //     };
+  //   }
+  // }, [debouncedMaintainScrollPosition]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -221,8 +234,8 @@ export default function WaveDrops({
         };
       };
 
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
     }
   }, []);
 
@@ -238,11 +251,14 @@ export default function WaveDrops({
     }
   }, [drops, maintainScrollPosition]);
 
-  const onIntersection = useCallback((state: boolean) => {
-    if (state && hasNextPage && !isFetching && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
+  const onIntersection = useCallback(
+    (state: boolean) => {
+      if (state && hasNextPage && !isFetching && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]
+  );
 
   const onRefresh = () => {
     refetch();

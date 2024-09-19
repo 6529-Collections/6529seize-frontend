@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { getDropKey } from "../../../helpers/waves/drop.helpers";
@@ -26,24 +26,44 @@ export default function DropsList({
   onReply,
   onQuote,
 }: DropsListProps) {
-  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
-    number | null
-  >(null);
+  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<number | null>(null);
+  const intersectionElementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIntersectionTargetIndex(drops.length >= 10 ? 9 : null);
+    setIntersectionTargetIndex(drops.length >= 10 ? 9 : drops.length - 1);
   }, [drops]);
+
+  useEffect(() => {
+    if (intersectionElementRef.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            onIntersection(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      observer.observe(intersectionElementRef.current);
+
+      return () => observer.disconnect();
+    }
+  }, [onIntersection, intersectionTargetIndex]);
 
   return (
     <div className="tw-flex tw-flex-col">
       {drops.map((drop, i) => (
         <div key={getDropKey({ drop, returnOriginal: i !== drops.length - 1 })}>
           {intersectionTargetIndex === i && (
-            <CommonIntersectionElement onIntersection={onIntersection} />
+            <div ref={intersectionElementRef}>
+              <CommonIntersectionElement onIntersection={onIntersection} />
+            </div>
           )}
           <WaveDetailedDrop
             drop={drop}
             previousDrop={drops[i - 1] ?? null}
+            nextDrop={drops[i + 1] ?? null}
             showWaveInfo={showWaveInfo}
             activeDrop={activeDrop}
             onReply={onReply}

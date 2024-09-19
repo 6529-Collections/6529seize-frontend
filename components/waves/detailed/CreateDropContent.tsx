@@ -32,6 +32,7 @@ import { Wave } from "../../../generated/models/Wave";
 import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
+import { useDebounce } from "react-use";
 
 export type CreateDropMetadataType =
   | {
@@ -80,7 +81,17 @@ export default function CreateDropContent({
   const { addOptimisticDrop, waitAndInvalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
-  
+
+  const [postCount, setPostCount] = useState(0);
+
+  useDebounce(
+    () => {
+      waitAndInvalidateDrops();
+    },
+    500,
+    [postCount]
+  );
+
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -454,7 +465,7 @@ export default function CreateDropContent({
       });
     },
     onSettled: () => {
-      waitAndInvalidateDrops();
+      setPostCount((prev) => prev + 1);
       setSubmitting(false);
     },
   });
@@ -545,6 +556,9 @@ export default function CreateDropContent({
   }, [files]);
 
   const onDrop = async (): Promise<void> => {
+    if (submitting) {
+      return;
+    }
     if (missingRequiredMedia.length || missingRequiredMetadataKeys.length) {
       return;
     }
@@ -575,9 +589,11 @@ export default function CreateDropContent({
     if (updatedFiles.length > 4) {
       removedCount = updatedFiles.length - 4;
       updatedFiles = updatedFiles.slice(-4);
-      
+
       setToast({
-        message: `File limit exceeded. The ${removedCount} oldest file${removedCount > 1 ? 's were' : ' was'} removed to maintain the 4-file limit. New files have been added.`,
+        message: `File limit exceeded. The ${removedCount} oldest file${
+          removedCount > 1 ? "s were" : " was"
+        } removed to maintain the 4-file limit. New files have been added.`,
         type: "warning",
       });
     }

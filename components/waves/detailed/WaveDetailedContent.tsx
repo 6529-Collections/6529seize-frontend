@@ -29,23 +29,9 @@ export default function WaveDetailedContent({
   onBackToList,
 }: WaveDetailedContentProps) {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const [isCreateDropFixed, setIsCreateDropFixed] = useState(false);
   const createDropRef = useRef<HTMLDivElement>(null);
   const canDrop = wave.participation.authenticated_user_eligible;
-
-  useEffect(() => {
-    if (activeDrop && createDropRef.current) {
-      const rect = createDropRef.current.getBoundingClientRect();
-      const isFullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-
-      if (!isFullyVisible) {
-        const scrollTarget = window.scrollY + rect.top - 20; // 20px extra space
-        window.scrollTo({
-          top: scrollTarget,
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [activeDrop]);
 
   const onReply = (drop: Drop, partId: number) => {
     setActiveDrop({

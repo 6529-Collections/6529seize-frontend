@@ -31,6 +31,7 @@ export default function WaveDetailedDropReply({
       }),
     placeholderData: keepPreviousData,
     initialData: maybeDrop ?? undefined,
+    enabled: !maybeDrop,
   });
 
   const getContent = (): string => {

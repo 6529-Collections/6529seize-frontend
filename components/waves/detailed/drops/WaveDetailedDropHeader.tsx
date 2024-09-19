@@ -1,22 +1,25 @@
-import React, { useContext } from "react";
+import React from "react";
 import Link from "next/link";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import { UserCICAndLevelSize } from "../../../user/utils/UserCICAndLevel";
 import { Drop } from "../../../../generated/models/Drop";
-import { AuthContext } from "../../../auth/Auth";
 
 interface WaveDetailedDropHeaderProps {
-  drop: Drop;
-  showWaveInfo: boolean;
+  readonly drop: Drop;
+  readonly isStorm: boolean;
+  readonly currentPartIndex: number;
+  readonly partsCount: number;
+  readonly showWaveInfo: boolean;
 }
 
 const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
   drop,
+  isStorm,
+  currentPartIndex,
+  partsCount,
   showWaveInfo,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
   const cicType = cicToType(drop.author.cic);
   return (
     <>
@@ -37,7 +40,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
             </Link>
           </p>
         </div>
-       {/*  {connectedProfile?.profile?.handle !== drop.author.handle && (
+        {/*  {connectedProfile?.profile?.handle !== drop.author.handle && (
           <WaveDetailedDropFollowAuthor drop={drop} />
         )} */}
         <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
@@ -55,11 +58,14 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
           </Link>
         )}
       </div>
-      <div className="tw-mt-2 tw-inline-flex tw-relative">
-        <span className="tw-text-xs tw-text-iron-50">
-          0 / <span className="tw-text-iron-400">3</span>
-        </span>
-      </div>
+      {isStorm && (
+        <div className="tw-mt-2 tw-inline-flex tw-relative">
+          <span className="tw-text-xs tw-text-iron-50">
+            {currentPartIndex + 1} /{" "}
+            <span className="tw-text-iron-400">{partsCount}</span>
+          </span>
+        </div>
+      )}
     </>
   );
 };
