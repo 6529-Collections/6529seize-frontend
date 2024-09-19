@@ -4,15 +4,15 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { Wave } from "../../../../generated/models/Wave";
-import DropListWrapper from "../../../drops/view/DropListWrapper";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 import WaveDropThreadTrace from "./WaveDropThreadTrace";
+import DropsList from "../../../drops/view/DropsList";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -35,10 +35,15 @@ export default function WaveDrops({
   onBackToList,
 }: WaveDropsProps) {
   const { connectedProfile, setTitle } = useContext(AuthContext);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInitialLoadRef = useRef<boolean>(true);
   const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
     WaveDropsFeed | undefined
   >(undefined);
+
+  const scrollInfo = useRef({ scrollTop: 0, scrollHeight: 0 });
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     data,
@@ -46,7 +51,6 @@ export default function WaveDrops({
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-    status,
     refetch,
   } = useInfiniteQuery({
     queryKey: [
@@ -81,12 +85,14 @@ export default function WaveDrops({
   const [drops, setDrops] = useState<Drop[]>([]);
   useEffect(() => {
     setDrops(
-      data?.pages.flatMap((page) =>
-        page.drops.map((drop) => ({
-          ...drop,
-          wave: page.wave,
-        }))
-      ) ?? []
+      data?.pages
+        .flatMap((page) =>
+          page.drops.map((drop) => ({
+            ...drop,
+            wave: page.wave,
+          }))
+        )
+        .reverse() ?? []
     );
     if (data) {
       setIsInitialQueryDone(true);
@@ -140,13 +146,13 @@ export default function WaveDrops({
         const latestPolledDrop = delayedPollingResult.drops[0];
 
         if (drops.length > 0) {
-          const latestExistingDrop = drops[0];
+          const latestExistingDrop = drops.at(-1);
 
           const polledCreatedAt = new Date(
             latestPolledDrop.created_at
           ).getTime();
           const existingCreatedAt = new Date(
-            latestExistingDrop.created_at
+            latestExistingDrop?.created_at ?? 0
           ).getTime();
 
           setHaveNewDrops(polledCreatedAt > existingCreatedAt);
@@ -159,27 +165,84 @@ export default function WaveDrops({
     }
   }, [delayedPollingResult, drops, isInitialQueryDone]);
 
-  const onBottomIntersection = (state: boolean) => {
-    if (drops.length < REQUEST_SIZE) {
-      return;
+  const maintainScrollPosition = useCallback(() => {
+    if (containerRef.current) {
+      const container = containerRef.current;
+      const { scrollTop, scrollHeight } = scrollInfo.current;
+      const newScrollHeight = container.scrollHeight;
+      const deltaHeight = newScrollHeight - scrollHeight;
+
+      if (deltaHeight !== 0) {
+        container.scrollTop = scrollTop + deltaHeight;
+      }
     }
-    if (!state) {
-      return;
+  }, []);
+
+  const debouncedMaintainScrollPosition = useCallback(() => {
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
     }
-    if (status === "pending") {
-      return;
+    resizeTimeoutRef.current = setTimeout(() => {
+      maintainScrollPosition();
+    }, 50);
+  }, [maintainScrollPosition]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      const resizeObserver = new ResizeObserver(debouncedMaintainScrollPosition);
+      resizeObserver.observe(container);
+
+      const mutationObserver = new MutationObserver(debouncedMaintainScrollPosition);
+      mutationObserver.observe(container, { 
+        childList: true, 
+        subtree: true, 
+        attributes: true, 
+        characterData: true 
+      });
+
+      return () => {
+        resizeObserver.disconnect();
+        mutationObserver.disconnect();
+        if (resizeTimeoutRef.current) {
+          clearTimeout(resizeTimeoutRef.current);
+        }
+      };
     }
-    if (isFetching) {
-      return;
+  }, [debouncedMaintainScrollPosition]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      const handleScroll = () => {
+        scrollInfo.current = {
+          scrollTop: container.scrollTop,
+          scrollHeight: container.scrollHeight,
+        };
+      };
+
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
     }
-    if (isFetchingNextPage) {
-      return;
+  }, []);
+
+  useEffect(() => {
+    if (isInitialLoadRef.current && drops.length > 0) {
+      const container = containerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+      isInitialLoadRef.current = false;
+    } else {
+      maintainScrollPosition();
     }
-    if (!hasNextPage) {
-      return;
+  }, [drops, maintainScrollPosition]);
+
+  const onIntersection = useCallback((state: boolean) => {
+    if (state && hasNextPage && !isFetching && !isFetchingNextPage) {
+      fetchNextPage();
     }
-    fetchNextPage();
-  };
+  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
 
   const onRefresh = () => {
     refetch();
@@ -202,7 +265,10 @@ export default function WaveDrops({
   }, [haveNewDrops]);
 
   return (
-    <div className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
+    <div
+      ref={containerRef}
+      className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0"
+    >
       <div>
         {rootDropId && onBackToList && (
           <div className="tw-px-4 tw-py-2 tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950">
@@ -246,17 +312,18 @@ export default function WaveDrops({
             </button>
           </div>
         )}
-        <DropListWrapper
-          drops={drops}
-          loading={isFetching}
-          showWaveInfo={false}
-          rootDropId={rootDropId}
-          onBottomIntersection={onBottomIntersection}
-          showReplyAndQuote={true}
-          onReply={onReply}
-          onQuote={onQuote}
-          activeDrop={activeDrop}
-        />
+        <div className="tw-overflow-hidden">
+          <DropsList
+            drops={drops}
+            showWaveInfo={false}
+            onIntersection={onIntersection}
+            onReply={onReply}
+            onQuote={onQuote}
+            showReplyAndQuote={true}
+            activeDrop={activeDrop}
+            rootDropId={rootDropId}
+          />
+        </div>
       </div>
     </div>
   );

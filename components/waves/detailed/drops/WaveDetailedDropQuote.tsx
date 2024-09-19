@@ -17,11 +17,13 @@ import { useRouter } from "next/router";
 interface WaveDetailedDropQuoteProps {
   readonly dropId: string;
   readonly partId: number;
+  readonly maybeDrop: Drop | null;
 }
 
 const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
   dropId,
   partId,
+  maybeDrop,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const router = useRouter();
@@ -41,6 +43,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
           : {},
       }),
     placeholderData: keepPreviousData,
+    initialData: maybeDrop ?? undefined,
   });
 
   const [quotedPart, setQuotedPart] = useState<DropPart | null>(null);

@@ -80,6 +80,7 @@ export default function CreateDropContent({
   const { addOptimisticDrop, waitAndInvalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
+  
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);

@@ -10,12 +10,14 @@
  * Do not edit the class manually.
  */
 
+import { DropWithoutWave } from '../models/DropWithoutWave';
 import { HttpFile } from '../http/http';
 
 export class ReplyToDropResponse {
     'drop_id': string;
     'drop_part_id': number;
     'is_deleted': boolean;
+    'drop'?: DropWithoutWave;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -36,6 +38,12 @@ export class ReplyToDropResponse {
             "name": "is_deleted",
             "baseName": "is_deleted",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "drop",
+            "baseName": "drop",
+            "type": "DropWithoutWave",
             "format": ""
         }    ];
 

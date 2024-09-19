@@ -13,6 +13,7 @@ import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 
 interface WaveDetailedDropProps {
   readonly drop: Drop;
+  readonly previousDrop: Drop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
@@ -23,6 +24,7 @@ interface WaveDetailedDropProps {
 
 export default function WaveDetailedDrop({
   drop,
+  previousDrop,
   showWaveInfo,
   activeDrop,
   rootDropId,
@@ -32,6 +34,14 @@ export default function WaveDetailedDrop({
 }: WaveDetailedDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
+
+  const showAsOneDrop =
+    !!previousDrop &&
+    previousDrop.author.handle === drop.author.handle &&
+    Math.abs(
+      new Date(previousDrop.created_at).getTime() -
+        new Date(drop.created_at).getTime()
+    ) <= 60000;
 
   return (
     <div
@@ -45,10 +55,18 @@ export default function WaveDetailedDrop({
         <WaveDetailedDropReply
           dropId={drop.reply_to.drop_id}
           dropPartId={drop.reply_to.drop_part_id}
+          maybeDrop={
+            drop.reply_to.drop
+              ? {
+                  ...drop.reply_to.drop,
+                  wave: drop.wave,
+                }
+              : null
+          }
         />
       )}
       <div className="tw-flex tw-gap-x-3">
-        <WaveDetailedDropAuthorPfp drop={drop} />
+        {!showAsOneDrop && <WaveDetailedDropAuthorPfp drop={drop} />}
         <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
           <WaveDetailedDropHeader drop={drop} showWaveInfo={showWaveInfo} />
 

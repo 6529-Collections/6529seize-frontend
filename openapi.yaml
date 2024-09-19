@@ -2587,6 +2587,8 @@ components:
         drop_part_id:
           type: number
           format: int64
+        drop:
+          $ref: "#/components/schemas/DropWithoutWave"
 
     ReplyToDrop:
       type: object
@@ -2614,6 +2616,8 @@ components:
           format: int64
         is_deleted:
           type: boolean
+        drop:
+          $ref: "#/components/schemas/DropWithoutWave"
 
     DropPart:
       type: object
@@ -3602,6 +3606,7 @@ components:
         - tdh_rank
         - market_cap
         - floor_price
+        - floor_price_from
         - scaled
         - compressed_animation
         - icon
@@ -3615,6 +3620,7 @@ components:
         - artist_seize_handle
         - has_distribution
         - highest_offer
+        - highest_offer_from
       properties:
         id:
           type: integer
@@ -3671,6 +3677,9 @@ components:
         floor_price:
           type: number
           format: float
+        floor_price_from:
+          type: string
+          nullable: true
         scaled:
           type: string
         compressed_animation:
@@ -3707,6 +3716,9 @@ components:
         highest_offer:
           type: number
           format: float
+        highest_offer_from:
+          type: string
+          nullable: true
 
     NftsPage:
       type: object

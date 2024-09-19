@@ -9,12 +9,12 @@ export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
 
 export const getDropKey = ({
   drop,
-  index,
+  returnOriginal,
 }: {
   readonly drop: Drop;
-  readonly index: number;
+  readonly returnOriginal: boolean;
 }): string => {
-  if (index !== 0) {
+  if (returnOriginal) {
     return drop.id;
   }
   const input = {
@@ -41,5 +41,5 @@ export const getFeedItemKey = ({
   readonly index: number;
 }): string =>
   index === 0 && item.type === FeedItemType.DropCreated
-    ? getDropKey({ drop: item.item, index: 0 })
+    ? getDropKey({ drop: item.item, returnOriginal: true })
     : `feed-item-${item.serial_no}`;

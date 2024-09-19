@@ -3,9 +3,9 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useContext, useEffect, useState } from "react";
-import DropListWrapper from "./DropListWrapper";
 import { AuthContext } from "../../auth/Auth";
 import { Drop } from "../../../generated/models/Drop";
+import DropsList from "./DropsList";
 
 const REQUEST_SIZE = 10;
 
@@ -88,16 +88,17 @@ export default function Drops() {
   }
 
   return (
-    <DropListWrapper
-      drops={drops}
-      loading={isFetching}
-      showWaveInfo={true}
-      activeDrop={null}
-      rootDropId={null}
-      onBottomIntersection={onBottomIntersection}
-      showReplyAndQuote={false}
-      onReply={() => {}}
-      onQuote={() => {}}
-    />
+    <div className="tw-overflow-hidden">
+      <DropsList
+        drops={drops}
+        showWaveInfo={true}
+        onIntersection={onBottomIntersection}
+        onReply={() => {}}
+        onQuote={() => {}}
+        showReplyAndQuote={true}
+        activeDrop={null}
+        rootDropId={null}
+      />
+    </div>
   );
 }

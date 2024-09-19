@@ -10,11 +10,13 @@ import { useRouter } from "next/router";
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
   readonly dropPartId: number;
+  readonly maybeDrop: Drop | null;
 }
 
 export default function WaveDetailedDropReply({
   dropId,
   dropPartId,
+  maybeDrop,
 }: WaveDetailedDropReplyProps) {
   const router = useRouter();
   const {
@@ -28,6 +30,7 @@ export default function WaveDetailedDropReply({
         endpoint: `drops/${dropId}`,
       }),
     placeholderData: keepPreviousData,
+    initialData: maybeDrop ?? undefined,
   });
 
   const getContent = (): string => {

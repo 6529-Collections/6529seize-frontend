@@ -118,6 +118,14 @@ const WaveDetailedDropPartContent: React.FC<
               <WaveDetailedDropQuote
                 dropId={activePart.quoted_drop.drop_id}
                 partId={activePart.quoted_drop.drop_part_id}
+                maybeDrop={
+                  activePart.quoted_drop.drop
+                    ? {
+                        ...activePart.quoted_drop.drop,
+                        wave: drop.wave,
+                      }
+                    : null
+                }
               />
             )}
           </motion.div>

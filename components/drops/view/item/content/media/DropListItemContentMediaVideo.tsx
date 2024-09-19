@@ -24,7 +24,7 @@ export default function DropListItemContentMediaVideo({
   };
 
   return (
-    <div className="]">
+    <div >
       <video
         ref={videoRef}
         controls

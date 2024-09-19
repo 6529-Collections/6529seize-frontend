@@ -103,7 +103,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   }, [wave, isAuthorAndNotProxy]);
 
   const [activeView, setActiveView] = useState<WaveDetailedView>(
-    WaveDetailedView.CHAT
+    WaveDetailedView.CONTENT
   );
 
   const components: Record<WaveDetailedView, JSX.Element> = {

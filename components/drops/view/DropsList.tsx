@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { getDropKey } from "../../../helpers/waves/drop.helpers";
@@ -11,7 +11,7 @@ interface DropsListProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
-  readonly onBottomIntersection: (state: boolean) => void;
+  readonly onIntersection: (state: boolean) => void;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
 }
@@ -22,49 +22,28 @@ export default function DropsList({
   activeDrop,
   rootDropId,
   showReplyAndQuote,
-  onBottomIntersection,
+  onIntersection,
   onReply,
   onQuote,
 }: DropsListProps) {
-  const getIntersectionTargetIndex = () => {
-    if (drops.length < 5) {
-      return null;
-    }
-    return drops.length - 5;
-  };
-
   const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
     number | null
-  >(getIntersectionTargetIndex());
-  const listRef = useRef<HTMLDivElement>(null);
-  const scrollPositionRef = useRef<number>(0);
+  >(null);
 
   useEffect(() => {
-    setIntersectionTargetIndex(getIntersectionTargetIndex());
+    setIntersectionTargetIndex(drops.length >= 10 ? 9 : null);
   }, [drops]);
 
-  useLayoutEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = scrollPositionRef.current;
-    }
-  });
-
-  const handleScroll = () => {
-    if (listRef.current) {
-      scrollPositionRef.current = listRef.current.scrollTop;
-    }
-  };
-
   return (
-    <div
-      className="tw-flex tw-flex-col"
-      ref={listRef}
-      onScroll={handleScroll}
-    >
+    <div className="tw-flex tw-flex-col">
       {drops.map((drop, i) => (
-        <div key={getDropKey({ drop, index: i })}>
+        <div key={getDropKey({ drop, returnOriginal: i !== drops.length - 1 })}>
+          {intersectionTargetIndex === i && (
+            <CommonIntersectionElement onIntersection={onIntersection} />
+          )}
           <WaveDetailedDrop
             drop={drop}
+            previousDrop={drops[i - 1] ?? null}
             showWaveInfo={showWaveInfo}
             activeDrop={activeDrop}
             onReply={onReply}
@@ -72,9 +51,6 @@ export default function DropsList({
             rootDropId={rootDropId}
             showReplyAndQuote={showReplyAndQuote}
           />
-          {!!intersectionTargetIndex && intersectionTargetIndex === i && (
-            <CommonIntersectionElement onIntersection={onBottomIntersection} />
-          )}
         </div>
       ))}
     </div>
