@@ -1,5 +1,5 @@
 import { ActiveDropState } from "./WaveDetailedContent";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
@@ -54,8 +54,54 @@ export default function CreateDrop({
       }),
   });
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const fixedBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const fixedBottom = fixedBottomRef.current;
+    if (!container || !fixedBottom) return;
+
+    const observer = new ResizeObserver(() => {
+      const containerRect = container.getBoundingClientRect();
+      const fixedBottomRect = fixedBottom.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      if (fixedBottomRect.bottom > viewportHeight) {
+        window.scrollTo({
+          top: window.pageYOffset + (fixedBottomRect.bottom - viewportHeight),
+          behavior: 'smooth'
+        });
+      } else if (fixedBottomRect.bottom < viewportHeight) {
+        const newScrollTop = Math.max(
+          0,
+          window.pageYOffset - (viewportHeight - fixedBottomRect.bottom)
+        );
+        window.scrollTo({
+          top: newScrollTop,
+          behavior: 'smooth'
+        });
+      }
+
+      if (containerRect.top < 0) {
+        window.scrollTo({
+          top: window.pageYOffset + containerRect.top,
+          behavior: 'smooth'
+        });
+      }
+    });
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
+
   return (
-    <div className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-b-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80">
+    <div
+      ref={containerRef}
+      className="tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-b-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-50/[0.06] tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80"
+    >
       <AnimatePresence>
         {isStormMode && (
           <motion.div
@@ -98,6 +144,7 @@ export default function CreateDrop({
           onDropCreated={onDropCreated}
         />
       ) : null}
+      <div ref={fixedBottomRef}></div>
     </div>
   );
 }

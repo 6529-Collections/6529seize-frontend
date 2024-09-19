@@ -31,7 +31,7 @@ export default function WaveDetailedDropFollowAuthor({
   const components: Record<FOLLOW_STATE, React.ReactNode> = {
     [FOLLOW_STATE.FOLLOWING]: (
       <svg
-        className="tw-h-3 tw-w-3"
+        className="tw-flex-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
         width="17"
         height="15"
         viewBox="0 0 17 15"
@@ -49,7 +49,7 @@ export default function WaveDetailedDropFollowAuthor({
     ),
     [FOLLOW_STATE.NOT_FOLLOWING]: (
       <svg
-        className="tw-h-3 tw-w-3"
+        className="tw-flex-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
         width="17"
         height="15"
         viewBox="0 0 17 15"
@@ -155,7 +155,7 @@ export default function WaveDetailedDropFollowAuthor({
           onFollow();
         }}
         disabled={mutating}
-        className={`${classes[followState]} tw-flex tw-border-none tw-bg-transparent -tw-mx-1 tw-px-1 tw-py-0 tw-rounded-full tw-m-0 tw-transition tw-duration-300 tw-ease-out`}
+        className={`${classes[followState]} tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300`}
       >
         {mutating ? (
           <CircleLoader size={CircleLoaderSize.SMALL} />

@@ -29,7 +29,6 @@ export default function WaveDetailedContent({
   onBackToList,
 }: WaveDetailedContentProps) {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-  const [isCreateDropFixed, setIsCreateDropFixed] = useState(false);
   const createDropRef = useRef<HTMLDivElement>(null);
   const canDrop = wave.participation.authenticated_user_eligible;
 
@@ -88,6 +87,7 @@ export default function WaveDetailedContent({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
+   
         >
           <WaveDrops
             wave={wave}

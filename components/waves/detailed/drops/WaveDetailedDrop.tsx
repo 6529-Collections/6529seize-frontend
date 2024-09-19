@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
@@ -5,9 +6,12 @@ import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import { ActiveDropState } from "../WaveDetailedContent";
-import { useState } from "react";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
+import { ActiveDropState } from "../WaveDetailedContent";
+
+enum GroupingThreshold {
+  TIME_DIFFERENCE = 60000,
+}
 
 interface WaveDetailedDropProps {
   readonly drop: Drop;
@@ -32,24 +36,25 @@ export default function WaveDetailedDrop({
   onQuote,
   showReplyAndQuote,
 }: WaveDetailedDropProps) {
-  const isActiveDrop = activeDrop?.drop.id === drop.id;
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
-  const isPreviousDropSameAuthor =
-    !!previousDrop &&
-    previousDrop.author.handle === drop.author.handle &&
-    Math.abs(
-      new Date(previousDrop.created_at).getTime() -
-        new Date(drop.created_at).getTime()
-    ) <= 60000;
+  const isActiveDrop = activeDrop?.drop.id === drop.id;
+  const isStorm = drop.parts.length > 1;
 
-  const isNextDropSameAuthor =
-    !!nextDrop &&
-    nextDrop.author.handle === drop.author.handle &&
-    Math.abs(
-      new Date(nextDrop.created_at).getTime() -
-        new Date(drop.created_at).getTime()
-    ) <= 60000;
+  const shouldGroupWithDrop = (otherDrop: Drop | null) =>
+    !isStorm &&
+    otherDrop &&
+    otherDrop.author.handle === drop.author.handle &&
+    Math.abs(new Date(otherDrop.created_at).getTime() - new Date(drop.created_at).getTime()) <= GroupingThreshold.TIME_DIFFERENCE;
+
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(previousDrop);
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(nextDrop);
+
+  const groupingClass = shouldGroupWithPreviousDrop
+    ? ""
+    : shouldGroupWithNextDrop
+    ? "tw-pt-4"
+    : "tw-py-4";
 
   return (
     <div
@@ -57,48 +62,38 @@ export default function WaveDetailedDrop({
         isActiveDrop
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
           : "tw-bg-iron-950"
-      } ${
-        isPreviousDropSameAuthor
-          ? ""
-          : isNextDropSameAuthor
-          ? "tw-pt-4"
-          : "tw-py-4"
-      }`}
+      } ${groupingClass}`}
     >
-      {!!drop.reply_to &&
+      {drop.reply_to &&
         drop.reply_to.drop_id !== rootDropId &&
-        !isPreviousDropSameAuthor && (
+        !shouldGroupWithPreviousDrop && (
           <WaveDetailedDropReply
             dropId={drop.reply_to.drop_id}
             dropPartId={drop.reply_to.drop_part_id}
             maybeDrop={
               drop.reply_to.drop
-                ? {
-                    ...drop.reply_to.drop,
-                    wave: drop.wave,
-                  }
+                ? { ...drop.reply_to.drop, wave: drop.wave }
                 : null
             }
           />
         )}
       <div className="tw-flex tw-gap-x-3">
-        {!isPreviousDropSameAuthor && <WaveDetailedDropAuthorPfp drop={drop} />}
+        {!shouldGroupWithPreviousDrop && <WaveDetailedDropAuthorPfp drop={drop} />}
         <div
           className={`${
-            isPreviousDropSameAuthor ? "" : "tw-mt-1"
+            shouldGroupWithPreviousDrop ? "" : "tw-mt-1"
           } tw-flex tw-flex-col tw-w-full`}
         >
-          {!isPreviousDropSameAuthor && (
+          {!shouldGroupWithPreviousDrop && (
             <WaveDetailedDropHeader
               drop={drop}
               showWaveInfo={showWaveInfo}
-              isStorm={!!drop.parts.length && drop.parts.length > 1}
+              isStorm={isStorm}
               currentPartIndex={activePartIndex}
               partsCount={drop.parts.length}
             />
           )}
-
-          <div className={`${isPreviousDropSameAuthor ? "tw-ml-[52px]" : ""}`}>
+          <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>
             <WaveDetailedDropContent
               drop={drop}
               activePartIndex={activePartIndex}
@@ -107,20 +102,14 @@ export default function WaveDetailedDrop({
           </div>
         </div>
       </div>
-
       {showReplyAndQuote && (
         <WaveDetailedDropActions
           drop={drop}
           activePartIndex={activePartIndex}
-          onReply={() =>
-            onReply({ drop, partId: drop.parts[activePartIndex].part_id })
-          }
-          onQuote={() =>
-            onQuote({ drop, partId: drop.parts[activePartIndex].part_id })
-          }
+          onReply={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
+          onQuote={() => onQuote({ drop, partId: drop.parts[activePartIndex].part_id })}
         />
       )}
-
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
         {drop.metadata.length > 0 && (
           <WaveDetailedDropMetadata metadata={drop.metadata} />

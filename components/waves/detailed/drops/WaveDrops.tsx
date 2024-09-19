@@ -285,9 +285,9 @@ export default function WaveDrops({
       ref={containerRef}
       className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0"
     >
-      <div>
+      <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-border-b tw-border-b-iron-800 tw-border-solid tw-border-x-0 tw-border-t-0">
         {rootDropId && onBackToList && (
-          <div className="tw-px-4 tw-py-2 tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950">
+          <div className="tw-px-4 tw-py-2">
             <button
               onClick={onBackToList}
               type="button"
