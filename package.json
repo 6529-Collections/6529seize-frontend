@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "prebuild": "rm -rf tmp_gen_outp && node ./node_modules/@openapitools/openapi-generator-cli/main generate -i openapi.yaml -g typescript -o tmp_gen_outp --additional-properties=modelPropertyNaming=snake_case && rm -rf generated && mkdir generated && mv tmp_gen_outp/models generated/models && rm -rf tmp_gen_outp && rm -rf openapitools.json && mkdir generated/http && echo 'export type HttpFile = any;' > generated/http/http.ts && rm generated/models/all.ts",
+    "generate": "rm -rf tmp_gen_outp && node ./node_modules/@openapitools/openapi-generator-cli/main generate -i openapi.yaml -g typescript -o tmp_gen_outp --additional-properties=modelPropertyNaming=snake_case && rm -rf generated && mkdir generated && mv tmp_gen_outp/models generated/models && rm -rf tmp_gen_outp && mkdir generated/http && echo 'export type HttpFile = any;' > generated/http/http.ts && rm generated/models/all.ts",
+    "prebuild": "npm run generate",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint"

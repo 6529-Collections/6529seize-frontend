@@ -4,10 +4,11 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
-import { disconnect } from "@wagmi/core";
 import { useAccount } from "wagmi";
-import { wagmiConfig } from "../../../../pages/_app";
 import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
+import { useSeizeConnect } from "../../../../hooks/useSeizeConnect";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRepeat } from "@fortawesome/free-solid-svg-icons";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -19,6 +20,7 @@ export default function HeaderUserProxyDropdown({
   readonly onClose: () => void;
 }) {
   const { address } = useAccount();
+  const { seizeDisconnect } = useSeizeConnect();
 
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
@@ -27,8 +29,6 @@ export default function HeaderUserProxyDropdown({
     await setActiveProfileProxy(profileProxy);
     onClose();
   };
-
-  const onDisconnect = () => disconnect(wagmiConfig);
 
   const getLabel = (): string => {
     if (profile.profile?.handle) {
@@ -123,7 +123,18 @@ export default function HeaderUserProxyDropdown({
                   <HeaderUserProxyDropdownChains />
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     <button
-                      onClick={onDisconnect}
+                      onClick={() => seizeDisconnect(true)}
+                      type="button"
+                      aria-label="Switch Account"
+                      title="Switch Account"
+                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                      <FontAwesomeIcon icon={faRepeat} height={16} width={16} />
+                      <span>Switch Account</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        seizeDisconnect();
+                      }}
                       type="button"
                       aria-label="Disconnect"
                       title="Disconnect"

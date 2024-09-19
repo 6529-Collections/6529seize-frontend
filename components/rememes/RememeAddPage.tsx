@@ -6,7 +6,6 @@ import { NFT } from "../../entities/INFT";
 import { fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
 import { useAccount, useSignMessage } from "wagmi";
-import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import { DBResponse } from "../../entities/IDBResponse";
 import { ConsolidatedTDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
@@ -14,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthContext } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
 import { SeizeSettings } from "../../generated/models/SeizeSettings";
+import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 
 interface CheckList {
   status: boolean;
@@ -23,8 +23,7 @@ interface CheckList {
 export default function RememeAddPage() {
   const accountResolution = useAccount();
   const { connectedProfile } = useContext(AuthContext);
-  const web3modal = useWeb3Modal();
-  const web3modalState = useWeb3ModalState();
+  const { seizeConnect, seizeConnectOpen } = useSeizeConnect();
 
   const [seizeSettings, setSeizeSettings] = useState<SeizeSettings>();
 
@@ -296,9 +295,9 @@ export default function RememeAddPage() {
                 ) : (
                   <Button
                     className="seize-btn btn-white"
-                    disabled={web3modalState.open}
-                    onClick={() => web3modal.open()}>
-                    {web3modalState.open ? `Connecting...` : `Connect Wallet`}
+                    disabled={seizeConnectOpen}
+                    onClick={() => seizeConnect()}>
+                    {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
                   </Button>
                 )}
               </Col>

@@ -1,5 +1,5 @@
+import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 import styles from "./Delegation.module.scss";
-import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import { Container, Row, Col } from "react-bootstrap";
 
 interface Props {
@@ -7,18 +7,16 @@ interface Props {
 }
 
 export default function ConnectWalletButton(props: Readonly<Props>) {
-  const { open } = useWeb3Modal();
-  const { open: isOpen } = useWeb3ModalState();
-
+  const { seizeConnect, seizeConnectOpen } = useSeizeConnect();
   return (
     <Container>
       <Row className="pb-2">
         <Col className="d-flex align-items-center justify-content-center">
           <button
-            disabled={isOpen}
+            disabled={seizeConnectOpen}
             className={styles.connectWalletButton}
-            onClick={() => open()}>
-            {isOpen && (
+            onClick={() => seizeConnect()}>
+            {seizeConnectOpen && (
               <div className="d-inline">
                 <div
                   className={`spinner-border ${styles.loader}`}
@@ -27,7 +25,7 @@ export default function ConnectWalletButton(props: Readonly<Props>) {
                 </div>
               </div>
             )}{" "}
-            {isOpen ? `Connecting...` : `Connect Wallet`}
+            {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
           </button>
         </Col>
       </Row>
