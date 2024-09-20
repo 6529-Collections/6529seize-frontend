@@ -63,10 +63,6 @@ export default function WaveDropThread({
     setActiveDrop(null);
   };
 
-  const onDropCreated = () => {
-    setActiveDrop(null);
-  };
-
   return (
     <div>
       <WaveDrops
@@ -84,7 +80,6 @@ export default function WaveDropThread({
             activeDrop={activeDrop}
             onCancelReplyQuote={onCancelReplyQuote}
             waveId={wave.id}
-            onDropCreated={onDropCreated}
           />
         </div>
       )}

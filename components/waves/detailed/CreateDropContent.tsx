@@ -23,7 +23,6 @@ import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
-import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import FilePreview from "./FilePreview";
 import { AnimatePresence, motion } from "framer-motion";
@@ -32,7 +31,6 @@ import { Wave } from "../../../generated/models/Wave";
 import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { useDebounce } from "react-use";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 
 export type CreateDropMetadataType =
@@ -172,10 +170,6 @@ interface UploadingFile {
   progress: number;
 }
 
-interface DropMedia {
-  url: string;
-  mime_type: string;
-}
 
 const uploadFileWithProgress = (
   url: string,
