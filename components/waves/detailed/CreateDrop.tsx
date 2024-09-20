@@ -18,6 +18,7 @@ import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
 import { useDebounce } from "react-use";
+import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -145,16 +146,26 @@ export default function CreateDrop({
     return item;
   }, []);
 
-  useDebounce(
+  const currentDelay = useProgressiveDebounce(
     () => {
       if (queueSize === 0 && !isProcessing && hasQueueChanged) {
-        console.log("queueSize === 0 && !isProcessing");
+        console.log("Waiting to invalidate drops");
         waitAndInvalidateDrops();
+
       }
     },
-    1000,
-    [queueSize, isProcessing]
+    [queueSize, isProcessing, hasQueueChanged],
+    {
+      minDelay: 1000,
+      maxDelay: 5000,
+      increaseFactor: 1.5,
+      decreaseFactor: 1.2,
+    }
   );
+
+  useEffect(() => {
+    console.log(`Current debounce delay: ${currentDelay}ms`);
+  }, [currentDelay]);
 
   const processQueue = useCallback(async () => {
     if (isProcessing || queueSize === 0) return;
