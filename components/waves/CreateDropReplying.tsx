@@ -2,10 +2,10 @@ import { Drop } from "../../generated/models/Drop";
 import { ActiveDropAction } from "./detailed/WaveDetailedContent";
 
 interface CreateDropReplyingProps {
-  drop: Drop;
-  action: ActiveDropAction;
-  onCancel: () => void;
-  disabled: boolean;
+  readonly drop: Drop;
+  readonly action: ActiveDropAction;
+  readonly onCancel: () => void;
+  readonly disabled: boolean;
 }
 
 export default function CreateDropReplying({

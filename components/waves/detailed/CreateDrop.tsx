@@ -14,7 +14,6 @@ interface CreateDropProps {
   readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
   readonly waveId: string;
-  readonly onDropCreated: () => void;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -64,7 +63,6 @@ export default function CreateDrop({
   rootDropId,
   onCancelReplyQuote,
   waveId,
-  onDropCreated,
 }: CreateDropProps) {
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
@@ -140,7 +138,6 @@ export default function CreateDrop({
           isStormMode={isStormMode}
           setDrop={setDrop}
           setIsStormMode={setIsStormMode}
-          onDropCreated={onDropCreated}
         />
       ) : null}
       <div ref={fixedBottomRef}></div>

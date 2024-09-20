@@ -36,7 +36,6 @@ import {
   DropMedia,
 } from "../../../entities/IDrop";
 import { commonApiPost } from "../../../services/api/common-api";
-import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { CreateWaveDropRequest } from "../../../generated/models/CreateWaveDropRequest";

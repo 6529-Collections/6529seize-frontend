@@ -34,7 +34,6 @@ import { WaveParticipationRequirement } from "../../../generated/models/WavePart
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { useDebounce } from "react-use";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import axios from 'axios';
 
 export type CreateDropMetadataType =
   | {
@@ -65,7 +64,6 @@ interface CreateDropContent {
   readonly setDrop: (drop: CreateDropConfig | null) => void;
   readonly isStormMode: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
-  readonly onDropCreated: () => void;
 }
 
 interface MissingRequirements {
@@ -170,12 +168,53 @@ const handleDropPart = (
 interface UploadingFile {
   file: File;
   isUploading: boolean;
+  progress: number;
 }
 
-const generateMediaForPart = async (media: File, setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>): Promise<DropMedia> => {
+interface DropMedia {
+  url: string;
+  mime_type: string;
+}
+
+const uploadFileWithProgress = (
+  url: string,
+  file: File,
+  contentType: string,
+  onProgress: (progress: number) => void
+): Promise<Response> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Content-Type', contentType);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        onProgress(progress);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(new Response(xhr.response, { status: xhr.status, statusText: xhr.statusText }));
+      } else {
+        reject(new Error(`HTTP error! status: ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Network error'));
+
+    xhr.send(file);
+  });
+};
+
+const generateMediaForPart = async (
+  media: File,
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+): Promise<DropMedia> => {
   try {
-    setUploadingFiles((prev) => [...prev, { file: media, isUploading: true }]);
-    
+    setUploadingFiles((prev) => [...prev, { file: media, isUploading: true, progress: 0 }]);
+
     const prep = await commonApiPost<
       {
         content_type: string;
@@ -196,28 +235,31 @@ const generateMediaForPart = async (media: File, setUploadingFiles: React.Dispat
       },
     });
 
-    const myHeaders = new Headers({ "Content-Type": prep.content_type });
-    const response = await fetch(prep.upload_url, {
-      method: "PUT",
-      headers: myHeaders,
-      body: media,
-    });
+    const response = await uploadFileWithProgress(
+      prep.upload_url,
+      media,
+      prep.content_type,
+      (progress) => {
+        setUploadingFiles((prev) =>
+          prev.map((uf) =>
+            uf.file === media ? { ...uf, progress } : uf
+          )
+        );
+      }
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to upload file: ${response.statusText}`);
     }
 
-    setUploadingFiles((prev) =>
-      prev.filter((uf) => uf.file !== media)
-    );
-    
+    setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
+
     return {
       url: prep.media_url,
       mime_type: prep.content_type,
     };
   } catch (error) {
-    setUploadingFiles((prev) =>
-      prev.filter((uf) => uf.file !== media)
-    );
+    setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
     throw new Error(
       `Error uploading ${media.name}: ${(error as Error).message}`
     );
@@ -242,7 +284,9 @@ const generateParts = async (
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
 ): Promise<CreateDropRequestPart[]> => {
   try {
-    return await Promise.all(parts.map((part) => generatePart(part, setUploadingFiles)));
+    return await Promise.all(
+      parts.map((part) => generatePart(part, setUploadingFiles))
+    );
   } catch (error) {
     throw new Error(`Error generating parts: ${(error as Error).message}`);
   }
@@ -266,23 +310,28 @@ const getOptimisticDrop = (
     return null;
   }
 
+  const getReplyTo = () => {
+    if (activeDrop?.action === ActiveDropAction.REPLY) {
+      return {
+        drop_id: activeDrop.drop.id,
+        drop_part_id: activeDrop.partId,
+        is_deleted: false,
+      };
+    }
+    if (rootDropId) {
+      return {
+        drop_id: rootDropId,
+        drop_part_id: 1,
+        is_deleted: false,
+      };
+    }
+    return undefined;
+  };
+
   return {
     id: getOptimisticDropId(),
     serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
-    reply_to:
-      activeDrop?.action === ActiveDropAction.REPLY
-        ? {
-            drop_id: activeDrop.drop.id,
-            drop_part_id: activeDrop.partId,
-            is_deleted: false,
-          }
-        : rootDropId
-        ? {
-            drop_id: rootDropId,
-            drop_part_id: 1,
-            is_deleted: false,
-          }
-        : undefined,
+    reply_to: getReplyTo(),
     wave: {
       id: wave.id,
       name: wave.name,
@@ -343,7 +392,6 @@ export default function CreateDropContent({
   onCancelReplyQuote,
   wave,
   isStormMode,
-  onDropCreated,
   drop,
   setDrop,
   setIsStormMode,
@@ -440,23 +488,28 @@ export default function CreateDropContent({
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
 
+  const getReplyTo = () => {
+    if (activeDrop?.action === ActiveDropAction.REPLY) {
+      return {
+        drop_id: activeDrop.drop.id,
+        drop_part_id: activeDrop.partId,
+      };
+    }
+    if (rootDropId) {
+      return {
+        drop_id: rootDropId,
+        drop_part_id: 1,
+      };
+    }
+    return undefined;
+  };
+
   const getInitialDrop = (): CreateDropConfig | null => {
     const markdown = getMarkdown;
     if (!markdown?.length && !files.length) {
       return {
         title: null,
-        reply_to:
-          activeDrop?.action === ActiveDropAction.REPLY
-            ? {
-                drop_id: activeDrop.drop.id,
-                drop_part_id: activeDrop.partId,
-              }
-            : rootDropId
-            ? {
-                drop_id: rootDropId,
-                drop_part_id: 1,
-              }
-            : undefined,
+        reply_to: getReplyTo(),
         parts: drop?.parts.length ? drop.parts : [],
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
@@ -473,18 +526,7 @@ export default function CreateDropContent({
   ): CreateDropConfig => {
     return {
       title: null,
-      reply_to:
-        activeDrop?.action === ActiveDropAction.REPLY
-          ? {
-              drop_id: activeDrop.drop.id,
-              drop_part_id: activeDrop.partId,
-            }
-          : rootDropId
-          ? {
-              drop_id: rootDropId,
-              drop_part_id: 1,
-            }
-          : undefined,
+      reply_to: getReplyTo(),
       parts: [
         ...(drop?.parts ?? []),
         {
@@ -551,7 +593,6 @@ export default function CreateDropContent({
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const refreshState = () => {
- 
     setDropEditorRefreshKey((prev) => prev + 1);
     setMetadata(initialMetadata);
     setMentionedUsers([]);
@@ -569,11 +610,10 @@ export default function CreateDropContent({
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);
       refreshState();
-      onDropCreated();
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
+        message: error instanceof Error ? error.message : String(error),
         type: "error",
       });
     },
@@ -628,7 +668,7 @@ export default function CreateDropContent({
       await addDropMutation.mutateAsync(requestBody);
     } catch (error) {
       setToast({
-        message: error as unknown as string,
+        message: error instanceof Error ? error.message : String(error),
         type: "error",
       });
     } finally {
@@ -636,44 +676,43 @@ export default function CreateDropContent({
     }
   };
 
-  const [missingRequirements, setMissingRequirements] =
-    useState<MissingRequirements>({
-      metadata: [],
-      media: [],
-    });
+  const isRequiredMetadataMissing = (item: CreateDropMetadataType): boolean => {
+    return item.required && (item.value === null || item.value === undefined || item.value === "");
+  };
+
+  const isMediaTypeMatching = (file: File, mediaType: WaveParticipationRequirement): boolean => {
+    switch (mediaType) {
+      case WaveParticipationRequirement.Image:
+        return file.type.startsWith("image/");
+      case WaveParticipationRequirement.Audio:
+        return file.type.startsWith("audio/");
+      case WaveParticipationRequirement.Video:
+        return file.type.startsWith("video/");
+      default:
+        return false;
+    }
+  };
 
   const getMissingRequirements = useMemo(
     () => (): MissingRequirements => {
       const missingMetadata = metadata
-        .filter(
-          (item) =>
-            item.required &&
-            (item.value === null ||
-              item.value === undefined ||
-              item.value === "")
-        )
+        .filter(isRequiredMetadataMissing)
         .map((item) => item.key as string);
 
       const missingMedia = wave.participation.required_media.filter(
-        (media) =>
-          !files.some((file) => {
-            switch (media) {
-              case WaveParticipationRequirement.Image:
-                return file.type.startsWith("image/");
-              case WaveParticipationRequirement.Audio:
-                return file.type.startsWith("audio/");
-              case WaveParticipationRequirement.Video:
-                return file.type.startsWith("video/");
-              default:
-                return false;
-            }
-          })
+        (media) => !files.some((file) => isMediaTypeMatching(file, media))
       );
 
       return { metadata: missingMetadata, media: missingMedia };
     },
     [metadata, files, wave.participation.required_media]
   );
+
+  const [missingRequirements, setMissingRequirements] =
+    useState<MissingRequirements>({
+      metadata: [],
+      media: [],
+    });
 
   useEffect(() => {
     setMissingRequirements(getMissingRequirements());

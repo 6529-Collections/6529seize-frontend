@@ -10,11 +10,8 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
-
-import { useRouter } from "next/router";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
-import DropPartQuote from "./quote/DropPartQuote";
 import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 
@@ -33,7 +30,6 @@ export default function DropPartMarkdown({
   onImageLoaded,
   textSize = "md",
 }: DropPartMarkdownProps) {
-  const router = useRouter();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -174,7 +170,9 @@ export default function DropPartMarkdown({
     const dropId = match ? match[2] : null;
 
     if (isSeizeLink && dropId && waveId) {
-      return <WaveDetailedDropQuote dropId={dropId} partId={1} maybeDrop={null}/>;
+      return (
+        <WaveDetailedDropQuote dropId={dropId} partId={1} maybeDrop={null} />
+      );
     }
 
     const twitterRegex =

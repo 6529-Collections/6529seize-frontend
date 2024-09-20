@@ -8,6 +8,7 @@ import CircleLoader, {
 interface UploadingFile {
   file: File;
   isUploading: boolean;
+  progress: number;
 }
 
 interface FilePreviewProps {
@@ -16,6 +17,15 @@ interface FilePreviewProps {
   readonly removeFile: (index: number) => void;
   readonly disabled: boolean;
 }
+
+const ProgressOverlay: React.FC<{ progress: number }> = ({ progress }) => (
+  <div
+    className="tw-absolute tw-inset-0 tw-bg-black tw-opacity-60 tw-transition-all tw-duration-300 tw-ease-out"
+    style={{
+      clipPath: `inset(0 0 0 ${progress}%)`,
+    }}
+  />
+);
 
 const FilePreview: React.FC<FilePreviewProps> = ({
   files,
@@ -26,15 +36,11 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   return (
     <div className="tw-flex tw-flex-wrap tw-gap-2 tw-mt-2">
       {files.map((file, index) => {
-        const isUploading =
-           uploadingFiles.some((uf) => uf.file === file);
+        const uploadingFile = uploadingFiles.find((uf) => uf.file === file);
+        const isUploading = !!uploadingFile;
+        const progress = uploadingFile?.progress ?? 0;
         return (
-          <div
-            key={index}
-            className={`tw-relative tw-group ${
-              disabled ? "tw-opacity-50" : ""
-            }`}
-          >
+          <div key={index} className="tw-relative tw-group">
             <div className="tw-h-[16rem] tw-w-[16rem] tw-bg-iron-800 tw-rounded-lg tw-overflow-hidden">
               {file.type.startsWith("image/") ? (
                 <img
@@ -48,9 +54,15 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                 </div>
               )}
               {isUploading && (
-                <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black tw-bg-opacity-50">
-                  <CircleLoader size={CircleLoaderSize.XXLARGE} />
-                </div>
+                <>
+                  <ProgressOverlay progress={progress} />
+                  <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center">
+                    <CircleLoader size={CircleLoaderSize.XXLARGE} />
+                    <span className="tw-text-white tw-font-bold tw-text-lg tw-mt-2">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
+                </>
               )}
             </div>
             {!isUploading && (

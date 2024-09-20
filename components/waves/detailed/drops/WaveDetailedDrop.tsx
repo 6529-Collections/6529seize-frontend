@@ -41,7 +41,7 @@ export default function WaveDetailedDrop({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithDrop = (otherDrop: Drop | null) =>
+  const shouldGroupWithDrop = (otherDrop: Drop | null, side: "previous" | "next") =>
     !isStorm &&
     otherDrop &&
     otherDrop.author.handle === drop.author.handle &&
@@ -49,10 +49,10 @@ export default function WaveDetailedDrop({
       new Date(otherDrop.created_at).getTime() -
         new Date(drop.created_at).getTime()
     ) <= GroupingThreshold.TIME_DIFFERENCE &&
-    !drop.reply_to;
+    (side === "next" || (!drop.reply_to || drop.reply_to.drop_id === rootDropId));
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(previousDrop);
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(nextDrop);
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(previousDrop, "previous");
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(nextDrop, "next");
 
   const groupingClass = shouldGroupWithPreviousDrop
     ? ""

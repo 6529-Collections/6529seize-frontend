@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
@@ -21,19 +21,23 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       const { naturalWidth, naturalHeight } = imgRef.current;
       if (naturalWidth && naturalHeight) {
         setDimensions({ width: naturalWidth, height: naturalHeight });
+        return true;
       }
     }
+    return false;
   };
 
   useEffect(() => {
-    const img = imgRef.current;
-    if (img) {
-      img.addEventListener('loadstart', updateDimensions);
-      const interval = setInterval(updateDimensions, 100);
-      return () => {
-        img.removeEventListener('loadstart', updateDimensions);
-        clearInterval(interval);
+    if (imgRef.current?.complete) {
+      handleImageLoad();
+    } else {
+      const checkDimensions = () => {
+        if (updateDimensions()) {
+          clearInterval(intervalId);
+        }
       };
+      const intervalId = setInterval(checkDimensions, 100);
+      return () => clearInterval(intervalId);
     }
   }, []);
 
@@ -43,8 +47,12 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     updateDimensions();
   };
 
-  const aspectRatio = dimensions.height ? dimensions.width / dimensions.height : 0;
-  const placeholderStyle = aspectRatio ? { paddingBottom: `${(1 / aspectRatio) * 100}%` } : undefined;
+  const aspectRatio = dimensions.height
+    ? dimensions.width / dimensions.height
+    : 0;
+  const placeholderStyle = aspectRatio
+    ? { paddingBottom: `${(1 / aspectRatio) * 100}%` }
+    : undefined;
 
   return (
     <div className="tw-relative tw-w-full">
@@ -59,7 +67,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
         src={src}
         alt={alt}
         onLoad={handleImageLoad}
-        className={`tw-w-full ${isLoading ? 'tw-opacity-0' : 'tw-opacity-100'}`}
+        className={`tw-w-full ${isLoading ? "tw-opacity-0" : "tw-opacity-100"}`}
         {...props}
       />
     </div>

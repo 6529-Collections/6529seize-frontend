@@ -177,6 +177,7 @@ const CreateDropInput = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const getPlaceHolderText = () => {
+      if (isStormMode) return "Add to the storm";
       if (!type) return "Create a drop";
       switch (type) {
         case ActiveDropAction.REPLY:

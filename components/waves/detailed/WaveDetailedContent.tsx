@@ -60,9 +60,6 @@ export default function WaveDetailedContent({
     setActiveDrop(null);
   };
 
-  const onDropCreated = () => {
-    setActiveDrop(null);
-  };
 
   return (
     <AnimatePresence mode="wait">
@@ -102,7 +99,6 @@ export default function WaveDetailedContent({
                 activeDrop={activeDrop}
                 onCancelReplyQuote={onCancelReplyQuote}
                 waveId={wave.id}
-                onDropCreated={onDropCreated}
                 rootDropId={null}
               />
             </div>

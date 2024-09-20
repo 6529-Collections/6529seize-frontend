@@ -16,12 +16,6 @@ export default function CreateWaveDropsMetadata({
     requiredMetadata: CreateWaveDropsRequiredMetadata[]
   ) => void;
 }) {
-  const getShowAddMore = () =>
-    !requiredMetadata.length ||
-    !requiredMetadata.filter((item) => !item.key.length).length;
-
-  const [showAddMore, setShowAddMore] = useState(getShowAddMore());
-  useEffect(() => setShowAddMore(getShowAddMore()), [requiredMetadata]);
 
   const onItemChange = ({
     index,

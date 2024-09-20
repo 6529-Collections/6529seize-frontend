@@ -5,11 +5,7 @@ import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import MyStreamLayoutTabs from "./MyStreamLayoutTabs";
-import {
-  AuthContext,
-  TitleType,
-  WAVES_MIN_ACCESS_LEVEL,
-} from "../../../auth/Auth";
+import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../../../auth/Auth";
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
