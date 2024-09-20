@@ -95,7 +95,7 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
   };
 
   return (
-    <div className="tw-mt-1 tw-mb-2 tw-w-full tw-inline-flex tw-justify-between tw-space-x-3">
+    <div className="tw-pt-1 tw-pb-1 tw-w-full tw-inline-flex tw-justify-between tw-space-x-3 hover:tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out">
       {isStorm && renderNavigationButton("previous")}
       <div className="tw-h-full tw-w-full" ref={contentRef}>
         <motion.div

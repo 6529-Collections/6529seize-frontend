@@ -14,6 +14,7 @@ import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 import WaveDropThreadTrace from "./WaveDropThreadTrace";
 import DropsList from "../../../drops/view/DropsList";
 import { useDebounce } from "react-use";
+import { AnimatePresence, motion } from "framer-motion";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -277,64 +278,74 @@ export default function WaveDrops({
   return (
     <div
       ref={containerRef}
-      className="tw-h-[calc(100vh-245px)] tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0"
+      className="tw-h-[calc(100vh-14rem)] lg:tw-h-[calc(100vh-13rem)] tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300"
     >
-      <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-border-b tw-border-b-iron-800 tw-border-solid tw-border-x-0 tw-border-t-0">
-        {rootDropId && onBackToList && (
-          <div className="tw-px-4 tw-py-2">
-            <button
-              onClick={onBackToList}
-              type="button"
-              className="tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
-            >
-              <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20 12H4M4 12L10 18M4 12L10 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                ></path>
-              </svg>
-              <span>Back</span>
-            </button>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={rootDropId ?? 'main'}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950">
+            {rootDropId && onBackToList && (
+              <div className="tw-px-4 tw-py-2">
+                <button
+                  onClick={onBackToList}
+                  type="button"
+                  className="tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
+                >
+                  <svg
+                    className="tw-flex-shrink-0 tw-w-5 tw-h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 12H4M4 12L10 18M4 12L10 6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>
+                  </svg>
+                  <span>Back</span>
+                </button>
+              </div>
+            )}
+            {rootDropId && (
+              <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
+            )}
           </div>
-        )}
-        {rootDropId && (
-          <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
-        )}
-      </div>
-      <div>
-        {haveNewDrops && (
-          <div className="tw-sticky tw-top-0 tw-left-0 tw-right-0 tw-z-50 tw-flex tw-justify-center">
-            <button
-              onClick={onRefresh}
-              type="button"
-              className="tw-mt-2 tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
-            >
-              New drops available
-            </button>
+          <div>
+            {haveNewDrops && (
+              <div className="tw-sticky tw-top-0 tw-left-0 tw-right-0 tw-z-50 tw-flex tw-justify-center">
+                <button
+                  onClick={onRefresh}
+                  type="button"
+                  className="tw-mt-2 tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
+                >
+                  New drops available
+                </button>
+              </div>
+            )}
+            <div className="tw-overflow-hidden">
+              <DropsList
+                drops={drops}
+                showWaveInfo={false}
+                onIntersection={onIntersection}
+                onReply={onReply}
+                onQuote={onQuote}
+                showReplyAndQuote={true}
+                activeDrop={activeDrop}
+                rootDropId={rootDropId}
+              />
+            </div>
           </div>
-        )}
-        <div className="tw-overflow-hidden">
-          <DropsList
-            drops={drops}
-            showWaveInfo={false}
-            onIntersection={onIntersection}
-            onReply={onReply}
-            onQuote={onQuote}
-            showReplyAndQuote={true}
-            activeDrop={activeDrop}
-            rootDropId={rootDropId}
-          />
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

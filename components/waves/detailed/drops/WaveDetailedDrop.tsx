@@ -111,9 +111,9 @@ export default function WaveDetailedDrop({
         />
       )}
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
-        {drop.metadata.length > 0 && (
+     {/*    {drop.metadata.length > 0 && (
           <WaveDetailedDropMetadata metadata={drop.metadata} />
-        )}
+        )} */}
         {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
       </div>
     </div>
