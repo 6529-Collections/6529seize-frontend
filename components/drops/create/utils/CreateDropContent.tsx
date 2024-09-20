@@ -274,6 +274,7 @@ const CreateDropContent = forwardRef<
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
+                disabled={false}
               />
               <AutoFocusPlugin />
             </div>
