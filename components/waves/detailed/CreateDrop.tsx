@@ -17,6 +17,7 @@ import {
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
+import { useDebounce } from "react-use";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -129,11 +130,13 @@ export default function CreateDrop({
 
   const [queueSize, setQueueSize] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasQueueChanged, setHasQueueChanged] = useState(false);
   const queueRef = useRef<CreateDropRequest[]>([]);
 
   const addToQueue = useCallback((dropRequest: CreateDropRequest) => {
     queueRef.current.push(dropRequest);
     setQueueSize(queueRef.current.length);
+    setHasQueueChanged(true);
   }, []);
 
   const removeFromQueue = useCallback(() => {
@@ -142,12 +145,19 @@ export default function CreateDrop({
     return item;
   }, []);
 
+  useDebounce(
+    () => {
+      if (queueSize === 0 && !isProcessing && hasQueueChanged) {
+        console.log("queueSize === 0 && !isProcessing");
+        waitAndInvalidateDrops();
+      }
+    },
+    1000,
+    [queueSize, isProcessing]
+  );
+
   const processQueue = useCallback(async () => {
-    if (isProcessing) return;
-    if (queueSize === 0) {
-      waitAndInvalidateDrops();
-      return;
-    }
+    if (isProcessing || queueSize === 0) return;
     setIsProcessing(true);
 
     const dropRequest = removeFromQueue();

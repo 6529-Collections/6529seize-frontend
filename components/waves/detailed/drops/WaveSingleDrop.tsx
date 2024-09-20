@@ -26,7 +26,6 @@ export default function WaveSingleDrop({
     placeholderData: keepPreviousData,
   });
 
-  useEffect(() => console.log(drop), [drop]);
 
   if (!drop) {
     return null;

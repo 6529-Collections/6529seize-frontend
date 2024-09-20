@@ -22,8 +22,6 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
 
   const breakpoint = useBreakpoint();
 
-  useEffect(() => console.log(breakpoint), [breakpoint])
-
   return breakpoint !== "MD" ? (
     <WaveDetailedMobile wave={wave} view={activeView} setView={setActiveView} />
   ) : (

@@ -185,7 +185,6 @@ export default function WaveDrops({
       const mediaElements = containerRef.current.querySelectorAll("img, video");
 
       setLoadedMediaCount(0);
-      console.log("mediaElements", mediaElements);
       Array.from(mediaElements).map((element) => {
         if (
           (element as HTMLImageElement).complete ||
