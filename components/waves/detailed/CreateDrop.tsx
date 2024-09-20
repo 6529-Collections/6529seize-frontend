@@ -17,7 +17,6 @@ import {
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
-import { useDebounce, useQueue } from "react-use";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -128,14 +127,30 @@ export default function CreateDrop({
     },
   });
 
-  const queue = useQueue<CreateDropRequest>();
+  const [queueSize, setQueueSize] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const queueRef = useRef<CreateDropRequest[]>([]);
+
+  const addToQueue = useCallback((dropRequest: CreateDropRequest) => {
+    queueRef.current.push(dropRequest);
+    setQueueSize(queueRef.current.length);
+  }, []);
+
+  const removeFromQueue = useCallback(() => {
+    const item = queueRef.current.shift();
+    setQueueSize(queueRef.current.length);
+    return item;
+  }, []);
 
   const processQueue = useCallback(async () => {
-    if (isProcessing || queue.size === 0) return;
-
+    if (isProcessing) return;
+    if (queueSize === 0) {
+      waitAndInvalidateDrops();
+      return;
+    }
     setIsProcessing(true);
-    const dropRequest = queue.remove();
+
+    const dropRequest = removeFromQueue();
 
     if (dropRequest) {
       try {
@@ -143,24 +158,28 @@ export default function CreateDrop({
       } catch (error) {
         console.error("Error processing drop:", error);
       }
+    } else {
+      console.warn("No drop request found in queue, but queue.size was not 0");
     }
 
     setIsProcessing(false);
-
-    if (queue.size === 0) {
-      waitAndInvalidateDrops();
-    }
-  }, [isProcessing, queue, addDropMutation, waitAndInvalidateDrops]);
+  }, [
+    isProcessing,
+    queueSize,
+    removeFromQueue,
+    addDropMutation,
+    waitAndInvalidateDrops,
+  ]);
 
   useEffect(() => {
     processQueue();
-  }, [processQueue, queue.size]);
+  }, [processQueue, queueSize]);
 
   const submitDrop = useCallback(
     (dropRequest: CreateDropRequest) => {
-      queue.add(dropRequest);
+      addToQueue(dropRequest);
     },
-    [queue]
+    [addToQueue]
   );
 
   return (
