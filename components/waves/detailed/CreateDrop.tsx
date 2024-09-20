@@ -1,5 +1,5 @@
 import { ActiveDropState } from "./WaveDetailedContent";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,6 +17,48 @@ interface CreateDropProps {
   readonly onDropCreated: () => void;
 }
 
+const ANIMATION_DURATION = 0.3;
+
+function useResizeObserver(containerRef: React.RefObject<HTMLDivElement>, fixedBottomRef: React.RefObject<HTMLDivElement>) {
+  useEffect(() => {
+    const container = containerRef.current!;
+    const fixedBottom = fixedBottomRef.current!;
+
+    const observer = new ResizeObserver(() => {
+      const containerRect = container.getBoundingClientRect();
+      const fixedBottomRect = fixedBottom.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      if (fixedBottomRect.bottom > viewportHeight) {
+        window.scrollTo({
+          top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
+          behavior: 'smooth'
+        });
+      } else if (fixedBottomRect.bottom < viewportHeight) {
+        const newScrollTop = Math.max(
+          0,
+          window.scrollY - (viewportHeight - fixedBottomRect.bottom) + 20
+        );
+        window.scrollTo({
+          top: newScrollTop,
+          behavior: 'smooth'
+        });
+      }
+
+      if (containerRect.top < 0) {
+        window.scrollTo({
+          top: window.scrollY + containerRect.top,
+          behavior: 'smooth'
+        });
+      }
+    });
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [containerRef, fixedBottomRef]);
+}
+
 export default function CreateDrop({
   activeDrop,
   rootDropId,
@@ -27,7 +69,7 @@ export default function CreateDrop({
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
 
-  const onRemovePart = (partIndex: number) => {
+  const onRemovePart = useCallback((partIndex: number) => {
     setDrop((prevDrop) => {
       if (!prevDrop) return null;
       const newParts = prevDrop.parts.filter((_, i) => i !== partIndex);
@@ -39,14 +81,9 @@ export default function CreateDrop({
         metadata: prevDrop.metadata || [],
       };
     });
-  };
+  }, []);
 
-  const {
-    data: wave,
-    isFetching,
-    isError,
-    error,
-  } = useQuery<Wave>({
+  const { data: wave, isFetching, isError, error } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
@@ -57,45 +94,7 @@ export default function CreateDrop({
   const containerRef = useRef<HTMLDivElement>(null);
   const fixedBottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    const fixedBottom = fixedBottomRef.current;
-    if (!container || !fixedBottom) return;
-
-    const observer = new ResizeObserver(() => {
-      const containerRect = container.getBoundingClientRect();
-      const fixedBottomRect = fixedBottom.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-
-      if (fixedBottomRect.bottom > viewportHeight) {
-        window.scrollTo({
-          top: window.pageYOffset + (fixedBottomRect.bottom - viewportHeight),
-          behavior: 'smooth'
-        });
-      } else if (fixedBottomRect.bottom < viewportHeight) {
-        const newScrollTop = Math.max(
-          0,
-          window.pageYOffset - (viewportHeight - fixedBottomRect.bottom)
-        );
-        window.scrollTo({
-          top: newScrollTop,
-          behavior: 'smooth'
-        });
-      }
-
-      if (containerRect.top < 0) {
-        window.scrollTo({
-          top: window.pageYOffset + containerRect.top,
-          behavior: 'smooth'
-        });
-      }
-    });
-
-    observer.observe(container);
-
-    return () => observer.disconnect();
-  }, []);
-
+  useResizeObserver(containerRef, fixedBottomRef);
 
   return (
     <div
@@ -108,7 +107,7 @@ export default function CreateDrop({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: ANIMATION_DURATION }}
           >
             <CreateDropStormParts
               parts={drop?.parts ?? []}
@@ -125,7 +124,7 @@ export default function CreateDrop({
           <div className="tw-h-[45px] tw-w-[100px] tw-bg-iron-800 tw-rounded-lg"></div>
         </div>
       ) : isError ? (
-        <div className="tw-text-red-500 tw-text-center tw-py-4">
+        <div className="tw-text-red tw-text-center tw-py-4">
           <p>Error loading wave data</p>
           <p className="tw-text-sm">
             {error instanceof Error ? error.message : "Unknown error"}
