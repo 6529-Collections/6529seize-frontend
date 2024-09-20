@@ -1,13 +1,23 @@
 import { ActiveDropState } from "./WaveDetailedContent";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useContext } from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Wave } from "../../../generated/models/Wave";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../services/api/common-api";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../react-query-wrapper/ReactQueryWrapper";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "../../../services/api/common-api";
+import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
+import { Drop } from "../../../generated/models/Drop";
+import { AuthContext } from "../../auth/Auth";
+import { useDebounce, useQueue } from "react-use";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -18,7 +28,10 @@ interface CreateDropProps {
 
 const ANIMATION_DURATION = 0.3;
 
-function useResizeObserver(containerRef: React.RefObject<HTMLDivElement>, fixedBottomRef: React.RefObject<HTMLDivElement>) {
+function useResizeObserver(
+  containerRef: React.RefObject<HTMLDivElement>,
+  fixedBottomRef: React.RefObject<HTMLDivElement>
+) {
   useEffect(() => {
     const container = containerRef.current!;
     const fixedBottom = fixedBottomRef.current!;
@@ -31,7 +44,7 @@ function useResizeObserver(containerRef: React.RefObject<HTMLDivElement>, fixedB
       if (fixedBottomRect.bottom > viewportHeight) {
         window.scrollTo({
           top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       } else if (fixedBottomRect.bottom < viewportHeight) {
         const newScrollTop = Math.max(
@@ -40,14 +53,14 @@ function useResizeObserver(containerRef: React.RefObject<HTMLDivElement>, fixedB
         );
         window.scrollTo({
           top: newScrollTop,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
 
       if (containerRect.top < 0) {
         window.scrollTo({
           top: window.scrollY + containerRect.top,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
     });
@@ -64,6 +77,8 @@ export default function CreateDrop({
   onCancelReplyQuote,
   waveId,
 }: CreateDropProps) {
+  const { setToast } = useContext(AuthContext);
+  const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
 
@@ -81,7 +96,12 @@ export default function CreateDrop({
     });
   }, []);
 
-  const { data: wave, isFetching, isError, error } = useQuery<Wave>({
+  const {
+    data: wave,
+    isFetching,
+    isError,
+    error,
+  } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
@@ -93,6 +113,55 @@ export default function CreateDrop({
   const fixedBottomRef = useRef<HTMLDivElement>(null);
 
   useResizeObserver(containerRef, fixedBottomRef);
+
+  const addDropMutation = useMutation({
+    mutationFn: async (body: CreateDropRequest) =>
+      await commonApiPost<CreateDropRequest, Drop>({
+        endpoint: `drops`,
+        body,
+      }),
+    onError: (error) => {
+      setToast({
+        message: error instanceof Error ? error.message : String(error),
+        type: "error",
+      });
+    },
+  });
+
+  const queue = useQueue<CreateDropRequest>();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const processQueue = useCallback(async () => {
+    if (isProcessing || queue.size === 0) return;
+
+    setIsProcessing(true);
+    const dropRequest = queue.remove();
+
+    if (dropRequest) {
+      try {
+        await addDropMutation.mutateAsync(dropRequest);
+      } catch (error) {
+        console.error("Error processing drop:", error);
+      }
+    }
+
+    setIsProcessing(false);
+
+    if (queue.size === 0) {
+      waitAndInvalidateDrops();
+    }
+  }, [isProcessing, queue, addDropMutation, waitAndInvalidateDrops]);
+
+  useEffect(() => {
+    processQueue();
+  }, [processQueue, queue.size]);
+
+  const submitDrop = useCallback(
+    (dropRequest: CreateDropRequest) => {
+      queue.add(dropRequest);
+    },
+    [queue]
+  );
 
   return (
     <div
@@ -138,6 +207,7 @@ export default function CreateDrop({
           isStormMode={isStormMode}
           setDrop={setDrop}
           setIsStormMode={setIsStormMode}
+          submitDrop={submitDrop}
         />
       ) : null}
       <div ref={fixedBottomRef}></div>

@@ -64,6 +64,7 @@ interface CreateDropContent {
   readonly setDrop: (drop: CreateDropConfig | null) => void;
   readonly isStormMode: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
+  readonly submitDrop: (dropRequest: CreateDropRequest) => void;
 }
 
 interface MissingRequirements {
@@ -184,8 +185,8 @@ const uploadFileWithProgress = (
 ): Promise<Response> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('PUT', url);
-    xhr.setRequestHeader('Content-Type', contentType);
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", contentType);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -196,13 +197,18 @@ const uploadFileWithProgress = (
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(new Response(xhr.response, { status: xhr.status, statusText: xhr.statusText }));
+        resolve(
+          new Response(xhr.response, {
+            status: xhr.status,
+            statusText: xhr.statusText,
+          })
+        );
       } else {
         reject(new Error(`HTTP error! status: ${xhr.status}`));
       }
     };
 
-    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.onerror = () => reject(new Error("Network error"));
 
     xhr.send(file);
   });
@@ -213,7 +219,10 @@ const generateMediaForPart = async (
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
 ): Promise<DropMedia> => {
   try {
-    setUploadingFiles((prev) => [...prev, { file: media, isUploading: true, progress: 0 }]);
+    setUploadingFiles((prev) => [
+      ...prev,
+      { file: media, isUploading: true, progress: 0 },
+    ]);
 
     const prep = await commonApiPost<
       {
@@ -241,9 +250,7 @@ const generateMediaForPart = async (
       prep.content_type,
       (progress) => {
         setUploadingFiles((prev) =>
-          prev.map((uf) =>
-            uf.file === media ? { ...uf, progress } : uf
-          )
+          prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
         );
       }
     );
@@ -395,21 +402,10 @@ export default function CreateDropContent({
   drop,
   setDrop,
   setIsStormMode,
+  submitDrop,
 }: CreateDropContent) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { addOptimisticDrop, waitAndInvalidateDrops } = useContext(
-    ReactQueryWrapperContext
-  );
-
-  const [postCount, setPostCount] = useState(0);
-
-  useDebounce(
-    () => {
-      waitAndInvalidateDrops();
-    },
-    500,
-    [postCount]
-  );
+  const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
@@ -600,30 +596,7 @@ export default function CreateDropContent({
     setDrop(null);
   };
 
-  const addDropMutation = useMutation({
-    mutationFn: async (body: CreateDropRequest) =>
-      await commonApiPost<CreateDropRequest, Drop>({
-        endpoint: `drops`,
-        body,
-      }),
-    onSuccess: (response: Drop) => {
-      !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
-      setFiles([]);
-      refreshState();
-    },
-    onError: (error) => {
-      setToast({
-        message: error instanceof Error ? error.message : String(error),
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      setPostCount((prev) => prev + 1);
-      setSubmitting(false);
-    },
-  });
-
-  const submitDrop = async (dropRequest: CreateDropConfig) => {
+  const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
     }
@@ -665,7 +638,11 @@ export default function CreateDropContent({
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop, rootDropId });
       }
-      await addDropMutation.mutateAsync(requestBody);
+      !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
+      setFiles([]);
+      refreshState();
+      submitDrop(requestBody);
+
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
@@ -677,10 +654,16 @@ export default function CreateDropContent({
   };
 
   const isRequiredMetadataMissing = (item: CreateDropMetadataType): boolean => {
-    return item.required && (item.value === null || item.value === undefined || item.value === "");
+    return (
+      item.required &&
+      (item.value === null || item.value === undefined || item.value === "")
+    );
   };
 
-  const isMediaTypeMatching = (file: File, mediaType: WaveParticipationRequirement): boolean => {
+  const isMediaTypeMatching = (
+    file: File,
+    mediaType: WaveParticipationRequirement
+  ): boolean => {
     switch (mediaType) {
       case WaveParticipationRequirement.Image:
         return file.type.startsWith("image/");
@@ -728,7 +711,7 @@ export default function CreateDropContent({
     ) {
       return;
     }
-    await submitDrop(getUpdatedDrop());
+    await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
   useEffect(() => {
