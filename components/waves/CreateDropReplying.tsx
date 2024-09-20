@@ -5,12 +5,14 @@ interface CreateDropReplyingProps {
   drop: Drop;
   action: ActiveDropAction;
   onCancel: () => void;
+  disabled: boolean;
 }
 
 export default function CreateDropReplying({
   drop,
   action,
   onCancel,
+  disabled,
 }: CreateDropReplyingProps) {
   const ACTION_LABELS = {
     [ActiveDropAction.REPLY]: "Replying to",
@@ -28,7 +30,12 @@ export default function CreateDropReplying({
       <button
         type="button"
         onClick={onCancel}
-        className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-primary-400 hover:tw-text-primary-500 tw-transition tw-duration-300 tw-ease-out "
+        disabled={disabled}
+        className={`tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2 tw-transition tw-duration-300 tw-ease-out ${
+          disabled
+            ? "tw-text-iron-600 tw-cursor-not-allowed"
+            : "tw-text-primary-400 hover:tw-text-primary-500"
+        }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

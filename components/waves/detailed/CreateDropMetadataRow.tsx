@@ -6,6 +6,7 @@ interface CreateDropMetadataRowProps {
   readonly metadata: CreateDropMetadataType;
   readonly isError: boolean;
   readonly index: number;
+  readonly disabled: boolean;
   readonly onChangeKey: (params: { index: number; newKey: string }) => void;
   readonly onChangeValue: (params: {
     index: number;
@@ -21,6 +22,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
   onChangeValue,
   isError,
   onRemove,
+  disabled,
 }) => {
   const [tempValue, setTempValue] = useState<string>(
     metadata.value !== null ? String(metadata.value) : ""
@@ -57,6 +59,8 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
     }
   };
 
+  const isInputDisabled = disabled || metadata.required;
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3 tw-w-full">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-w-full">
@@ -65,10 +69,11 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
             type="text"
             placeholder="Key"
             value={metadata.key}
-            onChange={metadata.required ? undefined : handleKeyChange}
-            readOnly={metadata.required}
+            onChange={isInputDisabled ? undefined : handleKeyChange}
+            readOnly={isInputDisabled}
+            disabled={disabled}
             className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset focus:tw-ring-1 focus:tw-ring-inset placeholder:tw-text-iron-500 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out ${
-              metadata.required
+              isInputDisabled
                 ? "tw-cursor-not-allowed focus:tw-ring-iron-700 tw-bg-iron-800 tw-ring-iron-700 tw-text-iron-400 tw-pl-9"
                 : "focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-primary-400 tw-bg-iron-900 tw-ring-iron-700 tw-text-iron-50 tw-pl-3"
             } tw-py-2.5`}
@@ -97,9 +102,9 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
                 <path
                   d="M4 7C4 6.06812 4 5.60218 4.15224 5.23463C4.35523 4.74458 4.74458 4.35523 5.23463 4.15224C5.60218 4 6.06812 4 7 4H17C17.9319 4 18.3978 4 18.7654 4.15224C19.2554 4.35523 19.6448 4.74458 19.8478 5.23463C20 5.60218 20 6.06812 20 7M9 20H15M12 4V20"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 ></path>
               </svg>
             )
@@ -111,12 +116,16 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
             inputMode={metadata.type === "NUMBER" ? "numeric" : "text"}
             placeholder="Value"
             value={tempValue}
-            onChange={handleValueChange}
+            onChange={disabled ? undefined : handleValueChange}
+            readOnly={disabled}
+            disabled={disabled}
             className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset ${
               isError
                 ? "tw-ring-red hover:tw-ring-red focus:tw-ring-red"
                 : "tw-ring-iron-700 hover:tw-ring-iron-700 focus:tw-ring-primary-400"
-            } placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out tw-pl-3 tw-py-2.5`}
+            } placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out tw-pl-3 tw-py-2.5 ${
+              disabled ? "tw-cursor-not-allowed tw-opacity-50" : ""
+            }`}
           />
         </div>
       </div>
@@ -126,10 +135,10 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
             type="button"
             onClick={() => onRemove(index)}
             aria-label={metadata.required ? "Required field" : "Remove"}
-            disabled={metadata.required}
+            disabled={disabled || metadata.required}
             className={`tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 -tw-ml-2 tw-text-xs tw-font-medium tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out ${
-              metadata.required
-                ? "tw-text-iron-600 tw-cursor-default"
+              disabled || metadata.required
+                ? "tw-text-iron-600 tw-cursor-not-allowed"
                 : "tw-text-iron-400 hover:tw-text-error"
             }`}
           >

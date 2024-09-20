@@ -14,6 +14,7 @@ interface CreateDropContentRequirementsProps {
   readonly wave: Wave;
   readonly missingMedia: WaveParticipationRequirement[];
   readonly missingMetadata: string[];
+  readonly disabled: boolean;
   readonly onOpenMetadata: () => void;
   readonly setFiles: (files: File[]) => void;
 }
@@ -25,6 +26,7 @@ const CreateDropContentRequirements: React.FC<
   wave,
   missingMedia,
   missingMetadata,
+  disabled,
   onOpenMetadata,
   setFiles,
 }) => {
@@ -47,6 +49,7 @@ const CreateDropContentRequirements: React.FC<
                 requirementType={DropRequirementType.MEDIA}
                 onOpenMetadata={onOpenMetadata}
                 setFiles={setFiles}
+                disabled={disabled}
               />
             )}
             {wave.participation.required_metadata.length > 0 && (
@@ -56,6 +59,7 @@ const CreateDropContentRequirements: React.FC<
                 requirementType={DropRequirementType.METADATA}
                 onOpenMetadata={onOpenMetadata}
                 setFiles={setFiles}
+                disabled={disabled}
               />
             )}
           </motion.div>

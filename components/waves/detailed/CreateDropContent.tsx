@@ -33,6 +33,8 @@ import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { useDebounce } from "react-use";
+import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import axios from 'axios';
 
 export type CreateDropMetadataType =
   | {
@@ -66,6 +68,275 @@ interface CreateDropContent {
   readonly onDropCreated: () => void;
 }
 
+interface MissingRequirements {
+  metadata: string[];
+  media: WaveParticipationRequirement[];
+}
+
+const getPartMentions = (
+  markdown: string | null,
+  mentionedUsers: Omit<MentionedUser, "current_handle">[]
+) => {
+  return mentionedUsers.filter((user) =>
+    markdown?.includes(`@[${user.handle_in_content}]`)
+  );
+};
+
+const getUpdatedMentions = (
+  partMentions: Omit<MentionedUser, "current_handle">[],
+  existingMentions: DropMentionedUser[]
+) => {
+  const notAddedMentions = partMentions.filter(
+    (mention) =>
+      !existingMentions.some(
+        (existing) =>
+          existing.mentioned_profile_id === mention.mentioned_profile_id
+      )
+  );
+  return [...existingMentions, ...notAddedMentions];
+};
+
+const getPartNfts = (
+  markdown: string | null,
+  referencedNfts: ReferencedNft[]
+) => {
+  return referencedNfts.filter((nft) => markdown?.includes(`#[${nft.name}]`));
+};
+
+const getUpdatedNfts = (
+  partNfts: ReferencedNft[],
+  existingNfts: ReferencedNft[]
+) => {
+  const notAddedNfts = partNfts.filter(
+    (nft) =>
+      !existingNfts.some(
+        (existing) =>
+          existing.contract === nft.contract && existing.token === nft.token
+      )
+  );
+  return [...existingNfts, ...notAddedNfts];
+};
+
+const convertMetadataToDropMetadata = (
+  metadata: CreateDropMetadataType[]
+): DropMetadata[] => {
+  return metadata
+    .filter(
+      (
+        md
+      ): md is CreateDropMetadataType & {
+        key: NonNullable<CreateDropMetadataType["key"]>;
+        value: NonNullable<CreateDropMetadataType["value"]>;
+      } =>
+        md.key !== null &&
+        md.key !== undefined &&
+        md.value !== null &&
+        md.value !== undefined
+    )
+    .map((md) => ({
+      data_key: md.key,
+      data_value: `${md.value}`,
+    }));
+};
+
+type HandleDropPartResult = {
+  updatedMentions: DropMentionedUser[];
+  updatedNfts: ReferencedNft[];
+  updatedMarkdown: string;
+};
+
+const handleDropPart = (
+  markdown: string | null,
+  existingMentions: DropMentionedUser[],
+  existingNfts: ReferencedNft[],
+  mentionedUsers: Omit<MentionedUser, "current_handle">[],
+  referencedNfts: ReferencedNft[]
+): HandleDropPartResult => {
+  const partMentions = getPartMentions(markdown, mentionedUsers);
+  const updatedMentions = getUpdatedMentions(partMentions, existingMentions);
+
+  const partNfts = getPartNfts(markdown, referencedNfts);
+  const updatedNfts = getUpdatedNfts(partNfts, existingNfts);
+
+  const updatedMarkdown = markdown ?? "";
+
+  return {
+    updatedMentions,
+    updatedNfts,
+    updatedMarkdown,
+  };
+};
+
+interface UploadingFile {
+  file: File;
+  isUploading: boolean;
+}
+
+const generateMediaForPart = async (media: File, setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>): Promise<DropMedia> => {
+  try {
+    setUploadingFiles((prev) => [...prev, { file: media, isUploading: true }]);
+    
+    const prep = await commonApiPost<
+      {
+        content_type: string;
+        file_name: string;
+        file_size: number;
+      },
+      {
+        upload_url: string;
+        content_type: string;
+        media_url: string;
+      }
+    >({
+      endpoint: "drop-media/prep",
+      body: {
+        content_type: media.type,
+        file_name: media.name,
+        file_size: media.size,
+      },
+    });
+
+    const myHeaders = new Headers({ "Content-Type": prep.content_type });
+    const response = await fetch(prep.upload_url, {
+      method: "PUT",
+      headers: myHeaders,
+      body: media,
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to upload file: ${response.statusText}`);
+    }
+
+    setUploadingFiles((prev) =>
+      prev.filter((uf) => uf.file !== media)
+    );
+    
+    return {
+      url: prep.media_url,
+      mime_type: prep.content_type,
+    };
+  } catch (error) {
+    setUploadingFiles((prev) =>
+      prev.filter((uf) => uf.file !== media)
+    );
+    throw new Error(
+      `Error uploading ${media.name}: ${(error as Error).message}`
+    );
+  }
+};
+
+const generatePart = async (
+  part: CreateDropPart,
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+): Promise<CreateDropRequestPart> => {
+  const media = await Promise.all(
+    part.media.map((media) => generateMediaForPart(media, setUploadingFiles))
+  );
+  return {
+    ...part,
+    media,
+  };
+};
+
+const generateParts = async (
+  parts: CreateDropPart[],
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+): Promise<CreateDropRequestPart[]> => {
+  try {
+    return await Promise.all(parts.map((part) => generatePart(part, setUploadingFiles)));
+  } catch (error) {
+    throw new Error(`Error generating parts: ${(error as Error).message}`);
+  }
+};
+
+const getOptimisticDrop = (
+  dropRequest: CreateDropRequest,
+  connectedProfile: IProfileAndConsolidations | null,
+  wave: {
+    id: string;
+    name: string;
+    picture: string | null;
+    description_drop: { id: string };
+    participation: { authenticated_user_eligible: boolean };
+    voting: { authenticated_user_eligible: boolean };
+  },
+  activeDrop: ActiveDropState | null,
+  rootDropId: string | null
+): Drop | null => {
+  if (!connectedProfile?.profile) {
+    return null;
+  }
+
+  return {
+    id: getOptimisticDropId(),
+    serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+    reply_to:
+      activeDrop?.action === ActiveDropAction.REPLY
+        ? {
+            drop_id: activeDrop.drop.id,
+            drop_part_id: activeDrop.partId,
+            is_deleted: false,
+          }
+        : rootDropId
+        ? {
+            drop_id: rootDropId,
+            drop_part_id: 1,
+            is_deleted: false,
+          }
+        : undefined,
+    wave: {
+      id: wave.id,
+      name: wave.name,
+      picture: wave.picture ?? "",
+      description_drop_id: wave.description_drop.id,
+      authenticated_user_eligible_to_participate:
+        wave.participation.authenticated_user_eligible,
+      authenticated_user_eligible_to_vote:
+        wave.voting.authenticated_user_eligible,
+    },
+    author: {
+      id: connectedProfile.profile.external_id,
+      handle: connectedProfile.profile.handle,
+      pfp: connectedProfile.profile.pfp_url ?? null,
+      banner1_color: connectedProfile.profile.banner_1 ?? null,
+      banner2_color: connectedProfile.profile.banner_2 ?? null,
+      cic: connectedProfile.cic.cic_rating,
+      rep: connectedProfile.rep,
+      tdh: connectedProfile.consolidation.tdh,
+      level: connectedProfile.level,
+      subscribed_actions: [],
+      archived: false,
+    },
+    created_at: Date.now(),
+    updated_at: null,
+    title: dropRequest.title ?? null,
+    parts: dropRequest.parts.map((part, i) => ({
+      part_id: i + 1,
+      content: part.content ?? null,
+      media: part.media.map((media) => ({
+        url: media.url,
+        mime_type: media.mime_type,
+      })),
+      quoted_drop: part.quoted_drop
+        ? {
+            ...part.quoted_drop,
+            is_deleted: false,
+          }
+        : null,
+      replies_count: 0,
+      quotes_count: 0,
+    })),
+    parts_count: dropRequest.parts.length,
+    referenced_nfts: dropRequest.referenced_nfts,
+    mentioned_users: dropRequest.mentioned_users,
+    metadata: dropRequest.metadata,
+    rating: 0,
+    top_raters: [],
+    raters_count: 0,
+    context_profile_context: null,
+    subscribed_actions: [],
+  };
+};
+
 export default function CreateDropContent({
   activeDrop,
   rootDropId,
@@ -95,6 +366,7 @@ export default function CreateDropContent({
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 
   const getMarkdown = useMemo(
     () =>
@@ -129,16 +401,7 @@ export default function CreateDropContent({
       getMarkdown?.length ?? 0
     ) ?? 0) >= 24000;
 
-  const getIsCharsLimit = () => {
-    const markDown = getMarkdown;
-    if (!!markDown?.length && markDown.length > 240) {
-      return true;
-    }
-    return false;
-  };
-
-  const getCanAddPart = () =>
-    getHaveMarkdownOrFile() && !getIsDropLimit() && !getIsCharsLimit();
+  const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
   const canSubmit = useMemo(() => getCanSubmit(), [getMarkdown, files, drop]);
   const canAddPart = useMemo(() => getCanAddPart(), [getMarkdown, files, drop]);
 
@@ -177,35 +440,10 @@ export default function CreateDropContent({
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
 
-  const clearInputState = () => {
-    createDropInputRef.current?.clearEditorState();
-    setFiles([]);
-  };
-
-  const convertMetadataToDropMetadata = (): DropMetadata[] => {
-    return metadata
-      .filter(
-        (
-          md
-        ): md is CreateDropMetadataType & {
-          key: NonNullable<CreateDropMetadataType["key"]>;
-          value: NonNullable<CreateDropMetadataType["value"]>;
-        } =>
-          md.key !== null &&
-          md.key !== undefined &&
-          md.value !== null &&
-          md.value !== undefined
-      )
-      .map((md) => ({
-        data_key: md.key,
-        data_value: `${md.value}`,
-      }));
-  };
-
-  const onDropPart = (): CreateDropConfig => {
+  const getInitialDrop = (): CreateDropConfig | null => {
     const markdown = getMarkdown;
     if (!markdown?.length && !files.length) {
-      const currentDrop: CreateDropConfig = {
+      return {
         title: null,
         reply_to:
           activeDrop?.action === ActiveDropAction.REPLY
@@ -222,38 +460,18 @@ export default function CreateDropContent({
         parts: drop?.parts.length ? drop.parts : [],
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
-        metadata: convertMetadataToDropMetadata(),
+        metadata: convertMetadataToDropMetadata(metadata),
       };
-      setDrop(currentDrop);
-      clearInputState();
-      return currentDrop;
     }
-    const mentions = mentionedUsers.filter((user) =>
-      markdown?.includes(`@[${user.handle_in_content}]`)
-    );
-    const partMentions = mentions.map((mention) => ({
-      ...mention,
-    }));
-    const notAddedMentions = partMentions.filter(
-      (mention) =>
-        !drop?.mentioned_users.some(
-          (existing) =>
-            existing.mentioned_profile_id === mention.mentioned_profile_id
-        )
-    );
-    const allMentions = [...(drop?.mentioned_users ?? []), ...notAddedMentions];
-    const partNfts = referencedNfts.filter((nft) =>
-      markdown?.includes(`#[${nft.name}]`)
-    );
-    const notAddedNfts = partNfts.filter(
-      (nft) =>
-        !drop?.referenced_nfts.some(
-          (existing) =>
-            existing.contract === nft.contract && existing.token === nft.token
-        )
-    );
-    const allNfts = [...(drop?.referenced_nfts ?? []), ...notAddedNfts];
-    const currentDrop: CreateDropConfig = {
+    return null;
+  };
+
+  const createCurrentDrop = (
+    markdown: string | null,
+    allMentions: DropMentionedUser[],
+    allNfts: ReferencedNft[]
+  ): CreateDropConfig => {
+    return {
       title: null,
       reply_to:
         activeDrop?.action === ActiveDropAction.REPLY
@@ -267,86 +485,54 @@ export default function CreateDropContent({
               drop_part_id: 1,
             }
           : undefined,
-      parts: drop?.parts.length ? drop.parts : [],
+      parts: [
+        ...(drop?.parts ?? []),
+        {
+          content: markdown?.length ? markdown : null,
+          quoted_drop:
+            activeDrop?.action === ActiveDropAction.QUOTE
+              ? {
+                  drop_id: activeDrop.drop.id,
+                  drop_part_id: activeDrop.partId,
+                }
+              : null,
+          media: files,
+        },
+      ],
       mentioned_users: allMentions,
       referenced_nfts: allNfts,
-      metadata: convertMetadataToDropMetadata(),
-    };
-
-    currentDrop.parts.push({
-      content: markdown?.length ? markdown : null,
-      quoted_drop:
-        activeDrop?.action === ActiveDropAction.QUOTE
-          ? {
-              drop_id: activeDrop.drop.id,
-              drop_part_id: activeDrop.partId,
-            }
-          : null,
-      media: files,
-    });
-    setDrop(currentDrop);
-    clearInputState();
-    return currentDrop;
-  };
-
-  const generateMediaForPart = async (media: File): Promise<DropMedia> => {
-    const prep = await commonApiPost<
-      {
-        content_type: string;
-        file_name: string;
-        file_size: number;
-      },
-      {
-        upload_url: string;
-        content_type: string;
-        media_url: string;
-      }
-    >({
-      endpoint: "drop-media/prep",
-      body: {
-        content_type: media.type,
-        file_name: media.name,
-        file_size: media.size,
-      },
-    });
-    const myHeaders = new Headers({ "Content-Type": prep.content_type });
-    await fetch(prep.upload_url, {
-      method: "PUT",
-      headers: myHeaders,
-      body: media,
-    });
-    return {
-      url: prep.media_url,
-      mime_type: prep.content_type,
+      metadata: convertMetadataToDropMetadata(metadata),
     };
   };
 
-  const generatePart = async (
-    part: CreateDropPart
-  ): Promise<CreateDropRequestPart> => {
-    const media = await Promise.all(
-      part.media.map((media) => generateMediaForPart(media))
-    );
-    return {
-      ...part,
-      media,
-    };
-  };
-
-  const generateParts = async ({
-    parts,
-  }: {
-    readonly parts: CreateDropPart[];
-  }): Promise<CreateDropRequestPart[]> => {
-    try {
-      return await Promise.all(parts.map((part) => generatePart(part)));
-    } catch (error) {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-      return [];
+  const getUpdatedDrop = (): CreateDropConfig => {
+    const initialDrop = getInitialDrop();
+    if (initialDrop) {
+      return initialDrop;
     }
+
+    const markdown = getMarkdown;
+    const { updatedMentions, updatedNfts, updatedMarkdown } = handleDropPart(
+      markdown,
+      drop?.mentioned_users ?? [],
+      drop?.referenced_nfts ?? [],
+      mentionedUsers,
+      referencedNfts
+    );
+
+    return createCurrentDrop(updatedMarkdown, updatedMentions, updatedNfts);
+  };
+
+  const updateDropStateAndClearInput = (newDrop: CreateDropConfig) => {
+    setDrop(newDrop);
+    createDropInputRef.current?.clearEditorState();
+    setFiles([]);
+  };
+
+  const finalizeAndAddDropPart = (): CreateDropConfig => {
+    const updatedDrop = getUpdatedDrop();
+    updateDropStateAndClearInput(updatedDrop);
+    return updatedDrop;
   };
 
   const filterMentionedUsers = ({
@@ -362,85 +548,10 @@ export default function CreateDropContent({
       )
     );
 
-  const getOptimisticDrop = (dropRequest: CreateDropRequest): Drop | null => {
-    if (!connectedProfile?.profile) {
-      return null;
-    }
-
-    return {
-      id: getOptimisticDropId(),
-      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
-      reply_to:
-        activeDrop?.action === ActiveDropAction.REPLY
-          ? {
-              drop_id: activeDrop.drop.id,
-              drop_part_id: activeDrop.partId,
-              is_deleted: false,
-            }
-          : rootDropId
-          ? {
-              drop_id: rootDropId,
-              drop_part_id: 1,
-              is_deleted: false,
-            }
-          : undefined,
-      wave: {
-        id: wave.id,
-        name: wave.name,
-        picture: wave.picture ?? "",
-        description_drop_id: wave.description_drop.id,
-        authenticated_user_eligible_to_participate:
-          wave.participation.authenticated_user_eligible,
-        authenticated_user_eligible_to_vote:
-          wave.voting.authenticated_user_eligible,
-      },
-      author: {
-        id: connectedProfile.profile.external_id,
-        handle: connectedProfile.profile.handle,
-        pfp: connectedProfile.profile.pfp_url ?? null,
-        banner1_color: connectedProfile.profile.banner_1 ?? null,
-        banner2_color: connectedProfile.profile.banner_2 ?? null,
-        cic: connectedProfile.cic.cic_rating,
-        rep: connectedProfile.rep,
-        tdh: connectedProfile.consolidation.tdh,
-        level: connectedProfile.level,
-        subscribed_actions: [],
-        archived: false,
-      },
-      created_at: Date.now(),
-      updated_at: null,
-      title: dropRequest.title ?? null,
-      parts: dropRequest.parts.map((part, i) => ({
-        part_id: i + 1,
-        content: part.content ?? null,
-        media: part.media.map((media) => ({
-          url: media.url,
-          mime_type: media.mime_type,
-        })),
-        quoted_drop: part.quoted_drop
-          ? {
-              ...part.quoted_drop,
-              is_deleted: false,
-            }
-          : null,
-        replies_count: 0,
-        quotes_count: 0,
-      })),
-      parts_count: dropRequest.parts.length,
-      referenced_nfts: dropRequest.referenced_nfts,
-      mentioned_users: dropRequest.mentioned_users,
-      metadata: dropRequest.metadata,
-      rating: 0,
-      top_raters: [],
-      raters_count: 0,
-      context_profile_context: null,
-      subscribed_actions: [],
-    };
-  };
-
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const refreshState = () => {
+ 
     setDropEditorRefreshKey((prev) => prev + 1);
     setMetadata(initialMetadata);
     setMentionedUsers([]);
@@ -455,6 +566,8 @@ export default function CreateDropContent({
         body,
       }),
     onSuccess: (response: Drop) => {
+      !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
+      setFiles([]);
       refreshState();
       onDropCreated();
     },
@@ -470,7 +583,6 @@ export default function CreateDropContent({
     },
   });
 
-  // TODO: add required metadata & media validations for wave participation
   const submitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
@@ -487,86 +599,99 @@ export default function CreateDropContent({
       return;
     }
 
-    const parts = await generateParts({ parts: dropRequest.parts });
-    if (!parts.length) {
+    try {
+      const parts = await generateParts(dropRequest.parts, setUploadingFiles);
+      if (!parts.length) {
+        setSubmitting(false);
+        return;
+      }
+
+      const requestBody: CreateDropRequest = {
+        ...dropRequest,
+        mentioned_users: filterMentionedUsers({
+          mentionedUsers: dropRequest.mentioned_users,
+          parts: dropRequest.parts,
+        }),
+        wave_id: wave.id,
+        parts,
+      };
+      const optimisticDrop = getOptimisticDrop(
+        requestBody,
+        connectedProfile,
+        wave,
+        activeDrop,
+        rootDropId
+      );
+      if (optimisticDrop) {
+        addOptimisticDrop({ drop: optimisticDrop, rootDropId });
+      }
+      await addDropMutation.mutateAsync(requestBody);
+    } catch (error) {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    const requestBody: CreateDropRequest = {
-      ...dropRequest,
-      mentioned_users: filterMentionedUsers({
-        mentionedUsers: dropRequest.mentioned_users,
-        parts: dropRequest.parts,
-      }),
-      wave_id: wave.id,
-      parts,
-    };
-    const optimisticDrop = getOptimisticDrop(requestBody);
-    if (optimisticDrop) {
-      addOptimisticDrop({ drop: optimisticDrop, rootDropId });
-    }
-    await addDropMutation.mutateAsync(requestBody);
   };
 
-  const [missingRequiredMetadataKeys, setMissingRequiredMetadataKeys] =
-    useState<string[]>([]);
+  const [missingRequirements, setMissingRequirements] =
+    useState<MissingRequirements>({
+      metadata: [],
+      media: [],
+    });
 
-  const getMissingRequiredMetadataKeys = (): string[] => {
-    const missingRequiredFields = metadata.filter(
-      (item) =>
-        item.required &&
-        (item.value === null || item.value === undefined || item.value === "")
-    );
+  const getMissingRequirements = useMemo(
+    () => (): MissingRequirements => {
+      const missingMetadata = metadata
+        .filter(
+          (item) =>
+            item.required &&
+            (item.value === null ||
+              item.value === undefined ||
+              item.value === "")
+        )
+        .map((item) => item.key as string);
 
-    const missingKeys = missingRequiredFields.map((item) => item.key as string);
-    return missingKeys;
-  };
+      const missingMedia = wave.participation.required_media.filter(
+        (media) =>
+          !files.some((file) => {
+            switch (media) {
+              case WaveParticipationRequirement.Image:
+                return file.type.startsWith("image/");
+              case WaveParticipationRequirement.Audio:
+                return file.type.startsWith("audio/");
+              case WaveParticipationRequirement.Video:
+                return file.type.startsWith("video/");
+              default:
+                return false;
+            }
+          })
+      );
+
+      return { metadata: missingMetadata, media: missingMedia };
+    },
+    [metadata, files, wave.participation.required_media]
+  );
 
   useEffect(() => {
-    setMissingRequiredMetadataKeys(getMissingRequiredMetadataKeys());
-  }, [metadata]);
-
-  const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
-    if (!wave.participation.required_media.length) {
-      return [];
-    }
-    return wave.participation.required_media.filter(
-      (media) =>
-        !files.some((file) => {
-          switch (media) {
-            case WaveParticipationRequirement.Image:
-              return file.type.startsWith("image/");
-            case WaveParticipationRequirement.Audio:
-              return file.type.startsWith("audio/");
-            case WaveParticipationRequirement.Video:
-              return file.type.startsWith("video/");
-            default:
-              return false;
-          }
-        })
-    );
-  };
-  const [missingRequiredMedia, setMissingRequiredMedia] = useState<
-    WaveParticipationRequirement[]
-  >(getMissingRequiredMedia());
-
-  useEffect(() => {
-    setMissingRequiredMedia(getMissingRequiredMedia());
-  }, [files]);
+    setMissingRequirements(getMissingRequirements());
+  }, [metadata, files, getMissingRequirements]);
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
       return;
     }
-    if (missingRequiredMedia.length || missingRequiredMetadataKeys.length) {
+    if (
+      missingRequirements.metadata.length ||
+      missingRequirements.media.length
+    ) {
       return;
     }
-    const currentDrop = onDropPart();
-    await submitDrop(currentDrop);
+    await submitDrop(getUpdatedDrop());
   };
 
-  // Focus the editor on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       createDropInputRef.current?.focus();
@@ -574,7 +699,6 @@ export default function CreateDropContent({
     return () => clearTimeout(timer);
   }, []);
 
-  // Focus the editor when activeDrop changes
   useEffect(() => {
     const timer = setTimeout(() => {
       createDropInputRef.current?.focus();
@@ -601,6 +725,10 @@ export default function CreateDropContent({
     setFiles(updatedFiles);
   };
 
+  const handleEditorStateChange = (newEditorState: EditorState) => {
+    setEditorState(newEditorState);
+  };
+
   const removeFile = (index: number) => {
     const newFiles = files.filter((_, i) => i !== index);
     setFiles(newFiles);
@@ -613,7 +741,6 @@ export default function CreateDropContent({
     }
 
     if (!drop.parts.length) {
-      // If no parts are left, exit storm mode
       setIsStormMode(false);
     }
   }, [drop?.parts]);
@@ -671,6 +798,7 @@ export default function CreateDropContent({
     <div className="tw-flex-grow">
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}
+        submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
       />
       <div className="tw-flex tw-items-end">
@@ -681,17 +809,18 @@ export default function CreateDropContent({
             editorState={editorState}
             type={activeDrop?.action ?? null}
             drop={drop}
+            submitting={submitting}
             isStormMode={isStormMode}
             setIsStormMode={setIsStormMode}
             canSubmit={canSubmit}
-            isRequiredMetadataMissing={!!missingRequiredMetadataKeys.length}
-            isRequiredMediaMissing={!!missingRequiredMedia.length}
+            isRequiredMetadataMissing={!!missingRequirements.metadata.length}
+            isRequiredMediaMissing={!!missingRequirements.media.length}
             canAddPart={canAddPart}
-            onEditorState={setEditorState}
+            onEditorState={handleEditorStateChange}
             onReferencedNft={onReferencedNft}
             onMentionedUser={onMentionedUser}
             setFiles={handleFileChange}
-            onDropPart={onDropPart}
+            onDropPart={finalizeAndAddDropPart}
             onDrop={onDrop}
             onAddMetadataClick={onAddMetadataClick}
           />
@@ -709,10 +838,11 @@ export default function CreateDropContent({
       <CreateDropContentRequirements
         canSubmit={canSubmit}
         wave={wave}
-        missingMedia={missingRequiredMedia}
-        missingMetadata={missingRequiredMetadataKeys}
+        missingMedia={missingRequirements.media}
+        missingMetadata={missingRequirements.metadata}
         onOpenMetadata={() => setIsMetadataOpen(true)}
         setFiles={handleFileChange}
+        disabled={submitting}
       />
       <AnimatePresence>
         {isMetadataOpen && (
@@ -723,10 +853,11 @@ export default function CreateDropContent({
             transition={{ duration: 0.3 }}
           >
             <CreateDropMetadata
+              disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}
               closeMetadata={closeMetadata}
               metadata={metadata}
-              missingRequiredMetadataKeys={missingRequiredMetadataKeys}
+              missingRequiredMetadataKeys={missingRequirements.metadata}
               onChangeKey={onChangeKey}
               onChangeValue={onChangeValue}
               onAddMetadata={onAddMetadata}
@@ -742,7 +873,12 @@ export default function CreateDropContent({
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <FilePreview files={files} removeFile={removeFile} />
+            <FilePreview
+              files={files}
+              uploadingFiles={uploadingFiles}
+              removeFile={removeFile}
+              disabled={submitting}
+            />
           </motion.div>
         )}
       </AnimatePresence>

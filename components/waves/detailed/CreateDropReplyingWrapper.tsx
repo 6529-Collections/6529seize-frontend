@@ -1,14 +1,19 @@
-import React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import CreateDropReplying from '../CreateDropReplying';
-import { ActiveDropState } from './WaveDetailedContent';
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import CreateDropReplying from "../CreateDropReplying";
+import { ActiveDropState } from "./WaveDetailedContent";
 
 interface CreateDropReplyingWrapperProps {
-  activeDrop: ActiveDropState | null;
-  onCancelReplyQuote: () => void;
+  readonly activeDrop: ActiveDropState | null;
+  readonly submitting: boolean;
+  readonly onCancelReplyQuote: () => void;
 }
 
-const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({ activeDrop, onCancelReplyQuote }) => {
+const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
+  activeDrop,
+  submitting,
+  onCancelReplyQuote,
+}) => {
   return (
     <AnimatePresence>
       {activeDrop && (
@@ -22,6 +27,7 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({ a
             drop={activeDrop.drop}
             action={activeDrop.action}
             onCancel={onCancelReplyQuote}
+            disabled={submitting}
           />
         </motion.div>
       )}

@@ -7,6 +7,7 @@ import Tippy from "@tippyjs/react";
 interface CreateDropMetadataProps {
   readonly metadata: CreateDropMetadataType[];
   readonly missingRequiredMetadataKeys: string[];
+  readonly disabled: boolean;
   readonly closeMetadata: () => void;
   readonly onChangeKey: (params: { index: number; newKey: string }) => void;
   readonly onChangeValue: (params: {
@@ -21,6 +22,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   metadata,
   missingRequiredMetadataKeys,
   closeMetadata,
+  disabled,
   onChangeKey,
   onChangeValue,
   onAddMetadata,
@@ -78,6 +80,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
               index={index}
               onChangeKey={onChangeKey}
               onChangeValue={onChangeValue}
+              disabled={disabled}
             />
           ))}
         </div>
@@ -85,7 +88,10 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
       <button
         type="button"
         onClick={onAddMetadata}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-medium tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+        disabled={disabled}
+        className={`tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-medium tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out ${
+          disabled ? "tw-opacity-50 tw-cursor-default" : ""
+        }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

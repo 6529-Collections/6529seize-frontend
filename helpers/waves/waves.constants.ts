@@ -146,14 +146,7 @@ export const CREATE_WAVE_START_DATE_LABELS: Record<WaveType, string> = {
   [WaveType.Approve]: "Start date",
 };
 
-export const CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS: Record<
-  WaveParticipationRequirement,
-  string
-> = {
-  [WaveParticipationRequirement.Image]: "Image",
-  [WaveParticipationRequirement.Audio]: "Audio",
-  [WaveParticipationRequirement.Video]: "Video",
-};
+
 
 export const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
   WaveMetadataType,

@@ -6,13 +6,21 @@ interface CreateDropContentRequirementsItemProps {
   readonly isValid: boolean;
   readonly requirementType: DropRequirementType;
   readonly missingItems: string[];
+  readonly disabled: boolean;
   readonly onOpenMetadata: () => void;
   readonly setFiles: (files: File[]) => void;
 }
 
 const CreateDropContentRequirementsItem: React.FC<
   CreateDropContentRequirementsItemProps
-> = ({ isValid, requirementType, missingItems, onOpenMetadata, setFiles }) => {
+> = ({
+  isValid,
+  requirementType,
+  missingItems,
+  onOpenMetadata,
+  setFiles,
+  disabled,
+}) => {
   const LABELS: Record<DropRequirementType, string> = {
     [DropRequirementType.MEDIA]: "Media",
     [DropRequirementType.METADATA]: "Metadata",
@@ -69,10 +77,15 @@ const CreateDropContentRequirementsItem: React.FC<
     >
       <button
         className={`tw-flex tw-bg-transparent tw-border-none tw-items-center tw-gap-x-1.5 ${
-          isValid ? "tw-text-green" : "tw-text-yellow"
+          disabled
+            ? "tw-opacity-50 tw-cursor-not-allowed"
+            : isValid
+            ? "tw-text-green"
+            : "tw-text-yellow"
         }`}
         onClick={handleClick}
         type="button"
+        disabled={disabled}
       >
         {isValid ? (
           <svg
@@ -80,7 +93,7 @@ const CreateDropContentRequirementsItem: React.FC<
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor"
+            stroke={disabled ? "currentColor" : "green"}
             aria-hidden="true"
             className="tw-size-4"
           >
@@ -97,7 +110,7 @@ const CreateDropContentRequirementsItem: React.FC<
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             aria-hidden="true"
-            stroke="currentColor"
+            stroke={disabled ? "currentColor" : "yellow"}
             className="tw-size-4"
           >
             <path

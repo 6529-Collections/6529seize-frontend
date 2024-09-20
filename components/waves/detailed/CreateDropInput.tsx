@@ -57,15 +57,39 @@ import NewHashtagsPlugin, {
 import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
-
 import { ActiveDropAction } from "./WaveDetailedContent";
-import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import Tippy from "@tippyjs/react";
+import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import StormButton from "./StormButton";
+import CreateDropInputOptions from "./CreateDropInputOptions";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
   focus: () => void;
+}
+
+// Create a custom command
+const DISABLE_EDIT_COMMAND = createCommand("DISABLE_EDIT");
+
+// Create a custom plugin to handle disabling
+function DisableEditPlugin({ disabled }: { disabled: boolean }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    if (disabled) {
+      return editor.registerCommand(
+        DISABLE_EDIT_COMMAND,
+        () => {
+          return true;
+        },
+        COMMAND_PRIORITY_CRITICAL
+      );
+    }
+    return () => {};
+  }, [editor, disabled]);
+
+  return null;
 }
 
 const CreateDropInput = forwardRef<
@@ -79,6 +103,7 @@ const CreateDropInput = forwardRef<
     readonly isStormMode: boolean;
     readonly isRequiredMetadataMissing: boolean;
     readonly isRequiredMediaMissing: boolean;
+    readonly submitting: boolean;
     readonly setIsStormMode: (isStormMode: boolean) => void;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
@@ -101,6 +126,7 @@ const CreateDropInput = forwardRef<
       isStormMode,
       isRequiredMetadataMissing,
       isRequiredMediaMissing,
+      submitting,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
@@ -133,6 +159,7 @@ const CreateDropInput = forwardRef<
         ImageNode,
       ],
       editorState,
+      editable: !submitting,
       onError(error: Error): void {
         throw error;
       },
@@ -266,13 +293,19 @@ const CreateDropInput = forwardRef<
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
-                    className="editor-input-one-liner tw-pr-24 tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-                  tw-pl-3 tw-py-2.5"
-                    autoFocus={true}
+                    className={`editor-input-one-liner tw-pr-24 tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                    tw-pl-3 tw-py-2.5 ${
+                      submitting ? "tw-opacity-50 tw-cursor-default" : ""
+                    }`}
+                    autoFocus={!submitting}
                   />
                 }
                 placeholder={
-                  <span className="editor-placeholder">
+                  <span
+                    className={`editor-placeholder ${
+                      submitting ? "tw-opacity-50" : ""
+                    }`}
+                  >
                     {getPlaceHolderText()}
                   </span>
                 }
@@ -295,168 +328,30 @@ const CreateDropInput = forwardRef<
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
+              <DisableEditPlugin disabled={submitting} />
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
+                disabled={submitting}
               />
-              <div className="tw-flex tw-items-center tw-absolute tw-top-3 tw-right-10">
-                <Tippy
-                  content={
-                    <div className="tw-text-center">
-                      <span
-                        className={`tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-                      >
-                        {isStormMode ? "Add a part" : "Break into storm"}
-                      </span>
-                    </div>
-                  }
-                  placement="top"
-                  disabled={false}
-                >
-                  <button
-                    onClick={breakIntoStorm}
-                    disabled={!canAddPart}
-                    type="button"
-                    className={`tw-border-0 tw-bg-transparent tw-flex tw-items-center tw-ease-out tw-transition tw-duration-300 tw-mr-2 ${
-                      canAddPart
-                        ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400"
-                        : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600"
-                    }`}
-                  >
-                    <svg
-                      className={`tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5 ${
-                        !canAddPart ? "tw-opacity-50" : ""
-                      }`}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 5V19M5 12H19"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <svg
-                      className={`tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0 ${
-                        !canAddPart ? "tw-opacity-50" : ""
-                      }`}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </Tippy>
-              </div>
+              <StormButton
+                isStormMode={isStormMode}
+                canAddPart={canAddPart}
+                submitting={submitting}
+                breakIntoStorm={breakIntoStorm}
+              />
 
-              <div ref={dropdownRef}>
-                <div
-                  className={`tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-absolute tw-top-0.5 tw-right-2 tw-rounded-lg tw-border-none tw-bg-transparent tw-ease-out tw-transition tw-duration-300 ${
-                    isRequiredMetadataMissing || isRequiredMediaMissing
-                      ? "tw-text-yellow hover:tw-text-opacity-80"
-                      : "tw-text-iron-400 hover:tw-text-iron-50"
-                  }`}
-                  onClick={toggleDropdown}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="tw-size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                    />
-                  </svg>
-                </div>
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      className="tw-absolute tw-right-0 tw-bottom-10 tw-z-10 tw-w-40 tw-origin-bottom-right tw-rounded-lg tw-bg-iron-950 tw-py-2 tw-px-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none tw-space-y-1"
-                    >
-                      <label
-                        className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
-                          isRequiredMediaMissing
-                            ? "tw-text-yellow hover:tw-bg-[#FDB022]/50"
-                            : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
-                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out hover:tw-font-medium`}
-                      >
-                        <svg
-                          className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          aria-hidden="true"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                          />
-                        </svg>
-                        <input
-                          type="file"
-                          className="tw-hidden"
-                          accept="image/*,video/*,audio/*"
-                          multiple
-                          onChange={handleFileChange}
-                        />
-                        <span>Upload a file</span>
-                      </label>
-
-                      <div
-                        className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
-                          isRequiredMetadataMissing
-                            ? "tw-text-yellow hover:tw-bg-[#FDB022]/40"
-                            : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
-                        } tw-rounded-md tw-cursor-pointer tw-transition-all tw-duration-300 tw-ease-out hover:tw-font-medium`}
-                        onClick={() => {
-                          onAddMetadataClick();
-                          setIsDropdownOpen(false);
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
-                          />
-                        </svg>
-                        <span>Add metadata</span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <CreateDropInputOptions
+                dropdownRef={dropdownRef}
+                isRequiredMetadataMissing={isRequiredMetadataMissing}
+                isRequiredMediaMissing={isRequiredMediaMissing}
+                submitting={submitting}
+                toggleDropdown={toggleDropdown}
+                isDropdownOpen={isDropdownOpen}
+                handleFileChange={handleFileChange}
+                onAddMetadataClick={onAddMetadataClick}
+                setIsDropdownOpen={setIsDropdownOpen}
+              />
             </div>
           </div>
         </LexicalComposer>

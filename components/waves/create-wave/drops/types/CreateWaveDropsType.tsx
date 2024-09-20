@@ -1,16 +1,23 @@
-import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
-import { CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS } from "../../../../../helpers/waves/waves.constants";
+import { ExtendedWaveParticipationRequirement } from "./CreateWaveDropsTypes";
 
 export default function CreateWaveDropsType({
-  requiredTypes,
+  isChecked,
   type,
   onRequiredTypeChange,
 }: {
-  readonly requiredTypes: WaveParticipationRequirement[];
-  readonly type: WaveParticipationRequirement;
-  readonly onRequiredTypeChange: (type: WaveParticipationRequirement) => void;
+  readonly isChecked: boolean;
+  readonly type: ExtendedWaveParticipationRequirement;
+  readonly onRequiredTypeChange: (
+    type: ExtendedWaveParticipationRequirement
+  ) => void;
 }) {
-  const isChecked = requiredTypes.includes(type);
+  const LABELS: Record<ExtendedWaveParticipationRequirement, string> = {
+    [ExtendedWaveParticipationRequirement.NONE]: "None",
+    [ExtendedWaveParticipationRequirement.IMAGE]: "Image",
+    [ExtendedWaveParticipationRequirement.AUDIO]: "Audio",
+    [ExtendedWaveParticipationRequirement.VIDEO]: "Video",
+  };
+
   const buttonClasses = isChecked
     ? "tw-ring-primary-400 tw-bg-[#202B45]"
     : "tw-ring-iron-700 tw-bg-iron-800 hover:tw-ring-iron-600";
@@ -32,7 +39,7 @@ export default function CreateWaveDropsType({
       <span className="tw-flex tw-items-center">
         <span className="tw-flex tw-flex-col tw-text-base tw-font-semibold">
           <span className={labelClasses}>
-            {CREATE_WAVE_DROPS_REQUIRED_TYPES_LABELS[type]}
+            {LABELS[type]}
           </span>
         </span>
       </span>

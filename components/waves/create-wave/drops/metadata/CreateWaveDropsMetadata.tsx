@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  CreateWaveDropsRequiredMetadata,
-} from "../../../../../types/waves.types";
+import { CreateWaveDropsRequiredMetadata } from "../../../../../types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
@@ -19,6 +17,7 @@ export default function CreateWaveDropsMetadata({
   ) => void;
 }) {
   const getShowAddMore = () =>
+    !requiredMetadata.length ||
     !requiredMetadata.filter((item) => !item.key.length).length;
 
   const [showAddMore, setShowAddMore] = useState(getShowAddMore());
@@ -97,7 +96,6 @@ export default function CreateWaveDropsMetadata({
                 key={`create-wave-drops-metadata-row-${i}`}
                 item={item}
                 index={i}
-                itemsCount={requiredMetadata.length}
                 isNotUnique={
                   nonUniqueMetadataIdxs.includes(i) && haveNonUniqueMetadata
                 }
@@ -105,10 +103,16 @@ export default function CreateWaveDropsMetadata({
                 onItemRemove={onRemoveRow}
               />
             ))}
+            {requiredMetadata.length === 0 && (
+              <div className="tw-text-iron-400 tw-text-sm tw-font-medium tw-py-2 tw-italic">
+                No required metadata added
+              </div>
+            )}
           </div>
-          {showAddMore && (
-            <CreateWaveDropsMetadataAddRowButton onAddNewRow={onAddNewRow} />
-          )}
+          <CreateWaveDropsMetadataAddRowButton
+            itemsCount={requiredMetadata.length}
+            onAddNewRow={onAddNewRow}
+          />
         </div>
       </div>
     </div>

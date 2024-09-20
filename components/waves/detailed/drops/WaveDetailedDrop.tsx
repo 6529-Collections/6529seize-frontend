@@ -45,7 +45,11 @@ export default function WaveDetailedDrop({
     !isStorm &&
     otherDrop &&
     otherDrop.author.handle === drop.author.handle &&
-    Math.abs(new Date(otherDrop.created_at).getTime() - new Date(drop.created_at).getTime()) <= GroupingThreshold.TIME_DIFFERENCE;
+    Math.abs(
+      new Date(otherDrop.created_at).getTime() -
+        new Date(drop.created_at).getTime()
+    ) <= GroupingThreshold.TIME_DIFFERENCE &&
+    !drop.reply_to;
 
   const shouldGroupWithPreviousDrop = shouldGroupWithDrop(previousDrop);
   const shouldGroupWithNextDrop = shouldGroupWithDrop(nextDrop);
@@ -64,21 +68,21 @@ export default function WaveDetailedDrop({
           : "tw-bg-iron-950 hover:tw-bg-iron-900"
       } ${groupingClass}`}
     >
-      {drop.reply_to &&
-        drop.reply_to.drop_id !== rootDropId &&
-        !shouldGroupWithPreviousDrop && (
-          <WaveDetailedDropReply
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
+      {drop.reply_to && drop.reply_to.drop_id !== rootDropId && (
+        <WaveDetailedDropReply
+          dropId={drop.reply_to.drop_id}
+          dropPartId={drop.reply_to.drop_part_id}
+          maybeDrop={
+            drop.reply_to.drop
+              ? { ...drop.reply_to.drop, wave: drop.wave }
+              : null
+          }
+        />
+      )}
       <div className="tw-flex tw-gap-x-3">
-        {!shouldGroupWithPreviousDrop && <WaveDetailedDropAuthorPfp drop={drop} />}
+        {!shouldGroupWithPreviousDrop && (
+          <WaveDetailedDropAuthorPfp drop={drop} />
+        )}
         <div
           className={`${
             shouldGroupWithPreviousDrop ? "" : "tw-mt-1"
@@ -106,12 +110,16 @@ export default function WaveDetailedDrop({
         <WaveDetailedDropActions
           drop={drop}
           activePartIndex={activePartIndex}
-          onReply={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
-          onQuote={() => onQuote({ drop, partId: drop.parts[activePartIndex].part_id })}
+          onReply={() =>
+            onReply({ drop, partId: drop.parts[activePartIndex].part_id })
+          }
+          onQuote={() =>
+            onQuote({ drop, partId: drop.parts[activePartIndex].part_id })
+          }
         />
       )}
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
-     {/*    {drop.metadata.length > 0 && (
+        {/*    {drop.metadata.length > 0 && (
           <WaveDetailedDropMetadata metadata={drop.metadata} />
         )} */}
         {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}

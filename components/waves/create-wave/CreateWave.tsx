@@ -55,7 +55,9 @@ export default function CreateWave({
 }) {
   const router = useRouter();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { waitAndInvalidateDrops, onWaveCreated } = useContext(ReactQueryWrapperContext);
+  const { waitAndInvalidateDrops, onWaveCreated } = useContext(
+    ReactQueryWrapperContext
+  );
   const initialType = WaveType.Chat;
   const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
@@ -84,7 +86,7 @@ export default function CreateWave({
       allowDiscussionDrops: true,
       noOfApplicationsAllowedPerParticipant: null,
       requiredTypes: [],
-      requiredMetadata: [{ key: "", type: WaveMetadataType.String }],
+      requiredMetadata: [],
     },
     voting: {
       type: WaveCreditType.Tdh,
