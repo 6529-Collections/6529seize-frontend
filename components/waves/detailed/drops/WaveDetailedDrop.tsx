@@ -61,7 +61,7 @@ export default function WaveDetailedDrop({
       className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 ${
         isActiveDrop
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
-          : "tw-bg-iron-950"
+          : "tw-bg-iron-950 hover:tw-bg-iron-900"
       } ${groupingClass}`}
     >
       {drop.reply_to &&

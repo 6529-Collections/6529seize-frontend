@@ -86,7 +86,7 @@ export default function WavePage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[1500px]:tw-max-w-[1280px] tw-mx-auto"
+                className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[1729px]:tw-max-w-[1280px] tw-mx-auto"
               >
                 <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
                   <div className="tw-flex tw-flex-col tw-gap-y-4 tw-w-[20.5rem]">
