@@ -146,7 +146,7 @@ export default function CreateDrop({
     return item;
   }, []);
 
-  const currentDelay = useProgressiveDebounce(
+  useProgressiveDebounce(
     () => {
       if (queueSize === 0 && !isProcessing && hasQueueChanged) {
         waitAndInvalidateDrops();
@@ -155,15 +155,11 @@ export default function CreateDrop({
     [queueSize, isProcessing, hasQueueChanged],
     {
       minDelay: 1000,
-      maxDelay: 5000,
+      maxDelay: 4000,
       increaseFactor: 1.5,
       decreaseFactor: 1.2,
     }
   );
-
-  useEffect(() => {
-    console.log(`Current debounce delay: ${currentDelay}ms`);
-  }, [currentDelay]);
 
   const processQueue = useCallback(async () => {
     if (isProcessing || queueSize === 0) return;

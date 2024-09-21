@@ -776,6 +776,17 @@ export default function ReactQueryWrapper({
     readonly drop: Drop;
     readonly rootDropId: string | null;
   }): void => {
+    queryClient.cancelQueries({
+      queryKey: [
+        QueryKey.DROPS,
+        {
+          limit: 20,
+          waveId: drop.wave.id,
+          dropId: rootDropId,
+        },
+      ],
+    });
+
     queryClient.setQueryData(
       [
         QueryKey.DROPS,
@@ -1186,7 +1197,6 @@ export default function ReactQueryWrapper({
     invalidateDrops();
   };
 
-
   const profileDropChangeMutation = ({
     oldData,
     drop,
@@ -1231,7 +1241,7 @@ export default function ReactQueryWrapper({
     }
 
     // Handle infinite query data structure
-    if ('pages' in oldData) {
+    if ("pages" in oldData) {
       return {
         ...oldData,
         pages: oldData.pages.map((page) => ({

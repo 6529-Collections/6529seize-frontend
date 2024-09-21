@@ -4,9 +4,10 @@ import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { getDropKey } from "../../../helpers/waves/drop.helpers";
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { ExtendedDrop } from "../../waves/detailed/drops/WaveDrops";
 
 interface DropsListProps {
-  readonly drops: Drop[];
+  readonly drops: ExtendedDrop[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
@@ -26,7 +27,9 @@ export default function DropsList({
   onReply,
   onQuote,
 }: DropsListProps) {
-  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<number | null>(null);
+  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
+    number | null
+  >(null);
   const intersectionElementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,7 +57,7 @@ export default function DropsList({
   return (
     <div className="tw-flex tw-flex-col">
       {drops.map((drop, i) => (
-        <div key={getDropKey({ drop, returnOriginal: i !== drops.length - 1 })}>
+        <div key={drop.stableKey}>
           {intersectionTargetIndex === i && (
             <div ref={intersectionElementRef}>
               <CommonIntersectionElement onIntersection={onIntersection} />

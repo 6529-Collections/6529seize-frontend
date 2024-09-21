@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { Drop } from "../../../generated/models/Drop";
 import DropsList from "./DropsList";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 const REQUEST_SIZE = 10;
 
@@ -51,9 +52,21 @@ export default function Drops() {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
   });
 
-  const [drops, setDrops] = useState<Drop[]>([]);
+  const [drops, setDrops] = useState<ExtendedDrop[]>([]);
 
-  useEffect(() => setDrops(data?.pages.flat() ?? []), [data]);
+  useEffect(
+    () =>
+      setDrops(
+        data?.pages
+          .flat()
+          .map((drop) => ({
+            ...drop,
+            stableKey: drop.id,
+            stableHash: drop.id,
+          })) ?? []
+      ),
+    [data]
+  );
 
   const onBottomIntersection = (state: boolean) => {
     if (drops.length < REQUEST_SIZE) {

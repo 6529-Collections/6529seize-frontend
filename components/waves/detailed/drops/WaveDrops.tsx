@@ -14,6 +14,7 @@ import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 import WaveDropThreadTrace from "./WaveDropThreadTrace";
 import DropsList from "../../../drops/view/DropsList";
 import { useDebounce } from "react-use";
+import { getDropKey, getStableDropKey } from "../../../../helpers/waves/drop.helpers";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -25,6 +26,11 @@ interface WaveDropsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onBackToList?: () => void;
+}
+
+export interface ExtendedDrop extends Drop {
+  readonly stableKey: string;
+  readonly stableHash: string;
 }
 
 export default function WaveDrops({
@@ -77,18 +83,48 @@ export default function WaveDrops({
     enabled: !!connectedProfile?.profile?.handle,
   });
 
-  const [drops, setDrops] = useState<Drop[]>([]);
+  const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   useEffect(() => {
-    setDrops(
-      data?.pages
+    setDrops(prev => {
+      const newDrops = data?.pages
         .flatMap((page) =>
-          page.drops.map((drop) => ({
-            ...drop,
-            wave: page.wave,
-          }))
+          page.drops.map((drop): ExtendedDrop => {
+            const { key, hash } = getStableDropKey(
+              { ...drop, wave: page.wave },
+              prev
+            );
+            return {
+              ...drop,
+              wave: page.wave,
+              stableKey: key,
+              stableHash: hash,
+            };
+          })
         )
-        .reverse() ?? []
-    );
+        .reverse() ?? [];
+  
+      // Create a map to count occurrences of each key
+      const keyCount = new Map<string, number>();
+  
+      // Merge new drops with existing drops, ensuring unique keys
+      return newDrops.map(newDrop => {
+        const existingDrop = prev.find(d => d.stableHash === newDrop.stableHash);
+        let finalKey = newDrop.stableKey;
+  
+        // If the key already exists, append a counter
+        if (keyCount.has(finalKey)) {
+          const count = keyCount.get(finalKey)! + 1;
+          finalKey = `${finalKey}-${count}`;
+          keyCount.set(newDrop.stableKey, count);
+        } else {
+          keyCount.set(finalKey, 1);
+        }
+  
+        return existingDrop 
+          ? { ...newDrop, stableKey: finalKey, stableHash: existingDrop.stableHash }
+          : { ...newDrop, stableKey: finalKey };
+      });
+    });
   }, [data]);
 
   const [haveNewDrops, setHaveNewDrops] = useState(false);
