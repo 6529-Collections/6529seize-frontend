@@ -149,9 +149,7 @@ export default function CreateDrop({
   const currentDelay = useProgressiveDebounce(
     () => {
       if (queueSize === 0 && !isProcessing && hasQueueChanged) {
-        console.log("Waiting to invalidate drops");
         waitAndInvalidateDrops();
-
       }
     },
     [queueSize, isProcessing, hasQueueChanged],
