@@ -17,6 +17,11 @@ import { useDebounce } from "react-use";
 import { getStableDropKey } from "../../../../helpers/waves/drop.helpers";
 import { WaveMin } from "../../../../generated/models/WaveMin";
 import { DropWithoutWave } from "../../../../generated/models/DropWithoutWave";
+import { WaveDropsNewDropsAvailable } from "./WaveDropsNewDropsAvailable";
+import { WaveDropsBackButton } from "./WaveDropsBackButton";
+import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
+import WaveDropsThreadHeader from "./WaveDropsThread";
+import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -71,7 +76,7 @@ const incrementKeyCount = (
   keyCount: Map<string, number>,
   key: string
 ): number => {
-  const count = (keyCount.get(key) || 0) + 1;
+  const count = (keyCount.get(key) ?? 0) + 1;
   keyCount.set(key, count);
   return count;
 };
@@ -312,93 +317,35 @@ export default function WaveDrops({
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-14rem)] lg:tw-h-[calc(100vh-13rem)] tw-relative">
-      {haveNewDrops && (
-        <div className="tw-absolute tw-top-2 tw-left-1/2 tw-transform -tw-translate-x-1/2 tw-z-50">
-          <button
-            onClick={onRefresh}
-            type="button"
-            className="tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
-          >
-            New drops available
-          </button>
-        </div>
-      )}
-      <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950">
-        {rootDropId && onBackToList && (
-          <div className="tw-px-4 tw-py-2">
-            <button
-              onClick={onBackToList}
-              type="button"
-              className="tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
-            >
-              <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20 12H4M4 12L10 18M4 12L10 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                ></path>
-              </svg>
-              <span>Back</span>
-            </button>
-          </div>
-        )}
-        {rootDropId && (
-          <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
-        )}
-      </div>
-      <div
+      <WaveDropsNewDropsAvailable
+        haveNewDrops={haveNewDrops}
+        onRefresh={onRefresh}
+      />
+      <WaveDropsThreadHeader
+        rootDropId={rootDropId}
+        wave={wave}
+        onBackToList={onBackToList}
+      />
+      <WaveDropsScrollContainer
         ref={scrollContainerRef}
-        className="tw-flex tw-flex-col-reverse tw-flex-grow tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300"
         onScroll={handleScroll}
       >
-        <div className="tw-flex tw-flex-col-reverse tw-flex-grow">
-          <div>
-            <div className="tw-overflow-hidden">
-              <DropsList
-                drops={drops}
-                showWaveInfo={false}
-                onIntersection={onIntersection}
-                onReply={onReply}
-                onQuote={onQuote}
-                showReplyAndQuote={true}
-                activeDrop={activeDrop}
-                rootDropId={rootDropId}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+        <DropsList
+          drops={drops}
+          showWaveInfo={false}
+          onIntersection={onIntersection}
+          onReply={onReply}
+          onQuote={onQuote}
+          showReplyAndQuote={true}
+          activeDrop={activeDrop}
+          rootDropId={rootDropId}
+        />
+      </WaveDropsScrollContainer>
 
-      {!isAtBottom && (
-        <button
-          onClick={scrollToBottom}
-          className="tw-absolute tw-bottom-4 tw-right-4 tw-bg-transparent tw-text-iron-200 tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 "
-          aria-label="Scroll to bottom"
-        >
-          <svg
-            className="tw-w-3 tw-h-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </button>
-      )}
+      <WaveDropsScrollBottomButton
+        isAtBottom={isAtBottom}
+        scrollToBottom={scrollToBottom}
+      />
     </div>
   );
 }
