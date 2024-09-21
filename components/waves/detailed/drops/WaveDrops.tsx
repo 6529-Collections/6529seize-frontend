@@ -14,7 +14,11 @@ import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 import WaveDropThreadTrace from "./WaveDropThreadTrace";
 import DropsList from "../../../drops/view/DropsList";
 import { useDebounce } from "react-use";
-import { getDropKey, getStableDropKey } from "../../../../helpers/waves/drop.helpers";
+import {
+  getDropKey,
+  getStableDropKey,
+} from "../../../../helpers/waves/drop.helpers";
+import { motion, AnimatePresence } from "framer-motion";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -85,32 +89,35 @@ export default function WaveDrops({
 
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   useEffect(() => {
-    setDrops(prev => {
-      const newDrops = data?.pages
-        .flatMap((page) =>
-          page.drops.map((drop): ExtendedDrop => {
-            const { key, hash } = getStableDropKey(
-              { ...drop, wave: page.wave },
-              prev
-            );
-            return {
-              ...drop,
-              wave: page.wave,
-              stableKey: key,
-              stableHash: hash,
-            };
-          })
-        )
-        .reverse() ?? [];
-  
+    setDrops((prev) => {
+      const newDrops =
+        data?.pages
+          .flatMap((page) =>
+            page.drops.map((drop): ExtendedDrop => {
+              const { key, hash } = getStableDropKey(
+                { ...drop, wave: page.wave },
+                prev
+              );
+              return {
+                ...drop,
+                wave: page.wave,
+                stableKey: key,
+                stableHash: hash,
+              };
+            })
+          )
+          .reverse() ?? [];
+
       // Create a map to count occurrences of each key
       const keyCount = new Map<string, number>();
-  
+
       // Merge new drops with existing drops, ensuring unique keys
-      return newDrops.map(newDrop => {
-        const existingDrop = prev.find(d => d.stableHash === newDrop.stableHash);
+      return newDrops.map((newDrop) => {
+        const existingDrop = prev.find(
+          (d) => d.stableHash === newDrop.stableHash
+        );
         let finalKey = newDrop.stableKey;
-  
+
         // If the key already exists, append a counter
         if (keyCount.has(finalKey)) {
           const count = keyCount.get(finalKey)! + 1;
@@ -119,9 +126,13 @@ export default function WaveDrops({
         } else {
           keyCount.set(finalKey, 1);
         }
-  
-        return existingDrop 
-          ? { ...newDrop, stableKey: finalKey, stableHash: existingDrop.stableHash }
+
+        return existingDrop
+          ? {
+              ...newDrop,
+              stableKey: finalKey,
+              stableHash: existingDrop.stableHash,
+            }
           : { ...newDrop, stableKey: finalKey };
       });
     });
@@ -226,20 +237,23 @@ export default function WaveDrops({
   }, [haveNewDrops]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isNearBottom, setIsNearBottom] = useState(true);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const scrollToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop =
-        scrollContainerRef.current.scrollHeight;
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
   }, []);
 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      setIsNearBottom(scrollHeight - scrollTop - clientHeight < 100);
+      const { scrollTop } = container;
+      const newIsAtBottom = scrollTop === 0;
+      setIsAtBottom(newIsAtBottom);
     }
   }, []);
 
@@ -252,15 +266,15 @@ export default function WaveDrops({
   }, [handleScroll]);
 
   useEffect(() => {
-    if (isNearBottom) {
+    if (isAtBottom) {
       scrollToBottom();
     }
-  }, [drops, isNearBottom, scrollToBottom]);
+  }, [drops, isAtBottom, scrollToBottom]);
 
-  // Initial scroll to bottom
   useEffect(() => {
     scrollToBottom();
-  }, [scrollToBottom]);
+    setTimeout(() => handleScroll(), 100);
+  }, [scrollToBottom, handleScroll]);
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-14rem)] lg:tw-h-[calc(100vh-13rem)] tw-relative">
@@ -309,6 +323,7 @@ export default function WaveDrops({
       <div
         ref={scrollContainerRef}
         className="tw-flex tw-flex-col-reverse tw-flex-grow tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300"
+        onScroll={handleScroll}
       >
         <div className="tw-flex tw-flex-col-reverse tw-flex-grow">
           <div>
@@ -327,6 +342,29 @@ export default function WaveDrops({
           </div>
         </div>
       </div>
+
+      {!isAtBottom && (
+        <button
+          onClick={scrollToBottom}
+          className="tw-absolute tw-bottom-4 tw-right-4 tw-bg-transparent tw-text-iron-200 tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 "
+          aria-label="Scroll to bottom"
+        >
+          <svg
+            className="tw-w-3 tw-h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
