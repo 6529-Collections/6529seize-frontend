@@ -12,6 +12,7 @@ export default function DropListItemContentMediaVideo({
 
   const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
     if (videoRef.current) {
+      event.stopPropagation();
       event.preventDefault();
       if (videoRef.current.muted) {
         videoRef.current.muted = false;
