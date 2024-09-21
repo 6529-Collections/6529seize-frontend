@@ -14,7 +14,7 @@ interface UploadingFile {
 interface FilePreviewProps {
   readonly files: File[];
   readonly uploadingFiles: UploadingFile[];
-  readonly removeFile: (index: number) => void;
+  readonly removeFile: (file: File) => void;
   readonly disabled: boolean;
 }
 
@@ -67,7 +67,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
             </div>
             {!isUploading && (
               <button
-                onClick={() => removeFile(index)}
+                onClick={() => removeFile(file)}
                 disabled={disabled}
                 className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red-500 tw-rounded-full tw-size-7 tw-opacity-0 group-hover:tw-opacity-100 hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 ${
                   disabled ? "tw-pointer-events-none" : ""

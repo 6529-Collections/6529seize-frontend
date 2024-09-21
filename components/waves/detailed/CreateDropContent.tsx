@@ -32,6 +32,7 @@ import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { CreateDropContentFiles } from "./CreateDropContentFiles";
 
 export type CreateDropMetadataType =
   | {
@@ -59,7 +60,9 @@ interface CreateDropContent {
   readonly onCancelReplyQuote: () => void;
   readonly wave: Wave;
   readonly drop: CreateDropConfig | null;
-  readonly setDrop: (drop: CreateDropConfig | null) => void;
+  readonly setDrop: React.Dispatch<
+    React.SetStateAction<CreateDropConfig | null>
+  >;
   readonly isStormMode: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly submitDrop: (dropRequest: CreateDropRequest) => void;
@@ -164,12 +167,11 @@ const handleDropPart = (
   };
 };
 
-interface UploadingFile {
+export interface UploadingFile {
   file: File;
   isUploading: boolean;
   progress: number;
 }
-
 
 const uploadFileWithProgress = (
   url: string,
@@ -636,7 +638,6 @@ export default function CreateDropContent({
       setFiles([]);
       refreshState();
       submitDrop(requestBody);
-
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
@@ -745,9 +746,22 @@ export default function CreateDropContent({
     setEditorState(newEditorState);
   };
 
-  const removeFile = (index: number) => {
-    const newFiles = files.filter((_, i) => i !== index);
-    setFiles(newFiles);
+  const removeFile = (file: File, partIndex?: number) => {
+    if (partIndex !== undefined) {
+      // Remove file from a specific part
+      setDrop((prevDrop) => {
+        if (!prevDrop) return null;
+        const newParts = [...prevDrop.parts];
+        newParts[partIndex] = {
+          ...newParts[partIndex],
+          media: newParts[partIndex].media.filter((f) => f !== file),
+        };
+        return { ...prevDrop, parts: newParts };
+      });
+    } else {
+      // Remove file from the current files array
+      setFiles((prevFiles) => prevFiles.filter((f) => f !== file));
+    }
   };
 
   useEffect(() => {
@@ -881,23 +895,13 @@ export default function CreateDropContent({
           </motion.div>
         )}
       </AnimatePresence>
-      <AnimatePresence>
-        {!!files.length && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <FilePreview
-              files={files}
-              uploadingFiles={uploadingFiles}
-              removeFile={removeFile}
-              disabled={submitting}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <CreateDropContentFiles
+        parts={drop?.parts ?? []}
+        files={files}
+        uploadingFiles={uploadingFiles}
+        removeFile={removeFile}
+        disabled={submitting}
+      />
     </div>
   );
 }
