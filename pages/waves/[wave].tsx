@@ -9,7 +9,7 @@ import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper
 import { Wave } from "../../generated/models/Wave";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext, TitleType } from "../../components/auth/Auth";
+import { AuthContext } from "../../components/auth/Auth";
 import { AnimatePresence, motion } from "framer-motion";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -40,14 +40,12 @@ export default function WavePage() {
   };
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(getBreadCrumbs());
-  useEffect(() => setBreadcrumbs(getBreadCrumbs()), [wave]);
-  useEffect(
-    () =>
-      setTitle({
-        title: `${wave?.name ?? "Waves"} | 6529 SEIZE`,
-      }),
-    [wave]
-  );
+  useEffect(() => {
+    setTitle({
+      title: `${wave?.name ?? "Waves"} | 6529 SEIZE`,
+    });
+    setBreadcrumbs(getBreadCrumbs());
+  }, [wave]);
 
   return (
     <>

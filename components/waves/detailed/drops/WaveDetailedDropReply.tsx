@@ -5,7 +5,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
-import { useRouter } from "next/router";
+import Link from 'next/link';
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
@@ -18,7 +18,6 @@ export default function WaveDetailedDropReply({
   dropPartId,
   maybeDrop,
 }: WaveDetailedDropReplyProps) {
-  const router = useRouter();
   const {
     data: drop,
     isFetching,
@@ -82,14 +81,10 @@ export default function WaveDetailedDropReply({
       <div className="tw-relative tw-flex tw-justify-end">
         <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
       </div>
-      <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5 tw-cursor-pointer">
+      <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
         <WaveDetailedDropReplyAuthor isFetching={isFetching} drop={drop} />
         <div>
-          <div
-            onClick={() =>
-              router.push(`/waves/${drop?.wave.id}?drop=${drop?.id}`)
-            }
-          >
+          <Link href={`/waves/${drop?.wave.id}?drop=${drop?.id}`} className="tw-no-underline">
             <DropPartMarkdown
               partContent={content}
               mentionedUsers={drop?.mentioned_users ?? []}
@@ -97,7 +92,7 @@ export default function WaveDetailedDropReply({
               onImageLoaded={() => undefined}
               textSize="sm"
             />
-          </div>
+          </Link>
         </div>
       </div>
     </div>

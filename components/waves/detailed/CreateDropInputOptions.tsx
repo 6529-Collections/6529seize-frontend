@@ -95,8 +95,8 @@ const CreateDropInputOptions: React.FC<CreateDropInputOptionsProps> = ({
               <span>Upload a file</span>
             </label>
 
-            <div
-              className={`tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 ${
+            <button
+              className={`tw-bg-transparent tw-border-none tw-px-2 tw-py-1.5 tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-w-full tw-text-left ${
                 isRequiredMetadataMissing
                   ? "tw-text-yellow hover:tw-bg-[#FDB022]/40"
                   : "tw-text-iron-400 hover:tw-bg-primary-500 hover:tw-text-iron-50"
@@ -113,6 +113,7 @@ const CreateDropInputOptions: React.FC<CreateDropInputOptionsProps> = ({
                 strokeWidth="1.5"
                 stroke="currentColor"
                 className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -121,7 +122,7 @@ const CreateDropInputOptions: React.FC<CreateDropInputOptionsProps> = ({
                 />
               </svg>
               <span>Add metadata</span>
-            </div>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

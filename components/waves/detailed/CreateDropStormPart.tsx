@@ -1,7 +1,6 @@
 import React from "react";
-import { CreateDropPart } from "../../../entities/IDrop";
+import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
-import { ReferencedNft } from "../../../entities/IDrop";
 import DropPartMarkdown from "../../drops/view/part/DropPartMarkdown";
 
 interface CreateDropStormPartProps {

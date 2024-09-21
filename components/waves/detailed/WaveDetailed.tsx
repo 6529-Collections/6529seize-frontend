@@ -1,5 +1,5 @@
 import { Wave } from "../../../generated/models/Wave";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import WaveDetailedDesktop from "./WaveDetailedDesktop";
 import { createBreakpoint } from "react-use";
 import WaveDetailedMobile from "./WaveDetailedMobile";

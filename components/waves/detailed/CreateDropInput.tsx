@@ -10,7 +10,12 @@ import {
   useState,
   useRef,
 } from "react";
-import { EditorState, RootNode } from "lexical";
+import {
+  EditorState,
+  RootNode,
+  COMMAND_PRIORITY_CRITICAL,
+  createCommand,
+} from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -19,7 +24,7 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import { TRANSFORMERS } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -45,9 +50,6 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import ClearEditorPlugin, {
   ClearEditorPluginHandles,
 } from "../../drops/create/lexical/plugins/ClearEditorPlugin";
-import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../../drops/create/lexical/transformers/ImageTransformer";
 import NewMentionsPlugin, {
   NewMentionsPluginHandles,
 } from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
@@ -59,7 +61,6 @@ import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPast
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { ActiveDropAction } from "./WaveDetailedContent";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import StormButton from "./StormButton";
 import CreateDropInputOptions from "./CreateDropInputOptions";
@@ -213,21 +214,6 @@ const CreateDropInput = forwardRef<
         )?.focus();
       },
     }));
-
-    const currentPartCount = (drop?.parts.length ?? 0) + 1;
-    const [charsCount, setCharsCount] = useState(0);
-    useEffect(() => {
-      editorState?.read(() =>
-        setCharsCount(
-          $convertToMarkdownString([
-            ...TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            HASHTAG_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-          ])?.length ?? 0
-        )
-      );
-    }, [editorState]);
 
     const breakIntoStorm = () => {
       onDropPart();

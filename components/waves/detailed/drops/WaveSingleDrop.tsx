@@ -6,14 +6,12 @@ import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function WaveSingleDrop({
   dropId,
-  availableCredit,
 }: {
   readonly dropId: string;
-  readonly availableCredit: number | null;
 }) {
   const [activePartIndex, setActivePartIndex] = useState(0);
 
@@ -25,7 +23,6 @@ export default function WaveSingleDrop({
       }),
     placeholderData: keepPreviousData,
   });
-
 
   if (!drop) {
     return null;

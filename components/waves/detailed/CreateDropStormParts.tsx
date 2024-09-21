@@ -1,8 +1,5 @@
-import React, { useContext, useEffect } from "react";
-import {
-  CreateDropPart,
-  ReferencedNft,
-} from "../../../entities/IDrop";
+import React, { useContext } from "react";
+import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { AuthContext } from "../../auth/Auth";
 import { cicToType } from "../../../helpers/Helpers";
@@ -29,7 +26,6 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const cicType = cicToType(connectedProfile?.cic.cic_rating ?? 0);
 
-  
   return (
     <div className="tw-space-y-4 tw-pb-3">
       <div className="tw-bg-transparent tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-py-2 tw-transition-colors tw-duration-300">

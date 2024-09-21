@@ -39,7 +39,7 @@ const WaveDropThreadTrace: React.FC<WaveDropThreadTraceProps> = ({
     },
   });
 
-  if (!data || !data.trace) {
+  if (!data?.trace) {
     return null;
   }
 
@@ -53,7 +53,7 @@ const WaveDropThreadTrace: React.FC<WaveDropThreadTraceProps> = ({
           {index !== (data.trace?.length ?? 0) - 1 && (
             <div className="tw-absolute tw-left-9 tw-top-2 tw-bottom-0 tw-w-[1px] tw-bg-iron-700"></div>
           )}
-          <WaveSingleDrop dropId={drop.drop_id} availableCredit={null} />
+          <WaveSingleDrop dropId={drop.drop_id} />
         </div>
       )) ?? null}
     </>

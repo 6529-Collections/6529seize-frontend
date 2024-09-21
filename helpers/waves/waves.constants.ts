@@ -1,6 +1,5 @@
 import { WaveCreditType } from "../../generated/models/WaveCreditType";
 import { WaveMetadataType } from "../../generated/models/WaveMetadataType";
-import { WaveParticipationRequirement } from "../../generated/models/WaveParticipationRequirement";
 import { WaveType } from "../../generated/models/WaveType";
 import {
   CreateWaveGroupConfigType,

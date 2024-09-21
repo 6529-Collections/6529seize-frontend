@@ -670,20 +670,22 @@ export default function CreateDropContent({
     }
   };
 
-  const getMissingRequirements = useMemo(
-    () => (): MissingRequirements => {
-      const missingMetadata = metadata
+  const getMissingRequirements = useMemo(() => {
+    const getMissingMetadata = () => 
+      metadata
         .filter(isRequiredMetadataMissing)
-        .map((item) => item.key as string);
+        .map(item => item.key as string);
 
-      const missingMedia = wave.participation.required_media.filter(
-        (media) => !files.some((file) => isMediaTypeMatching(file, media))
+    const getMissingMedia = () =>
+      wave.participation.required_media.filter(
+        media => !files.some(file => isMediaTypeMatching(file, media))
       );
 
-      return { metadata: missingMetadata, media: missingMedia };
-    },
-    [metadata, files, wave.participation.required_media]
-  );
+    return (): MissingRequirements => ({
+      metadata: getMissingMetadata(),
+      media: getMissingMedia()
+    });
+  }, [metadata, files, wave.participation.required_media]);
 
   const [missingRequirements, setMissingRequirements] =
     useState<MissingRequirements>({

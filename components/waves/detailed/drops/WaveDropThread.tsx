@@ -6,9 +6,9 @@ import WaveDrops from "./WaveDrops";
 import { ActiveDropAction, ActiveDropState } from "../WaveDetailedContent";
 
 interface WaveDropThreadProps {
-  rootDropId: string;
-  onBackToList: () => void;
-  wave: Wave;
+  readonly rootDropId: string;
+  readonly onBackToList: () => void;
+  readonly wave: Wave;
 }
 
 export default function WaveDropThread({

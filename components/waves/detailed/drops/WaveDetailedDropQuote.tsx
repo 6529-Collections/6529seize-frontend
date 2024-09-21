@@ -58,27 +58,43 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
     setQuotedPart(part);
   }, [drop]);
 
+  const renderProfilePicture = () => {
+    if (!drop) {
+      return (
+        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900 tw-animate-pulse"></div>
+      );
+    }
+
+    if (drop.author.pfp) {
+      return (
+        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden">
+          <img
+            src={drop.author.pfp}
+            alt={`${drop.author.handle}'s profile picture`}
+            className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-cover"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900"></div>
+    );
+  };
+
+  const navigateToDropInWave = () => {
+    if (drop?.wave.id && drop?.id) {
+      router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+    }
+  };
+
   return (
     <div className="tw-bg-iron-950 tw-rounded-xl tw-px-4 tw-py-2 tw-mt-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
       <div className="tw-relative tw-group tw-w-full tw-flex tw-flex-col">
         <div className="tw-flex tw-gap-x-2">
           <div className="tw-h-6 tw-w-6 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-md">
             <div className="tw-rounded-md tw-h-full tw-w-full">
-              {drop ? (
-                drop.author.pfp ? (
-                  <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden">
-                    <img
-                      src={drop.author.pfp}
-                      alt={`${drop.author.handle}'s profile picture`}
-                      className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900"></div>
-                )
-              ) : (
-                <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900 tw-animate-pulse"></div>
-              )}
+              {renderProfilePicture()}
             </div>
           </div>
           <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
@@ -119,8 +135,13 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
               className="tw-mt-0.5 tw-cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
-                if (drop?.wave.id && drop?.id) {
-                  router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+                navigateToDropInWave();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigateToDropInWave();
                 }
               }}
               role="button"

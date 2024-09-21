@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
@@ -60,7 +60,6 @@ export default function WaveDetailedContent({
     setActiveDrop(null);
   };
 
-
   return (
     <AnimatePresence mode="wait">
       {activeDropId ? (
@@ -84,7 +83,6 @@ export default function WaveDetailedContent({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-   
         >
           <WaveDrops
             wave={wave}

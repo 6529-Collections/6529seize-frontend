@@ -1,8 +1,8 @@
-import React from "react";
 import Link from "next/link";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
-import { UserCICAndLevelSize } from "../../../user/utils/UserCICAndLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "../../../user/utils/UserCICAndLevel";
 import { Drop } from "../../../../generated/models/Drop";
 
 interface WaveDetailedDropHeaderProps {

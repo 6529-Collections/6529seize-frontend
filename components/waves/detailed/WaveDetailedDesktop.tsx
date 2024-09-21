@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
 import { Wave } from "../../../generated/models/Wave";
 import WaveHeader from "./header/WaveHeader";
 import WaveLeaderboard from "./leaderboard/WaveLeaderboard";

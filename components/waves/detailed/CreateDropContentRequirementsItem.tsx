@@ -44,6 +44,11 @@ const CreateDropContentRequirementsItem: React.FC<
     }
   };
 
+  const getButtonColorClass = () => {
+    if (disabled) return "tw-opacity-50 tw-cursor-not-allowed";
+    return isValid ? "tw-text-green" : "tw-text-yellow";
+  };
+
   return (
     <Tippy
       content={
@@ -60,8 +65,8 @@ const CreateDropContentRequirementsItem: React.FC<
                   : "Missing required metadata:"}
               </p>
               <ul className="tw-list-disc tw-list-inside tw-text-white">
-                {missingItems.map((item, index) => (
-                  <li key={index} className="tw-capitalize">
+                {missingItems.map((item) => (
+                  <li key={item} className="tw-capitalize">
                     {item}
                   </li>
                 ))}
@@ -76,13 +81,7 @@ const CreateDropContentRequirementsItem: React.FC<
       }
     >
       <button
-        className={`tw-flex tw-bg-transparent tw-border-none tw-items-center tw-gap-x-1.5 ${
-          disabled
-            ? "tw-opacity-50 tw-cursor-not-allowed"
-            : isValid
-            ? "tw-text-green"
-            : "tw-text-yellow"
-        }`}
+        className={`tw-flex tw-bg-transparent tw-border-none tw-items-center tw-gap-x-1.5 ${getButtonColorClass()}`}
         onClick={handleClick}
         type="button"
         disabled={disabled}

@@ -1,12 +1,11 @@
 import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
-import { useState } from "react";
 import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { fetchUrl } from "../../../services/6529api";
 import { formatAddress, parseIpfsUrl } from "../../../helpers/Helpers";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {

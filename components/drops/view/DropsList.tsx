@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { getDropKey } from "../../../helpers/waves/drop.helpers";
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../waves/detailed/drops/WaveDrops";

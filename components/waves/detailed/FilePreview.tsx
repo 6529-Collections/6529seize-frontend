@@ -1,13 +1,11 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner, faTimes } from "@fortawesome/free-solid-svg-icons";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 
 interface FileItem {
-  file: File
-  label: string | null
+  file: File;
+  label: string | null;
 }
 
 interface UploadingFile {
@@ -17,7 +15,7 @@ interface UploadingFile {
 }
 
 interface FilePreviewProps {
-  readonly files: FileItem[]
+  readonly files: FileItem[];
   readonly uploadingFiles: UploadingFile[];
   readonly removeFile: (file: File) => void;
   readonly disabled: boolean;
@@ -41,11 +39,13 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   return (
     <div className="tw-flex tw-flex-wrap tw-gap-2 tw-mt-2">
       {files.map((file, index) => {
-        const uploadingFile = uploadingFiles.find((uf) => uf.file === file.file);
+        const uploadingFile = uploadingFiles.find(
+          (uf) => uf.file === file.file
+        );
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
         return (
-          <div key={index} className="tw-relative tw-group">
+          <div key={file.file.name} className="tw-relative tw-group">
             <div className="tw-h-[16rem] tw-w-[16rem] tw-bg-iron-800 tw-rounded-lg tw-overflow-hidden">
               {file.file.type.startsWith("image/") ? (
                 <img

@@ -6,7 +6,6 @@ import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 import { ActiveDropState } from "../WaveDetailedContent";
 
 enum GroupingThreshold {
@@ -63,11 +62,13 @@ export default function WaveDetailedDrop({
   const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop, rootDropId);
   const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop, rootDropId);
 
-  const groupingClass = shouldGroupWithPreviousDrop
-    ? ""
-    : shouldGroupWithNextDrop
-    ? "tw-pt-4"
-    : "tw-py-4";
+  const getGroupingClass = () => {
+    if (shouldGroupWithPreviousDrop) return "";
+    if (shouldGroupWithNextDrop) return "tw-pt-4";
+    return "tw-py-4";
+  };
+
+  const groupingClass = getGroupingClass();
 
   return (
     <div

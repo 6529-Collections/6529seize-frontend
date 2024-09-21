@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
-import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
@@ -36,7 +35,7 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
   const updateContainerHeight = useCallback(() => {
     if (!contentRef.current) return;
     const firstImg = contentRef.current.querySelector("img");
-    if (firstImg && firstImg.complete) {
+    if (firstImg?.complete) {
       const imgRect = firstImg.getBoundingClientRect();
       const containerRect = contentRef.current.getBoundingClientRect();
       if (imgRect.top <= containerRect.bottom) {

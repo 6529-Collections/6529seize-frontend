@@ -6,9 +6,9 @@ import WaveDetailedDropPartOverflow from "./WaveDetailedDropPartOverflow";
 import { useRouter } from "next/router";
 
 interface WaveDetailedDropPartProps {
-  drop: Drop;
-  activePartIndex: number;
-  setActivePartIndex: (index: number) => void;
+  readonly drop: Drop;
+  readonly activePartIndex: number;
+  readonly setActivePartIndex: (index: number) => void;
 }
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
@@ -25,22 +25,27 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     const haveNextPart = activePartIndex < drop.parts.length - 1;
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
+    const [showMore, setShowMore] = useState(false);
+
     const checkOverflow = () => {
-      const tolerance = 2; // Adjust this value as needed
+      const tolerance = 2;
       if (containerRef.current) {
         const { scrollHeight, clientHeight } = containerRef.current;
         setIsOverflowing(scrollHeight > clientHeight + tolerance);
       }
     };
-    const [showMore, setShowMore] = useState(false);
+
+    const handleClick = () => {
+      router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+    };
 
     return (
       <div 
-        className="tw-cursor-pointer"
-        onClick={() => router.push(`/waves/${drop.wave.id}?drop=${drop.id}`)}
+        onClick={handleClick}
+        className="tw-cursor-pointer tw-no-underline"
         role="button"
         tabIndex={0}
-  
+        onKeyDown={(e) => e.key === 'Enter' && handleClick()}
       >
         <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
           <div

@@ -14,11 +14,9 @@ import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 import WaveDropThreadTrace from "./WaveDropThreadTrace";
 import DropsList from "../../../drops/view/DropsList";
 import { useDebounce } from "react-use";
-import {
-  getDropKey,
-  getStableDropKey,
-} from "../../../../helpers/waves/drop.helpers";
-import { motion, AnimatePresence } from "framer-motion";
+import { getStableDropKey } from "../../../../helpers/waves/drop.helpers";
+import { WaveMin } from "../../../../generated/models/WaveMin";
+import { DropWithoutWave } from "../../../../generated/models/DropWithoutWave";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -36,6 +34,85 @@ export interface ExtendedDrop extends Drop {
   readonly stableKey: string;
   readonly stableHash: string;
 }
+
+const createExtendedDrop = (
+  drop: DropWithoutWave,
+  wave: WaveMin,
+  prevDrops: ExtendedDrop[]
+): ExtendedDrop => {
+  const { key, hash } = getStableDropKey({ ...drop, wave }, prevDrops);
+  return {
+    ...drop,
+    wave,
+    stableKey: key,
+    stableHash: hash,
+  };
+};
+
+const processWaveDropsFeed = (
+  page: WaveDropsFeed,
+  prevDrops: ExtendedDrop[]
+): ExtendedDrop[] => {
+  return page.drops.map((drop) =>
+    createExtendedDrop(drop, page.wave, prevDrops)
+  );
+};
+
+const mapToExtendedDrops = (
+  pages: WaveDropsFeed[],
+  prevDrops: ExtendedDrop[]
+): ExtendedDrop[] => {
+  return pages
+    .flatMap((page) => processWaveDropsFeed(page, prevDrops))
+    .reverse();
+};
+
+const incrementKeyCount = (
+  keyCount: Map<string, number>,
+  key: string
+): number => {
+  const count = (keyCount.get(key) || 0) + 1;
+  keyCount.set(key, count);
+  return count;
+};
+
+const generateFinalKey = (
+  keyCount: Map<string, number>,
+  initialKey: string
+): string => {
+  const count = incrementKeyCount(keyCount, initialKey);
+  return count > 1 ? `${initialKey}-${count}` : initialKey;
+};
+
+const createUpdatedDrop = (
+  drop: ExtendedDrop,
+  finalKey: string,
+  existingDrop: ExtendedDrop | undefined
+): ExtendedDrop => {
+  if (existingDrop) {
+    return {
+      ...drop,
+      stableKey: finalKey,
+      stableHash: existingDrop.stableHash,
+    };
+  }
+  return { ...drop, stableKey: finalKey };
+};
+
+const generateUniqueKeys = (
+  drops: ExtendedDrop[],
+  prevDrops: ExtendedDrop[]
+): ExtendedDrop[] => {
+  const keyCount = new Map<string, number>();
+
+  return drops.map((drop) => {
+    const existingDrop = prevDrops.find(
+      (d) => d.stableHash === drop.stableHash
+    );
+    const finalKey = generateFinalKey(keyCount, drop.stableKey);
+    return createUpdatedDrop(drop, finalKey, existingDrop);
+  });
+};
 
 export default function WaveDrops({
   wave,
@@ -90,51 +167,8 @@ export default function WaveDrops({
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   useEffect(() => {
     setDrops((prev) => {
-      const newDrops =
-        data?.pages
-          .flatMap((page) =>
-            page.drops.map((drop): ExtendedDrop => {
-              const { key, hash } = getStableDropKey(
-                { ...drop, wave: page.wave },
-                prev
-              );
-              return {
-                ...drop,
-                wave: page.wave,
-                stableKey: key,
-                stableHash: hash,
-              };
-            })
-          )
-          .reverse() ?? [];
-
-      // Create a map to count occurrences of each key
-      const keyCount = new Map<string, number>();
-
-      // Merge new drops with existing drops, ensuring unique keys
-      return newDrops.map((newDrop) => {
-        const existingDrop = prev.find(
-          (d) => d.stableHash === newDrop.stableHash
-        );
-        let finalKey = newDrop.stableKey;
-
-        // If the key already exists, append a counter
-        if (keyCount.has(finalKey)) {
-          const count = keyCount.get(finalKey)! + 1;
-          finalKey = `${finalKey}-${count}`;
-          keyCount.set(newDrop.stableKey, count);
-        } else {
-          keyCount.set(finalKey, 1);
-        }
-
-        return existingDrop
-          ? {
-              ...newDrop,
-              stableKey: finalKey,
-              stableHash: existingDrop.stableHash,
-            }
-          : { ...newDrop, stableKey: finalKey };
-      });
+      const newDrops = data?.pages ? mapToExtendedDrops(data.pages, prev) : [];
+      return generateUniqueKeys(newDrops, prev);
     });
   }, [data]);
 
