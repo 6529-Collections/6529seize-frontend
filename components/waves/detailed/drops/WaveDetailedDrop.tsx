@@ -13,6 +13,25 @@ enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
 
+const shouldGroupWithDrop = (currentDrop: Drop, otherDrop: Drop | null, rootDropId: string | null): boolean => {
+  if (!otherDrop || currentDrop.parts.length > 1) {
+    return false;
+  }
+
+  const isSameAuthor = currentDrop.author.handle === otherDrop.author.handle;
+  const isWithinTimeThreshold = Math.abs(currentDrop.created_at - otherDrop.created_at) <= GroupingThreshold.TIME_DIFFERENCE;
+
+  if (!isSameAuthor || !isWithinTimeThreshold) {
+    return false;
+  }
+
+  const bothNotReplies = !currentDrop.reply_to && !otherDrop.reply_to;
+  const currentReplyToRoot = currentDrop.reply_to?.drop_id === rootDropId;
+  const repliesInSameThread = currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
+
+  return bothNotReplies || currentReplyToRoot || repliesInSameThread;
+};
+
 interface WaveDetailedDropProps {
   readonly drop: Drop;
   readonly previousDrop: Drop | null;
@@ -41,18 +60,8 @@ export default function WaveDetailedDrop({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithDrop = (otherDrop: Drop | null, side: "previous" | "next") =>
-    !isStorm &&
-    otherDrop &&
-    otherDrop.author.handle === drop.author.handle &&
-    Math.abs(
-      new Date(otherDrop.created_at).getTime() -
-        new Date(drop.created_at).getTime()
-    ) <= GroupingThreshold.TIME_DIFFERENCE &&
-    (side === "next" || (!drop.reply_to || drop.reply_to.drop_id === rootDropId));
-
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(previousDrop, "previous");
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(nextDrop, "next");
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop, rootDropId);
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop, rootDropId);
 
   const groupingClass = shouldGroupWithPreviousDrop
     ? ""
@@ -68,17 +77,19 @@ export default function WaveDetailedDrop({
           : "tw-bg-iron-950 hover:tw-bg-iron-900"
       } ${groupingClass}`}
     >
-      {drop.reply_to && drop.reply_to.drop_id !== rootDropId && (
-        <WaveDetailedDropReply
-          dropId={drop.reply_to.drop_id}
-          dropPartId={drop.reply_to.drop_part_id}
-          maybeDrop={
-            drop.reply_to.drop
-              ? { ...drop.reply_to.drop, wave: drop.wave }
-              : null
-          }
-        />
-      )}
+      {drop.reply_to &&
+        drop.reply_to.drop_id !== rootDropId &&
+        drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
+          <WaveDetailedDropReply
+            dropId={drop.reply_to.drop_id}
+            dropPartId={drop.reply_to.drop_part_id}
+            maybeDrop={
+              drop.reply_to.drop
+                ? { ...drop.reply_to.drop, wave: drop.wave }
+                : null
+            }
+          />
+        )}
       <div className="tw-flex tw-gap-x-3">
         {!shouldGroupWithPreviousDrop && (
           <WaveDetailedDropAuthorPfp drop={drop} />

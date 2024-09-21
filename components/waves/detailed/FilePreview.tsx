@@ -5,6 +5,11 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 
+interface FileItem {
+  file: File
+  label: string | null
+}
+
 interface UploadingFile {
   file: File;
   isUploading: boolean;
@@ -12,7 +17,7 @@ interface UploadingFile {
 }
 
 interface FilePreviewProps {
-  readonly files: File[];
+  readonly files: FileItem[]
   readonly uploadingFiles: UploadingFile[];
   readonly removeFile: (file: File) => void;
   readonly disabled: boolean;
@@ -36,21 +41,21 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   return (
     <div className="tw-flex tw-flex-wrap tw-gap-2 tw-mt-2">
       {files.map((file, index) => {
-        const uploadingFile = uploadingFiles.find((uf) => uf.file === file);
+        const uploadingFile = uploadingFiles.find((uf) => uf.file === file.file);
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
         return (
           <div key={index} className="tw-relative tw-group">
             <div className="tw-h-[16rem] tw-w-[16rem] tw-bg-iron-800 tw-rounded-lg tw-overflow-hidden">
-              {file.type.startsWith("image/") ? (
+              {file.file.type.startsWith("image/") ? (
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={URL.createObjectURL(file.file)}
                   alt={`Preview ${index}`}
                   className="tw-w-full tw-h-full tw-object-cover"
                 />
               ) : (
                 <div className="tw-flex tw-items-center tw-justify-center tw-w-full tw-h-full tw-text-iron-400">
-                  {file.type.startsWith("video/") ? "🎥" : "📁"}
+                  {file.file.type.startsWith("video/") ? "🎥" : "📁"}
                 </div>
               )}
               {isUploading && (
@@ -65,9 +70,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                 </>
               )}
             </div>
+            {file.label && (
+              <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-bg-iron-800/80 tw-text-white tw-px-2 tw-py-1 tw-rounded tw-text-sm tw-truncate">
+                {file.label}
+              </div>
+            )}
             {!isUploading && (
               <button
-                onClick={() => removeFile(file)}
+                onClick={() => removeFile(file.file)}
                 disabled={disabled}
                 className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red-500 tw-rounded-full tw-size-7 tw-opacity-0 group-hover:tw-opacity-100 hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 ${
                   disabled ? "tw-pointer-events-none" : ""

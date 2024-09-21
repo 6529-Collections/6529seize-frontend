@@ -12,6 +12,7 @@ enum FileSource {
 interface FileWithSource {
   file: File;
   source: FileSource;
+  label: string | null;
   partIndex?: number;
 }
 
@@ -35,10 +36,15 @@ export const CreateDropContentFiles: React.FC<CreateDropContentFilesProps> = ({
       part.media.map((file) => ({
         file,
         source: FileSource.Parts,
+        label: parts.length ? `Part ${index + 1}` : null,
         partIndex: index,
       }))
     ),
-    ...files.map((file) => ({ file, source: FileSource.Files })),
+    ...files.map((file) => ({
+      file,
+      source: FileSource.Files,
+      label: parts.length ? `Part ${parts.length + 1}` : null,
+    })),
   ];
 
   return (
@@ -52,7 +58,10 @@ export const CreateDropContentFiles: React.FC<CreateDropContentFilesProps> = ({
             transition={{ duration: 0.3 }}
           >
             <FilePreview
-              files={allFiles.map((fileWithSource) => fileWithSource.file)}
+              files={allFiles.map((fileWithSource) => ({
+                file: fileWithSource.file,
+                label: fileWithSource.label,
+              }))}
               uploadingFiles={uploadingFiles}
               removeFile={(file) => {
                 const fileWithSource = allFiles.find((f) => f.file === file);

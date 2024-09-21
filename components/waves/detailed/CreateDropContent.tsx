@@ -24,7 +24,6 @@ import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { Drop } from "../../../generated/models/Drop";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import FilePreview from "./FilePreview";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
 import { Wave } from "../../../generated/models/Wave";
