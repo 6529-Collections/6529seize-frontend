@@ -10,6 +10,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ProfileAvailableDropRateResponse } from "../../../entities/IProfile";
 import FeedWrapper from "../feed/FeedWrapper";
+import CircleLoader, { CircleLoaderSize } from "../../distribution-plan-tool/common/CircleLoader";
 
 export default function MyStream() {
   const { connectedProfile, activeProfileProxy, setTitle } =
@@ -190,9 +191,9 @@ export default function MyStream() {
             <button
               onClick={onRefresh}
               type="button"
-              className="tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
+              className="tw-border-none tw-bg-primary-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-md tw-cursor-pointer tw-transition-all tw-flex tw-items-center tw-gap-2 hover:tw-bg-primary-600 tw-text-xs tw-font-medium"
             >
-              New items available
+              New items available {isFetching && <CircleLoader size={CircleLoaderSize.SMALL}/>}
             </button>
           </div>
         )}

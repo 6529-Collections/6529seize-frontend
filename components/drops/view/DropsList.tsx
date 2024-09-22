@@ -1,9 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
-import { ExtendedDrop } from "../../waves/detailed/drops/WaveDrops";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
+type DropActionHandler = ({
+  drop,
+  partId,
+}: {
+  drop: Drop;
+  partId: number;
+}) => void;
 
 interface DropsListProps {
   readonly drops: ExtendedDrop[];
@@ -12,8 +20,8 @@ interface DropsListProps {
   readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
   readonly onIntersection: (state: boolean) => void;
-  readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
-  readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
+  readonly onReply: DropActionHandler;
+  readonly onQuote: DropActionHandler;
 }
 
 export default function DropsList({
@@ -29,33 +37,15 @@ export default function DropsList({
   const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
     number | null
   >(null);
-  const intersectionElementRef = useRef<HTMLDivElement>(null);
+  const intersectionElementRef = useIntersectionObserver(onIntersection);
 
   useEffect(() => {
     setIntersectionTargetIndex(drops.length >= 10 ? 9 : drops.length - 1);
   }, [drops]);
 
-  useEffect(() => {
-    if (intersectionElementRef.current) {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            onIntersection(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
-
-      observer.observe(intersectionElementRef.current);
-
-      return () => observer.disconnect();
-    }
-  }, [onIntersection, intersectionTargetIndex]);
-
-  return (
-    <div className="tw-flex tw-flex-col">
-      {drops.map((drop, i) => (
+  const memoizedDrops = useMemo(
+    () =>
+      drops.map((drop, i) => (
         <div key={drop.stableKey}>
           {intersectionTargetIndex === i && (
             <div ref={intersectionElementRef}>
@@ -74,7 +64,18 @@ export default function DropsList({
             showReplyAndQuote={showReplyAndQuote}
           />
         </div>
-      ))}
-    </div>
+      )),
+    [
+      drops,
+      intersectionTargetIndex,
+      showWaveInfo,
+      activeDrop,
+      onReply,
+      onQuote,
+      rootDropId,
+      showReplyAndQuote,
+    ]
   );
+
+  return <div className="tw-flex tw-flex-col">{memoizedDrops}</div>;
 }
