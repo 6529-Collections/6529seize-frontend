@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Wave } from "../../../../generated/models/Wave";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -11,21 +11,26 @@ interface WaveHeaderPinnedProps {
 
 const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useClickAway(dropdownRef, () => {
-    if (isOpen) {
-      setIsOpen(false);
-    }
+    if (isOpen) setIsOpen(false);
   });
 
   useKeyPressEvent("Escape", () => {
-    if (isOpen) {
-      setIsOpen(false);
-    }
+    if (isOpen) setIsOpen(false);
   });
 
-  const buttonRef = useRef<HTMLButtonElement>(null);
   return (
     <div ref={dropdownRef} className="tw-relative">
       <button
@@ -55,16 +60,28 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
           {isOpen && (
             <motion.div
               ref={portalRef}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
+              initial={isMobile ? { opacity: 0, y: 10 } : { opacity: 0, x: -10 }}
+              animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+              exit={isMobile ? { opacity: 0, y: 10 } : { opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
               style={{
                 position: "absolute",
-                top: buttonRef.current?.getBoundingClientRect().top ?? 0,
-                left: (buttonRef.current?.getBoundingClientRect().right ?? 0) + 8,
+                ...(isMobile
+                  ? {
+                      top: (buttonRef.current?.getBoundingClientRect().bottom ?? 0) + 8,
+                      left: 0,
+                      right: 0,
+                    }
+                  : {
+                      top: buttonRef.current?.getBoundingClientRect().top ?? 0,
+                      left: (buttonRef.current?.getBoundingClientRect().right ?? 0) + 8,
+                    }),
               }}
-              className="tw-z-50 tw-max-w-[672px] tw-w-full tw-origin-top-left tw-rounded-lg tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1"
+              className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 ${
+                isMobile
+                  ? "tw-w-full tw-rounded-lg"
+                  : "lg:tw-max-w-[672px] tw-w-full tw-rounded-lg tw-origin-top-left"
+              }`}
             >
               <WaveDetailedDrop
                 drop={wave.description_drop}

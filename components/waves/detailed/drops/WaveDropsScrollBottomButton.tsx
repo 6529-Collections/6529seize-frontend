@@ -14,7 +14,7 @@ export const WaveDropsScrollBottomButton: React.FC<WaveDropsScrollBottomButtonPr
   return (
     <button
       onClick={scrollToBottom}
-      className="tw-absolute tw-bottom-4 tw-right-4 tw-bg-transparent tw-text-iron-200 tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300"
+      className="tw-border tw-border-solid tw-border-iron-700 tw-absolute tw-bottom-4 tw-right-4 tw-bg-iron-800 tw-text-iron-200 tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
       aria-label="Scroll to bottom"
     >
       <svg
