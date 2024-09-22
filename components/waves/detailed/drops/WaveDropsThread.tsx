@@ -17,7 +17,7 @@ const WaveDropsThreadHeader: React.FC<WaveDropsThreadHeaderProps> = ({
   if (!rootDropId) return null;
 
   return (
-    <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950">
+    <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-mb-2 tw-border-iron-700 tw-border-solid">
       {onBackToList && <WaveDropsBackButton onBackToList={onBackToList} />}
       <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
     </div>

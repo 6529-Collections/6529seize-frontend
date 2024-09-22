@@ -21,6 +21,7 @@ import { wait } from "../../helpers/Helpers";
 import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
 import { FeedItemType } from "../../generated/models/FeedItemType";
 import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
+import { addDropToDrops } from "./utils/addDropsToDrops";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -769,56 +770,6 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const addDropToDrops = ({
-    drop,
-    rootDropId,
-  }: {
-    readonly drop: Drop;
-    readonly rootDropId: string | null;
-  }): void => {
-    queryClient.cancelQueries({
-      queryKey: [
-        QueryKey.DROPS,
-        {
-          limit: 20,
-          waveId: drop.wave.id,
-          dropId: rootDropId,
-        },
-      ],
-    });
-
-    queryClient.setQueryData(
-      [
-        QueryKey.DROPS,
-        {
-          limit: 20,
-          waveId: drop.wave.id,
-          dropId: rootDropId,
-        },
-      ],
-      (
-        oldData:
-          | {
-              pages: WaveDropsFeed[];
-            }
-          | undefined
-      ) => {
-        if (!oldData?.pages.length) {
-          return oldData;
-        }
-        const pages: WaveDropsFeed[] = JSON.parse(
-          JSON.stringify(oldData.pages)
-        );
-
-        pages.at(0)?.drops.unshift(drop);
-        return {
-          ...oldData,
-          pages,
-        };
-      }
-    );
-  };
-
   const addDropToFeedItems = ({ drop }: { readonly drop: Drop }): void => {
     queryClient.setQueryData(
       [QueryKey.FEED_ITEMS],
@@ -1183,7 +1134,7 @@ export default function ReactQueryWrapper({
     readonly drop: Drop;
     readonly rootDropId: string | null;
   }): Promise<void> => {
-    addDropToDrops({ drop, rootDropId });
+    addDropToDrops(queryClient, { drop, rootDropId });
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {

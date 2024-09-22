@@ -11,17 +11,14 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { Drop } from "../../../../generated/models/Drop";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
-import WaveDropThreadTrace from "./WaveDropThreadTrace";
 import DropsList from "../../../drops/view/DropsList";
 import { useDebounce } from "react-use";
-import { getStableDropKey } from "../../../../helpers/waves/drop.helpers";
-import { WaveMin } from "../../../../generated/models/WaveMin";
-import { DropWithoutWave } from "../../../../generated/models/DropWithoutWave";
+import { ExtendedDrop} from "../../../../helpers/waves/drop.helpers";
 import { WaveDropsNewDropsAvailable } from "./WaveDropsNewDropsAvailable";
-import { WaveDropsBackButton } from "./WaveDropsBackButton";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import WaveDropsThreadHeader from "./WaveDropsThread";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
+import { generateUniqueKeys, mapToExtendedDrops } from "../../../../helpers/waves/wave-drops.helpers";
 
 const REQUEST_SIZE = 20;
 const POLLING_DELAY = 3000; // 3 seconds delay
@@ -34,90 +31,6 @@ interface WaveDropsProps {
   readonly rootDropId: string | null;
   readonly onBackToList?: () => void;
 }
-
-export interface ExtendedDrop extends Drop {
-  readonly stableKey: string;
-  readonly stableHash: string;
-}
-
-const createExtendedDrop = (
-  drop: DropWithoutWave,
-  wave: WaveMin,
-  prevDrops: ExtendedDrop[]
-): ExtendedDrop => {
-  const { key, hash } = getStableDropKey({ ...drop, wave }, prevDrops);
-  return {
-    ...drop,
-    wave,
-    stableKey: key,
-    stableHash: hash,
-  };
-};
-
-const processWaveDropsFeed = (
-  page: WaveDropsFeed,
-  prevDrops: ExtendedDrop[]
-): ExtendedDrop[] => {
-  return page.drops.map((drop) =>
-    createExtendedDrop(drop, page.wave, prevDrops)
-  );
-};
-
-const mapToExtendedDrops = (
-  pages: WaveDropsFeed[],
-  prevDrops: ExtendedDrop[]
-): ExtendedDrop[] => {
-  return pages
-    .flatMap((page) => processWaveDropsFeed(page, prevDrops))
-    .reverse();
-};
-
-const incrementKeyCount = (
-  keyCount: Map<string, number>,
-  key: string
-): number => {
-  const count = (keyCount.get(key) ?? 0) + 1;
-  keyCount.set(key, count);
-  return count;
-};
-
-const generateFinalKey = (
-  keyCount: Map<string, number>,
-  initialKey: string
-): string => {
-  const count = incrementKeyCount(keyCount, initialKey);
-  return count > 1 ? `${initialKey}-${count}` : initialKey;
-};
-
-const createUpdatedDrop = (
-  drop: ExtendedDrop,
-  finalKey: string,
-  existingDrop: ExtendedDrop | undefined
-): ExtendedDrop => {
-  if (existingDrop) {
-    return {
-      ...drop,
-      stableKey: finalKey,
-      stableHash: existingDrop.stableHash,
-    };
-  }
-  return { ...drop, stableKey: finalKey };
-};
-
-const generateUniqueKeys = (
-  drops: ExtendedDrop[],
-  prevDrops: ExtendedDrop[]
-): ExtendedDrop[] => {
-  const keyCount = new Map<string, number>();
-
-  return drops.map((drop) => {
-    const existingDrop = prevDrops.find(
-      (d) => d.stableHash === drop.stableHash
-    );
-    const finalKey = generateFinalKey(keyCount, drop.stableKey);
-    return createUpdatedDrop(drop, finalKey, existingDrop);
-  });
-};
 
 export default function WaveDrops({
   wave,
@@ -294,7 +207,7 @@ export default function WaveDrops({
     if (container) {
       const { scrollTop } = container;
       const newIsAtBottom = scrollTop === 0;
-      const newShouldScrollDownAfterNewPosts = scrollTop > -60
+      const newShouldScrollDownAfterNewPosts = scrollTop > -60;
       setIsAtBottom(newIsAtBottom);
       setShouldScrollDownAfterNewPosts(newShouldScrollDownAfterNewPosts);
     }
