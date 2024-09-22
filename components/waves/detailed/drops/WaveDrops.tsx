@@ -277,6 +277,8 @@ export default function WaveDrops({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [shouldScrollDownAfterNewPosts, setShouldScrollDownAfterNewPosts] =
+    useState(false);
 
   const scrollToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
@@ -292,7 +294,9 @@ export default function WaveDrops({
     if (container) {
       const { scrollTop } = container;
       const newIsAtBottom = scrollTop === 0;
+      const newShouldScrollDownAfterNewPosts = scrollTop > -60
       setIsAtBottom(newIsAtBottom);
+      setShouldScrollDownAfterNewPosts(newShouldScrollDownAfterNewPosts);
     }
   }, []);
 
@@ -305,10 +309,10 @@ export default function WaveDrops({
   }, [handleScroll]);
 
   useEffect(() => {
-    if (isAtBottom) {
+    if (shouldScrollDownAfterNewPosts) {
       scrollToBottom();
     }
-  }, [drops, isAtBottom, scrollToBottom]);
+  }, [drops, shouldScrollDownAfterNewPosts, scrollToBottom]);
 
   useEffect(() => {
     scrollToBottom();

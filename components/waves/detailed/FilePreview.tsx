@@ -63,7 +63,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                   <ProgressOverlay progress={progress} />
                   <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center">
                     <CircleLoader size={CircleLoaderSize.XXLARGE} />
-                    <span className="tw-text-white tw-font-bold tw-text-lg tw-mt-2">
+                    <span className="tw-text-white tw-font-medium tw-text-base tw-mt-1">
                       {Math.round(progress)}%
                     </span>
                   </div>
