@@ -6,11 +6,11 @@ import { ActiveDropState } from "../WaveDetailedContent";
 import DropsList from "../../../drops/view/DropsList";
 import { WaveDropsNewDropsAvailable } from "./WaveDropsNewDropsAvailable";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
-import WaveDropsThreadHeader from "./WaveDropsThread";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import { useWaveDrops } from "../../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
-
+import WaveDropThreadTrace from "./WaveDropThreadTrace";
+import { WaveDropsBackButton } from "./WaveDropsBackButton";
 
 interface WaveDropsProps {
   readonly wave: Wave;
@@ -81,15 +81,20 @@ export default function WaveDrops({
         loading={isFetching}
         onRefresh={refetch}
       />
-      <WaveDropsThreadHeader
-        rootDropId={rootDropId}
-        wave={wave}
-        onBackToList={onBackToList}
-      />
+      {rootDropId && onBackToList && (
+        <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-mb-2 tw-border-iron-700 tw-border-solid">
+          <WaveDropsBackButton onBackToList={onBackToList} />
+        </div>
+      )}
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
       >
+        {rootDropId && (
+          <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-mb-2 tw-border-iron-700 tw-border-solid">
+            <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
+          </div>
+        )}
         <DropsList
           drops={drops}
           showWaveInfo={false}
