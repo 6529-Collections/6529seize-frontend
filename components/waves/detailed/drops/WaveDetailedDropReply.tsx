@@ -5,7 +5,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
-import Link from 'next/link';
+import Link from "next/link";
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
@@ -34,7 +34,7 @@ export default function WaveDetailedDropReply({
   });
 
   const getContent = (): string => {
-    if (isFetching) {
+    if (isFetching && !maybeDrop) {
       return "Loading...";
     }
 
@@ -82,9 +82,12 @@ export default function WaveDetailedDropReply({
         <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
       </div>
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
-        <WaveDetailedDropReplyAuthor isFetching={isFetching} drop={drop} />
+        <WaveDetailedDropReplyAuthor isFetching={false} drop={drop} />
         <div>
-          <Link href={`/waves/${drop?.wave.id}?drop=${drop?.id}`} className="tw-no-underline">
+          <Link
+            href={`/waves/${drop?.wave.id}?drop=${drop?.id}`}
+            className="tw-no-underline"
+          >
             <DropPartMarkdown
               partContent={content}
               mentionedUsers={drop?.mentioned_users ?? []}

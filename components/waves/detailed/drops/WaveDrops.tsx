@@ -76,23 +76,20 @@ export default function WaveDrops({
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-16rem)] md:tw-h-[calc(100vh-13rem)] tw-relative">
-     {/*  <div className="tw-sticky tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-mb-2 tw-border-iron-700 tw-border-solid">
-        <WaveDropsBackButton />
-      </div> */}
-     
       <WaveDropsNewDropsAvailable
         haveNewDrops={haveNewDrops}
         loading={isFetching}
         onRefresh={refetch}
       />
       {rootDropId && onBackToList && (
-        <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-mb-2 tw-border-iron-700 tw-border-solid">
+        <div className="tw-sticky tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
           <WaveDropsBackButton onBackToList={onBackToList} />
         </div>
       )}
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
+        rootDropId={rootDropId}
       >
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <div>
@@ -115,6 +112,7 @@ export default function WaveDrops({
             rootDropId={rootDropId}
           />
         </div>
+        
       </WaveDropsScrollContainer>
 
       <WaveDropsScrollBottomButton

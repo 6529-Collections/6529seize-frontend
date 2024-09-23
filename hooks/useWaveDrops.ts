@@ -33,6 +33,15 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
   const [delayedPollingResult, setDelayedPollingResult] = useState<WaveDropsFeed | undefined>(undefined);
   const isTabVisible = useTabVisibility();
 
+  const queryKey = [
+    QueryKey.DROPS,
+    {
+      waveId: wave.id,
+      limit: REQUEST_SIZE,
+      dropId: rootDropId,
+    },
+  ];
+
   const {
     data,
     fetchNextPage,
@@ -41,14 +50,7 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [
-      QueryKey.DROPS,
-      {
-        waveId: wave.id,
-        limit: REQUEST_SIZE,
-        dropId: rootDropId,
-      },
-    ],
+    queryKey,
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         limit: REQUEST_SIZE.toString(),
@@ -77,18 +79,16 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
     });
   }, [data]);
 
-  useDebounce(() => setCanPoll(true), 10000, [data]);
-  useEffect(() => setCanPoll(false), [data]);
+  useEffect(() => {
+    setCanPoll(false);
+    setHaveNewDrops(false);
+    setDelayedPollingResult(undefined);
+  }, [rootDropId]);
+
+  useDebounce(() => setCanPoll(true), 10000, [data, rootDropId]);
 
   const { data: pollingResult } = useQuery({
-    queryKey: [
-      QueryKey.DROPS,
-      {
-        waveId: wave.id,
-        limit: 1,
-        dropId: rootDropId,
-      },
-    ],
+    queryKey: [...queryKey, 'polling'],
     queryFn: async () => {
       const params: Record<string, string> = {
         limit: "1",

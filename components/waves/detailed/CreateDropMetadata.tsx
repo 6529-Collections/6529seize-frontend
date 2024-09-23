@@ -73,7 +73,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
         <div className="tw-space-y-2 tw-w-full">
           {metadata.map((item, index) => (
             <CreateDropMetadataRow
-              key={item.key}
+              key={index}
               isError={missingRequiredMetadataKeys.includes(item.key)}
               onRemove={onRemoveMetadata}
               metadata={item}

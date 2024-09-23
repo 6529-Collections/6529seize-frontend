@@ -8,18 +8,25 @@ import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
+import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
 
-const shouldGroupWithDrop = (currentDrop: ExtendedDrop, otherDrop: ExtendedDrop | null, rootDropId: string | null): boolean => {
+const shouldGroupWithDrop = (
+  currentDrop: ExtendedDrop,
+  otherDrop: ExtendedDrop | null,
+  rootDropId: string | null
+): boolean => {
   if (!otherDrop || currentDrop.parts.length > 1) {
     return false;
   }
 
   const isSameAuthor = currentDrop.author.handle === otherDrop.author.handle;
-  const isWithinTimeThreshold = Math.abs(currentDrop.created_at - otherDrop.created_at) <= GroupingThreshold.TIME_DIFFERENCE;
+  const isWithinTimeThreshold =
+    Math.abs(currentDrop.created_at - otherDrop.created_at) <=
+    GroupingThreshold.TIME_DIFFERENCE;
 
   if (!isSameAuthor || !isWithinTimeThreshold) {
     return false;
@@ -27,7 +34,8 @@ const shouldGroupWithDrop = (currentDrop: ExtendedDrop, otherDrop: ExtendedDrop 
 
   const bothNotReplies = !currentDrop.reply_to && !otherDrop.reply_to;
   const currentReplyToRoot = currentDrop.reply_to?.drop_id === rootDropId;
-  const repliesInSameThread = currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
+  const repliesInSameThread =
+    currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
 
   return bothNotReplies || currentReplyToRoot || repliesInSameThread;
 };
@@ -40,8 +48,20 @@ interface WaveDetailedDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
-  readonly onReply: ({ drop, partId }: { drop: ExtendedDrop; partId: number }) => void;
-  readonly onQuote: ({ drop, partId }: { drop: ExtendedDrop; partId: number }) => void;
+  readonly onReply: ({
+    drop,
+    partId,
+  }: {
+    drop: ExtendedDrop;
+    partId: number;
+  }) => void;
+  readonly onQuote: ({
+    drop,
+    partId,
+  }: {
+    drop: ExtendedDrop;
+    partId: number;
+  }) => void;
 }
 
 export default function WaveDetailedDrop({
@@ -61,8 +81,16 @@ export default function WaveDetailedDrop({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop, rootDropId);
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop, rootDropId);
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(
+    drop,
+    previousDrop,
+    rootDropId
+  );
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(
+    drop,
+    nextDrop,
+    rootDropId
+  );
 
   const getGroupingClass = () => {
     if (shouldGroupWithPreviousDrop) return "";
@@ -85,7 +113,6 @@ export default function WaveDetailedDrop({
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
           : "tw-bg-iron-950 hover:tw-bg-iron-900"
       } ${groupingClass}`}
-      onMouseEnter={handleMouseEnter}
     >
       {drop.reply_to &&
         drop.reply_to.drop_id !== rootDropId &&
@@ -140,9 +167,9 @@ export default function WaveDetailedDrop({
         />
       )}
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
-        {/*    {drop.metadata.length > 0 && (
+        {drop.metadata.length > 0 && (
           <WaveDetailedDropMetadata metadata={drop.metadata} />
-        )} */}
+        )}
         {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
       </div>
     </div>
