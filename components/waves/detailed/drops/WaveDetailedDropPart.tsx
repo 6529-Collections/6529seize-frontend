@@ -35,17 +35,25 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
       }
     };
 
+    const isTemporaryDrop = drop.id.startsWith("temp-");
+
     const handleClick = () => {
-      router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+      if (!isTemporaryDrop) {
+        router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+      }
     };
 
     return (
-      <div 
+      <div
         onClick={handleClick}
-        className="tw-cursor-pointer tw-no-underline"
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+        className={`tw-no-underline ${
+          isTemporaryDrop ? "tw-cursor-default" : "tw-cursor-pointer"
+        }`}
+        role={isTemporaryDrop ? undefined : "button"}
+        tabIndex={isTemporaryDrop ? undefined : 0}
+        onKeyDown={(e) =>
+          !isTemporaryDrop && e.key === "Enter" && handleClick()
+        }
       >
         <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
           <div

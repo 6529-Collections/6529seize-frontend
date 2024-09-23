@@ -4,13 +4,19 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 
 interface WaveDetailedDropActionsCopyLinkProps {
-  drop: Drop;
+  readonly drop: Drop;
 }
 
 const WaveDetailedDropActionsCopyLink: React.FC<WaveDetailedDropActionsCopyLinkProps> = ({ drop }) => {
   const [copied, setCopied] = useState(false);
 
+  const isTemporaryDrop = (drop: Drop): boolean => {
+    return drop.id.startsWith('temp-');
+  };
+
   const copyToClipboard = () => {
+    if (isTemporaryDrop(drop)) return;
+
     const dropLink = `${window.location.protocol}//${window.location.host}/waves/${drop.wave.id}?drop=${drop.id}`;
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
@@ -18,26 +24,29 @@ const WaveDetailedDropActionsCopyLink: React.FC<WaveDetailedDropActionsCopyLinkP
     });
   };
 
+  const isDisabled = isTemporaryDrop(drop);
+
   return (
     <Tippy
       content={
         <div className="tw-text-center">
-          <span
-            className={`tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-          >
-            {copied ? "Copied!" : "Copy link"}
+          <span className="tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out">
+            {isDisabled ? "Unavailable" : copied ? "Copied!" : "Copy link"}
           </span>
         </div>
       }
       placement="top"
-      disabled={false}
+      disabled={isDisabled}
       trigger="mouseenter"
       hideOnClick={false}
     >
       <div>
         <button
-          className={`tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300`}
+          className={`tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
+            isDisabled ? 'tw-opacity-50 tw-cursor-default' : 'tw-cursor-pointer'
+          }`}
           onClick={copyToClipboard}
+          disabled={isDisabled}
         >
           <svg
             className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300`}

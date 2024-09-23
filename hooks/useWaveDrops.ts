@@ -6,18 +6,32 @@ import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
-import { generateUniqueKeys } from "../helpers/waves/wave-drops.helpers";
+import { generateUniqueKeys, mapToExtendedDrops } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
-import { mapToExtendedDrops } from "../helpers/waves/wave-drops.helpers";
 
 const REQUEST_SIZE = 20;
-const POLLING_DELAY = 3000; // 3 seconds delay
+const POLLING_DELAY = 3000;
+const ACTIVE_POLLING_INTERVAL = 5000;
+const INACTIVE_POLLING_INTERVAL = 30000;
+
+function useTabVisibility() {
+  const [isVisible, setIsVisible] = useState(!document.hidden);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => setIsVisible(!document.hidden);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  return isVisible;
+}
 
 export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedProfileHandle: string | undefined) {
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<WaveDropsFeed | undefined>(undefined);
+  const isTabVisible = useTabVisibility();
 
   const {
     data,
@@ -88,7 +102,7 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
       });
     },
     enabled: !haveNewDrops && canPoll,
-    refetchInterval: 30000,
+    refetchInterval: isTabVisible ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
