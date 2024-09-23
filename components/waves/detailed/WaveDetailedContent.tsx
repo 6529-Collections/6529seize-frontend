@@ -61,29 +61,9 @@ export default function WaveDetailedContent({
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {activeDropId ? (
-        <motion.div
-          key="thread"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <WaveDropThread
-            rootDropId={activeDropId}
-            onBackToList={onBackToList}
-            wave={wave}
-          />
-        </motion.div>
-      ) : (
-        <motion.div
-          key="drops"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+    <div>
+      <div className="tw-w-full tw-inline-flex ">
+        <div className="tw-w-full">
           <WaveDrops
             wave={wave}
             onReply={handleReply}
@@ -91,18 +71,29 @@ export default function WaveDetailedContent({
             activeDrop={activeDrop}
             rootDropId={null}
           />
-          {canDrop && (
-            <div ref={createDropRef}>
-              <CreateDrop
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                waveId={wave.id}
-                rootDropId={null}
-              />
-            </div>
-          )}
-        </motion.div>
+        </div>
+        {activeDropId && (
+          <div className="tw-w-full">
+            <WaveDrops
+              wave={wave}
+              onReply={handleReply}
+              onQuote={handleQuote}
+              activeDrop={activeDrop}
+              rootDropId={activeDropId}
+            />
+          </div>
+        )}
+      </div>
+      {canDrop && (
+        <div ref={createDropRef}>
+          <CreateDrop
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+            waveId={wave.id}
+            rootDropId={activeDropId}
+          />
+        </div>
       )}
-    </AnimatePresence>
+    </div>
   );
 }
