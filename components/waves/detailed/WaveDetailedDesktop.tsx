@@ -125,7 +125,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
 
   return (
     <div className="tailwind-scope tw-bg-black">
-      <div className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[1729px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 xl:tw-px-6">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
           <div className="lg:tw-h-[calc(100vh-7.5rem)] tw-overflow-y-auto no-scrollbar lg:tw-max-w-[20.5rem] tw-w-full">
             <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-4 tw-mb-4">

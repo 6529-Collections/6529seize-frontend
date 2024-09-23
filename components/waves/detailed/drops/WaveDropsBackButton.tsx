@@ -1,33 +1,34 @@
-import React from 'react';
+import React from "react";
 
 interface WaveDropsBackButtonProps {
   readonly onBackToList: () => void;
 }
 
-export const WaveDropsBackButton: React.FC<WaveDropsBackButtonProps> = ({ onBackToList }) => {
+export const WaveDropsBackButton: React.FC<WaveDropsBackButtonProps> = ({
+  onBackToList,
+}) => {
   return (
     <div className="tw-px-4 tw-py-2">
       <button
         onClick={onBackToList}
         type="button"
-        className="tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
+        aria-label="Back"
+        className="tw-px-2 -tw-mr-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-300 tw-bg-transparent hover:tw-text-iron-400"
       >
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="tw-flex-shrink-0 tw-size-6"
         >
           <path
-            d="M20 12H4M4 12L10 18M4 12L10 6"
-            stroke="currentColor"
-            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            d="M6 18 18 6M6 6l12 12"
           />
         </svg>
-        <span>Back</span>
       </button>
     </div>
   );
