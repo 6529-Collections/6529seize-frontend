@@ -4,9 +4,16 @@ import { useEffect, useState } from "react";
 import { Wave } from "../generated/models/Wave";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
-import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
-import { generateUniqueKeys, mapToExtendedDrops } from "../helpers/waves/wave-drops.helpers";
+import {
+  generateUniqueKeys,
+  mapToExtendedDrops,
+} from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
 
 const REQUEST_SIZE = 20;
@@ -20,17 +27,24 @@ function useTabVisibility() {
   useEffect(() => {
     const handleVisibilityChange = () => setIsVisible(!document.hidden);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   return isVisible;
 }
 
-export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedProfileHandle: string | undefined) {
+export function useWaveDrops(
+  wave: Wave,
+  rootDropId: string | null,
+  connectedProfileHandle: string | undefined
+) {
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
-  const [delayedPollingResult, setDelayedPollingResult] = useState<WaveDropsFeed | undefined>(undefined);
+  const [delayedPollingResult, setDelayedPollingResult] = useState<
+    WaveDropsFeed | undefined
+  >(undefined);
   const isTabVisible = useTabVisibility();
 
   const queryKey = [
@@ -88,7 +102,7 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
   useDebounce(() => setCanPoll(true), 10000, [data, rootDropId]);
 
   const { data: pollingResult } = useQuery({
-    queryKey: [...queryKey, 'polling'],
+    queryKey: [...queryKey, "polling"],
     queryFn: async () => {
       const params: Record<string, string> = {
         limit: "1",
@@ -102,7 +116,9 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
       });
     },
     enabled: !haveNewDrops && canPoll,
-    refetchInterval: isTabVisible ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL,
+    refetchInterval: isTabVisible
+      ? ACTIVE_POLLING_INTERVAL
+      : INACTIVE_POLLING_INTERVAL,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
@@ -143,6 +159,15 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
       }
     }
   }, [delayedPollingResult, drops]);
+
+  useEffect(() => {
+    if (!haveNewDrops) return;
+    if (!isTabVisible) return;
+    const hasTempDrop = drops.some((drop) => drop.id.startsWith("temp-"));
+    if (hasTempDrop) return;
+    refetch();
+    setHaveNewDrops(false);
+  }, [haveNewDrops, isTabVisible, drops]);
 
   return {
     drops,

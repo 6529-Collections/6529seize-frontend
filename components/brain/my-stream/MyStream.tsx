@@ -6,7 +6,6 @@ import {
   useMyStreamQuery,
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
-import { MyStreamNewItemsButton } from "./MyStreamNewItemsButton";
 
 export default function MyStream() {
   const { connectedProfile, activeProfileProxy, setTitle } =
@@ -42,10 +41,6 @@ export default function MyStream() {
     }
   };
 
-  const onRefresh = () => {
-    refetch();
-  };
-
   useEffect(() => {
     setTitle({
       title: haveNewItems ? "New Stream Items Available | 6529 SEIZE" : null,
@@ -60,15 +55,24 @@ export default function MyStream() {
     };
   }, [haveNewItems]);
 
+  useEffect(() => {
+    const checkAndRefetch = () => {
+      if (haveNewItems && document.visibilityState === "visible") {
+        refetch();
+      }
+    };
+
+    checkAndRefetch();
+    document.addEventListener("visibilitychange", checkAndRefetch);
+
+    return () => {
+      document.removeEventListener("visibilitychange", checkAndRefetch);
+    };
+  }, [haveNewItems]);
+
   return (
     <div className="lg:tw-w-[672px] tw-flex-shrink-0">
       <div>
-        {haveNewItems && (
-          <MyStreamNewItemsButton
-            onRefresh={onRefresh}
-            isFetching={isFetching}
-          />
-        )}
         <FeedWrapper
           items={items}
           loading={isFetching}

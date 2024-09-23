@@ -405,16 +405,16 @@ export default function Auth({
   };
 
   useEffect(() => {
-    if (titles[TitleType.NOTIFICATION]) {
-      setPageTitle(titles[TitleType.NOTIFICATION]);
-      return;
-    }
     if (titles[TitleType.WAVE]) {
       setPageTitle(titles[TitleType.WAVE]);
       return;
     }
     if (titles[TitleType.MY_STREAM]) {
       setPageTitle(titles[TitleType.MY_STREAM]);
+      return;
+    }
+    if (titles[TitleType.NOTIFICATION]) {
+      setPageTitle(titles[TitleType.NOTIFICATION]);
       return;
     }
     if (titles[TitleType.PAGE]) {
@@ -449,7 +449,8 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered>
+        centered
+      >
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -475,13 +476,15 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnect();
-            }}>
+            }}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}>
+            disabled={signMessage.isPending}
+          >
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />
