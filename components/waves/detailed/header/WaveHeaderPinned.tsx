@@ -40,7 +40,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
         className="tw-h-8 tw-w-8 tw-text-iron-400 hover:tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm hover:tw-bg-iron-700 hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-size-4"
+          className="tw-size-4 tw-flex-shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

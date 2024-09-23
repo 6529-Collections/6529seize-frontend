@@ -23,7 +23,7 @@ const WaveDetailedDropAuthorPfp: React.FC<WaveDetailedDropAuthorPfpProps> = ({
           </div>
         </div>
       ) : (
-        <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-rounded-lg"></div>
+        <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-lg"></div>
       )}
     </div>
   );

@@ -75,7 +75,7 @@ export default function WaveDrops({
   }, [scrollToBottom, handleScroll]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-16rem)] lg:tw-h-[calc(100vh-13rem)] tw-relative">
+    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-16rem)] md:tw-h-[calc(100vh-13rem)] tw-relative">
       <WaveDropsNewDropsAvailable
         haveNewDrops={haveNewDrops}
         loading={isFetching}

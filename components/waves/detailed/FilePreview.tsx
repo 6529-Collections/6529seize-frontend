@@ -48,11 +48,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           <div key={file.file.name} className="tw-relative tw-group">
             <div className="tw-h-[16rem] tw-w-[16rem] tw-bg-iron-800 tw-rounded-lg tw-overflow-hidden">
               {file.file.type.startsWith("image/") ? (
-                <img
-                  src={URL.createObjectURL(file.file)}
-                  alt={`Preview ${index}`}
-                  className="tw-w-full tw-h-full tw-object-cover"
-                />
+                <div className="tw-relative tw-w-full tw-h-full">
+                  <img
+                    src={URL.createObjectURL(file.file)}
+                    alt={`Preview ${index}`}
+                    className="tw-w-full tw-h-full tw-object-cover"
+                  />
+                  <div className="tw-absolute tw-inset-0 tw-bg-iron-950 tw-opacity-0 group-hover:tw-opacity-30 tw-transition-opacity tw-duration-300"></div>
+                </div>
               ) : (
                 <div className="tw-flex tw-items-center tw-justify-center tw-w-full tw-h-full tw-text-iron-400">
                   {file.file.type.startsWith("video/") ? "🎥" : "📁"}
@@ -79,13 +82,13 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               <button
                 onClick={() => removeFile(file.file)}
                 disabled={disabled}
-                className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red-500 tw-rounded-full tw-size-7 tw-opacity-0 group-hover:tw-opacity-100 hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 ${
+                className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red tw-rounded-full tw-size-7 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 hover:tw-bg-iron-700 ${
                   disabled ? "tw-pointer-events-none" : ""
                 }`}
                 aria-label="Remove file"
               >
                 <svg
-                  className="tw-size-4"
+                  className="tw-size-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"

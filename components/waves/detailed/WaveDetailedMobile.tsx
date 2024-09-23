@@ -130,24 +130,26 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   const components: Record<WaveDetailedMobileView, JSX.Element> = {
     [WaveDetailedMobileView.CHAT]: chatComponents[view],
     [WaveDetailedMobileView.ABOUT]: (
-      <div className="tw-h-[calc(100vh-12rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4 tw-mb-4 tw-px-4">
-        <WaveHeader
-          wave={wave}
-          onFollowersClick={() => {
-            setView(WaveDetailedView.FOLLOWERS);
-            setActiveView(WaveDetailedMobileView.CHAT);
-          }}
-        />
-        <WaveSpecs wave={wave} />
-        <WaveGroups wave={wave} />
-        {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
-        {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
-        {false && (
-          <>
-            <WaveLeaderboard wave={wave} />
-            <WaveOutcomes wave={wave} />
-          </>
-        )}
+      <div className="tw-px-4 md:tw-px-2">
+        <div className="tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4 tw-pb-4">
+          <WaveHeader
+            wave={wave}
+            onFollowersClick={() => {
+              setView(WaveDetailedView.FOLLOWERS);
+              setActiveView(WaveDetailedMobileView.CHAT);
+            }}
+          />
+          <WaveSpecs wave={wave} />
+          <WaveGroups wave={wave} />
+          {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
+          {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
+          {false && (
+            <>
+              <WaveLeaderboard wave={wave} />
+              <WaveOutcomes wave={wave} />
+            </>
+          )}
+        </div>
       </div>
     ),
   };
@@ -157,8 +159,8 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   }
 
   return (
-    <div className="tailwind-scope tw-bg-black tw-min-h-screen">
-      <div className="tw-mt-4 tw-pb-16 lg:tw-pb-20 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+    <div className="tailwind-scope tw-bg-black">
+      <div className="tw-mt-4 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-mb-4 tw-px-4 min-[992px]:tw-px-3">
           <div className="tw-flex tw-gap-x-3 lg:tw-gap-x-4">
             <button

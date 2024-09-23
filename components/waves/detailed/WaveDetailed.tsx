@@ -13,7 +13,7 @@ interface WaveDetailedProps {
   readonly wave: Wave;
 }
 
-const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
@@ -22,7 +22,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
 
   const breakpoint = useBreakpoint();
 
-  return breakpoint !== "MD" ? (
+  return breakpoint !== "LG" ? (
     <WaveDetailedMobile wave={wave} view={activeView} setView={setActiveView} />
   ) : (
     <WaveDetailedDesktop

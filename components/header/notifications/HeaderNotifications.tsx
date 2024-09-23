@@ -57,7 +57,7 @@ export default function HeaderNotifications() {
   }, [notifications]);
 
   return (
-    <div className="tailwind-scope tw-relative lg:tw-mr-3 tw-self-center">
+    <div className="tailwind-scope tw-relative xl:tw-mr-3 tw-self-center">
       <Link
         href="/my-stream/notifications"
         aria-label="Notifications"
