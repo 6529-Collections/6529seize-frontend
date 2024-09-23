@@ -10,7 +10,7 @@ import { RateMatter } from "../../../../../generated/models/RateMatter";
 export enum GroupCardState {
   IDLE = "IDLE",
   REP = "REP",
-  CIC = "CIC",
+  NIC = "NIC",
 }
 
 export enum CreditDirection {
@@ -87,11 +87,11 @@ export default function GroupCard({
         matter={RateMatter.Rep}
       />
     ),
-    [GroupCardState.CIC]: (
+    [GroupCardState.NIC]: (
       <GroupCardVoteAll
         group={group}
         onCancel={onActionCancel}
-        matter={RateMatter.Cic}
+        matter={RateMatter.Nic}
       />
     ),
   };

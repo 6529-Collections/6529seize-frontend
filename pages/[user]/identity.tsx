@@ -18,7 +18,7 @@ export interface UserPageIdentityProps {
   readonly handleOrWallet: string;
 }
 
-const MATTER_TYPE = RateMatter.CIC;
+const MATTER_TYPE = RateMatter.NIC;
 
 const getInitialActivityLogParams = (
   handleOrWallet: string

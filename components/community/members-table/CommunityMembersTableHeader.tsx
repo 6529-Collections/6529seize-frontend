@@ -74,11 +74,11 @@ export default function CommunityMembersTableHeader({
         <th
           scope="col"
           className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-          onClick={() => onSort(CommunityMembersSortOption.CIC)}
-          onMouseEnter={() => setHoverOption(CommunityMembersSortOption.CIC)}
+          onClick={() => onSort(CommunityMembersSortOption.NIC)}
+          onMouseEnter={() => setHoverOption(CommunityMembersSortOption.NIC)}
           onMouseLeave={() => setHoverOption(null)}>
           <CommunityMembersTableHeaderSortableContent
-            sort={CommunityMembersSortOption.CIC}
+            sort={CommunityMembersSortOption.NIC}
             activeSort={activeSort}
             sortDirection={sortDirection}
             isLoading={isLoading}

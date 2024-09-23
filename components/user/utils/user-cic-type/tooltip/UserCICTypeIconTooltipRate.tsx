@@ -13,7 +13,7 @@ export default function UserCICTypeIconTooltipRate({
   return (
     <div className="tw-mt-3.5 tw-pt-3.5 tw-border-t tw-border-solid tw-border-neutral-600 tw-border-x-0 tw-border-b-0">
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
-        <UserPageRateWrapper profile={profile} type={RateMatter.CIC}>
+        <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
           <UserPageIdentityHeaderCICRate profile={profile} isTooltip={true} />
         </UserPageRateWrapper>
       </div>

@@ -26,7 +26,7 @@ export default function CommunityMembersTableHeaderSortableContent({
     [CommunityMembersSortOption.LEVEL]: "Level",
     [CommunityMembersSortOption.TDH]: "TDH",
     [CommunityMembersSortOption.REP]: "REP",
-    [CommunityMembersSortOption.CIC]: "CIC",
+    [CommunityMembersSortOption.NIC]: "NIC",
   };
 
   const [rotate, setRotate] = useState<boolean>(false);

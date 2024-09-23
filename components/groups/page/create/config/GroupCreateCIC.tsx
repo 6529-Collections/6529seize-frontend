@@ -1,6 +1,8 @@
 import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
-import IdentitySearch, { IdentitySearchSize } from "../../../../utils/input/identity/IdentitySearch";
+import IdentitySearch, {
+  IdentitySearchSize,
+} from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";
 
@@ -34,7 +36,7 @@ export default function GroupCreateCIC({
           <div className="tw-mb-4">
             <GroupCreateDirection
               direction={cic.direction}
-              label="CIC"
+              label="NIC"
               setDirection={(direction) => setCIC({ ...cic, direction })}
             />
           </div>
@@ -50,7 +52,7 @@ export default function GroupCreateCIC({
           />
           <GroupCreateNumericValue
             value={cic.min}
-            label="CIC at least"
+            label="NIC at least"
             labelId="floating_cic"
             setValue={(value) => setCIC({ ...cic, min: value })}
           />

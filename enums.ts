@@ -53,5 +53,5 @@ export enum CommunityMembersSortOption {
   LEVEL = "level",
   TDH = "tdh",
   REP = "rep",
-  CIC = "cic",
+  NIC = "nic",
 }

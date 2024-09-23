@@ -25,7 +25,7 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageRateWrapper profile={profile} type={RateMatter.CIC}>
+          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
             <UserPageIdentityHeaderCICRate
               profile={profile}
               isTooltip={false}

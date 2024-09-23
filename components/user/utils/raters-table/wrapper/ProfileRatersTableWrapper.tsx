@@ -55,7 +55,7 @@ export default function ProfileRatersTableWrapper({
 
   const getType = (): ProfileRatersTableType => {
     switch (matter) {
-      case RateMatter.CIC:
+      case RateMatter.NIC:
         return given
           ? ProfileRatersTableType.CIC_GIVEN
           : ProfileRatersTableType.CIC_RECEIVED;

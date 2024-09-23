@@ -9,7 +9,7 @@ export default function GroupCardConfig({
   const configLabel: Record<GroupDescriptionType, string> = {
     [GroupDescriptionType.TDH]: "Tdh",
     [GroupDescriptionType.REP]: "Rep",
-    [GroupDescriptionType.CIC]: "CIC",
+    [GroupDescriptionType.NIC]: "NIC",
     [GroupDescriptionType.LEVEL]: "Level",
     [GroupDescriptionType.OWNS_NFTS]: "Owns NFTs",
     [GroupDescriptionType.WALLETS]: "Identities",

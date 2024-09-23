@@ -487,14 +487,14 @@ export default function ReactQueryWrapper({
     invalidateLogs();
     invalidateProfileRaters({
       profile: targetProfile,
-      matter: RateMatter.CIC,
+      matter: RateMatter.NIC,
       given: false,
     });
 
     if (connectedProfile) {
       invalidateProfileRaters({
         profile: connectedProfile,
-        matter: RateMatter.CIC,
+        matter: RateMatter.NIC,
         given: true,
       });
     }
@@ -517,12 +517,12 @@ export default function ReactQueryWrapper({
         values: [
           {
             handleOrWallet: profileProxy.created_by.handle,
-            matter: RateMatter.CIC,
+            matter: RateMatter.NIC,
             given: false,
           },
           {
             handleOrWallet: profileProxy.granted_to.handle,
-            matter: RateMatter.CIC,
+            matter: RateMatter.NIC,
             given: false,
           },
         ],
