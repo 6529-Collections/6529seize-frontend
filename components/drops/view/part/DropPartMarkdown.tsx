@@ -10,10 +10,10 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
-import DropPartQuote from "./quote/DropPartQuote";
-import { useRouter } from "next/router";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
+import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
+import DropPartMarkdownImage from "./DropPartMarkdownImage";
 
 interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -30,7 +30,6 @@ export default function DropPartMarkdown({
   onImageLoaded,
   textSize = "md",
 }: DropPartMarkdownProps) {
-  const router = useRouter();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -171,22 +170,8 @@ export default function DropPartMarkdown({
     const dropId = match ? match[2] : null;
 
     if (isSeizeLink && dropId && waveId) {
-      const onRedropClick = (redropId: string) => {
-        router.push(`/waves/${waveId}?drop=${redropId}`, undefined, {
-          shallow: true,
-        });
-      };
       return (
-        <div>
-          <DropPartQuote
-            quotedDrop={{
-              drop_id: dropId,
-              drop_part_id: 1,
-            }}
-            marginLeft={false}
-            onRedropClick={onRedropClick}
-          />
-        </div>
+        <WaveDetailedDropQuote dropId={dropId} partId={1} maybeDrop={null} />
       );
     }
 
@@ -250,7 +235,7 @@ export default function DropPartMarkdown({
       className="tw-w-full"
       components={{
         h5: (params) => (
-          <h5 className="tw-text-iron-50 tw-break-words word-break">
+          <h5 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -260,7 +245,7 @@ export default function DropPartMarkdown({
           </h5>
         ),
         h4: (params) => (
-          <h4 className="tw-text-iron-50 tw-break-words word-break">
+          <h4 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -270,7 +255,7 @@ export default function DropPartMarkdown({
           </h4>
         ),
         h3: (params) => (
-          <h3 className="tw-text-iron-50 tw-break-words word-break">
+          <h3 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -280,7 +265,7 @@ export default function DropPartMarkdown({
           </h3>
         ),
         h2: (params) => (
-          <h2 className="tw-text-iron-50 tw-break-words word-break">
+          <h2 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -290,7 +275,7 @@ export default function DropPartMarkdown({
           </h2>
         ),
         h1: (params) => (
-          <h1 className="tw-text-iron-50 tw-break-words word-break">
+          <h1 className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -301,7 +286,7 @@ export default function DropPartMarkdown({
         ),
         p: (params) => (
           <p
-            className={`last:tw-mb-0 tw-leading-5 tw-text-iron-50 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+            className={`last:tw-mb-0 tw-leading-5 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
           >
             {customRenderer({
               content: params.children,
@@ -312,7 +297,7 @@ export default function DropPartMarkdown({
           </p>
         ),
         li: (params) => (
-          <li className="tw-text-iron-50 tw-break-words word-break">
+          <li className="tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -324,7 +309,7 @@ export default function DropPartMarkdown({
         code: (params) => (
           <code
             style={{ textOverflow: "unset" }}
-            className="tw-text-iron-50 tw-whitespace-pre-wrap tw-break-words"
+            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words"
           >
             {customRenderer({
               content: params.children,
@@ -336,12 +321,21 @@ export default function DropPartMarkdown({
         ),
         a: (params) => aHrefRenderer(params),
         img: (params) => (
-          <img
+          <DropPartMarkdownImage
             {...params}
-            alt="Seize"
-            onLoad={onImageLoaded}
-            className="tw-w-full"
+            src={params.src ?? ""}
+            onImageLoaded={onImageLoaded}
           />
+        ),
+        blockquote: (params) => (
+          <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+              onImageLoaded,
+            })}
+          </blockquote>
         ),
       }}
     >

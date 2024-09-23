@@ -84,7 +84,7 @@ export default function WaveDetailedFollowers({
   };
 
   return (
-    <div>
+    <div className="tw-px-4 tw-py-4">
       <button
         onClick={onBackClick}
         className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
@@ -106,7 +106,7 @@ export default function WaveDetailedFollowers({
         </svg>
         <span>Back</span>
       </button>
-      <div className="tw-mt-4">
+      <div className="tw-mt-2">
         <div className="tw-mb-0 tw-text-lg tw-text-white tw-font-semibold tw-tracking-tight">
           Followers
         </div>

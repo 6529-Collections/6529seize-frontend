@@ -73,7 +73,9 @@ export default function UserFollowBtn({
       >({
         endpoint: `identities/${handle}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction),
+          actions: Object.values(IdentitySubscriptionTargetAction).filter(
+            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          ),
         },
       });
     },
@@ -99,7 +101,9 @@ export default function UserFollowBtn({
       >({
         endpoint: `identities/${handle}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction),
+          actions: Object.values(IdentitySubscriptionTargetAction).filter(
+            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          ),
         },
       });
     },

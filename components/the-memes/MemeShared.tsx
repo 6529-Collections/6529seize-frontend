@@ -2,6 +2,8 @@ import Head from "next/head";
 import { MEMELAB_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../auth/Auth";
 
 export interface SharedHeadProps {
   id: string;
@@ -16,6 +18,7 @@ export function SharedHead(
     isDistribution?: boolean;
   }>
 ) {
+  const { setTitle, title } = useContext(AuthContext);
   let path = "the-memes";
   if (areEqualAddresses(props.contract, MEMELAB_CONTRACT)) {
     path = "meme-lab";
@@ -30,9 +33,15 @@ export function SharedHead(
     props.isDistribution ? " Distribution" : ""
   } | 6529 SEIZE`;
 
+  useEffect(() => {
+    setTitle({
+      title: pagenameFull,
+    });
+  }, []);
+
   return (
     <Head>
-      <title>{pagenameFull}</title>
+      <title>{title}</title>
       <link rel="icon" href="/favicon.ico" />
       <meta name="description" content={pagenameFull} />
       <meta

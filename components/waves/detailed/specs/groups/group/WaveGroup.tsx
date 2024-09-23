@@ -39,7 +39,7 @@ export default function WaveGroup({
           {scope.group ? (
             <WaveGroupScope group={scope.group} />
           ) : (
-            <span className="tw-font-medium tw-text-white tw-text-md">
+            <span className="tw-font-medium tw-text-iron-200 tw-text-md">
               Anyone
             </span>
           )}

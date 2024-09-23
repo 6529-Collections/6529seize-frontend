@@ -3,6 +3,8 @@ import Groups from "../../components/groups/page/Groups";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import Head from "next/head";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -10,14 +12,22 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function GroupsPage() {
+  const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Groups" },
   ];
+
+  useEffect(() => {
+    setTitle({
+      title: "Groups | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Groups | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Groups | 6529 SEIZE" />
         <meta

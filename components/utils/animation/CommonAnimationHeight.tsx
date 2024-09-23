@@ -5,10 +5,12 @@ export default function CommonAnimationHeight({
   className,
   children,
   onAnimationCompleted,
+  onAnimationStart,
 }: {
   readonly children: React.ReactNode;
   readonly className?: string;
   readonly onAnimationCompleted?: () => void;
+  readonly onAnimationStart?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number | "auto">("auto");
@@ -36,6 +38,7 @@ export default function CommonAnimationHeight({
       style={{ height }}
       animate={{ height }}
       transition={{ duration: 0.3 }}
+      onAnimationStart={onAnimationStart}
       onAnimationComplete={onAnimationCompleted}
     >
       <div ref={containerRef}>{children}</div>

@@ -71,6 +71,7 @@ module.exports = {
     require("@tailwindcss/forms")({
       strategy: "class",
     }),
+    require('tailwind-scrollbar')({ nocompatible: true }),
     function ({ addVariant }) {
       addVariant("not-first", "&:not(:first-child)");
     },

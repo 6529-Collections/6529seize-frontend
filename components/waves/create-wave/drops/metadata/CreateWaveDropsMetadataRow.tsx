@@ -5,7 +5,6 @@ import CreateWaveDropsMetadataRowType from "./CreateWaveDropsMetadataRowType";
 export default function CreateWaveDropsMetadataRow({
   item,
   index,
-  itemsCount,
   isNotUnique,
   onItemChange,
   onItemRemove,
@@ -18,7 +17,6 @@ export default function CreateWaveDropsMetadataRow({
     readonly key: string;
     readonly type: WaveMetadataType;
   }) => void;
-  readonly itemsCount: number;
   readonly onItemRemove: (index: number) => void;
 }) {
   const onKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,30 +60,28 @@ export default function CreateWaveDropsMetadataRow({
             } tw-peer tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
             placeholder=" "
           />
-          {itemsCount > 1 && (
-            <div
-              role="button"
-              aria-label="Remove item"
-              className="tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-              onClick={() => onItemRemove(index)}
+          <div
+            role="button"
+            aria-label="Remove item"
+            className="tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+            onClick={() => onItemRemove(index)}
+          >
+            <svg
+              className="tw-top-4 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <svg
-                className="tw-top-4 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M17 7L7 17M7 7L17 17"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-          )}
+              <path
+                d="M17 7L7 17M7 7L17 17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
           <label
             htmlFor={`required_metadata_key_${index}`}
             className={`${
