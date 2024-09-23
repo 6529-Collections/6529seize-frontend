@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -7,7 +7,6 @@ import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 
 enum GroupingThreshold {
@@ -75,7 +74,6 @@ export default function WaveDetailedDrop({
   onQuote,
   showReplyAndQuote,
 }: WaveDetailedDropProps) {
-  const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
@@ -99,12 +97,6 @@ export default function WaveDetailedDrop({
   };
 
   const groupingClass = getGroupingClass();
-
-  const handleMouseEnter = () => {
-    if (drop.id.startsWith("temp-")) {
-      waitAndInvalidateDrops();
-    }
-  };
 
   return (
     <div

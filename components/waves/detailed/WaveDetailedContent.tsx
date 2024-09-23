@@ -1,11 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
-import WaveDropThread from "./drops/WaveDropThread";
 import { AnimatePresence, motion } from "framer-motion";
-import { WaveDropsBackButton } from "./drops/WaveDropsBackButton";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -31,7 +29,6 @@ export default function WaveDetailedContent({
 }: WaveDetailedContentProps) {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const [isThreadOpen, setIsThreadOpen] = useState(false);
-  const createDropRef = useRef<HTMLDivElement>(null);
   const canDrop = wave.participation.authenticated_user_eligible;
 
   useEffect(() => {
@@ -104,7 +101,6 @@ export default function WaveDetailedContent({
             exit={{ width: 0, opacity: 0 }}
             className="tw-w-full tw-relative"
           >
-
             <div className="tw-flex tw-flex-col">
               <WaveDrops
                 wave={wave}

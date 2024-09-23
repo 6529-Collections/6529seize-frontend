@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -112,7 +112,6 @@ export default function WaveDrops({
             rootDropId={rootDropId}
           />
         </div>
-        
       </WaveDropsScrollContainer>
 
       <WaveDropsScrollBottomButton

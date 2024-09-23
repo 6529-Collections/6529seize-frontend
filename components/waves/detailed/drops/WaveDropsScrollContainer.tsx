@@ -1,10 +1,5 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import React, { forwardRef } from "react";
-import { Drop } from "../../../../generated/models/Drop";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
 import WaveDropThreadHeader from "./WaveDropThreadHeader";
-
 
 interface WaveDropsScrollContainerProps {
   readonly rootDropId: string | null;
@@ -16,15 +11,6 @@ export const WaveDropsScrollContainer = forwardRef<
   HTMLDivElement,
   WaveDropsScrollContainerProps
 >(({ children, onScroll, rootDropId }, ref) => {
-  const { data: drop } = useQuery<Drop>({
-    queryKey: [QueryKey.DROP, rootDropId],
-    queryFn: async () =>
-      await commonApiFetch<Drop>({
-        endpoint: `/drops/${rootDropId}`,
-      }),
-    enabled: !!rootDropId,
-    placeholderData: keepPreviousData,
-  });
   return (
     <div
       ref={ref}
@@ -33,9 +19,7 @@ export const WaveDropsScrollContainer = forwardRef<
     >
       <div className="tw-flex tw-flex-col-reverse tw-flex-grow">
         <div className="tw-overflow-hidden">{children}</div>
-        {rootDropId && (
-          <WaveDropThreadHeader rootDropId={rootDropId} />
-        )}
+        {rootDropId && <WaveDropThreadHeader rootDropId={rootDropId} />}
       </div>
     </div>
   );

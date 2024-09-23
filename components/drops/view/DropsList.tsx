@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Drop } from "../../../generated/models/Drop";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
