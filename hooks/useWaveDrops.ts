@@ -144,6 +144,13 @@ export function useWaveDrops(wave: Wave, rootDropId: string | null, connectedPro
     }
   }, [delayedPollingResult, drops]);
 
+  useEffect(() => {
+    if (haveNewDrops && isTabVisible) {
+      refetch();
+      setHaveNewDrops(false);
+    }
+  }, [haveNewDrops, isTabVisible, refetch]);
+
   return {
     drops,
     fetchNextPage,

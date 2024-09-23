@@ -4,7 +4,6 @@ import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
 import { ActiveDropState } from "../WaveDetailedContent";
 import DropsList from "../../../drops/view/DropsList";
-import { WaveDropsNewDropsAvailable } from "./WaveDropsNewDropsAvailable";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import { useWaveDrops } from "../../../../hooks/useWaveDrops";
@@ -76,11 +75,6 @@ export default function WaveDrops({
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-16rem)] md:tw-h-[calc(100vh-13rem)] tw-relative">
-      <WaveDropsNewDropsAvailable
-        haveNewDrops={haveNewDrops}
-        loading={isFetching}
-        onRefresh={refetch}
-      />
       {rootDropId && onBackToList && (
         <div className="tw-sticky tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
           <WaveDropsBackButton onBackToList={onBackToList} />
