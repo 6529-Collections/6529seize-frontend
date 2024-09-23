@@ -104,7 +104,7 @@ export default function WaveDetailedContent({
             exit={{ width: 0, opacity: 0 }}
             className="tw-w-full tw-relative"
           >
-            <div className="tw-absolute tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
+            <div className="tw-sticky tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
               <WaveDropsBackButton onBackToList={closeActiveDropId} />
             </div>
             <div className="tw-flex tw-flex-col">
