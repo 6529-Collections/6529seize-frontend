@@ -21,25 +21,25 @@ export default function ConsolidatedCommunityMetricsDownloads() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Open Data", href: "/open-data" },
-    { display: "Consolidated Community Metrics" },
+    { display: "Consolidated Network Metrics" },
   ];
 
   return (
     <>
       <Head>
-        <title>Consolidated Community Metrics Downloads | 6529 SEIZE</title>
+        <title>Consolidated Network Metrics Downloads | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Consolidated Community Metrics Downloads | 6529 SEIZE"
+          content="Consolidated Network Metrics Downloads | 6529 SEIZE"
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/open-data/consolidated-community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/open-data/consolidated-network-metrics`}
         />
         <meta
           property="og:title"
-          content={`Consolidated Community Metrics Downloads`}
+          content={`Consolidated Network Metrics Downloads`}
         />
         <meta property="og:description" content="6529 SEIZE" />
         <meta

@@ -2,19 +2,19 @@ import Head from "next/head";
 import {
   getCommonHeaders,
   getUserProfileActivityLogs,
-} from "../helpers/server.helpers";
-import { CountlessPage } from "../helpers/Types";
-import { ProfileActivityLog } from "../entities/IProfile";
+} from "../../helpers/server.helpers";
+import { CountlessPage } from "../../helpers/Types";
+import { ProfileActivityLog } from "../../entities/IProfile";
 import ProfileActivityLogs, {
   ActivityLogParams,
   convertActivityLogParams,
-} from "../components/profile-activity/ProfileActivityLogs";
-import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
+} from "../../components/profile-activity/ProfileActivityLogs";
+import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import { useContext } from "react";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
-import { Crumb } from "../components/breadcrumb/Breadcrumb";
-import SidebarLayout from "../components/utils/sidebar/SidebarLayout";
-import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
+import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
@@ -39,7 +39,7 @@ export default function CommunityActivityPage({
 }) {
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Community Activity" },
+    { display: "Network Activity" },
   ];
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
@@ -71,10 +71,9 @@ export default function CommunityActivityPage({
       <SidebarLayout breadcrumbs={breadcrumbs}>
         <ProfileActivityLogs
           initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-          withFilters={true}
-        >
+          withFilters={true}>
           <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
-            <span className="font-lightest">Community</span> Activity
+            <span className="font-lightest">Network</span> Activity
           </h1>
         </ProfileActivityLogs>
       </SidebarLayout>

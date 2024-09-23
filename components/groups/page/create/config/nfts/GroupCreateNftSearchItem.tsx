@@ -58,8 +58,7 @@ export default function GroupCreateNftSearchItem({
       <button
         type="button"
         className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-        onClick={() => onSelect(item)}
-      >
+        onClick={() => onSelect(item)}>
         <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
           <div className="tw-flex tw-space-x-2 tw-items-center">
             <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-900">
@@ -70,7 +69,7 @@ export default function GroupCreateNftSearchItem({
                       item.image_url,
                       ImageScale.W_AUTO_H_50
                     )}
-                    alt="Community Table Profile Picture"
+                    alt="Network Table Profile Picture"
                     className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                   />
                 </div>
@@ -91,8 +90,7 @@ export default function GroupCreateNftSearchItem({
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M20 6L9 17L4 12"
                 stroke="currentColor"

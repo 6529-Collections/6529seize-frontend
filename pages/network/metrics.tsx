@@ -1,11 +1,11 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.scss";
+import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import Breadcrumb from "../components/breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 
-const Header = dynamic(() => import("../components/header/Header"), {
+const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
@@ -13,20 +13,20 @@ const Header = dynamic(() => import("../components/header/Header"), {
 export default function CommunityMetrics() {
   const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Community Metrics" },
+    { display: "Network Metrics" },
   ];
 
   return (
     <>
       <Head>
-        <title>Community Metrics | 6529 SEIZE</title>
+        <title>Network Metrics | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Community Metrics | 6529 SEIZE" />
+        <meta name="description" content="Network Metrics | 6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/network/metrics`}
         />
-        <meta property="og:title" content="Community Metrics" />
+        <meta property="og:title" content="Network Metrics" />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -44,7 +44,7 @@ export default function CommunityMetrics() {
                 <Row>
                   <Col>
                     <h1>
-                      <span className="font-lightest">Community</span> Metrics
+                      <span className="font-lightest">Network</span> Metrics
                     </h1>
                   </Col>
                 </Row>

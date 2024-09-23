@@ -343,7 +343,7 @@ export default function Header(props: Readonly<Props>) {
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
                   }`}>
-                Community
+                Network
               </h3>
             </Col>
             {showBurgerMenuCommunity && (
@@ -355,21 +355,21 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/community">
-                      <h3>Community</h3>
+                    <Link href="/network">
+                      <h3>Network</h3>
                     </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/community-activity">
-                      <h3>Community Activity</h3>
+                    <Link href="/network/activity">
+                      <h3>Network Activity</h3>
                     </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/groups">
+                    <Link href="/network/groups">
                       <h3>Groups</h3>
                     </Link>
                   </Col>
@@ -388,7 +388,7 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/community/prenodes">
+                    <Link href="/network/prenodes">
                       <h3>Prenodes</h3>
                     </Link>
                   </Col>
@@ -400,21 +400,21 @@ export default function Header(props: Readonly<Props>) {
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/community-metrics">
-                      <h3>Community Metrics</h3>
+                    <Link href="/network/metrics">
+                      <h3>Network Metrics</h3>
                     </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/community-stats">
-                      <h3>Community Stats</h3>
+                    <Link href="/network/stats">
+                      <h3>Network Stats</h3>
                     </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
-                    <Link href="/levels">
+                    <Link href="/network/levels">
                       <h3>Levels</h3>
                     </Link>
                   </Col>
@@ -872,25 +872,25 @@ export default function Header(props: Readonly<Props>) {
                               />
                             </NavDropdown>
                             <NavDropdown
-                              title="Community"
+                              title="Network"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Community",
-                                  path: "/community",
+                                  name: "Network",
+                                  path: "/network",
                                 }}
                               />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Community Activity",
-                                  path: "/community-activity",
+                                  name: "Network Activity",
+                                  path: "/network/activity",
                                 }}
                               />
                               <HeaderDesktopLink
                                 link={{
                                   name: "Groups",
-                                  path: "/groups",
+                                  path: "/network/groups",
                                 }}
                               />
                               <HeaderDesktopLink
@@ -903,26 +903,26 @@ export default function Header(props: Readonly<Props>) {
                               <HeaderDesktopLink
                                 link={{
                                   name: "Prenodes",
-                                  path: "/community/prenodes",
+                                  path: "/network/prenodes",
                                 }}
                               />
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Community Metrics",
-                                  path: "/community-metrics",
+                                  name: "Network Metrics",
+                                  path: "/network/metrics",
                                 }}
                               />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Community Stats",
-                                  path: "/community-stats",
+                                  name: "Network Stats",
+                                  path: "/network/stats",
                                 }}
                               />
                               <HeaderDesktopLink
                                 link={{
                                   name: "Levels",
-                                  path: "/levels",
+                                  path: "/network/levels",
                                 }}
                               />
                             </NavDropdown>

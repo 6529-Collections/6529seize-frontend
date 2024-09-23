@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SortDirection } from "../../../entities/ISort";
-import { CommunityMembersSortOption } from "../../../pages/community";
 import CommunityMembersTableHeaderSortableContent from "./CommunityMembersTableHeaderSortableContent";
+import { CommunityMembersSortOption } from "../../../enums";
 
 export default function CommunityMembersTableHeader({
   activeSort,
@@ -21,14 +21,12 @@ export default function CommunityMembersTableHeader({
       <tr>
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-        >
+          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           Rank
         </th>
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-pr-4 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-        >
+          className="tw-whitespace-nowrap tw-pr-4 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           Profile
         </th>
         <th
@@ -36,8 +34,7 @@ export default function CommunityMembersTableHeader({
           className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.LEVEL)}
           onMouseEnter={() => setHoverOption(CommunityMembersSortOption.LEVEL)}
-          onMouseLeave={() => setHoverOption(null)}
-        >
+          onMouseLeave={() => setHoverOption(null)}>
           <CommunityMembersTableHeaderSortableContent
             sort={CommunityMembersSortOption.LEVEL}
             activeSort={activeSort}
@@ -51,8 +48,7 @@ export default function CommunityMembersTableHeader({
           className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.TDH)}
           onMouseEnter={() => setHoverOption(CommunityMembersSortOption.TDH)}
-          onMouseLeave={() => setHoverOption(null)}
-        >
+          onMouseLeave={() => setHoverOption(null)}>
           <CommunityMembersTableHeaderSortableContent
             sort={CommunityMembersSortOption.TDH}
             activeSort={activeSort}
@@ -66,8 +62,7 @@ export default function CommunityMembersTableHeader({
           className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.REP)}
           onMouseEnter={() => setHoverOption(CommunityMembersSortOption.REP)}
-          onMouseLeave={() => setHoverOption(null)}
-        >
+          onMouseLeave={() => setHoverOption(null)}>
           <CommunityMembersTableHeaderSortableContent
             sort={CommunityMembersSortOption.REP}
             activeSort={activeSort}
@@ -81,8 +76,7 @@ export default function CommunityMembersTableHeader({
           className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
           onClick={() => onSort(CommunityMembersSortOption.CIC)}
           onMouseEnter={() => setHoverOption(CommunityMembersSortOption.CIC)}
-          onMouseLeave={() => setHoverOption(null)}
-        >
+          onMouseLeave={() => setHoverOption(null)}>
           <CommunityMembersTableHeaderSortableContent
             sort={CommunityMembersSortOption.CIC}
             activeSort={activeSort}
@@ -93,8 +87,7 @@ export default function CommunityMembersTableHeader({
         </th>
         <th
           scope="col"
-          className="tw-px-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-        >
+          className="tw-px-4 sm:tw-pr-6 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           <span>Active</span>
         </th>
       </tr>

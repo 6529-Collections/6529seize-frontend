@@ -1,19 +1,21 @@
 import Head from "next/head";
-import styles from "../../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
+import styles from "../../../../styles/Home.module.scss";
+import Breadcrumb, {
+  Crumb,
+} from "../../../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import { LeaderboardFocus } from "../../../components/leaderboard/Leaderboard";
+import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
+import { LeaderboardFocus } from "../../../../components/leaderboard/Leaderboard";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 const Leaderboard = dynamic(
-  () => import("../../../components/leaderboard/Leaderboard"),
+  () => import("../../../../components/leaderboard/Leaderboard"),
   { ssr: false }
 );
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
+const Header = dynamic(() => import("../../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
@@ -26,10 +28,10 @@ export default function CommunityNerdPage(props: any) {
   useEffect(() => {
     setBreadcrumbs([
       { display: "Home", href: "/" },
-      { display: `Community Nerd - ${focus}` },
+      { display: `Network - ${focus}` },
     ]);
 
-    let path = "/community-nerd";
+    let path = "/network/nerd";
     if (focus === LeaderboardFocus.INTERACTIONS) {
       path += "/interactions";
     } else {
@@ -47,14 +49,20 @@ export default function CommunityNerdPage(props: any) {
   return (
     <>
       <Head>
-        <title>Community | 6529 SEIZE</title>
+        <title>Network {focus ? ` | ${focus}` : ""} | 6529 SEIZE</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Community | 6529 SEIZE" />
+        <meta
+          name="description"
+          content={`Network${focus ? ` | ${focus}` : ""} | 6529 SEIZE`}
+        />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/community`}
+          content={`${process.env.BASE_ENDPOINT}/network/nerd`}
         />
-        <meta property="og:title" content="Community" />
+        <meta
+          property="og:title"
+          content={`Network${focus ? ` | ${focus}` : ""}`}
+        />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
