@@ -7,7 +7,6 @@ import {
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
 
-
 export default function MyStream() {
   const { connectedProfile, activeProfileProxy, setTitle } =
     useContext(AuthContext);
@@ -40,10 +39,6 @@ export default function MyStream() {
     ) {
       fetchNextPage();
     }
-  };
-
-  const onRefresh = () => {
-    refetch();
   };
 
   useEffect(() => {

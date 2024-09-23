@@ -35,7 +35,6 @@ export default function WaveDrops({
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-    refetch,
     haveNewDrops,
   } = useWaveDrops(wave, rootDropId, connectedProfile?.profile?.handle);
 
