@@ -31,6 +31,10 @@ export default function WaveDetailedDropActions({
       return false;
     }
 
+    if (drop.id.startsWith('temp-')) {
+      return false;
+    }
+
     return connectedProfile.profile.handle === drop.author.handle;
   };
 

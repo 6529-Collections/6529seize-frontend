@@ -84,7 +84,11 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
               }`}
             >
               <WaveDetailedDrop
-                drop={wave.description_drop}
+                drop={{
+                  ...wave.description_drop,
+                  stableKey: wave.description_drop.id,
+                  stableHash: wave.description_drop.id,
+                }}
                 showWaveInfo={false}
                 activeDrop={null}
                 rootDropId={null}

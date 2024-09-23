@@ -12,7 +12,9 @@ interface WaveDetailedDropActionsReplyProps {
 const WaveDetailedDropActionsReply: React.FC<
   WaveDetailedDropActionsReplyProps
 > = ({ onReply, drop, activePartIndex }) => {
-  const canReply = drop.wave.authenticated_user_eligible_to_participate;
+  const isTemporaryDrop = drop.id.startsWith("temp-");
+  const canReply =
+    drop.wave.authenticated_user_eligible_to_participate && !isTemporaryDrop;
   const repliesCount = drop.parts[activePartIndex].replies_count;
   const contextProfileReplied =
     !!drop.parts[activePartIndex].context_profile_context?.replies_count;
@@ -29,7 +31,7 @@ const WaveDetailedDropActionsReply: React.FC<
         </div>
       }
       placement="top"
-      disabled={false}
+      disabled={isTemporaryDrop}
     >
       <div>
         <button
