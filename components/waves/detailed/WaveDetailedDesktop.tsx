@@ -133,7 +133,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     <div className="tailwind-scope tw-bg-black">
       <div className="tw-mt-3 tw-px-4">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
-          <div className="lg:tw-h-[calc(100vh-7rem)] tw-overflow-y-auto no-scrollbar lg:tw-max-w-[20.5rem] tw-w-full">
+          <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-3 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[20.5rem] tw-w-full">
             <div className="tw-flex tw-flex-1 tw-flex-col">
               <WaveHeader
                 wave={wave}
@@ -143,16 +143,23 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               <button
                 onClick={toggleExpand}
                 type="button"
-                className="tw-w-full tw-group tw-mt-4 tw-ring-1 tw-ring-iron-800 tw-ring-inset hover:tw-ring-primary-400/20 tw-flex tw-justify-between tw-items-center tw-text-iron-300 hover:tw-text-primary-300 tw-font-medium tw-py-3 tw-px-5 tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-300 tw-border-0"
+                className={`tw-w-full tw-group tw-mt-4 tw-ring-1 tw-ring-iron-800 tw-ring-inset hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-3 tw-px-5 tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-300 tw-border-0 ${
+                  isExpanded
+                    ? "tw-text-primary-300"
+                    : "tw-text-iron-300 hover:tw-text-primary-300"
+                }`}
                 aria-expanded={isExpanded}
               >
                 <span className="tw-text-sm">Wave Info</span>
                 <svg
-                  className={`tw-size-5 tw-text-iron-400 group-hover:tw-text-primary-300 tw-transition-all tw-duration-300 ${
-                    isExpanded ? "tw-rotate-180" : ""
+                  className={`tw-size-5 tw-transition-all tw-duration-300 ${
+                    isExpanded
+                      ? "tw-rotate-180 tw-text-primary-300"
+                      : "tw-text-iron-400 group-hover:tw-text-primary-300"
                   }`}
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
+                  aria-hidden="true"
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
@@ -191,7 +198,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
                 )}
               </AnimatePresence>
 
-              <div className="tw-mt-4 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
+              <div className="tw-mt-4 tw-mb-3 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
                 <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-py-5 tw-px-5">
                   <div className="tw-flex tw-items-center tw-gap-x-2">
                     <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -291,7 +298,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               </div>
             </div>
           </div>
-          <div className="tw-flex-1">
+          <div className="tw-flex-1 tw-ml-[20.5rem]">
             <div
               ref={contentWrapperRef}
               className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800"
