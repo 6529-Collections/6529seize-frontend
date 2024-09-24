@@ -76,13 +76,13 @@ export default function WaveDetailedContent({
 
   const threadAnimationVariants = {
     S: {
-      initial: { opacity: 0, width: 0, y: "100%" },
-      animate: { opacity: 1, width: "100%", y: 0 },
-      exit: { opacity: 0, width: 0, y: "100%" },
+      initial: { opacity: 0, width: 0, x: "-100%" },
+      animate: { opacity: 1, width: "100%", x: 0 },
+      exit: { opacity: 0, width: 0, x: "-100%" },
     },
     default: {
       initial: { width: 0, opacity: 0 },
-      animate: { width: "33%", opacity: 1 },
+      animate: { width: "70%", opacity: 1 },
       exit: { width: 0, opacity: 0 },
     },
   };
