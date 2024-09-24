@@ -96,6 +96,7 @@ export default function WaveDetailedContent({
           onQuote={handleQuote}
           activeDrop={activeDrop}
           rootDropId={null}
+          onActiveDropClick={closeActiveDropId}
         />
         {canDrop && (
           <div className="tw-mt-auto">

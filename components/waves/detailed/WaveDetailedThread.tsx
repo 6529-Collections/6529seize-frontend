@@ -51,6 +51,7 @@ export const WaveDetailedThread: React.FC<{
         activeDrop={activeDrop}
         rootDropId={rootDropId}
         onBackToList={closeActiveDropId}
+        onActiveDropClick={closeActiveDropId}
       />
       {canDrop && (
         <div className="tw-mt-auto">
