@@ -13,6 +13,7 @@ import WaveDetailedContent from "./WaveDetailedContent";
 import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
 import WaveRequiredTypes from "./types/WaveRequiredTypes";
 import { WaveDetailedView } from "./WaveDetailed";
+import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
 
 interface WaveDetailedMobileProps {
   readonly wave: Wave;
@@ -20,7 +21,7 @@ interface WaveDetailedMobileProps {
   readonly setView: (view: WaveDetailedView) => void;
 }
 
-enum WaveDetailedMobileView {
+export enum WaveDetailedMobileView {
   CHAT = "CHAT",
   ABOUT = "ABOUT",
 }
@@ -130,27 +131,13 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   const components: Record<WaveDetailedMobileView, JSX.Element> = {
     [WaveDetailedMobileView.CHAT]: chatComponents[view],
     [WaveDetailedMobileView.ABOUT]: (
-      <div className="tw-px-4 md:tw-px-2 tw-mt-4">
-        <div className="tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4 tw-pb-4">
-          <WaveHeader
-            wave={wave}
-            onFollowersClick={() => {
-              setView(WaveDetailedView.FOLLOWERS);
-              setActiveView(WaveDetailedMobileView.CHAT);
-            }}
-          />
-          <WaveSpecs wave={wave} />
-          <WaveGroups wave={wave} />
-          {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
-          {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
-          {false && (
-            <>
-              <WaveLeaderboard wave={wave} />
-              <WaveOutcomes wave={wave} />
-            </>
-          )}
-        </div>
-      </div>
+      <WaveDetailedMobileAbout
+        wave={wave}
+        showRequiredMetadata={showRequiredMetadata}
+        showRequiredTypes={showRequiredTypes}
+        setView={setView}
+        setActiveView={setActiveView}
+      />
     ),
   };
 
