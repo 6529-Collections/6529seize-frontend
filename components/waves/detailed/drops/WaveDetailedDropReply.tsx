@@ -3,7 +3,6 @@ import { Drop } from "../../../../generated/models/Drop";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
-import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
 import Link from "next/link";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";

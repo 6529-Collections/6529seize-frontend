@@ -1,5 +1,4 @@
-import React from "react";
-import { AnchorHTMLAttributes, ClassAttributes, ReactNode } from "react";
+import { AnchorHTMLAttributes, ClassAttributes, memo, ReactNode } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -344,4 +343,4 @@ function DropPartMarkdown({
   );
 }
 
-export default React.memo(DropPartMarkdown);
+export default memo(DropPartMarkdown);

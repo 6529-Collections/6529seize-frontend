@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
-import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
