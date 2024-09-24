@@ -358,12 +358,10 @@ export default function CommunityMetrics() {
                     </h5>
                     <br />
                     <table className={styles.communityMetricsTable}>
-                      <thead>
-                        <tr>
-                          <td colSpan={2}>&#40;1&#41;</td>
-                        </tr>
-                      </thead>
                       <tbody>
+                        <tr>
+                          <th colSpan={2}>&#40;1&#41;</th>
+                        </tr>
                         <tr>
                           <td>A complete set of Meme Cards</td>
                           <td>1.20x</td>
@@ -385,12 +383,12 @@ export default function CommunityMetrics() {
                           <td></td>
                         </tr>
                         <tr>
-                          <td colSpan={2}>
+                          <th colSpan={2}>
                             <b>or</b>
-                          </td>
+                          </th>
                         </tr>
                         <tr>
-                          <td colSpan={2}>&#40;2&#41;</td>
+                          <th colSpan={2}>&#40;2&#41;</th>
                         </tr>
                         <tr>
                           <td>A complete set of Meme Cards - 1</td>
@@ -419,12 +417,12 @@ export default function CommunityMetrics() {
                           <td>1.02x</td>
                         </tr>
                         <tr>
-                          <td colSpan={2}>
+                          <th colSpan={2}>
                             <b>or</b>
-                          </td>
+                          </th>
                         </tr>
                         <tr>
-                          <td colSpan={2}>&#40;3&#41;</td>
+                          <th colSpan={2}>&#40;3&#41;</th>
                         </tr>
                         <tr>
                           <td>
@@ -434,7 +432,7 @@ export default function CommunityMetrics() {
                         </tr>
                       </tbody>
                     </table>
-                    <p>
+                    <p className="pt-3">
                       Each address uses the highest value that it is eligible
                       for from #1, #2 or #3
                     </p>

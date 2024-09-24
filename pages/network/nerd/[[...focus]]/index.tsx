@@ -49,7 +49,9 @@ export default function CommunityNerdPage(props: any) {
   }, [focus]);
 
   useEffect(() => {
-    const title = `Network ${focus ? ` | ${focus}` : ""} | 6529 SEIZE`;
+    const title = focus
+      ? `Network | ${focus} | 6529 SEIZE`
+      : "Network | 6529 SEIZE";
     setTitle({ title });
   }, [focus]);
 

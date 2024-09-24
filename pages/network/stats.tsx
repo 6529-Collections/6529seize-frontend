@@ -3,7 +3,7 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { AuthContext } from "../../components/auth/Auth";
 
