@@ -50,12 +50,23 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   const aspectRatio = dimensions.height
     ? dimensions.width / dimensions.height
     : 0;
+
+  const imageStyle = {
+    maxHeight: '70vh',
+    width: 'auto',
+    maxWidth: '100%',
+    objectFit: 'contain' as const,
+  };
+
   const placeholderStyle = aspectRatio
-    ? { paddingBottom: `${(1 / aspectRatio) * 100}%` }
+    ? {
+        paddingBottom: `${Math.min((1 / aspectRatio) * 100, 70)}%`,
+        maxHeight: '70vh',
+      }
     : undefined;
 
   return (
-    <div className="tw-relative tw-w-full tw-max-w-lg tw-mt-3">
+    <div className="tw-relative tw-w-full tw-max-w-lg tw-mt-3 tw-flex">
       {isLoading && (
         <div
           className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
@@ -67,7 +78,8 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
         src={src}
         alt={alt}
         onLoad={handleImageLoad}
-        className={`tw-w-full ${isLoading ? "tw-opacity-0" : "tw-opacity-100"}`}
+        className={`${isLoading ? "tw-opacity-0" : "tw-opacity-100"}`}
+        style={imageStyle}
         {...props}
       />
     </div>
