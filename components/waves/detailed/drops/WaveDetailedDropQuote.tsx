@@ -2,17 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
-
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
 import { useRouter } from "next/router";
+import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 interface WaveDetailedDropQuoteProps {
   readonly dropId: string;
@@ -147,7 +146,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
               role="button"
               tabIndex={0}
             >
-              <DropPartMarkdown
+              <DropPartMarkdownWithPropLogger
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}
                 referencedNfts={drop?.referenced_nfts ?? []}

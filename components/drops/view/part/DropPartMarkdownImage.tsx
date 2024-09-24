@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
@@ -16,7 +16,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const updateDimensions = () => {
+  const updateDimensions = useCallback(() => {
     if (imgRef.current) {
       const { naturalWidth, naturalHeight } = imgRef.current;
       if (naturalWidth && naturalHeight) {
@@ -25,7 +25,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       }
     }
     return false;
-  };
+  }, []);
 
   useEffect(() => {
     if (imgRef.current?.complete) {
@@ -39,13 +39,13 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       const intervalId = setInterval(checkDimensions, 100);
       return () => clearInterval(intervalId);
     }
-  }, []);
+  }, [updateDimensions]);
 
-  const handleImageLoad = () => {
+  const handleImageLoad = useCallback(() => {
     setIsLoading(false);
     onImageLoaded();
     updateDimensions();
-  };
+  }, [onImageLoaded, updateDimensions]);
 
   const aspectRatio = dimensions.height
     ? dimensions.width / dimensions.height
@@ -74,4 +74,4 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   );
 };
 
-export default DropPartMarkdownImage;
+export default React.memo(DropPartMarkdownImage);
