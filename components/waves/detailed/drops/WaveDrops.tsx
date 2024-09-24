@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -40,6 +40,11 @@ export default function WaveDrops({
     haveNewDrops,
   } = useWaveDrops(wave, rootDropId, connectedProfile?.profile?.handle);
 
+  const [newDropsCount, setNewDropsCount] = useState(0);
+  const [lastVisibleDropTimestamp, setLastVisibleDropTimestamp] = useState<
+    number | null
+  >(null);
+
   const {
     scrollContainerRef,
     isAtBottom,
@@ -63,6 +68,28 @@ export default function WaveDrops({
   }, [haveNewDrops]);
 
   useEffect(() => {
+    if (drops.length > 0) {
+      if (isAtBottom) {
+        setNewDropsCount(0);
+        setLastVisibleDropTimestamp(drops.at(-1)?.created_at ?? null);
+      } else if (lastVisibleDropTimestamp === null) {
+        setLastVisibleDropTimestamp(drops.at(-1)?.created_at ?? null);
+      } else {
+        const newDrops = drops.filter(
+          (drop) => drop.created_at > lastVisibleDropTimestamp
+        );
+        if (newDrops.length > 0) {
+          setNewDropsCount(newDrops.length);
+          setLastVisibleDropTimestamp(newDrops.at(-1)?.created_at ?? null);
+        }
+      }
+    } else {
+      setNewDropsCount(0);
+      setLastVisibleDropTimestamp(null);
+    }
+  }, [drops, lastVisibleDropTimestamp, isAtBottom]);
+
+  useEffect(() => {
     if (shouldScrollDownAfterNewPosts) {
       scrollToBottom();
     }
@@ -73,6 +100,11 @@ export default function WaveDrops({
     const timeoutId = setTimeout(() => handleScroll(), 100);
     return () => clearTimeout(timeoutId);
   }, [scrollToBottom, handleScroll]);
+
+  const handleNewDropsClick = () => {
+    scrollToBottom();
+    setNewDropsCount(0);
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
@@ -120,6 +152,20 @@ export default function WaveDrops({
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
       />
+      {newDropsCount > 0 && (
+        <div className="tw-absolute tw-bottom-4 tw-left-0 tw-right-0 tw-flex tw-items-center tw-justify-center">
+          <div className="tw-w-full tw-flex tw-items-center">
+            <div className="tw-flex-grow tw-h-px tw-bg-red"></div>
+            <button
+              onClick={handleNewDropsClick}
+              className="tw-bg-iron-950 tw-text-red tw-px-2 tw-py-0 tw-text-sm tw-rounded-full tw-border-none"
+            >
+              {newDropsCount} new drop{newDropsCount !== 1 ? "s" : ""}
+            </button>
+            <div className="tw-flex-grow tw-h-px tw-bg-red"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
