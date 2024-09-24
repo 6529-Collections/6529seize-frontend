@@ -1,8 +1,4 @@
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQuery,
-} from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -21,36 +17,32 @@ const WaveDetailedFollowingWaves: React.FC = () => {
     },
   ];
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        page_size: PAGE_SIZE.toString(),
-      };
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey,
+      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+        const params: Record<string, string> = {
+          page_size: PAGE_SIZE.toString(),
+        };
 
-      if (pageParam) {
-        params.page = `${pageParam}`;
-      }
-      return await commonApiFetch<{
-        data: { target: Wave }[];
-        count: number;
-        page: number;
-        next: boolean;
-      }>({
-        endpoint: `/identity-subscriptions/outgoing/WAVE`,
-        params,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
-    placeholderData: keepPreviousData,
-  });
+        if (pageParam) {
+          params.page = `${pageParam}`;
+        }
+        return await commonApiFetch<{
+          data: { target: Wave }[];
+          count: number;
+          page: number;
+          next: boolean;
+        }>({
+          endpoint: `/identity-subscriptions/outgoing/WAVE`,
+          params,
+        });
+      },
+      initialPageParam: null,
+      getNextPageParam: (lastPage) =>
+        lastPage.next ? lastPage.page + 1 : null,
+      placeholderData: keepPreviousData,
+    });
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
