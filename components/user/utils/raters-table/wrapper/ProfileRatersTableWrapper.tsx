@@ -119,9 +119,9 @@ export default function ProfileRatersTableWrapper({
   const getNoRatingsMessage = (): string => {
     switch (type) {
       case ProfileRatersTableType.CIC_RECEIVED:
-        return "No CIC received ratings";
+        return "No NIC received ratings";
       case ProfileRatersTableType.CIC_GIVEN:
-        return "No CIC given ratings";
+        return "No NIC given ratings";
       case ProfileRatersTableType.REP_RECEIVED:
         return "No Rep received ratings";
       case ProfileRatersTableType.REP_GIVEN:

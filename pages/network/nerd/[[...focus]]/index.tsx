@@ -30,7 +30,8 @@ export default function CommunityNerdPage(props: any) {
   useEffect(() => {
     setBreadcrumbs([
       { display: "Home", href: "/" },
-      { display: `Network - ${focus}` },
+      { display: "Network", href: "/network" },
+      { display: `Nerd - ${focus}` },
     ]);
 
     let path = "/network/nerd";
@@ -49,9 +50,7 @@ export default function CommunityNerdPage(props: any) {
   }, [focus]);
 
   useEffect(() => {
-    const title = focus
-      ? `Network | ${focus} | 6529 SEIZE`
-      : "Network | 6529 SEIZE";
+    const title = focus ? `Network | ${focus}` : "Network";
     setTitle({ title });
   }, [focus]);
 
@@ -60,7 +59,7 @@ export default function CommunityNerdPage(props: any) {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={title} />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/network/nerd`}

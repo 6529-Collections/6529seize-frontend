@@ -47,7 +47,8 @@ export default function CommunityActivityPage({
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Network Activity" },
+    { display: "Network", href: "/network" },
+    { display: "Activity" },
   ];
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
@@ -63,10 +64,10 @@ export default function CommunityActivityPage({
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Profiles Activity | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/profiles-activity`}
+          content={`${process.env.BASE_ENDPOINT}/network/activity`}
         />
         <meta property="og:title" content="Profiles Activity" />
         <meta

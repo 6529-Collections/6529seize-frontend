@@ -16,12 +16,13 @@ export default function CommunityMetrics() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Network Metrics | 6529 SEIZE",
+      title: "Metrics | Network",
     });
   }, []);
 
   const breadcrumbs = [
     { display: "Home", href: "/" },
+    { display: "Network", href: "/network" },
     { display: "Network Metrics" },
   ];
 
@@ -30,12 +31,12 @@ export default function CommunityMetrics() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Network Metrics | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/network/metrics`}
         />
-        <meta property="og:title" content="Network Metrics" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"

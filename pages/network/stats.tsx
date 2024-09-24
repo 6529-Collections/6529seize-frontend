@@ -21,13 +21,14 @@ export default function CommunityStats() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Network Stats | 6529 SEIZE",
+      title: "Stats | Network",
     });
   }, []);
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Network Stats" },
+    { display: "Network", href: "/network" },
+    { display: "Stats" },
   ];
 
   return (
@@ -35,12 +36,12 @@ export default function CommunityStats() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Network Stats | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/network/stats`}
         />
-        <meta property="og:title" content="Network Stats" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"

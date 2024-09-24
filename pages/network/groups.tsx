@@ -15,12 +15,13 @@ export default function GroupsPage() {
   const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
+    { display: "Network", href: "/network" },
     { display: "Groups" },
   ];
 
   useEffect(() => {
     setTitle({
-      title: "Groups | 6529 SEIZE",
+      title: "Groups | Network",
     });
   }, []);
 
@@ -29,12 +30,12 @@ export default function GroupsPage() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Groups | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/groups`}
+          content={`${process.env.BASE_ENDPOINT}/network/groups`}
         />
-        <meta property="og:title" content="Groups" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"

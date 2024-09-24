@@ -68,7 +68,7 @@ export default function GroupCard({
   }, [connectedProfile?.profile?.handle]);
 
   const onEditClick = (group: GroupFull) => {
-    router.push(`/groups?edit=${group.id}`);
+    router.push(`/network/groups?edit=${group.id}`);
   };
 
   const components: Record<GroupCardState, JSX.Element> = {

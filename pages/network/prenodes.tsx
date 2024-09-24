@@ -21,12 +21,13 @@ export default function PrenodesPage() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Prenodes | 6529 SEIZE",
+      title: "Prenodes | Network",
     });
   }, []);
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
+    { display: "Network", href: "/network" },
     { display: "Prenodes" },
   ];
 
@@ -35,12 +36,12 @@ export default function PrenodesPage() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Prenodes | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/prenodes`}
+          content={`${process.env.BASE_ENDPOINT}/network/prenodes`}
         />
-        <meta property="og:title" content="Prenodes" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"

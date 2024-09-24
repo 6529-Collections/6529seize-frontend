@@ -23,7 +23,7 @@ export default function ProfileRatersTableHeader({
     switch (type) {
       case ProfileRatersTableType.CIC_RECEIVED:
       case ProfileRatersTableType.CIC_GIVEN:
-        return "Total CIC";
+        return "Total NIC";
       case ProfileRatersTableType.REP_RECEIVED:
       case ProfileRatersTableType.REP_GIVEN:
         return "Total Rep";

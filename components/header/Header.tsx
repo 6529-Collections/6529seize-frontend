@@ -364,7 +364,7 @@ export default function Header(props: Readonly<Props>) {
                 <Row className="pt-3">
                   <Col>
                     <Link href="/network/activity">
-                      <h3>Network Activity</h3>
+                      <h3>Activity</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -402,14 +402,14 @@ export default function Header(props: Readonly<Props>) {
                 <Row className="pt-3">
                   <Col>
                     <Link href="/network/metrics">
-                      <h3>Network Metrics</h3>
+                      <h3>Metrics</h3>
                     </Link>
                   </Col>
                 </Row>
                 <Row className="pt-3">
                   <Col>
                     <Link href="/network/stats">
-                      <h3>Network Stats</h3>
+                      <h3>Stats</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -760,7 +760,9 @@ export default function Header(props: Readonly<Props>) {
                     <Image
                       loading="eager"
                       priority
-                      className={props.isSmall ? styles.logoIconSmall : styles.logoIcon}
+                      className={
+                        props.isSmall ? styles.logoIconSmall : styles.logoIcon
+                      }
                       src={logoSrc}
                       alt="6529Seize"
                       width={logoWidth}
@@ -888,7 +890,7 @@ export default function Header(props: Readonly<Props>) {
                               />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Network Activity",
+                                  name: "Activity",
                                   path: "/network/activity",
                                 }}
                               />
@@ -914,13 +916,13 @@ export default function Header(props: Readonly<Props>) {
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Network Metrics",
+                                  name: "Metrics",
                                   path: "/network/metrics",
                                 }}
                               />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Network Stats",
+                                  name: "Stats",
                                   path: "/network/stats",
                                 }}
                               />
