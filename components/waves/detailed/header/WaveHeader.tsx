@@ -29,7 +29,7 @@ export default function WaveHeader({
   return (
     <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-overflow-auto">
-        <div className="tw-border tw-border-b-0 tw-border-solid tw-border-iron-900 tw-rounded-t-xl tw-overflow-hidden">
+        <div className="tw-rounded-t-xl tw-overflow-hidden">
           <div
             className="tw-h-14 tw-w-full tw-object-cover"
             style={{
