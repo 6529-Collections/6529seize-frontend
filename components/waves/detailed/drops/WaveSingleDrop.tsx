@@ -10,8 +10,10 @@ import { useState } from "react";
 
 export default function WaveSingleDrop({
   dropId,
+  onActiveDropClick,
 }: {
   readonly dropId: string;
+  readonly onActiveDropClick?: () => void;
 }) {
   const [activePartIndex, setActivePartIndex] = useState(0);
 
@@ -46,6 +48,7 @@ export default function WaveSingleDrop({
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
+              onActiveDropClick={onActiveDropClick}
             />
           </div>
           {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}

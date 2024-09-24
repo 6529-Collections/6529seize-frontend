@@ -9,10 +9,11 @@ interface WaveDetailedDropPartProps {
   readonly drop: Drop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
+  readonly onActiveDropClick?: () => void;
 }
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
-  ({ drop, activePartIndex, setActivePartIndex }) => {
+  ({ drop, activePartIndex, setActivePartIndex, onActiveDropClick }) => {
     const router = useRouter();
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
@@ -39,7 +40,13 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
 
     const handleClick = () => {
       if (!isTemporaryDrop) {
-        router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+        const currentDropId = router.query.drop;
+        if (currentDropId === drop.id) {
+          onActiveDropClick?.();
+          return;
+        }
+        const newPath = `/waves/${drop.wave.id}?drop=${drop.id}`;
+        router.push(newPath);
       }
     };
 

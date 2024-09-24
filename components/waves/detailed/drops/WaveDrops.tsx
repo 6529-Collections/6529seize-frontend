@@ -18,6 +18,7 @@ interface WaveDropsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onBackToList?: () => void;
+  readonly onActiveDropClick?: () => void;
 }
 
 export default function WaveDrops({
@@ -27,6 +28,7 @@ export default function WaveDrops({
   activeDrop,
   rootDropId,
   onBackToList,
+  onActiveDropClick,
 }: WaveDropsProps) {
   const { connectedProfile, setTitle } = useContext(AuthContext);
   const {
@@ -87,12 +89,19 @@ export default function WaveDrops({
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <div>
             {rootDropId && (
-              <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
+              <WaveDropThreadTrace
+                rootDropId={rootDropId}
+                wave={wave}
+                onActiveDropClick={onActiveDropClick}
+              />
             )}
           </div>
+
           <DropsList
+            onActiveDropClick={onActiveDropClick}
             drops={drops}
             showWaveInfo={false}
+            isFetchingNextPage={isFetchingNextPage}
             onIntersection={(state) => {
               if (state && hasNextPage && !isFetching && !isFetchingNextPage) {
                 fetchNextPage();

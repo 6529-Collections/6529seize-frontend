@@ -61,6 +61,7 @@ interface WaveDetailedDropProps {
     drop: ExtendedDrop;
     partId: number;
   }) => void;
+  readonly onActiveDropClick?: () => void;
 }
 
 export default function WaveDetailedDrop({
@@ -73,6 +74,7 @@ export default function WaveDetailedDrop({
   onReply,
   onQuote,
   showReplyAndQuote,
+  onActiveDropClick,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
@@ -142,6 +144,7 @@ export default function WaveDetailedDrop({
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
+              onActiveDropClick={onActiveDropClick}
             />
           </div>
         </div>

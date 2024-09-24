@@ -9,11 +9,13 @@ import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
 interface WaveDropThreadTraceProps {
   readonly rootDropId: string;
   readonly wave: Wave;
+  readonly onActiveDropClick?: () => void;
 }
 
 const WaveDropThreadTrace: React.FC<WaveDropThreadTraceProps> = ({
   rootDropId,
   wave,
+  onActiveDropClick,
 }) => {
   const { data } = useQuery({
     queryKey: [
@@ -53,7 +55,10 @@ const WaveDropThreadTrace: React.FC<WaveDropThreadTraceProps> = ({
           {index !== (data.trace?.length ?? 0) - 1 && (
             <div className="tw-absolute tw-left-9 tw-top-2 tw-bottom-0 tw-w-[1px] tw-bg-iron-700"></div>
           )}
-          <WaveSingleDrop dropId={drop.drop_id} />
+          <WaveSingleDrop
+            dropId={drop.drop_id}
+            onActiveDropClick={onActiveDropClick}
+          />
         </div>
       )) ?? null}
     </>

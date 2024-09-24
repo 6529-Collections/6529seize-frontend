@@ -49,7 +49,7 @@ export const addDropToDrops = (
   { drop, rootDropId }: { readonly drop: Drop; readonly rootDropId: string | null }
 ): void => {
   const baseQueryParams: Omit<DropsQueryParams, 'dropId'> = { 
-    limit: 20, 
+    limit: 40, 
     waveId: drop.wave.id 
   };
 
