@@ -1,20 +1,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Wave } from "../../../generated/models/Wave";
-import WaveHeader from "./header/WaveHeader";
-import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
-import WaveOutcomes from "./outcome/WaveOutcomes";
-import WaveSpecs from "./specs/WaveSpecs";
-import WaveGroups from "./groups/WaveGroups";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
-import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
-import WaveRequiredTypes from "./types/WaveRequiredTypes";
 import { WaveDetailedView } from "./WaveDetailed";
-import WaveDetailedFollowingWaves from "./WaveDetailedFollowingWaves";
 import WaveDetailedAbout from "./WaveDetailedAbout";
 
 interface WaveDetailedDesktopProps {
@@ -105,11 +97,6 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
 
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CONTENT]: (

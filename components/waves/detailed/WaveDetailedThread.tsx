@@ -3,22 +3,16 @@ import { Wave } from "../../../generated/models/Wave";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 
 export const WaveDetailedThread: React.FC<{
   readonly wave: Wave;
   readonly rootDropId: string | null;
   readonly closeActiveDropId: () => void;
-}> = ({
-  wave,
-  rootDropId,
-  closeActiveDropId,
-}) => {
-
+}> = ({ wave, rootDropId, closeActiveDropId }) => {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const canDrop = wave.participation.authenticated_user_eligible;
-
 
   const onReply = (drop: Drop, partId: number) => {
     setActiveDrop({
