@@ -76,19 +76,19 @@ export default function WaveDetailedContent({
 
   const threadAnimationVariants = {
     S: {
-      initial: { opacity: 0, y: "100%" },
-      animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: "100%" },
+      initial: { opacity: 0, width: 0, x: "100%" },
+      animate: { opacity: 1, width: "100%", x: 0 },
+      exit: { opacity: 0, width: 0, x: "100%" },
     },
     default: {
       initial: { width: 0, opacity: 0 },
-      animate: { width: "100%", opacity: 1 },
+      animate: { width: "75%", opacity: 1 },
       exit: { width: 0, opacity: 0 },
     },
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-items-stretch tw-divide-x-4 tw-divide-iron-600 tw-divide-solid tw-divide-y-0">
+    <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
       <div className="tw-w-full tw-flex tw-flex-col">
         <WaveDrops
           wave={wave}
@@ -111,7 +111,9 @@ export default function WaveDetailedContent({
       <AnimatePresence>
         {isThreadOpen && (
           <motion.div
-            variants={threadAnimationVariants[breakpoint === "S" ? "S" : "default"]}
+            variants={
+              threadAnimationVariants[breakpoint === "S" ? "S" : "default"]
+            }
             initial="initial"
             animate="animate"
             exit="exit"
