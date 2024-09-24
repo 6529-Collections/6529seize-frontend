@@ -91,7 +91,7 @@ export default function GroupCard({
       <GroupCardVoteAll
         group={group}
         onCancel={onActionCancel}
-        matter={RateMatter.Nic}
+        matter={RateMatter.Cic}
       />
     ),
   };

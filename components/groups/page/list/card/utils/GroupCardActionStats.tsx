@@ -22,7 +22,7 @@ export default function GroupCardActionStats({
 }) {
   const MATTER_LABEL: Record<RateMatter, string> = {
     [RateMatter.Rep]: "Rep",
-    [RateMatter.Nic]: "Nic",
+    [RateMatter.Cic]: "Nic",
   };
 
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -87,7 +87,7 @@ export default function GroupCardActionStats({
     switch (matter) {
       case RateMatter.Rep:
         return creditLeft?.rep_credit ?? null;
-      case RateMatter.Nic:
+      case RateMatter.Cic:
         return creditLeft?.cic_credit ?? null;
       default:
         assertUnreachable(matter);

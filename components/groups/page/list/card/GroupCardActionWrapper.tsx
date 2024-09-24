@@ -26,7 +26,7 @@ export default function GroupCardActionWrapper({
 }) {
   const MATTER_LABEL: Record<RateMatter, string> = {
     [RateMatter.Rep]: "Rep",
-    [RateMatter.Nic]: "NIC",
+    [RateMatter.Cic]: "NIC",
   };
   const getProgress = (): string => {
     if (

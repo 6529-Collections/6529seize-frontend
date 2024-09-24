@@ -33,7 +33,7 @@ export default function GroupCardVoteAll({
   readonly onCancel: () => void;
 }) {
   const SUCCESS_LABEL: Record<RateMatter, string> = {
-    [RateMatter.Nic]: "NIC distributed.",
+    [RateMatter.Cic]: "NIC distributed.",
     [RateMatter.Rep]: "Rep distributed.",
   };
 

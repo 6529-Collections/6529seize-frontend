@@ -11,14 +11,7 @@ import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../components/auth/Auth";
-
-export enum CommunityMembersSortOption {
-  DISPLAY = "display",
-  LEVEL = "level",
-  TDH = "tdh",
-  REP = "rep",
-  CIC = "cic",
-}
+import { CommunityMembersSortOption } from "../../enums";
 
 export interface CommunityMembersQuery
   extends FullPageRequest<CommunityMembersSortOption> {

@@ -26,7 +26,7 @@ export default function GroupCardVoteAllInputs({
   readonly setCreditDirection: (creditDirection: CreditDirection) => void;
 }) {
   const components: Record<RateMatter, JSX.Element> = {
-    [RateMatter.Nic]: (
+    [RateMatter.Cic]: (
       <div className="tw-w-full xl:tw-max-w-[17.156rem]">
         <GroupCardActionNumberInput
           label="NIC"
