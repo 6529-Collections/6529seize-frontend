@@ -25,10 +25,10 @@ export default function CommunityStats() {
     });
   }, []);
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
+  const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Network Stats" },
-  ]);
+  ];
 
   return (
     <>

@@ -49,9 +49,8 @@ export default function CommunityNerdPage(props: any) {
   }, [focus]);
 
   useEffect(() => {
-    setTitle({
-      title: `Network ${focus ? ` | ${focus}` : ""} | 6529 SEIZE`,
-    });
+    const title = `Network ${focus ? ` | ${focus}` : ""} | 6529 SEIZE`;
+    setTitle({ title });
   }, [focus]);
 
   return (
@@ -59,18 +58,12 @@ export default function CommunityNerdPage(props: any) {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content={`Network${focus ? ` | ${focus}` : ""} | 6529 SEIZE`}
-        />
+        <meta name="description" content={title} />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/network/nerd`}
         />
-        <meta
-          property="og:title"
-          content={`Network${focus ? ` | ${focus}` : ""}`}
-        />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
