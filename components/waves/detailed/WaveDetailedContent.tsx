@@ -3,7 +3,6 @@ import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
-import { AnimatePresence, motion } from "framer-motion";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -32,11 +31,7 @@ export default function WaveDetailedContent({
   const canDrop = wave.participation.authenticated_user_eligible;
 
   useEffect(() => {
-    if (activeDropId) {
-      setIsThreadOpen(true);
-    } else {
-      setIsThreadOpen(false);
-    }
+    setIsThreadOpen(!!activeDropId);
   }, [activeDropId]);
 
   const onReply = (drop: Drop, partId: number) => {
@@ -73,8 +68,12 @@ export default function WaveDetailedContent({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-items-stretch tw-divide-x-4 tw-divide-iron-600 tw-divide-solid tw-divide-y-0">
-      <div className="tw-w-full tw-flex tw-flex-col">
+    <div className="tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
+      <div
+        className={`tw-w-full tw-flex tw-flex-col ${
+          isThreadOpen ? "tw-hidden lg:tw-flex" : ""
+        }`}
+      >
         <WaveDrops
           wave={wave}
           onReply={handleReply}
@@ -93,37 +92,50 @@ export default function WaveDetailedContent({
           </div>
         )}
       </div>
-      <AnimatePresence>
-        {isThreadOpen && (
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: "100%", opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            className="tw-w-full tw-relative"
-          >
-            <div className="tw-flex tw-flex-col">
-              <WaveDrops
-                wave={wave}
-                onReply={handleReply}
-                onQuote={handleQuote}
-                activeDrop={activeDrop}
-                rootDropId={activeDropId}
-                onBackToList={closeActiveDropId}
-              />
-              {canDrop && (
-                <div className="tw-mt-auto">
-                  <CreateDrop
-                    activeDrop={activeDrop}
-                    onCancelReplyQuote={onCancelReplyQuote}
-                    waveId={wave.id}
-                    rootDropId={activeDropId}
-                  />
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isThreadOpen && (
+        <div className="tw-w-full lg:tw-w-[70%]">
+          <div className="tw-flex tw-flex-col lg:tw-hidden">
+            <WaveDrops
+              wave={wave}
+              onReply={handleReply}
+              onQuote={handleQuote}
+              activeDrop={activeDrop}
+              rootDropId={activeDropId}
+              onBackToList={closeActiveDropId}
+            />
+            {canDrop && (
+              <div className="tw-mt-auto">
+                <CreateDrop
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  waveId={wave.id}
+                  rootDropId={activeDropId}
+                />
+              </div>
+            )}
+          </div>
+          <div className="tw-hidden lg:tw-flex tw-flex-col">
+            <WaveDrops
+              wave={wave}
+              onReply={handleReply}
+              onQuote={handleQuote}
+              activeDrop={activeDrop}
+              rootDropId={activeDropId}
+              onBackToList={closeActiveDropId}
+            />
+            {canDrop && (
+              <div className="tw-mt-auto">
+                <CreateDrop
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  waveId={wave.id}
+                  rootDropId={activeDropId}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

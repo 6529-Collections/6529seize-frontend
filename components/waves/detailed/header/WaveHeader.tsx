@@ -50,8 +50,8 @@ export default function WaveHeader({
           )}
         </div>
 
-        <div className="tw-mt-4 md:tw-mt-10 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-space-x-6 tw-pb-1">
-          <div className="tw-min-w-0 tw-flex-1 tw-hidden md:tw-block">
+        <div className="tw-mt-10 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-space-x-6 tw-pb-1">
+          <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-flex-col tw-items-end tw-gap-y-2">
               {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
                 <div className="tw-inline-flex tw-space-x-3 tw-items-center">
@@ -90,36 +90,36 @@ export default function WaveHeader({
           )}
         </div>
         <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4">
-          <WaveHeaderFollowers
-            wave={wave}
-            onFollowersClick={onFollowersClick}
-          />
           <div className="tw-flex tw-justify-between">
-            {!!firstXContributors.length && (
-              <div className="tw-flex tw-items-center">
-                <div className="tw-flex -tw-space-x-2">
-                  {firstXContributors.map((item) => (
-                    <img
-                      key={item.contributor_identity}
-                      className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
-                      src={getScaledImageUri(
-                        item.contributor_pfp,
-                        ImageScale.W_AUTO_H_50
-                      )}
-                      alt=""
-                    />
-                  ))}
-                </div>
-                <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                  <span className="tw-text-iron-200">
-                    {numberWithCommas(wave.metrics.drops_count)}
-                  </span>{" "}
-                  {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
-                </span>
-              </div>
-            )}
+            <WaveHeaderFollowers
+              wave={wave}
+              onFollowersClick={onFollowersClick}
+            />
             <WaveHeaderPinned wave={wave} />
           </div>
+          {!!firstXContributors.length && (
+            <div className="tw-flex tw-items-center">
+              <div className="tw-flex -tw-space-x-2">
+                {firstXContributors.map((item) => (
+                  <img
+                    key={item.contributor_identity}
+                    className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
+                    src={getScaledImageUri(
+                      item.contributor_pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
+                    alt=""
+                  />
+                ))}
+              </div>
+              <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
+                <span className="tw-text-iron-200">
+                  {numberWithCommas(wave.metrics.drops_count)}
+                </span>{" "}
+                {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

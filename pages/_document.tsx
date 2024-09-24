@@ -14,7 +14,7 @@ export default function Document() {
       <body>
         <Main />
         <NextScript />
-        <footer
+     {/*    <footer
           className="d-flex flex-column align-items-center justify-content-center gap-2"
           id="footer">
           <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
@@ -108,7 +108,7 @@ export default function Document() {
               Status
             </a>
           </span>
-        </footer>
+        </footer> */}
       </body>
     </Html>
   );

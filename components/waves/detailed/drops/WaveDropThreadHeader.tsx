@@ -35,9 +35,9 @@ const WaveDropThreadHeader: React.FC<WaveDropThreadHeaderProps> = ({ rootDropId 
 
   return (
     <div className="tw-bg-iron-900 tw-px-4 tw-py-4 tw-mb-2">
-      <div className="tw-mb-2 tw-bg-iron-700 tw-h-14 tw-w-14 tw-flex tw-justify-center tw-items-center tw-rounded-full">
+      <div className="tw-mb-2 tw-bg-iron-700 tw-size-10 lg:tw-size-14 tw-flex tw-justify-center tw-items-center tw-rounded-full">
         <svg
-          className="tw-size-6 tw-text-iron-300"
+          className="tw-size-4 lg:tw-size-6 tw-text-iron-300"
           viewBox="0 0 56 56"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

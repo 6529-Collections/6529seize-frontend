@@ -55,7 +55,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     : undefined;
 
   return (
-    <div className="tw-relative tw-w-full">
+    <div className="tw-relative tw-w-full tw-max-w-lg tw-mt-3">
       {isLoading && (
         <div
           className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
