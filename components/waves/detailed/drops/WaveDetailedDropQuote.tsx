@@ -13,6 +13,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
 import { useRouter } from "next/router";
+import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 interface WaveDetailedDropQuoteProps {
   readonly dropId: string;
@@ -147,7 +148,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
               role="button"
               tabIndex={0}
             >
-              <DropPartMarkdown
+              <DropPartMarkdownWithPropLogger
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}
                 referencedNfts={drop?.referenced_nfts ?? []}

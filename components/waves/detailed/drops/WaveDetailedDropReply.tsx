@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
 import Link from "next/link";
+import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
@@ -88,7 +89,7 @@ export default function WaveDetailedDropReply({
             href={`/waves/${drop?.wave.id}?drop=${drop?.id}`}
             className="tw-no-underline"
           >
-            <DropPartMarkdown
+            <DropPartMarkdownWithPropLogger
               partContent={content}
               mentionedUsers={drop?.mentioned_users ?? []}
               referencedNfts={drop?.referenced_nfts ?? []}

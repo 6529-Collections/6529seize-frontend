@@ -1,13 +1,19 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import DropPartMarkdown from "../../../drops/view/part/DropPartMarkdown";
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
+import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
+import { ReferencedNft } from "../../../../entities/IDrop";
+import { WaveMin } from "../../../../generated/models/WaveMin";
+import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 interface WaveDetailedDropPartContentProps {
-  readonly drop: Drop;
+  readonly mentionedUsers: DropMentionedUser[];
+  readonly referencedNfts: ReferencedNft[];
+  readonly wave: WaveMin;
   readonly activePart: DropPart;
   readonly havePreviousPart: boolean;
   readonly haveNextPart: boolean;
@@ -18,8 +24,12 @@ interface WaveDetailedDropPartContentProps {
   readonly showMore: boolean;
 }
 
-const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = ({
-  drop,
+const WaveDetailedDropPartContent: React.FC<
+  WaveDetailedDropPartContentProps
+> = ({
+  mentionedUsers,
+  referencedNfts,
+  wave,
   activePart,
   havePreviousPart,
   haveNextPart,
@@ -51,14 +61,20 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
 
   useEffect(() => {
     if (contentRef.current) {
-      contentRef.current.style.maxHeight = showMore ? "100%" : `${containerHeight}px`;
+      contentRef.current.style.maxHeight = showMore
+        ? "100%"
+        : `${containerHeight}px`;
     }
   }, [showMore, containerHeight]);
+
+  const memoizedMentionedUsers = useMemo(() => mentionedUsers, [mentionedUsers]);
+  const memoizedReferencedNfts = useMemo(() => referencedNfts, [referencedNfts]);
 
   const renderNavigationButton = (direction: "previous" | "next") => {
     const isPrevious = direction === "previous";
     const isDisabled = isPrevious ? !havePreviousPart : !haveNextPart;
-    const onClick = () => setActivePartIndex(activePartIndex + (isPrevious ? -1 : 1));
+    const onClick = () =>
+      setActivePartIndex(activePartIndex + (isPrevious ? -1 : 1));
 
     return (
       <button
@@ -86,7 +102,11 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d={isPrevious ? "M15.75 19.5 8.25 12l7.5-7.5" : "m8.25 4.5 7.5 7.5-7.5 7.5"}
+            d={
+              isPrevious
+                ? "M15.75 19.5 8.25 12l7.5-7.5"
+                : "m8.25 4.5 7.5 7.5-7.5 7.5"
+            }
           />
         </svg>
       </button>
@@ -104,9 +124,9 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <DropPartMarkdown
-            mentionedUsers={drop.mentioned_users}
-            referencedNfts={drop.referenced_nfts}
+          <DropPartMarkdownWithPropLogger
+            mentionedUsers={memoizedMentionedUsers}
+            referencedNfts={memoizedReferencedNfts}
             partContent={activePart.content}
             onImageLoaded={updateContainerHeight}
           />
@@ -114,7 +134,11 @@ const WaveDetailedDropPartContent: React.FC<WaveDetailedDropPartContentProps> = 
             <WaveDetailedDropQuote
               dropId={activePart.quoted_drop.drop_id}
               partId={activePart.quoted_drop.drop_part_id}
-              maybeDrop={activePart.quoted_drop.drop ? { ...activePart.quoted_drop.drop, wave: drop.wave } : null}
+              maybeDrop={
+                activePart.quoted_drop.drop
+                  ? { ...activePart.quoted_drop.drop, wave: wave }
+                  : null
+              }
             />
           )}
         </motion.div>
