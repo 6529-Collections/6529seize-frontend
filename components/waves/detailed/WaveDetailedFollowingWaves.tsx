@@ -1,30 +1,68 @@
-import { useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { OutgoingIdentitySubscriptionsPage } from "../../../generated/models/OutgoingIdentitySubscriptionsPage";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
 import Link from "next/link";
+import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
+
+const PAGE_SIZE = 20;
 
 const WaveDetailedFollowingWaves: React.FC = () => {
-  const { data } = useQuery({
-    queryKey: [
-      QueryKey.FOLLOWING_WAVES,
-      {
-        target_type: "WAVE",
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<OutgoingIdentitySubscriptionsPage>({
+  const queryKey = [
+    QueryKey.DROPS,
+    {
+      page_size: PAGE_SIZE,
+      target_type: "WAVE",
+    },
+  ];
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+      const params: Record<string, string> = {
+        page_size: PAGE_SIZE.toString(),
+      };
+
+      if (pageParam) {
+        params.page = `${pageParam}`;
+      }
+      return await commonApiFetch<{
+        data: { target: Wave }[];
+        count: number;
+        page: number;
+        next: boolean;
+      }>({
         endpoint: `/identity-subscriptions/outgoing/WAVE`,
-      }),
+        params,
+      });
+    },
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
+    placeholderData: keepPreviousData,
+  });
+
+  const intersectionElementRef = useIntersectionObserver(() => {
+    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+      fetchNextPage();
+    }
   });
 
   const getWaves = () => {
-    if (!data?.data.length) {
+    if (!data?.pages.length) {
       return [];
     }
-    return data.data.map((wave) => wave.target as Wave);
+    return data.pages.flatMap((wave) => wave.data.map((wave) => wave.target));
   };
 
   const [waves, setWaves] = useState<Wave[]>(getWaves());
@@ -109,6 +147,12 @@ const WaveDetailedFollowingWaves: React.FC = () => {
                 </Link>
               </div>
             ))}
+            {isFetchingNextPage && (
+              <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
+                <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+              </div>
+            )}
+            <div ref={intersectionElementRef}></div>
           </div>
         </div>
       </div>
