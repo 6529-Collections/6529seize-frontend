@@ -73,7 +73,7 @@ export default function WaveDrops({
   }, [scrollToBottom, handleScroll]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-16rem)] md:tw-h-[calc(100vh-13rem)] tw-relative">
+    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
       {rootDropId && onBackToList && (
         <div className="tw-sticky tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
           <WaveDropsBackButton onBackToList={onBackToList} />

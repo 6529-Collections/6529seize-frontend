@@ -47,6 +47,21 @@ export default function WavePage() {
     setBreadcrumbs(getBreadCrumbs());
   }, [wave]);
 
+  useEffect(() => {
+    const elementToRemove = document.getElementById("footer");
+    if (elementToRemove) {
+      elementToRemove.remove();
+    }
+
+    // Cleanup function to restore the removed element
+    return () => {
+      const parentElement = document.body; // Adjust this if the parent is different
+      if (elementToRemove) {
+        parentElement.appendChild(elementToRemove);
+      }
+    };
+  }, []);
+
   return (
     <>
       <Head>
@@ -69,13 +84,13 @@ export default function WavePage() {
           }
         `}</style>
       </Head>
-      <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col">
+      <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col tw-h-screen tw-overflow-hidden">
         <div>
           <Header isSmall={true} />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
 
-        <div className="tw-flex-1">
+        <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
           <AnimatePresence mode="wait">
             {!wave && !isError && (
               <motion.div
@@ -84,7 +99,7 @@ export default function WavePage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 xl:tw-px-6"
+                className="tw-mt-4 tw-px-4"
               >
                 <div className="lg:tw-flex lg:tw-items-start tw-justify-center tw-gap-x-4">
                   <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-4 lg:tw-w-[20.5rem]">
