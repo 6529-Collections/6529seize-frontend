@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@capacitor/local-notifications": "^6.1.0",
+    "@capacitor/push-notifications": "^6.0.2",
     "@capacitor/share": "^6.0.2",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
