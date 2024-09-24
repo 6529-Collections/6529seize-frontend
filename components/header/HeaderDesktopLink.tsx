@@ -1,6 +1,5 @@
 import { NavDropdown } from "react-bootstrap";
 import styles from "./Header.module.scss";
-import Link from "next/link";
 import { HeaderLink } from "./Header";
 
 export default function HeaderDesktopLink({

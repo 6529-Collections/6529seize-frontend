@@ -359,6 +359,7 @@ export default function CommunityMetrics() {
                     <br />
                     &#40;1&#41;
                     <table className={styles.communityMetricsTable}>
+                      <thead></thead>
                       <tbody>
                         <tr>
                           <td>A complete set of Meme Cards</td>
