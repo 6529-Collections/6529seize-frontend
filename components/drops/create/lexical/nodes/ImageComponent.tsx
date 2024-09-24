@@ -10,15 +10,15 @@ interface ImageComponentProps {
 
 export default function ImageComponent({ src, altText, width, height }: ImageComponentProps): JSX.Element {
   const imageRef = useRef<HTMLImageElement>(null);
-  const [dimensions, setDimensions] = useState({ width: width || 0, height: height || 0 });
+  const [dimensions, setDimensions] = useState({ width: width ?? 0, height: height ?? 0 });
 
   useEffect(() => {
     const img = new Image();
     img.src = src;
     img.onload = () => {
       const aspectRatio = img.width / img.height;
-      let newWidth = width || img.width;
-      let newHeight = height || img.height;
+      let newWidth = width ?? img.width;
+      let newHeight = height ?? img.height;
 
       if (!width && !height) {
         newWidth = Math.min(img.width, 800); // Max width of 800px
@@ -41,7 +41,7 @@ export default function ImageComponent({ src, altText, width, height }: ImageCom
     <img
       ref={imageRef}
       src={src}
-      alt={altText || ''}
+      alt={altText ?? ''}
       width={dimensions.width}
       height={dimensions.height}
       className="max-w-full h-auto object-contain"
