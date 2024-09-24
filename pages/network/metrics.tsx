@@ -1,7 +1,7 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Table } from "react-bootstrap";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
@@ -358,8 +358,7 @@ export default function CommunityMetrics() {
                     </h5>
                     <br />
                     &#40;1&#41;
-                    <table className={styles.communityMetricsTable}>
-                      <thead></thead>
+                    <Table className={styles.communityMetricsTable}>
                       <tbody>
                         <tr>
                           <td>A complete set of Meme Cards</td>
@@ -382,7 +381,7 @@ export default function CommunityMetrics() {
                           <td></td>
                         </tr>
                       </tbody>
-                    </table>
+                    </Table>
                     <p>
                       <b>or</b>
                     </p>
