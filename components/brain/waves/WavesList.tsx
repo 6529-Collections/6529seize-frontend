@@ -119,7 +119,7 @@ export default function WavesList({
                 </div>
               </div>
 
-              <p className="-tw-mb-1 tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+              <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
                 {TITLE[type]}
               </p>
             </div>

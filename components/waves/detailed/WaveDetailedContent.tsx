@@ -93,7 +93,7 @@ export default function WaveDetailedContent({
         )}
       </div>
       {isThreadOpen && (
-        <div className="tw-w-full lg:tw-w-[70%]">
+        <div className="tw-w-full lg:tw-w-[75%]">
           <div className="tw-flex tw-flex-col lg:tw-hidden">
             <WaveDrops
               wave={wave}
