@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import styles from "../styles/Home.module.scss";
 import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { LoginImage } from "./access";
+import { AuthContext } from "../components/auth/Auth";
 
 export default function Access() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Restricted | 6529 SEIZE",
+    });
+  }, []);
   const router = useRouter();
   const [image, setImage] = useState();
   const [message, setMessage] = useState("");
@@ -36,7 +43,7 @@ export default function Access() {
   return (
     <>
       <Head>
-        <title>Restricted | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Restricted | 6529 SEIZE" />
         <meta

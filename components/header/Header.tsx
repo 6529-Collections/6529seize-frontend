@@ -22,6 +22,7 @@ import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
+  readonly isSmall?: boolean;
 }
 
 export interface HeaderLink {
@@ -729,11 +730,13 @@ export default function Header(props: Readonly<Props>) {
       {capacitor.isCapacitor && <CapacitorWidget />}
       <Container
         fluid
-        className={
+        className={`${
           capacitor.isCapacitor
             ? styles.capacitorMainContainer
+            : props.isSmall
+            ? styles.mainContainerSmall
             : styles.mainContainer
-        }>
+        }`}>
         <Row>
           <Col>
             <Container className={styles.capacitorHeaderRowContainerLandscape}>
@@ -741,6 +744,8 @@ export default function Header(props: Readonly<Props>) {
                 className={
                   capacitor.isCapacitor
                     ? styles.capacitorHeaderRow
+                    : props.isSmall
+                    ? styles.headerRowSmall
                     : styles.headerRow
                 }>
                 <Col
@@ -755,7 +760,7 @@ export default function Header(props: Readonly<Props>) {
                     <Image
                       loading="eager"
                       priority
-                      className={styles.logoIcon}
+                      className={props.isSmall ? styles.logoIconSmall : styles.logoIcon}
                       src={logoSrc}
                       alt="6529Seize"
                       width={logoWidth}

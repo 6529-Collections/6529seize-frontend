@@ -1,4 +1,10 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { EditorState, RootNode } from "lexical";
 import {
   CreateDropConfig,
@@ -28,8 +34,12 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import NewMentionsPlugin, { NewMentionsPluginHandles } from "../../../../create/lexical/plugins/mentions/MentionsPlugin";
-import NewHashtagsPlugin, { NewHastagsPluginHandles } from "../../../../create/lexical/plugins/hashtags/HashtagsPlugin";
+import NewMentionsPlugin, {
+  NewMentionsPluginHandles,
+} from "../../../../create/lexical/plugins/mentions/MentionsPlugin";
+import NewHashtagsPlugin, {
+  NewHastagsPluginHandles,
+} from "../../../../create/lexical/plugins/hashtags/HashtagsPlugin";
 import { MaxLengthPlugin } from "../../../../create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../../../../create/lexical/plugins/DragDropPastePlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
@@ -69,7 +79,7 @@ const DropReplyInput = forwardRef<
       onReferencedNft,
       onMentionedUser,
       onFileChange,
-      children
+      children,
     },
     ref
   ) => {
@@ -191,8 +201,9 @@ const DropReplyInput = forwardRef<
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
+                disabled={false}
               />
-               <AutoFocusPlugin />
+              <AutoFocusPlugin />
             </div>
             {children && <div>{children}</div>}
           </div>

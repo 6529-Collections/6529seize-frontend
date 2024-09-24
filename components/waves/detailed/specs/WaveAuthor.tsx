@@ -8,10 +8,10 @@ import {
 export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
   return (
     <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-font-medium tw-text-iron-400">Created by</span>
+      <span className="tw-font-medium tw-text-iron-500">Created by</span>
       <Link
         href={`/${wave.author.handle}`}
-        className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
+        className="tw-no-underline hover:tw-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
       >
         {wave.author.pfp ? (
           <img

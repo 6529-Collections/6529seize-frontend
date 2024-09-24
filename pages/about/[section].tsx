@@ -2,7 +2,7 @@ import styles from "../../styles/Home.module.scss";
 import menuStyles from "../../components/about/About.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
@@ -27,6 +27,7 @@ import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
 import AboutCopyright from "../../components/about/AboutCopyright";
 import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
+import { AuthContext } from "../../components/auth/Auth";
 
 const AboutCookiePolicy = dynamic(
   () => import("../../components/about/AboutCookiePolicy"),
@@ -73,6 +74,7 @@ interface Props {
 }
 
 export default function About(props: any) {
+  const { setTitle, title } = useContext(AuthContext);
   const pageProps: Props = props.pageProps;
   const router = useRouter();
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
@@ -160,10 +162,16 @@ export default function About(props: any) {
     }
   }
 
+  useEffect(() => {
+    setTitle({
+      title: `About - ${sectionTitle} | 6529 SEIZE`,
+    });
+  }, [sectionTitle]);
+
   return (
     <>
       <Head>
-        <title>{`About - ${sectionTitle} | 6529 SEIZE`}</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"

@@ -1,11 +1,12 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import MappingToolPlaceholder from "../components/mapping-tools/MappingToolPlaceholder";
+import { AuthContext } from "../components/auth/Auth";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -19,6 +20,13 @@ const ConsolidationMappingTool = dynamic(
 );
 
 export default function ConsolidationMappingToolPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Consolidation Mapping Tool | 6529 SEIZE",
+    });
+  }, []);
+
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Consolidation Mapping Tool" },
@@ -45,7 +53,7 @@ export default function ConsolidationMappingToolPage() {
   return (
     <>
       <Head>
-        <title>Consolidation Mapping Tool | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"

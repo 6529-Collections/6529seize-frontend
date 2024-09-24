@@ -311,3 +311,20 @@
   padding: 2px 5px;
   border: 1px solid white;
 }
+
+.mainContainerSmall {
+  font-size: larger;
+  z-index: 600;
+  position: relative;
+  min-height: 60px;
+  background-color: $bg-color-1;
+}
+
+.headerRowSmall {
+  min-height: 60px; 
+}
+
+.logoIconSmall {
+  height: auto;
+  max-width: min(30vw, 180px); 
+}

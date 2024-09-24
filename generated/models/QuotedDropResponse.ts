@@ -10,11 +10,13 @@
  * Do not edit the class manually.
  */
 
+import { DropWithoutWave } from '../models/DropWithoutWave';
 import { HttpFile } from '../http/http';
 
 export class QuotedDropResponse {
     'drop_id': string;
     'drop_part_id': number;
+    'drop'?: DropWithoutWave;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -30,6 +32,12 @@ export class QuotedDropResponse {
             "baseName": "drop_part_id",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "drop",
+            "baseName": "drop",
+            "type": "DropWithoutWave",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

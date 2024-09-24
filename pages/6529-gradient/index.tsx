@@ -1,11 +1,12 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { AuthContext } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -18,6 +19,13 @@ const GradientsComponent = dynamic(
 );
 
 export default function GradientsPage() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "6529 Gradient | 6529 SEIZE",
+    });
+  }, []);
+
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "6529 Gradient" },
@@ -27,7 +35,7 @@ export default function GradientsPage() {
   return (
     <>
       <Head>
-        <title>6529 Gradient | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="6529 Gradient | 6529 SEIZE" />
         <meta

@@ -36,7 +36,6 @@ import {
   DropMedia,
 } from "../../../entities/IDrop";
 import { commonApiPost } from "../../../services/api/common-api";
-import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { CreateWaveDropRequest } from "../../../generated/models/CreateWaveDropRequest";
@@ -55,7 +54,9 @@ export default function CreateWave({
 }) {
   const router = useRouter();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropCreate, onWaveCreated } = useContext(ReactQueryWrapperContext);
+  const { waitAndInvalidateDrops, onWaveCreated } = useContext(
+    ReactQueryWrapperContext
+  );
   const initialType = WaveType.Chat;
   const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
@@ -84,7 +85,7 @@ export default function CreateWave({
       allowDiscussionDrops: true,
       noOfApplicationsAllowedPerParticipant: null,
       requiredTypes: [],
-      requiredMetadata: [{ key: "", type: WaveMetadataType.String }],
+      requiredMetadata: [],
     },
     voting: {
       type: WaveCreditType.Tdh,
@@ -361,7 +362,7 @@ export default function CreateWave({
         body,
       }),
     onSuccess: (response) => {
-      onDropCreate();
+      waitAndInvalidateDrops();
       onWaveCreated();
       router.push(`/waves/${response.id}`);
       return response;

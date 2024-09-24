@@ -43,12 +43,10 @@ export default function CreateWaveDrops({
     });
   };
 
-  const onRequiredTypeChange = (type: WaveParticipationRequirement) => {
-    const requiredTypes = drops.requiredTypes.includes(type) ? [] : [type];
-
+  const onRequiredTypeChange = (types: WaveParticipationRequirement[]) => {
     setDrops({
       ...drops,
-      requiredTypes,
+      requiredTypes: types,
     });
   };
 

@@ -15,6 +15,8 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
+import { AuthContext } from "../../../../../components/auth/Auth";
+import { useContext, useEffect } from "react";
 
 const Header = dynamic(
   () => import("../../../../../components/header/Header"),
@@ -43,6 +45,7 @@ const NextGenTokenOnChainComponent = dynamic(
 );
 
 export default function NextGenCollectionToken(props: any) {
+  const { setTitle, title } = useContext(AuthContext);
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
   const traits: NextGenTrait[] = props.pageProps.traits;
@@ -66,10 +69,16 @@ export default function NextGenCollectionToken(props: any) {
     },
   ];
 
+  useEffect(() => {
+    setTitle({
+      title: pagenameFull,
+    });
+  }, [pagenameFull]);
+
   return (
     <>
       <Head>
-        <title>{pagenameFull}</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content={pagenameFull} />
         <meta

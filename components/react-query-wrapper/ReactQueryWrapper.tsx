@@ -20,6 +20,8 @@ import { ProfileProxy } from "../../generated/models/ProfileProxy";
 import { wait } from "../../helpers/Helpers";
 import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
 import { FeedItemType } from "../../generated/models/FeedItemType";
+import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
+import { addDropToDrops } from "./utils/addDropsToDrops";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -169,8 +171,11 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  onDropCreate: () => void;
-  addOptimisticDrop: (params: { drop: Drop }) => void;
+  waitAndInvalidateDrops: () => void;
+  addOptimisticDrop: (params: {
+    readonly drop: Drop;
+    readonly rootDropId: string | null;
+  }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
@@ -201,7 +206,7 @@ export const ReactQueryWrapperContext =
     initProfileIdentityPage: () => {},
     initLandingPage: () => {},
     initCommunityActivityPage: () => {},
-    onDropCreate: () => {},
+    waitAndInvalidateDrops: () => {},
     addOptimisticDrop: () => {},
     onDropChange: () => {},
     invalidateDrops: () => {},
@@ -765,37 +770,6 @@ export default function ReactQueryWrapper({
     });
   };
 
-  const addDropToDrops = ({ drop }: { readonly drop: Drop }): void => {
-    queryClient.setQueryData(
-      [
-        QueryKey.DROPS,
-        {
-          limit: `10`,
-          context_profile: drop.author.handle,
-          wave_id: drop.wave.id,
-          include_replies: "true",
-        },
-      ],
-      (
-        oldData:
-          | {
-              pages: Drop[][];
-            }
-          | undefined
-      ) => {
-        if (!oldData?.pages.length) {
-          return oldData;
-        }
-        const pages = JSON.parse(JSON.stringify(oldData.pages));
-        pages.at(0)?.unshift(drop);
-        return {
-          ...oldData,
-          pages,
-        };
-      }
-    );
-  };
-
   const addDropToFeedItems = ({ drop }: { readonly drop: Drop }): void => {
     queryClient.setQueryData(
       [QueryKey.FEED_ITEMS],
@@ -1155,10 +1129,12 @@ export default function ReactQueryWrapper({
 
   const addOptimisticDrop = async ({
     drop,
+    rootDropId,
   }: {
     readonly drop: Drop;
+    readonly rootDropId: string | null;
   }): Promise<void> => {
-    addDropToDrops({ drop });
+    addDropToDrops(queryClient, { drop, rootDropId });
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {
@@ -1167,12 +1143,12 @@ export default function ReactQueryWrapper({
     }
   };
 
-  const onDropCreate = async (): Promise<void> => {
+  const waitAndInvalidateDrops = async (): Promise<void> => {
     await wait(500);
     invalidateDrops();
   };
 
-  const dropChangeMutation = ({
+  const profileDropChangeMutation = ({
     oldData,
     drop,
   }: {
@@ -1199,6 +1175,40 @@ export default function ReactQueryWrapper({
     };
   };
 
+  const dropsDropChangeMutation = ({
+    oldData,
+    drop,
+  }: {
+    oldData:
+      | {
+          pages: WaveDropsFeed[];
+        }
+      | WaveDropsFeed
+      | undefined;
+    drop: Drop;
+  }) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    // Handle infinite query data structure
+    if ("pages" in oldData) {
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page) => ({
+          ...page,
+          drops: page.drops.map((d) => (d.id === drop.id ? drop : d)),
+        })),
+      };
+    }
+
+    // Handle regular query data structure
+    return {
+      ...oldData,
+      drops: oldData.drops.map((d) => (d.id === drop.id ? drop : d)),
+    };
+  };
+
   const onDropChange = ({
     drop,
     giverHandle,
@@ -1220,19 +1230,13 @@ export default function ReactQueryWrapper({
               pages: Drop[][];
             }
           | undefined
-      ) => dropChangeMutation({ oldData, drop })
+      ) => profileDropChangeMutation({ oldData, drop })
     );
     queryClient.setQueriesData(
       {
         queryKey: [QueryKey.DROPS],
       },
-      (
-        oldData:
-          | {
-              pages: Drop[][];
-            }
-          | undefined
-      ) => dropChangeMutation({ oldData, drop })
+      (oldData: any) => dropsDropChangeMutation({ oldData, drop })
     );
     if (giverHandle) {
       queryClient.invalidateQueries({
@@ -1370,7 +1374,7 @@ export default function ReactQueryWrapper({
       initCommunityActivityPage,
       onGroupRemoved,
       onGroupChanged,
-      onDropCreate,
+      waitAndInvalidateDrops,
       addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,
@@ -1397,7 +1401,7 @@ export default function ReactQueryWrapper({
       initCommunityActivityPage,
       onGroupRemoved,
       onGroupChanged,
-      onDropCreate,
+      waitAndInvalidateDrops,
       addOptimisticDrop,
       onDropChange,
       onIdentityBulkRate,

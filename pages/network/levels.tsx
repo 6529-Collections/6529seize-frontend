@@ -2,7 +2,8 @@ import Head from "next/head";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -414,14 +415,22 @@ const LEVELS: { minTdh: number; level: number }[] = [
 ];
 
 export default function Levels() {
+  const { setTitle, title } = useContext(AuthContext);
   const [breadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Levels" },
   ]);
+
+  useEffect(() => {
+    setTitle({
+      title: "Levels | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Levels | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Levels | 6529 SEIZE" />
         <meta

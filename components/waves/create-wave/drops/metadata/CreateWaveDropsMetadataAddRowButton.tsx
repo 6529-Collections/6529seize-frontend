@@ -1,8 +1,11 @@
 export default function CreateWaveDropsMetadataAddRowButton({
+  itemsCount,
   onAddNewRow,
 }: {
+  readonly itemsCount: number;
   readonly onAddNewRow: () => void;
 }) {
+  const label = itemsCount ? "Add more" : "Add";
   return (
     <div className="tw-flex tw-justify-center">
       <button
@@ -26,7 +29,7 @@ export default function CreateWaveDropsMetadataAddRowButton({
             strokeLinejoin="round"
           />
         </svg>
-        <span>Add more</span>
+        <span>{label}</span>
       </button>
     </div>
   );

@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from "react";
+import { ReactNode, useContext, useEffect } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
@@ -17,12 +17,14 @@ export default function MyStreamLayout({
 }: {
   readonly children: ReactNode;
 }) {
+  const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "My Stream" },
   ];
 
   const { showWaves } = useContext(AuthContext);
+  useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
 
   if (!showWaves) {
     return null;
@@ -31,7 +33,7 @@ export default function MyStreamLayout({
   return (
     <>
       <Head>
-        <title>My Stream | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="My Stream | 6529 SEIZE" />
         <meta
@@ -46,7 +48,7 @@ export default function MyStreamLayout({
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950">
         <div>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -82,7 +84,7 @@ export default function MyStreamLayout({
             <MyStreamLayoutTabs />
           </div>
         </div>
-        <div className="tw-overflow-hidden tw-h-full tw-w-full">
+        <div className="tw-h-full tw-w-full">
           <Brain>
             <div>{children}</div>
           </Brain>

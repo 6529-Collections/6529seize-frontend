@@ -2587,6 +2587,8 @@ components:
         drop_part_id:
           type: number
           format: int64
+        drop:
+          $ref: "#/components/schemas/DropWithoutWave"
 
     ReplyToDrop:
       type: object
@@ -2614,6 +2616,8 @@ components:
           format: int64
         is_deleted:
           type: boolean
+        drop:
+          $ref: "#/components/schemas/DropWithoutWave"
 
     DropPart:
       type: object

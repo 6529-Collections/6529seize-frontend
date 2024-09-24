@@ -7,8 +7,9 @@ import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { LeaderboardFocus } from "../../../../components/leaderboard/Leaderboard";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { AuthContext } from "../../../../components/auth/Auth";
 
 const Leaderboard = dynamic(
   () => import("../../../../components/leaderboard/Leaderboard"),
@@ -21,6 +22,7 @@ const Header = dynamic(() => import("../../../../components/header/Header"), {
 });
 
 export default function CommunityNerdPage(props: any) {
+  const { setTitle, title } = useContext(AuthContext);
   const router = useRouter();
   const [focus, setFocus] = useState<LeaderboardFocus>(props.pageProps.focus);
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
@@ -46,10 +48,16 @@ export default function CommunityNerdPage(props: any) {
     );
   }, [focus]);
 
+  useEffect(() => {
+    setTitle({
+      title: `Network ${focus ? ` | ${focus}` : ""} | 6529 SEIZE`,
+    });
+  }, [focus]);
+
   return (
     <>
       <Head>
-        <title>Network {focus ? ` | ${focus}` : ""} | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"

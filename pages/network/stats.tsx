@@ -3,8 +3,9 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { AuthContext } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -17,6 +18,13 @@ const CommunityStatsComponent = dynamic(
 );
 
 export default function CommunityStats() {
+  const { setTitle, title } = useContext(AuthContext);
+  useEffect(() => {
+    setTitle({
+      title: "Network Stats | 6529 SEIZE",
+    });
+  }, []);
+
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
     { display: "Network Stats" },
@@ -25,7 +33,7 @@ export default function CommunityStats() {
   return (
     <>
       <Head>
-        <title>Network Stats | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Network Stats | 6529 SEIZE" />
         <meta

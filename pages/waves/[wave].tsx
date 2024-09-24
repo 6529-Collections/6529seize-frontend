@@ -8,7 +8,9 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Wave } from "../../generated/models/Wave";
 import { commonApiFetch } from "../../services/api/common-api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../components/auth/Auth";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -16,6 +18,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
 });
 
 export default function WavePage() {
+  const { setTitle, title } = useContext(AuthContext);
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
@@ -37,12 +40,17 @@ export default function WavePage() {
   };
 
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>(getBreadCrumbs());
-  useEffect(() => setBreadcrumbs(getBreadCrumbs()), [wave]);
+  useEffect(() => {
+    setTitle({
+      title: `${wave?.name ?? "Waves"} | 6529 SEIZE`,
+    });
+    setBreadcrumbs(getBreadCrumbs());
+  }, [wave]);
 
   return (
     <>
       <Head>
-        <title>Waves | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Waves | 6529 SEIZE" />
         <meta
@@ -55,13 +63,65 @@ export default function WavePage() {
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
+        <style>{`
+          body {
+            overflow: hidden !important;
+          }
+        `}</style>
       </Head>
-      <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+      <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col">
         <div>
-          <Header />
+          <Header isSmall={true} />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
-        {wave && !isError && <WaveDetailed wave={wave} />}
+
+        <div className="tw-flex-1">
+          <AnimatePresence mode="wait">
+            {!wave && !isError && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="tw-mt-4 tw-pb-16 lg:tw-pb-20 tw-px-4 xl:tw-px-6"
+              >
+                <div className="lg:tw-flex lg:tw-items-start tw-justify-center tw-gap-x-4">
+                  <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-4 lg:tw-w-[20.5rem]">
+                    {[1, 2, 3].map((index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className="tw-h-48 tw-bg-iron-900 tw-rounded-xl tw-animate-pulse"
+                      ></motion.div>
+                    ))}
+                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.3 }}
+                    className="tw-flex-1"
+                  >
+                    <div className="tw-h-[calc(100vh-160px)] tw-bg-iron-950 tw-rounded-xl tw-animate-pulse"></div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+            {wave && !isError && (
+              <motion.div
+                key="content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <WaveDetailed wave={wave} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </main>
     </>
   );

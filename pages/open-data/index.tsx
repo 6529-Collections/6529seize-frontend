@@ -3,6 +3,8 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -17,15 +19,22 @@ const CommunityDownloads = dynamic(
 );
 
 export default function Downloads() {
+  const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Open Data" },
   ];
 
+  useEffect(() => {
+    setTitle({
+      title: "Open Data | 6529 SEIZE",
+    });
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Open Data | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Open Data | 6529 SEIZE" />
         <meta

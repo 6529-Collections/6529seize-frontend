@@ -89,7 +89,9 @@ export default function DropListItemFollowAuthor({
       >({
         endpoint: `identities/${drop.author.id}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction),
+          actions: Object.values(IdentitySubscriptionTargetAction).filter(
+            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          ),
         },
       });
     },
@@ -115,7 +117,9 @@ export default function DropListItemFollowAuthor({
       >({
         endpoint: `identities/${drop.author.id}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction),
+          actions: Object.values(IdentitySubscriptionTargetAction).filter(
+            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          ),
         },
       });
     },
