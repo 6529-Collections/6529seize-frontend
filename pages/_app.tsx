@@ -113,6 +113,7 @@ import { Capacitor } from "@capacitor/core";
 import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
 import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 import useCapacitor from "../hooks/useCapacitor";
+import { NotificationsProvider } from "../components/notifications/NotificationsContext";
 
 library.add(
   faArrowUp,
@@ -284,10 +285,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <Auth>
-              <CookieConsentProvider>
-                {getLayout(<Component {...props} />)}
-                <CookiesBanner />
-              </CookieConsentProvider>
+              <NotificationsProvider>
+                <CookieConsentProvider>
+                  {getLayout(<Component {...props} />)}
+                  <CookiesBanner />
+                </CookieConsentProvider>
+              </NotificationsProvider>
             </Auth>
           </ReactQueryWrapper>
         </WagmiProvider>

@@ -29,7 +29,6 @@ import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnect } from "../../hooks/useSeizeConnect";
-import useNotifications from "../../hooks/useNotifications";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -78,6 +77,10 @@ export const AuthContext = createContext<AuthContextType>({
   title: DEFAULT_TITLE,
 });
 
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
 export default function Auth({
   children,
 }: {
@@ -86,7 +89,6 @@ export default function Auth({
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { address } = useAccount();
   const { seizeDisconnect } = useSeizeConnect();
-  useNotifications();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);

@@ -1,15 +1,15 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext, TitleType } from "../../auth/Auth";
+import { useEffect, useState } from "react";
+import { TitleType, useAuth } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { NotificationsResponse } from "../../../generated/models/NotificationsResponse";
 import { commonApiFetch } from "../../../services/api/common-api";
 import Link from "next/link";
-import useNotifications from "../../../hooks/useNotifications";
+import { useNotifications } from "../../notifications/NotificationsContext";
 import { getRandomInt } from "../../../helpers/Helpers";
 
 export default function HeaderNotifications() {
-  const { connectedProfile, setTitle } = useContext(AuthContext);
+  const { connectedProfile, setTitle } = useAuth();
 
   const { sendLocalNotification } = useNotifications();
 
