@@ -4,12 +4,12 @@ import { PushNotifications } from "@capacitor/push-notifications";
 import { Device } from "@capacitor/device";
 import { useRouter } from "next/router";
 import useCapacitor from "../../hooks/useCapacitor";
-import { AuthContext } from "../auth/Auth";
+import { AuthContext, useAuth } from "../auth/Auth";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { useAccount } from "wagmi";
 
 type NotificationsContextType = {
-  initializeNotifications: () => void;
   sendLocalNotification: (id: number, title: string, body: string) => void;
-  isPermissionGranted: boolean | null;
 };
 
 const NotificationsContext = createContext<
@@ -30,34 +30,44 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor } = useCapacitor();
-  const { connectedProfile } = useContext(AuthContext);
+  const { isConnected } = useAccount();
+  const { connectedProfile } = useAuth();
   const router = useRouter();
-  const [isPermissionGranted, setIsPermissionGranted] = useState<
-    boolean | null
-  >(null);
 
   useEffect(() => {
-    initializeNotifications();
-  }, []);
+    if (connectedProfile) {
+      initializeNotifications(connectedProfile);
+    }
+  }, [connectedProfile]);
 
-  const initializeNotifications = () => {
-    console.log("Initializing notifications");
+  useEffect(() => {
+    if (!isConnected) {
+      initializeNotifications();
+    }
+  }, [isConnected]);
+
+  const initializeNotifications = (profile?: IProfileAndConsolidations) => {
+    console.log("Initializing notifications", profile);
     if (isCapacitor) {
       console.log("Initializing push notifications");
-      initializePushNotifications();
+      initializePushNotifications(profile);
     } else {
       console.log("Initializing local notifications");
       initializeLocalNotifications();
     }
   };
 
-  const initializePushNotifications = async () => {
+  const initializePushNotifications = async (
+    profile?: IProfileAndConsolidations
+  ) => {
     const deviceId = await Device.getId();
+
+    PushNotifications.removeAllListeners();
 
     PushNotifications.addListener("registration", (token) => {
       console.log("Push registration success, token: " + token.value);
       console.log("Device id", deviceId);
-      console.log("Connected profile", connectedProfile);
+      console.log("Connected profile", profile);
     });
 
     PushNotifications.addListener("registrationError", (error) => {
@@ -75,6 +85,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       "pushNotificationActionPerformed",
       (action) => {
         console.log("Push action performed: ", action);
+        console.log("Connected profile", profile);
+        console.log("redirecting to /the-memes");
         router.push("/the-memes");
       }
     );
@@ -85,10 +97,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (permStatus.receive === "granted") {
       await PushNotifications.register();
-      setIsPermissionGranted(true);
     } else {
       console.warn("Push notifications permission not granted");
-      setIsPermissionGranted(false);
     }
   };
 
@@ -97,9 +107,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     if (permission.display === "prompt") {
       permission = await LocalNotifications.requestPermissions();
     }
-    const isGranted = permission.display === "granted";
-    setIsPermissionGranted(isGranted);
-    return isGranted;
+    return permission.display === "granted";
   };
 
   const sendLocalNotification = (id: number, title: string, body: string) => {
@@ -125,9 +133,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <NotificationsContext.Provider
       value={{
-        initializeNotifications,
         sendLocalNotification,
-        isPermissionGranted,
       }}>
       {children}
     </NotificationsContext.Provider>

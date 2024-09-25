@@ -29,6 +29,7 @@ import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnect } from "../../hooks/useSeizeConnect";
+import { useNotifications } from "../notifications/NotificationsContext";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -87,20 +88,27 @@ export default function Auth({
   readonly children: React.ReactNode;
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
+
   const { seizeDisconnect } = useSeizeConnect();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
+  const [connectedProfile, setConnectedProfile] =
+    useState<IProfileAndConsolidations>();
+
+  useEffect(() => {
+    if (address && getAuthJwt()) {
+      commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${address}`,
-      }),
-    enabled: !!address && !!getAuthJwt(),
-  });
+      }).then((profile) => {
+        setConnectedProfile(profile);
+      });
+    } else {
+      setConnectedProfile(undefined);
+    }
+  }, [address, getAuthJwt()]);
 
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
     queryKey: [
@@ -144,11 +152,15 @@ export default function Auth({
     }
   }, [profileProxies, connectedProfile]);
 
+  function reset() {
+    removeAuthJwt();
+    invalidateAll();
+    setActiveProfileProxy(null);
+  }
+
   useEffect(() => {
     if (!address) {
-      removeAuthJwt();
-      invalidateAll();
-      setActiveProfileProxy(null);
+      reset();
       return;
     } else {
       const isAuth = validateJwt({
@@ -157,9 +169,7 @@ export default function Auth({
         role: activeProfileProxy?.created_by.id ?? null,
       });
       if (!isAuth) {
-        removeAuthJwt();
-        setActiveProfileProxy(null);
-        invalidateAll();
+        reset();
         setShowSignModal(true);
       }
     }
