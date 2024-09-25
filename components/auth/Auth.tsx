@@ -97,7 +97,7 @@ export default function Auth({
       await commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${address}`,
       }),
-    enabled: !!address,
+    enabled: !!address && !!getAuthJwt(),
   });
 
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
