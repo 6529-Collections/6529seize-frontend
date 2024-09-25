@@ -268,7 +268,6 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     if (capacitor.isCapacitor) {
       document.body.classList.add("capacitor-native");
     }
-    capacitor.initializeNotifications();
   }, []);
 
   return (

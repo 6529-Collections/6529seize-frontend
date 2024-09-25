@@ -5,13 +5,13 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { NotificationsResponse } from "../../../generated/models/NotificationsResponse";
 import { commonApiFetch } from "../../../services/api/common-api";
 import Link from "next/link";
-import useCapacitor from "../../../hooks/useCapacitor";
+import useNotifications from "../../../hooks/useNotifications";
 import { getRandomInt } from "../../../helpers/Helpers";
 
 export default function HeaderNotifications() {
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
-  const capacitor = useCapacitor();
+  const { sendLocalNotification } = useNotifications();
 
   const { data: notifications } = useQuery<NotificationsResponse>({
     queryKey: [
@@ -41,7 +41,7 @@ export default function HeaderNotifications() {
     const hasUnread = !!notifications?.unread_count;
     setHaveUnreadNotifications(hasUnread);
     if (hasUnread) {
-      capacitor.sendLocalNotification(
+      sendLocalNotification(
         getRandomInt(Number.MAX_SAFE_INTEGER),
         "New Brain Notification",
         "You have unread notifications!"
