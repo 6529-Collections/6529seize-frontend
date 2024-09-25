@@ -83,7 +83,7 @@ const useCapacitor = () => {
     });
   }
 
-  async function initializeLocalNotifications(): Promise<Boolean> {
+  async function initializeLocalNotifications(): Promise<boolean> {
     let permission = await LocalNotifications.checkPermissions();
     if (permission.display === "prompt") {
       permission = await LocalNotifications.requestPermissions();
@@ -125,7 +125,6 @@ const useCapacitor = () => {
       await PushNotifications.register();
     } else {
       console.warn("Push notifications permission not granted");
-      return;
     }
   };
 
