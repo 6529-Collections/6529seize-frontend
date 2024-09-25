@@ -15,7 +15,7 @@ const useCapacitor = () => {
   const platform = Capacitor.getPlatform();
   const router = useRouter();
 
-  const [deviceId, setDeviceId] = useState<DeviceId>();
+  const { connectedProfile } = useContext(AuthContext);
 
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
@@ -45,13 +45,6 @@ const useCapacitor = () => {
     return () => {
       window.removeEventListener("orientationchange", handleOrientationchange);
     };
-  }, []);
-
-  useEffect(() => {
-    Device.getId().then((id) => {
-      console.log("Device id", id);
-      setDeviceId(id);
-    });
   }, []);
 
   function initializeNotifications() {
@@ -92,9 +85,12 @@ const useCapacitor = () => {
   }
 
   const initializePushNotifications = async () => {
+    const deviceId = await Device.getId();
+
     PushNotifications.addListener("registration", (token) => {
       console.log("Push registration success, token: " + token.value);
       console.log("Device id", deviceId);
+      console.log("Connected profile", connectedProfile);
     });
 
     PushNotifications.addListener("registrationError", (error) => {
