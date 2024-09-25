@@ -87,7 +87,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("Push action performed: ", action);
         console.log("Connected profile", profile);
         console.log("redirecting to /the-memes");
-        router.push("/the-memes");
+
+        const redirectUrl = action.notification.data.redirectUrl;
+        if (redirectUrl) {
+          router.push(redirectUrl);
+        }
       }
     );
 
@@ -131,6 +135,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }).catch((error) => {
           console.error("Error sending notification", error);
         });
+      } else {
+        console.log("Local notifications permission not granted");
       }
     });
   };
