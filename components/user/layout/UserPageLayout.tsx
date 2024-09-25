@@ -143,7 +143,7 @@ export default function UserPageLayout({
         />
       </Head>
 
-      <main className="tw-min-h-[100dvh]">
+      <main className="tw-min-h-[100dvh] tailwind-scope">
         <Header />
         <div className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20">
           <UserPageHeader profile={profile} mainAddress={mainAddress} />

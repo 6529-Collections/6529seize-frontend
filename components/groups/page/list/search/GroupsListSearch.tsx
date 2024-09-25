@@ -47,8 +47,7 @@ export default function GroupsListSearch({
             onChange={onGroupNameChange}
             id={randomId}
             autoComplete="off"
-            className="tw-pb-3 tw-pt-3 tw-text-sm tw-form-input tw-block tw-pl-10 tw-pr-4 tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-700 focus:tw-border-blue-500 tw-peer
-      tw-bg-iron-900 focus:tw-bg-iron-900 hover:tw-ring-iron-650 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-py-3 tw-text-sm tw-ring-iron-700 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400 hover:tw-ring-iron-650 tw-form-input tw-block tw-w-full  tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-700 tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out tw-text-white"
             placeholder=" "
           />
           <svg
