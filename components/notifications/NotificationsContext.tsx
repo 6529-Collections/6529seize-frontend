@@ -103,11 +103,16 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const initializeLocalNotifications = async (): Promise<boolean> => {
-    let permission = await LocalNotifications.checkPermissions();
-    if (permission.display === "prompt") {
-      permission = await LocalNotifications.requestPermissions();
+    try {
+      let permission = await LocalNotifications.checkPermissions();
+      if (permission.display === "prompt") {
+        permission = await LocalNotifications.requestPermissions();
+      }
+      return permission.display === "granted";
+    } catch (error) {
+      console.log("Error initializing local notifications", error);
+      return false;
     }
-    return permission.display === "granted";
   };
 
   const sendLocalNotification = (id: number, title: string, body: string) => {
