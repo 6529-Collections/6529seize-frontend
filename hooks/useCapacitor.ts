@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { Capacitor } from "@capacitor/core";
+import { useRouter } from "next/router";
+import { Device, DeviceId } from "@capacitor/device";
 
 export enum CapacitorOrientationType {
   PORTRAIT,
@@ -11,18 +13,13 @@ export enum CapacitorOrientationType {
 const useCapacitor = () => {
   const isCapacitor = Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
+  const router = useRouter();
+
+  const [deviceId, setDeviceId] = useState<DeviceId>();
 
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
   );
-
-  useEffect(() => {
-    if (isCapacitor) {
-      initializePushNotifications();
-    } else {
-      initializeLocalNotifications();
-    }
-  }, [isCapacitor]);
 
   useEffect(() => {
     function isPortrait() {
@@ -50,7 +47,25 @@ const useCapacitor = () => {
     };
   }, []);
 
+  useEffect(() => {
+    Device.getId().then((id) => {
+      console.log("Device id", id);
+      setDeviceId(id);
+    });
+  }, []);
+
+  function initializeNotifications() {
+    if (isCapacitor) {
+      initializePushNotifications();
+    } else {
+      initializeLocalNotifications();
+    }
+  }
+
   function sendLocalNotification(id: number, title: string, body: string) {
+    if (isCapacitor) {
+      return;
+    }
     initializeLocalNotifications().then((isGranted) => {
       if (isGranted) {
         LocalNotifications.schedule({
@@ -68,53 +83,59 @@ const useCapacitor = () => {
     });
   }
 
-  return { isCapacitor, platform, orientation, sendLocalNotification };
+  async function initializeLocalNotifications(): Promise<Boolean> {
+    let permission = await LocalNotifications.checkPermissions();
+    if (permission.display === "prompt") {
+      permission = await LocalNotifications.requestPermissions();
+    }
+    return permission.display === "granted";
+  }
+
+  const initializePushNotifications = async () => {
+    PushNotifications.addListener("registration", (token) => {
+      console.log("Push registration success, token: " + token.value);
+      console.log("Device id", deviceId);
+    });
+
+    PushNotifications.addListener("registrationError", (error) => {
+      console.error("Push registration error: ", error);
+    });
+
+    PushNotifications.addListener(
+      "pushNotificationReceived",
+      (notification) => {
+        // nothing to do here for now
+      }
+    );
+
+    PushNotifications.addListener(
+      "pushNotificationActionPerformed",
+      (action) => {
+        console.log("Push action performed: ", action);
+        // TODO: Handle the action, e.g., navigate to a specific page
+        router.push("/the-memes");
+      }
+    );
+
+    // Request permission to use push notifications
+    let permStatus = await PushNotifications.requestPermissions();
+    console.log("Push permission status", permStatus);
+
+    if (permStatus.receive === "granted") {
+      await PushNotifications.register();
+    } else {
+      console.warn("Push notifications permission not granted");
+      return;
+    }
+  };
+
+  return {
+    isCapacitor,
+    platform,
+    orientation,
+    initializeNotifications,
+    sendLocalNotification,
+  };
 };
 
 export default useCapacitor;
-
-export async function initializeLocalNotifications(): Promise<Boolean> {
-  let permission = await LocalNotifications.checkPermissions();
-  if (permission.display === "prompt") {
-    permission = await LocalNotifications.requestPermissions();
-  }
-  return permission.display === "granted";
-}
-
-export const initializePushNotifications = async () => {
-  // Add event listeners first to ensure they are set up before registration
-  PushNotifications.addListener("registration", (token) => {
-    console.log("i am here");
-    console.log("Push registration success, token: " + token.value);
-  });
-
-  PushNotifications.addListener("registrationError", (error) => {
-    console.error("Push registration error: ", error);
-  });
-
-  PushNotifications.addListener("pushNotificationReceived", (notification) => {
-    console.log("Push received: ", notification);
-    // TODO: Handle the notification as needed in your app
-  });
-
-  PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
-    console.log("Push action performed: ", action);
-    // TODO: Handle the action, e.g., navigate to a specific page
-  });
-
-  // Request permission to use push notifications
-  console.log("Requesting push notification permissions");
-  let permStatus = await PushNotifications.requestPermissions();
-  console.log("Push permission status", permStatus);
-
-  if (permStatus.receive === "granted") {
-    // Register with Apple / FCM
-    console.log("Registering with push notifications");
-    await PushNotifications.register();
-    console.log("Push notifications registered");
-  } else {
-    // Handle permission denial
-    console.warn("Push notifications permission not granted");
-    return;
-  }
-};

@@ -112,6 +112,7 @@ import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
 import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
 import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
+import useCapacitor from "../hooks/useCapacitor";
 
 library.add(
   faArrowUp,
@@ -261,16 +262,19 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout ?? ((page) => page);
 
+  const capacitor = useCapacitor();
+
   useEffect(() => {
-    if (isCapacitor) {
+    if (capacitor.isCapacitor) {
       document.body.classList.add("capacitor-native");
     }
+    capacitor.initializeNotifications();
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        {isCapacitor && (
+        {capacitor.isCapacitor && (
           <Head>
             <meta
               name="viewport"

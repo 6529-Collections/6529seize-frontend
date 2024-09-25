@@ -11,6 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@capacitor/device": "^6.0.1",
     "@capacitor/local-notifications": "^6.1.0",
     "@capacitor/push-notifications": "^6.0.2",
     "@capacitor/share": "^6.0.2",
