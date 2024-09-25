@@ -16,7 +16,7 @@ import {
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
 
-const REQUEST_SIZE = 20;
+const REQUEST_SIZE = 40;
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
 const INACTIVE_POLLING_INTERVAL = 30000;

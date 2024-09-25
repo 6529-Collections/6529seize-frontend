@@ -60,7 +60,7 @@ export default function WaveDetailedDropMetadata({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="tw-absolute tw-bottom-full tw-right-0 tw-mb-2 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-md tw-shadow-lg tw-z-10 tw-min-w-52 tw-max-w-72 tw-w-max"
+            className="tw-absolute tw-bottom-full tw-right-0 tw-mb-2 tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-md tw-shadow-lg tw-z-10 tw-min-w-52 tw-max-w-72 tw-w-max"
           >
             <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-2 tw-px-2 tw-text-xs tw-text-iron-300">
               {metadata.map((item) => (

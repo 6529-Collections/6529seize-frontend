@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
@@ -16,7 +16,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const updateDimensions = () => {
+  const updateDimensions = useCallback(() => {
     if (imgRef.current) {
       const { naturalWidth, naturalHeight } = imgRef.current;
       if (naturalWidth && naturalHeight) {
@@ -25,7 +25,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       }
     }
     return false;
-  };
+  }, []);
 
   useEffect(() => {
     if (imgRef.current?.complete) {
@@ -39,23 +39,34 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       const intervalId = setInterval(checkDimensions, 100);
       return () => clearInterval(intervalId);
     }
-  }, []);
+  }, [updateDimensions]);
 
-  const handleImageLoad = () => {
+  const handleImageLoad = useCallback(() => {
     setIsLoading(false);
     onImageLoaded();
     updateDimensions();
-  };
+  }, [onImageLoaded, updateDimensions]);
 
   const aspectRatio = dimensions.height
     ? dimensions.width / dimensions.height
     : 0;
+
+  const imageStyle = {
+    maxHeight: '70vh',
+    width: 'auto',
+    maxWidth: '100%',
+    objectFit: 'contain' as const,
+  };
+
   const placeholderStyle = aspectRatio
-    ? { paddingBottom: `${(1 / aspectRatio) * 100}%` }
+    ? {
+        paddingBottom: `${Math.min((1 / aspectRatio) * 100, 70)}%`,
+        maxHeight: '70vh',
+      }
     : undefined;
 
   return (
-    <div className="tw-relative tw-w-full">
+    <div className="tw-relative tw-w-full tw-max-w-lg tw-mt-3 tw-flex">
       {isLoading && (
         <div
           className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
@@ -67,11 +78,12 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
         src={src}
         alt={alt}
         onLoad={handleImageLoad}
-        className={`tw-w-full ${isLoading ? "tw-opacity-0" : "tw-opacity-100"}`}
+        className={`${isLoading ? "tw-opacity-0" : "tw-opacity-100"}`}
+        style={imageStyle}
         {...props}
       />
     </div>
   );
 };
 
-export default DropPartMarkdownImage;
+export default React.memo(DropPartMarkdownImage);

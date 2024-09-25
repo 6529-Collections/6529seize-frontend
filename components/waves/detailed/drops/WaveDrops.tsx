@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -18,6 +18,7 @@ interface WaveDropsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly onBackToList?: () => void;
+  readonly onActiveDropClick?: () => void;
 }
 
 export default function WaveDrops({
@@ -27,6 +28,7 @@ export default function WaveDrops({
   activeDrop,
   rootDropId,
   onBackToList,
+  onActiveDropClick,
 }: WaveDropsProps) {
   const { connectedProfile, setTitle } = useContext(AuthContext);
   const {
@@ -37,6 +39,11 @@ export default function WaveDrops({
     isFetchingNextPage,
     haveNewDrops,
   } = useWaveDrops(wave, rootDropId, connectedProfile?.profile?.handle);
+
+  const [newDropsCount, setNewDropsCount] = useState(0);
+  const [lastVisibleDropTimestamp, setLastVisibleDropTimestamp] = useState<
+    number | null
+  >(null);
 
   const {
     scrollContainerRef,
@@ -61,6 +68,28 @@ export default function WaveDrops({
   }, [haveNewDrops]);
 
   useEffect(() => {
+    if (drops.length > 0) {
+      if (isAtBottom) {
+        setNewDropsCount(0);
+        setLastVisibleDropTimestamp(drops.at(-1)?.created_at ?? null);
+      } else if (lastVisibleDropTimestamp === null) {
+        setLastVisibleDropTimestamp(drops.at(-1)?.created_at ?? null);
+      } else {
+        const newDrops = drops.filter(
+          (drop) => drop.created_at > lastVisibleDropTimestamp
+        );
+        if (newDrops.length > 0) {
+          setNewDropsCount(newDrops.length);
+          setLastVisibleDropTimestamp(newDrops.at(-1)?.created_at ?? null);
+        }
+      }
+    } else {
+      setNewDropsCount(0);
+      setLastVisibleDropTimestamp(null);
+    }
+  }, [drops, lastVisibleDropTimestamp, isAtBottom]);
+
+  useEffect(() => {
     if (shouldScrollDownAfterNewPosts) {
       scrollToBottom();
     }
@@ -72,8 +101,13 @@ export default function WaveDrops({
     return () => clearTimeout(timeoutId);
   }, [scrollToBottom, handleScroll]);
 
+  const handleNewDropsClick = () => {
+    scrollToBottom();
+    setNewDropsCount(0);
+  };
+
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-16rem)] md:tw-h-[calc(100vh-13rem)] tw-relative">
+    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
       {rootDropId && onBackToList && (
         <div className="tw-sticky tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
           <WaveDropsBackButton onBackToList={onBackToList} />
@@ -87,12 +121,19 @@ export default function WaveDrops({
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <div>
             {rootDropId && (
-              <WaveDropThreadTrace rootDropId={rootDropId} wave={wave} />
+              <WaveDropThreadTrace
+                rootDropId={rootDropId}
+                wave={wave}
+                onActiveDropClick={onActiveDropClick}
+              />
             )}
           </div>
+
           <DropsList
+            onActiveDropClick={onActiveDropClick}
             drops={drops}
             showWaveInfo={false}
+            isFetchingNextPage={isFetchingNextPage}
             onIntersection={(state) => {
               if (state && hasNextPage && !isFetching && !isFetchingNextPage) {
                 fetchNextPage();
@@ -111,6 +152,20 @@ export default function WaveDrops({
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
       />
+      {newDropsCount > 0 && (
+        <div className="tw-absolute tw-bottom-4 tw-left-0 tw-right-0 tw-flex tw-items-center tw-justify-center">
+          <div className="tw-w-full tw-flex tw-items-center">
+            <div className="tw-flex-grow tw-h-px tw-bg-red"></div>
+            <button
+              onClick={handleNewDropsClick}
+              className="tw-bg-iron-950 tw-text-red tw-px-2 tw-py-0 tw-text-sm tw-rounded-full tw-border-none"
+            >
+              {newDropsCount} new drop{newDropsCount !== 1 ? "s" : ""}
+            </button>
+            <div className="tw-flex-grow tw-h-px tw-bg-red"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

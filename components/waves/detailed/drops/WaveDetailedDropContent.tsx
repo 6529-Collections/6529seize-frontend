@@ -5,12 +5,14 @@ interface WaveDetailedDropContentProps {
   drop: Drop;
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
+  onActiveDropClick?: () => void;
 }
 
 const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
   drop,
   activePartIndex,
   setActivePartIndex,
+  onActiveDropClick,
 }) => {
   return (
     <div>
@@ -18,6 +20,7 @@ const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
         drop={drop}
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
+        onActiveDropClick={onActiveDropClick}
       />
     </div>
   );
