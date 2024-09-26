@@ -219,8 +219,14 @@ const handlePushNotificationAction = (
 };
 
 const resolveRedirectUrl = (redirectType: string, redirectPath?: string) => {
-  redirectType = redirectType.replace(/(^\/+|\/+$)/g, "");
-  redirectPath = redirectPath?.replace(/(^\/+|\/+$)/g, "") ?? "";
+  const formatInput = (input?: string) => {
+    if (!input) return "";
+    input = input.startsWith("/") ? input.slice(1) : input;
+    input = input.endsWith("/") ? input.slice(0, -1) : input;
+    return input;
+  };
+  redirectType = formatInput(redirectType);
+  redirectPath = formatInput(redirectPath);
 
   console.log("Cleaned Redirect Type", redirectType);
   console.log("Cleaned Redirect Path", redirectPath);
