@@ -74,15 +74,21 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Connected profile", profile);
       console.log("platform", deviceInfo.platform);
 
-      await commonApiPost({
+      commonApiPost({
         endpoint: `push-notifications/register`,
         body: {
-          deviceId: deviceId.identifier,
+          device_id: deviceId.identifier,
           token: token.value,
           platform: deviceInfo.platform,
-          profileId: profile?.profile?.external_id,
+          profile_id: profile?.profile?.external_id,
         },
-      });
+      })
+        .then((response) => {
+          console.log("Push registration success", response);
+        })
+        .catch((error) => {
+          console.error("Push registration error", error);
+        });
     });
 
     PushNotifications.addListener("registrationError", (error) => {
