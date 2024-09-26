@@ -22,7 +22,7 @@
     "@headlessui/react": "^2.0.4",
     "@lexical/react": "^0.14.2",
     "@mojs/core": "^1.7.1",
-    "@openapitools/openapi-generator-cli": "^2.13.4",
+    "@openapitools/openapi-generator-cli": "^2.13.9",
     "@reduxjs/toolkit": "^2.2.5",
     "@tailwindcss/forms": "^0.5.7",
     "@tanstack/query-core": "^5.45.0",

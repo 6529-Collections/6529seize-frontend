@@ -215,8 +215,8 @@ const handlePushNotificationAction = (
 };
 
 const resolveRedirectUrl = (type: string, path: string) => {
-  type = type.replace(/^\/+|\/+$/g, "");
-  path = path.replace(/^\/+|\/+$/g, "");
+  type = type?.replace(/^\/+|\/+$/g, "");
+  path = path?.replace(/^\/+|\/+$/g, "");
 
   console.log("Cleaned Type", type);
   console.log("Cleaned Path", path);
