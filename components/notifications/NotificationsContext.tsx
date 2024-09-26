@@ -199,13 +199,14 @@ const handlePushNotificationAction = (
     return;
   }
 
-  const redirect = notificationData.redirect;
+  const hasRedirect =
+    !!notificationData.redirect_type || !!notificationData.redirect_path;
 
-  if (redirect) {
-    const type = redirect.type;
-    const path = redirect.path;
-
-    const redirectUrl = resolveRedirectUrl(type, path);
+  if (hasRedirect) {
+    const redirectUrl = resolveRedirectUrl(
+      notificationData.redirect_type,
+      notificationData.redirect_path
+    );
 
     if (redirectUrl) {
       router.push(redirectUrl);
