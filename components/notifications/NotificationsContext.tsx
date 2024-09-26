@@ -54,7 +54,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       initializePushNotifications(profile);
     } else {
       console.log("Initializing local notifications");
-      initializeLocalNotifications();
+      initializeLocalNotifications().catch((error) =>
+        console.error("Error initializing local notifications", error)
+      );
     }
   };
 
@@ -120,58 +122,37 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const initializeLocalNotifications = async (): Promise<boolean> => {
-    try {
-      let permission = await LocalNotifications.checkPermissions();
-      if (permission.display === "prompt") {
-        permission = await LocalNotifications.requestPermissions();
-      }
-      return permission.display === "granted";
-    } catch (error) {
-      console.log("Error initializing local notifications", error);
-      return false;
+    let permission = await LocalNotifications.checkPermissions();
+    if (permission.display === "prompt") {
+      permission = await LocalNotifications.requestPermissions();
     }
+    return permission.display === "granted";
   };
 
   const sendLocalNotification = (id: number, title: string, body: string) => {
     if (isCapacitor) return;
 
-    // Check permission and call the corresponding function
     initializeLocalNotifications()
-      .then(grantOrDenyLocalNotification(id, title, body))
+      .then(() =>
+        LocalNotifications.schedule({
+          notifications: [
+            {
+              id,
+              title,
+              body,
+            },
+          ],
+        })
+          .then((result) => {
+            console.log("Local notification sent", result);
+          })
+          .catch((error) => {
+            console.error("Error scheduling local notification", error);
+          })
+      )
       .catch((error) =>
-        console.error("Error during notification initialization", error)
+        console.error("Error initializing local notifications", error)
       );
-  };
-
-  const grantOrDenyLocalNotification =
-    (id: number, title: string, body: string) => (isGranted: boolean) => {
-      if (isGranted) {
-        localNotificationWithPermissionGranted(id, title, body);
-      } else {
-        localNotificationNotGranted();
-      }
-    };
-
-  const localNotificationWithPermissionGranted = (
-    id: number,
-    title: string,
-    body: string
-  ) => {
-    LocalNotifications.schedule({
-      notifications: [
-        {
-          id,
-          title,
-          body,
-        },
-      ],
-    }).catch((error) => {
-      console.error("Error sending notification", error);
-    });
-  };
-
-  const localNotificationNotGranted = () => {
-    console.log("Local notifications permission not granted");
   };
 
   const value = useMemo(
