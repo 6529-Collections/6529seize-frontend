@@ -135,17 +135,20 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const sendLocalNotification = (id: number, title: string, body: string) => {
     if (isCapacitor) return;
 
-    initializeLocalNotifications().then(
-      localNotificationWithPermission(id, title, body)
-    );
+    // Check permission and call the corresponding function
+    initializeLocalNotifications()
+      .then(grantOrDenyLocalNotification(id, title, body))
+      .catch((error) =>
+        console.error("Error during notification initialization", error)
+      );
   };
 
-  const localNotificationWithPermission =
-    (id: number, title: string, body: string) => async (isGranted: boolean) => {
+  const grantOrDenyLocalNotification =
+    (id: number, title: string, body: string) => (isGranted: boolean) => {
       if (isGranted) {
         localNotificationWithPermissionGranted(id, title, body);
       } else {
-        console.log("Local notifications permission not granted");
+        localNotificationNotGranted();
       }
     };
 
@@ -165,6 +168,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }).catch((error) => {
       console.error("Error sending notification", error);
     });
+  };
+
+  const localNotificationNotGranted = () => {
+    console.log("Local notifications permission not granted");
   };
 
   const value = useMemo(
