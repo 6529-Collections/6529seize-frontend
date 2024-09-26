@@ -45,7 +45,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
           onActiveDropClick?.();
           return;
         }
-        const newPath = `/waves/${drop.wave.id}?drop=${drop.id}`;
+        const newPath = `/waves/${drop.wave.id}?drop=${drop.serial_no}`;
         router.push(newPath);
       }
     };

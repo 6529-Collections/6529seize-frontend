@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo, RefObject } from "react";
 import { Drop } from "../../../generated/models/Drop";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
+
 type DropActionHandler = ({
   drop,
   partId,
@@ -19,10 +19,14 @@ interface DropsListProps {
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly isFetchingNextPage: boolean;
-  readonly onIntersection: (state: boolean) => void;
+  readonly isFetchingPreviousPage: boolean;
+
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
   readonly onActiveDropClick?: () => void;
+  readonly onReplyClick: (serialNo: number) => void;
+  readonly serialNo: number | null;
+  readonly targetDropRef: RefObject<HTMLDivElement>;
 }
 
 export default function DropsList({
@@ -31,30 +35,25 @@ export default function DropsList({
   activeDrop,
   showReplyAndQuote,
   isFetchingNextPage,
-  onIntersection,
+  isFetchingPreviousPage,
   onReply,
   onQuote,
   onActiveDropClick,
+  onReplyClick,
+  serialNo,
+  targetDropRef,
 }: DropsListProps) {
-  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
-    number | null
-  >(null);
-  const intersectionElementRef = useIntersectionObserver(onIntersection);
-
-  useEffect(() => {
-    setIntersectionTargetIndex(drops.length >= 40 ? 30 : drops.length - 1);
-  }, [drops]);
-
   const memoizedDrops = useMemo(
     () =>
       drops.map((drop, i) => (
-        <div key={drop.stableKey}>
-          {intersectionTargetIndex === i && (
-            <div ref={intersectionElementRef}>
-              <CommonIntersectionElement onIntersection={onIntersection} />
-            </div>
-          )}
+        <div
+          key={drop.stableKey}
+          id={`drop-${drop.serial_no}`}
+          ref={serialNo === drop.serial_no ? targetDropRef : null}
+          className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
+        >
           <WaveDetailedDrop
+            onReplyClick={onReplyClick}
             drop={drop}
             previousDrop={drops[i - 1] ?? null}
             nextDrop={drops[i + 1] ?? null}
@@ -69,13 +68,14 @@ export default function DropsList({
       )),
     [
       drops,
-      intersectionTargetIndex,
       showWaveInfo,
       activeDrop,
       onReply,
       onQuote,
       showReplyAndQuote,
       onActiveDropClick,
+      serialNo,
+      targetDropRef,
     ]
   );
 
@@ -87,6 +87,11 @@ export default function DropsList({
         </div>
       )}
       {memoizedDrops}
+      {isFetchingPreviousPage && (
+        <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
+          <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+        </div>
+      )}
     </div>
   );
 }

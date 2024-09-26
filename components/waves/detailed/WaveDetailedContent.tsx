@@ -3,7 +3,7 @@ import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
-import { createBreakpoint } from "react-use";
+import { useSearchParams } from "next/navigation";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -23,6 +23,8 @@ interface WaveDetailedContentProps {
 export default function WaveDetailedContent({
   wave,
 }: WaveDetailedContentProps) {
+  const searchParams = useSearchParams();
+  const initialDrop = searchParams.get("drop");
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const canDrop = wave.participation.authenticated_user_eligible;
 
@@ -54,7 +56,6 @@ export default function WaveDetailedContent({
     setActiveDrop(null);
   };
 
-
   return (
     <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
       <div className="tw-w-full tw-flex tw-flex-col">
@@ -63,6 +64,7 @@ export default function WaveDetailedContent({
           onReply={handleReply}
           onQuote={handleQuote}
           activeDrop={activeDrop}
+          initialDrop={initialDrop ? parseInt(initialDrop) : null}
         />
         {canDrop && (
           <div className="tw-mt-auto">

@@ -15,6 +15,13 @@ import {
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
+import { useQueryClient,  QueryClient } from "@tanstack/react-query";
+
+export enum WaveDropsSearchStrategy {
+  FIND_OLDER = "FIND_OLDER",
+  FIND_NEWER = "FIND_NEWER",
+  FIND_BOTH = "FIND_BOTH",
+}
 
 const REQUEST_SIZE = 40;
 const POLLING_DELAY = 3000;
@@ -34,10 +41,31 @@ function useTabVisibility() {
   return isVisible;
 }
 
+// This function will reset the query for a specific wave and serialNo
+export function resetWaveDropsQuery(
+  queryClient: QueryClient,
+  wave: Wave,
+  serialNo: number | null
+) {
+  const queryKey = [
+    QueryKey.DROPS,
+    {
+      waveId: wave.id,
+      limit: REQUEST_SIZE,
+      dropId: null,
+    },
+  ];
+
+  queryClient.removeQueries({ queryKey });
+}
+
 export function useWaveDrops(
   wave: Wave,
-  connectedProfileHandle: string | undefined
+  connectedProfileHandle: string | undefined,
+  serialNo: number | null
 ) {
+  const queryClient = useQueryClient();
+
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
@@ -58,26 +86,55 @@ export function useWaveDrops(
   const {
     data,
     fetchNextPage,
+    fetchPreviousPage,
     hasNextPage,
+    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
+    isFetchingPreviousPage,
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+    queryFn: async ({
+      pageParam,
+    }: {
+      pageParam: {
+        serialNo: number | null;
+        strategy: WaveDropsSearchStrategy;
+      } | null;
+    }) => {
       const params: Record<string, string> = {
         limit: REQUEST_SIZE.toString(),
       };
-      if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
+      if (pageParam?.serialNo) {
+        params.serial_no_limit = `${pageParam.serialNo}`;
+        params.search_strategy = `${pageParam.strategy}`;
       }
       return await commonApiFetch<WaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,
       });
     },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
+    initialPageParam: serialNo
+      ? {
+          serialNo: serialNo,
+          strategy: WaveDropsSearchStrategy.FIND_BOTH,
+        }
+      : null,
+    getNextPageParam: (lastPage) =>
+      lastPage.drops.at(-1)?.serial_no
+        ? {
+            serialNo: lastPage.drops.at(-1)?.serial_no ?? null,
+            strategy: WaveDropsSearchStrategy.FIND_OLDER,
+          }
+        : null,
+    getPreviousPageParam: (firstPage) =>
+      firstPage.drops.at(0)?.serial_no
+        ? {
+            serialNo: firstPage.drops.at(0)?.serial_no ?? null,
+            strategy: WaveDropsSearchStrategy.FIND_NEWER,
+          }
+        : null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
@@ -89,7 +146,6 @@ export function useWaveDrops(
       return generateUniqueKeys(newDrops, prev);
     });
   }, [data]);
-
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
@@ -113,6 +169,10 @@ export function useWaveDrops(
     refetchOnReconnect: true,
     refetchIntervalInBackground: true,
   });
+
+
+
+
 
   useEffect(() => {
     if (pollingResult) {
@@ -158,13 +218,25 @@ export function useWaveDrops(
     setHaveNewDrops(false);
   }, [haveNewDrops, isTabVisible, drops]);
 
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries({
+        queryKey: [QueryKey.DROPS, { waveId: wave.id }],
+      });
+    };
+  }, [wave.id, queryClient]);
+
   return {
     drops,
     fetchNextPage,
+    fetchPreviousPage,
     hasNextPage,
+    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
+    isFetchingPreviousPage,
     refetch,
     haveNewDrops,
+    resetQuery: () => resetWaveDropsQuery(queryClient, wave, serialNo),
   };
 }

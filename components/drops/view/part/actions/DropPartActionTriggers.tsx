@@ -35,7 +35,7 @@ export default function DropPartActionTriggers({
   const [_, copyToClipboard] = useCopyToClipboard();
   const copyDropLink = () => {
     copyToClipboard(
-      `${window.location.protocol}//${window.location.host}/waves/${drop.wave.id}?drop=${drop.id}`
+      `${window.location.protocol}//${window.location.host}/waves/${drop.wave.id}?drop=${drop.serial_no}`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

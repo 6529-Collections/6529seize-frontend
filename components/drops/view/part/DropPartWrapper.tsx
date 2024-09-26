@@ -23,7 +23,7 @@ export interface DropPartWrapperProps {
   readonly size?: DropPartSize;
   readonly connectingLineType?: DropConnectingLineType | null;
   readonly onDiscussionButtonClick: () => void;
-  readonly onRedropClick?: (redropId: string) => void;
+  readonly onRedropClick?: (serialNo: number) => void;
   readonly children: React.ReactNode;
 }
 

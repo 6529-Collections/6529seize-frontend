@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -59,6 +59,7 @@ interface WaveDetailedDropProps {
     partId: number;
   }) => void;
   readonly onActiveDropClick?: () => void;
+  readonly onReplyClick: (serialNo: number) => void;
 }
 
 export default function WaveDetailedDrop({
@@ -69,10 +70,48 @@ export default function WaveDetailedDrop({
   activeDrop,
   onReply,
   onQuote,
+  onReplyClick,
   showReplyAndQuote,
   onActiveDropClick,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  useEffect(() => {
+    const images = Array.from(document.querySelectorAll(`#drop-${drop.serial_no} img`));
+    if (images.length === 0) {
+      setImagesLoaded(true);
+      return;
+    }
+
+    let loadedCount = 0;
+    const onImageLoad = () => {
+      loadedCount++;
+      if (loadedCount === images.length) {
+        setImagesLoaded(true);
+      }
+    };
+
+    images.forEach(img => {
+      if (img.complete) {
+        onImageLoad();
+      } else {
+        img.addEventListener('load', onImageLoad);
+        img.addEventListener('error', onImageLoad);
+      }
+    });
+
+    return () => {
+      images.forEach(img => {
+        img.removeEventListener('load', onImageLoad);
+        img.removeEventListener('error', onImageLoad);
+      });
+    };
+  }, [drop.serial_no]);
+
+  if (!imagesLoaded) {
+    return <div className="tw-h-32 tw-bg-iron-900 tw-animate-pulse"></div>;
+  }
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
@@ -99,6 +138,7 @@ export default function WaveDetailedDrop({
       {drop.reply_to &&
         drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
           <WaveDetailedDropReply
+            onReplyClick={onReplyClick}
             dropId={drop.reply_to.drop_id}
             dropPartId={drop.reply_to.drop_part_id}
             maybeDrop={
