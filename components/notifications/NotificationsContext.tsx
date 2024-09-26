@@ -199,10 +199,7 @@ const handlePushNotificationAction = (
     return;
   }
 
-  const hasRedirect =
-    !!notificationData.redirect_type || !!notificationData.redirect_path;
-
-  if (hasRedirect) {
+  if (notificationData.redirect_type) {
     const redirectUrl = resolveRedirectUrl(
       notificationData.redirect_type,
       notificationData.redirect_path
@@ -214,25 +211,25 @@ const handlePushNotificationAction = (
   }
 };
 
-const resolveRedirectUrl = (type: string, path: string) => {
-  type = type?.replace(/^\/+|\/+$/g, "");
-  path = path?.replace(/^\/+|\/+$/g, "");
+const resolveRedirectUrl = (redirectType: string, redirectPath?: string) => {
+  redirectType = redirectType.replace(/^\/+|\/+$/g, "");
+  redirectPath = redirectPath?.replace(/^\/+|\/+$/g, "") ?? "";
 
-  console.log("Cleaned Type", type);
-  console.log("Cleaned Path", path);
+  console.log("Cleaned Redirect Type", redirectType);
+  console.log("Cleaned Redirect Path", redirectPath);
 
-  switch (type) {
+  switch (redirectType) {
     case "path":
     case "profile":
-      return `/${path}`;
+      return `/${redirectPath}`;
     case "the-memes":
-      return `/the-memes/${path}`;
+      return `/the-memes/${redirectPath}`;
     case "6529-gradient":
-      return `/6529-gradient/${path}`;
+      return `/6529-gradient/${redirectPath}`;
     case "meme-lab":
-      return `/meme-lab/${path}`;
+      return `/meme-lab/${redirectPath}`;
     case "waves":
-      return `/waves/${path}`;
+      return `/waves/${redirectPath}`;
     default:
       return null;
   }
