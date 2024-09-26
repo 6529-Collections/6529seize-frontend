@@ -218,6 +218,9 @@ const resolveRedirectUrl = (type: string, path: string) => {
   type = type.replace(/^\/+|\/+$/g, "");
   path = path.replace(/^\/+|\/+$/g, "");
 
+  console.log("Cleaned Type", type);
+  console.log("Cleaned Path", path);
+
   switch (type) {
     case "path":
     case "profile":
