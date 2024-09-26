@@ -109,11 +109,18 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const initializeLocalNotifications = async (): Promise<boolean> => {
+    LocalNotifications.removeAllListeners();
     let permission = await LocalNotifications.checkPermissions();
     if (permission.display === "prompt") {
       permission = await LocalNotifications.requestPermissions();
     }
-    return permission.display === "granted";
+    const isGranted = permission.display === "granted";
+    if (isGranted) {
+      LocalNotifications.addListener("localNotificationActionPerformed", () => {
+        router.push("/my-stream/notifications");
+      });
+    }
+    return isGranted;
   };
 
   const sendLocalNotification = (id: number, title: string, body: string) => {
@@ -212,8 +219,8 @@ const handlePushNotificationAction = (
 };
 
 const resolveRedirectUrl = (redirectType: string, redirectPath?: string) => {
-  redirectType = redirectType.replace(/^\/+|\/+$/g, "");
-  redirectPath = redirectPath?.replace(/^\/+|\/+$/g, "") ?? "";
+  redirectType = redirectType.replace(/(^\/+|\/+$)/g, "");
+  redirectPath = redirectPath?.replace(/(^\/+|\/+$)/g, "") ?? "";
 
   console.log("Cleaned Redirect Type", redirectType);
   console.log("Cleaned Redirect Path", redirectPath);
