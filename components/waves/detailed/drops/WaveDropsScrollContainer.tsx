@@ -1,8 +1,6 @@
 import React, { forwardRef } from "react";
-import WaveDropThreadHeader from "./WaveDropThreadHeader";
 
 interface WaveDropsScrollContainerProps {
-  readonly rootDropId: string | null;
   readonly children: React.ReactNode;
   readonly onScroll: () => void;
 }
@@ -10,7 +8,7 @@ interface WaveDropsScrollContainerProps {
 export const WaveDropsScrollContainer = forwardRef<
   HTMLDivElement,
   WaveDropsScrollContainerProps
->(({ children, onScroll, rootDropId }, ref) => {
+>(({ children, onScroll }, ref) => {
   return (
     <div
       ref={ref}
@@ -19,7 +17,6 @@ export const WaveDropsScrollContainer = forwardRef<
     >
       <div className="tw-flex tw-flex-col-reverse tw-flex-grow">
         <div className="tw-overflow-hidden">{children}</div>
-        {rootDropId && <WaveDropThreadHeader rootDropId={rootDropId} />}
       </div>
     </div>
   );

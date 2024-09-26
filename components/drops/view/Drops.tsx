@@ -110,7 +110,6 @@ export default function Drops() {
         onQuote={() => {}}
         showReplyAndQuote={true}
         activeDrop={null}
-        rootDropId={null}
         isFetchingNextPage={isFetchingNextPage}
       />
     </div>

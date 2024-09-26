@@ -36,7 +36,6 @@ function useTabVisibility() {
 
 export function useWaveDrops(
   wave: Wave,
-  rootDropId: string | null,
   connectedProfileHandle: string | undefined
 ) {
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
@@ -52,7 +51,7 @@ export function useWaveDrops(
     {
       waveId: wave.id,
       limit: REQUEST_SIZE,
-      dropId: rootDropId,
+      dropId: null,
     },
   ];
 
@@ -69,9 +68,6 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: REQUEST_SIZE.toString(),
       };
-      if (rootDropId) {
-        params.drop_id = rootDropId;
-      }
       if (pageParam) {
         params.serial_no_less_than = `${pageParam}`;
       }
@@ -84,6 +80,7 @@ export function useWaveDrops(
     getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
+    staleTime: 60000,
   });
 
   useEffect(() => {
@@ -93,13 +90,8 @@ export function useWaveDrops(
     });
   }, [data]);
 
-  useEffect(() => {
-    setCanPoll(false);
-    setHaveNewDrops(false);
-    setDelayedPollingResult(undefined);
-  }, [rootDropId]);
 
-  useDebounce(() => setCanPoll(true), 10000, [data, rootDropId]);
+  useDebounce(() => setCanPoll(true), 10000, [data]);
 
   const { data: pollingResult } = useQuery({
     queryKey: [...queryKey, "polling"],
@@ -107,9 +99,6 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: "1",
       };
-      if (rootDropId) {
-        params.drop_id = rootDropId;
-      }
       return await commonApiFetch<WaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,

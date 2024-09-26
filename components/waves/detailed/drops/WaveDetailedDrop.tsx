@@ -15,8 +15,7 @@ enum GroupingThreshold {
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
-  otherDrop: ExtendedDrop | null,
-  rootDropId: string | null
+  otherDrop: ExtendedDrop | null
 ): boolean => {
   if (!otherDrop || currentDrop.parts.length > 1) {
     return false;
@@ -32,11 +31,10 @@ const shouldGroupWithDrop = (
   }
 
   const bothNotReplies = !currentDrop.reply_to && !otherDrop.reply_to;
-  const currentReplyToRoot = currentDrop.reply_to?.drop_id === rootDropId;
   const repliesInSameThread =
     currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
 
-  return bothNotReplies || currentReplyToRoot || repliesInSameThread;
+  return bothNotReplies || repliesInSameThread;
 };
 
 interface WaveDetailedDropProps {
@@ -45,7 +43,6 @@ interface WaveDetailedDropProps {
   readonly nextDrop: ExtendedDrop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
   readonly onReply: ({
     drop,
@@ -70,7 +67,6 @@ export default function WaveDetailedDrop({
   nextDrop,
   showWaveInfo,
   activeDrop,
-  rootDropId,
   onReply,
   onQuote,
   showReplyAndQuote,
@@ -81,16 +77,8 @@ export default function WaveDetailedDrop({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(
-    drop,
-    previousDrop,
-    rootDropId
-  );
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(
-    drop,
-    nextDrop,
-    rootDropId
-  );
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop);
 
   const getGroupingClass = () => {
     if (shouldGroupWithPreviousDrop) return "";
@@ -109,7 +97,6 @@ export default function WaveDetailedDrop({
       } ${groupingClass}`}
     >
       {drop.reply_to &&
-        drop.reply_to.drop_id !== rootDropId &&
         drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
           <WaveDetailedDropReply
             dropId={drop.reply_to.drop_id}

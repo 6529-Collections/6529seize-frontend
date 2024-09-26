@@ -12,58 +12,21 @@ import WaveDetailedAbout from "./WaveDetailedAbout";
 interface WaveDetailedDesktopProps {
   readonly wave: Wave;
   readonly view: WaveDetailedView;
+  readonly isFetching: boolean;
   readonly setView: (view: WaveDetailedView) => void;
 }
 
 const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   wave,
   view,
+  isFetching,
   setView,
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const getActiveDropId = (): string | null => {
-    const dropId = searchParams.get("drop");
-    return dropId ?? null;
-  };
-
-  const [activeDropId, setActiveDropId] = useState<string | null>(
-    getActiveDropId()
-  );
-  useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
-
-  const onBackToList = () => {
-    const updatedQuery = { ...router.query };
-    delete updatedQuery.drop;
-    router.replace(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
 
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const container = contentWrapperRef.current;
-
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      if (rect.top < 0) {
-        container.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "center",
-        });
-      }
-    }
-  }, [activeDropId]);
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -97,13 +60,11 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CONTENT]: (
       <WaveDetailedContent
-        activeDropId={activeDropId}
+        key={`wave-detailed-content-${wave.id}`}
         wave={wave}
-        onBackToList={onBackToList}
       />
     ),
     [WaveDetailedView.FOLLOWERS]: (

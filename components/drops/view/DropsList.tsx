@@ -17,7 +17,6 @@ interface DropsListProps {
   readonly drops: ExtendedDrop[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onIntersection: (state: boolean) => void;
@@ -30,7 +29,6 @@ export default function DropsList({
   drops,
   showWaveInfo,
   activeDrop,
-  rootDropId,
   showReplyAndQuote,
   isFetchingNextPage,
   onIntersection,
@@ -64,7 +62,6 @@ export default function DropsList({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            rootDropId={rootDropId}
             showReplyAndQuote={showReplyAndQuote}
             onActiveDropClick={onActiveDropClick}
           />
@@ -77,7 +74,6 @@ export default function DropsList({
       activeDrop,
       onReply,
       onQuote,
-      rootDropId,
       showReplyAndQuote,
       onActiveDropClick,
     ]

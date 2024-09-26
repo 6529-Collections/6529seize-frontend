@@ -13,7 +13,7 @@ type DropsQueryParams = {
   dropId: string | null;
 };
 
-const getDropsQueryKey = (params: DropsQueryParams) => 
+const getDropsQueryKey = (params: DropsQueryParams) =>
   [QueryKey.DROPS, params] as const;
 
 const updateQueryData = (
@@ -38,23 +38,18 @@ const updateDropsQuery = (
 ) => {
   const queryKey = getDropsQueryKey(queryParams);
   queryClient.cancelQueries({ queryKey });
-  queryClient.setQueryData<DropsQueryData | undefined>(
-    queryKey,
-    (oldData) => updateQueryData(oldData, drop)
+  queryClient.setQueryData<DropsQueryData | undefined>(queryKey, (oldData) =>
+    updateQueryData(oldData, drop)
   );
 };
 
 export const addDropToDrops = (
   queryClient: QueryClient,
-  { drop, rootDropId }: { readonly drop: Drop; readonly rootDropId: string | null }
+  { drop }: { readonly drop: Drop }
 ): void => {
-  const baseQueryParams: Omit<DropsQueryParams, 'dropId'> = { 
-    limit: 40, 
-    waveId: drop.wave.id 
+  const baseQueryParams: Omit<DropsQueryParams, "dropId"> = {
+    limit: 40,
+    waveId: drop.wave.id,
   };
-
   updateDropsQuery(queryClient, { ...baseQueryParams, dropId: null }, drop);
-  if (rootDropId) {
-    updateDropsQuery(queryClient, { ...baseQueryParams, dropId: rootDropId }, drop);
-  }
 };

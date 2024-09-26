@@ -11,11 +11,12 @@ export enum WaveDetailedView {
 
 interface WaveDetailedProps {
   readonly wave: Wave;
+  readonly isFetching: boolean;
 }
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function WaveDetailed({ wave }: WaveDetailedProps) {
+export default function WaveDetailed({ wave, isFetching }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
     WaveDetailedView.CONTENT
   );
@@ -27,6 +28,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   ) : (
     <WaveDetailedDesktop
       wave={wave}
+      isFetching={isFetching}
       view={activeView}
       setView={setActiveView}
     />
