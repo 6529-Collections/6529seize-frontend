@@ -218,7 +218,7 @@ const resolveRedirectUrl = (type: string, path: string) => {
   switch (type) {
     case "path":
     case "profile":
-      return path;
+      return `/${path}`;
     case "the-memes":
       return `/the-memes/${path}`;
     case "6529-gradient":
