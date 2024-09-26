@@ -4,9 +4,10 @@ import { PushNotifications } from "@capacitor/push-notifications";
 import { Device } from "@capacitor/device";
 import { useRouter } from "next/router";
 import useCapacitor from "../../hooks/useCapacitor";
-import { AuthContext, useAuth } from "../auth/Auth";
+import { useAuth } from "../auth/Auth";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { useAccount } from "wagmi";
+import { commonApiPost } from "../../services/api/common-api";
 
 type NotificationsContextType = {
   sendLocalNotification: (id: number, title: string, body: string) => void;
@@ -63,11 +64,23 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     PushNotifications.removeAllListeners();
 
     const deviceId = await Device.getId();
+    const deviceInfo = await Device.getInfo();
 
-    PushNotifications.addListener("registration", (token) => {
+    PushNotifications.addListener("registration", async (token) => {
       console.log("Push registration success, token: " + token.value);
       console.log("Device id", deviceId);
       console.log("Connected profile", profile);
+      console.log("platform", deviceInfo.platform);
+
+      await commonApiPost({
+        endpoint: `push-notifications/register`,
+        body: {
+          deviceId: deviceId.identifier,
+          token: token.value,
+          platform: deviceInfo.platform,
+          profileId: profile?.profile?.external_id,
+        },
+      });
     });
 
     PushNotifications.addListener("registrationError", (error) => {
