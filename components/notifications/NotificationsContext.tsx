@@ -60,9 +60,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const initializePushNotifications = async (
     profile?: IProfileAndConsolidations
   ) => {
-    const deviceId = await Device.getId();
-
     PushNotifications.removeAllListeners();
+
+    const deviceId = await Device.getId();
 
     PushNotifications.addListener("registration", (token) => {
       console.log("Push registration success, token: " + token.value);
