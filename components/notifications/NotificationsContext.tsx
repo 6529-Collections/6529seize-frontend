@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { LocalNotifications } from "@capacitor/local-notifications";
-import { PushNotifications } from "@capacitor/push-notifications";
-import { Device } from "@capacitor/device";
-import { useRouter } from "next/router";
+import {
+  PushNotifications,
+  PushNotificationSchema,
+} from "@capacitor/push-notifications";
+import { Device, DeviceId, DeviceInfo } from "@capacitor/device";
+import { NextRouter, useRouter } from "next/router";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
@@ -69,26 +72,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     const deviceInfo = await Device.getInfo();
 
     PushNotifications.addListener("registration", async (token) => {
-      console.log("Push registration success, token: " + token.value);
-      console.log("Device id", deviceId);
-      console.log("Connected profile", profile);
-      console.log("platform", deviceInfo.platform);
-
-      commonApiPost({
-        endpoint: `push-notifications/register`,
-        body: {
-          device_id: deviceId.identifier,
-          token: token.value,
-          platform: deviceInfo.platform,
-          profile_id: profile?.profile?.external_id,
-        },
-      })
-        .then((response) => {
-          console.log("Push registration success", response);
-        })
-        .catch((error) => {
-          console.error("Push registration error", error);
-        });
+      console.log("Push registration success");
+      registerPushNotification(deviceId, deviceInfo, token.value, profile);
     });
 
     PushNotifications.addListener("registrationError", (error) => {
@@ -98,7 +83,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
-        // Handle the notification if needed
+        console.log("Push notification received: ", notification);
       }
     );
 
@@ -107,12 +92,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       (action) => {
         console.log("Push action performed: ", action);
         console.log("Connected profile", profile);
-        console.log("redirecting to /the-memes");
 
-        const redirectUrl = action.notification.data.redirectUrl;
-        if (redirectUrl) {
-          router.push(redirectUrl);
-        }
+        handlePushNotificationAction(router, action.notification, profile);
       }
     );
 
@@ -173,4 +154,79 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </NotificationsContext.Provider>
   );
+};
+
+const registerPushNotification = async (
+  deviceId: DeviceId,
+  deviceInfo: DeviceInfo,
+  token: string,
+  profile?: IProfileAndConsolidations
+) => {
+  console.log("Device id", deviceId);
+  console.log("Connected profile", profile);
+  console.log("Platform", deviceInfo.platform);
+
+  try {
+    const response = await commonApiPost({
+      endpoint: `push-notifications/register`,
+      body: {
+        device_id: deviceId.identifier,
+        token,
+        platform: deviceInfo.platform,
+        profile_id: profile?.profile?.external_id,
+      },
+    });
+    console.log("Push registration success", response);
+  } catch (error) {
+    console.error("Push registration error", error);
+  }
+};
+
+const handlePushNotificationAction = (
+  router: NextRouter,
+  notification: PushNotificationSchema,
+  profile?: IProfileAndConsolidations
+) => {
+  const notificationData = notification.data;
+  const notificationProfileId = notificationData.profile_id;
+
+  if (
+    profile &&
+    notificationProfileId &&
+    notificationProfileId !== profile.profile?.external_id
+  ) {
+    console.log("Notification profile id does not match connected profile");
+    return;
+  }
+
+  const redirect = notificationData.redirect;
+
+  if (redirect) {
+    const type = redirect.type;
+    const path = redirect.path;
+
+    const redirectUrl = resolveRedirectUrl(type, path);
+
+    if (redirectUrl) {
+      router.push(redirectUrl);
+    }
+  }
+};
+
+const resolveRedirectUrl = (type: string, path: string) => {
+  switch (type) {
+    case "path":
+    case "profile":
+      return path;
+    case "the-memes":
+      return `/the-memes/${path}`;
+    case "6529-gradient":
+      return `/6529-gradient/${path}`;
+    case "meme-lab":
+      return `/meme-lab/${path}`;
+    case "waves":
+      return `/waves/${path}`;
+    default:
+      return null;
+  }
 };
