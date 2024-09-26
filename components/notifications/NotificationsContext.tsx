@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { Device } from "@capacitor/device";
@@ -135,30 +135,47 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const sendLocalNotification = (id: number, title: string, body: string) => {
     if (isCapacitor) return;
 
-    initializeLocalNotifications().then((isGranted) => {
+    initializeLocalNotifications().then(
+      localNotificationWithPermission(id, title, body)
+    );
+  };
+
+  const localNotificationWithPermission =
+    (id: number, title: string, body: string) => async (isGranted: boolean) => {
       if (isGranted) {
-        LocalNotifications.schedule({
-          notifications: [
-            {
-              id,
-              title,
-              body,
-            },
-          ],
-        }).catch((error) => {
-          console.error("Error sending notification", error);
-        });
+        localNotificationWithPermissionGranted(id, title, body);
       } else {
         console.log("Local notifications permission not granted");
       }
+    };
+
+  const localNotificationWithPermissionGranted = (
+    id: number,
+    title: string,
+    body: string
+  ) => {
+    LocalNotifications.schedule({
+      notifications: [
+        {
+          id,
+          title,
+          body,
+        },
+      ],
+    }).catch((error) => {
+      console.error("Error sending notification", error);
     });
   };
 
+  const value = useMemo(
+    () => ({
+      sendLocalNotification,
+    }),
+    []
+  );
+
   return (
-    <NotificationsContext.Provider
-      value={{
-        sendLocalNotification,
-      }}>
+    <NotificationsContext.Provider value={value}>
       {children}
     </NotificationsContext.Provider>
   );
