@@ -23,6 +23,18 @@ const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
 
+const redirectConfig = {
+  path: ({ path }: { path: string }) => `/${path}`,
+  profile: ({ handle }: { handle: string }) => `/${handle}`,
+  "the-memes": ({ id }: { id: string }) => `/the-memes/${id}`,
+  "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
+  "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
+  waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
+    let base = `/waves/${wave_id}`;
+    return drop_id ? `${base}?drop=${drop_id}` : base;
+  },
+};
+
 export const useNotifications = () => {
   const context = useContext(NotificationsContext);
   if (!context) {
@@ -210,6 +222,7 @@ const handlePushNotificationAction = async (
   }
 
   const notificationId = notificationData.notification_id;
+  console.log("Marking notification as read", notificationId);
   await commonApiPostWithoutBodyAndResponse({
     endpoint: `notifications/${notificationId}/read`,
   })
@@ -223,13 +236,16 @@ const handlePushNotificationAction = async (
     .finally(() => {
       const redirectUrl = resolveRedirectUrl(notificationData);
       if (redirectUrl) {
+        console.log("Redirecting to", redirectUrl);
         router.push(redirectUrl);
       }
     });
 };
 
 const resolveRedirectUrl = (notificationData: any) => {
-  if (!notificationData.redirect) {
+  const { redirect, ...params } = notificationData;
+
+  if (!redirect) {
     console.error(
       "No redirect type found in notification data",
       notificationData
@@ -237,42 +253,17 @@ const resolveRedirectUrl = (notificationData: any) => {
     return null;
   }
 
-  switch (notificationData.redirect) {
-    case "path":
-      if (!notificationData.path) {
-        return null;
-      }
-      return `/${notificationData.path}`;
-    case "profile":
-      if (!notificationData.profile) {
-        return null;
-      }
-      return `/${notificationData.profile}`;
-    case "the-memes":
-      if (!notificationData.meme_id) {
-        return null;
-      }
-      return `/the-memes/${notificationData.meme_id}`;
-    case "6529-gradient":
-      if (!notificationData.gradient_id) {
-        return null;
-      }
-      return `/6529-gradient/${notificationData.gradient_id}`;
-    case "meme-lab":
-      if (!notificationData.meme_lab_id) {
-        return null;
-      }
-      return `/meme-lab/${notificationData.meme_lab_id}`;
-    case "waves":
-      if (!notificationData.wave_id) {
-        return null;
-      }
-      let path = `/waves/${notificationData.wave_id}`;
-      if (notificationData.drop_id) {
-        path += `?drop=${notificationData.drop_id}`;
-      }
-      return path;
-    default:
-      return null;
+  const resolveFn = redirectConfig[redirect as keyof typeof redirectConfig];
+
+  if (!resolveFn) {
+    console.error("Unknown redirect type", redirect);
+    return null;
+  }
+
+  try {
+    return resolveFn(params);
+  } catch (error) {
+    console.error("Error resolving redirect URL", error);
+    return null;
   }
 };
