@@ -66,7 +66,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isConnected]);
 
   const initializeNotifications = (profile?: IProfileAndConsolidations) => {
-    console.log("Initializing notifications", profile);
     if (isCapacitor) {
       console.log("Initializing push notifications");
       initializePushNotifications(profile);
@@ -87,7 +86,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     const deviceInfo = await Device.getInfo();
 
     PushNotifications.addListener("registration", async (token) => {
-      console.log("Push registration success");
       registerPushNotification(deviceId, deviceInfo, token.value, profile);
     });
 
@@ -105,14 +103,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     PushNotifications.addListener(
       "pushNotificationActionPerformed",
       (action) => {
-        console.log("Push action performed: ", action);
-        console.log("Connected profile", profile);
-
         handlePushNotificationAction(router, action.notification, profile);
       }
     );
 
-    // Request permission to use push notifications
     const permStatus = await PushNotifications.requestPermissions();
     console.log("Push permission status", permStatus);
 
@@ -132,6 +126,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     const isGranted = permission.display === "granted";
     if (isGranted) {
       LocalNotifications.addListener("localNotificationActionPerformed", () => {
+        console.log(
+          "Local notification action performed",
+          "redirecting to notifications"
+        );
         router.push("/my-stream/notifications");
       });
     }
@@ -184,10 +182,6 @@ const registerPushNotification = async (
   token: string,
   profile?: IProfileAndConsolidations
 ) => {
-  console.log("Device id", deviceId);
-  console.log("Connected profile", profile);
-  console.log("Platform", deviceInfo.platform);
-
   try {
     const response = await commonApiPost({
       endpoint: `push-notifications/register`,
@@ -209,6 +203,7 @@ const handlePushNotificationAction = async (
   notification: PushNotificationSchema,
   profile?: IProfileAndConsolidations
 ) => {
+  console.log("Push notification action performed", notification);
   const notificationData = notification.data;
   const notificationProfileId = notificationData.profile_id;
 
@@ -222,10 +217,12 @@ const handlePushNotificationAction = async (
   }
 
   const notificationId = notificationData.notification_id;
-  console.log("Marking notification as read", notificationId);
   await commonApiPostWithoutBodyAndResponse({
     endpoint: `notifications/${notificationId}/read`,
   })
+    .then(() => {
+      console.log("Notification marked as read", notificationId);
+    })
     .catch((error) => {
       console.error(
         "Error marking notification as read",
