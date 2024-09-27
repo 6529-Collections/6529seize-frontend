@@ -33,7 +33,9 @@ const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
         <div>
           <WaveDetailedDropPartTitle title={drop.title} />
           <WaveDetailedDropPartContent
-            drop={drop}
+            mentionedUsers={drop.mentioned_users}
+            referencedNfts={drop.referenced_nfts}
+            wave={drop.wave}
             activePart={activePart}
             havePreviousPart={havePreviousPart}
             haveNextPart={haveNextPart}

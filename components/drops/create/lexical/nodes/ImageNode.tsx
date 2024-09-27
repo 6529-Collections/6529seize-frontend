@@ -26,36 +26,54 @@ const ImageComponent = React.lazy(() => import("./ImageComponent"));
 export interface ImagePayload {
   key?: NodeKey;
   src: string;
+  altText?: string;
+  width?: number;
+  height?: number;
 }
 
 function $convertImageElement(domNode: Node): null | DOMConversionOutput {
   const img = domNode as HTMLImageElement;
-  const { src } = img;
-  const node = $createImageNode({ src });
+  const { src, alt, width, height } = img;
+  const node = $createImageNode({ src, altText: alt, width, height });
   return { node };
 }
 
 export type SerializedImageNode = Spread<
   {
     src: string;
+    altText?: string;
+    width?: number;
+    height?: number;
   },
   SerializedLexicalNode
 >;
 
 export class ImageNode extends DecoratorNode<JSX.Element> {
   __src: string;
+  __altText?: string;
+  __width?: number;
+  __height?: number;
   static getType(): string {
     return "image";
   }
 
   static clone(node: ImageNode): ImageNode {
-    return new ImageNode(node.__src, node.__key);
+    return new ImageNode(
+      node.__src,
+      node.__altText,
+      node.__width,
+      node.__height,
+      node.__key
+    );
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const { src } = serializedNode;
+    const { src, altText, width, height } = serializedNode;
     const node = $createImageNode({
       src,
+      altText,
+      width,
+      height,
     });
 
     return node;
@@ -76,9 +94,18 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     };
   }
 
-  constructor(src: string, key?: NodeKey) {
+  constructor(
+    src: string,
+    altText?: string,
+    width?: number,
+    height?: number,
+    key?: NodeKey
+  ) {
     super(key);
     this.__src = src;
+    this.__altText = altText;
+    this.__width = width;
+    this.__height = height;
   }
 
   exportJSON(): SerializedImageNode {
@@ -86,6 +113,9 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       src: this.getSrc(),
       type: "image",
       version: 1,
+      altText: this.getAltText(),
+      width: this.getWidth(),
+      height: this.getHeight(),
     };
   }
 
@@ -109,17 +139,34 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return this.__src;
   }
 
+  getAltText(): string {
+    return this.__altText ?? "";
+  }
+
+  getWidth(): number | undefined {
+    return this.__width;
+  }
+
+  getHeight(): number | undefined {
+    return this.__height;
+  }
+
   decorate(): JSX.Element {
     return (
       <Suspense fallback={null}>
-        <ImageComponent src={this.__src} />
+        <ImageComponent
+          src={this.__src}
+          altText={this.getAltText()}
+          width={this.getWidth()}
+          height={this.getHeight()}
+        />
       </Suspense>
     );
   }
 }
 
-export function $createImageNode({ src, key }: ImagePayload): ImageNode {
-  return $applyNodeReplacement(new ImageNode(src, key));
+export function $createImageNode({ src, altText, width, height, key }: ImagePayload): ImageNode {
+  return $applyNodeReplacement(new ImageNode(src, altText, width, height, key));
 }
 
 export function $isImageNode(

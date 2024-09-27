@@ -111,6 +111,7 @@ export default function Drops() {
         showReplyAndQuote={true}
         activeDrop={null}
         rootDropId={null}
+        isFetchingNextPage={isFetchingNextPage}
       />
     </div>
   );

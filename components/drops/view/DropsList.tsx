@@ -19,9 +19,11 @@ interface DropsListProps {
   readonly activeDrop: ActiveDropState | null;
   readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
+  readonly isFetchingNextPage: boolean;
   readonly onIntersection: (state: boolean) => void;
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
+  readonly onActiveDropClick?: () => void;
 }
 
 export default function DropsList({
@@ -30,9 +32,11 @@ export default function DropsList({
   activeDrop,
   rootDropId,
   showReplyAndQuote,
+  isFetchingNextPage,
   onIntersection,
   onReply,
   onQuote,
+  onActiveDropClick,
 }: DropsListProps) {
   const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
     number | null
@@ -40,7 +44,7 @@ export default function DropsList({
   const intersectionElementRef = useIntersectionObserver(onIntersection);
 
   useEffect(() => {
-    setIntersectionTargetIndex(drops.length >= 10 ? 9 : drops.length - 1);
+    setIntersectionTargetIndex(drops.length >= 40 ? 30 : drops.length - 1);
   }, [drops]);
 
   const memoizedDrops = useMemo(
@@ -62,6 +66,7 @@ export default function DropsList({
             onQuote={onQuote}
             rootDropId={rootDropId}
             showReplyAndQuote={showReplyAndQuote}
+            onActiveDropClick={onActiveDropClick}
           />
         </div>
       )),
@@ -74,8 +79,18 @@ export default function DropsList({
       onQuote,
       rootDropId,
       showReplyAndQuote,
+      onActiveDropClick,
     ]
   );
 
-  return <div className="tw-flex tw-flex-col">{memoizedDrops}</div>;
+  return (
+    <div className="tw-flex tw-flex-col">
+      {isFetchingNextPage && (
+        <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
+          <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+        </div>
+      )}
+      {memoizedDrops}
+    </div>
+  );
 }

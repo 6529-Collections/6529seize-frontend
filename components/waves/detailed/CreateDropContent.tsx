@@ -584,11 +584,13 @@ export default function CreateDropContent({
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const refreshState = () => {
-    setDropEditorRefreshKey((prev) => prev + 1);
+    createDropInputRef.current?.clearEditorState();
+    setEditorState(null);
     setMetadata(initialMetadata);
     setMentionedUsers([]);
     setReferencedNfts([]);
     setDrop(null);
+    setDropEditorRefreshKey((prev) => prev + 1);
   };
 
   const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {

@@ -4,6 +4,8 @@ import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import { AnimatePresence, motion } from "framer-motion";
+import WaveDetailedThread from "./WaveDetailedThread";
+import { createBreakpoint } from "react-use";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -22,6 +24,8 @@ interface WaveDetailedContentProps {
   readonly onBackToList: () => void;
 }
 
+const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
+
 export default function WaveDetailedContent({
   activeDropId,
   wave,
@@ -32,11 +36,7 @@ export default function WaveDetailedContent({
   const canDrop = wave.participation.authenticated_user_eligible;
 
   useEffect(() => {
-    if (activeDropId) {
-      setIsThreadOpen(true);
-    } else {
-      setIsThreadOpen(false);
-    }
+    setIsThreadOpen(!!activeDropId);
   }, [activeDropId]);
 
   const onReply = (drop: Drop, partId: number) => {
@@ -72,8 +72,23 @@ export default function WaveDetailedContent({
     setIsThreadOpen(false);
   };
 
+  const breakpoint = useBreakpoint();
+
+  const threadAnimationVariants = {
+    S: {
+      initial: { opacity: 0, width: 0, x: "-100%" },
+      animate: { opacity: 1, width: "100%", x: 0 },
+      exit: { opacity: 0, width: 0, x: "-100%" },
+    },
+    default: {
+      initial: { width: 0, opacity: 0 },
+      animate: { width: "70%", opacity: 1 },
+      exit: { width: 0, opacity: 0 },
+    },
+  };
+
   return (
-    <div className="tw-w-full tw-flex tw-items-stretch tw-divide-x-4 tw-divide-iron-600 tw-divide-solid tw-divide-y-0">
+    <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
       <div className="tw-w-full tw-flex tw-flex-col">
         <WaveDrops
           wave={wave}
@@ -81,6 +96,7 @@ export default function WaveDetailedContent({
           onQuote={handleQuote}
           activeDrop={activeDrop}
           rootDropId={null}
+          onActiveDropClick={closeActiveDropId}
         />
         {canDrop && (
           <div className="tw-mt-auto">
@@ -96,31 +112,24 @@ export default function WaveDetailedContent({
       <AnimatePresence>
         {isThreadOpen && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: "100%", opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            className="tw-w-full tw-relative"
+            variants={
+              threadAnimationVariants[breakpoint === "S" ? "S" : "default"]
+            }
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className={`tw-w-full ${
+              breakpoint === "S"
+                ? "tw-fixed tw-inset-x-0  tw-z-50 tw-bg-iron-900 tw-h-full"
+                : "tw-relative"
+            }`}
           >
-            <div className="tw-flex tw-flex-col">
-              <WaveDrops
-                wave={wave}
-                onReply={handleReply}
-                onQuote={handleQuote}
-                activeDrop={activeDrop}
-                rootDropId={activeDropId}
-                onBackToList={closeActiveDropId}
-              />
-              {canDrop && (
-                <div className="tw-mt-auto">
-                  <CreateDrop
-                    activeDrop={activeDrop}
-                    onCancelReplyQuote={onCancelReplyQuote}
-                    waveId={wave.id}
-                    rootDropId={activeDropId}
-                  />
-                </div>
-              )}
-            </div>
+            <WaveDetailedThread
+              wave={wave}
+              rootDropId={activeDropId}
+              closeActiveDropId={closeActiveDropId}
+            />
           </motion.div>
         )}
       </AnimatePresence>

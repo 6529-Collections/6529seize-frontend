@@ -1,16 +1,15 @@
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import useCapacitor from "../../../../../../hooks/useCapacitor";
 
-export default function DropListItemContentMediaVideo({
+function DropListItemContentMediaVideo({
   src,
 }: {
   readonly src: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-
   const capacitor = useCapacitor();
 
-  const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
+  const handleVideoClick = useCallback((event: React.MouseEvent<HTMLVideoElement>) => {
     if (videoRef.current) {
       event.stopPropagation();
       event.preventDefault();
@@ -22,10 +21,10 @@ export default function DropListItemContentMediaVideo({
         videoRef.current.play();
       }
     }
-  };
+  }, []);
 
   return (
-    <div >
+    <div>
       <video
         ref={videoRef}
         controls
@@ -33,10 +32,13 @@ export default function DropListItemContentMediaVideo({
         muted
         loop
         className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-[516px]"
-        onClick={handleVideoClick}>
+        onClick={handleVideoClick}
+      >
         <source src={src} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
   );
 }
+
+export default React.memo(DropListItemContentMediaVideo);

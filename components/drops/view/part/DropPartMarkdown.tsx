@@ -1,4 +1,4 @@
-import { AnchorHTMLAttributes, ClassAttributes, ReactNode } from "react";
+import { AnchorHTMLAttributes, ClassAttributes, memo, ReactNode } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -15,7 +15,7 @@ import Link from "next/link";
 import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 
-interface DropPartMarkdownProps {
+export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;
   readonly partContent: string | null;
@@ -23,7 +23,7 @@ interface DropPartMarkdownProps {
   readonly textSize?: "sm" | "md";
 }
 
-export default function DropPartMarkdown({
+function DropPartMarkdown({
   mentionedUsers,
   referencedNfts,
   partContent,
@@ -322,7 +322,6 @@ export default function DropPartMarkdown({
         a: (params) => aHrefRenderer(params),
         img: (params) => (
           <DropPartMarkdownImage
-            {...params}
             src={params.src ?? ""}
             onImageLoaded={onImageLoaded}
           />
@@ -343,3 +342,5 @@ export default function DropPartMarkdown({
     </Markdown>
   );
 }
+
+export default memo(DropPartMarkdown);
