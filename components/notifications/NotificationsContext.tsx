@@ -10,7 +10,10 @@ import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { useAccount } from "wagmi";
-import { commonApiPost } from "../../services/api/common-api";
+import {
+  commonApiPost,
+  commonApiPostWithoutBodyAndResponse,
+} from "../../services/api/common-api";
 
 type NotificationsContextType = {
   sendLocalNotification: (id: number, title: string, body: string) => void;
@@ -189,7 +192,7 @@ const registerPushNotification = async (
   }
 };
 
-const handlePushNotificationAction = (
+const handlePushNotificationAction = async (
   router: NextRouter,
   notification: PushNotificationSchema,
   profile?: IProfileAndConsolidations
@@ -206,43 +209,69 @@ const handlePushNotificationAction = (
     return;
   }
 
-  if (notificationData.redirect_type) {
-    const redirectUrl = resolveRedirectUrl(
-      notificationData.redirect_type,
-      notificationData.redirect_path
-    );
-
-    if (redirectUrl) {
-      router.push(redirectUrl);
-    }
-  }
+  const notificationId = notificationData.notification_id;
+  await commonApiPostWithoutBodyAndResponse({
+    endpoint: `notifications/${notificationId}/read`,
+  })
+    .catch((error) => {
+      console.error(
+        "Error marking notification as read",
+        notificationId,
+        error
+      );
+    })
+    .finally(() => {
+      const redirectUrl = resolveRedirectUrl(notificationData);
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      }
+    });
 };
 
-const resolveRedirectUrl = (redirectType: string, redirectPath?: string) => {
-  const formatInput = (input?: string) => {
-    if (!input) return "";
-    input = input.startsWith("/") ? input.slice(1) : input;
-    input = input.endsWith("/") ? input.slice(0, -1) : input;
-    return input;
-  };
-  redirectType = formatInput(redirectType);
-  redirectPath = formatInput(redirectPath);
+const resolveRedirectUrl = (notificationData: any) => {
+  if (!notificationData.redirect) {
+    console.error(
+      "No redirect type found in notification data",
+      notificationData
+    );
+    return null;
+  }
 
-  console.log("Cleaned Redirect Type", redirectType);
-  console.log("Cleaned Redirect Path", redirectPath);
-
-  switch (redirectType) {
+  switch (notificationData.redirect) {
     case "path":
+      if (!notificationData.path) {
+        return null;
+      }
+      return `/${notificationData.path}`;
     case "profile":
-      return `/${redirectPath}`;
+      if (!notificationData.profile) {
+        return null;
+      }
+      return `/${notificationData.profile}`;
     case "the-memes":
-      return `/the-memes/${redirectPath}`;
+      if (!notificationData.meme_id) {
+        return null;
+      }
+      return `/the-memes/${notificationData.meme_id}`;
     case "6529-gradient":
-      return `/6529-gradient/${redirectPath}`;
+      if (!notificationData.gradient_id) {
+        return null;
+      }
+      return `/6529-gradient/${notificationData.gradient_id}`;
     case "meme-lab":
-      return `/meme-lab/${redirectPath}`;
+      if (!notificationData.meme_lab_id) {
+        return null;
+      }
+      return `/meme-lab/${notificationData.meme_lab_id}`;
     case "waves":
-      return `/waves/${redirectPath}`;
+      if (!notificationData.wave_id) {
+        return null;
+      }
+      let path = `/waves/${notificationData.wave_id}`;
+      if (notificationData.drop_id) {
+        path += `?drop=${notificationData.drop_id}`;
+      }
+      return path;
     default:
       return null;
   }
