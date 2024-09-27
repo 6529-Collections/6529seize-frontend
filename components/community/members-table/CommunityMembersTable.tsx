@@ -1,6 +1,6 @@
 import { CommunityMemberOverview } from "../../../entities/IProfile";
 import { SortDirection } from "../../../entities/ISort";
-import { CommunityMembersSortOption } from "../../../pages/community";
+import { CommunityMembersSortOption } from "../../../enums";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
 

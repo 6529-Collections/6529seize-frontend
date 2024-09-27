@@ -448,10 +448,10 @@ export default function Home({
                   disableActiveGroup={true}>
                   <span className="d-flex align-items-center gap-3">
                     <h1 className="tw-block tw-whitespace-nowrap tw-float-none tw-pb-0 tw-mb-0">
-                      <span className="font-lightest">Community</span> Activity{" "}
+                      <span className="font-lightest">Network</span> Activity{" "}
                     </h1>
                     <Link
-                      href="/community-activity"
+                      href="/network/activity"
                       className={styles.viewAllLink}>
                       <span>View All</span>
                     </Link>

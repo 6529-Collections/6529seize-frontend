@@ -366,7 +366,7 @@ export type ProfileActivityLog =
   | ProfileActivityLogProxyDropRatingEdit;
 
 export enum RateMatter {
-  CIC = "CIC",
+  NIC = "NIC",
   REP = "REP",
   DROP_REP = "DROP_REP",
 }

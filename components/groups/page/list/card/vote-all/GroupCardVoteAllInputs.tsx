@@ -29,8 +29,8 @@ export default function GroupCardVoteAllInputs({
     [RateMatter.Cic]: (
       <div className="tw-w-full xl:tw-max-w-[17.156rem]">
         <GroupCardActionNumberInput
-          label="CIC"
-          componentId={`${group.id}_cic`}
+          label="NIC"
+          componentId={`${group.id}_nic`}
           amount={amountToAdd}
           creditDirection={creditDirection}
           setCreditDirection={setCreditDirection}

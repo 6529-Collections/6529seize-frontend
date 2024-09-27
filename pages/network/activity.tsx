@@ -2,20 +2,20 @@ import Head from "next/head";
 import {
   getCommonHeaders,
   getUserProfileActivityLogs,
-} from "../helpers/server.helpers";
-import { CountlessPage } from "../helpers/Types";
-import { ProfileActivityLog } from "../entities/IProfile";
+} from "../../helpers/server.helpers";
+import { CountlessPage } from "../../helpers/Types";
+import { ProfileActivityLog } from "../../entities/IProfile";
 import ProfileActivityLogs, {
   ActivityLogParams,
   convertActivityLogParams,
-} from "../components/profile-activity/ProfileActivityLogs";
-import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
+} from "../../components/profile-activity/ProfileActivityLogs";
+import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import { useContext, useEffect } from "react";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
-import { Crumb } from "../components/breadcrumb/Breadcrumb";
-import SidebarLayout from "../components/utils/sidebar/SidebarLayout";
-import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
-import { AuthContext } from "../components/auth/Auth";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
+import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
+import { AuthContext } from "../../components/auth/Auth";
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
@@ -47,7 +47,8 @@ export default function CommunityActivityPage({
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Community Activity" },
+    { display: "Network", href: "/network" },
+    { display: "Activity" },
   ];
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
@@ -63,10 +64,10 @@ export default function CommunityActivityPage({
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Profiles Activity | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/profiles-activity`}
+          content={`${process.env.BASE_ENDPOINT}/network/activity`}
         />
         <meta property="og:title" content="Profiles Activity" />
         <meta
@@ -79,10 +80,9 @@ export default function CommunityActivityPage({
       <SidebarLayout breadcrumbs={breadcrumbs}>
         <ProfileActivityLogs
           initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-          withFilters={true}
-        >
+          withFilters={true}>
           <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
-            <span className="font-lightest">Community</span> Activity
+            <span className="font-lightest">Network</span> Activity
           </h1>
         </ProfileActivityLogs>
       </SidebarLayout>

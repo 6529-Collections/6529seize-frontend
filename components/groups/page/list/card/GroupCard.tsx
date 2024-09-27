@@ -10,7 +10,7 @@ import { RateMatter } from "../../../../../generated/models/RateMatter";
 export enum GroupCardState {
   IDLE = "IDLE",
   REP = "REP",
-  CIC = "CIC",
+  NIC = "NIC",
 }
 
 export enum CreditDirection {
@@ -68,7 +68,7 @@ export default function GroupCard({
   }, [connectedProfile?.profile?.handle]);
 
   const onEditClick = (group: GroupFull) => {
-    router.push(`/groups?edit=${group.id}`);
+    router.push(`/network/groups?edit=${group.id}`);
   };
 
   const components: Record<GroupCardState, JSX.Element> = {
@@ -87,7 +87,7 @@ export default function GroupCard({
         matter={RateMatter.Rep}
       />
     ),
-    [GroupCardState.CIC]: (
+    [GroupCardState.NIC]: (
       <GroupCardVoteAll
         group={group}
         onCancel={onActionCancel}
@@ -98,7 +98,7 @@ export default function GroupCard({
 
   const goToCommunityView = () => {
     if (state !== GroupCardState.IDLE) return;
-    router.push(`/community?page=1&group=${group.id}`);
+    router.push(`/network?page=1&group=${group.id}`);
   };
 
   return (
@@ -106,14 +106,12 @@ export default function GroupCard({
       className={`${
         state === GroupCardState.IDLE && "tw-group tw-cursor-pointer"
       } tw-col-span-1`}
-      onClick={goToCommunityView}
-    >
+      onClick={goToCommunityView}>
       <div
         className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
         style={{
           background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-        }}
-      >
+        }}>
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 group-hover:tw-ring-white/40 tw-ring-inset tw-pointer-events-none tw-transition tw-duration-500 tw-ease-out"></div>
       </div>
       <div
@@ -121,8 +119,7 @@ export default function GroupCard({
           connectedProfile?.profile?.handle
             ? "tw-min-h-[134px]"
             : "tw-h-[123.5px]"
-        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}
-      >
+        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}>
         {components[state]}
       </div>
     </div>
