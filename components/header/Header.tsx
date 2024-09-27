@@ -357,7 +357,7 @@ export default function Header(props: Readonly<Props>) {
                 <Row className="pt-3">
                   <Col>
                     <Link href="/network">
-                      <h3>Network</h3>
+                      <h3>Members</h3>
                     </Link>
                   </Col>
                 </Row>
@@ -884,7 +884,7 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Network",
+                                  name: "Members",
                                   path: "/network",
                                 }}
                               />
