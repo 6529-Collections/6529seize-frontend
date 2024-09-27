@@ -1,33 +1,34 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
+import { Container, Row, Col } from "react-bootstrap";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import { useContext, useEffect } from "react";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { AuthContext } from "../../components/auth/Auth";
-import { useContext, useEffect } from "react";
-
-const PrenodesStatus = dynamic(
-  () => import("../../components/prenodes/PrenodesStatus"),
-  { ssr: false }
-);
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function PrenodesPage() {
+const CommunityStatsComponent = dynamic(
+  () => import("../../components/communityStats/CommunityStats"),
+  { ssr: false }
+);
+
+export default function CommunityStats() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Prenodes | 6529 SEIZE",
+      title: "Stats | Network",
     });
   }, []);
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
-    { display: "Prenodes" },
+    { display: "Network", href: "/network" },
+    { display: "Stats" },
   ];
 
   return (
@@ -35,12 +36,12 @@ export default function PrenodesPage() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Prenodes | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/prenodes`}
+          content={`${process.env.BASE_ENDPOINT}/network/stats`}
         />
-        <meta property="og:title" content="Prenodes" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -48,15 +49,19 @@ export default function PrenodesPage() {
         />
       </Head>
 
-      <main className={styles.main}>
+      <main className={`${styles.main} ${styles.tdhMain}`}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container
-          fluid
-          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}>
+        <Container fluid className={styles.mainContainer}>
           <Row>
             <Col>
-              <PrenodesStatus />
+              <Container className="no-padding">
+                <Row>
+                  <Col>
+                    <CommunityStatsComponent />
+                  </Col>
+                </Row>
+              </Container>
             </Col>
           </Row>
         </Container>

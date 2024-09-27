@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../entities/ISort";
-import { CommunityMembersSortOption } from "../../../pages/community";
 import CommonTableSortIcon from "../../user/utils/icons/CommonTableSortIcon";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
+import { CommunityMembersSortOption } from "../../../enums";
 
 export default function CommunityMembersTableHeaderSortableContent({
   sort,
@@ -26,7 +26,7 @@ export default function CommunityMembersTableHeaderSortableContent({
     [CommunityMembersSortOption.LEVEL]: "Level",
     [CommunityMembersSortOption.TDH]: "TDH",
     [CommunityMembersSortOption.REP]: "REP",
-    [CommunityMembersSortOption.CIC]: "CIC",
+    [CommunityMembersSortOption.NIC]: "NIC",
   };
 
   const [rotate, setRotate] = useState<boolean>(false);
@@ -41,8 +41,7 @@ export default function CommunityMembersTableHeaderSortableContent({
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
-        } tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-transition tw-duration-300 tw-ease-out`}>
         {TITLE[sort]}
       </span>
       {showLoader ? (

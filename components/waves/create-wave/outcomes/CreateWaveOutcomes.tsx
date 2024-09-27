@@ -55,7 +55,7 @@ export default function WavesOutcome({
         waveType={waveType}
       />
     ),
-    [CreateWaveOutcomeType.CIC]: (
+    [CreateWaveOutcomeType.NIC]: (
       <CreateWaveOutcomesCIC
         onOutcome={onOutcome}
         onCancel={onCancel}

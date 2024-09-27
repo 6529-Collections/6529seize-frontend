@@ -418,12 +418,13 @@ export default function Levels() {
   const { setTitle, title } = useContext(AuthContext);
   const [breadcrumbs] = useState<Crumb[]>([
     { display: "Home", href: "/" },
+    { display: "Network", href: "/network" },
     { display: "Levels" },
   ]);
 
   useEffect(() => {
     setTitle({
-      title: "Levels | 6529 SEIZE",
+      title: "Levels | Network",
     });
   }, []);
 
@@ -432,12 +433,12 @@ export default function Levels() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Levels | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/levels`}
+          content={`${process.env.BASE_ENDPOINT}/network/levels`}
         />
-        <meta property="og:title" content="Levels" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"

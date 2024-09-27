@@ -20,11 +20,9 @@ const ACTION: Record<ProfileActivityLogRateType, string> = {
   [ProfileActivityLogRateType.REMOVED]: "reduced",
 };
 
-
-
 const LOG_MATTER_STR: Record<RateMatter, string> = {
   [RateMatter.REP]: "Rep",
-  [RateMatter.CIC]: "CIC",
+  [RateMatter.NIC]: "NIC",
   [RateMatter.DROP_REP]: "Drop Rep",
 };
 
@@ -99,8 +97,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
-        >
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium">
           (Proxy for {proxyHandle})
         </Link>
       )}
@@ -108,13 +105,11 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-base tw-font-medium`}
-      >
+        } tw-text-base tw-font-medium`}>
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-base tw-font-medium`}
-      >
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-base tw-font-medium`}>
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
@@ -136,8 +131,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
-        >
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium">
           (Proxy: {proxyHandle})
         </Link>
       )}
@@ -147,8 +141,7 @@ export default function ProfileActivityLogRate({
           <svg
             className="tw-flex-shrink-0 tw-h-1.5 tw-w-1.5 tw-fill-red"
             viewBox="0 0 6 6"
-            aria-hidden="true"
-          >
+            aria-hidden="true">
             <circle cx="3" cy="3" r="3" />
           </svg>
           <span>System Adjustment</span>

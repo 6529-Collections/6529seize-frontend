@@ -84,9 +84,9 @@ export default function AboutMemes() {
             </a>
           </p>
           <p>
-            The Memes Community:{" "}
-            <a href={`/community`} target="_blank" rel="noreferrer">
-              seize.io/community
+            The Memes Network:{" "}
+            <a href={`/network`} target="_blank" rel="noreferrer">
+              seize.io/network
             </a>
           </p>
           <p>

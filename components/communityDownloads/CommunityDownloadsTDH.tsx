@@ -14,5 +14,5 @@ export default function CommunityDownloadsTDH(props: Readonly<Props>) {
     props.view === VIEW.WALLET ? "uploads" : "consolidated_uploads"
   }`;
   const title = props.view === VIEW.CONSOLIDATION ? `Consolidated ` : ``;
-  return <CommunityDownloadsComponent title={`${title} Community`} url={url} />;
+  return <CommunityDownloadsComponent title={`${title} Network`} url={url} />;
 }

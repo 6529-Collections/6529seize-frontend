@@ -441,7 +441,7 @@ const getRankOutcomes = ({
         }),
       });
     } else if (
-      outcome.type === CreateWaveOutcomeType.CIC &&
+      outcome.type === CreateWaveOutcomeType.NIC &&
       outcome.winnersConfig?.totalAmount
     ) {
       outcomes.push({
@@ -488,7 +488,7 @@ const getApproveOutcomes = ({
         rep_category: outcome.category,
         amount: outcome.credit,
       });
-    } else if (outcome.type === CreateWaveOutcomeType.CIC && outcome.credit) {
+    } else if (outcome.type === CreateWaveOutcomeType.NIC && outcome.credit) {
       outcomes.push({
         type: WaveOutcomeType.Automatic,
         subtype: WaveOutcomeSubType.CreditDistribution,

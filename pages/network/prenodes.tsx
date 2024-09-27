@@ -1,52 +1,47 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
+import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { VIEW } from "../../components/communityDownloads/CommunityDownloadsTDH";
-import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
+import { useContext, useEffect } from "react";
+
+const PrenodesStatus = dynamic(
+  () => import("../../components/prenodes/PrenodesStatus"),
+  { ssr: false }
+);
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-const CommunityDownloadsTDH = dynamic(
-  () => import("../../components/communityDownloads/CommunityDownloadsTDH"),
-  {
-    ssr: false,
-  }
-);
-
-export default function CommunityMetricsDownloads() {
+export default function PrenodesPage() {
   const { setTitle, title } = useContext(AuthContext);
-  const breadcrumbs = [
-    { display: "Home", href: "/" },
-    { display: "Open Data", href: "/open-data" },
-    { display: "Community Metrics" },
-  ];
-
   useEffect(() => {
     setTitle({
-      title: "Community Metrics Downloads | 6529 SEIZE",
+      title: "Prenodes | Network",
     });
   }, []);
+
+  const breadcrumbs: Crumb[] = [
+    { display: "Home", href: "/" },
+    { display: "Network", href: "/network" },
+    { display: "Prenodes" },
+  ];
 
   return (
     <>
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="Community Metrics Downloads | 6529 SEIZE"
-        />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/open-data/community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/network/prenodes`}
         />
-        <meta property="og:title" content={`Community Metrics Downloads`} />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -57,7 +52,15 @@ export default function CommunityMetricsDownloads() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CommunityDownloadsTDH view={VIEW.WALLET} />
+        <Container
+          fluid
+          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}>
+          <Row>
+            <Col>
+              <PrenodesStatus />
+            </Col>
+          </Row>
+        </Container>
       </main>
     </>
   );

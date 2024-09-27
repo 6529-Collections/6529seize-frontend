@@ -17,7 +17,7 @@ export default function UserPageIdentityActivityLog({
         <span>
           <ProfileName type={ProfileNameType.POSSESSION} />
         </span>{" "}
-        CIC Activity Log
+        NIC Activity Log
       </UserTableHeaderWrapper>
       <div className="tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
         <ProfileActivityLogs

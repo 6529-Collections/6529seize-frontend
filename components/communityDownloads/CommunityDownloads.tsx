@@ -16,14 +16,14 @@ export default function CommunityDownloads() {
             </Row>
             <Row className="pt-4">
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/open-data/community-metrics">
-                  <span className={styles.downloadLink}>Community Metrics</span>
+                <a href="/open-data/network-metrics">
+                  <span className={styles.downloadLink}>Network Metrics</span>
                 </a>
               </Col>
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/open-data/consolidated-community-metrics">
+                <a href="/open-data/consolidated-network-metrics">
                   <span className={styles.downloadLink}>
-                    Consolidated Community Metrics
+                    Consolidated Network Metrics
                   </span>
                 </a>
               </Col>

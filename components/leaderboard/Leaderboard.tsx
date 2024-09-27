@@ -14,7 +14,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { MemeSeason } from "../../entities/ISeason";
 import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
 import LeaderboardInteractionsComponent from "./LeaderboardInteractions";
-import {BlocksPage} from "../../generated/models/BlocksPage";
+import { BlocksPage } from "../../generated/models/BlocksPage";
 
 export enum Content {
   ALL = "All",
@@ -52,7 +52,7 @@ export default function Leaderboard(
 
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
 
-  const showViewAll = !window.location.pathname.includes("community");
+  const showViewAll = !window.location.pathname.includes("network");
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
@@ -174,9 +174,9 @@ export default function Leaderboard(
           xs={{ span: showViewAll ? 12 : 6 }}
           sm={{ span: 6 }}>
           <h1>
-            Community{" "}
+            Network{" "}
             {showViewAll && (
-              <a href="/community">
+              <a href="/network/nerd">
                 <span className={styles.viewAllLink}>View All</span>
               </a>
             )}
@@ -199,7 +199,7 @@ export default function Leaderboard(
                 </a>
               </span>
               <span>
-                Community TDH:{" "}
+                Network TDH:{" "}
                 {globalTdhHistory ? (
                   numberWithCommas(globalTdhHistory.total_boosted_tdh)
                 ) : (

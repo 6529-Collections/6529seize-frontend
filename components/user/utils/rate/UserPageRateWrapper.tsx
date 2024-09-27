@@ -11,7 +11,7 @@ import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
 
 const SUB_TITLE: Record<RateMatter, string> = {
-  [RateMatter.CIC]: "CIC rate",
+  [RateMatter.NIC]: "NIC rate",
   [RateMatter.REP]: "give Rep for",
   [RateMatter.DROP_REP]: "give Drop Rep for",
 };
@@ -39,7 +39,7 @@ export default function UserPageRateWrapper({
 
   const getIsProxyAndHaveAllowance = (): boolean => {
     switch (type) {
-      case RateMatter.CIC:
+      case RateMatter.NIC:
         return !!activeProfileProxy?.actions.find(
           (action) => action.action_type === ProfileProxyActionType.AllocateCic
         );

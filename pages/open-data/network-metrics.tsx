@@ -19,17 +19,17 @@ const CommunityDownloadsTDH = dynamic(
   }
 );
 
-export default function ConsolidatedCommunityMetricsDownloads() {
+export default function CommunityMetricsDownloads() {
   const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs = [
     { display: "Home", href: "/" },
     { display: "Open Data", href: "/open-data" },
-    { display: "Consolidated Community Metrics" },
+    { display: "Network Metrics" },
   ];
 
   useEffect(() => {
     setTitle({
-      title: "Consolidated Community Metrics Downloads | 6529 SEIZE",
+      title: "Network Metrics Downloads | 6529 SEIZE",
     });
   }, []);
 
@@ -40,16 +40,13 @@ export default function ConsolidatedCommunityMetricsDownloads() {
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Consolidated Community Metrics Downloads | 6529 SEIZE"
+          content="Network Metrics Downloads | 6529 SEIZE"
         />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/open-data/consolidated-community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/open-data/network-metrics`}
         />
-        <meta
-          property="og:title"
-          content={`Consolidated Community Metrics Downloads`}
-        />
+        <meta property="og:title" content={`Network Metrics Downloads`} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -60,7 +57,7 @@ export default function ConsolidatedCommunityMetricsDownloads() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <CommunityDownloadsTDH view={VIEW.CONSOLIDATION} />
+        <CommunityDownloadsTDH view={VIEW.WALLET} />
       </main>
     </>
   );

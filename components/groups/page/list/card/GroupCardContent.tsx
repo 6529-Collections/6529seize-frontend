@@ -23,8 +23,7 @@ export default function GroupCardContent({
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-justify-between">
         <p
           title={group.name}
-          className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold tw-whitespace-nowrap tw-overflow-hidden tw-text-overflow-ellipsis tw-truncate"
-        >
+          className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold tw-whitespace-nowrap tw-overflow-hidden tw-text-overflow-ellipsis tw-truncate">
           {group.name}
         </p>
         {!!connectedProfile?.profile?.handle && (
@@ -38,22 +37,20 @@ export default function GroupCardContent({
               disabled={haveActiveGroupVoteAll}
               className={`${
                 haveActiveGroupVoteAll ? disabledClasses : nonDisabledClasses
-              } tw-whitespace-nowrap tw-inline-flex tw-items-center tw-bg-iron-800 tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}
-            >
+              } tw-whitespace-nowrap tw-inline-flex tw-items-center tw-bg-iron-800 tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}>
               Rep all
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setState(GroupCardState.CIC);
+                setState(GroupCardState.NIC);
               }}
               type="button"
               disabled={haveActiveGroupVoteAll}
               className={`${
                 haveActiveGroupVoteAll ? disabledClasses : nonDisabledClasses
-              } tw-whitespace-nowrap tw-inline-flex tw-items-center tw-bg-iron-800 tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}
-            >
-              CIC all
+              } tw-whitespace-nowrap tw-inline-flex tw-items-center tw-bg-iron-800 tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}>
+              NIC all
             </button>
           </div>
         )}

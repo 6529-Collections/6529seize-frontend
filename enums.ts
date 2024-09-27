@@ -47,3 +47,11 @@ export enum MemeLabSort {
   VOLUME = "volume",
   HIGHEST_OFFER = "highest-offer",
 }
+
+export enum CommunityMembersSortOption {
+  DISPLAY = "display",
+  LEVEL = "level",
+  TDH = "tdh",
+  REP = "rep",
+  NIC = "nic",
+}

@@ -22,7 +22,7 @@ export default function GroupCardActionStats({
 }) {
   const MATTER_LABEL: Record<RateMatter, string> = {
     [RateMatter.Rep]: "Rep",
-    [RateMatter.Cic]: "CIC",
+    [RateMatter.Cic]: "Nic",
   };
 
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
