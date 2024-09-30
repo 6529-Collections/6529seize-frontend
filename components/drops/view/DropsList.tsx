@@ -1,9 +1,10 @@
-import { useMemo, RefObject } from "react";
+import { useMemo, RefObject, useCallback } from "react";
 import { Drop } from "../../../generated/models/Drop";
 
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import React from "react";
 
 type DropActionHandler = ({
   drop,
@@ -19,8 +20,6 @@ interface DropsListProps {
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly isFetchingNextPage: boolean;
-  readonly isFetchingPreviousPage: boolean;
-
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
   readonly onActiveDropClick?: () => void;
@@ -29,13 +28,14 @@ interface DropsListProps {
   readonly targetDropRef: RefObject<HTMLDivElement>;
 }
 
+const MemoizedWaveDetailedDrop = React.memo(WaveDetailedDrop);
+
 export default function DropsList({
   drops,
   showWaveInfo,
   activeDrop,
   showReplyAndQuote,
   isFetchingNextPage,
-  isFetchingPreviousPage,
   onReply,
   onQuote,
   onActiveDropClick,
@@ -43,6 +43,21 @@ export default function DropsList({
   serialNo,
   targetDropRef,
 }: DropsListProps) {
+  const handleReply = useCallback<DropActionHandler>(
+    ({ drop, partId }) => onReply({ drop, partId }),
+    [onReply]
+  );
+
+  const handleQuote = useCallback<DropActionHandler>(
+    ({ drop, partId }) => onQuote({ drop, partId }),
+    [onQuote]
+  );
+
+  const handleReplyClick = useCallback(
+    (dropSerialNo: number) => onReplyClick(dropSerialNo),
+    [onReplyClick]
+  );
+
   const memoizedDrops = useMemo(
     () =>
       drops.map((drop, i) => (
@@ -52,15 +67,15 @@ export default function DropsList({
           ref={serialNo === drop.serial_no ? targetDropRef : null}
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
         >
-          <WaveDetailedDrop
-            onReplyClick={onReplyClick}
+          <MemoizedWaveDetailedDrop
+            onReplyClick={handleReplyClick}
             drop={drop}
             previousDrop={drops[i - 1] ?? null}
             nextDrop={drops[i + 1] ?? null}
             showWaveInfo={showWaveInfo}
             activeDrop={activeDrop}
-            onReply={onReply}
-            onQuote={onQuote}
+            onReply={handleReply}
+            onQuote={handleQuote}
             showReplyAndQuote={showReplyAndQuote}
             onActiveDropClick={onActiveDropClick}
           />
@@ -70,12 +85,13 @@ export default function DropsList({
       drops,
       showWaveInfo,
       activeDrop,
-      onReply,
-      onQuote,
+      handleReply,
+      handleQuote,
       showReplyAndQuote,
       onActiveDropClick,
       serialNo,
       targetDropRef,
+      handleReplyClick,
     ]
   );
 
@@ -87,11 +103,6 @@ export default function DropsList({
         </div>
       )}
       {memoizedDrops}
-      {isFetchingPreviousPage && (
-        <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-          <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Wave } from "../generated/models/Wave";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
@@ -15,7 +15,8 @@ import {
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
-import { useQueryClient,  QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { getRandomObjectId } from "../helpers/AllowlistToolHelpers";
 
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
@@ -23,7 +24,7 @@ export enum WaveDropsSearchStrategy {
   FIND_BOTH = "FIND_BOTH",
 }
 
-const REQUEST_SIZE = 40;
+const REQUEST_SIZE = 50;
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
 const INACTIVE_POLLING_INTERVAL = 30000;
@@ -41,28 +42,9 @@ function useTabVisibility() {
   return isVisible;
 }
 
-// This function will reset the query for a specific wave and serialNo
-export function resetWaveDropsQuery(
-  queryClient: QueryClient,
-  wave: Wave,
-  serialNo: number | null
-) {
-  const queryKey = [
-    QueryKey.DROPS,
-    {
-      waveId: wave.id,
-      limit: REQUEST_SIZE,
-      dropId: null,
-    },
-  ];
-
-  queryClient.removeQueries({ queryKey });
-}
-
 export function useWaveDrops(
   wave: Wave,
-  connectedProfileHandle: string | undefined,
-  serialNo: number | null
+  connectedProfileHandle: string | undefined
 ) {
   const queryClient = useQueryClient();
 
@@ -86,12 +68,9 @@ export function useWaveDrops(
   const {
     data,
     fetchNextPage,
-    fetchPreviousPage,
     hasNextPage,
-    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
-    isFetchingPreviousPage,
     refetch,
   } = useInfiniteQuery({
     queryKey,
@@ -110,29 +89,20 @@ export function useWaveDrops(
         params.serial_no_limit = `${pageParam.serialNo}`;
         params.search_strategy = `${pageParam.strategy}`;
       }
-      return await commonApiFetch<WaveDropsFeed>({
+
+      const results = await commonApiFetch<WaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,
       });
+
+      return results;
     },
-    initialPageParam: serialNo
-      ? {
-          serialNo: serialNo,
-          strategy: WaveDropsSearchStrategy.FIND_BOTH,
-        }
-      : null,
+    initialPageParam: null,
     getNextPageParam: (lastPage) =>
       lastPage.drops.at(-1)?.serial_no
         ? {
             serialNo: lastPage.drops.at(-1)?.serial_no ?? null,
             strategy: WaveDropsSearchStrategy.FIND_OLDER,
-          }
-        : null,
-    getPreviousPageParam: (firstPage) =>
-      firstPage.drops.at(0)?.serial_no
-        ? {
-            serialNo: firstPage.drops.at(0)?.serial_no ?? null,
-            strategy: WaveDropsSearchStrategy.FIND_NEWER,
           }
         : null,
     placeholderData: keepPreviousData,
@@ -169,10 +139,6 @@ export function useWaveDrops(
     refetchOnReconnect: true,
     refetchIntervalInBackground: true,
   });
-
-
-
-
 
   useEffect(() => {
     if (pollingResult) {
@@ -226,17 +192,20 @@ export function useWaveDrops(
     };
   }, [wave.id, queryClient]);
 
+  const manualFetch = useCallback(async () => {
+    if (hasNextPage) {
+      await fetchNextPage();
+    }
+  }, [hasNextPage, fetchNextPage]);
+
   return {
     drops,
     fetchNextPage,
-    fetchPreviousPage,
     hasNextPage,
-    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
-    isFetchingPreviousPage,
     refetch,
     haveNewDrops,
-    resetQuery: () => resetWaveDropsQuery(queryClient, wave, serialNo),
+    manualFetch,
   };
 }

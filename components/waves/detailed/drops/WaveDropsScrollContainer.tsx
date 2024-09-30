@@ -5,7 +5,6 @@ interface WaveDropsScrollContainerProps {
   readonly children: React.ReactNode;
   readonly onScroll: () => void;
   readonly onTopIntersection: () => void;
-  readonly onBottomIntersection: () => void;
   readonly newItemsCount: number;
 }
 
@@ -20,7 +19,6 @@ export const WaveDropsScrollContainer = forwardRef<
       children,
       onScroll,
       onTopIntersection,
-      onBottomIntersection,
       newItemsCount,
     },
     ref
@@ -28,6 +26,7 @@ export const WaveDropsScrollContainer = forwardRef<
     const contentRef = useRef<HTMLDivElement>(null);
     const [lastScrollTop, setLastScrollTop] = useState(0);
 
+    // todo make it only up scroll
     useEffect(() => {
       if (contentRef.current  && ref && "current" in ref) {
         const scrollContainer = ref.current;
@@ -71,9 +70,7 @@ export const WaveDropsScrollContainer = forwardRef<
       if (outOfViewCount <= MIN_OUT_OF_VIEW_COUNT) {
         if (direction === "up") {
           onTopIntersection();
-        } else if (direction === "down") {
-          onBottomIntersection();
-        }
+        } 
       }
     };
 

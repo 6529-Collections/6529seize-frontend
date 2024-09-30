@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -8,6 +15,11 @@ import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import { useWaveDrops } from "../../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveDropsProps {
   readonly wave: Wave;
@@ -18,6 +30,7 @@ interface WaveDropsProps {
   readonly initialDrop: number | null;
 }
 
+
 export default function WaveDrops({
   wave,
   onReply,
@@ -27,32 +40,29 @@ export default function WaveDrops({
   initialDrop,
 }: WaveDropsProps) {
   const { connectedProfile, setTitle } = useContext(AuthContext);
-  const [scrollBehavior, setScrollBehavior] = useState<ScrollBehavior>(
-    initialDrop ? "auto" : "smooth"
-  );
+
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   const {
     drops,
     fetchNextPage,
-    fetchPreviousPage,
     hasNextPage,
-    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
-    isFetchingPreviousPage,
     haveNewDrops,
-    resetQuery,
-  } = useWaveDrops(wave, connectedProfile?.profile?.handle, serialNo);
+  } = useWaveDrops(wave, connectedProfile?.profile?.handle);
 
   const {
     scrollContainerRef,
     isAtBottom,
     shouldScrollDownAfterNewPosts,
     scrollToBottom,
+    scrollToTop,
     handleScroll,
   } = useScrollBehavior();
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
+
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
@@ -90,37 +100,68 @@ export default function WaveDrops({
     };
   }, [haveNewDrops]);
 
+  const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
   useEffect(() => {
-    if (init) {
-      return;
+    if (drops.length > 0) {
+      setInit(true);
+      const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
+      smallestSerialNo.current = minSerialNo;
+    } else {
+      smallestSerialNo.current = null;
     }
-    setInit(true);
-    if (serialNo) {
-      return;
-    }
-    scrollToBottom();
-    const timeoutId = setTimeout(() => handleScroll(), 100);
-    return () => clearTimeout(timeoutId);
-  }, [scrollToBottom, handleScroll, serialNo, init]);
+  }, [drops]);
+
+  const fetchAndScrollToDrop = useCallback(async () => {
+    if (!serialNo) return;
+    let found = false;
+    setIsScrolling(true);
+
+    const checkAndFetchNext = async () => {
+      if (found || !hasNextPage || isFetching || isFetchingNextPage) {
+        setIsScrolling(false);
+        return;
+      }
+      await fetchNextPage();
+
+      if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
+        found = true;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setIsScrolling(false);
+        scrollToSerialNo("smooth");
+
+        setSerialNo(null);
+      } else {
+        scrollToTop();
+        setTimeout(checkAndFetchNext, 1000);
+      }
+    };
+
+    checkAndFetchNext();
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    scrollToSerialNo,
+    serialNo,
+    setSerialNo,
+    scrollToTop,
+  ]);
 
   useEffect(() => {
-    console.log(drops.length);
-    if (drops.length > 0 && serialNo) {
-      const timeoutId = setTimeout(() => {
-        const success = scrollToSerialNo(scrollBehavior);
-        if (success) {
-          setSerialNo(null);
-          setScrollBehavior("smooth");
-        } else {
-          setScrollBehavior("auto");
-          resetQuery();
-        }
-      }, 100);
-      return () => clearTimeout(timeoutId);
+    if (init && serialNo) {
+      const success = scrollToSerialNo("smooth");
+      if (success) {
+        setSerialNo(null);
+      } else {
+        fetchAndScrollToDrop();
+      }
     }
-  }, [drops, serialNo, scrollToSerialNo]);
+  }, [init, serialNo]);
+
+
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
@@ -130,14 +171,7 @@ export default function WaveDrops({
         newItemsCount={newItemsCount}
         onTopIntersection={() => {
           if (hasNextPage && !isFetching && !isFetchingNextPage) {
-            console.log("fetching next page - scrolling up");
             fetchNextPage();
-          }
-        }}
-        onBottomIntersection={() => {
-          if (hasPreviousPage && !isFetching && !isFetchingPreviousPage) {
-            console.log("fetching previous page - scrolling down");
-            fetchPreviousPage();
           }
         }}
       >
@@ -148,7 +182,6 @@ export default function WaveDrops({
             drops={drops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
-            isFetchingPreviousPage={isFetchingPreviousPage}
             onReply={onReply}
             onQuote={onQuote}
             showReplyAndQuote={true}
@@ -163,6 +196,17 @@ export default function WaveDrops({
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
       />
+
+      {isScrolling && (
+        <>
+          <div className="tw-absolute tw-inset-0 tw-bg-iron-900 tw-bg-opacity-50 tw-z-10" />
+          <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-z-20">
+            <div className="tw-bg-iron-800 tw-rounded-full tw-p-4">
+              <CircleLoader size={CircleLoaderSize.XXLARGE} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

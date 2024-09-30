@@ -48,7 +48,7 @@ export const addDropToDrops = (
   { drop }: { readonly drop: Drop }
 ): void => {
   const baseQueryParams: Omit<DropsQueryParams, "dropId"> = {
-    limit: 40,
+    limit: 50,
     waveId: drop.wave.id,
   };
   updateDropsQuery(queryClient, { ...baseQueryParams, dropId: null }, drop);

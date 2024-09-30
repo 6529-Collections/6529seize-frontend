@@ -87,13 +87,13 @@ const WaveDetailedFollowingWaves: React.FC = () => {
         QueryKey.DROPS,
         {
           waveId: waveId,
-          limit: 40,
+          limit: 50,
           dropId: null,
         },
       ],
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
-          limit: "40",
+          limit: "50",
         };
 
         if (pageParam) {
