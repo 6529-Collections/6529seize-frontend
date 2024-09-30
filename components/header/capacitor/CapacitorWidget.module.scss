@@ -16,6 +16,7 @@
 .capacitorWidgetPortrait {
   padding-left: 35px;
   padding-right: 35px;
+  padding-bottom: max(50px, env(safe-area-inset-bottom));
   height: 75px;
 }
 
