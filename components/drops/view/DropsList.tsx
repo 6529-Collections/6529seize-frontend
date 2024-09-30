@@ -25,7 +25,7 @@ interface DropsListProps {
   readonly onActiveDropClick?: () => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly serialNo: number | null;
-  readonly targetDropRef: RefObject<HTMLDivElement>;
+  readonly targetDropRef: RefObject<HTMLDivElement> | null;
 }
 
 const MemoizedWaveDetailedDrop = React.memo(WaveDetailedDrop);

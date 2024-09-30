@@ -91,6 +91,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
                 }}
                 showWaveInfo={false}
                 activeDrop={null}
+                onReplyClick={() => {}}
                 showReplyAndQuote={false}
                 onReply={() => {}}
                 onQuote={() => {}}

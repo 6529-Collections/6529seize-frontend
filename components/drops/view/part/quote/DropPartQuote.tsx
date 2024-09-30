@@ -16,7 +16,7 @@ export default function DropPartQuote({
 }: {
   readonly quotedDrop: QuotedDrop;
   readonly marginLeft?: boolean;
-  readonly onRedropClick?: (redropId: string) => void;
+  readonly onRedropClick?: (serialNo: number) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
@@ -95,7 +95,7 @@ export default function DropPartQuote({
         }}
         size={DropPartSize.SMALL}
         onContentClick={() =>
-          onRedropClick && onRedropClick(quotedDrop.drop_id)
+          onRedropClick && onRedropClick(drop.serial_no)
         }
       />
     </div>

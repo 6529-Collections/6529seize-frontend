@@ -93,7 +93,7 @@ export default function WaveDetailedDrop({
     };
 
     images.forEach(img => {
-      if (img.complete) {
+      if ((img as HTMLImageElement).complete) {
         onImageLoad();
       } else {
         img.addEventListener('load', onImageLoad);

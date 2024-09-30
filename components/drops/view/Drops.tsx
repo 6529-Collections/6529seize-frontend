@@ -57,13 +57,11 @@ export default function Drops() {
   useEffect(
     () =>
       setDrops(
-        data?.pages
-          .flat()
-          .map((drop) => ({
-            ...drop,
-            stableKey: drop.id,
-            stableHash: drop.id,
-          })) ?? []
+        data?.pages.flat().map((drop) => ({
+          ...drop,
+          stableKey: drop.id,
+          stableHash: drop.id,
+        })) ?? []
       ),
     [data]
   );
@@ -105,10 +103,12 @@ export default function Drops() {
       <DropsList
         drops={drops}
         showWaveInfo={true}
-        onIntersection={onBottomIntersection}
         onReply={() => {}}
         onQuote={() => {}}
-        showReplyAndQuote={true}
+        onReplyClick={() => {}}
+        serialNo={null}
+        targetDropRef={null}
+        showReplyAndQuote={false}
         activeDrop={null}
         isFetchingNextPage={isFetchingNextPage}
       />
