@@ -243,7 +243,7 @@ const resolveRedirectUrl = (notificationData: any) => {
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
-    console.error(
+    console.log(
       "No redirect type found in notification data",
       notificationData
     );
