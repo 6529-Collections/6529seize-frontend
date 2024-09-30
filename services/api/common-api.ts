@@ -26,10 +26,8 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     const queryParams = new URLSearchParams();
     // Override NIC with CIC
     Object.entries(param.params).forEach(([key, value]: [string, any]) => {
-      if (value === "nic") {
-        value = "cic";
-      }
-      queryParams.set(key, value);
+      const newValue = value === "nic" ? "cic" : value;
+      queryParams.set(key, newValue);
     });
     url += `?${queryParams.toString()}`;
   }
