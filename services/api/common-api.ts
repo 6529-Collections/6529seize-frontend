@@ -23,7 +23,12 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
 }): Promise<T> => {
   let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
   if (param.params) {
-    const queryParams = new URLSearchParams(param.params);
+    const queryParams = new URLSearchParams();
+    // Override NIC with CIC
+    Object.entries(param.params).forEach(([key, value]: [string, any]) => {
+      const newValue = value === "nic" ? "cic" : value;
+      queryParams.set(key, newValue);
+    });
     url += `?${queryParams.toString()}`;
   }
   const res = await fetch(url, {
