@@ -5,15 +5,13 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import GroupItem from "./item/GroupItem";
 import { CommunityMemberOverview } from "../../../entities/IProfile";
 import { Page } from "../../../helpers/Types";
-import {
-  CommunityMembersQuery,
-  CommunityMembersSortOption,
-} from "../../../pages/community";
+import { CommunityMembersQuery } from "../../../pages/network/index";
 import { SortDirection } from "../../../entities/ISort";
 import { useEffect, useState } from "react";
 import { GroupFull } from "../../../generated/models/GroupFull";
 import { useDispatch } from "react-redux";
 import { setActiveGroupId } from "../../../store/groupSlice";
+import { CommunityMembersSortOption } from "../../../enums";
 
 export default function GroupsSelectActiveGroup({
   activeGroupId,
@@ -89,8 +87,7 @@ export default function GroupsSelectActiveGroup({
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-200"
-          >
+            className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-200">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

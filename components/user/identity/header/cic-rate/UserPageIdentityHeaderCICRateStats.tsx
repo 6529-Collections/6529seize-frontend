@@ -56,8 +56,7 @@ export default function UserPageIdentityHeaderCICRateStats({
     <div
       className={`${
         isTooltip ? "tw-text-sm" : "tw-text-base"
-      } tw-flex tw-flex-col tw-space-y-1`}
-    >
+      } tw-flex tw-flex-col tw-space-y-1`}>
       {!!activeProfileProxy && (
         <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>You are acting as proxy for:</span>
@@ -69,7 +68,7 @@ export default function UserPageIdentityHeaderCICRateStats({
         </span>
       )}
       <span className="tw-block tw-text-iron-300 tw-font-normal">
-        <span>Your available CIC:</span>
+        <span>Your available NIC:</span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
           {formatNumberWithCommas(availableCredit)}
         </span>
@@ -77,13 +76,13 @@ export default function UserPageIdentityHeaderCICRateStats({
       {activeProfileProxy ? (
         <>
           <span className="tw-block tw-text-iron-300 tw-font-normal">
-            <span>Your max CIC Rating to {profile.profile?.handle}:</span>
+            <span>Your max NIC Rating to {profile.profile?.handle}:</span>
             <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
               {formatNumberWithCommas(minMaxValues.max)}
             </span>
           </span>
           <span className="tw-block tw-text-iron-300 tw-font-normal">
-            <span>Your min CIC Rating to {profile.profile?.handle}:</span>
+            <span>Your min NIC Rating to {profile.profile?.handle}:</span>
             <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
               {formatNumberWithCommas(minMaxValues.min)}
             </span>
@@ -91,7 +90,7 @@ export default function UserPageIdentityHeaderCICRateStats({
         </>
       ) : (
         <span className="tw-block tw-text-iron-300 tw-font-normal tw-break-all">
-          <span>Your max/min CIC Rating to {profile.profile?.handle}:</span>
+          <span>Your max/min NIC Rating to {profile.profile?.handle}:</span>
           <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/- {formatNumberWithCommas(minMaxValues.max)}
           </span>

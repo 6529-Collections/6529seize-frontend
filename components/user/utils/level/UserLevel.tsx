@@ -29,14 +29,13 @@ export default function UserLevel({
 
   const classes = `${getColorClasses()} ${getSizeClasses()}`;
   const openLevelsPage = () => {
-    window.open("/levels", "_blank");
+    window.open("/network/levels", "_blank");
   };
 
   return (
     <button
       onClick={openLevelsPage}
-      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}
-    >
+      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}>
       Level {level}
     </button>
   );

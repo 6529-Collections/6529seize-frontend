@@ -69,7 +69,7 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Community</span>
+            <span className="font-lightest">Network</span>
           </h1>
           <h1>&nbsp;Card {props.nftId}</h1>
         </Col>

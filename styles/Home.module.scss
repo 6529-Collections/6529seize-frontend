@@ -165,9 +165,8 @@
 }
 
 .communityMetricsTable {
-  max-width: 750px;
-}
-
-.communityMetricsTable > :not(caption) > * > * {
-  padding: 0.5rem !important;
+  tr td {
+    max-width: fit-content;
+    padding: 0.5rem !important;
+  }
 }

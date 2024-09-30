@@ -123,7 +123,7 @@ export default function UserPageStatsBoostBreakdown({
         </h3>
         <span>
           <a
-            href="/community-metrics#tdh-1.3"
+            href="/network/metrics#tdh-1.3"
             className="decoration-hover-underline tw-text-sm">
             TDH Version: 1.3
           </a>

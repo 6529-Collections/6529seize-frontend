@@ -76,7 +76,7 @@ export interface CreateWaveApprovalConfig {
 export enum CreateWaveOutcomeType {
   MANUAL = "MANUAL",
   REP = "REP",
-  CIC = "CIC",
+  NIC = "NIC",
 }
 
 export enum CreateWaveOutcomeConfigWinnersCreditValueType {

@@ -1,13 +1,13 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.scss";
+import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import Breadcrumb from "../components/breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
+import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../components/header/Header"), {
+const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
@@ -16,13 +16,14 @@ export default function CommunityMetrics() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Community Metrics | 6529 SEIZE",
+      title: "Metrics | Network",
     });
   }, []);
 
   const breadcrumbs = [
     { display: "Home", href: "/" },
-    { display: "Community Metrics" },
+    { display: "Network", href: "/network" },
+    { display: "Network Metrics" },
   ];
 
   return (
@@ -30,12 +31,12 @@ export default function CommunityMetrics() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Community Metrics | 6529 SEIZE" />
+        <meta name="description" content="6529 SEIZE" />
         <meta
           property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/community-metrics`}
+          content={`${process.env.BASE_ENDPOINT}/network/metrics`}
         />
-        <meta property="og:title" content="Community Metrics" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content="6529 SEIZE" />
         <meta
           property="og:image"
@@ -53,7 +54,7 @@ export default function CommunityMetrics() {
                 <Row>
                   <Col>
                     <h1>
-                      <span className="font-lightest">Community</span> Metrics
+                      <span className="font-lightest">Network</span> Metrics
                     </h1>
                   </Col>
                 </Row>
@@ -357,9 +358,11 @@ export default function CommunityMetrics() {
                       </a>
                     </h5>
                     <br />
-                    &#40;1&#41;
                     <table className={styles.communityMetricsTable}>
                       <tbody>
+                        <tr>
+                          <th colSpan={2}>&#40;1&#41;</th>
+                        </tr>
                         <tr>
                           <td>A complete set of Meme Cards</td>
                           <td>1.20x</td>
@@ -380,14 +383,14 @@ export default function CommunityMetrics() {
                           <td>with a max of 1.30x</td>
                           <td></td>
                         </tr>
-                      </tbody>
-                    </table>
-                    <p>
-                      <b>or</b>
-                    </p>
-                    &#40;2&#41;
-                    <table className={styles.communityMetricsTable}>
-                      <tbody>
+                        <tr>
+                          <th colSpan={2}>
+                            <b>or</b>
+                          </th>
+                        </tr>
+                        <tr>
+                          <th colSpan={2}>&#40;2&#41;</th>
+                        </tr>
                         <tr>
                           <td>A complete set of Meme Cards - 1</td>
                           <td>1.05x</td>
@@ -414,14 +417,14 @@ export default function CommunityMetrics() {
                           </td>
                           <td>1.02x</td>
                         </tr>
-                      </tbody>
-                    </table>
-                    <p>
-                      <b>or</b>
-                    </p>
-                    &#40;3&#41;
-                    <table className={styles.communityMetricsTable}>
-                      <tbody>
+                        <tr>
+                          <th colSpan={2}>
+                            <b>or</b>
+                          </th>
+                        </tr>
+                        <tr>
+                          <th colSpan={2}>&#40;3&#41;</th>
+                        </tr>
                         <tr>
                           <td>
                             A complete set of genesis cards (cards 1 to 3):
@@ -430,434 +433,10 @@ export default function CommunityMetrics() {
                         </tr>
                       </tbody>
                     </table>
-                    <p>
+                    <p className="pt-3">
                       Each address uses the highest value that it is eligible
                       for from #1, #2 or #3
                     </p>
-                    <br />
-                    <p id="levels">
-                      <a href="#levels">
-                        <b>Levels:</b>
-                      </a>{" "}
-                      TDH and rep are added together and the level is determined
-                      by the table below. It is our most integrated measure of
-                      trust in our ecosystem. Rep is not live yet so for this
-                      initial release, levels are determined solely by TDH.
-                    </p>
-                    <table className={styles.communityMetricsTable}>
-                      <thead>
-                        <tr>
-                          <th>TDH</th>
-                          <th>Level</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>0</td>
-                          <td>0</td>
-                        </tr>
-                        <tr>
-                          <td>25</td>
-                          <td>1</td>
-                        </tr>
-                        <tr>
-                          <td>50</td>
-                          <td>2</td>
-                        </tr>
-                        <tr>
-                          <td>100</td>
-                          <td>3</td>
-                        </tr>
-                        <tr>
-                          <td>250</td>
-                          <td>4</td>
-                        </tr>
-                        <tr>
-                          <td>500</td>
-                          <td>5</td>
-                        </tr>
-                        <tr>
-                          <td>1000</td>
-                          <td>6</td>
-                        </tr>
-                        <tr>
-                          <td>1500</td>
-                          <td>7</td>
-                        </tr>
-                        <tr>
-                          <td>3000</td>
-                          <td>8</td>
-                        </tr>
-                        <tr>
-                          <td>5000</td>
-                          <td>9</td>
-                        </tr>
-                        <tr>
-                          <td>7500</td>
-                          <td>10</td>
-                        </tr>
-                        <tr>
-                          <td>10000</td>
-                          <td>11</td>
-                        </tr>
-                        <tr>
-                          <td>15000</td>
-                          <td>12</td>
-                        </tr>
-                        <tr>
-                          <td>20000</td>
-                          <td>13</td>
-                        </tr>
-                        <tr>
-                          <td>25000</td>
-                          <td>14</td>
-                        </tr>
-                        <tr>
-                          <td>30000</td>
-                          <td>15</td>
-                        </tr>
-                        <tr>
-                          <td>35000</td>
-                          <td>16</td>
-                        </tr>
-                        <tr>
-                          <td>40000</td>
-                          <td>17</td>
-                        </tr>
-                        <tr>
-                          <td>45000</td>
-                          <td>18</td>
-                        </tr>
-                        <tr>
-                          <td>50000</td>
-                          <td>19</td>
-                        </tr>
-                        <tr>
-                          <td>60000</td>
-                          <td>20</td>
-                        </tr>
-                        <tr>
-                          <td>70000</td>
-                          <td>21</td>
-                        </tr>
-                        <tr>
-                          <td>80000</td>
-                          <td>22</td>
-                        </tr>
-                        <tr>
-                          <td>90000</td>
-                          <td>23</td>
-                        </tr>
-                        <tr>
-                          <td>100000</td>
-                          <td>24</td>
-                        </tr>
-                        <tr>
-                          <td>110000</td>
-                          <td>25</td>
-                        </tr>
-                        <tr>
-                          <td>120000</td>
-                          <td>26</td>
-                        </tr>
-                        <tr>
-                          <td>130000</td>
-                          <td>27</td>
-                        </tr>
-                        <tr>
-                          <td>140000</td>
-                          <td>28</td>
-                        </tr>
-                        <tr>
-                          <td>150000</td>
-                          <td>29</td>
-                        </tr>
-                        <tr>
-                          <td>160000</td>
-                          <td>30</td>
-                        </tr>
-                        <tr>
-                          <td>170000</td>
-                          <td>31</td>
-                        </tr>
-                        <tr>
-                          <td>180000</td>
-                          <td>32</td>
-                        </tr>
-                        <tr>
-                          <td>190000</td>
-                          <td>33</td>
-                        </tr>
-                        <tr>
-                          <td>200000</td>
-                          <td>34</td>
-                        </tr>
-                        <tr>
-                          <td>220000</td>
-                          <td>35</td>
-                        </tr>
-                        <tr>
-                          <td>240000</td>
-                          <td>36</td>
-                        </tr>
-                        <tr>
-                          <td>260000</td>
-                          <td>37</td>
-                        </tr>
-                        <tr>
-                          <td>280000</td>
-                          <td>38</td>
-                        </tr>
-                        <tr>
-                          <td>300000</td>
-                          <td>39</td>
-                        </tr>
-                        <tr>
-                          <td>320000</td>
-                          <td>40</td>
-                        </tr>
-                        <tr>
-                          <td>340000</td>
-                          <td>41</td>
-                        </tr>
-                        <tr>
-                          <td>360000</td>
-                          <td>42</td>
-                        </tr>
-                        <tr>
-                          <td>380000</td>
-                          <td>43</td>
-                        </tr>
-                        <tr>
-                          <td>400000</td>
-                          <td>44</td>
-                        </tr>
-                        <tr>
-                          <td>420000</td>
-                          <td>45</td>
-                        </tr>
-                        <tr>
-                          <td>440000</td>
-                          <td>46</td>
-                        </tr>
-                        <tr>
-                          <td>460000</td>
-                          <td>47</td>
-                        </tr>
-                        <tr>
-                          <td>480000</td>
-                          <td>48</td>
-                        </tr>
-                        <tr>
-                          <td>500000</td>
-                          <td>49</td>
-                        </tr>
-                        <tr>
-                          <td>550000</td>
-                          <td>50</td>
-                        </tr>
-                        <tr>
-                          <td>600000</td>
-                          <td>51</td>
-                        </tr>
-                        <tr>
-                          <td>650000</td>
-                          <td>52</td>
-                        </tr>
-                        <tr>
-                          <td>700000</td>
-                          <td>53</td>
-                        </tr>
-                        <tr>
-                          <td>750000</td>
-                          <td>54</td>
-                        </tr>
-                        <tr>
-                          <td>800000</td>
-                          <td>55</td>
-                        </tr>
-                        <tr>
-                          <td>850000</td>
-                          <td>56</td>
-                        </tr>
-                        <tr>
-                          <td>900000</td>
-                          <td>57</td>
-                        </tr>
-                        <tr>
-                          <td>950000</td>
-                          <td>58</td>
-                        </tr>
-                        <tr>
-                          <td>1000000</td>
-                          <td>59</td>
-                        </tr>
-                        <tr>
-                          <td>1250000</td>
-                          <td>60</td>
-                        </tr>
-                        <tr>
-                          <td>1500000</td>
-                          <td>61</td>
-                        </tr>
-                        <tr>
-                          <td>1750000</td>
-                          <td>62</td>
-                        </tr>
-                        <tr>
-                          <td>2000000</td>
-                          <td>63</td>
-                        </tr>
-                        <tr>
-                          <td>2250000</td>
-                          <td>64</td>
-                        </tr>
-                        <tr>
-                          <td>2500000</td>
-                          <td>65</td>
-                        </tr>
-                        <tr>
-                          <td>2750000</td>
-                          <td>66</td>
-                        </tr>
-                        <tr>
-                          <td>3000000</td>
-                          <td>67</td>
-                        </tr>
-                        <tr>
-                          <td>3250000</td>
-                          <td>68</td>
-                        </tr>
-                        <tr>
-                          <td>3500000</td>
-                          <td>69</td>
-                        </tr>
-                        <tr>
-                          <td>3750000</td>
-                          <td>70</td>
-                        </tr>
-                        <tr>
-                          <td>4000000</td>
-                          <td>71</td>
-                        </tr>
-                        <tr>
-                          <td>4250000</td>
-                          <td>72</td>
-                        </tr>
-                        <tr>
-                          <td>4500000</td>
-                          <td>73</td>
-                        </tr>
-                        <tr>
-                          <td>4750000</td>
-                          <td>74</td>
-                        </tr>
-                        <tr>
-                          <td>5000000</td>
-                          <td>75</td>
-                        </tr>
-                        <tr>
-                          <td>5500000</td>
-                          <td>76</td>
-                        </tr>
-                        <tr>
-                          <td>6000000</td>
-                          <td>77</td>
-                        </tr>
-                        <tr>
-                          <td>6500000</td>
-                          <td>78</td>
-                        </tr>
-                        <tr>
-                          <td>7000000</td>
-                          <td>79</td>
-                        </tr>
-                        <tr>
-                          <td>7500000</td>
-                          <td>80</td>
-                        </tr>
-                        <tr>
-                          <td>8000000</td>
-                          <td>81</td>
-                        </tr>
-                        <tr>
-                          <td>8500000</td>
-                          <td>82</td>
-                        </tr>
-                        <tr>
-                          <td>9000000</td>
-                          <td>83</td>
-                        </tr>
-                        <tr>
-                          <td>9500000</td>
-                          <td>84</td>
-                        </tr>
-                        <tr>
-                          <td>10000000</td>
-                          <td>85</td>
-                        </tr>
-                        <tr>
-                          <td>11000000</td>
-                          <td>86</td>
-                        </tr>
-                        <tr>
-                          <td>12000000</td>
-                          <td>87</td>
-                        </tr>
-                        <tr>
-                          <td>13000000</td>
-                          <td>88</td>
-                        </tr>
-                        <tr>
-                          <td>14000000</td>
-                          <td>89</td>
-                        </tr>
-                        <tr>
-                          <td>15000000</td>
-                          <td>90</td>
-                        </tr>
-                        <tr>
-                          <td>16000000</td>
-                          <td>91</td>
-                        </tr>
-                        <tr>
-                          <td>17000000</td>
-                          <td>92</td>
-                        </tr>
-                        <tr>
-                          <td>18000000</td>
-                          <td>93</td>
-                        </tr>
-                        <tr>
-                          <td>19000000</td>
-                          <td>94</td>
-                        </tr>
-                        <tr>
-                          <td>20000000</td>
-                          <td>95</td>
-                        </tr>
-                        <tr>
-                          <td>21000000</td>
-                          <td>96</td>
-                        </tr>
-                        <tr>
-                          <td>22000000</td>
-                          <td>97</td>
-                        </tr>
-                        <tr>
-                          <td>23000000</td>
-                          <td>98</td>
-                        </tr>
-                        <tr>
-                          <td>24000000</td>
-                          <td>99</td>
-                        </tr>
-                        <tr>
-                          <td>25000000</td>
-                          <td>100</td>
-                        </tr>
-                      </tbody>
-                    </table>
                   </Col>
                 </Row>
               </Container>

@@ -539,9 +539,9 @@ export default function AboutMinting() {
             </li>
             <br />
             <li>
-              For our full analysis of our Community Metrics, go here:{" "}
-              <a href="/community-metrics" target="_blank" rel="noreferrer">
-                seize.io/community-metrics
+              For our full analysis of our Network Metrics, go here:{" "}
+              <a href="/network/metrics" target="_blank" rel="noreferrer">
+                seize.io/network/metrics
               </a>
             </li>
           </ul>

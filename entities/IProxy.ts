@@ -46,7 +46,7 @@ export const PROFILE_PROXY_ACTION_LABELS: Record<
   string
 > = {
   [ProfileProxyActionType.AllocateRep]: "Allocate Rep",
-  [ProfileProxyActionType.AllocateCic]: "Allocate CIC",
+  [ProfileProxyActionType.AllocateCic]: "Allocate NIC",
   [ProfileProxyActionType.CreateWave]: "Create Wave",
   [ProfileProxyActionType.ReadWave]: "Read Wave",
   [ProfileProxyActionType.CreateDropToWave]: "Create Drop To Wave",

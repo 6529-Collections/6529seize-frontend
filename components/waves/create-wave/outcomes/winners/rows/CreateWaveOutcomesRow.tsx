@@ -31,7 +31,7 @@ export default function CreateWaveOutcomesRow({
         removeOutcome={removeOutcome}
       />
     ),
-    [CreateWaveOutcomeType.CIC]: (
+    [CreateWaveOutcomeType.NIC]: (
       <CreateWaveOutcomesRowCIC
         waveType={waveType}
         outcome={outcome}

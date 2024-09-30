@@ -59,7 +59,7 @@ export default function UserPageGroups({
     if (!success) {
       return;
     }
-    router.push("/groups?edit=new");
+    router.push("/network/groups?edit=new");
   };
 
   return (

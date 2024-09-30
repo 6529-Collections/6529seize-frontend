@@ -11,7 +11,7 @@ export default function CreateWaveOutcomeTypes({
   const LABELS: Record<CreateWaveOutcomeType, string> = {
     [CreateWaveOutcomeType.MANUAL]: "Manual",
     [CreateWaveOutcomeType.REP]: "Rep",
-    [CreateWaveOutcomeType.CIC]: "CIC",
+    [CreateWaveOutcomeType.NIC]: "NIC",
   };
   return (
     <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">

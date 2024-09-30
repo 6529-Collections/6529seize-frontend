@@ -27,7 +27,7 @@ export default function UserProfileTooltip({
       </div>
       <div>Level: {formatNumberWithCommasOrDash(profile?.level ?? 0)}</div>
       <div>
-        CIC: {formatNumberWithCommasOrDash(profile?.cic?.cic_rating ?? 0)}
+        NIC: {formatNumberWithCommasOrDash(profile?.cic?.cic_rating ?? 0)}
       </div>
       <div>REP: {formatNumberWithCommasOrDash(profile?.rep ?? 0)}</div>
       <div>Balance: {formatNumberWithCommasOrDash(profile?.balance ?? 0)}</div>

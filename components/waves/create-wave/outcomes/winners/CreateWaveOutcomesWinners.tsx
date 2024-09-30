@@ -27,7 +27,7 @@ export default function CreateWaveOutcomesWinners({
   const OUTCOME_TYPE_LABELS: Record<CreateWaveOutcomeType, string> = {
     [CreateWaveOutcomeType.MANUAL]: "Manual",
     [CreateWaveOutcomeType.REP]: "Rep",
-    [CreateWaveOutcomeType.CIC]: "CIC",
+    [CreateWaveOutcomeType.NIC]: "NIC",
   };
   const onCreditType = (
     creditType: CreateWaveOutcomeConfigWinnersCreditValueType
@@ -95,8 +95,7 @@ export default function CreateWaveOutcomesWinners({
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
               stroke="currentColor"
@@ -117,8 +116,7 @@ export default function CreateWaveOutcomesWinners({
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
               stroke="currentColor"
@@ -155,8 +153,7 @@ tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-rin
                     ? "peer-focus:tw-text-error tw-text-error"
                     : "peer-focus:tw-text-primary-400 tw-text-iron-500"
                 } tw-absolute tw-cursor-text tw-text-base tw-font-normal tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 
-           peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
-              >
+           peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}>
                 Total Amount
               </label>
               <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">

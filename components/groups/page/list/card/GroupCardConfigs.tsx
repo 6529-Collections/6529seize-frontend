@@ -100,7 +100,7 @@ export default function GroupCardConfigs({
     }
 
     return {
-      key: GroupDescriptionType.CIC,
+      key: GroupDescriptionType.NIC,
       value: parts.join(", "),
     };
   };
@@ -132,7 +132,8 @@ export default function GroupCardConfigs({
 
   const getConfigs = (): GroupCardConfigProps[] => {
     const configs: GroupCardConfigProps[] = [];
-    const { tdh, rep, cic, level, identity_group_identities_count } = group.group;
+    const { tdh, rep, cic, level, identity_group_identities_count } =
+      group.group;
     const tdhConfig = getTdhConfig(tdh);
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);
@@ -196,15 +197,13 @@ export default function GroupCardConfigs({
               e.stopPropagation();
               scrollContainer("left");
             }}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out"
-          >
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out">
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -218,8 +217,7 @@ export default function GroupCardConfigs({
         <div
           className="tw-flex tw-items-center tw-gap-x-3 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
           ref={containerRef}
-          onScroll={checkForHiddenContent}
-        >
+          onScroll={checkForHiddenContent}>
           {configs.map((config, i) => (
             <GroupCardConfig config={config} key={config.key} />
           ))}
@@ -230,15 +228,13 @@ export default function GroupCardConfigs({
               e.stopPropagation();
               scrollContainer("right");
             }}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out"
-          >
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out">
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"

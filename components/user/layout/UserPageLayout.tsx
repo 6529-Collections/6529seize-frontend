@@ -84,7 +84,7 @@ export default function UserPageLayout({
   descriptionArray.push(`Level: ${formatNumberWithCommas(profile.level)}`);
 
   descriptionArray.push(
-    `CIC: ${formatNumberWithCommas(profile.cic.cic_rating)}`
+    `NIC: ${formatNumberWithCommas(profile.cic.cic_rating)}`
   );
   descriptionArray.push(`Rep: ${formatNumberWithCommas(profile.rep)}`);
   descriptionArray.push(

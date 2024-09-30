@@ -54,7 +54,7 @@ export default function LeaderboardFooter(
           className="pt-4 pb-3 d-flex justify-content-center gap-4">
           <LeaderboardDownload
             url={props.url}
-            name="community-interactions"
+            name="network-interactions"
             page={props.page}
             block={props.block}
           />

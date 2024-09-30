@@ -7,7 +7,7 @@ export interface GroupsRequestParams {
 export enum GroupDescriptionType {
   TDH = "TDH",
   REP = "REP",
-  CIC = "CIC",
+  NIC = "NIC",
   LEVEL = "LEVEL",
   OWNS_NFTS = "OWNS_NFTS",
   WALLETS = "WALLETS",

@@ -241,7 +241,7 @@ export default function CommunityStats() {
       <Row>
         <Col sm={12} md={8} className="pt-4">
           <h1 className="mb-0">
-            <span className="font-lightest">Community</span> Stats
+            <span className="font-lightest">Network</span> Stats
           </h1>
         </Col>
         {/* <Col
@@ -278,7 +278,7 @@ export default function CommunityStats() {
                     <Table>
                       <tbody>
                         <tr>
-                          <td>Community TDH</td>
+                          <td>Network TDH</td>
                           <td className="text-right">
                             {numberWithCommas(latestHistory!.total_boosted_tdh)}
                           </td>

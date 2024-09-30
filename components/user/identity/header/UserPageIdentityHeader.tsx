@@ -17,15 +17,15 @@ export default function UserPageIdentityHeader({
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-flex-col">
             <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-tight">
-              Community Identity Check (CIC)
+              Network Identity Check (NIC)
             </h2>
             <p className="tw-font-normal tw-text-iron-400 tw-text-sm sm:tw-text-base tw-mb-0">
-              Does the community believe this profile accurately represents its
+              Does the network believe this profile accurately represents its
               identity?
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageRateWrapper profile={profile} type={RateMatter.CIC}>
+          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
             <UserPageIdentityHeaderCICRate
               profile={profile}
               isTooltip={false}
