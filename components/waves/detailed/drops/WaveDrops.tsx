@@ -14,8 +14,6 @@ import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import { useWaveDrops } from "../../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
