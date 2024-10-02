@@ -15,6 +15,7 @@ export function NftPageStats(props: {
           label="Mint Price"
           value={props.nft.mint_price}
           decimals={100000}
+          unit="ETH"
         />
       )}
       {hasHodlRate && (
@@ -24,13 +25,22 @@ export function NftPageStats(props: {
           decimals={100}
         />
       )}
-      <NftStatTableRow label="Floor Price" value={props.nft.floor_price} />
+      <NftStatTableRow
+        label="Floor Price"
+        value={props.nft.floor_price}
+        unit="ETH"
+      />
       <NftStatTableRow
         label="Market Cap"
         value={props.nft.market_cap}
         decimals={100}
+        unit="ETH"
       />
-      <NftStatTableRow label="Highest Offer" value={props.nft.highest_offer} />
+      <NftStatTableRow
+        label="Highest Offer"
+        value={props.nft.highest_offer}
+        unit="ETH"
+      />
     </>
   );
 }
@@ -39,6 +49,7 @@ function NftStatTableRow(props: {
   readonly label: string;
   readonly value: number;
   readonly decimals?: number;
+  readonly unit?: string;
 }) {
   const decimals = props.decimals ?? 1000;
   const value = Math.round(props.value * decimals) / decimals;
@@ -46,7 +57,9 @@ function NftStatTableRow(props: {
     <tr>
       <td>{props.label}</td>
       <td>
-        <b>{value > 0 ? `${numberWithCommas(value)} ETH` : `N/A`}</b>
+        <b>
+          {value > 0 ? `${numberWithCommas(value)} ${props.unit ?? ""}` : `N/A`}
+        </b>
       </td>
     </tr>
   );
