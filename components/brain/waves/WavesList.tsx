@@ -109,8 +109,8 @@ export default function WavesList({
 
   return (
     <div className="tw-mt-4">
-      <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
-        <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-py-5 tw-px-5">
+      <div className="tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+        <div className="tw-h-full tw-rounded-xl tw-py-5 tw-px-5">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <div className="tw-flex tw-items-center tw-gap-x-3">
               <div className="tw-h-9 tw-w-9 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-800 tw-via-indigo-300/40 tw-to-iron-800">
@@ -118,28 +118,29 @@ export default function WavesList({
                   {SVG_ICONS[type]}
                 </div>
               </div>
-
-              <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+              <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-200 tw-tracking-tight">
                 {TITLE[type]}
               </p>
             </div>
           </div>
-          <div className="tw-mt-4 tw-flex tw-flex-col tw-space-y-4">
+          <div className="tw-mt-4 tw-flex tw-flex-col tw-space-y-2 -tw-ml-1 -tw-mr-1">
             {waves.map((wave) => (
               <Link
                 key={wave.id}
                 href={`/waves/${wave.id}`}
-                className="tw-no-underline tw-flex tw-items-center tw-text-white tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-semibold tw-text-sm hover:tw-text-white tw-group tw-py-2 tw-px-2 tw-rounded-xl hover:tw-bg-iron-800/70 active:tw-bg-iron-700/70 tw-transition tw-duration-300 tw-ease-out"
               >
-                {wave.picture && (
+                {wave.picture ? (
                   <img
                     src={getScaledImageUri(
                       wave.picture,
                       ImageScale.W_100_H_AUTO
                     )}
                     alt="#"
-                    className="tw-mr-3 tw-flex-shrink-0 tw-object-contain tw-h-7 tw-w-7 tw-rounded-full tw-bg-iron-900 tw-ring-1  tw-ring-white/10"
+                    className="tw-mr-3 tw-flex-shrink-0 tw-object-cover tw-size-7 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 tw-ring-offset-2 tw-ring-offset-iron-950"
                   />
+                ) : (
+                  <div className="tw-mr-3 tw-flex-shrink-0 tw-size-7 tw-rounded-full tw-bg-gradient-to-br tw-from-iron-500/20 tw-to-iron-400/20" />
                 )}
                 <span>{wave.name}</span>
               </Link>

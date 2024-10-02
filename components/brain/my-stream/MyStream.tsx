@@ -71,16 +71,14 @@ export default function MyStream() {
   }, [haveNewItems]);
 
   return (
-    <div className="lg:tw-w-[672px] tw-flex-shrink-0">
-      <div>
-        <FeedWrapper
-          items={items}
-          loading={isFetching}
-          showWaveInfo={true}
-          availableCredit={availableCredit}
-          onBottomIntersection={onBottomIntersection}
-        />
-      </div>
+    <div className="tw-flex-shrink-0">
+      <FeedWrapper
+        items={items}
+        loading={isFetching}
+        showWaveInfo={true}
+        availableCredit={availableCredit}
+        onBottomIntersection={onBottomIntersection}
+      />
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function FeedItems({
   }, [items]);
 
   return (
-    <div className="tw-flex tw-flex-col lg:tw-w-[672px]">
+    <div className="tw-flex tw-flex-col">
       {items.map((item, i) => (
         <div key={getFeedItemKey({ item, index: i })}>
           <CommonChangeAnimation>

@@ -48,15 +48,15 @@ export default function MyStreamLayout({
         <meta property="og:description" content="6529 SEIZE" />
       </Head>
 
-      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950">
+      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-black">
         <div>
           <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
 
         <div className="tw-pt-8 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-          <div className="tw-max-w-5xl tw-mx-auto">
-            <div className="tw-rounded-xl tw-bg-white/[0.02] tw-p-4 tw-text-iron-500 tw-text-[13px] tw-leading-5 tw-mb-4">
+          <div>
+            {/* <div className="tw-rounded-xl tw-bg-white/[0.02] tw-p-4 tw-text-iron-500 tw-text-[13px] tw-leading-5 tw-mb-4">
               <div className="tw-inline-flex tw-gap-x-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -80,10 +80,11 @@ export default function MyStreamLayout({
                   Currently only &quot;chat&quot; waves are active.
                 </span>
               </div>
-            </div>
-            <MyStreamLayoutTabs />
+            </div> */}
+          {/*   <MyStreamLayoutTabs /> */}
           </div>
         </div>
+
         <div className="tw-h-full tw-w-full">
           <Brain>
             <div>{children}</div>
