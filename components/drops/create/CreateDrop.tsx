@@ -277,7 +277,7 @@ export default function CreateDrop({
     };
     const optimisticDrop = getOptimisticDrop(requestBody);
     if (optimisticDrop) {
-      addOptimisticDrop({ drop: optimisticDrop, rootDropId: null });
+      addOptimisticDrop({ drop: optimisticDrop });
     }
     await addDropMutation.mutateAsync(requestBody);
   };

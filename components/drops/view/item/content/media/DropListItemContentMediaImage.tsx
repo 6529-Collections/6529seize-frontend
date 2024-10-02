@@ -15,6 +15,11 @@ function DropListItemContentMediaImage({
     onImageLoaded();
   }, [onImageLoaded]);
 
+  const handleImageClick = useCallback((event: React.MouseEvent<HTMLImageElement>) => {
+    event.stopPropagation();
+    window.open(src, '_blank');
+  }, [src]);
+
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
@@ -40,8 +45,9 @@ function DropListItemContentMediaImage({
         alt="Drop media"
         className={`tw-w-full tw-h-full tw-object-center tw-object-contain ${
           isLoading ? "tw-opacity-0" : "tw-opacity-100"
-        }`}
+        } tw-cursor-pointer`}
         onLoad={handleImageLoad}
+        onClick={handleImageClick}
       />
     </div>
   );

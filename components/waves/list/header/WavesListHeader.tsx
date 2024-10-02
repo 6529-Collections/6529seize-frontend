@@ -52,7 +52,7 @@ export default function WavesListHeader({
             </button>
           )}
           {showCreateNewWaveButton && (
-            <div className="tw-p-[1px] tw-flex tw-mx-auto tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-400 tw-to-primary-500">
+            <div className="tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-400 tw-to-primary-500">
               <button
                 onClick={onCreateNewWave}
                 type="button"

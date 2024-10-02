@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export const useScrollBehavior = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [shouldScrollDownAfterNewPosts, setShouldScrollDownAfterNewPosts] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(false);
 
   const scrollToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
@@ -14,14 +14,24 @@ export const useScrollBehavior = () => {
     }
   }, []);
 
+  const scrollToTop = useCallback(() => {
+    if (scrollContainerRef.current) {
+      const scrollHeight = scrollContainerRef.current.scrollHeight;
+      scrollContainerRef.current.scrollTo({
+        top: -scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      const { scrollTop } = container;
+      const { scrollTop, scrollHeight, clientHeight } = container;
       const newIsAtBottom = scrollTop === 0;
-      const newShouldScrollDownAfterNewPosts = scrollTop > -60;
+      const newIsAtTop = scrollTop === scrollHeight - clientHeight;
       setIsAtBottom(newIsAtBottom);
-      setShouldScrollDownAfterNewPosts(newShouldScrollDownAfterNewPosts);
+      setIsAtTop(newIsAtTop);
     }
   }, []);
 
@@ -36,8 +46,9 @@ export const useScrollBehavior = () => {
   return {
     scrollContainerRef,
     isAtBottom,
-    shouldScrollDownAfterNewPosts,
+    isAtTop,
     scrollToBottom,
+    scrollToTop,
     handleScroll,
   };
 };

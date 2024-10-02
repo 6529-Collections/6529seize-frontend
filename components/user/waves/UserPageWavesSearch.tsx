@@ -1,3 +1,5 @@
+import PrimaryButton from "../../utils/button/PrimaryButton";
+
 export default function UserPageWavesSearch({
   waveName,
   showCreateNewWaveButton,
@@ -14,8 +16,8 @@ export default function UserPageWavesSearch({
   };
 
   return (
-    <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
-      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
+    <div className="tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row tw-w-full sm:tw-items-center sm:tw-justify-between tw-gap-x-3 tw-gap-y-3">
+      <div className="sm:tw-max-w-xs tw-w-full">
         <div className="tw-group tw-w-full tw-relative">
           <input
             type="text"
@@ -23,12 +25,11 @@ export default function UserPageWavesSearch({
             onChange={onWaveNameChange}
             id="identity-page-wave-search"
             autoComplete="off"
-            className="tw-pb-3 tw-pt-3 tw-text-md tw-form-input tw-block tw-pl-10 tw-pr-4 tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-650 focus:tw-border-blue-500 tw-peer
-      tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-py-3 tw-text-sm tw-ring-iron-700 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400 hover:tw-ring-iron-650 tw-form-input tw-block tw-w-full  tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-700 tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out tw-text-white"
             placeholder=" "
           />
           <svg
-            className={`tw-top-3.5 tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+            className={`tw-top-3 tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -42,7 +43,7 @@ export default function UserPageWavesSearch({
           {!!waveName?.length && (
             <svg
               onClick={() => setWaveName(null)}
-              className="tw-top-3.5 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
+              className="tw-top-3 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -58,39 +59,36 @@ export default function UserPageWavesSearch({
           )}
           <label
             htmlFor="identity-page-wave-search"
-            className="tw-text-md tw-absolute tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 tw-rounded-lg group-hover:tw-bg-iron-800 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
-        peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
+            className="tw-text-sm peer-focus:tw-text-primary-400 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 tw-absolute tw-rounded-lg tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900  peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2  peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
           >
             By Wave Name
           </label>
         </div>
       </div>
-      <div className="tw-flex tw-gap-x-3">
-        {showCreateNewWaveButton && (
-          <button
-            onClick={onCreateNewWave}
-            type="button"
-            className="tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
+      {showCreateNewWaveButton && (
+        <PrimaryButton
+          onClicked={onCreateNewWave}
+          loading={false}
+          disabled={false}
+        >
+          <svg
+            className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 5V19M5 12H19"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>Create New</span>
-          </button>
-        )}
-      </div>
+            <path
+              d="M12 5V19M5 12H19"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>Create new</span>
+        </PrimaryButton>
+      )}
     </div>
   );
 }

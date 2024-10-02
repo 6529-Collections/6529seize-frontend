@@ -12,49 +12,56 @@
 
 import { HttpFile } from '../http/http';
 
-export class WaveMetrics {
-    'subscribers_count': number;
-    'drops_count': number;
-    'latest_drop_timestamp': number;
-    'your_drops_count'?: number;
-    'your_latest_drop_timestamp'?: number;
+export class NftOwner {
+    'created_at': Date;
+    'updated_at': Date;
+    'token_id': number;
+    'contract': string;
+    'balance': number;
+    'consolidation_key': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "subscribers_count",
-            "baseName": "subscribers_count",
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "Date",
+            "format": "date-time"
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
+            "type": "Date",
+            "format": "date-time"
+        },
+        {
+            "name": "token_id",
+            "baseName": "token_id",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "drops_count",
-            "baseName": "drops_count",
+            "name": "contract",
+            "baseName": "contract",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "balance",
+            "baseName": "balance",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "latest_drop_timestamp",
-            "baseName": "latest_drop_timestamp",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "your_drops_count",
-            "baseName": "your_drops_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "your_latest_drop_timestamp",
-            "baseName": "your_latest_drop_timestamp",
-            "type": "number",
-            "format": "int64"
+            "name": "consolidation_key",
+            "baseName": "consolidation_key",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WaveMetrics.attributeTypeMap;
+        return NftOwner.attributeTypeMap;
     }
 
     public constructor() {

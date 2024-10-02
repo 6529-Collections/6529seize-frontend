@@ -1,8 +1,6 @@
 import { Wave } from "../../../generated/models/Wave";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -26,52 +24,10 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const getActiveDropId = (): string | null => {
-    const dropId = searchParams.get("drop");
-    return dropId ?? null;
-  };
-
-  const [activeDropId, setActiveDropId] = useState<string | null>(
-    getActiveDropId()
-  );
-  useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
 
   const [activeView, setActiveView] = useState<WaveDetailedMobileView>(
     WaveDetailedMobileView.CHAT
   );
-
-  const onBackToList = () => {
-    const updatedQuery = { ...router.query };
-    delete updatedQuery.drop;
-    router.replace(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const container = contentWrapperRef.current;
-
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      if (rect.top < 0) {
-        container.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "center",
-        });
-      }
-    }
-  }, [activeDropId]);
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -106,13 +62,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   }, [wave, isAuthorAndNotProxy]);
 
   const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: (
-      <WaveDetailedContent
-        activeDropId={activeDropId}
-        wave={wave}
-        onBackToList={onBackToList}
-      />
-    ),
+    [WaveDetailedView.CONTENT]: <WaveDetailedContent wave={wave} />,
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}

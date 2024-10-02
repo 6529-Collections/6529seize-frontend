@@ -21,7 +21,6 @@ import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
   readonly waveId: string;
 }
@@ -73,7 +72,6 @@ function useResizeObserver(
 
 export default function CreateDrop({
   activeDrop,
-  rootDropId,
   onCancelReplyQuote,
   waveId,
 }: CreateDropProps) {
@@ -193,8 +191,9 @@ export default function CreateDrop({
   const submitDrop = useCallback(
     (dropRequest: CreateDropRequest) => {
       addToQueue(dropRequest);
+      onCancelReplyQuote();
     },
-    [addToQueue]
+    [addToQueue, onCancelReplyQuote]
   );
 
   return (
@@ -234,7 +233,6 @@ export default function CreateDrop({
       ) : wave ? (
         <CreateDropContent
           activeDrop={activeDrop}
-          rootDropId={rootDropId}
           onCancelReplyQuote={onCancelReplyQuote}
           wave={wave}
           drop={drop}

@@ -59,11 +59,9 @@ export default function UserPageHeaderAbout({
               <div
                 className={`${
                   statement ? "group-hover:tw-block tw-hidden" : "tw-block"
-                }  tw-text-neutral-400`}
+                }  tw-text-iron-400`}
               >
-                <div className="tw-absolute tw-top-3 lg:tw-top-2 -tw-right-7">
-                  <PencilIcon />
-                </div>
+                <PencilIcon />
               </div>
             )}
           </button>

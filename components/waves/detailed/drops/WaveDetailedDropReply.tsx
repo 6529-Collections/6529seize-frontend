@@ -4,19 +4,20 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
-import Link from "next/link";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
   readonly dropPartId: number;
   readonly maybeDrop: Drop | null;
+  readonly onReplyClick: (serialNo: number) => void;
 }
 
 export default function WaveDetailedDropReply({
   dropId,
   dropPartId,
   maybeDrop,
+  onReplyClick,
 }: WaveDetailedDropReplyProps) {
   const {
     data: drop,
@@ -84,9 +85,9 @@ export default function WaveDetailedDropReply({
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
         <WaveDetailedDropReplyAuthor isFetching={false} drop={drop} />
         <div>
-          <Link
-            href={`/waves/${drop?.wave.id}?drop=${drop?.id}`}
-            className="tw-no-underline"
+          <button
+            onClick={() => drop?.serial_no && onReplyClick(drop.serial_no)}
+            className="tw-text-left tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-cursor-pointer"
           >
             <DropPartMarkdownWithPropLogger
               partContent={content}
@@ -95,7 +96,7 @@ export default function WaveDetailedDropReply({
               onImageLoaded={() => undefined}
               textSize="sm"
             />
-          </Link>
+          </button>
         </div>
       </div>
     </div>

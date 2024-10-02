@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../../auth/Auth";
 import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
 import WavesListWrapper from "./WavesListWrapper";
@@ -12,10 +13,9 @@ export default function WavesList({
   readonly showCreateNewWaveButton?: boolean;
   readonly onCreateNewWave: () => void;
 }) {
+  const router = useRouter();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [showAllType, setShowAllType] = useState<WavesOverviewType | null>(
-    null
-  );
+  const [showAllType, setShowAllType] = useState<WavesOverviewType | null>(null);
 
   const getWaveOverviewTypes = (): WavesOverviewType[] => {
     const types = showAllType
@@ -33,18 +33,32 @@ export default function WavesList({
     [connectedProfile, activeProfileProxy, showAllType]
   );
 
-  const [identity, setIdentity] = useState<string | null>(null);
+  const [identity, setIdentity] = useState<string | null>(
+    (router.query.identity as string) || null
+  );
   const [waveName, setWaveName] = useState<string | null>(null);
 
-  const getShowSearchResults = () => !!identity || !!waveName;
-  const [showSearchResults, setShowSearchResults] = useState(
-    getShowSearchResults()
-  );
+  const updateIdentity = (newIdentity: string | null) => {
+    setIdentity(newIdentity);
+    const newQuery = { ...router.query };
+    if (!newIdentity || newIdentity.trim() === "") {
+      delete newQuery.identity;
+    } else {
+      newQuery.identity = newIdentity;
+    }
+    router.push({
+      pathname: router.pathname,
+      query: newQuery,
+    }, undefined, { shallow: true });
+  };
 
-  useEffect(
-    () => setShowSearchResults(getShowSearchResults()),
-    [identity, waveName]
-  );
+  const getShowSearchResults = () => !!identity || !!waveName;
+  const [showSearchResults, setShowSearchResults] = useState(getShowSearchResults());
+
+  useEffect(() => {
+    setShowSearchResults(getShowSearchResults());
+    setIdentity((router.query.identity as string) || null);
+  }, [router.query.identity, waveName]);
 
   return (
     <div className="tailwind-scope">
@@ -62,7 +76,7 @@ export default function WavesList({
           waveName={waveName}
           showCreateNewWaveButton={showCreateNewWaveButton}
           onCreateNewWave={onCreateNewWave}
-          setIdentity={setIdentity}
+          setIdentity={updateIdentity}
           setWaveName={setWaveName}
         />
         <div className="tw-mt-6">
