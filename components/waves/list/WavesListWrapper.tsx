@@ -17,6 +17,10 @@ const LABELS: Record<WavesOverviewType, string> = {
   [WavesOverviewType.MostSubscribed]: "Most Followed",
   [WavesOverviewType.HighLevelAuthor]: "High Level Authors",
   [WavesOverviewType.AuthorYouHaveRepped]: "Waves from Authors You Have Repped",
+  [WavesOverviewType.MostDropped]: "Most Dropped",
+  [WavesOverviewType.MostDroppedByYou]: "Most Dropped by You",
+  [WavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
+  [WavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped by You",
 };
 
 const SHOW_ALL_REQUEST_SIZE = 12;

@@ -10,45 +10,50 @@
  * Do not edit the class manually.
  */
 
-import { AggregatedActivity } from '../models/AggregatedActivity';
 import { HttpFile } from '../http/http';
 
-export class AggregatedActivityPage {
-    'data': Array<AggregatedActivity>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class RegisterPushNotificationTokenRequest {
+    'device_id': string;
+    'token': string;
+    /**
+    * Optional profile_id
+    */
+    'profile_id'?: string;
+    /**
+    * Optional platform (ios, android, web)
+    */
+    'platform'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<AggregatedActivity>",
+            "name": "device_id",
+            "baseName": "device_id",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
+            "name": "token",
+            "baseName": "token",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
+            "name": "profile_id",
+            "baseName": "profile_id",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "next",
-            "baseName": "next",
+            "name": "platform",
+            "baseName": "platform",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return AggregatedActivityPage.attributeTypeMap;
+        return RegisterPushNotificationTokenRequest.attributeTypeMap;
     }
 
     public constructor() {
