@@ -288,8 +288,7 @@ export default function Header(props: Readonly<Props>) {
                   <Col>
                     <Link href="/nextgen">
                       <h3>
-                        <span>NextGen</span>&nbsp;
-                        <span className={styles.new}>new</span>
+                        <span>NextGen</span>
                       </h3>
                     </Link>
                   </Col>
@@ -861,7 +860,6 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "NextGen",
                                   path: "/nextgen",
-                                  isNew: true,
                                 }}
                               />
                               <NavDropdown.Divider />
