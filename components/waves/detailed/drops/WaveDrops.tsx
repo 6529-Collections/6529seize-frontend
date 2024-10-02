@@ -103,6 +103,10 @@ export default function WaveDrops({
       setNewItemsCount((prevCount) => drops.length - prevCount);
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
+      const lastDrop = drops[drops.length - 1];
+      if(lastDrop.id.startsWith('temp-')) {
+        setSerialNo(lastDrop.serial_no);
+      }
     } else {
       smallestSerialNo.current = null;
     }
