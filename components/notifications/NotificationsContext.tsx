@@ -66,14 +66,18 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isConnected]);
 
   const initializeNotifications = (profile?: IProfileAndConsolidations) => {
-    if (isCapacitor) {
-      console.log("Initializing push notifications");
-      initializePushNotifications(profile);
-    } else {
-      console.log("Initializing local notifications");
-      initializeLocalNotifications().catch((error) =>
-        console.error("Error initializing local notifications", error)
-      );
+    try {
+      if (isCapacitor) {
+        console.log("Initializing push notifications");
+        initializePushNotifications(profile);
+      } else {
+        console.log("Initializing local notifications");
+        initializeLocalNotifications().catch((error) =>
+          console.error("Error initializing local notifications", error)
+        );
+      }
+    } catch (error) {
+      console.error("Error initializing notifications", error);
     }
   };
 
