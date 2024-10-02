@@ -109,9 +109,7 @@ export default function WaveDetailedDrop({
     };
   }, [drop.serial_no]);
 
-  if (!imagesLoaded) {
-    return <div className="tw-h-32 tw-bg-iron-900 tw-animate-pulse"></div>;
-  }
+
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;

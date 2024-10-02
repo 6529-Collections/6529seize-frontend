@@ -191,8 +191,9 @@ export default function CreateDrop({
   const submitDrop = useCallback(
     (dropRequest: CreateDropRequest) => {
       addToQueue(dropRequest);
+      onCancelReplyQuote();
     },
-    [addToQueue]
+    [addToQueue, onCancelReplyQuote]
   );
 
   return (

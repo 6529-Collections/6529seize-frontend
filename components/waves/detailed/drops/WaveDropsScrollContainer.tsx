@@ -26,7 +26,6 @@ export const WaveDropsScrollContainer = forwardRef<
     const contentRef = useRef<HTMLDivElement>(null);
     const [lastScrollTop, setLastScrollTop] = useState(0);
 
-    // todo make it only up scroll
     useEffect(() => {
       if (contentRef.current  && ref && "current" in ref) {
         const scrollContainer = ref.current;

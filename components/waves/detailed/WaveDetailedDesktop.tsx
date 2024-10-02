@@ -2,8 +2,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Wave } from "../../../generated/models/Wave";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";

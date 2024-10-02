@@ -2,7 +2,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -29,7 +28,6 @@ interface WaveDropsProps {
   readonly onActiveDropClick?: () => void;
   readonly initialDrop: number | null;
 }
-
 
 export default function WaveDrops({
   wave,
@@ -80,11 +78,7 @@ export default function WaveDrops({
 
   const [newItemsCount, setNewItemsCount] = useState(0);
 
-  useEffect(() => {
-    if (drops.length > 0) {
-      setNewItemsCount((prevCount) => drops.length - prevCount);
-    }
-  }, [drops]);
+
 
   useEffect(() => {
     setTitle({
@@ -106,6 +100,7 @@ export default function WaveDrops({
   useEffect(() => {
     if (drops.length > 0) {
       setInit(true);
+      setNewItemsCount((prevCount) => drops.length - prevCount);
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
     } else {
@@ -150,6 +145,7 @@ export default function WaveDrops({
     scrollToTop,
   ]);
 
+
   useEffect(() => {
     if (init && serialNo) {
       const success = scrollToSerialNo("smooth");
@@ -160,8 +156,6 @@ export default function WaveDrops({
       }
     }
   }, [init, serialNo]);
-
-
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
