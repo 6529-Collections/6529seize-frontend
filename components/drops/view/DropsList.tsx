@@ -1,10 +1,10 @@
-import { useMemo, RefObject, useCallback } from "react";
+import { useMemo, RefObject, useCallback, memo } from "react";
 import { Drop } from "../../../generated/models/Drop";
 
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import React from "react";
+
 
 type DropActionHandler = ({
   drop,
@@ -28,7 +28,7 @@ interface DropsListProps {
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
 }
 
-const MemoizedWaveDetailedDrop = React.memo(WaveDetailedDrop);
+const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
 
 export default function DropsList({
   drops,

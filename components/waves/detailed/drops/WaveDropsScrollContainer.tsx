@@ -1,4 +1,3 @@
-import { dir } from "console";
 import React, { forwardRef, useRef, useEffect, useState } from "react";
 
 interface WaveDropsScrollContainerProps {

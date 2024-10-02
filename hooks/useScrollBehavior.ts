@@ -4,7 +4,6 @@ export const useScrollBehavior = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isAtTop, setIsAtTop] = useState(false);
-  const [shouldScrollDownAfterNewPosts, setShouldScrollDownAfterNewPosts] = useState(false);
 
   const scrollToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
@@ -31,10 +30,8 @@ export const useScrollBehavior = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       const newIsAtBottom = scrollTop === 0;
       const newIsAtTop = scrollTop === scrollHeight - clientHeight;
-      const newShouldScrollDownAfterNewPosts = scrollTop > -60;
       setIsAtBottom(newIsAtBottom);
       setIsAtTop(newIsAtTop);
-      setShouldScrollDownAfterNewPosts(newShouldScrollDownAfterNewPosts);
     }
   }, []);
 
@@ -50,7 +47,6 @@ export const useScrollBehavior = () => {
     scrollContainerRef,
     isAtBottom,
     isAtTop,
-    shouldScrollDownAfterNewPosts,
     scrollToBottom,
     scrollToTop,
     handleScroll,

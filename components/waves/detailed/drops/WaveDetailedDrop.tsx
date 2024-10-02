@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -75,39 +75,6 @@ export default function WaveDetailedDrop({
   onActiveDropClick,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-
-  useEffect(() => {
-    const images = Array.from(document.querySelectorAll(`#drop-${drop.serial_no} img`));
-    if (images.length === 0) {
-      setImagesLoaded(true);
-      return;
-    }
-
-    let loadedCount = 0;
-    const onImageLoad = () => {
-      loadedCount++;
-      if (loadedCount === images.length) {
-        setImagesLoaded(true);
-      }
-    };
-
-    images.forEach(img => {
-      if ((img as HTMLImageElement).complete) {
-        onImageLoad();
-      } else {
-        img.addEventListener('load', onImageLoad);
-        img.addEventListener('error', onImageLoad);
-      }
-    });
-
-    return () => {
-      images.forEach(img => {
-        img.removeEventListener('load', onImageLoad);
-        img.removeEventListener('error', onImageLoad);
-      });
-    };
-  }, [drop.serial_no]);
 
 
 

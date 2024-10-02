@@ -1,8 +1,6 @@
 import { Wave } from "../../../generated/models/Wave";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -27,11 +25,9 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 
-
   const [activeView, setActiveView] = useState<WaveDetailedMobileView>(
     WaveDetailedMobileView.CHAT
   );
-
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -66,11 +62,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   }, [wave, isAuthorAndNotProxy]);
 
   const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: (
-      <WaveDetailedContent
-        wave={wave}
-      />
-    ),
+    [WaveDetailedView.CONTENT]: <WaveDetailedContent wave={wave} />,
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}

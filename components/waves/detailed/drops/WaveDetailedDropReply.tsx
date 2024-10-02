@@ -4,7 +4,6 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
-import Link from "next/link";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 export interface WaveDetailedDropReplyProps {

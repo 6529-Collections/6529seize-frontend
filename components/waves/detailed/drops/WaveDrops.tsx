@@ -50,7 +50,6 @@ export default function WaveDrops({
   const {
     scrollContainerRef,
     isAtBottom,
-    shouldScrollDownAfterNewPosts,
     scrollToBottom,
     scrollToTop,
     handleScroll,

@@ -8,6 +8,7 @@ import {
   keepPreviousData,
   useInfiniteQuery,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
 import {
@@ -15,8 +16,6 @@ import {
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
-import { useQueryClient } from "@tanstack/react-query";
-import { getRandomObjectId } from "../helpers/AllowlistToolHelpers";
 
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
