@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -17,6 +11,7 @@ import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface WaveDropsProps {
   readonly wave: Wave;
@@ -35,6 +30,7 @@ export default function WaveDrops({
   onActiveDropClick,
   initialDrop,
 }: WaveDropsProps) {
+  const capacitor = useCapacitor();
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
@@ -75,8 +71,6 @@ export default function WaveDrops({
 
   const [newItemsCount, setNewItemsCount] = useState(0);
 
-
-
   useEffect(() => {
     setTitle({
       title: haveNewDrops ? "New Drops Available | 6529 SEIZE" : null,
@@ -101,7 +95,7 @@ export default function WaveDrops({
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
       const lastDrop = drops[drops.length - 1];
-      if(lastDrop.id.startsWith('temp-')) {
+      if (lastDrop.id.startsWith("temp-")) {
         setSerialNo(lastDrop.serial_no);
       }
     } else {
@@ -146,7 +140,6 @@ export default function WaveDrops({
     scrollToTop,
   ]);
 
-
   useEffect(() => {
     if (init && serialNo) {
       const success = scrollToSerialNo("smooth");
@@ -159,7 +152,13 @@ export default function WaveDrops({
   }, [init, serialNo]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
+    <div
+      className={`tw-flex tw-flex-col tw-relative ${
+        capacitor.isCapacitor
+          ? "tw-h-[calc(100vh-21rem)]"
+          : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
+      }`}
+    >
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}

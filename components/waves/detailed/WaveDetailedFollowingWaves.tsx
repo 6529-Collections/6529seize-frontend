@@ -159,7 +159,7 @@ const WaveDetailedFollowingWaves: React.FC = () => {
         <div className="tw-h-8 tw-flex tw-items-center tw-gap-x-2 tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200 tw-tracking-tight">
-              Following
+              Waves you follow
             </p>
           </div>
           <div className="tw-relative" ref={dropdownRef}>
