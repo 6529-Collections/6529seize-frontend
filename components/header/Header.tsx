@@ -32,7 +32,7 @@ export interface HeaderLink {
 }
 
 export default function Header(props: Readonly<Props>) {
-  const capacitor = useCapacitor();
+  const capacitor = { isCapacitor: true };
   const { seizeConnectOpen } = useSeizeConnect();
 
   const { showWaves } = useContext(AuthContext);
