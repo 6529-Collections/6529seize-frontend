@@ -1,6 +1,6 @@
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Wave } from "../generated/models/Wave";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
@@ -8,6 +8,7 @@ import {
   keepPreviousData,
   useInfiniteQuery,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
 import {
@@ -16,7 +17,13 @@ import {
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
 
-const REQUEST_SIZE = 40;
+export enum WaveDropsSearchStrategy {
+  FIND_OLDER = "FIND_OLDER",
+  FIND_NEWER = "FIND_NEWER",
+  FIND_BOTH = "FIND_BOTH",
+}
+
+const REQUEST_SIZE = 50;
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
 const INACTIVE_POLLING_INTERVAL = 30000;
@@ -36,9 +43,10 @@ function useTabVisibility() {
 
 export function useWaveDrops(
   wave: Wave,
-  rootDropId: string | null,
   connectedProfileHandle: string | undefined
 ) {
+  const queryClient = useQueryClient();
+
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
@@ -52,7 +60,7 @@ export function useWaveDrops(
     {
       waveId: wave.id,
       limit: REQUEST_SIZE,
-      dropId: rootDropId,
+      dropId: null,
     },
   ];
 
@@ -65,25 +73,40 @@ export function useWaveDrops(
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+    queryFn: async ({
+      pageParam,
+    }: {
+      pageParam: {
+        serialNo: number | null;
+        strategy: WaveDropsSearchStrategy;
+      } | null;
+    }) => {
       const params: Record<string, string> = {
         limit: REQUEST_SIZE.toString(),
       };
-      if (rootDropId) {
-        params.drop_id = rootDropId;
+      if (pageParam?.serialNo) {
+        params.serial_no_limit = `${pageParam.serialNo}`;
+        params.search_strategy = `${pageParam.strategy}`;
       }
-      if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
-      }
-      return await commonApiFetch<WaveDropsFeed>({
+
+      const results = await commonApiFetch<WaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,
       });
+
+      return results;
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
+    getNextPageParam: (lastPage) =>
+      lastPage.drops.at(-1)?.serial_no
+        ? {
+            serialNo: lastPage.drops.at(-1)?.serial_no ?? null,
+            strategy: WaveDropsSearchStrategy.FIND_OLDER,
+          }
+        : null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
+    staleTime: 60000,
   });
 
   useEffect(() => {
@@ -93,13 +116,7 @@ export function useWaveDrops(
     });
   }, [data]);
 
-  useEffect(() => {
-    setCanPoll(false);
-    setHaveNewDrops(false);
-    setDelayedPollingResult(undefined);
-  }, [rootDropId]);
-
-  useDebounce(() => setCanPoll(true), 10000, [data, rootDropId]);
+  useDebounce(() => setCanPoll(true), 10000, [data]);
 
   const { data: pollingResult } = useQuery({
     queryKey: [...queryKey, "polling"],
@@ -107,9 +124,6 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: "1",
       };
-      if (rootDropId) {
-        params.drop_id = rootDropId;
-      }
       return await commonApiFetch<WaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,
@@ -169,6 +183,20 @@ export function useWaveDrops(
     setHaveNewDrops(false);
   }, [haveNewDrops, isTabVisible, drops]);
 
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries({
+        queryKey: [QueryKey.DROPS, { waveId: wave.id }],
+      });
+    };
+  }, [wave.id, queryClient]);
+
+  const manualFetch = useCallback(async () => {
+    if (hasNextPage) {
+      await fetchNextPage();
+    }
+  }, [hasNextPage, fetchNextPage]);
+
   return {
     drops,
     fetchNextPage,
@@ -177,5 +205,6 @@ export function useWaveDrops(
     isFetchingNextPage,
     refetch,
     haveNewDrops,
+    manualFetch,
   };
 }

@@ -1,4 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -8,17 +14,17 @@ import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import { useWaveDrops } from "../../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
-import WaveDropThreadTrace from "./WaveDropThreadTrace";
-import { WaveDropsBackButton } from "./WaveDropsBackButton";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveDropsProps {
   readonly wave: Wave;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
-  readonly onBackToList?: () => void;
   readonly onActiveDropClick?: () => void;
+  readonly initialDrop: number | null;
 }
 
 export default function WaveDrops({
@@ -26,11 +32,12 @@ export default function WaveDrops({
   onReply,
   onQuote,
   activeDrop,
-  rootDropId,
-  onBackToList,
   onActiveDropClick,
+  initialDrop,
 }: WaveDropsProps) {
   const { connectedProfile, setTitle } = useContext(AuthContext);
+
+  const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   const {
     drops,
     fetchNextPage,
@@ -38,20 +45,37 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDrops(wave, rootDropId, connectedProfile?.profile?.handle);
-
-  const [newDropsCount, setNewDropsCount] = useState(0);
-  const [lastVisibleDropTimestamp, setLastVisibleDropTimestamp] = useState<
-    number | null
-  >(null);
+  } = useWaveDrops(wave, connectedProfile?.profile?.handle);
 
   const {
     scrollContainerRef,
     isAtBottom,
-    shouldScrollDownAfterNewPosts,
     scrollToBottom,
+    scrollToTop,
     handleScroll,
   } = useScrollBehavior();
+
+  const targetDropRef = useRef<HTMLDivElement | null>(null);
+
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  const scrollToSerialNo = useCallback(
+    (behavior: ScrollBehavior) => {
+      if (serialNo && targetDropRef.current) {
+        targetDropRef.current.scrollIntoView({
+          behavior: behavior,
+          block: "center",
+        });
+        return true;
+      }
+      return false;
+    },
+    [serialNo, targetDropRef.current]
+  );
+
+  const [newItemsCount, setNewItemsCount] = useState(0);
+
+
 
   useEffect(() => {
     setTitle({
@@ -67,83 +91,98 @@ export default function WaveDrops({
     };
   }, [haveNewDrops]);
 
+  const smallestSerialNo = useRef<number | null>(null);
+  const [init, setInit] = useState(false);
+
   useEffect(() => {
     if (drops.length > 0) {
-      if (isAtBottom) {
-        setNewDropsCount(0);
-        setLastVisibleDropTimestamp(drops.at(-1)?.created_at ?? null);
-      } else if (lastVisibleDropTimestamp === null) {
-        setLastVisibleDropTimestamp(drops.at(-1)?.created_at ?? null);
-      } else {
-        const newDrops = drops.filter(
-          (drop) => drop.created_at > lastVisibleDropTimestamp
-        );
-        if (newDrops.length > 0) {
-          setNewDropsCount(newDrops.length);
-          setLastVisibleDropTimestamp(newDrops.at(-1)?.created_at ?? null);
-        }
+      setInit(true);
+      setNewItemsCount((prevCount) => drops.length - prevCount);
+      const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
+      smallestSerialNo.current = minSerialNo;
+      const lastDrop = drops[drops.length - 1];
+      if(lastDrop.id.startsWith('temp-')) {
+        setSerialNo(lastDrop.serial_no);
       }
     } else {
-      setNewDropsCount(0);
-      setLastVisibleDropTimestamp(null);
+      smallestSerialNo.current = null;
     }
-  }, [drops, lastVisibleDropTimestamp, isAtBottom]);
+  }, [drops]);
+
+  const fetchAndScrollToDrop = useCallback(async () => {
+    if (!serialNo) return;
+    let found = false;
+    setIsScrolling(true);
+
+    const checkAndFetchNext = async () => {
+      if (found || !hasNextPage || isFetching || isFetchingNextPage) {
+        setIsScrolling(false);
+        return;
+      }
+      await fetchNextPage();
+
+      if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
+        found = true;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setIsScrolling(false);
+        scrollToSerialNo("smooth");
+
+        setSerialNo(null);
+      } else {
+        scrollToTop();
+        setTimeout(checkAndFetchNext, 1000);
+      }
+    };
+
+    checkAndFetchNext();
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    scrollToSerialNo,
+    serialNo,
+    setSerialNo,
+    scrollToTop,
+  ]);
+
 
   useEffect(() => {
-    if (shouldScrollDownAfterNewPosts) {
-      scrollToBottom();
+    if (init && serialNo) {
+      const success = scrollToSerialNo("smooth");
+      if (success) {
+        setSerialNo(null);
+      } else {
+        fetchAndScrollToDrop();
+      }
     }
-  }, [drops, shouldScrollDownAfterNewPosts, scrollToBottom]);
-
-  useEffect(() => {
-    scrollToBottom();
-    const timeoutId = setTimeout(() => handleScroll(), 100);
-    return () => clearTimeout(timeoutId);
-  }, [scrollToBottom, handleScroll]);
-
-  const handleNewDropsClick = () => {
-    scrollToBottom();
-    setNewDropsCount(0);
-  };
+  }, [init, serialNo]);
 
   return (
     <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
-      {rootDropId && onBackToList && (
-        <div className="tw-sticky tw-w-full tw-top-0 tw-z-10 tw-flex tw-justify-end tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-iron-700 tw-border-solid">
-          <WaveDropsBackButton onBackToList={onBackToList} />
-        </div>
-      )}
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        rootDropId={rootDropId}
+        newItemsCount={newItemsCount}
+        onTopIntersection={() => {
+          if (hasNextPage && !isFetching && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
       >
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
-          <div>
-            {rootDropId && (
-              <WaveDropThreadTrace
-                rootDropId={rootDropId}
-                wave={wave}
-                onActiveDropClick={onActiveDropClick}
-              />
-            )}
-          </div>
-
           <DropsList
+            onReplyClick={setSerialNo}
             onActiveDropClick={onActiveDropClick}
             drops={drops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
-            onIntersection={(state) => {
-              if (state && hasNextPage && !isFetching && !isFetchingNextPage) {
-                fetchNextPage();
-              }
-            }}
             onReply={onReply}
             onQuote={onQuote}
             showReplyAndQuote={true}
             activeDrop={activeDrop}
-            rootDropId={rootDropId}
+            serialNo={serialNo}
+            targetDropRef={targetDropRef}
           />
         </div>
       </WaveDropsScrollContainer>
@@ -152,19 +191,16 @@ export default function WaveDrops({
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
       />
-      {newDropsCount > 0 && (
-        <div className="tw-absolute tw-bottom-4 tw-left-0 tw-right-0 tw-flex tw-items-center tw-justify-center">
-          <div className="tw-w-full tw-flex tw-items-center">
-            <div className="tw-flex-grow tw-h-px tw-bg-red"></div>
-            <button
-              onClick={handleNewDropsClick}
-              className="tw-bg-iron-950 tw-text-red tw-px-2 tw-py-0 tw-text-sm tw-rounded-full tw-border-none"
-            >
-              {newDropsCount} new drop{newDropsCount !== 1 ? "s" : ""}
-            </button>
-            <div className="tw-flex-grow tw-h-px tw-bg-red"></div>
+
+      {isScrolling && (
+        <>
+          <div className="tw-absolute tw-inset-0 tw-bg-iron-900 tw-bg-opacity-50 tw-z-10" />
+          <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-z-20">
+            <div className="tw-bg-iron-800 tw-rounded-full tw-p-4">
+              <CircleLoader size={CircleLoaderSize.XXLARGE} />
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -1,14 +1,22 @@
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
 import Link from "next/link";
 import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
+import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
+import { useRouter } from "next/router";
 
 const PAGE_SIZE = 20;
 
 const WaveDetailedFollowingWaves: React.FC = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const queryKey = [
     QueryKey.DROPS,
     {
@@ -64,6 +72,53 @@ const WaveDetailedFollowingWaves: React.FC = () => {
       setWaves(getWaves());
     }
   }, [data]);
+
+  const onHover = (waveId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+      queryFn: async () =>
+        await commonApiFetch<Wave>({
+          endpoint: `waves/${waveId}`,
+        }),
+      staleTime: 60000,
+    });
+    queryClient.prefetchInfiniteQuery({
+      queryKey: [
+        QueryKey.DROPS,
+        {
+          waveId: waveId,
+          limit: 50,
+          dropId: null,
+        },
+      ],
+      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+        const params: Record<string, string> = {
+          limit: "50",
+        };
+
+        if (pageParam) {
+          params.serial_no_less_than = `${pageParam}`;
+        }
+        return await commonApiFetch<WaveDropsFeed>({
+          endpoint: `waves/${waveId}/drops`,
+          params,
+        });
+      },
+      initialPageParam: null,
+      getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
+      pages: 1,
+      staleTime: 60000,
+    });
+  };
+
+  const handleClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    waveId: string
+  ) => {
+    e.preventDefault();
+    router.push(`/waves/${waveId}`, undefined, { shallow: true });
+  };
+
   return (
     <div className="tw-mt-4 tw-mb-3 tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-py-5 tw-px-5">
@@ -124,6 +179,8 @@ const WaveDetailedFollowingWaves: React.FC = () => {
               <div key={wave.id}>
                 <Link
                   href={`/waves/${wave.id}`}
+                  onClick={(e) => handleClick(e, wave.id)}
+                  onMouseEnter={() => onHover(wave.id)}
                   className="tw-no-underline tw-flex tw-items-center tw-text-white tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
                 >
                   <div className="tw-mr-3 tw-flex-shrink-0 tw-h-7 tw-w-7 tw-rounded-full tw-bg-iron-900">

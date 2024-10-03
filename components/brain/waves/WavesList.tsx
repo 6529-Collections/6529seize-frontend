@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Wave } from "../../../generated/models/Wave";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
+import { useContext } from "react";
+import { AuthContext } from "../../auth/Auth";
 
 export enum WavesListType {
   MY_WAVES = "MY_WAVES",
@@ -15,6 +17,7 @@ export default function WavesList({
   readonly waves: Wave[];
   readonly type: WavesListType;
 }) {
+  const { connectedProfile } = useContext(AuthContext);
   const TITLE: Record<WavesListType, string> = {
     [WavesListType.MY_WAVES]: "My Waves",
     [WavesListType.FOLLOWING]: "Following",
@@ -107,6 +110,13 @@ export default function WavesList({
     ),
   };
 
+  const getShowMoreLink = () => {
+    if (type === WavesListType.MY_WAVES && connectedProfile?.profile?.handle) {
+      return `/waves?identity=${connectedProfile.profile.handle}`;
+    }
+    return "/waves";
+  };
+
   return (
     <div className="tw-mt-4">
       <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
@@ -148,7 +158,7 @@ export default function WavesList({
           {waves.length >= 10 && (
             <div className="tw-mt-2 tw-text-right -tw-mb-2">
               <Link
-                href="/waves"
+                href={getShowMoreLink()}
                 className="tw-group -tw-mr-1 tw-no-underline tw-inline-flex tw-bg-transparent tw-border-none tw-text-primary-400 hover:tw-text-primary-300 tw-text-xs tw-font-medium tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-items-center group"
               >
                 <span className="group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out">

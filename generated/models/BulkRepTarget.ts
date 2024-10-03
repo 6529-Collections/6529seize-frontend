@@ -12,49 +12,35 @@
 
 import { HttpFile } from '../http/http';
 
-export class WaveMetrics {
-    'subscribers_count': number;
-    'drops_count': number;
-    'latest_drop_timestamp': number;
-    'your_drops_count'?: number;
-    'your_latest_drop_timestamp'?: number;
+export class BulkRepTarget {
+    'address': string;
+    'category': string;
+    'amount': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "subscribers_count",
-            "baseName": "subscribers_count",
-            "type": "number",
-            "format": "int64"
+            "name": "address",
+            "baseName": "address",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "drops_count",
-            "baseName": "drops_count",
-            "type": "number",
-            "format": "int64"
+            "name": "category",
+            "baseName": "category",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "latest_drop_timestamp",
-            "baseName": "latest_drop_timestamp",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "your_drops_count",
-            "baseName": "your_drops_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "your_latest_drop_timestamp",
-            "baseName": "your_latest_drop_timestamp",
+            "name": "amount",
+            "baseName": "amount",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return WaveMetrics.attributeTypeMap;
+        return BulkRepTarget.attributeTypeMap;
     }
 
     public constructor() {

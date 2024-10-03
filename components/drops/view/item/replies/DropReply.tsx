@@ -110,7 +110,7 @@ export default function DropReply(props: DropReplyProps) {
 
   const onReplyClick = () => {
     router.push(
-      `/waves/${finalDrop?.wave.id}?drop=${finalDrop?.id}`,
+      `/waves/${finalDrop?.wave.id}?drop=${finalDrop?.serial_no}`,
       undefined,
       {
         shallow: true,

@@ -1,43 +1,43 @@
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import Head from "next/head";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import WaveDetailed from "../../components/waves/detailed/WaveDetailed";
 import { useRouter } from "next/router";
+import { ReactNode, useContext, useEffect, useState } from "react";
+import { Wave } from "../../../generated/models/Wave";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
-import { Wave } from "../../generated/models/Wave";
-import { commonApiFetch } from "../../services/api/common-api";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import Head from "next/head";
+import { AuthContext } from "../../auth/Auth";
+import dynamic from "next/dynamic";
+import HeaderPlaceholder from "../../header/HeaderPlaceholder";
+import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import { AnimatePresence, motion } from "framer-motion";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
+interface WaveLayoutProps {
+  readonly wave: Wave;
+  readonly children: ReactNode;
+}
+
+const Header = dynamic(() => import("../../header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function WavePage() {
+export default function WaveLayout({ wave: initialWave, children }: WaveLayoutProps) {
   const { setTitle, title } = useContext(AuthContext);
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const {
-    data: wave,
-    isError,
-    isFetching,
-  } = useQuery<Wave>({
+  const { data: wave, isError } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
         endpoint: `waves/${wave_id}`,
       }),
     enabled: !!wave_id,
-    staleTime: 60000,
     placeholderData: keepPreviousData,
+    initialData: initialWave,
   });
 
-  const getBreadCrumbs = (): Crumb[] => {
+    const getBreadCrumbs = (): Crumb[] => {
     return [
       { display: "Home", href: "/" },
       { display: "My Stream", href: "/my-stream" },
@@ -53,7 +53,7 @@ export default function WavePage() {
     setBreadcrumbs(getBreadCrumbs());
   }, [wave]);
 
-/*   useEffect(() => {
+  useEffect(() => {
     const elementToRemove = document.getElementById("footer");
     if (elementToRemove) {
       elementToRemove.remove();
@@ -66,9 +66,9 @@ export default function WavePage() {
         parentElement.appendChild(elementToRemove);
       }
     };
-  }, []); */
-
-  return (
+  }, []);
+  
+    return (
     <>
       <Head>
         <title>{title}</title>
@@ -84,11 +84,11 @@ export default function WavePage() {
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
-       {/*  <style>{`
+        <style>{`
           body {
             overflow: hidden !important;
           }
-        `}</style> */}
+        `}</style>
       </Head>
       <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col tw-h-screen tw-overflow-hidden">
         <div>
@@ -132,12 +132,13 @@ export default function WavePage() {
             )}
             {wave && !isError && (
               <motion.div
+                key={`${wave.id}-content`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <WaveDetailed wave={wave} isFetching={isFetching} />
+                {children}
               </motion.div>
             )}
           </AnimatePresence>
@@ -145,4 +146,4 @@ export default function WavePage() {
       </main>
     </>
   );
-}
+};

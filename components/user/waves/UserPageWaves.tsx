@@ -202,7 +202,7 @@ export default function UserPageWaves({
         onCreateNewWave={onCreateNewWave}
       />
       <div className="tw-overflow-hidden">
-        <div className="tw-mt-3 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-4">
+        <div className="tw-mt-4 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-y-3 tw-gap-x-4">
           {waves.map((wave) => (
             <WaveItem key={`waves-${wave.id}`} wave={wave} />
           ))}
