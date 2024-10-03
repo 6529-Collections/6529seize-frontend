@@ -9,7 +9,6 @@ import {
   BRAIN_NOTIFICATION_ICON,
   useNotifications,
 } from "../../notifications/NotificationsContext";
-import { getRandomInt } from "../../../helpers/Helpers";
 
 export default function HeaderNotifications() {
   const { connectedProfile, setTitle } = useAuth();
@@ -45,7 +44,6 @@ export default function HeaderNotifications() {
     setHaveUnreadNotifications(hasUnread);
     if (hasUnread) {
       sendLocalNotification(
-        getRandomInt(Number.MAX_SAFE_INTEGER),
         "New Brain Notification",
         "You have unread notifications!",
         BRAIN_NOTIFICATION_ICON

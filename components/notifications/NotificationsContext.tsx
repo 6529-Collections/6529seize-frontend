@@ -18,12 +18,7 @@ export const BRAIN_NOTIFICATION_ICON =
   "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP";
 
 type NotificationsContextType = {
-  sendLocalNotification: (
-    id: number,
-    title: string,
-    body: string,
-    icon?: string
-  ) => void;
+  sendLocalNotification: (title: string, body: string, icon?: string) => void;
 };
 
 const NotificationsContext = createContext<
@@ -140,7 +135,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const sendLocalNotification = (
-    id: number,
     title: string,
     body: string,
     icon?: string
