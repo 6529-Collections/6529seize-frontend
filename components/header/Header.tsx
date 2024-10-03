@@ -32,6 +32,7 @@ export interface HeaderLink {
 }
 
 export default function Header(props: Readonly<Props>) {
+  // TODO: change it back  const capacitor = useCapacitor();
   const capacitor = { isCapacitor: true };
   const { seizeConnectOpen } = useSeizeConnect();
 
