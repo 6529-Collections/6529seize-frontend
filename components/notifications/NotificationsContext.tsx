@@ -154,14 +154,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           if (router.pathname !== notificationsPath) {
             router.push(notificationsPath);
           } else {
-            router.push(
-              {
-                pathname: notificationsPath,
-                query: { ...router.query, refresh: Date.now() / 1000 },
-              },
-              undefined,
-              { shallow: true }
-            );
+            router.reload();
           }
         };
         console.log("Local notification sent", notification);
