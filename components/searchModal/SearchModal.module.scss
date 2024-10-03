@@ -126,7 +126,7 @@
   padding: 10px;
   cursor: pointer;
   &:hover {
-    background-color: $off-white;
+    background-color: $off-white !important;
   }
 
   &:disabled {
@@ -136,10 +136,12 @@
 }
 
 .searchBtnActive {
-  background-color: lighten($color: $green, $amount: 10);
+  background-color: lighten($color: $green, $amount: 10) !important;
 
-  &:hover {
-    background-color: $green;
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: $green !important;
   }
 }
 

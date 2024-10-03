@@ -78,6 +78,10 @@ export const AuthContext = createContext<AuthContextType>({
   title: DEFAULT_TITLE,
 });
 
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
 export default function Auth({
   children,
 }: {
@@ -85,19 +89,26 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { address } = useAccount();
+
   const { seizeDisconnect } = useSeizeConnect();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
+  const [connectedProfile, setConnectedProfile] =
+    useState<IProfileAndConsolidations>();
+
+  useEffect(() => {
+    if (address && getAuthJwt()) {
+      commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${address}`,
-      }),
-    enabled: !!address,
-  });
+      }).then((profile) => {
+        setConnectedProfile(profile);
+      });
+    } else {
+      setConnectedProfile(undefined);
+    }
+  }, [address, getAuthJwt()]);
 
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
     queryKey: [
@@ -141,11 +152,15 @@ export default function Auth({
     }
   }, [profileProxies, connectedProfile]);
 
+  function reset() {
+    removeAuthJwt();
+    invalidateAll();
+    setActiveProfileProxy(null);
+  }
+
   useEffect(() => {
     if (!address) {
-      removeAuthJwt();
-      invalidateAll();
-      setActiveProfileProxy(null);
+      reset();
       return;
     } else {
       const isAuth = validateJwt({
@@ -154,9 +169,7 @@ export default function Auth({
         role: activeProfileProxy?.created_by.id ?? null,
       });
       if (!isAuth) {
-        removeAuthJwt();
-        setActiveProfileProxy(null);
-        invalidateAll();
+        reset();
         setShowSignModal(true);
       }
     }
@@ -441,8 +454,7 @@ export default function Auth({
         setActiveProfileProxy: onActiveProfileProxy,
         setTitle,
         title: pageTitle,
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
       <Modal
@@ -450,8 +462,7 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered
-      >
+        centered>
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -477,15 +488,13 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnect();
-            }}
-          >
+            }}>
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}
-          >
+            disabled={signMessage.isPending}>
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />

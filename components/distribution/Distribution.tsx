@@ -182,7 +182,7 @@ export default function DistributionPage(props: Readonly<Props>) {
         </Container>
         <Container>
           <Row className={styles.distributionsScrollContainer}>
-            <Col>
+            <Col className="no-padding">
               <Table className={styles.distributionsTable}>
                 <thead>
                   <tr>
@@ -268,6 +268,42 @@ export default function DistributionPage(props: Readonly<Props>) {
     );
   }
 
+  function printEmpty() {
+    return (
+      <Row>
+        <Col xs={12}>
+          <Image
+            loading="eager"
+            width="0"
+            height="0"
+            style={{ height: "auto", width: "100px" }}
+            src="/SummerGlasses.svg"
+            alt="SummerGlasses"
+          />{" "}
+          The Distribution Plan will be made available soon!
+        </Col>
+        <Col xs={12}>
+          Please check back later and make sure to also check the{" "}
+          <a
+            href="https://twitter.com/6529Collections"
+            target="_blank"
+            rel="noreferrer">
+            &#64;6529Collections
+          </a>{" "}
+          account on X for drop updates.
+        </Col>
+      </Row>
+    );
+  }
+
+  function printNotFound() {
+    return (
+      <Row>
+        <Col xs={12}>No results found for the search criteria.</Col>
+      </Row>
+    );
+  }
+
   return (
     <>
       <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -289,6 +325,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   <Col>{printDistributionPhotos()}</Col>
                 </Row>
               )}
+
               <Row>
                 <Col>
                   {nftId &&
@@ -296,32 +333,9 @@ export default function DistributionPage(props: Readonly<Props>) {
                     printDistribution()}
                 </Col>
               </Row>
-              <Row>
-                {!fetching && distributions.length === 0 && (
-                  <>
-                    <Col xs={12}>
-                      <Image
-                        width="0"
-                        height="0"
-                        style={{ height: "auto", width: "100px" }}
-                        src="/SummerGlasses.svg"
-                        alt="SummerGlasses"
-                      />{" "}
-                      The Distribution Plan will be made available soon!
-                    </Col>
-                    <Col xs={12}>
-                      Please check back later and make sure to also check the{" "}
-                      <a
-                        href="https://twitter.com/6529Collections"
-                        target="_blank"
-                        rel="noreferrer">
-                        &#64;6529Collections
-                      </a>{" "}
-                      account on X for drop updates.
-                    </Col>
-                  </>
-                )}
-              </Row>
+              {!fetching && distributions.length === 0 && (
+                <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
+              )}
             </Container>
           </Col>
         </Row>

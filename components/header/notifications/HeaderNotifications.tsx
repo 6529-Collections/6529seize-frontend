@@ -1,17 +1,19 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext, TitleType } from "../../auth/Auth";
+import { useEffect, useState } from "react";
+import { TitleType, useAuth } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { NotificationsResponse } from "../../../generated/models/NotificationsResponse";
 import { commonApiFetch } from "../../../services/api/common-api";
 import Link from "next/link";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { getRandomInt } from "../../../helpers/Helpers";
+import {
+  BRAIN_NOTIFICATION_ICON,
+  useNotifications,
+} from "../../notifications/NotificationsContext";
 
 export default function HeaderNotifications() {
-  const { connectedProfile, setTitle } = useContext(AuthContext);
+  const { connectedProfile, setTitle } = useAuth();
 
-  const capacitor = useCapacitor();
+  const { sendLocalNotification } = useNotifications();
 
   const { data: notifications } = useQuery<NotificationsResponse>({
     queryKey: [
@@ -41,10 +43,10 @@ export default function HeaderNotifications() {
     const hasUnread = !!notifications?.unread_count;
     setHaveUnreadNotifications(hasUnread);
     if (hasUnread) {
-      capacitor.sendNotification(
-        getRandomInt(Number.MAX_SAFE_INTEGER),
+      sendLocalNotification(
         "New Brain Notification",
-        "You have unread notifications!"
+        "You have unread notifications!",
+        BRAIN_NOTIFICATION_ICON
       );
     }
 
@@ -62,16 +64,14 @@ export default function HeaderNotifications() {
         href="/my-stream/notifications"
         aria-label="Notifications"
         title="Notifications"
-        className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-h-10 tw-w-10 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-h-10 tw-w-10 tw-border tw-border-solid tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
         <svg
           className="tw-w-5 tw-h-5 tw-flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
-          stroke="currentColor"
-        >
+          stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
