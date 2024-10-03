@@ -4,7 +4,6 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
-import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
@@ -93,14 +92,6 @@ export default function WaveDetailedDropReply({
           <p className="tw-mb-0 tw-leading-5 tw-text-iron-200 tw-font-normal tw-text-sm tw-truncate">
             {content}
           </p>
-
-          <DropPartMarkdownWithPropLogger
-            partContent={content}
-            mentionedUsers={drop?.mentioned_users ?? []}
-            referencedNfts={drop?.referenced_nfts ?? []}
-            onImageLoaded={() => undefined}
-            textSize="sm"
-          />
         </button>
       </div>
     </div>
