@@ -163,7 +163,7 @@ function DropPartMarkdown({
 
     const baseEndpoint = process.env.BASE_ENDPOINT || "";
     const regex =
-      /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
+  /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=(\d+)/;
     const match = href ? href.match(regex) : null;
     const isSeizeLink = !!match;
     const waveId = match ? match[1] : null;

@@ -4,65 +4,58 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
 import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
-import { useRouter } from "next/router";
 import WaveDetailedFollowingWavesSort from "./WaveDetailedFollowingWavesSort";
 import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
 import { useNewDropsCount } from "../../../hooks/useNewDropsCount";
 import WaveDetailedFollowingWave from "./WaveDetailedFollowingWave";
+import { WAVE_FOLLOWING_WAVES_PARAMS } from "../../react-query-wrapper/utils/query-utils";
 
 interface WaveDetailedFollowingWavesProps {
   readonly activeWaveId: string;
 }
 
-const PAGE_SIZE = 20;
-
 const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
   activeWaveId,
 }) => {
-  const router = useRouter();
-
   const [selectedSort, setSelectedSort] = useState<WavesOverviewType>(
-    WavesOverviewType.RecentlyDroppedTo
+    WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType
   );
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: [
-      QueryKey.WAVES_OVERVIEW,
-      {
-        limit: PAGE_SIZE,
-        type: selectedSort,
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        QueryKey.WAVES_OVERVIEW,
+        {
+          limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+          type: selectedSort,
+          only_waves_followed_by_authenticated_user:
+            WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+        },
+      ],
+      queryFn: async ({ pageParam }: { pageParam: number }) => {
+        const queryParams: Record<string, string> = {
+          limit: `${WAVE_FOLLOWING_WAVES_PARAMS.limit}`,
+          offset: `${pageParam}`,
+          type: selectedSort,
+          only_waves_followed_by_authenticated_user:
+            WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user.toString(),
+        };
+        return await commonApiFetch<Wave[]>({
+          endpoint: `waves-overview`,
+          params: queryParams,
+        });
       },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
-      const queryParams: Record<string, string> = {
-        limit: `${PAGE_SIZE}`,
-        offset: `${pageParam}`,
-        type: selectedSort,
-        only_waves_followed_by_authenticated_user: "true",
-      };
-      return await commonApiFetch<Wave[]>({
-        endpoint: `waves-overview`,
-        params: queryParams,
-      });
-    },
-    initialPageParam: 0,
-    getNextPageParam: (_, allPages, lastPageParam) => {
-      const nextOffset = allPages.flat().length;
-      if (nextOffset === lastPageParam) {
-        return null;
-      }
-      return nextOffset;
-    },
-    placeholderData: keepPreviousData,
-    refetchInterval: 10000,
-  });
+      initialPageParam: 0,
+      getNextPageParam: (_, allPages, lastPageParam) => {
+        const nextOffset = allPages.flat().length;
+        if (nextOffset === lastPageParam) {
+          return null;
+        }
+        return nextOffset;
+      },
+      placeholderData: keepPreviousData,
+      refetchInterval: 10000,
+    });
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {

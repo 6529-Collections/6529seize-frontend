@@ -16,6 +16,7 @@ import {
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
+import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
@@ -23,7 +24,6 @@ export enum WaveDropsSearchStrategy {
   FIND_BOTH = "FIND_BOTH",
 }
 
-const REQUEST_SIZE = 50;
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
 const INACTIVE_POLLING_INTERVAL = 30000;
@@ -59,7 +59,7 @@ export function useWaveDrops(
     QueryKey.DROPS,
     {
       waveId: wave.id,
-      limit: REQUEST_SIZE,
+      limit: WAVE_DROPS_PARAMS.limit,
       dropId: null,
     },
   ];
@@ -82,7 +82,7 @@ export function useWaveDrops(
       } | null;
     }) => {
       const params: Record<string, string> = {
-        limit: REQUEST_SIZE.toString(),
+        limit: WAVE_DROPS_PARAMS.limit.toString(),
       };
       if (pageParam?.serialNo) {
         params.serial_no_limit = `${pageParam.serialNo}`;
