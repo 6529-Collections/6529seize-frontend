@@ -150,7 +150,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         notification.onclick = function () {
           window.focus();
-          router.replace("/my-stream/notifications");
+          router.push(
+            {
+              pathname: "/my-stream/notifications",
+              query: { refresh: Date.now() / 1000 },
+            },
+            undefined,
+            { shallow: true }
+          );
         };
         console.log("Local notification sent", notification);
       })
