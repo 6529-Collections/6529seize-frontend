@@ -12,7 +12,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@capacitor/local-notifications": "^6.1.0",
+    "@capacitor/device": "^6.0.1",
+    "@capacitor/push-notifications": "^6.0.2",
     "@capacitor/share": "^6.0.2",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
@@ -21,7 +22,7 @@
     "@headlessui/react": "^2.0.4",
     "@lexical/react": "^0.14.2",
     "@mojs/core": "^1.7.1",
-    "@openapitools/openapi-generator-cli": "^2.13.4",
+    "@openapitools/openapi-generator-cli": "^2.13.9",
     "@reduxjs/toolkit": "^2.2.5",
     "@tailwindcss/forms": "^0.5.7",
     "@tanstack/query-core": "^5.45.0",
