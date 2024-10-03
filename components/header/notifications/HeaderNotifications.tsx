@@ -5,7 +5,10 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { NotificationsResponse } from "../../../generated/models/NotificationsResponse";
 import { commonApiFetch } from "../../../services/api/common-api";
 import Link from "next/link";
-import { useNotifications } from "../../notifications/NotificationsContext";
+import {
+  BRAIN_NOTIFICATION_ICON,
+  useNotifications,
+} from "../../notifications/NotificationsContext";
 import { getRandomInt } from "../../../helpers/Helpers";
 
 export default function HeaderNotifications() {
@@ -44,7 +47,8 @@ export default function HeaderNotifications() {
       sendLocalNotification(
         getRandomInt(Number.MAX_SAFE_INTEGER),
         "New Brain Notification",
-        "You have unread notifications!"
+        "You have unread notifications!",
+        BRAIN_NOTIFICATION_ICON
       );
     }
 

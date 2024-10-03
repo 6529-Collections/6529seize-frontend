@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useMemo } from "react";
-import { LocalNotifications } from "@capacitor/local-notifications";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -15,8 +14,16 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "../../services/api/common-api";
 
+export const BRAIN_NOTIFICATION_ICON =
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP";
+
 type NotificationsContextType = {
-  sendLocalNotification: (id: number, title: string, body: string) => void;
+  sendLocalNotification: (
+    id: number,
+    title: string,
+    body: string,
+    icon?: string
+  ) => void;
 };
 
 const NotificationsContext = createContext<
@@ -122,45 +129,37 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const initializeLocalNotifications = async (): Promise<boolean> => {
-    LocalNotifications.removeAllListeners();
-    let permission = await LocalNotifications.checkPermissions();
-    if (permission.display === "prompt") {
-      permission = await LocalNotifications.requestPermissions();
+    if (!("Notification" in window)) {
+      console.warn("Local notifications not supported");
+      return false;
     }
-    const isGranted = permission.display === "granted";
-    if (isGranted) {
-      LocalNotifications.addListener("localNotificationActionPerformed", () => {
-        console.log(
-          "Local notification action performed",
-          "redirecting to notifications"
-        );
-        router.push("/my-stream/notifications");
-      });
-    }
-    return isGranted;
+
+    let permission = await Notification.requestPermission();
+
+    return permission === "granted";
   };
 
-  const sendLocalNotification = (id: number, title: string, body: string) => {
+  const sendLocalNotification = (
+    id: number,
+    title: string,
+    body: string,
+    icon?: string
+  ) => {
     if (isCapacitor) return;
 
     initializeLocalNotifications()
-      .then(() =>
-        LocalNotifications.schedule({
-          notifications: [
-            {
-              id,
-              title,
-              body,
-            },
-          ],
-        })
-          .then((result) => {
-            console.log("Local notification sent", result);
-          })
-          .catch((error) => {
-            console.error("Error scheduling local notification", error);
-          })
-      )
+      .then(() => {
+        const notification = new Notification(title, {
+          body: body,
+          icon: icon,
+        });
+
+        notification.onclick = function () {
+          window.focus();
+          router.push("/my-stream/notifications");
+        };
+        console.log("Local notification sent", notification);
+      })
       .catch((error) =>
         console.error("Error initializing local notifications", error)
       );
