@@ -41,7 +41,7 @@ export default function CommunityActivityPage({
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Community Activity | 6529 SEIZE",
+      title: "Network Activity | 6529 SEIZE",
     });
   }, []);
 
