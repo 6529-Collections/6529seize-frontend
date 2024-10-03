@@ -15,8 +15,8 @@ export async function login(page: Page, baseURL: string) {
   if (page.url().includes('/access')) {
     console.log('Redirected to /access, attempting login...');
     
-    const password = process.env.STAGING_PASSWORD || 'default_password';
-    console.log(`Using password: ${password.slice(0, 2)}${'*'.repeat(password.length - 2)}`);
+    const password = process.env.STAGING_PASSWORD;
+    console.log(`Using password: ${password ? '*'.repeat(password.length) : 'NOT SET IN ENV'}`);
 
     const inputField = page.locator('input[type="text"]');
     
