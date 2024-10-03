@@ -16,7 +16,7 @@ test.describe('The Memes Page', () => {
     await page.goto('/the-memes');
     
     // Wait for the meme items to load
-    await page.waitForSelector('.row > div > a[href^="/the-memes/"]', { timeout: 10000 });
+    await page.waitForSelector('.row > div > a[href^="/the-memes/"]');
     
     // Get all meme items
     const memeItems = page.locator('.row > div > a[href^="/the-memes/"]');
