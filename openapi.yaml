@@ -1919,6 +1919,12 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/WavesOverviewType"
+        - name: only_waves_followed_by_authenticated_user
+          in: query
+          description: If true then result only includes waves what authenticated user follows
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import WaveDetailed from "../../components/waves/detailed/WaveDetailed";
 import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Wave } from "../../generated/models/Wave";
 import { commonApiFetch } from "../../services/api/common-api";
@@ -22,13 +22,19 @@ export default function WavePage() {
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const { data: wave, isError } = useQuery<Wave>({
+  const {
+    data: wave,
+    isError,
+    isFetching,
+  } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
         endpoint: `waves/${wave_id}`,
       }),
     enabled: !!wave_id,
+    staleTime: 60000,
+    placeholderData: keepPreviousData,
   });
 
   const getBreadCrumbs = (): Crumb[] => {
@@ -60,7 +66,7 @@ export default function WavePage() {
         parentElement.appendChild(elementToRemove);
       }
     };
-  }, []); 
+  }, []);
 
   return (
     <>
@@ -78,19 +84,19 @@ export default function WavePage() {
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
-     <style>{`
-          body {
-            overflow: hidden !important;
-          }
-        `}</style> 
+        <style>{`
+        body {
+          overflow: hidden !important;
+        }
+      `}</style>
       </Head>
-      <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col tw-h-screen">
+      <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col tw-h-screen tw-overflow-hidden">
         <div>
           <Header isSmall={true} />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
 
-        <div className="tw-flex-1 lg:tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
+        <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
           <AnimatePresence mode="wait">
             {!wave && !isError && (
               <motion.div
@@ -126,13 +132,12 @@ export default function WavePage() {
             )}
             {wave && !isError && (
               <motion.div
-                key={`${wave.id}-content`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <WaveDetailed wave={wave} isFetching={false} />
+                <WaveDetailed wave={wave} isFetching={isFetching} />
               </motion.div>
             )}
           </AnimatePresence>

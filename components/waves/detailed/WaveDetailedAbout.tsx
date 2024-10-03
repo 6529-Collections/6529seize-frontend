@@ -97,7 +97,7 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <WaveDetailedFollowingWaves />
+      <WaveDetailedFollowingWaves activeWaveId={wave.id} />
     </>
   );
 };

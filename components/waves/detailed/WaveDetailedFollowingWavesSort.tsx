@@ -1,27 +1,35 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
 
-interface WaveDetailedFollowingWavesSortProps {}
+interface WaveDetailedFollowingWavesSortProps {
+  readonly selectedOption: WavesOverviewType;
+  readonly setSelectedOption: (option: WavesOverviewType) => void;
+}
 
 const WaveDetailedFollowingWavesSort: React.FC<
   WaveDetailedFollowingWavesSortProps
-> = ({}) => {
+> = ({ selectedOption, setSelectedOption }) => {
+  const LABELS: Record<WavesOverviewType, string> = {
+    [WavesOverviewType.Latest]: "Latest",
+    [WavesOverviewType.MostSubscribed]: "Most Subscribed",
+    [WavesOverviewType.HighLevelAuthor]: "High Level Author",
+    [WavesOverviewType.AuthorYouHaveRepped]: "Author You Have Repped",
+    [WavesOverviewType.MostDropped]: "Most Dropped",
+    [WavesOverviewType.MostDroppedByYou]: "Most Dropped By You",
+    [WavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
+    [WavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped By You",
+  };
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleOptionSelect = (option: string) => {
-    if (selectedOption === option) {
-      setSelectedOption(null);
+  const handleOptionSelect = (option: WavesOverviewType) => {
+    setSelectedOption(option);
       setIsDropdownOpen(false);
-    } else {
-      setSelectedOption(option);
-      setIsDropdownOpen(false);
-    }
   };
 
   useEffect(() => {
@@ -48,7 +56,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
           onClick={toggleDropdown}
           className="tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-justify-between tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-primary-400 tw-bg-iron-950 tw-rounded-lg focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-border-primary-400 tw-transition-colors tw-duration-300 tw-ease-out tw-px-2 tw-py-2 -tw-mr-2"
         >
-          <span>{selectedOption || "Sort by"}</span>
+          <span>{LABELS[selectedOption] || "Sort by"}</span>
           <svg
             className="tw-size-4 tw-flex-shrink-0"
             xmlns="http://www.w3.org/2000/svg"
@@ -75,14 +83,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
               className="tw-absolute tw-z-10 tw-w-56 tw-right-0 tw-bottom-full tw-mb-1 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-lg tw-shadow-lg tw-shadow-iron-950/50"
             >
               <div className="tw-py-2 tw-px-2 tw-space-y-1.5">
-                {[
-                  "Latest Drops",
-                  "Most Subscribed",
-                  "Most Dropped",
-                  "Most Dropped by You",
-                  "Recently Dropped",
-                  "Recently Dropped by You",
-                ].map((option) => (
+                {Object.values(WavesOverviewType).map((option) => (
                   <div
                     key={option}
                     onClick={() => handleOptionSelect(option)}
@@ -92,7 +93,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
                         : "tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-100"
                     }`}
                   >
-                    {option}
+                    {LABELS[option]}
                     {selectedOption === option && (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

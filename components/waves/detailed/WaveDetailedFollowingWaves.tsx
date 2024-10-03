@@ -12,47 +12,63 @@ import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver"
 import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
 import { useRouter } from "next/router";
 import WaveDetailedFollowingWavesSort from "./WaveDetailedFollowingWavesSort";
+import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { getTimeAgoShort } from "../../../helpers/Helpers";
+
+interface WaveDetailedFollowingWavesProps {
+  readonly activeWaveId: string;
+}
 
 const PAGE_SIZE = 20;
 
-const WaveDetailedFollowingWaves: React.FC = () => {
+const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
+  activeWaveId,
+}) => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const queryKey = [
-    QueryKey.DROPS,
-    {
-      page_size: PAGE_SIZE,
-      target_type: "WAVE",
-    },
-  ];
+  const [selectedSort, setSelectedSort] = useState<WavesOverviewType>(
+    WavesOverviewType.RecentlyDroppedTo
+  );
 
-  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey,
-      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-        const params: Record<string, string> = {
-          page_size: PAGE_SIZE.toString(),
-        };
-
-        if (pageParam) {
-          params.page = `${pageParam}`;
-        }
-        return await commonApiFetch<{
-          data: { target: Wave }[];
-          count: number;
-          page: number;
-          next: boolean;
-        }>({
-          endpoint: `/identity-subscriptions/outgoing/WAVE`,
-          params,
-        });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: [
+      QueryKey.WAVES_OVERVIEW,
+      {
+        limit: PAGE_SIZE,
+        type: selectedSort,
       },
-      initialPageParam: null,
-      getNextPageParam: (lastPage) =>
-        lastPage.next ? lastPage.page + 1 : null,
-      placeholderData: keepPreviousData,
-    });
+    ],
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      const queryParams: Record<string, string> = {
+        limit: `${PAGE_SIZE}`,
+        offset: `${pageParam}`,
+        type: selectedSort,
+        only_waves_followed_by_authenticated_user: "true",
+      };
+      return await commonApiFetch<Wave[]>({
+        endpoint: `waves-overview`,
+        params: queryParams,
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (_, allPages, lastPageParam) => {
+      const nextOffset = allPages.flat().length;
+      if (nextOffset === lastPageParam) {
+        return null;
+      }
+      return nextOffset;
+    },
+    placeholderData: keepPreviousData,
+    refetchInterval: 10000,
+  });
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -64,7 +80,7 @@ const WaveDetailedFollowingWaves: React.FC = () => {
     if (!data?.pages.length) {
       return [];
     }
-    return data.pages.flatMap((wave) => wave.data.map((wave) => wave.target));
+    return data.pages.flatMap((page) => page);
   };
 
   const [waves, setWaves] = useState<Wave[]>(getWaves());
@@ -127,10 +143,13 @@ const WaveDetailedFollowingWaves: React.FC = () => {
         <div className="tw-h-8 tw-flex tw-items-center tw-gap-x-2 tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200 tw-tracking-tight">
-              Waves you follow
+              Following
             </p>
           </div>
-          <WaveDetailedFollowingWavesSort />
+          <WaveDetailedFollowingWavesSort
+            selectedOption={selectedSort}
+            setSelectedOption={setSelectedSort}
+          />
         </div>
         <div className="tw-mt-2 tw-max-h-60 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
@@ -150,28 +169,18 @@ const WaveDetailedFollowingWaves: React.FC = () => {
                         className="tw-w-full tw-h-full tw-rounded-full tw-object-contain"
                       />
                     )}
-                    <div className="tw-absolute -tw-top-1 -tw-right-1 tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-xs tw-animate-pulse group-hover:tw-animate-bounce">
-                      1
-                    </div>
+                    {wave.id !== activeWaveId && (
+                      <div className="tw-absolute -tw-top-1 -tw-right-1 tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-xs tw-animate-pulse group-hover:tw-animate-bounce">
+                        1
+                      </div>
+                    )}
                   </div>
-                  <div className="tw-flex tw-items-center tw-gap-x-2">
+                  <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
                     <span>{wave.name}</span>
-                    <div className="tw-flex tw-items-center tw-gap-x-1 tw-text-xs tw-text-iron-400">
-                      <svg
-                        className="tw-size-4 tw-flex-shrink-0"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="2"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
-                        />
-                      </svg>
-                      <span>75</span>
+                    <div className="tw-flex tw-items-center tw-pr-4 tw-text-xs tw-text-iron-400">
+                      <span>
+                        {getTimeAgoShort(wave.metrics.latest_drop_timestamp)}
+                      </span>
                     </div>
                   </div>
                 </Link>
