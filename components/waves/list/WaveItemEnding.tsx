@@ -25,17 +25,17 @@ export default function WaveItemEnding({ wave }: { readonly wave: Wave }) {
 
       {!haveEnding ? (
         <span>
-          <span className="tw-text-iron-400">Ending</span>{" "}
+          <span className="tw-text-iron-400 xl:tw-hidden min-[1400px]:tw-inline-flex">Ending</span>{" "}
           <span className="tw-font-medium tw-text-iron-50">Never</span>
         </span>
       ) : isPast ? (
         <span>
-          <span className="tw-text-iron-400">Ending</span>{" "}
+          <span className="tw-text-iron-400 xl:tw-hidden min-[1400px]:tw-inline-flex">Ending</span>{" "}
           <span className="tw-font-medium tw-text-iron-50">Ended</span>
         </span>
       ) : (
         <span>
-          <span className="tw-text-iron-400">Ending in</span>{" "}
+          <span className="tw-text-iron-400 xl:tw-hidden min-[1400px]:tw-inline-flex">Ending in</span>{" "}
           <span className="tw-font-medium tw-text-iron-50">
             {getTimeUntil(wave.wave.period?.max!).replace("in ", "")}
           </span>

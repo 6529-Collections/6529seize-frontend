@@ -55,7 +55,6 @@ export type CreateDropMetadataType =
 
 interface CreateDropContent {
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: Wave;
   readonly drop: CreateDropConfig | null;
@@ -306,7 +305,6 @@ const getOptimisticDrop = (
     voting: { authenticated_user_eligible: boolean };
   },
   activeDrop: ActiveDropState | null,
-  rootDropId: string | null
 ): Drop | null => {
   if (!connectedProfile?.profile) {
     return null;
@@ -317,13 +315,6 @@ const getOptimisticDrop = (
       return {
         drop_id: activeDrop.drop.id,
         drop_part_id: activeDrop.partId,
-        is_deleted: false,
-      };
-    }
-    if (rootDropId) {
-      return {
-        drop_id: rootDropId,
-        drop_part_id: 1,
         is_deleted: false,
       };
     }
@@ -390,7 +381,6 @@ const getOptimisticDrop = (
 
 export default function CreateDropContent({
   activeDrop,
-  rootDropId,
   onCancelReplyQuote,
   wave,
   isStormMode,
@@ -484,12 +474,6 @@ export default function CreateDropContent({
       return {
         drop_id: activeDrop.drop.id,
         drop_part_id: activeDrop.partId,
-      };
-    }
-    if (rootDropId) {
-      return {
-        drop_id: rootDropId,
-        drop_part_id: 1,
       };
     }
     return undefined;
@@ -630,10 +614,9 @@ export default function CreateDropContent({
         connectedProfile,
         wave,
         activeDrop,
-        rootDropId
       );
       if (optimisticDrop) {
-        addOptimisticDrop({ drop: optimisticDrop, rootDropId });
+        addOptimisticDrop({ drop: optimisticDrop });
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);

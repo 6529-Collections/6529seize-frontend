@@ -174,7 +174,6 @@ type ReactQueryWrapperContextType = {
   waitAndInvalidateDrops: () => void;
   addOptimisticDrop: (params: {
     readonly drop: Drop;
-    readonly rootDropId: string | null;
   }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
@@ -1129,12 +1128,10 @@ export default function ReactQueryWrapper({
 
   const addOptimisticDrop = async ({
     drop,
-    rootDropId,
   }: {
     readonly drop: Drop;
-    readonly rootDropId: string | null;
   }): Promise<void> => {
-    addDropToDrops(queryClient, { drop, rootDropId });
+    addDropToDrops(queryClient, { drop });
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {

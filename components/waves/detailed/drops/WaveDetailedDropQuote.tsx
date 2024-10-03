@@ -83,7 +83,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
 
   const navigateToDropInWave = () => {
     if (drop?.wave.id && drop?.id) {
-      router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
     }
   };
 

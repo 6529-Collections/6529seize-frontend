@@ -47,6 +47,11 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     updateDimensions();
   }, [onImageLoaded, updateDimensions]);
 
+  const handleImageClick = useCallback((e: React.MouseEvent<HTMLImageElement>) => {
+    e.stopPropagation();
+    window.open(src, '_blank');
+  }, [src]);
+
   const aspectRatio = dimensions.height
     ? dimensions.width / dimensions.height
     : 0;
@@ -56,6 +61,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     width: 'auto',
     maxWidth: '100%',
     objectFit: 'contain' as const,
+    cursor: 'pointer',
   };
 
   const placeholderStyle = aspectRatio
@@ -78,6 +84,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
         src={src}
         alt={alt}
         onLoad={handleImageLoad}
+        onClick={handleImageClick}
         className={`${isLoading ? "tw-opacity-0" : "tw-opacity-100"}`}
         style={imageStyle}
         {...props}

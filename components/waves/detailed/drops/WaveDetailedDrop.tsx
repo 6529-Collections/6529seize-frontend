@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -15,8 +15,7 @@ enum GroupingThreshold {
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
-  otherDrop: ExtendedDrop | null,
-  rootDropId: string | null
+  otherDrop: ExtendedDrop | null
 ): boolean => {
   if (!otherDrop || currentDrop.parts.length > 1) {
     return false;
@@ -32,11 +31,10 @@ const shouldGroupWithDrop = (
   }
 
   const bothNotReplies = !currentDrop.reply_to && !otherDrop.reply_to;
-  const currentReplyToRoot = currentDrop.reply_to?.drop_id === rootDropId;
   const repliesInSameThread =
     currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
 
-  return bothNotReplies || currentReplyToRoot || repliesInSameThread;
+  return bothNotReplies || repliesInSameThread;
 };
 
 interface WaveDetailedDropProps {
@@ -45,7 +43,6 @@ interface WaveDetailedDropProps {
   readonly nextDrop: ExtendedDrop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
   readonly onReply: ({
     drop,
@@ -62,6 +59,7 @@ interface WaveDetailedDropProps {
     partId: number;
   }) => void;
   readonly onActiveDropClick?: () => void;
+  readonly onReplyClick: (serialNo: number) => void;
 }
 
 export default function WaveDetailedDrop({
@@ -70,27 +68,21 @@ export default function WaveDetailedDrop({
   nextDrop,
   showWaveInfo,
   activeDrop,
-  rootDropId,
   onReply,
   onQuote,
+  onReplyClick,
   showReplyAndQuote,
   onActiveDropClick,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
+
+
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(
-    drop,
-    previousDrop,
-    rootDropId
-  );
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(
-    drop,
-    nextDrop,
-    rootDropId
-  );
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop);
 
   const getGroupingClass = () => {
     if (shouldGroupWithPreviousDrop) return "";
@@ -102,16 +94,16 @@ export default function WaveDetailedDrop({
 
   return (
     <div
-      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 ${
+      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-rounded-xl tw-transition-colors tw-duration-300 ${
         isActiveDrop
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
           : "tw-bg-iron-950 hover:tw-bg-iron-900"
       } ${groupingClass}`}
     >
       {drop.reply_to &&
-        drop.reply_to.drop_id !== rootDropId &&
         drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
           <WaveDetailedDropReply
+            onReplyClick={onReplyClick}
             dropId={drop.reply_to.drop_id}
             dropPartId={drop.reply_to.drop_part_id}
             maybeDrop={

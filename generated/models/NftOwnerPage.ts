@@ -10,51 +10,45 @@
  * Do not edit the class manually.
  */
 
+import { NftOwner } from '../models/NftOwner';
 import { HttpFile } from '../http/http';
 
-export class WaveMetrics {
-    'subscribers_count': number;
-    'drops_count': number;
-    'latest_drop_timestamp': number;
-    'your_drops_count'?: number;
-    'your_latest_drop_timestamp'?: number;
+export class NftOwnerPage {
+    'data': Array<NftOwner>;
+    'count': number;
+    'page': number;
+    'next': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "subscribers_count",
-            "baseName": "subscribers_count",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<NftOwner>",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "drops_count",
-            "baseName": "drops_count",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "latest_drop_timestamp",
-            "baseName": "latest_drop_timestamp",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "your_drops_count",
-            "baseName": "your_drops_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "your_latest_drop_timestamp",
-            "baseName": "your_latest_drop_timestamp",
-            "type": "number",
-            "format": "int64"
+            "name": "next",
+            "baseName": "next",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WaveMetrics.attributeTypeMap;
+        return NftOwnerPage.attributeTypeMap;
     }
 
     public constructor() {

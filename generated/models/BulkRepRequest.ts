@@ -10,45 +10,24 @@
  * Do not edit the class manually.
  */
 
-import { AggregatedActivity } from '../models/AggregatedActivity';
+import { BulkRepTarget } from '../models/BulkRepTarget';
 import { HttpFile } from '../http/http';
 
-export class AggregatedActivityPage {
-    'data': Array<AggregatedActivity>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class BulkRepRequest {
+    'targets': Array<BulkRepTarget>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<AggregatedActivity>",
-            "format": ""
-        },
-        {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "string",
+            "name": "targets",
+            "baseName": "targets",
+            "type": "Array<BulkRepTarget>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return AggregatedActivityPage.attributeTypeMap;
+        return BulkRepRequest.attributeTypeMap;
     }
 
     public constructor() {
