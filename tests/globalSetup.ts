@@ -14,7 +14,7 @@ async function globalSetup(config: FullConfig) {
       throw new Error('baseURL is not defined in the configuration');
     }
     
-    // Save signed-in state to 'storageState.json'
+    // Save signed-in state
     await context.storageState({ path: 'storageState.json' });
   } catch (error) {
     console.error('Error during global setup:', error);

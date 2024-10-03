@@ -1,7 +1,6 @@
 import { PlaywrightTestConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
 
-// Specify the path to your .env.local file
 dotenv.config(); // Loads variables from .env
 dotenv.config({ path: '.env.local' }); // Overrides or adds variables from .env.local
 
