@@ -31,9 +31,9 @@ import {
 import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
 
 interface Props {
-  readonly wave: Wave;
-  readonly wavesOverview: Wave[];
-  readonly waveDrops: WaveDropsFeed;
+  readonly wave: Wave | null;
+  readonly wavesOverview: Wave[] | null;
+  readonly waveDrops: WaveDropsFeed | null;
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -48,50 +48,55 @@ export default function WavePage({ pageProps }: { pageProps: Props }) {
   const { setTitle, title } = useContext(AuthContext);
   const queryClient = useQueryClient();
 
-  const waveInit = queryClient.getQueryData<Wave>([
-    QueryKey.WAVE,
-    { wave_id: pageProps.wave.id },
-  ]);
+  if (pageProps.wave) {
+    const waveInit = queryClient.getQueryData<Wave>([
+      QueryKey.WAVE,
+      { wave_id: pageProps.wave.id },
+    ]);
 
-  if (!waveInit) {
-    setWave(pageProps.wave);
+    if (!waveInit) {
+      setWave(pageProps.wave);
+    }
   }
 
-  const followingWavesInit = queryClient.getQueryData<Wave[]>([
-    QueryKey.WAVES_OVERVIEW,
-    {
-      limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
-      type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
-      only_waves_followed_by_authenticated_user:
-        WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
-    },
-  ]);
+  if (pageProps.wavesOverview) {
+    const followingWavesInit = queryClient.getQueryData<Wave[]>([
+      QueryKey.WAVES_OVERVIEW,
+      {
+        limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+        type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+        only_waves_followed_by_authenticated_user:
+          WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+      },
+    ]);
 
-  if (!followingWavesInit) {
-    setWavesOverviewPage(pageProps.wavesOverview);
+    if (!followingWavesInit) {
+      setWavesOverviewPage(pageProps.wavesOverview);
+    }
   }
 
-  const waveDropsInit = queryClient.getQueryData<WaveDropsFeed>([
-    QueryKey.DROPS,
-    {
-      waveId: pageProps.wave.id,
-      limit: WAVE_DROPS_PARAMS.limit,
-      dropId: null,
-    },
-  ]);
+  if (pageProps.waveDrops && pageProps.wave) {
+    const waveDropsInit = queryClient.getQueryData<WaveDropsFeed>([
+      QueryKey.DROPS,
+      {
+        waveId: pageProps.wave.id,
+        limit: WAVE_DROPS_PARAMS.limit,
+        dropId: null,
+      },
+    ]);
 
-  if (!waveDropsInit) {
-    setWaveDrops({ waveDrops: pageProps.waveDrops, waveId: pageProps.wave.id });
+    if (!waveDropsInit) {
+      setWaveDrops({
+        waveDrops: pageProps.waveDrops,
+        waveId: pageProps.wave.id,
+      });
+    }
   }
 
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const {
-    data: wave,
-    isError,
-    isFetching,
-  } = useQuery<Wave>({
+  const { data: wave } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
@@ -99,7 +104,7 @@ export default function WavePage({ pageProps }: { pageProps: Props }) {
       }),
     enabled: !!wave_id,
     staleTime: 60000,
-    initialData: pageProps.wave,
+    initialData: pageProps.wave ?? undefined,
     placeholderData: keepPreviousData,
   });
 
@@ -163,7 +168,7 @@ export default function WavePage({ pageProps }: { pageProps: Props }) {
         </div>
 
         <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
-          <WaveDetailed wave={wave} />
+          {wave && <WaveDetailed wave={wave} />}
         </div>
       </main>
     </>
@@ -201,11 +206,11 @@ export async function getServerSideProps(
     };
   } catch (e: any) {
     return {
-      redirect: {
-        permanent: false,
-        destination: "/404",
+      props: {
+        wave: null,
+        wavesOverview: null,
+        waveDrops: null,
       },
-      props: {},
-    } as any;
+    };
   }
 }
