@@ -13,35 +13,6 @@ import CircleLoader, {
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import useCapacitor from "../../../../hooks/useCapacitor";
 
-const waitForImagesToLoad = (container: HTMLElement): Promise<void> => {
-  return new Promise((resolve) => {
-    const images = Array.from(container.querySelectorAll('img'));
-    const unloadedImages = images.filter(img => !img.complete);
-    
-    if (unloadedImages.length === 0) {
-      resolve();
-      return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement;
-          img.onload = () => {
-            unloadedImages.splice(unloadedImages.indexOf(img), 1);
-            if (unloadedImages.length === 0) {
-              observer.disconnect();
-              resolve();
-            }
-          };
-        }
-      });
-    });
-
-    unloadedImages.forEach(img => observer.observe(img));
-  });
-};
-
 interface WaveDropsProps {
   readonly wave: Wave;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
@@ -85,9 +56,8 @@ export default function WaveDrops({
   const [isScrolling, setIsScrolling] = useState(false);
 
   const scrollToSerialNo = useCallback(
-    async (behavior: ScrollBehavior) => {
-      if (serialNo && targetDropRef.current && scrollContainerRef.current) {
-        await waitForImagesToLoad(scrollContainerRef.current);
+    (behavior: ScrollBehavior) => {
+      if (serialNo && targetDropRef.current) {
         targetDropRef.current.scrollIntoView({
           behavior: behavior,
           block: "center",
@@ -96,7 +66,7 @@ export default function WaveDrops({
       }
       return false;
     },
-    [serialNo, targetDropRef, scrollContainerRef]
+    [serialNo, targetDropRef.current]
   );
 
   const [newItemsCount, setNewItemsCount] = useState(0);
