@@ -12,8 +12,10 @@ import { DropMentionedUser } from "../../../../generated/models/DropMentionedUse
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
-import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
+
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
+import WaveDetailedDropQuoteWithDropId from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithDropId";
+import WaveDetailedDropQuoteWithSerialNo from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithSerialNo";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -163,15 +165,18 @@ function DropPartMarkdown({
 
     const baseEndpoint = process.env.BASE_ENDPOINT || "";
     const regex =
-  /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=(\d+)/;
+      /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=(\d+)/;
     const match = href ? href.match(regex) : null;
     const isSeizeLink = !!match;
     const waveId = match ? match[1] : null;
-    const dropId = match ? match[2] : null;
+    const serialNo = match ? match[2] : null;
 
-    if (isSeizeLink && dropId && waveId) {
+    if (isSeizeLink && serialNo && waveId) {
       return (
-        <WaveDetailedDropQuote dropId={dropId} partId={1} maybeDrop={null} />
+        <WaveDetailedDropQuoteWithSerialNo
+          serialNo={parseInt(serialNo)}
+          waveId={waveId}
+        />
       );
     }
 
