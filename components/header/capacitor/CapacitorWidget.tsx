@@ -70,6 +70,10 @@ export default function CapacitorWidget() {
     };
   }, [canGoBack, canGoForward]);
 
+  if (capacitor.keyboardVisible) {
+    return <></>;
+  }
+
   return (
     <div
       className={`${styles.capacitorWidget} ${

@@ -87,9 +87,9 @@ export default function WaveDetailedDropReply({
 
         <button
           onClick={() => drop?.serial_no && onReplyClick(drop.serial_no)}
-          className="tw-min-w-0 tw-w-full tw-text-left tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-cursor-pointer"
+          className="tw-min-w-0 tw-text-left tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-cursor-pointer"
         >
-          <p className="tw-mb-0 tw-leading-5 tw-text-iron-200 tw-font-normal tw-text-sm tw-truncate">
+          <p className="tw-mb-0 tw-leading-5 tw-text-iron-200 tw-font-normal tw-text-sm tw-truncate hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
             {content}
           </p>
         </button>

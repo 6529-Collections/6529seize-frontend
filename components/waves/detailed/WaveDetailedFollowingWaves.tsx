@@ -85,12 +85,10 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
   return (
     <div className="tw-mt-4 tw-mb-3">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-5 tw-px-5">
-        <div className="tw-h-8 tw-flex tw-items-center tw-gap-x-2 tw-justify-between">
-          <div className="tw-flex tw-items-center tw-gap-x-3">
-            <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200 tw-tracking-tight">
-              Following
-            </p>
-          </div>
+        <div className="tw-flex tw-flex-col tw-gap-y-1">
+          <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-200 tw-tracking-tight">
+            Waves you follow
+          </p>
           <WaveDetailedFollowingWavesSort
             selectedOption={selectedSort}
             setSelectedOption={setSelectedSort}

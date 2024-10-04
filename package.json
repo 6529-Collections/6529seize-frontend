@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@capacitor/device": "^6.0.1",
+    "@capacitor/keyboard": "^6.0.2",
     "@capacitor/push-notifications": "^6.0.2",
     "@capacitor/share": "^6.0.2",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",

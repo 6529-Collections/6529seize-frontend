@@ -41,7 +41,7 @@ const WaveDetailedDropReplyAuthor: React.FC<
               </div>
             </div>
           ) : (
-            <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/20" />
+            <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10" />
           )}
         </div>
         <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
