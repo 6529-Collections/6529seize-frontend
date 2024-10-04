@@ -6,7 +6,6 @@ import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
-import { useRouter } from "next/router";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 interface WaveDetailedDropQuoteProps {
@@ -20,7 +19,6 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
   partId,
   onQuoteClick,
 }) => {
-  const router = useRouter();
 
   const [quotedPart, setQuotedPart] = useState<DropPart | null>(null);
   useEffect(() => {
