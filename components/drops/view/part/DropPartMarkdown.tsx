@@ -17,8 +17,10 @@ import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDetailedDropQuoteWithDropId from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithDropId";
 import WaveDetailedDropQuoteWithSerialNo from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithSerialNo";
 import { Drop } from "../../../../generated/models/Drop";
-import { parseSeizeLink, SeizeLinkInfo } from "../../../../helpers/SeizeLinkParser";
-
+import {
+  parseSeizeLink,
+  SeizeLinkInfo,
+} from "../../../../helpers/SeizeLinkParser";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
@@ -186,7 +188,8 @@ function DropPartMarkdown({
   };
 
   const parseTwitterLink = (href: string): string | null => {
-    const twitterRegex = /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
+    const twitterRegex =
+      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
     const match = href.match(twitterRegex);
     return match ? match[3] : null;
   };
