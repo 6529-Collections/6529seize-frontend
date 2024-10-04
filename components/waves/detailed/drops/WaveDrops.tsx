@@ -12,13 +12,13 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { useRouter } from "next/router";
 
 interface WaveDropsProps {
   readonly wave: Wave;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly activeDrop: ActiveDropState | null;
-  readonly onActiveDropClick?: () => void;
   readonly initialDrop: number | null;
 }
 
@@ -27,10 +27,10 @@ export default function WaveDrops({
   onReply,
   onQuote,
   activeDrop,
-  onActiveDropClick,
   initialDrop,
 }: WaveDropsProps) {
   const capacitor = useCapacitor();
+  const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
@@ -151,6 +151,14 @@ export default function WaveDrops({
     }
   }, [init, serialNo]);
 
+  const onQuoteClick = (drop: Drop) => {
+    if (drop.wave.id !== wave.id) {
+      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+    } else {
+      setSerialNo(drop.serial_no);
+    }
+  };
+
   return (
     <div
       className={`tw-flex tw-flex-col tw-relative ${
@@ -172,7 +180,6 @@ export default function WaveDrops({
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <DropsList
             onReplyClick={setSerialNo}
-            onActiveDropClick={onActiveDropClick}
             drops={drops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
@@ -182,6 +189,7 @@ export default function WaveDrops({
             activeDrop={activeDrop}
             serialNo={serialNo}
             targetDropRef={targetDropRef}
+            onQuoteClick={onQuoteClick}
           />
         </div>
       </WaveDropsScrollContainer>

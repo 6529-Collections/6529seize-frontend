@@ -7,6 +7,7 @@ import { ReferencedNft } from "../../../../entities/IDrop";
 import { WaveMin } from "../../../../generated/models/WaveMin";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDetailedDropQuoteWithDropId from "./WaveDetailedDropQuoteWithDropId";
+import { Drop } from "../../../../generated/models/ObjectSerializer";
 
 interface WaveDetailedDropPartContentProps {
   readonly mentionedUsers: DropMentionedUser[];
@@ -19,6 +20,7 @@ interface WaveDetailedDropPartContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly checkOverflow: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
   readonly showMore: boolean;
 }
 
@@ -35,6 +37,7 @@ const WaveDetailedDropPartContent: React.FC<
   activePartIndex,
   setActivePartIndex,
   checkOverflow,
+  onQuoteClick,
   showMore,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -133,6 +136,7 @@ const WaveDetailedDropPartContent: React.FC<
             referencedNfts={memoizedReferencedNfts}
             partContent={activePart.content}
             onImageLoaded={updateContainerHeight}
+            onQuoteClick={onQuoteClick}
           />
           {activePart.quoted_drop?.drop_id && (
             <div className="tw-mt-3">
@@ -144,6 +148,7 @@ const WaveDetailedDropPartContent: React.FC<
                     ? { ...activePart.quoted_drop.drop, wave: wave }
                     : null
                 }
+                onQuoteClick={onQuoteClick}
               />
             </div>
           )}

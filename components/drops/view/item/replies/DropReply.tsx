@@ -118,6 +118,16 @@ export default function DropReply(props: DropReplyProps) {
     );
   };
 
+  const onQuoteClick = (drop: Drop) => {
+    router.push(
+      `/waves/${drop.wave.id}?drop=${drop.serial_no}`,
+      undefined,
+      {
+        shallow: true,
+      }
+    );
+  };
+
   return (
     <div>
       <div className="tw-ml-16 tw-flex tw-items-center tw-gap-x-1.5 tw-cursor-pointer">
@@ -145,6 +155,7 @@ export default function DropReply(props: DropReplyProps) {
             referencedNfts={finalDrop?.referenced_nfts ?? []}
             onImageLoaded={() => undefined}
             textSize="sm"
+            onQuoteClick={onQuoteClick}
           />
         </div>
       </div>

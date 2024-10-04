@@ -11,11 +11,12 @@ interface WaveDetailedDropQuoteWithDropIdProps {
   readonly dropId: string;
   readonly partId: number;
   readonly maybeDrop: Drop | null;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropQuoteWithDropId: React.FC<
   WaveDetailedDropQuoteWithDropIdProps
-> = ({ dropId, partId, maybeDrop }) => {
+> = ({ dropId, partId, maybeDrop, onQuoteClick }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { data: drop } = useQuery<Drop>({
     queryKey: [
@@ -36,7 +37,13 @@ const WaveDetailedDropQuoteWithDropId: React.FC<
     initialData: maybeDrop ?? undefined,
   });
 
-  return <WaveDetailedDropQuote drop={drop ?? null} partId={partId} />;
+  return (
+    <WaveDetailedDropQuote
+      drop={drop ?? null}
+      partId={partId}
+      onQuoteClick={onQuoteClick}
+    />
+  );
 };
 
 export default WaveDetailedDropQuoteWithDropId;

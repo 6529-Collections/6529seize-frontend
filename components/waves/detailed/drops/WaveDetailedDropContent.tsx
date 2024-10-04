@@ -6,6 +6,7 @@ interface WaveDetailedDropContentProps {
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
   onDropClick: () => void;
+  onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
@@ -13,6 +14,7 @@ const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
   activePartIndex,
   setActivePartIndex,
   onDropClick,
+  onQuoteClick,
 }) => {
   return (
     <div>
@@ -21,6 +23,7 @@ const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
         onDropClick={onDropClick}
+        onQuoteClick={onQuoteClick}
       />
     </div>
   );

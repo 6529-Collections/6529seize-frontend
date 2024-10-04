@@ -16,12 +16,14 @@ import Link from "next/link";
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDetailedDropQuoteWithDropId from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithDropId";
 import WaveDetailedDropQuoteWithSerialNo from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithSerialNo";
+import { Drop } from "../../../../generated/models/Drop";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;
   readonly partContent: string | null;
   readonly onImageLoaded: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
   readonly textSize?: "sm" | "md";
 }
 
@@ -30,6 +32,7 @@ function DropPartMarkdown({
   referencedNfts,
   partContent,
   onImageLoaded,
+  onQuoteClick,
   textSize = "md",
 }: DropPartMarkdownProps) {
   const textSizeClass = (() => {
@@ -178,6 +181,7 @@ function DropPartMarkdown({
           <WaveDetailedDropQuoteWithSerialNo
             serialNo={parseInt(serialNo)}
             waveId={waveId}
+            onQuoteClick={onQuoteClick}
           />
         );
       } else if (dropId) {
@@ -186,6 +190,7 @@ function DropPartMarkdown({
             dropId={dropId}
             partId={1}
             maybeDrop={null}
+            onQuoteClick={onQuoteClick}
           />
         );
       }

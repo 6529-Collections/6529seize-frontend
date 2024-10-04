@@ -8,6 +8,7 @@ import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
+import { Drop } from "../../../../generated/models/Drop";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -60,6 +61,7 @@ interface WaveDetailedDropProps {
   }) => void;
 
   readonly onReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 export default function WaveDetailedDrop({
@@ -71,6 +73,7 @@ export default function WaveDetailedDrop({
   onReply,
   onQuote,
   onReplyClick,
+  onQuoteClick,
   showReplyAndQuote,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
@@ -88,6 +91,8 @@ export default function WaveDetailedDrop({
   };
 
   const groupingClass = getGroupingClass();
+
+
 
   return (
     <div
@@ -134,6 +139,7 @@ export default function WaveDetailedDrop({
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
               onDropClick={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
+              onQuoteClick={onQuoteClick}
             />
           </div>
         </div>

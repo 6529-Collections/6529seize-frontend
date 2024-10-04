@@ -12,11 +12,13 @@ import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMar
 interface WaveDetailedDropQuoteProps {
   readonly drop: Drop | null;
   readonly partId: number;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
   drop,
   partId,
+  onQuoteClick,
 }) => {
   const router = useRouter();
 
@@ -58,7 +60,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
 
   const navigateToDropInWave = () => {
     if (drop?.wave.id && drop?.id) {
-      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+      onQuoteClick(drop);
     }
   };
 
@@ -127,6 +129,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 referencedNfts={drop?.referenced_nfts ?? []}
                 onImageLoaded={() => undefined}
                 textSize="sm"
+                onQuoteClick={onQuoteClick}
               />
             </div>
           </div>

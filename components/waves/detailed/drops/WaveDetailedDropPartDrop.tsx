@@ -14,6 +14,7 @@ interface WaveDetailedDropPartDropProps {
   setActivePartIndex: (index: number) => void;
   checkOverflow: () => void;
   showMore: boolean;
+  onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
@@ -26,6 +27,7 @@ const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
   setActivePartIndex,
   checkOverflow,
   showMore,
+  onQuoteClick,
 }) => {
   return (
     <div className="tw-mt-1 tw-flex tw-gap-x-3 tw-h-full tw-relative">
@@ -44,6 +46,7 @@ const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
             setActivePartIndex={setActivePartIndex}
             checkOverflow={checkOverflow}
             showMore={showMore}
+            onQuoteClick={onQuoteClick}
           />
         </div>
       </div>

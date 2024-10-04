@@ -11,11 +11,12 @@ import { Drop } from "../../../../generated/models/Drop";
 interface WaveDetailedDropQuoteWithSerialNoProps {
   readonly serialNo: number;
   readonly waveId: string;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropQuoteWithSerialNo: React.FC<
   WaveDetailedDropQuoteWithSerialNoProps
-> = ({ serialNo, waveId }) => {
+> = ({ serialNo, waveId, onQuoteClick }) => {
   const { data } = useQuery<WaveDropsFeed>({
     queryKey: [
       QueryKey.DROPS,
@@ -49,7 +50,7 @@ const WaveDetailedDropQuoteWithSerialNo: React.FC<
       setDrop({ ...targetDrop, wave: data.wave });
     }
   }, [data]);
-  return <WaveDetailedDropQuote drop={drop} partId={1} />;
+  return <WaveDetailedDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />;
 };
 
 export default WaveDetailedDropQuoteWithSerialNo;

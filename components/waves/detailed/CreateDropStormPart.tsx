@@ -29,6 +29,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
           referencedNfts={referencedNfts}
           partContent={part.content ?? ""}
           onImageLoaded={() => {}}
+          onQuoteClick={() => {}}
         />
       </div>
       <div className="tw-absolute tw-right-0 tw-top-1 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">

@@ -114,6 +114,10 @@ export default function Drops() {
     };
   }, [drops]);
 
+  const onQuoteClick = (drop: Drop) => {
+    router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+  };
+
   if (!drops.length && !isFetching) {
     return (
       <div className="tw-text-sm tw-italic tw-text-iron-500">
@@ -135,6 +139,7 @@ export default function Drops() {
         showReplyAndQuote={false}
         activeDrop={null}
         isFetchingNextPage={isFetchingNextPage}
+        onQuoteClick={onQuoteClick}
       />
       <div ref={bottomRef} style={{ height: "1px" }} />
     </div>

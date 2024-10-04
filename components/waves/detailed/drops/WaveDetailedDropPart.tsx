@@ -9,10 +9,11 @@ interface WaveDetailedDropPartProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onDropClick: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
-  ({ drop, activePartIndex, setActivePartIndex, onDropClick }) => {
+  ({ drop, activePartIndex, setActivePartIndex, onDropClick, onQuoteClick }) => {
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
     useEffect(() => {
@@ -68,6 +69,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
               setActivePartIndex={setActivePartIndex}
               checkOverflow={checkOverflow}
               showMore={showMore}
+              onQuoteClick={onQuoteClick}
             />
             <WaveDetailedDropPartOverflow
               isOverflowing={isOverflowing}
