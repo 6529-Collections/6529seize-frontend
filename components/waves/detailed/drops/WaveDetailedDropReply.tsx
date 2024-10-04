@@ -4,7 +4,6 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import WaveDetailedDropReplyAuthor from "./WaveDetailedDropReplyAuthor";
-import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
@@ -34,6 +33,21 @@ export default function WaveDetailedDropReply({
     enabled: !maybeDrop,
   });
 
+  const removeSquareBrackets = (text: string): string => {
+    return text.replace(/@\[([^\]]+)\]/g, "@$1");
+  };
+
+  const replaceImageLinks = (text: string): string => {
+    const imagePattern = /!\[([^\]]*)\]\([^\)]+\)/g;
+    return text.replace(imagePattern, "[external link]");
+  };
+
+  const modifyContent = (content: string): string => {
+    let modifiedContent = removeSquareBrackets(content);
+    modifiedContent = replaceImageLinks(modifiedContent);
+    return modifiedContent;
+  };
+
   const getContent = (): string => {
     if (isFetching && !maybeDrop) {
       return "Loading...";
@@ -62,13 +76,9 @@ export default function WaveDetailedDropReply({
       return "Media";
     }
 
-    const urlRegex = /https?:\/\/[^\s]+/g;
-    const content = part.content
-      .replace(urlRegex, "[link]")
-      .slice(0, 50)
-      .replace(/\n/g, " ");
 
-    return part.content.length > 50 ? content + "..." : content;
+
+    return modifyContent(part.content);
   };
 
   const [content, setContent] = useState<string>(getContent());
@@ -78,26 +88,22 @@ export default function WaveDetailedDropReply({
   }, [drop, dropPartId, isFetching, error]);
 
   return (
-    <div className="tw-mb-4">
-      <div className="tw-relative tw-flex tw-justify-end">
-        <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
-      </div>
+    <div className="tw-mb-4 tw-relative">
+      <div
+        className="tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"
+        style={{ height: "calc(100% - 2px)" }}
+      ></div>
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
         <WaveDetailedDropReplyAuthor isFetching={false} drop={drop} />
-        <div>
-          <button
-            onClick={() => drop?.serial_no && onReplyClick(drop.serial_no)}
-            className="tw-text-left tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-cursor-pointer"
-          >
-            <DropPartMarkdownWithPropLogger
-              partContent={content}
-              mentionedUsers={drop?.mentioned_users ?? []}
-              referencedNfts={drop?.referenced_nfts ?? []}
-              onImageLoaded={() => undefined}
-              textSize="sm"
-            />
-          </button>
-        </div>
+
+        <button
+          onClick={() => drop?.serial_no && onReplyClick(drop.serial_no)}
+          className="tw-min-w-0 tw-text-left tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-cursor-pointer tw-flex-1"
+        >
+          <p className="tw-mb-0 tw-leading-5 tw-text-iron-200 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-2 tw-break-words">
+            {content}
+          </p>
+        </button>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 import { DropPart } from "../../../../generated/models/DropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { ReferencedNft } from "../../../../entities/IDrop";
 import { WaveMin } from "../../../../generated/models/WaveMin";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
+import WaveDetailedDropQuoteWithDropId from "./WaveDetailedDropQuoteWithDropId";
+import { Drop } from "../../../../generated/models/ObjectSerializer";
 
 interface WaveDetailedDropPartContentProps {
   readonly mentionedUsers: DropMentionedUser[];
@@ -19,6 +20,7 @@ interface WaveDetailedDropPartContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly checkOverflow: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
   readonly showMore: boolean;
 }
 
@@ -35,6 +37,7 @@ const WaveDetailedDropPartContent: React.FC<
   activePartIndex,
   setActivePartIndex,
   checkOverflow,
+  onQuoteClick,
   showMore,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -65,8 +68,14 @@ const WaveDetailedDropPartContent: React.FC<
     }
   }, [showMore, containerHeight]);
 
-  const memoizedMentionedUsers = useMemo(() => mentionedUsers, [mentionedUsers]);
-  const memoizedReferencedNfts = useMemo(() => referencedNfts, [referencedNfts]);
+  const memoizedMentionedUsers = useMemo(
+    () => mentionedUsers,
+    [mentionedUsers]
+  );
+  const memoizedReferencedNfts = useMemo(
+    () => referencedNfts,
+    [referencedNfts]
+  );
 
   const renderNavigationButton = (direction: "previous" | "next") => {
     const isPrevious = direction === "previous";
@@ -81,7 +90,7 @@ const WaveDetailedDropPartContent: React.FC<
           isDisabled
             ? "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
             : "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
-        } tw-bg-transparent tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+        } tw-bg-transparent tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -127,17 +136,21 @@ const WaveDetailedDropPartContent: React.FC<
             referencedNfts={memoizedReferencedNfts}
             partContent={activePart.content}
             onImageLoaded={updateContainerHeight}
+            onQuoteClick={onQuoteClick}
           />
           {activePart.quoted_drop?.drop_id && (
-            <WaveDetailedDropQuote
-              dropId={activePart.quoted_drop.drop_id}
-              partId={activePart.quoted_drop.drop_part_id}
-              maybeDrop={
-                activePart.quoted_drop.drop
-                  ? { ...activePart.quoted_drop.drop, wave: wave }
-                  : null
-              }
-            />
+            <div className="tw-mt-3">
+              <WaveDetailedDropQuoteWithDropId
+                dropId={activePart.quoted_drop.drop_id}
+                partId={activePart.quoted_drop.drop_part_id}
+                maybeDrop={
+                  activePart.quoted_drop.drop
+                    ? { ...activePart.quoted_drop.drop, wave: wave }
+                    : null
+                }
+                onQuoteClick={onQuoteClick}
+              />
+            </div>
           )}
         </motion.div>
         {!!activePart.media.length && (

@@ -59,7 +59,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
-                className="tw-size-5"
+                className="tw-size-5 tw-flex-shrink-0"
               >
                 <path
                   strokeLinecap="round"

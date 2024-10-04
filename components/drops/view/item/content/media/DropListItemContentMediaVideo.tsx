@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useEffect } from "react";
 import useCapacitor from "../../../../../../hooks/useCapacitor";
 
 function DropListItemContentMediaVideo({
@@ -15,18 +15,43 @@ function DropListItemContentMediaVideo({
       event.preventDefault();
       if (videoRef.current.muted) {
         videoRef.current.muted = false;
-      } else if (!videoRef.current.muted && !videoRef.current.paused) {
+        videoRef.current.play();
+      } else if (!videoRef.current.paused) {
         videoRef.current.pause();
-      } else if (videoRef.current.paused) {
+      } else {
         videoRef.current.play();
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            video.pause();
+            video.muted = true;
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(video);
+
+    return () => {
+      observer.unobserve(video);
+    };
   }, []);
 
   return (
     <div>
       <video
         ref={videoRef}
+        playsInline 
         controls
         autoPlay={!capacitor.isCapacitor}
         muted

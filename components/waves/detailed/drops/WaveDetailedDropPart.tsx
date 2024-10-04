@@ -3,18 +3,17 @@ import { Drop } from "../../../../generated/models/Drop";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
 import WaveDetailedDropPartOverflow from "./WaveDetailedDropPartOverflow";
-import { useRouter } from "next/router";
 
 interface WaveDetailedDropPartProps {
   readonly drop: Drop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly onActiveDropClick?: () => void;
+  readonly onDropClick: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
-  ({ drop, activePartIndex, setActivePartIndex, onActiveDropClick }) => {
-    const router = useRouter();
+  ({ drop, activePartIndex, setActivePartIndex, onDropClick, onQuoteClick }) => {
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
     useEffect(() => {
@@ -39,15 +38,8 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     const isTemporaryDrop = drop.id.startsWith("temp-");
 
     const handleClick = () => {
-      if (!isTemporaryDrop) {
-        const currentDropId = router.query.drop;
-        if (currentDropId === drop.id) {
-          onActiveDropClick?.();
-          return;
-        }
-        const newPath = `/waves/${drop.wave.id}?drop=${drop.serial_no}`;
-        router.push(newPath);
-      }
+      if (isTemporaryDrop) return;
+      onDropClick();
     };
 
     return (
@@ -77,6 +69,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
               setActivePartIndex={setActivePartIndex}
               checkOverflow={checkOverflow}
               showMore={showMore}
+              onQuoteClick={onQuoteClick}
             />
             <WaveDetailedDropPartOverflow
               isOverflowing={isOverflowing}

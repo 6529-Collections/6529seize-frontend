@@ -45,7 +45,7 @@ const CreateDropInputOptions: React.FC<CreateDropInputOptionsProps> = ({
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className={`tw-size-6 ${submitting ? "tw-opacity-50" : ""}`}
+          className={`tw-size-6 tw-flex-shrink-0 ${submitting ? "tw-opacity-50" : ""}`}
         >
           <path
             strokeLinecap="round"

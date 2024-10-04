@@ -10,14 +10,13 @@ import WaveDetailedAbout from "./WaveDetailedAbout";
 interface WaveDetailedDesktopProps {
   readonly wave: Wave;
   readonly view: WaveDetailedView;
-  readonly isFetching: boolean;
+
   readonly setView: (view: WaveDetailedView) => void;
 }
 
 const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   wave,
   view,
-  isFetching,
   setView,
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =

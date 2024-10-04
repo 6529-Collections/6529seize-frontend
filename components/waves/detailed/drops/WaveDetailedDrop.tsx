@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -8,6 +8,7 @@ import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
+import { Drop } from "../../../../generated/models/Drop";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -58,8 +59,9 @@ interface WaveDetailedDropProps {
     drop: ExtendedDrop;
     partId: number;
   }) => void;
-  readonly onActiveDropClick?: () => void;
+
   readonly onReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 export default function WaveDetailedDrop({
@@ -71,12 +73,10 @@ export default function WaveDetailedDrop({
   onReply,
   onQuote,
   onReplyClick,
+  onQuoteClick,
   showReplyAndQuote,
-  onActiveDropClick,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
-
-
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
@@ -92,12 +92,14 @@ export default function WaveDetailedDrop({
 
   const groupingClass = getGroupingClass();
 
+
+
   return (
     <div
       className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-rounded-xl tw-transition-colors tw-duration-300 ${
         isActiveDrop
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
-          : "tw-bg-iron-950 hover:tw-bg-iron-900"
+          : "tw-bg-iron-950"
       } ${groupingClass}`}
     >
       {drop.reply_to &&
@@ -136,7 +138,8 @@ export default function WaveDetailedDrop({
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
-              onActiveDropClick={onActiveDropClick}
+              onDropClick={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
+              onQuoteClick={onQuoteClick}
             />
           </div>
         </div>

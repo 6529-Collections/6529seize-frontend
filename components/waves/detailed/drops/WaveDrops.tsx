@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -17,13 +11,14 @@ import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
+import useCapacitor from "../../../../hooks/useCapacitor";
+import { useRouter } from "next/router";
 
 interface WaveDropsProps {
   readonly wave: Wave;
   readonly onReply: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly onQuote: ({ drop, partId }: { drop: Drop; partId: number }) => void;
   readonly activeDrop: ActiveDropState | null;
-  readonly onActiveDropClick?: () => void;
   readonly initialDrop: number | null;
 }
 
@@ -32,9 +27,10 @@ export default function WaveDrops({
   onReply,
   onQuote,
   activeDrop,
-  onActiveDropClick,
   initialDrop,
 }: WaveDropsProps) {
+  const capacitor = useCapacitor();
+  const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
@@ -75,8 +71,6 @@ export default function WaveDrops({
 
   const [newItemsCount, setNewItemsCount] = useState(0);
 
-
-
   useEffect(() => {
     setTitle({
       title: haveNewDrops ? "New Drops Available | 6529 SEIZE" : null,
@@ -101,7 +95,7 @@ export default function WaveDrops({
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
       const lastDrop = drops[drops.length - 1];
-      if(lastDrop.id.startsWith('temp-')) {
+      if (lastDrop.id.startsWith("temp-")) {
         setSerialNo(lastDrop.serial_no);
       }
     } else {
@@ -146,7 +140,6 @@ export default function WaveDrops({
     scrollToTop,
   ]);
 
-
   useEffect(() => {
     if (init && serialNo) {
       const success = scrollToSerialNo("smooth");
@@ -158,8 +151,22 @@ export default function WaveDrops({
     }
   }, [init, serialNo]);
 
+  const onQuoteClick = (drop: Drop) => {
+    if (drop.wave.id !== wave.id) {
+      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+    } else {
+      setSerialNo(drop.serial_no);
+    }
+  };
+
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)] tw-relative">
+    <div
+      className={`tw-flex tw-flex-col tw-relative ${
+        capacitor.isCapacitor
+          ? "tw-h-[calc(100vh-21rem)]"
+          : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
+      }`}
+    >
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
@@ -173,7 +180,6 @@ export default function WaveDrops({
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <DropsList
             onReplyClick={setSerialNo}
-            onActiveDropClick={onActiveDropClick}
             drops={drops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
@@ -183,6 +189,7 @@ export default function WaveDrops({
             activeDrop={activeDrop}
             serialNo={serialNo}
             targetDropRef={targetDropRef}
+            onQuoteClick={onQuoteClick}
           />
         </div>
       </WaveDropsScrollContainer>

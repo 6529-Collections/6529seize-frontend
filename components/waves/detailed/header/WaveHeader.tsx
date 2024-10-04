@@ -104,7 +104,7 @@ export default function WaveHeader({
                   {firstXContributors.map((item) => (
                     <img
                       key={item.contributor_identity}
-                      className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black"
+                      className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black tw-bg-iron-900"
                       src={getScaledImageUri(
                         item.contributor_pfp,
                         ImageScale.W_AUTO_H_50

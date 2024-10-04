@@ -22,8 +22,8 @@ interface DropsListProps {
   readonly isFetchingNextPage: boolean;
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
-  readonly onActiveDropClick?: () => void;
   readonly onReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: Drop) => void;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
 }
@@ -38,10 +38,10 @@ export default function DropsList({
   isFetchingNextPage,
   onReply,
   onQuote,
-  onActiveDropClick,
   onReplyClick,
   serialNo,
   targetDropRef,
+  onQuoteClick,
 }: DropsListProps) {
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
@@ -77,7 +77,7 @@ export default function DropsList({
             onReply={handleReply}
             onQuote={handleQuote}
             showReplyAndQuote={showReplyAndQuote}
-            onActiveDropClick={onActiveDropClick}
+            onQuoteClick={onQuoteClick}
           />
         </div>
       )),
@@ -88,7 +88,6 @@ export default function DropsList({
       handleReply,
       handleQuote,
       showReplyAndQuote,
-      onActiveDropClick,
       serialNo,
       targetDropRef,
       handleReplyClick,

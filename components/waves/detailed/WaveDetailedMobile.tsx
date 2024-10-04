@@ -90,32 +90,30 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
 
   return (
     <div className="tailwind-scope tw-bg-black">
-      <div className="tw-mt-4">
-        <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
-          <button
-            onClick={() => setActiveView(WaveDetailedMobileView.CHAT)}
-            className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
-              activeView === WaveDetailedMobileView.CHAT
-                ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
-                : "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-            }`}
-          >
-            Chat
-          </button>
-          <button
-            onClick={() => setActiveView(WaveDetailedMobileView.ABOUT)}
-            className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 ${
-              activeView === WaveDetailedMobileView.ABOUT
-                ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
-                : "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-            }`}
-          >
-            About
-          </button>
-        </div>
-        <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
-          {components[activeView]}
-        </div>
+      <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
+        <button
+          onClick={() => setActiveView(WaveDetailedMobileView.CHAT)}
+          className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
+            activeView === WaveDetailedMobileView.CHAT
+              ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+              : "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+          }`}
+        >
+          Chat
+        </button>
+        <button
+          onClick={() => setActiveView(WaveDetailedMobileView.ABOUT)}
+          className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 ${
+            activeView === WaveDetailedMobileView.ABOUT
+              ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+              : "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+          }`}
+        >
+          About
+        </button>
+      </div>
+      <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
+        {components[activeView]}
       </div>
     </div>
   );
