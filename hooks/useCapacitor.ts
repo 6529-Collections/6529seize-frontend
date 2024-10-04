@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
+import { Keyboard } from "@capacitor/keyboard";
 
 export enum CapacitorOrientationType {
   PORTRAIT,
@@ -13,17 +14,18 @@ const useCapacitor = () => {
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
   );
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
+    if (!isCapacitor) {
+      return;
+    }
+
     function isPortrait() {
       return window.matchMedia("(orientation: portrait)").matches;
     }
 
     function handleOrientationchange() {
-      if (!isCapacitor) {
-        return;
-      }
-
       if (isPortrait()) {
         setOrientation(CapacitorOrientationType.PORTRAIT);
       } else {
@@ -40,10 +42,33 @@ const useCapacitor = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isCapacitor) {
+      return;
+    }
+
+    try {
+      Keyboard.addListener("keyboardWillShow", () => {
+        setKeyboardVisible(true);
+      });
+
+      Keyboard.addListener("keyboardWillHide", () => {
+        setKeyboardVisible(false);
+      });
+
+      return () => {
+        Keyboard.removeAllListeners();
+      };
+    } catch (error) {
+      console.error("Keyboard plugin is not available on this device:", error);
+    }
+  }, []);
+
   return {
     isCapacitor,
     platform,
     orientation,
+    keyboardVisible,
   };
 };
 
