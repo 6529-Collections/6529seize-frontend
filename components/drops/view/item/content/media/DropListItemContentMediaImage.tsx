@@ -1,7 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 
 function DropListItemContentMediaImage({
   src,
@@ -39,7 +37,12 @@ function DropListItemContentMediaImage({
   }, []);
 
   const handleOpenInNewTab = useCallback(() => {
-    window.open(src, '_blank');
+    const img = new Image();
+    img.src = src;
+    img.onload = () => {
+      const originalSrc = img.src;
+      window.open(originalSrc, '_blank');
+    };
   }, [src]);
 
   const loadingPlaceholderStyle: React.CSSProperties = {
@@ -55,7 +58,7 @@ function DropListItemContentMediaImage({
 
   const modalContent = (
     <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000" onClick={handleCloseModal}>
-      <div className="tw-fixed tw-inset-0 tw-bg-iron-800 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-iron-900 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
         <div className="tw-relative tw-max-w-[90vw] tw-max-h-[90vh] tw-my-8">
           <button
@@ -79,22 +82,24 @@ function DropListItemContentMediaImage({
               />
             </svg>
           </button>
-          <img
-            src={src}
-            alt="Full size drop media"
-            className="tw-max-w-[90vw] tw-max-h-[90vh] tw-object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenInNewTab();
-            }}
-            className="tw-absolute -tw-bottom-8 tw-left-0 tw-whitespace-nowrap tw-text-sm tw-border-0 tw-bg-iron-800 tw-text-iron-200 tw-rounded-full tw-py-1 tw-px-1 tw-opacity-70 hover:tw-opacity-100 tw-transition-opacity tw-duration-300"
-            aria-label="Open image in new tab"
-          >
-            Open in Browser
-          </button>
+          <div className="tw-flex tw-flex-col tw-items-center">
+            <img
+              src={src}
+              alt="Full size drop media"
+              className="tw-max-w-[90vw] tw-max-h-[calc(90vh-30px)] tw-object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenInNewTab();
+              }}
+              className="tw-mt-2 tw-whitespace-nowrap tw-text-sm tw-border-0 tw-bg-iron-800 tw-text-iron-200 tw-rounded-full tw-py-1 tw-px-3 tw-opacity-70 hover:tw-opacity-100 tw-transition-opacity tw-duration-300"
+              aria-label="Open image in new tab"
+            >
+              Open in Browser
+            </button>
+          </div>
         </div>
       </div>
     </div>
