@@ -18,6 +18,7 @@ import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
+import { useKeyPressEvent } from "react-use";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -77,6 +78,7 @@ export default function CreateDrop({
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
+  useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
 

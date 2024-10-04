@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
@@ -37,9 +38,17 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     []
   );
 
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-  }, []);
+  const handleCloseModal = useCallback(
+    (
+      event?:
+        | React.MouseEvent<HTMLButtonElement>
+        | React.MouseEvent<HTMLDivElement>
+    ) => {
+      event?.stopPropagation();
+      setIsModalOpen(false);
+    },
+    []
+  );
 
   const handleOpenInNewTab = useCallback(() => {
     const img = new Image();
@@ -49,6 +58,8 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       window.open(originalSrc, "_blank");
     };
   }, [src]);
+
+  useKeyPressEvent("Escape", () => handleCloseModal());
 
   const modalContent = (
     <div

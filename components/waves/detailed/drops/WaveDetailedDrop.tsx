@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -58,7 +58,7 @@ interface WaveDetailedDropProps {
     drop: ExtendedDrop;
     partId: number;
   }) => void;
-  readonly onActiveDropClick?: () => void;
+
   readonly onReplyClick: (serialNo: number) => void;
 }
 
@@ -72,11 +72,8 @@ export default function WaveDetailedDrop({
   onQuote,
   onReplyClick,
   showReplyAndQuote,
-  onActiveDropClick,
 }: WaveDetailedDropProps) {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
-
-
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
@@ -136,7 +133,7 @@ export default function WaveDetailedDrop({
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
-              onActiveDropClick={onActiveDropClick}
+              onDropClick={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
             />
           </div>
         </div>

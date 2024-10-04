@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 
 function DropListItemContentMediaImage({
   src,
@@ -32,16 +33,25 @@ function DropListItemContentMediaImage({
     []
   );
 
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-  }, []);
+  const handleCloseModal = useCallback(
+    (
+      event?:
+        | React.MouseEvent<HTMLDivElement>
+        | React.KeyboardEvent<HTMLDivElement>
+        | React.MouseEvent<HTMLButtonElement>
+    ) => {
+      event?.stopPropagation();
+      setIsModalOpen(false);
+    },
+    []
+  );
 
   const handleOpenInNewTab = useCallback(() => {
     const img = new Image();
     img.src = src;
     img.onload = () => {
       const originalSrc = img.src;
-      window.open(originalSrc, '_blank');
+      window.open(originalSrc, "_blank");
     };
   }, [src]);
 
@@ -56,8 +66,13 @@ function DropListItemContentMediaImage({
     transform: "translate(-50%, -50%)",
   };
 
+  useKeyPressEvent("Escape", () => handleCloseModal());
+
   const modalContent = (
-    <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000" onClick={handleCloseModal}>
+    <div
+      className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
+      onClick={handleCloseModal}
+    >
       <div className="tw-fixed tw-inset-0 tw-bg-iron-900 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
         <div className="tw-relative tw-max-w-[90vw] tw-max-h-[90vh] tw-my-8">
@@ -122,9 +137,9 @@ function DropListItemContentMediaImage({
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           } tw-cursor-pointer`}
           style={{
-            width: naturalSize.width > 0 ? `${naturalSize.width}px` : '100%',
-            maxWidth: '100%',
-            height: 'auto'
+            width: naturalSize.width > 0 ? `${naturalSize.width}px` : "100%",
+            maxWidth: "100%",
+            height: "auto",
           }}
           onLoad={handleImageLoad}
           onClick={handleImageClick}
