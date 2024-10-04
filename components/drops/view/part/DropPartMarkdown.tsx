@@ -165,19 +165,30 @@ function DropPartMarkdown({
 
     const baseEndpoint = process.env.BASE_ENDPOINT || "";
     const regex =
-      /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=(\d+)/;
+      /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:\?drop=(\d+)$|\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}))/;
+
     const match = href ? href.match(regex) : null;
     const isSeizeLink = !!match;
     const waveId = match ? match[1] : null;
     const serialNo = match ? match[2] : null;
-
-    if (isSeizeLink && serialNo && waveId) {
-      return (
-        <WaveDetailedDropQuoteWithSerialNo
-          serialNo={parseInt(serialNo)}
-          waveId={waveId}
-        />
-      );
+    const dropId = match ? match[3] : null;
+    if (isSeizeLink && waveId && (serialNo || dropId)) {
+      if (serialNo) {
+        return (
+          <WaveDetailedDropQuoteWithSerialNo
+            serialNo={parseInt(serialNo)}
+            waveId={waveId}
+          />
+        );
+      } else if (dropId) {
+        return (
+          <WaveDetailedDropQuoteWithDropId
+            dropId={dropId}
+            partId={1}
+            maybeDrop={null}
+          />
+        );
+      }
     }
 
     const twitterRegex =

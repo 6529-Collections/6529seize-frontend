@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -6,6 +6,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { WaveDropsSearchStrategy } from "../../../../hooks/useWaveDrops";
 import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
+import { Drop } from "../../../../generated/models/Drop";
 
 interface WaveDetailedDropQuoteWithSerialNoProps {
   readonly serialNo: number;
@@ -41,9 +42,14 @@ const WaveDetailedDropQuoteWithSerialNo: React.FC<
       return results;
     },
   });
-  console.log(serialNo);
-  useEffect(() => console.log(data), [data]);
-  return <WaveDetailedDropQuote drop={null} partId={0} />;
+  const [drop, setDrop] = useState<Drop | null>(null);
+  useEffect(() => {
+    const targetDrop = data?.drops.find((drop) => drop.serial_no === serialNo);
+    if (targetDrop && data?.wave) {
+      setDrop({ ...targetDrop, wave: data.wave });
+    }
+  }, [data]);
+  return <WaveDetailedDropQuote drop={drop} partId={1} />;
 };
 
 export default WaveDetailedDropQuoteWithSerialNo;
