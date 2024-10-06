@@ -200,8 +200,14 @@ function DropPartMarkdown({
     </Link>
   );
 
-  const isValidLink = (href: string): boolean =>
-    href.startsWith("..") || href.startsWith("/") || !href.includes(".");
+  const isValidLink = (href: string): boolean => {
+    try {
+      new URL(href);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const renderExternalOrInternalLink = (
     href: string,
