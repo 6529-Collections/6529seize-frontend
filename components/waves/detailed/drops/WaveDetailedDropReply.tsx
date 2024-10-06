@@ -86,10 +86,10 @@ export default function WaveDetailedDropReply({
   }, [drop, dropPartId, isFetching, error]);
 
   return (
-    <div className="tw-mb-2 tw-relative">
+    <div className="tw-mb-3 tw-relative">
       <div
         className="tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"
-        style={{ height: "calc(100% - 6px)" }}
+        style={{ height: "calc(100% - 3px)" }}
       ></div>
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
         {isFetching ? (
@@ -143,7 +143,7 @@ export default function WaveDetailedDropReply({
               <div className="tw-h-full tw-w-full tw-bg-iron-800 tw-rounded-md" />
             </div>
             <p className="tw-mb-0 tw-text-sm tw-text-iron-200 tw-font-semibold">
-              Unknown Author
+              Drop not found
             </p>
           </div>
         )}
