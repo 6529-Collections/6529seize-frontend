@@ -1,5 +1,5 @@
 import { ActiveDropState } from "./WaveDetailedContent";
-import { useEffect, useRef, useState, useCallback, useContext } from "react";
+import { useEffect, useRef, useState, useCallback, useContext, useMemo } from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
@@ -136,15 +136,21 @@ export default function CreateDrop({
 
   const addToQueue = useCallback((dropRequest: CreateDropRequest) => {
     queueRef.current.push(dropRequest);
-    setQueueSize(queueRef.current.length);
-    setHasQueueChanged(true);
-  }, []);
+    const newQueueSize = queueRef.current.length;
+    if (newQueueSize !== queueSize) {
+      setQueueSize(newQueueSize);
+      setHasQueueChanged(true);
+    }
+  }, [queueSize]);
 
   const removeFromQueue = useCallback(() => {
     const item = queueRef.current.shift();
-    setQueueSize(queueRef.current.length);
+    const newQueueSize = queueRef.current.length;
+    if (newQueueSize !== queueSize) {
+      setQueueSize(newQueueSize);
+    }
     return item;
-  }, []);
+  }, [queueSize]);
 
   useProgressiveDebounce(
     () => {
@@ -198,6 +204,16 @@ export default function CreateDrop({
     [addToQueue, onCancelReplyQuote]
   );
 
+  const createDropContentProps = useMemo(() => ({
+    activeDrop,
+    onCancelReplyQuote,
+    drop,
+    isStormMode,
+    setDrop,
+    setIsStormMode,
+    submitDrop,
+  }), [activeDrop, onCancelReplyQuote, drop, isStormMode, setDrop, setIsStormMode, submitDrop]);
+
   return (
     <div
       ref={containerRef}
@@ -234,14 +250,8 @@ export default function CreateDrop({
         </div>
       ) : wave ? (
         <CreateDropContent
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-          wave={wave}
-          drop={drop}
-          isStormMode={isStormMode}
-          setDrop={setDrop}
-          setIsStormMode={setIsStormMode}
-          submitDrop={submitDrop}
+        {...createDropContentProps}
+        wave={wave}
         />
       ) : null}
       <div ref={fixedBottomRef}></div>

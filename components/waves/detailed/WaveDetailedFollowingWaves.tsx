@@ -1,5 +1,5 @@
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
@@ -75,12 +75,12 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
     waves,
     activeWaveId
   );
-
   useEffect(() => {
     if (data) {
       setWaves(getWaves());
     }
   }, [data]);
+  const memoizedWaves = useMemo(() => waves || [], [waves]);
 
   return (
     <div className="tw-mt-4 tw-mb-3">
@@ -96,7 +96,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
         </div>
         <div className="tw-mt-2 tw-max-h-60 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
-            {waves.map((wave) => (
+            {memoizedWaves.map((wave) => (
               <WaveDetailedFollowingWave
                 key={wave.id}
                 wave={wave}

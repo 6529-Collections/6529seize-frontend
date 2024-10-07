@@ -1,3 +1,4 @@
+import React from 'react';
 import PrimaryButton from "../../utils/button/PrimaryButton";
 import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
@@ -53,17 +54,15 @@ export type CreateDropMetadataType =
       readonly required: boolean;
     };
 
-interface CreateDropContent {
-  readonly activeDrop: ActiveDropState | null;
-  readonly onCancelReplyQuote: () => void;
-  readonly wave: Wave;
-  readonly drop: CreateDropConfig | null;
-  readonly setDrop: React.Dispatch<
-    React.SetStateAction<CreateDropConfig | null>
-  >;
-  readonly isStormMode: boolean;
-  readonly setIsStormMode: (isStormMode: boolean) => void;
-  readonly submitDrop: (dropRequest: CreateDropRequest) => void;
+interface CreateDropContentProps {
+  activeDrop: ActiveDropState | null;
+  onCancelReplyQuote: () => void;
+  wave: Wave;
+  drop: CreateDropConfig | null;
+  isStormMode: boolean;
+  setDrop: React.Dispatch<React.SetStateAction<CreateDropConfig | null>>;
+  setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
+  submitDrop: (dropRequest: CreateDropRequest) => void;
 }
 
 interface MissingRequirements {
@@ -379,16 +378,16 @@ const getOptimisticDrop = (
   };
 };
 
-export default function CreateDropContent({
+const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
   wave,
-  isStormMode,
   drop,
+  isStormMode,
   setDrop,
   setIsStormMode,
   submitDrop,
-}: CreateDropContent) {
+}) => {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
 
@@ -890,4 +889,6 @@ export default function CreateDropContent({
       />
     </div>
   );
-}
+};
+
+export default React.memo(CreateDropContent);
