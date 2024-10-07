@@ -66,6 +66,7 @@ const DropsList = memo(function DropsList({
           id={`drop-${drop.serial_no}`}
           ref={serialNo === drop.serial_no ? targetDropRef : null}
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
+          // TODO set it back
           // style={{
           //   contentVisibility: "auto",
           //   containIntrinsicSize: "auto"
