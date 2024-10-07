@@ -1,9 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from '../testHelpers';
 
 test.describe("Meme Gas Page", () => {
   test.beforeEach(async ({ page }, testInfo) => {
-    // Avoid hammering the server (esp if staging):
-    await page.waitForTimeout(testInfo.project.metadata.testDelay);
     await page.goto("/meme-gas");
   });
 

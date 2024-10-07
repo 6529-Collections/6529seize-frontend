@@ -1,8 +1,19 @@
-import { Page, BrowserContext } from "@playwright/test";
+import { test as baseTest, expect, Page } from "@playwright/test";
+
+// Extend the base test to include a global beforeEach hook
+export const test = baseTest.extend({
+  page: async ({ page }, use, testInfo) => {
+    await page.waitForTimeout(testInfo.project.metadata.testDelay);
+    await use(page);
+  },
+});
+
+// Re-export expect
+export { expect };
 
 export async function login(page: Page, baseURL: string) {
   console.log(
-    `No auth context yet for this worker, attempting to reach the home page...`
+    "No auth context yet for this worker, attempting to reach the home page..."
   );
   await page.goto(baseURL);
 

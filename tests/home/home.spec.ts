@@ -1,15 +1,11 @@
-import { test, expect } from "@playwright/test";
-import { login } from "../testHelpers";
+import { test, expect } from '../testHelpers';
 
 test.describe("Home Page", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    // Avoid hammering the server (especially if running against staging):
-    await page.waitForTimeout(testInfo.project.metadata.testDelay);
+  test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
 
   test("should display the Latest Drop section", async ({ page }) => {
-    await page.goto("/");
     await expect(page).toHaveTitle("6529 SEIZE");
 
     const heading = page.locator("h1", { hasText: "Latest Drop" });

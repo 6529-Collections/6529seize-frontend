@@ -1,11 +1,6 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from '../testHelpers';
 
 test.describe("About Pages", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    // Avoid hammering the server (esp if staging):
-    await page.waitForTimeout(testInfo.project.metadata.testDelay);
-  });
-  
   test("should load the about/the-memes page", async ({ page }) => {
     await page.goto("/about/the-memes");
     await expect(page).toHaveTitle("About - THE MEMES | 6529 SEIZE");
