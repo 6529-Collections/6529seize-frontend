@@ -30,7 +30,7 @@ interface DropsListProps {
 
 const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
 
-export default function DropsList({
+const DropsList = memo(function DropsList({
   drops,
   showWaveInfo,
   activeDrop,
@@ -66,6 +66,10 @@ export default function DropsList({
           id={`drop-${drop.serial_no}`}
           ref={serialNo === drop.serial_no ? targetDropRef : null}
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
+          style={{
+            contentVisibility: "auto",
+            containIntrinsicSize: "auto"
+          }}
         >
           <MemoizedWaveDetailedDrop
             onReplyClick={handleReplyClick}
@@ -104,4 +108,6 @@ export default function DropsList({
       {memoizedDrops}
     </div>
   );
-}
+})
+
+export default DropsList;
