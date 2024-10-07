@@ -1,9 +1,6 @@
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useState, useEffect, useRef } from "react";
 import { Drop } from "../../../../generated/models/Drop";
-import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
-import WaveDetailedDropPartOverflow from "./WaveDetailedDropPartOverflow";
-import useLongPress from "react-use/lib/useLongPress";
 
 interface WaveDetailedDropPartProps {
   readonly drop: Drop;
@@ -14,6 +11,9 @@ interface WaveDetailedDropPartProps {
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
 }
+
+const LONG_PRESS_DURATION = 500; // milliseconds
+const MOVE_THRESHOLD = 10; // pixels
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
   ({
@@ -31,42 +31,63 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
       setActivePart(drop.parts[activePartIndex]);
     }, [activePartIndex, drop.parts]);
 
-    const isStorm = !!drop.parts.length && drop.parts.length > 1;
+    const isStorm = drop.parts.length > 1;
     const havePreviousPart = activePartIndex > 0;
     const haveNextPart = activePartIndex < drop.parts.length - 1;
-    const containerRef = React.useRef<HTMLDivElement>(null);
-    const [isOverflowing, setIsOverflowing] = useState(false);
-    const [showMore, setShowMore] = useState(false);
 
-    const checkOverflow = () => {
-      const tolerance = 2;
-      if (containerRef.current) {
-        const { scrollHeight, clientHeight } = containerRef.current;
-        setIsOverflowing(scrollHeight > clientHeight + tolerance);
+    const isTemporaryDrop = drop.id.startsWith("temp-");
+
+    const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+      if (isTemporaryDrop) return;
+
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+
+      longPressTimeout.current = setTimeout(() => {
+        setLongPressTriggered(true);
+        onLongPress();
+      }, LONG_PRESS_DURATION);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+      const touchX = e.touches[0].clientX;
+      const touchY = e.touches[0].clientY;
+
+      const deltaX = Math.abs(touchX - touchStartX.current);
+      const deltaY = Math.abs(touchY - touchStartY.current);
+
+      if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
+        if (longPressTimeout.current) {
+          clearTimeout(longPressTimeout.current);
+          longPressTimeout.current = null;
+        }
       }
     };
 
-    const isTemporaryDrop = drop.id.startsWith("temp-");
+    const handleTouchEnd = () => {
+      if (longPressTimeout.current) {
+        clearTimeout(longPressTimeout.current);
+        longPressTimeout.current = null;
+      }
+      setLongPressTriggered(false);
+    };
 
     const handleClick = () => {
       if (isTemporaryDrop) return;
       onDropClick();
     };
 
-    const { onTouchStart } = useLongPress(onLongPress, {
-      isPreventDefault: true,
-      delay: 300,
-    });
-
     return (
       <div
         onClick={handleClick}
-        onTouchStart={(e) => {
-          if (isTemporaryDrop) return;
-          setLongPressTriggered(true);
-          onTouchStart(e);
-        }}
-        onTouchEnd={() => setLongPressTriggered(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         className={`tw-no-underline ${
           isTemporaryDrop ? "tw-cursor-default" : "tw-cursor-pointer"
         }`}
@@ -76,30 +97,18 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
           !isTemporaryDrop && e.key === "Enter" && handleClick()
         }
       >
-        <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
-          <div
-            ref={containerRef}
-            className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
-          >
-            <WaveDetailedDropPartDrop
-              drop={drop}
-              activePart={activePart}
-              havePreviousPart={havePreviousPart}
-              haveNextPart={haveNextPart}
-              isStorm={isStorm}
-              activePartIndex={activePartIndex}
-              setActivePartIndex={setActivePartIndex}
-              checkOverflow={checkOverflow}
-              showMore={showMore}
-              onQuoteClick={onQuoteClick}
-            />
-            <WaveDetailedDropPartOverflow
-              isOverflowing={isOverflowing}
-              showMore={showMore}
-              setShowMore={setShowMore}
-            />
-          </div>
-        </CommonAnimationHeight>
+        <div className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
+          <WaveDetailedDropPartDrop
+            drop={drop}
+            activePart={activePart}
+            havePreviousPart={havePreviousPart}
+            haveNextPart={haveNextPart}
+            isStorm={isStorm}
+            activePartIndex={activePartIndex}
+            setActivePartIndex={setActivePartIndex}
+            onQuoteClick={onQuoteClick}
+          />
+        </div>
       </div>
     );
   }

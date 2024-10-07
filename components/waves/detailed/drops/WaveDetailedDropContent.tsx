@@ -1,6 +1,7 @@
 import React from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import WaveDetailedDropPart from "./WaveDetailedDropPart";
+
 interface WaveDetailedDropContentProps {
   readonly drop: Drop;
   readonly activePartIndex: number;

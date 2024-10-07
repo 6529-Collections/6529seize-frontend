@@ -140,7 +140,7 @@ const DropPart = memo(
     };
 
     return (
-      <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
+      <CommonAnimationHeight onAnimationCompleted={() => {}}>
         <div
           ref={containerRef}
           className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"

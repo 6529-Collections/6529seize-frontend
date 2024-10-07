@@ -19,6 +19,7 @@ import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
+import { useDebouncedCallback } from 'use-debounce';
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -32,43 +33,47 @@ function useResizeObserver(
   containerRef: React.RefObject<HTMLDivElement>,
   fixedBottomRef: React.RefObject<HTMLDivElement>
 ) {
-  useEffect(() => {
+  const handleResize = useCallback(() => {
     const container = containerRef.current!;
     const fixedBottom = fixedBottomRef.current!;
+    const containerRect = container.getBoundingClientRect();
+    const fixedBottomRect = fixedBottom.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
 
-    const observer = new ResizeObserver(() => {
-      const containerRect = container.getBoundingClientRect();
-      const fixedBottomRect = fixedBottom.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
+    if (fixedBottomRect.bottom > viewportHeight) {
+      window.scrollTo({
+        top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
+        behavior: 'smooth',
+      });
+    } else if (fixedBottomRect.bottom < viewportHeight) {
+      const newScrollTop = Math.max(
+        0,
+        window.scrollY - (viewportHeight - fixedBottomRect.bottom) + 20
+      );
+      window.scrollTo({
+        top: newScrollTop,
+        behavior: 'smooth',
+      });
+    }
 
-      if (fixedBottomRect.bottom > viewportHeight) {
-        window.scrollTo({
-          top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
-          behavior: "smooth",
-        });
-      } else if (fixedBottomRect.bottom < viewportHeight) {
-        const newScrollTop = Math.max(
-          0,
-          window.scrollY - (viewportHeight - fixedBottomRect.bottom) + 20
-        );
-        window.scrollTo({
-          top: newScrollTop,
-          behavior: "smooth",
-        });
-      }
+    if (containerRect.top < 0) {
+      window.scrollTo({
+        top: window.scrollY + containerRect.top,
+        behavior: 'smooth',
+      });
+    }
+  }, [containerRef, fixedBottomRef]);
 
-      if (containerRect.top < 0) {
-        window.scrollTo({
-          top: window.scrollY + containerRect.top,
-          behavior: "smooth",
-        });
-      }
-    });
+  const debouncedHandleResize = useDebouncedCallback(handleResize, 100);
 
-    observer.observe(container);
+  useEffect(() => {
+    const observer = new ResizeObserver(debouncedHandleResize);
+
+    observer.observe(containerRef.current!);
+    observer.observe(fixedBottomRef.current!);
 
     return () => observer.disconnect();
-  }, [containerRef, fixedBottomRef]);
+  }, [debouncedHandleResize, containerRef, fixedBottomRef]);
 }
 
 export default function CreateDrop({

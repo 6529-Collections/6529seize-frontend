@@ -12,8 +12,6 @@ interface WaveDetailedDropPartDropProps {
   isStorm: boolean;
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
-  checkOverflow: () => void;
-  showMore: boolean;
   onQuoteClick: (drop: Drop) => void;
 }
 
@@ -25,8 +23,6 @@ const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
   isStorm,
   activePartIndex,
   setActivePartIndex,
-  checkOverflow,
-  showMore,
   onQuoteClick,
 }) => {
   return (
@@ -44,8 +40,6 @@ const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({
             isStorm={isStorm}
             activePartIndex={activePartIndex}
             setActivePartIndex={setActivePartIndex}
-            checkOverflow={checkOverflow}
-            showMore={showMore}
             onQuoteClick={onQuoteClick}
           />
         </div>
