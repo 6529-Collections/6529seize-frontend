@@ -1,9 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from '../testHelpers';
 
 test.describe("Network Activity Page", () => {
   test.beforeEach(async ({ page }, testInfo) => {
-    // Avoid hammering the server (esp if staging):
-    await page.waitForTimeout(testInfo.project.metadata.testDelay);
     await page.goto("/network/activity");
   });
   

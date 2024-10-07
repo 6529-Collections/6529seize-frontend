@@ -3,8 +3,6 @@ import { login } from "../testHelpers";
 
 test.describe("Home Page Navigation", () => {
   test.beforeEach(async ({ page }, testInfo) => {
-    // Avoid hammering the server (especially if running against staging):
-    await page.waitForTimeout(testInfo.project.metadata.testDelay);
     await page.goto("/");
   });
 
