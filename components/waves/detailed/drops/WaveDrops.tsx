@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -91,7 +91,10 @@ export default function WaveDrops({
   useEffect(() => {
     if (drops.length > 0) {
       setInit(true);
-      setNewItemsCount((prevCount) => drops.length - prevCount);
+      setNewItemsCount((prevCount) => {
+        const newCount = drops.length - prevCount;
+        return prevCount !== newCount ? newCount : prevCount;
+      });
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
       const lastDrop = drops[drops.length - 1];
@@ -168,24 +171,31 @@ export default function WaveDrops({
     [router, wave.id, setSerialNo]
   );
 
+  const memoizedDrops = useMemo(() => drops, [drops]);
+
+  const containerClassName = useMemo(() => {
+    return `tw-flex tw-flex-col tw-relative ${
+      capacitor.isCapacitor
+        ? "tw-h-[calc(100vh-21rem)]"
+        : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
+    }`;
+  }, [capacitor.isCapacitor]);
+
   return (
     <div
-      className={`tw-flex tw-flex-col tw-relative ${
-        capacitor.isCapacitor
-          ? "tw-h-[calc(100vh-21rem)]"
-          : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
-      }`}
+      className={containerClassName}
     >
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
         newItemsCount={newItemsCount}
+        isFetchingNextPage={isFetchingNextPage}
         onTopIntersection={handleTopIntersection}
       >
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <DropsList
             onReplyClick={setSerialNo}
-            drops={drops}
+            drops={memoizedDrops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
             onReply={onReply}

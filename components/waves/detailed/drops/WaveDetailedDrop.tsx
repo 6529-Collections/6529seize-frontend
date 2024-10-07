@@ -96,6 +96,14 @@ const WaveDetailedDrop = ({
     onReply({ drop, partId: drop.parts[activePartIndex].part_id });
   }, [onReply, drop, activePartIndex]);
 
+  const handleOnReply = useCallback(() => {
+    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+  }, [onReplyClick]);
+
+  const handleOnQuote = useCallback(() => {
+    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+  }, [onQuoteClick]);
+
   return (
     <div
       className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-rounded-xl tw-transition-colors tw-duration-300 ${
@@ -150,12 +158,8 @@ const WaveDetailedDrop = ({
         <WaveDetailedDropActions
           drop={drop}
           activePartIndex={activePartIndex}
-          onReply={() =>
-            onReply({ drop, partId: drop.parts[activePartIndex].part_id })
-          }
-          onQuote={() =>
-            onQuote({ drop, partId: drop.parts[activePartIndex].part_id })
-          }
+          onReply={handleOnReply}
+          onQuote={handleOnQuote}
         />
       )}
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
