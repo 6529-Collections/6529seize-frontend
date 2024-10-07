@@ -47,21 +47,28 @@ const useCapacitor = () => {
       return;
     }
 
-    try {
-      Keyboard.addListener("keyboardWillShow", () => {
+    const addPushListeners = async () => {
+      await Keyboard.addListener("keyboardWillShow", () => {
         setKeyboardVisible(true);
       });
-
-      Keyboard.addListener("keyboardWillHide", () => {
+      await Keyboard.addListener("keyboardWillHide", () => {
         setKeyboardVisible(false);
       });
+    };
 
-      return () => {
-        Keyboard.removeAllListeners();
-      };
-    } catch (error) {
-      console.error("Keyboard plugin is not available on this device:", error);
-    }
+    const removePushListeners = async () => {
+      await Keyboard.removeAllListeners();
+    };
+
+    const commonCatch = (error: any) => {
+      console.error("Keyboard plugin error:", error);
+    };
+
+    addPushListeners().catch(commonCatch);
+
+    return () => {
+      removePushListeners().catch(commonCatch);
+    };
   }, []);
 
   return {
