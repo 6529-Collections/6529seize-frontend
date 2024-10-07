@@ -4,16 +4,10 @@ import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Wave } from "../../../generated/models/Wave";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "../../../services/api/common-api";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
