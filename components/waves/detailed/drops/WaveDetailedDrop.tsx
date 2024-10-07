@@ -9,6 +9,8 @@ import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 import { Drop } from "../../../../generated/models/Drop";
+import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import { createPortal } from "react-dom";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -92,7 +94,12 @@ export default function WaveDetailedDrop({
 
   const groupingClass = getGroupingClass();
 
+  const [isSlideUp, setIsSlideUp] = useState(false);
 
+  const onLongPress = () => {
+    console.log("onLongPress");
+    setIsSlideUp(true);
+  };
 
   return (
     <div
@@ -138,7 +145,8 @@ export default function WaveDetailedDrop({
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
-              onDropClick={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
+              // onDropClick={() => onReply({ drop, partId: drop.parts[activePartIndex].part_id })}
+              onDropClick={onLongPress}
               onQuoteClick={onQuoteClick}
             />
           </div>
@@ -162,6 +170,17 @@ export default function WaveDetailedDrop({
         )}
         {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
       </div>
+      {createPortal(
+        <CommonDropdownItemsMobileWrapper
+          isOpen={isSlideUp}
+          setOpen={setIsSlideUp}
+        >
+          <div>
+            <p>Hello</p>
+          </div>
+        </CommonDropdownItemsMobileWrapper>,
+        document.body
+      )}
     </div>
   );
 }
