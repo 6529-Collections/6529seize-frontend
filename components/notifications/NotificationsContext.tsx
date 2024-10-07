@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useEffect, useMemo } from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -105,8 +105,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const value = useMemo(() => ({}), []);
+
   return (
-    <NotificationsContext.Provider value={{}}>
+    <NotificationsContext.Provider value={value}>
       {children}
     </NotificationsContext.Provider>
   );
