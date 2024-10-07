@@ -1,15 +1,15 @@
-import { test, expect } from '@playwright/test';
-import { login } from '../testHelpers';
+import { test, expect } from "@playwright/test";
+import { login } from "../testHelpers";
 
-test.describe('Home Page Navigation', () => {
+test.describe("Home Page Navigation", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     await login(page, baseURL!);
   });
 
-  test('should have working footer navigation links', async ({ page }) => {
-    await page.goto('/about/privacy-policy');
+  test("should have working footer navigation links", async ({ page }) => {
+    await page.goto("/about/privacy-policy");
     await expect(page).toHaveURL(/.*privacy-policy/);
-    
+
     await page.click('a[href*="/about/terms-of-service"]');
     await expect(page).toHaveURL(/.*terms-of-service/);
   });
