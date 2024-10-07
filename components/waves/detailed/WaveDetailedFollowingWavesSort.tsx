@@ -87,30 +87,13 @@ const WaveDetailedFollowingWavesSort: React.FC<
                   <div
                     key={option}
                     onClick={() => handleOptionSelect(option)}
-                    className={`tw-px-4 tw-py-2 tw-text-xs tw-rounded-xl tw-transition-colors tw-duration-300 tw-cursor-pointer tw-whitespace-nowrap tw-flex tw-justify-between tw-items-center ${
+                    className={`tw-px-4 tw-py-2 tw-text-xs tw-rounded-xl tw-transition-colors tw-duration-300 tw-cursor-pointer tw-whitespace-nowrap ${
                       selectedOption === option
                         ? "tw-text-iron-100 tw-bg-iron-700"
                         : "tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-100"
                     }`}
                   >
                     {LABELS[option]}
-                    {selectedOption === option && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        aria-hidden="true"
-                        stroke="currentColor"
-                        className="tw-w-4 tw-h-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
                   </div>
                 ))}
               </div>

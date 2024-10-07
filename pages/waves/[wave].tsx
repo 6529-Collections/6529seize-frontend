@@ -17,7 +17,6 @@ import { Wave } from "../../generated/models/Wave";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../components/auth/Auth";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   getCommonHeaders,
   getWave,
@@ -41,7 +40,7 @@ const Header = dynamic(() => import("../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function WavePage({ pageProps }: { pageProps: Props }) {
+export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
   const { setWave, setWavesOverviewPage, setWaveDrops } = useContext(
     ReactQueryWrapperContext
   );

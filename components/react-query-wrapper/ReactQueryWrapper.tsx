@@ -23,7 +23,10 @@ import { FeedItemType } from "../../generated/models/FeedItemType";
 import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { Wave } from "../../generated/models/Wave";
-import { WAVE_DROPS_PARAMS, WAVE_FOLLOWING_WAVES_PARAMS } from "./utils/query-utils";
+import {
+  WAVE_DROPS_PARAMS,
+  WAVE_FOLLOWING_WAVES_PARAMS,
+} from "./utils/query-utils";
 
 export enum QueryKey {
   PROFILE = "PROFILE",

@@ -20,7 +20,6 @@ import {
 import { SortDirection } from "../entities/ISort";
 import { ProfileProxy } from "../generated/models/ProfileProxy";
 import { Wave } from "../generated/models/Wave";
-import { WaveDropsSearchStrategy } from "../hooks/useWaveDrops";
 import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 
