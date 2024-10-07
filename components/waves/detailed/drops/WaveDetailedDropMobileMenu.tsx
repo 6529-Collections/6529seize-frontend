@@ -5,6 +5,7 @@ import { Drop } from "../../../../generated/models/Drop";
 import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropMobileMenuDelete from "./WaveDetailedDropMobileMenuDelete";
 import WaveDetailedDropMobileMenuFollow from "./WaveDetailedDropMobileMenuFollow";
+import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
 
 interface WaveDetailedDropMobileMenuProps {
   readonly drop: Drop;
@@ -42,13 +43,13 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
         setTimeout(() => setCopied(false), 2000);
       });
     } else {
-      const textArea = document.createElement('textarea');
+      const textArea = document.createElement("textarea");
       textArea.value = dropLink;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-9999px';
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
       document.body.appendChild(textArea);
       textArea.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(textArea);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -173,12 +174,14 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
             {copied ? "Copied!" : "Copy link"}
           </span>
         </button>
+
         {!isAuthor && (
           <WaveDetailedDropMobileMenuFollow
             drop={drop}
             onFollowChange={closeMenu}
           />
         )}
+
         {showOptions && <WaveDetailedDropMobileMenuDelete drop={drop} />}
       </div>
     </CommonDropdownItemsMobileWrapper>,

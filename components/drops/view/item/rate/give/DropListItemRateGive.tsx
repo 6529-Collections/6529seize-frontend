@@ -17,11 +17,13 @@ export default function DropListItemRateGive({
   voteState,
   canVote,
   availableCredit,
+  onRated,
 }: {
   readonly drop: Drop;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number;
+  readonly onRated?: () => void;
 }) {
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [
@@ -45,6 +47,7 @@ export default function DropListItemRateGive({
 
   const onSuccessfulRateChange = () => {
     setOnProgressRate(1);
+    onRated?.();
   };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);

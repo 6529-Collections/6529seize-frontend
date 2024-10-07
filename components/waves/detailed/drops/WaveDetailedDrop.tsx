@@ -102,7 +102,8 @@ const WaveDetailedDrop = ({
 
   const [longPressTriggered, setLongPressTriggered] = useState(false);
 
-  const [debouncedLongPressTriggered, setDebouncedLongPressTriggered] = useState(false);
+  const [debouncedLongPressTriggered, setDebouncedLongPressTriggered] =
+    useState(false);
 
   useEffect(() => {
     if (longPressTriggered) {
