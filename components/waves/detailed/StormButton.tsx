@@ -33,27 +33,10 @@ const StormButton: React.FC<StormButtonProps> = ({
           type="button"
           className={`tw-border-0 tw-bg-transparent tw-flex tw-items-center tw-ease-out tw-transition tw-duration-300 tw-mr-2 ${
             canAddPart && !submitting
-              ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400"
+              ? "tw-cursor-pointer tw-text-iron-300 hover:tw-text-primary-400"
               : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600"
           }`}
         >
-          <svg
-            className={`tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5 ${
-              !canAddPart || submitting ? "tw-opacity-50" : ""
-            }`}
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
           <svg
             className={`tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0 ${
               !canAddPart || submitting ? "tw-opacity-50" : ""

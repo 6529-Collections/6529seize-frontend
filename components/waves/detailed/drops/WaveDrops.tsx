@@ -163,8 +163,8 @@ export default function WaveDrops({
     <div
       className={`tw-flex tw-flex-col tw-relative ${
         capacitor.isCapacitor
-          ? "tw-h-[calc(100vh-21rem)]"
-          : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
+          ? "tw-h-[calc(100vh-19.5rem)]"
+          : "tw-h-[calc(100vh-13.7rem)] lg:tw-h-[calc(100vh-12.5rem)]"
       }`}
     >
       <WaveDropsScrollContainer

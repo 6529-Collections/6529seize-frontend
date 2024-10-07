@@ -166,7 +166,7 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
 
-        <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
+        <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ">
           {wave && <WaveDetailed wave={wave} />}
         </div>
       </main>
