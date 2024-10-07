@@ -5,15 +5,9 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { NotificationsResponse } from "../../../generated/models/NotificationsResponse";
 import { commonApiFetch } from "../../../services/api/common-api";
 import Link from "next/link";
-import {
-  BRAIN_NOTIFICATION_ICON,
-  useNotifications,
-} from "../../notifications/NotificationsContext";
 
 export default function HeaderNotifications() {
   const { connectedProfile, setTitle } = useAuth();
-
-  const { sendLocalNotification } = useNotifications();
 
   const { data: notifications } = useQuery<NotificationsResponse>({
     queryKey: [
@@ -42,13 +36,6 @@ export default function HeaderNotifications() {
   useEffect(() => {
     const hasUnread = !!notifications?.unread_count;
     setHaveUnreadNotifications(hasUnread);
-    if (hasUnread) {
-      sendLocalNotification(
-        "New Brain Notification",
-        "You have unread notifications!",
-        BRAIN_NOTIFICATION_ICON
-      );
-    }
 
     setTitle({
       title: hasUnread

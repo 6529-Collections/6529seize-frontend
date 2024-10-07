@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, { createContext, useEffect, useMemo } from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -14,12 +14,7 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "../../services/api/common-api";
 
-export const BRAIN_NOTIFICATION_ICON =
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP";
-
-type NotificationsContextType = {
-  sendLocalNotification: (title: string, body: string, icon?: string) => void;
-};
+type NotificationsContextType = {};
 
 const NotificationsContext = createContext<
   NotificationsContextType | undefined
@@ -35,16 +30,6 @@ const redirectConfig = {
     let base = `/waves/${wave_id}`;
     return drop_id ? `${base}?drop=${drop_id}` : base;
   },
-};
-
-export const useNotifications = () => {
-  const context = useContext(NotificationsContext);
-  if (!context) {
-    throw new Error(
-      "useNotifications must be used within a NotificationsProvider"
-    );
-  }
-  return context;
 };
 
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -67,16 +52,13 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [isConnected]);
 
-  const initializeNotifications = (profile?: IProfileAndConsolidations) => {
+  const initializeNotifications = async (
+    profile?: IProfileAndConsolidations
+  ) => {
     try {
       if (isCapacitor) {
         console.log("Initializing push notifications");
-        initializePushNotifications(profile);
-      } else {
-        console.log("Initializing local notifications");
-        initializeLocalNotifications().catch((error) =>
-          console.error("Error initializing local notifications", error)
-        );
+        await initializePushNotifications(profile);
       }
     } catch (error) {
       console.error("Error initializing notifications", error);
@@ -86,27 +68,27 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const initializePushNotifications = async (
     profile?: IProfileAndConsolidations
   ) => {
-    PushNotifications.removeAllListeners();
+    await PushNotifications.removeAllListeners();
 
     const deviceId = await Device.getId();
     const deviceInfo = await Device.getInfo();
 
-    PushNotifications.addListener("registration", async (token) => {
+    await PushNotifications.addListener("registration", async (token) => {
       registerPushNotification(deviceId, deviceInfo, token.value, profile);
     });
 
-    PushNotifications.addListener("registrationError", (error) => {
+    await PushNotifications.addListener("registrationError", (error) => {
       console.error("Push registration error: ", error);
     });
 
-    PushNotifications.addListener(
+    await PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
         console.log("Push notification received: ", notification);
       }
     );
 
-    PushNotifications.addListener(
+    await PushNotifications.addListener(
       "pushNotificationActionPerformed",
       (action) => {
         handlePushNotificationAction(router, action.notification, profile);
@@ -123,53 +105,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const initializeLocalNotifications = async (): Promise<boolean> => {
-    if (!("Notification" in window)) {
-      console.warn("Local notifications not supported");
-      return false;
-    }
-
-    let permission = await Notification.requestPermission();
-
-    return permission === "granted";
-  };
-
-  const sendLocalNotification = (
-    title: string,
-    body: string,
-    icon?: string
-  ) => {
-    if (isCapacitor) return;
-
-    initializeLocalNotifications()
-      .then(() => {
-        const notification = new Notification(title, {
-          body: body,
-          icon: icon,
-        });
-
-        notification.onclick = function () {
-          window.focus();
-          const notificationsPath = "/my-stream/notifications";
-          if (router.pathname !== notificationsPath) {
-            router.push(notificationsPath);
-          } else {
-            router.reload();
-          }
-        };
-        console.log("Local notification sent", notification);
-      })
-      .catch((error) =>
-        console.error("Error initializing local notifications", error)
-      );
-  };
-
-  const value = useMemo(
-    () => ({
-      sendLocalNotification,
-    }),
-    []
-  );
+  const value = useMemo(() => ({}), []);
 
   return (
     <NotificationsContext.Provider value={value}>
