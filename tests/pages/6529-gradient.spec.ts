@@ -11,23 +11,26 @@ test.describe("6529 Gradient Page", () => {
     // Check og meta tags
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
       "content",
-      /.*6529 Gradient.*/i
-    );
-    await expect(
-      page.locator('meta[property="og:description"]')
-    ).toHaveAttribute("content", /.*6529 SEIZE.*/i);
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
-      "content",
-      /.*gradients.*/
+      expect.stringContaining("6529 Gradient")
     );
 
+    // Check og:description meta tag contains "6529 SEIZE"
+    await expect(
+      page.locator('meta[property="og:description"]')
+    ).toHaveAttribute("content", expect.stringContaining("6529 SEIZE"));
+
+    // Check og:image meta tag contains "gradients"
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      expect.stringContaining("gradients")
+    );
   });
 
   test("should display the correct title and heading", async ({ page }) => {
     await expect(page.locator("h1")).toContainText("6529 Gradient");
 
     const heading = page.locator("h1");
-    await expect(heading).toContainText("6529 Gradient");    
+    await expect(heading).toContainText("6529 Gradient");
     await expect(heading).toBeVisible();
   });
 
@@ -153,16 +156,21 @@ test.describe("Individual Gradient Page", () => {
   });
 
   test("should have correct meta tags", async ({ page }) => {
+    // Check og:title meta tag contains "Gradient #1"
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
       "content",
-      /.*Gradient #1.*/i
+      expect.stringContaining("Gradient #1")
     );
+
+    // Check og:image meta tag has any non-empty content
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
       "content",
-      /.+/
+      expect.stringMatching(/.+/)
     );
+
+    // Check og:description meta tag contains "6529 SEIZE"
     await expect(
       page.locator('meta[property="og:description"]')
-    ).toHaveAttribute("content", /.*6529 SEIZE.*/i);
+    ).toHaveAttribute("content", expect.stringContaining("6529 SEIZE"));
   });
 });

@@ -2,8 +2,10 @@ import { test, expect } from "@playwright/test";
 import { login } from "../testHelpers";
 
 test.describe("Home Page Navigation", () => {
-  test.beforeEach(async ({ page, baseURL }) => {
-    await login(page, baseURL!);
+  test.beforeEach(async ({ page }, testInfo) => {
+    // Avoid hammering the server (especially if running against staging):
+    await page.waitForTimeout(testInfo.project.metadata.testDelay);
+    await page.goto("/");
   });
 
   test("should have working footer navigation links", async ({ page }) => {
