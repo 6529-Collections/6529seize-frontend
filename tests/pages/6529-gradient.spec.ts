@@ -1,50 +1,63 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('6529 Gradient Page', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/6529-gradient');
+test.describe("6529 Gradient Page", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    // Avoid hammering the server (esp if staging):
+    await page.waitForTimeout(testInfo.project.metadata.testDelay);
+    await page.goto("/6529-gradient");
   });
 
-  test('should have correct meta tags and H1', async ({ page }) => {
+  test("should have correct meta tags and H1", async ({ page }) => {
     // Check og meta tags
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /.*6529 Gradient.*/i);
-    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', /.*6529 SEIZE.*/i);
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /.*gradients.*/);
-    
-    // Check H1
-    const h1 = page.locator('h1');
-    await expect(h1).toContainText('6529 Gradient');
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      "content",
+      /.*6529 Gradient.*/i
+    );
+    await expect(
+      page.locator('meta[property="og:description"]')
+    ).toHaveAttribute("content", /.*6529 SEIZE.*/i);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      /.*gradients.*/
+    );
+
   });
 
-  test('should display the page title', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('6529 Gradient');
+  test("should display the correct title and heading", async ({ page }) => {
+    await expect(page.locator("h1")).toContainText("6529 Gradient");
+
+    const heading = page.locator("h1");
+    await expect(heading).toContainText("6529 Gradient");    
+    await expect(heading).toBeVisible();
   });
 
-  test('should display sorting options', async ({ page }) => {
-    await expect(page.locator('text=Sort')).toBeVisible();
+  test("should display sorting options", async ({ page }) => {
+    await expect(page.locator("text=Sort")).toBeVisible();
     await expect(page.locator('span:has-text("ID")')).toBeVisible();
     await expect(page.locator('span:has-text("TDH")')).toBeVisible();
   });
 
-  test('should display gradient NFTs', async ({ page }) => {
-    await expect(page.locator('text=6529 Gradient #0')).toBeVisible();
-    await expect(page.locator('text=6529 Gradient #69')).toBeVisible();
+  test("should display gradient NFTs", async ({ page }) => {
+    await expect(page.locator("text=6529 Gradient #0")).toBeVisible();
+    await expect(page.locator("text=6529 Gradient #69")).toBeVisible();
   });
 
-  test('should display NFT details', async ({ page }) => {
+  test("should display NFT details", async ({ page }) => {
     await page.waitForSelector('div:has-text("TDH:")');
-    
-    const nftDetailsDiv = page.locator('div:has-text("TDH:"):has-text("Rank:")').first();
+
+    const nftDetailsDiv = page
+      .locator('div:has-text("TDH:"):has-text("Rank:")')
+      .first();
     await expect(nftDetailsDiv).toBeVisible();
-    
+
     const detailsText = await nftDetailsDiv.textContent();
     expect(detailsText).toMatch(/TDH: \d{1,3}(,\d{3})*/);
     expect(detailsText).toMatch(/Rank: \d+\/101/);
   });
 
-  test('should change sort direction', async ({ page }) => {
-    const ascIcon = page.locator('svg.fa-circle-chevron-up');
-    const descIcon = page.locator('svg.fa-circle-chevron-down');
+  test("should change sort direction", async ({ page }) => {
+    const ascIcon = page.locator("svg.fa-circle-chevron-up");
+    const descIcon = page.locator("svg.fa-circle-chevron-down");
 
     // Check initial state
     await expect(ascIcon).not.toHaveClass(/disabled/);
@@ -63,7 +76,7 @@ test.describe('6529 Gradient Page', () => {
     await expect(descIcon).toHaveClass(/disabled/);
   });
 
-  test('should change sort type', async ({ page }) => {
+  test("should change sort type", async ({ page }) => {
     const idSort = page.locator('span:has-text("ID")');
     const tdhSort = page.locator('span:has-text("TDH")');
 
@@ -74,54 +87,82 @@ test.describe('6529 Gradient Page', () => {
     await expect(page).toHaveURL(/sort=id/);
   });
 
-  test('should navigate to individual gradient page', async ({ page }) => {
-    await page.click('text=6529 Gradient #1');
-    await expect(page).toHaveURL('/6529-gradient/1');
+  test("should navigate to individual gradient page", async ({ page }) => {
+    await page.click("text=6529 Gradient #1");
+    await expect(page).toHaveURL("/6529-gradient/1");
   });
 });
 
-test.describe('Individual Gradient Page', () => {
+test.describe("Individual Gradient Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/6529-gradient/1');
-    await page.waitForLoadState('networkidle');
+    await page.goto("/6529-gradient/1");
+    await page.waitForLoadState("networkidle");
   });
 
-  test('should display gradient details', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('6529 Gradient');
-    
-    const gradientImage = page.locator('img[alt="6529 Gradient #1"]#the-art-fullscreen-img');
+  test("should display gradient details", async ({ page }) => {
+    await expect(page.locator("h1")).toContainText("6529 Gradient");
+
+    const gradientImage = page.locator(
+      'img[alt="6529 Gradient #1"]#the-art-fullscreen-img'
+    );
     await expect(gradientImage).toBeVisible();
-    await expect(gradientImage).toHaveAttribute('src');
+    await expect(gradientImage).toHaveAttribute("src");
 
     // Check for TDH Rate
     await page.waitForSelector('td:has-text("TDH Rate")');
     const tdhRateCell = page.locator('td:has-text("TDH Rate")');
     await expect(tdhRateCell).toBeVisible();
-    const tdhRateValue = await tdhRateCell.locator('..').locator('td').nth(1).textContent();
+    const tdhRateValue = await tdhRateCell
+      .locator("..")
+      .locator("td")
+      .nth(1)
+      .textContent();
     expect(tdhRateValue).toMatch(/\d+(\.\d+)?/);
 
     // Check for TDH
-    const tdhCell = page.locator('td:has-text("TDH"):not(:has-text("Rate")):not(:has-text("Unweighted"))');
+    const tdhCell = page.locator(
+      'td:has-text("TDH"):not(:has-text("Rate")):not(:has-text("Unweighted"))'
+    );
     await expect(tdhCell).toBeVisible();
-    const tdhValue = await tdhCell.locator('..').locator('td').nth(1).textContent();
+    const tdhValue = await tdhCell
+      .locator("..")
+      .locator("td")
+      .nth(1)
+      .textContent();
     expect(tdhValue).toMatch(/\d{1,3}(,\d{3})*/);
 
     // Check for Unweighted TDH
     const unweightedTdhCell = page.locator('td:has-text("Unweighted TDH")');
     await expect(unweightedTdhCell).toBeVisible();
-    const unweightedTdhValue = await unweightedTdhCell.locator('..').locator('td').nth(1).textContent();
+    const unweightedTdhValue = await unweightedTdhCell
+      .locator("..")
+      .locator("td")
+      .nth(1)
+      .textContent();
     expect(unweightedTdhValue).toMatch(/\d{1,3}(,\d{3})*/);
 
     // Check for Gradient Rank
     const rankCell = page.locator('td:has-text("Gradient Rank")');
     await expect(rankCell).toBeVisible();
-    const rankValue = await rankCell.locator('..').locator('td').nth(1).textContent();
+    const rankValue = await rankCell
+      .locator("..")
+      .locator("td")
+      .nth(1)
+      .textContent();
     expect(rankValue).toMatch(/\d+\/101/);
   });
 
-  test('should have correct meta tags', async ({ page }) => {
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /.*Gradient #1.*/i);
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /.+/);
-    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', /.*6529 SEIZE.*/i);
+  test("should have correct meta tags", async ({ page }) => {
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      "content",
+      /.*Gradient #1.*/i
+    );
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      /.+/
+    );
+    await expect(
+      page.locator('meta[property="og:description"]')
+    ).toHaveAttribute("content", /.*6529 SEIZE.*/i);
   });
 });

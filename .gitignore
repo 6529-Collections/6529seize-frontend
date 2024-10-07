@@ -12,7 +12,7 @@
 /playwright/.cache/
 /storageState.json
 /playwright/.auth/
-/storageState.json
+storageState.json
 /trace.zip
 
 # next.js
