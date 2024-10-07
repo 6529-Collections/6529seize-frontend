@@ -4,16 +4,10 @@ import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Wave } from "../../../generated/models/Wave";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "../../../services/api/common-api";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
@@ -23,7 +17,7 @@ import { useKeyPressEvent } from "react-use";
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly waveId: string;
+  readonly wave: Wave;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -74,7 +68,7 @@ function useResizeObserver(
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
-  waveId,
+  wave,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -95,19 +89,6 @@ export default function CreateDrop({
       };
     });
   }, []);
-
-  const {
-    data: wave,
-    isFetching,
-    isError,
-    error,
-  } = useQuery<Wave>({
-    queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-    queryFn: async () =>
-      await commonApiFetch<Wave>({
-        endpoint: `waves/${waveId}`,
-      }),
-  });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fixedBottomRef = useRef<HTMLDivElement>(null);
@@ -220,30 +201,16 @@ export default function CreateDrop({
           </motion.div>
         )}
       </AnimatePresence>
-      {isFetching ? (
-        <div className="tw-animate-pulse tw-flex tw-items-center tw-space-x-4">
-          <div className="tw-h-[45px] tw-flex-grow tw-bg-iron-800 tw-rounded-lg"></div>
-          <div className="tw-h-[45px] tw-w-[100px] tw-bg-iron-800 tw-rounded-lg"></div>
-        </div>
-      ) : isError ? (
-        <div className="tw-text-red tw-text-center tw-py-4">
-          <p>Error loading wave data</p>
-          <p className="tw-text-sm">
-            {error instanceof Error ? error.message : "Unknown error"}
-          </p>
-        </div>
-      ) : wave ? (
-        <CreateDropContent
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-          wave={wave}
-          drop={drop}
-          isStormMode={isStormMode}
-          setDrop={setDrop}
-          setIsStormMode={setIsStormMode}
-          submitDrop={submitDrop}
-        />
-      ) : null}
+      <CreateDropContent
+        activeDrop={activeDrop}
+        onCancelReplyQuote={onCancelReplyQuote}
+        wave={wave}
+        drop={drop}
+        isStormMode={isStormMode}
+        setDrop={setDrop}
+        setIsStormMode={setIsStormMode}
+        submitDrop={submitDrop}
+      />
       <div ref={fixedBottomRef}></div>
     </div>
   );
