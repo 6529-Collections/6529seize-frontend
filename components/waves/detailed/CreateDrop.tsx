@@ -1,30 +1,31 @@
 import { ActiveDropState } from "./WaveDetailedContent";
-import { useEffect, useRef, useState, useCallback, useContext, useMemo } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+  useMemo,
+} from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Wave } from "../../../generated/models/Wave";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "../../../services/api/common-api";
 import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
 import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
-import { useDebouncedCallback } from 'use-debounce';
+import { useDebouncedCallback } from "use-debounce";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly waveId: string;
+  readonly wave: Wave;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -43,7 +44,7 @@ function useResizeObserver(
     if (fixedBottomRect.bottom > viewportHeight) {
       window.scrollTo({
         top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     } else if (fixedBottomRect.bottom < viewportHeight) {
       const newScrollTop = Math.max(
@@ -52,14 +53,14 @@ function useResizeObserver(
       );
       window.scrollTo({
         top: newScrollTop,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
 
     if (containerRect.top < 0) {
       window.scrollTo({
         top: window.scrollY + containerRect.top,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   }, [containerRef, fixedBottomRef]);
@@ -79,7 +80,7 @@ function useResizeObserver(
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
-  waveId,
+  wave,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -100,19 +101,6 @@ export default function CreateDrop({
       };
     });
   }, []);
-
-  const {
-    data: wave,
-    isFetching,
-    isError,
-    error,
-  } = useQuery<Wave>({
-    queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-    queryFn: async () =>
-      await commonApiFetch<Wave>({
-        endpoint: `waves/${waveId}`,
-      }),
-  });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fixedBottomRef = useRef<HTMLDivElement>(null);
@@ -139,14 +127,17 @@ export default function CreateDrop({
   const [hasQueueChanged, setHasQueueChanged] = useState(false);
   const queueRef = useRef<CreateDropRequest[]>([]);
 
-  const addToQueue = useCallback((dropRequest: CreateDropRequest) => {
-    queueRef.current.push(dropRequest);
-    const newQueueSize = queueRef.current.length;
-    if (newQueueSize !== queueSize) {
-      setQueueSize(newQueueSize);
-      setHasQueueChanged(true);
-    }
-  }, [queueSize]);
+  const addToQueue = useCallback(
+    (dropRequest: CreateDropRequest) => {
+      queueRef.current.push(dropRequest);
+      const newQueueSize = queueRef.current.length;
+      if (newQueueSize !== queueSize) {
+        setQueueSize(newQueueSize);
+        setHasQueueChanged(true);
+      }
+    },
+    [queueSize]
+  );
 
   const removeFromQueue = useCallback(() => {
     const item = queueRef.current.shift();
@@ -209,15 +200,26 @@ export default function CreateDrop({
     [addToQueue, onCancelReplyQuote]
   );
 
-  const createDropContentProps = useMemo(() => ({
-    activeDrop,
-    onCancelReplyQuote,
-    drop,
-    isStormMode,
-    setDrop,
-    setIsStormMode,
-    submitDrop,
-  }), [activeDrop, onCancelReplyQuote, drop, isStormMode, setDrop, setIsStormMode, submitDrop]);
+  const createDropContentProps = useMemo(
+    () => ({
+      activeDrop,
+      onCancelReplyQuote,
+      drop,
+      isStormMode,
+      setDrop,
+      setIsStormMode,
+      submitDrop,
+    }),
+    [
+      activeDrop,
+      onCancelReplyQuote,
+      drop,
+      isStormMode,
+      setDrop,
+      setIsStormMode,
+      submitDrop,
+    ]
+  );
 
   return (
     <div
@@ -241,24 +243,7 @@ export default function CreateDrop({
           </motion.div>
         )}
       </AnimatePresence>
-      {isFetching ? (
-        <div className="tw-animate-pulse tw-flex tw-items-center tw-space-x-4">
-          <div className="tw-h-[45px] tw-flex-grow tw-bg-iron-800 tw-rounded-lg"></div>
-          <div className="tw-h-[45px] tw-w-[100px] tw-bg-iron-800 tw-rounded-lg"></div>
-        </div>
-      ) : isError ? (
-        <div className="tw-text-red tw-text-center tw-py-4">
-          <p>Error loading wave data</p>
-          <p className="tw-text-sm">
-            {error instanceof Error ? error.message : "Unknown error"}
-          </p>
-        </div>
-      ) : wave ? (
-        <CreateDropContent
-        {...createDropContentProps}
-        wave={wave}
-        />
-      ) : null}
+      <CreateDropContent {...createDropContentProps} wave={wave} />
       <div ref={fixedBottomRef}></div>
     </div>
   );
