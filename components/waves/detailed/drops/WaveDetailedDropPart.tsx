@@ -3,6 +3,7 @@ import { Drop } from "../../../../generated/models/Drop";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
 import WaveDetailedDropPartOverflow from "./WaveDetailedDropPartOverflow";
+import useLongPress from "react-use/lib/useLongPress";
 
 interface WaveDetailedDropPartProps {
   readonly drop: Drop;
@@ -10,10 +11,20 @@ interface WaveDetailedDropPartProps {
   readonly setActivePartIndex: (index: number) => void;
   readonly onDropClick: () => void;
   readonly onQuoteClick: (drop: Drop) => void;
+  readonly onLongPress: () => void;
+  readonly setLongPressTriggered: (triggered: boolean) => void;
 }
 
 const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
-  ({ drop, activePartIndex, setActivePartIndex, onDropClick, onQuoteClick }) => {
+  ({
+    drop,
+    activePartIndex,
+    setActivePartIndex,
+    onDropClick,
+    onQuoteClick,
+    onLongPress,
+    setLongPressTriggered,
+  }) => {
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
     useEffect(() => {
@@ -42,9 +53,20 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
       onDropClick();
     };
 
+    const { onTouchStart } = useLongPress(onLongPress, {
+      isPreventDefault: true,
+      delay: 300,
+    });
+
     return (
       <div
         onClick={handleClick}
+        onTouchStart={(e) => {
+          if (isTemporaryDrop) return;
+          setLongPressTriggered(true);
+          onTouchStart(e);
+        }}
+        onTouchEnd={() => setLongPressTriggered(false)}
         className={`tw-no-underline ${
           isTemporaryDrop ? "tw-cursor-default" : "tw-cursor-pointer"
         }`}

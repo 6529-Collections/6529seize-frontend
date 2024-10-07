@@ -2,11 +2,13 @@ import React from "react";
 import { Drop } from "../../../../generated/models/Drop";
 import WaveDetailedDropPart from "./WaveDetailedDropPart";
 interface WaveDetailedDropContentProps {
-  drop: Drop;
-  activePartIndex: number;
-  setActivePartIndex: (index: number) => void;
-  onDropClick: () => void;
-  onQuoteClick: (drop: Drop) => void;
+  readonly drop: Drop;
+  readonly activePartIndex: number;
+  readonly setActivePartIndex: (index: number) => void;
+  readonly onDropClick: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onLongPress: () => void;
+  readonly setLongPressTriggered: (triggered: boolean) => void;
 }
 
 const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
@@ -15,6 +17,8 @@ const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
   setActivePartIndex,
   onDropClick,
   onQuoteClick,
+  onLongPress,
+  setLongPressTriggered,
 }) => {
   return (
     <div>
@@ -24,6 +28,8 @@ const WaveDetailedDropContent: React.FC<WaveDetailedDropContentProps> = ({
         setActivePartIndex={setActivePartIndex}
         onDropClick={onDropClick}
         onQuoteClick={onQuoteClick}
+        onLongPress={onLongPress}
+        setLongPressTriggered={setLongPressTriggered}
       />
     </div>
   );
