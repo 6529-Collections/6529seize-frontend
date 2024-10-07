@@ -71,7 +71,7 @@ export default function WaveDetailedContent({
             <CreateDrop
               activeDrop={activeDrop}
               onCancelReplyQuote={onCancelReplyQuote}
-              waveId={wave.id}
+              wave={wave}
             />
           </div>
         )}
