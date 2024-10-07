@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { login } from "../testHelpers";
 
 test.describe("Home Page Navigation", () => {
   test.beforeEach(async ({ page }, testInfo) => {
