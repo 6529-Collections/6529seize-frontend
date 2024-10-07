@@ -66,7 +66,7 @@ export default function WaveDrops({
       }
       return false;
     },
-    [serialNo, targetDropRef.current]
+    [serialNo] 
   );
 
   const [newItemsCount, setNewItemsCount] = useState(0);
@@ -151,13 +151,22 @@ export default function WaveDrops({
     }
   }, [init, serialNo]);
 
-  const onQuoteClick = (drop: Drop) => {
-    if (drop.wave.id !== wave.id) {
-      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
-    } else {
-      setSerialNo(drop.serial_no);
+  const handleTopIntersection = useCallback(() => {
+    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  };
+  }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
+
+  const onQuoteClick = useCallback(
+    (drop: Drop) => {
+      if (drop.wave.id !== wave.id) {
+        router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+      } else {
+        setSerialNo(drop.serial_no);
+      }
+    },
+    [router, wave.id, setSerialNo]
+  );
 
   return (
     <div
@@ -171,11 +180,7 @@ export default function WaveDrops({
         ref={scrollContainerRef}
         onScroll={handleScroll}
         newItemsCount={newItemsCount}
-        onTopIntersection={() => {
-          if (hasNextPage && !isFetching && !isFetchingNextPage) {
-            fetchNextPage();
-          }
-        }}
+        onTopIntersection={handleTopIntersection}
       >
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <DropsList
