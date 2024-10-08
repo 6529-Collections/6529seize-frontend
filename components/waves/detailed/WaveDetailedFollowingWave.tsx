@@ -75,18 +75,25 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
   const isActive = wave.id === activeWaveId;
 
   return (
-    <div key={wave.id} className="tw-my-2">
+    <div
+      key={wave.id}
+      className={`tw-py-2 tw-px-2 ${
+        isActive ? "tw-bg-primary-300/5 tw-text-white" : ""
+      } tw-rounded-lg`}
+    >
       <Link
         href={`/waves/${wave.id}`}
         onClick={(e) => handleClick(e, wave.id)}
         onMouseEnter={() => onHover(wave.id)}
         className="tw-ml-1 tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group"
       >
-        <div className={`tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
-          isActive
-            ? "tw-ring-2 tw-ring-primary-400 tw-ring-offset-2 tw-ring-offset-iron-950"
-            : "tw-ring-1 tw-ring-white/10"
-        }`}>
+        <div
+          className={`tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
+            isActive
+              ? "tw-ring-1 tw-ring-primary-400"
+              : "tw-ring-1 tw-ring-white/10"
+          }`}
+        >
           {wave.picture && (
             <img
               src={wave.picture}
