@@ -5,7 +5,6 @@ import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
-
 type DropActionHandler = ({
   drop,
   partId,
@@ -68,7 +67,7 @@ const DropsList = memo(function DropsList({
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
           style={{
             contentVisibility: "auto",
-            containIntrinsicSize: "auto"
+            containIntrinsicSize: "auto",
           }}
         >
           <MemoizedWaveDetailedDrop
@@ -108,6 +107,6 @@ const DropsList = memo(function DropsList({
       {memoizedDrops}
     </div>
   );
-})
+});
 
 export default DropsList;

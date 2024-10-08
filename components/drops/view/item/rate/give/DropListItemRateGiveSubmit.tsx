@@ -22,6 +22,7 @@ export default function DropListItemRateGiveSubmit({
   availableCredit,
   canVote,
   onSuccessfulRateChange,
+  isMobile = false
 }: {
   readonly rate: number;
   readonly drop: Drop;
@@ -29,6 +30,7 @@ export default function DropListItemRateGiveSubmit({
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly onSuccessfulRateChange: () => void;
+  readonly isMobile?: boolean;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
@@ -100,6 +102,7 @@ export default function DropListItemRateGiveSubmit({
         voteState={voteState}
         canVote={canVote}
         availableCredit={availableCredit}
+        isMobile={isMobile}
       />
     </div>
   );

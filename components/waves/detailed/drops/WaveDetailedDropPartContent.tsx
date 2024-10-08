@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { DropPart } from "../../../../generated/models/DropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
@@ -19,9 +19,7 @@ interface WaveDetailedDropPartContentProps {
   readonly isStorm: boolean;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly checkOverflow: () => void;
   readonly onQuoteClick: (drop: Drop) => void;
-  readonly showMore: boolean;
 }
 
 const WaveDetailedDropPartContent: React.FC<
@@ -36,37 +34,9 @@ const WaveDetailedDropPartContent: React.FC<
   isStorm,
   activePartIndex,
   setActivePartIndex,
-  checkOverflow,
   onQuoteClick,
-  showMore,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(1000);
-
-  const updateContainerHeight = useCallback(() => {
-    if (!contentRef.current) return;
-    const firstImg = contentRef.current.querySelector("img");
-    if (firstImg?.complete) {
-      const imgRect = firstImg.getBoundingClientRect();
-      const containerRect = contentRef.current.getBoundingClientRect();
-      if (imgRect.top <= containerRect.bottom) {
-        setContainerHeight(288 + firstImg.height + 288);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    checkOverflow();
-    updateContainerHeight();
-  }, [checkOverflow, updateContainerHeight]);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.style.maxHeight = showMore
-        ? "100%"
-        : `${containerHeight}px`;
-    }
-  }, [showMore, containerHeight]);
 
   const memoizedMentionedUsers = useMemo(
     () => mentionedUsers,
@@ -123,7 +93,10 @@ const WaveDetailedDropPartContent: React.FC<
   return (
     <div className="tw-pt-1 tw-pb-1 tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
       {isStorm && renderNavigationButton("previous")}
-      <div className="tw-h-full tw-w-full" ref={contentRef}>
+      <div
+        className="tw-h-full tw-w-full xl:tw-pr-24 active:tw-bg-iron-800"
+        ref={contentRef}
+      >
         <motion.div
           key={activePartIndex}
           initial={{ opacity: 0 }}
@@ -135,7 +108,7 @@ const WaveDetailedDropPartContent: React.FC<
             mentionedUsers={memoizedMentionedUsers}
             referencedNfts={memoizedReferencedNfts}
             partContent={activePart.content}
-            onImageLoaded={updateContainerHeight}
+            onImageLoaded={() => {}}
             onQuoteClick={onQuoteClick}
           />
           {activePart.quoted_drop?.drop_id && (
@@ -156,7 +129,7 @@ const WaveDetailedDropPartContent: React.FC<
         {!!activePart.media.length && (
           <WaveDetailedDropPartContentMedias
             activePart={activePart}
-            updateContainerHeight={updateContainerHeight}
+            updateContainerHeight={() => {}}
           />
         )}
       </div>

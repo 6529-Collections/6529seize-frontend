@@ -44,7 +44,7 @@ export default function CommonDropdownItemsWrapper({
       {isMobile ? (
         <CommonDropdownItemsMobileWrapper
           isOpen={isOpen}
-          filterLabel={filterLabel}
+          label={filterLabel}
           setOpen={setOpen}
         >
           {children}

@@ -91,9 +91,9 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
             </div>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-w-full">
           <span>{wave.name}</span>
-          <div className="tw-flex tw-items-center tw-pr-4 tw-text-xs tw-text-iron-400">
+          <div className="tw-flex tw-items-center tw-text-right tw-whitespace-nowrap tw-pr-4 tw-text-xs tw-text-iron-400">
             <span>{getTimeAgoShort(wave.metrics.latest_drop_timestamp)}</span>
           </div>
         </div>

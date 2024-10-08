@@ -1,52 +1,39 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-interface ProgressiveDebounceOptions {
+interface DebounceOptions {
   minDelay: number;
   maxDelay: number;
   increaseFactor: number;
   decreaseFactor: number;
 }
 
-export function useProgressiveDebounce(
+export const useProgressiveDebounce = (
   callback: () => void,
   dependencies: any[],
-  options: ProgressiveDebounceOptions
-): number {
+  options: DebounceOptions
+) => {
   const { minDelay, maxDelay, increaseFactor, decreaseFactor } = options;
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastCallTime = useRef<number>(0);
-  const [currentDelay, setCurrentDelay] = useState<number>(minDelay);
+  const delayRef = useRef(minDelay);
 
   useEffect(() => {
-    const now = Date.now();
-    const timeSinceLastCall = now - lastCallTime.current;
-
-    let newDelay: number;
-    if (timeSinceLastCall < currentDelay) {
-      // Rapid change: increase delay
-      newDelay = Math.min(currentDelay * increaseFactor, maxDelay);
-    } else {
-      // Slower change: decrease delay
-      newDelay = Math.max(currentDelay / decreaseFactor, minDelay);
-    }
-
-    setCurrentDelay(newDelay);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
+    const handler = setTimeout(() => {
       callback();
-      lastCallTime.current = Date.now();
-    }, newDelay);
+      delayRef.current = minDelay; // Reset delay after execution
+    }, delayRef.current);
+
+    // Adjust delay for next call
+    delayRef.current = Math.min(
+      maxDelay,
+      delayRef.current * increaseFactor
+    );
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      clearTimeout(handler);
+      // Optionally adjust delay on cleanup
+      delayRef.current = Math.max(
+        minDelay,
+        delayRef.current / decreaseFactor
+      );
     };
-  }, dependencies);
-
-  return currentDelay;
-}
+  }, dependencies); // eslint-disable-line react-hooks/exhaustive-deps
+};

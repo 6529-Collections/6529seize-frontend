@@ -1,5 +1,12 @@
 import { ActiveDropState } from "./WaveDetailedContent";
-import { useEffect, useRef, useState, useCallback, useContext } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+  useMemo,
+} from "react";
 import { CreateDropConfig } from "../../../entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
@@ -13,6 +20,7 @@ import { Drop } from "../../../generated/models/Drop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
+import { useDebouncedCallback } from "use-debounce";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -26,43 +34,48 @@ function useResizeObserver(
   containerRef: React.RefObject<HTMLDivElement>,
   fixedBottomRef: React.RefObject<HTMLDivElement>
 ) {
+  const handleResize = useCallback(() => {
+    const container = containerRef.current;
+    const fixedBottom = fixedBottomRef.current;
+    if (!container || !fixedBottom) return;
+    const containerRect = container.getBoundingClientRect();
+    const fixedBottomRect = fixedBottom.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    if (fixedBottomRect.bottom > viewportHeight) {
+      window.scrollTo({
+        top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
+        behavior: "smooth",
+      });
+    } else if (fixedBottomRect.bottom < viewportHeight) {
+      const newScrollTop = Math.max(
+        0,
+        window.scrollY - (viewportHeight - fixedBottomRect.bottom) + 20
+      );
+      window.scrollTo({
+        top: newScrollTop,
+        behavior: "smooth",
+      });
+    }
+
+    if (containerRect.top < 0) {
+      window.scrollTo({
+        top: window.scrollY + containerRect.top,
+        behavior: "smooth",
+      });
+    }
+  }, [containerRef, fixedBottomRef]);
+
+  const debouncedHandleResize = useDebouncedCallback(handleResize, 100);
+
   useEffect(() => {
-    const container = containerRef.current!;
-    const fixedBottom = fixedBottomRef.current!;
-
-    const observer = new ResizeObserver(() => {
-      const containerRect = container.getBoundingClientRect();
-      const fixedBottomRect = fixedBottom.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-
-      if (fixedBottomRect.bottom > viewportHeight) {
-        window.scrollTo({
-          top: window.scrollY + (fixedBottomRect.bottom - viewportHeight) + 20,
-          behavior: "smooth",
-        });
-      } else if (fixedBottomRect.bottom < viewportHeight) {
-        const newScrollTop = Math.max(
-          0,
-          window.scrollY - (viewportHeight - fixedBottomRect.bottom) + 20
-        );
-        window.scrollTo({
-          top: newScrollTop,
-          behavior: "smooth",
-        });
-      }
-
-      if (containerRect.top < 0) {
-        window.scrollTo({
-          top: window.scrollY + containerRect.top,
-          behavior: "smooth",
-        });
-      }
-    });
-
-    observer.observe(container);
+    if (!containerRef.current || !fixedBottomRef.current) return;
+    const observer = new ResizeObserver(debouncedHandleResize);
+    observer.observe(containerRef.current);
+    observer.observe(fixedBottomRef.current);
 
     return () => observer.disconnect();
-  }, [containerRef, fixedBottomRef]);
+  }, [debouncedHandleResize, containerRef, fixedBottomRef]);
 }
 
 export default function CreateDrop({
@@ -115,17 +128,26 @@ export default function CreateDrop({
   const [hasQueueChanged, setHasQueueChanged] = useState(false);
   const queueRef = useRef<CreateDropRequest[]>([]);
 
-  const addToQueue = useCallback((dropRequest: CreateDropRequest) => {
-    queueRef.current.push(dropRequest);
-    setQueueSize(queueRef.current.length);
-    setHasQueueChanged(true);
-  }, []);
+  const addToQueue = useCallback(
+    (dropRequest: CreateDropRequest) => {
+      queueRef.current.push(dropRequest);
+      const newQueueSize = queueRef.current.length;
+      if (newQueueSize !== queueSize) {
+        setQueueSize(newQueueSize);
+        setHasQueueChanged(true);
+      }
+    },
+    [queueSize]
+  );
 
   const removeFromQueue = useCallback(() => {
     const item = queueRef.current.shift();
-    setQueueSize(queueRef.current.length);
+    const newQueueSize = queueRef.current.length;
+    if (newQueueSize !== queueSize) {
+      setQueueSize(newQueueSize);
+    }
     return item;
-  }, []);
+  }, [queueSize]);
 
   useProgressiveDebounce(
     () => {
@@ -179,6 +201,27 @@ export default function CreateDrop({
     [addToQueue, onCancelReplyQuote]
   );
 
+  const createDropContentProps = useMemo(
+    () => ({
+      activeDrop,
+      onCancelReplyQuote,
+      drop,
+      isStormMode,
+      setDrop,
+      setIsStormMode,
+      submitDrop,
+    }),
+    [
+      activeDrop,
+      onCancelReplyQuote,
+      drop,
+      isStormMode,
+      setDrop,
+      setIsStormMode,
+      submitDrop,
+    ]
+  );
+
   return (
     <div
       ref={containerRef}
@@ -201,16 +244,7 @@ export default function CreateDrop({
           </motion.div>
         )}
       </AnimatePresence>
-      <CreateDropContent
-        activeDrop={activeDrop}
-        onCancelReplyQuote={onCancelReplyQuote}
-        wave={wave}
-        drop={drop}
-        isStormMode={isStormMode}
-        setDrop={setDrop}
-        setIsStormMode={setIsStormMode}
-        submitDrop={submitDrop}
-      />
+      <CreateDropContent {...createDropContentProps} wave={wave} />
       <div ref={fixedBottomRef}></div>
     </div>
   );

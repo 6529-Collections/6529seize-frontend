@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -66,7 +73,7 @@ export default function WaveDrops({
       }
       return false;
     },
-    [serialNo] 
+    [serialNo]
   );
 
   const [newItemsCount, setNewItemsCount] = useState(0);
@@ -176,15 +183,13 @@ export default function WaveDrops({
   const containerClassName = useMemo(() => {
     return `tw-flex tw-flex-col tw-relative ${
       capacitor.isCapacitor
-        ? "tw-h-[calc(100vh-21rem)]"
-        : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
+        ? "tw-h-[calc(100vh-19.5rem)]"
+        : "tw-h-[calc(100vh-13.7rem)] lg:tw-h-[calc(100vh-12.5rem)]"
     }`;
   }, [capacitor.isCapacitor]);
 
   return (
-    <div
-      className={containerClassName}
-    >
+    <div className={containerClassName}>
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}

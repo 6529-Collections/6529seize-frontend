@@ -57,24 +57,26 @@ export default function WaveDetailedContent({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
-      <div className="tw-w-full tw-flex tw-flex-col">
-        <WaveDrops
-          wave={wave}
-          onReply={handleReply}
-          onQuote={handleQuote}
-          activeDrop={activeDrop}
-          initialDrop={initialDrop ? parseInt(initialDrop) : null}
-        />
-        {canDrop && (
-          <div className="tw-mt-auto">
-            <CreateDrop
-              activeDrop={activeDrop}
-              onCancelReplyQuote={onCancelReplyQuote}
-              wave={wave}
-            />
-          </div>
-        )}
+    <div className="tw-relative tw-h-full">
+      <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
+        <div className="tw-w-full tw-flex tw-flex-col">
+          <WaveDrops
+            wave={wave}
+            onReply={handleReply}
+            onQuote={handleQuote}
+            activeDrop={activeDrop}
+            initialDrop={initialDrop ? parseInt(initialDrop) : null}
+          />
+          {canDrop && (
+            <div className="tw-mt-auto">
+              <CreateDrop
+                activeDrop={activeDrop}
+                onCancelReplyQuote={onCancelReplyQuote}
+                wave={wave}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

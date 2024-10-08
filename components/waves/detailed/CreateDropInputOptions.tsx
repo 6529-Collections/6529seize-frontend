@@ -34,7 +34,7 @@ const CreateDropInputOptions: React.FC<CreateDropInputOptionsProps> = ({
         } ${
           submitting
             ? "tw-opacity-50 tw-cursor-default"
-            : "tw-cursor-pointer hover:tw-text-iron-50"
+            : "tw-cursor-pointer"
         }`}
         onClick={toggleDropdown}
         disabled={submitting}
