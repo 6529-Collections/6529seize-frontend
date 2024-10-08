@@ -233,7 +233,7 @@ export default function CreateDrop({
   return (
     <div
       ref={containerRef}
-      className={`${containerClassName} tw-overflow-y-scroll tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-b-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-700 tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80`}
+      className={`${containerClassName} tw-absolute tw-overflow-y-scroll tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-10 tw-w-full tw-rounded-b-xl tw-backdrop-blur tw-flex-none tw-transition-colors tw-duration-500 tw-lg:z-50 tw-border-t tw-border-solid tw-border-b-0 tw-border-x-0 tw-border-iron-700 tw-supports-backdrop-blur:tw-bg-white/95 tw-bg-iron-950/80`}
     >
       <AnimatePresence>
         {isStormMode && (
