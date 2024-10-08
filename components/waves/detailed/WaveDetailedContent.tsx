@@ -61,8 +61,8 @@ export default function WaveDetailedContent({
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col ${
       capacitor.isCapacitor
-        ? "tw-h-[calc(100vh-19.5rem)]"
-        : "tw-h-[calc(100vh-13.7rem)] lg:tw-h-[calc(100vh-12.5rem)]"
+        ? "tw-h-[calc(100vh-14.7rem)]"
+        : "tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-7.5rem)]"
     }`;
   }, [capacitor.isCapacitor]);
 

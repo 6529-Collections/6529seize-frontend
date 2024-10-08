@@ -244,6 +244,7 @@ export default function CreateDrop({
           </motion.div>
         )}
       </AnimatePresence>
+
       <CreateDropContent {...createDropContentProps} wave={wave} />
       <div ref={fixedBottomRef}></div>
     </div>
