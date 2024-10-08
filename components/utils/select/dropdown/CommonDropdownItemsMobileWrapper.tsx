@@ -21,10 +21,10 @@ export default function CommonDropdownItemsMobileWrapper({
       >
         <Transition.Child
           as={Fragment}
-          enter="tw-ease-in-out tw-duration-500"
+          enter="tw-ease-in-out tw-duration-300"
           enterFrom="tw-opacity-0"
           enterTo="tw-opacity-100"
-          leave="tw-ease-in-out tw-duration-500"
+          leave="tw-ease-in-out tw-duration-300"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
@@ -36,20 +36,20 @@ export default function CommonDropdownItemsMobileWrapper({
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
               <Transition.Child
                 as={Fragment}
-                enter="tw-transform tw-transition tw-ease-in-out tw-duration-500 sm:tw-duration-700"
+                enter="tw-transform tw-transition tw-ease-out tw-duration-300"
                 enterFrom="tw-translate-y-full"
                 enterTo="tw-translate-y-0"
-                leave="tw-transform tw-transition tw-ease-in-out tw-duration-500 sm:tw-duration-700"
+                leave="tw-transform tw-transition tw-ease-in tw-duration-300"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
                 <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen">
                   <Transition.Child
                     as={Fragment}
-                    enter="tw-ease-in-out tw-duration-500"
+                    enter="tw-ease-in-out tw-duration-300"
                     enterFrom="tw-opacity-0"
                     enterTo="tw-opacity-100"
-                    leave="tw-ease-in-out tw-duration-500"
+                    leave="tw-ease-in-out tw-duration-300"
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >

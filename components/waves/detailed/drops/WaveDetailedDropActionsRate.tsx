@@ -11,11 +11,12 @@ import { Drop } from "../../../../generated/models/Drop";
 interface WaveDetailedDropActionsRateProps {
   drop: Drop;
   readonly onRated?: () => void;
+  isMobile?: boolean;
 }
 
 const WaveDetailedDropActionsRate: React.FC<
   WaveDetailedDropActionsRateProps
-> = ({ drop, onRated }) => {
+> = ({ drop, onRated, isMobile = false }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const { data: availableRateResponse } =
@@ -92,13 +93,16 @@ const WaveDetailedDropActionsRate: React.FC<
   return (
     <>
       {showClap && (
-        <DropListItemRateGive
-          drop={drop}
-          voteState={voteState}
-          canVote={canVote}
-          availableCredit={availableCredit ?? 0}
-          onRated={onRated}
-        />
+        <div className={isMobile ? "tw-p-4 tw-rounded-xl tw-inline-flex" : ""}>
+          <DropListItemRateGive
+            drop={drop}
+            voteState={voteState}
+            canVote={canVote}
+            availableCredit={availableCredit ?? 0}
+            onRated={onRated}
+            isMobile={isMobile}
+          />
+        </div>
       )}
     </>
   );

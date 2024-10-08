@@ -18,12 +18,14 @@ export default function DropListItemRateGive({
   canVote,
   availableCredit,
   onRated,
+  isMobile = false,
 }: {
   readonly drop: Drop;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number;
   readonly onRated?: () => void;
+  readonly isMobile?: boolean;
 }) {
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [
@@ -221,12 +223,13 @@ export default function DropListItemRateGive({
       }
     >
       <div className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-        <div className="tw-w-full tw-inline-flex tw-items-center">
+        <div  className={`${isMobile ? "tw-gap-x-4" : ""} tw-w-full tw-inline-flex tw-items-center`}>
           <DropListItemRateGiveChangeButton
             canVote={canVote}
             type={RateChangeType.DECREASE}
             handleMouseDown={handleMouseDown}
             handleMouseUp={handleMouseUp}
+            isMobile={isMobile}
           />
           <DropListItemRateGiveSubmit
             rate={onProgressRate}
@@ -241,6 +244,7 @@ export default function DropListItemRateGive({
             type={RateChangeType.INCREASE}
             handleMouseDown={handleMouseDown}
             handleMouseUp={handleMouseUp}
+            isMobile={isMobile}
           />
         </div>
       </div>

@@ -87,7 +87,11 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
 
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
-      <div className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${longPressTriggered && "tw-select-none"}`}>
+      <div
+        className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
+          longPressTriggered && "tw-select-none"
+        }`}
+      >
         {showReplyAndQuote && (
           <>
             <button
@@ -170,7 +174,7 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
               d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
             />
           </svg>
-          <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
+          <span className={`tw-font-semibold tw-text-base ${copied ? "tw-text-primary-400" : "tw-text-iron-300"}`}>
             {copied ? "Copied!" : "Copy link"}
           </span>
         </button>
@@ -181,7 +185,11 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
             onFollowChange={closeMenu}
           />
         )}
-
+          <WaveDetailedDropActionsRate
+            drop={drop}
+            isMobile={true}
+            onRated={closeMenu}
+          />
         {showOptions && <WaveDetailedDropMobileMenuDelete drop={drop} />}
       </div>
     </CommonDropdownItemsMobileWrapper>,
