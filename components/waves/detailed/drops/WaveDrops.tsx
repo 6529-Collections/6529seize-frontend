@@ -36,7 +36,7 @@ export default function WaveDrops({
   activeDrop,
   initialDrop,
 }: WaveDropsProps) {
-  const capacitor = useCapacitor();
+
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
@@ -180,16 +180,10 @@ export default function WaveDrops({
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
-  const containerClassName = useMemo(() => {
-    return `tw-flex tw-flex-col tw-relative ${
-      capacitor.isCapacitor
-        ? "tw-h-[calc(100vh-19.5rem)]"
-        : "tw-h-[calc(100vh-13.7rem)] lg:tw-h-[calc(100vh-12.5rem)]"
-    }`;
-  }, [capacitor.isCapacitor]);
+
 
   return (
-    <div className={containerClassName}>
+    <div className="tw-flex tw-flex-col tw-relative tw-overflow-y-auto">
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
