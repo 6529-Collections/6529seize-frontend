@@ -35,8 +35,9 @@ function useResizeObserver(
   fixedBottomRef: React.RefObject<HTMLDivElement>
 ) {
   const handleResize = useCallback(() => {
-    const container = containerRef.current!;
-    const fixedBottom = fixedBottomRef.current!;
+    const container = containerRef.current;
+    const fixedBottom = fixedBottomRef.current;
+    if (!container || !fixedBottom) return;
     const containerRect = container.getBoundingClientRect();
     const fixedBottomRect = fixedBottom.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
@@ -68,10 +69,10 @@ function useResizeObserver(
   const debouncedHandleResize = useDebouncedCallback(handleResize, 100);
 
   useEffect(() => {
+    if (!containerRef.current || !fixedBottomRef.current) return;
     const observer = new ResizeObserver(debouncedHandleResize);
-
-    observer.observe(containerRef.current!);
-    observer.observe(fixedBottomRef.current!);
+    observer.observe(containerRef.current);
+    observer.observe(fixedBottomRef.current);
 
     return () => observer.disconnect();
   }, [debouncedHandleResize, containerRef, fixedBottomRef]);

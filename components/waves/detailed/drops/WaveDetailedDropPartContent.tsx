@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { DropPart } from "../../../../generated/models/DropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
@@ -93,7 +93,10 @@ const WaveDetailedDropPartContent: React.FC<
   return (
     <div className="tw-pt-1 tw-pb-1 tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
       {isStorm && renderNavigationButton("previous")}
-      <div className="tw-h-full tw-w-full xl:tw-pr-24 active:tw-bg-iron-800" ref={contentRef}>
+      <div
+        className="tw-h-full tw-w-full xl:tw-pr-24 active:tw-bg-iron-800"
+        ref={contentRef}
+      >
         <motion.div
           key={activePartIndex}
           initial={{ opacity: 0 }}

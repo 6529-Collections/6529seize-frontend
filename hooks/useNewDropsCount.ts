@@ -1,9 +1,7 @@
-import { useState, useMemo, useEffect, useContext } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Wave } from "../generated/models/Wave";
-import { AuthContext } from "../components/auth/Auth";
 
 export const useNewDropsCount = (waves: Wave[], activeWaveId: string) => {
-  const { connectedProfile } = useContext(AuthContext);
   const [initialDropsCounts, setInitialDropsCounts] = useState<
     Record<string, number>
   >({});

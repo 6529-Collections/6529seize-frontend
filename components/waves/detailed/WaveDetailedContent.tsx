@@ -4,7 +4,6 @@ import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import { useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",

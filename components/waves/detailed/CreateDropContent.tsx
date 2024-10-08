@@ -1,9 +1,8 @@
-import React from 'react';
 import PrimaryButton from "../../utils/button/PrimaryButton";
 import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -891,4 +890,4 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   );
 };
 
-export default React.memo(CreateDropContent);
+export default memo(CreateDropContent);
