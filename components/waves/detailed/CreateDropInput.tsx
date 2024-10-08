@@ -15,6 +15,8 @@ import {
   RootNode,
   COMMAND_PRIORITY_CRITICAL,
   createCommand,
+  TextNode,
+  $createTextNode,
 } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -22,13 +24,13 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { $isListItemNode, $isListNode } from "@lexical/list";
+import { $createListItemNode, $createListNode } from "@lexical/list";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { HeadingNode, QuoteNode, $createHeadingNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
@@ -310,7 +312,7 @@ const CreateDropInput = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
-              <ListPlugin />
+              <ListPlugin /> 
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />

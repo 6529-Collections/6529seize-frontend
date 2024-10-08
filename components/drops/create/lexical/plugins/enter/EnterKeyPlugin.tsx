@@ -54,8 +54,14 @@ export default function EnterKeyPlugin({
             return true;
           }
         }
-
+        
         if (event?.shiftKey) {
+          event.preventDefault();
+          editor.update(() => {
+            const paragraphNode = $createParagraphNode();
+            $insertNodes([paragraphNode]);
+            paragraphNode.select();
+          });
           return true; // Prevents the default behavior
         } else {
           // Handle Enter (Submit)
