@@ -220,7 +220,7 @@ export default function DropListItemRateGiveClap({
     });
   }, [rate, availableCredit]);
 
-  const svgSize = isMobile ? "tw-h-[18px] tw-w-[18px]" : "tw-size-7";
+  const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   return (
     <LazyTippy
       placement="top"

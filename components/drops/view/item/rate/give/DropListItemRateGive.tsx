@@ -238,6 +238,7 @@ export default function DropListItemRateGive({
             canVote={canVote}
             availableCredit={availableCredit}
             onSuccessfulRateChange={onSuccessfulRateChange}
+            isMobile={isMobile}
           />
           <DropListItemRateGiveChangeButton
             canVote={canVote}
