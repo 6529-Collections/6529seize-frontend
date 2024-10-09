@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
 import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
 import { AuthContext } from "../../auth/Auth";
@@ -11,10 +11,10 @@ import CreateDropStormPart from "./CreateDropStormPart";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface CreateDropStormPartsProps {
-  readonly parts: CreateDropPart[];
-  readonly mentionedUsers: DropMentionedUser[];
-  readonly referencedNfts: ReferencedNft[];
-  readonly onRemovePart: (partIndex: number) => void;
+  parts: CreateDropPart[];
+  mentionedUsers: DropMentionedUser[];
+  referencedNfts: ReferencedNft[];
+  onRemovePart: (partIndex: number) => void;
 }
 
 const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
@@ -23,7 +23,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   referencedNfts,
   onRemovePart,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = React.useContext(AuthContext);
   const cicType = cicToType(connectedProfile?.cic.cic_rating ?? 0);
 
   return (
@@ -88,4 +88,4 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   );
 };
 
-export default CreateDropStormParts;
+export default React.memo(CreateDropStormParts);

@@ -12,6 +12,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import * as React from "react";
@@ -180,7 +181,7 @@ const NewMentionsPlugin = forwardRef<
   const results = useMentionLookupService(queryString);
   const [isOpen, setIsOpen] = useState(false);
   const isMentionsOpen = () => isOpen;
-
+  const modalRef = useRef<HTMLDivElement>(null);
   useImperativeHandle(ref, () => ({
     isMentionsOpen,
   }));
@@ -239,30 +240,33 @@ const NewMentionsPlugin = forwardRef<
   );
 
   return (
-    <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
-      onQueryChange={setQueryString}
-      onSelectOption={onSelectOption}
-      triggerFn={checkForMentionMatch}
-      options={options}
-      onOpen={() => setIsOpen(true)}
-      onClose={() => setIsOpen(false)}
-      menuRenderFn={(
-        anchorElementRef,
-        { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
-      ) => {
-        return anchorElementRef.current && results.length
-          ? ReactDOM.createPortal(
-              <MentionsTypeaheadMenu
-                selectedIndex={selectedIndex}
-                options={options}
-                setHighlightedIndex={setHighlightedIndex}
-                selectOptionAndCleanUp={selectOptionAndCleanUp}
-              />,
-              anchorElementRef.current
-            )
-          : null;
-      }}
-    />
+    <div ref={modalRef}>
+      <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
+        onQueryChange={setQueryString}
+        onSelectOption={onSelectOption}
+        triggerFn={checkForMentionMatch}
+        options={options}
+        onOpen={() => setIsOpen(true)}
+        onClose={() => setIsOpen(false)}
+        
+        menuRenderFn={(
+          anchorElementRef,
+          { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
+        ) => {
+          return anchorElementRef.current && results.length
+            ? ReactDOM.createPortal(
+                <MentionsTypeaheadMenu
+                  selectedIndex={selectedIndex}
+                  options={options}
+                  setHighlightedIndex={setHighlightedIndex}
+                  selectOptionAndCleanUp={selectOptionAndCleanUp}
+                />,
+                anchorElementRef.current
+              )
+            : null;
+        }}
+      />
+    </div>
   );
 });
 

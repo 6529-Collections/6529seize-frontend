@@ -1,5 +1,5 @@
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Wave } from "../../../generated/models/Wave";
@@ -75,17 +75,17 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
     waves,
     activeWaveId
   );
-
   useEffect(() => {
     if (data) {
       setWaves(getWaves());
     }
   }, [data]);
+  const memoizedWaves = useMemo(() => waves || [], [waves]);
 
   return (
     <div className="tw-mt-4 tw-mb-3">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-5 tw-px-5">
-        <div className="tw-flex tw-flex-col tw-gap-y-1">
+      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-5">
+        <div className="tw-flex tw-flex-col tw-gap-y-1 tw-px-5">
           <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-200 tw-tracking-tight">
             Waves you follow
           </p>
@@ -96,7 +96,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
         </div>
         <div className="tw-mt-2 tw-max-h-60 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
-            {waves.map((wave) => (
+            {memoizedWaves.map((wave) => (
               <WaveDetailedFollowingWave
                 key={wave.id}
                 wave={wave}

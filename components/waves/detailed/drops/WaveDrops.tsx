@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { Wave } from "../../../../generated/models/Wave";
 import { Drop } from "../../../../generated/models/Drop";
@@ -11,7 +18,6 @@ import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
-import useCapacitor from "../../../../hooks/useCapacitor";
 import { useRouter } from "next/router";
 
 interface WaveDropsProps {
@@ -29,7 +35,7 @@ export default function WaveDrops({
   activeDrop,
   initialDrop,
 }: WaveDropsProps) {
-  const capacitor = useCapacitor();
+
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
@@ -66,7 +72,7 @@ export default function WaveDrops({
       }
       return false;
     },
-    [serialNo, targetDropRef.current]
+    [serialNo]
   );
 
   const [newItemsCount, setNewItemsCount] = useState(0);
@@ -91,7 +97,10 @@ export default function WaveDrops({
   useEffect(() => {
     if (drops.length > 0) {
       setInit(true);
-      setNewItemsCount((prevCount) => drops.length - prevCount);
+      setNewItemsCount((prevCount) => {
+        const newCount = drops.length - prevCount;
+        return prevCount !== newCount ? newCount : prevCount;
+      });
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
       const lastDrop = drops[drops.length - 1];
@@ -151,36 +160,40 @@ export default function WaveDrops({
     }
   }, [init, serialNo]);
 
-  const onQuoteClick = (drop: Drop) => {
-    if (drop.wave.id !== wave.id) {
-      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
-    } else {
-      setSerialNo(drop.serial_no);
+  const handleTopIntersection = useCallback(() => {
+    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  };
+  }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
+
+  const onQuoteClick = useCallback(
+    (drop: Drop) => {
+      if (drop.wave.id !== wave.id) {
+        router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+      } else {
+        setSerialNo(drop.serial_no);
+      }
+    },
+    [router, wave.id, setSerialNo]
+  );
+
+  const memoizedDrops = useMemo(() => drops, [drops]);
+
+
 
   return (
-    <div
-      className={`tw-flex tw-flex-col tw-relative ${
-        capacitor.isCapacitor
-          ? "tw-h-[calc(100vh-21rem)]"
-          : "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-12.5rem)]"
-      }`}
-    >
+    <div className="tw-flex tw-flex-col tw-relative tw-overflow-y-auto">
       <WaveDropsScrollContainer
         ref={scrollContainerRef}
         onScroll={handleScroll}
         newItemsCount={newItemsCount}
-        onTopIntersection={() => {
-          if (hasNextPage && !isFetching && !isFetchingNextPage) {
-            fetchNextPage();
-          }
-        }}
+        isFetchingNextPage={isFetchingNextPage}
+        onTopIntersection={handleTopIntersection}
       >
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <DropsList
             onReplyClick={setSerialNo}
-            drops={drops}
+            drops={memoizedDrops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
             onReply={onReply}

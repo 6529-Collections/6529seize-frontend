@@ -11,7 +11,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
   WaveDetailedFollowingWavesSortProps
 > = ({ selectedOption, setSelectedOption }) => {
   const LABELS: Record<WavesOverviewType, string> = {
-    [WavesOverviewType.Latest]: "Latest",
+    [WavesOverviewType.Latest]: "Recently Created",
     [WavesOverviewType.MostSubscribed]: "Most Subscribed",
     [WavesOverviewType.HighLevelAuthor]: "High Level Author",
     [WavesOverviewType.AuthorYouHaveRepped]: "Author You Have Repped",
@@ -20,6 +20,18 @@ const WaveDetailedFollowingWavesSort: React.FC<
     [WavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
     [WavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped By You",
   };
+
+  const ORDER: WavesOverviewType[] = [
+    WavesOverviewType.RecentlyDroppedTo,
+    WavesOverviewType.RecentlyDroppedToByYou,
+    WavesOverviewType.MostDropped,
+    WavesOverviewType.MostDroppedByYou,
+    WavesOverviewType.MostSubscribed,
+    WavesOverviewType.HighLevelAuthor,
+    WavesOverviewType.AuthorYouHaveRepped,
+    WavesOverviewType.Latest,
+  ];
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -29,7 +41,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
 
   const handleOptionSelect = (option: WavesOverviewType) => {
     setSelectedOption(option);
-      setIsDropdownOpen(false);
+    setIsDropdownOpen(false);
   };
 
   useEffect(() => {
@@ -80,21 +92,22 @@ const WaveDetailedFollowingWavesSort: React.FC<
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="tw-absolute tw-z-10 tw-w-56 tw-right-0 tw-bottom-full tw-mb-1 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-lg tw-shadow-lg tw-shadow-iron-950/50"
+              className="tw-absolute tw-z-20 tw-w-56 tw-right-0 tw-bottom-full tw-mb-1 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-lg tw-shadow-lg tw-shadow-iron-950/50"
             >
               <div className="tw-py-2 tw-px-2 tw-space-y-1.5">
-                {Object.values(WavesOverviewType).map((option) => (
-                  <div
+                {ORDER.map((option) => (
+                  <button
+                    type="button"
                     key={option}
                     onClick={() => handleOptionSelect(option)}
-                    className={`tw-px-4 tw-py-2 tw-text-xs tw-rounded-xl tw-transition-colors tw-duration-300 tw-cursor-pointer tw-whitespace-nowrap ${
+                    className={`tw-border-0 tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-xs tw-rounded-xl tw-transition-colors tw-duration-300 tw-cursor-pointer tw-whitespace-nowrap ${
                       selectedOption === option
                         ? "tw-text-iron-100 tw-bg-iron-700"
-                        : "tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-100"
+                        : "tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-100 tw-bg-iron-900"
                     }`}
                   >
                     {LABELS[option]}
-                  </div>
+                  </button>
                 ))}
               </div>
             </motion.div>

@@ -11,7 +11,7 @@ $negative-color: rgba(192, 57, 43, 1);
   border-radius: 50%;
   width: $btn-dimension;
   height: $btn-dimension;
-  background: none;
+  background: transparent;
 
   &:after {
     content: "";

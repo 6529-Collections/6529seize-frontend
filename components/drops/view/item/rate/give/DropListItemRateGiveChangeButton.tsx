@@ -8,11 +8,13 @@ export default function DropListItemRateGiveChangeButton({
   canVote,
   handleMouseDown,
   handleMouseUp,
+  isMobile = false,
 }: {
   readonly type: RateChangeType;
   readonly canVote: boolean;
   readonly handleMouseDown: (changeType: RateChangeType) => void;
   readonly handleMouseUp: () => void;
+  readonly isMobile?: boolean;
 }) {
   const { connectionStatus } = useContext(AuthContext);
 
@@ -42,7 +44,7 @@ export default function DropListItemRateGiveChangeButton({
 
   const getButtonClasses = (ratingAllowed: boolean) => {
     if (ratingAllowed) {
-      return "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-text-iron-300 hover:tw-text-iron-500";
+      return "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-text-iron-300";
     }
     return "tw-text-iron-500";
   };
@@ -70,10 +72,16 @@ export default function DropListItemRateGiveChangeButton({
       onClick={(e) => e.stopPropagation()}
       disabled={!canVote}
       aria-label={ariaLabels[type]}
-      className={`${buttonClasses} tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-bg-transparent tw-h-6 tw-w-6 tw-transition-all tw-duration-300 tw-ease-out`}
+      className={`tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-flex-shrink-0 ${
+        isMobile
+          ? "tw-bg-iron-800 tw-size-10 active:tw-bg-iron-600 active:tw-scale-95"
+          : "tw-bg-iron-900 tw-size-6"
+      } tw-transition-all tw-duration-150 ${buttonClasses}`}
     >
       <svg
-        className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-rotate-90"
+        className={`${
+          isMobile ? "tw-size-6" : "tw-size-4"
+        } tw-rotate-90 tw-flex-shrink-0`}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

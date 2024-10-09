@@ -4,12 +4,12 @@ import { Dialog, Transition } from "@headlessui/react";
 export default function CommonDropdownItemsMobileWrapper({
   isOpen,
   setOpen,
-  filterLabel,
+  label,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
-  readonly filterLabel: string;
+  readonly label?: string;
   readonly children: ReactNode;
 }) {
   return (
@@ -21,10 +21,10 @@ export default function CommonDropdownItemsMobileWrapper({
       >
         <Transition.Child
           as={Fragment}
-          enter="tw-ease-in-out tw-duration-500"
+          enter="tw-ease-in-out tw-duration-300"
           enterFrom="tw-opacity-0"
           enterTo="tw-opacity-100"
-          leave="tw-ease-in-out tw-duration-500"
+          leave="tw-ease-in-out tw-duration-300"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
@@ -36,20 +36,20 @@ export default function CommonDropdownItemsMobileWrapper({
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
               <Transition.Child
                 as={Fragment}
-                enter="tw-transform tw-transition tw-ease-in-out tw-duration-500 sm:tw-duration-700"
+                enter="tw-transform tw-transition tw-ease-out tw-duration-300"
                 enterFrom="tw-translate-y-full"
                 enterTo="tw-translate-y-0"
-                leave="tw-transform tw-transition tw-ease-in-out tw-duration-500 sm:tw-duration-700"
+                leave="tw-transform tw-transition tw-ease-in tw-duration-300"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
                 <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen">
                   <Transition.Child
                     as={Fragment}
-                    enter="tw-ease-in-out tw-duration-500"
+                    enter="tw-ease-in-out tw-duration-300"
                     enterFrom="tw-opacity-0"
                     enterTo="tw-opacity-100"
-                    leave="tw-ease-in-out tw-duration-500"
+                    leave="tw-ease-in-out tw-duration-300"
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >
@@ -81,13 +81,15 @@ export default function CommonDropdownItemsMobileWrapper({
                   </Transition.Child>
                   <div
                     className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-py-6"
-                    style={{ maxHeight: "calc(100vh - 4rem)" }}
+                    style={{ maxHeight: "calc(100vh - 8rem)" }}
                   >
-                    <div className="tw-px-6">
-                      <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
-                        {filterLabel}
-                      </Dialog.Title>
-                    </div>
+                    {label && (
+                      <div className="tw-px-6">
+                        <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
+                          {label}
+                        </Dialog.Title>
+                      </div>
+                    )}
                     <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
                       <ul className="tw-flex tw-flex-col tw-mx-0 tw-pl-0 tw-space-y-3 tw-mb-0 tw-list-none">
                         {children}

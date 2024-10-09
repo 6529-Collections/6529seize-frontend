@@ -1,6 +1,15 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND } from "lexical";
+import {
+  $createParagraphNode,
+  $getSelection,
+  $insertNodes,
+  $isRangeSelection,
+  COMMAND_PRIORITY_HIGH,
+  KEY_ENTER_COMMAND,
+} from "lexical";
 import { useEffect } from "react";
+import { $isListItemNode, $isListNode } from "@lexical/list";
+import { $isHeadingNode } from "@lexical/rich-text";
 
 export default function EnterKeyPlugin({
   disabled,
@@ -21,9 +30,39 @@ export default function EnterKeyPlugin({
           // Let the mention plugin handle the Enter key
           return false; // Allows the mention plugin to process the Enter key
         }
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchorNode = selection.anchor.getNode();
+          let parentNode = anchorNode.getParent();
+          if (parentNode === null) {
+            parentNode = anchorNode.getTopLevelElement();
+          }
 
+          // Check if the cursor is inside a list item
+          if ($isListItemNode(parentNode) || $isListNode(parentNode)) {
+          
+            // Inside a list item: Let Lexical handle the 'Enter' key as usual
+            return false; // Returning false allows default Lexical behavior
+          }
+          if ($isHeadingNode(parentNode) && event?.shiftKey) {
+            event.preventDefault();
+            editor.update(() => {
+              const paragraphNode = $createParagraphNode();
+              $insertNodes([paragraphNode]);
+              paragraphNode.select();
+            });
+            return true;
+          }
+        }
+        
         if (event?.shiftKey) {
-          return true; // Prevents the default behavior
+          event.preventDefault();
+          editor.update(() => {
+            const paragraphNode = $createParagraphNode();
+            $insertNodes([paragraphNode]);
+            paragraphNode.select();
+          });
+          return false; // Prevents the default behavior
         } else {
           // Handle Enter (Submit)
           event?.preventDefault();
