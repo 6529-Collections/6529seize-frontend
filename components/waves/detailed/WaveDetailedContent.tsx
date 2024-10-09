@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import { useSearchParams } from "next/navigation";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -23,6 +24,7 @@ interface WaveDetailedContentProps {
 export default function WaveDetailedContent({
   wave,
 }: WaveDetailedContentProps) {
+  const capacitor = useCapacitor();
   const searchParams = useSearchParams();
   const initialDrop = searchParams.get("drop");
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
@@ -56,10 +58,18 @@ export default function WaveDetailedContent({
     setActiveDrop(null);
   };
 
+  const containerClassName = useMemo(() => {
+    return `tw-w-full tw-flex tw-flex-col ${
+      capacitor.isCapacitor
+        ? "tw-h-[calc(100vh-14.7rem)]"
+        : "tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-7.5rem)]"
+    }`;
+  }, [capacitor.isCapacitor]);
+
   return (
     <div className="tw-relative tw-h-full">
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
-        <div className="tw-w-full tw-flex tw-flex-col">
+        <div className={containerClassName}>
           <WaveDrops
             wave={wave}
             onReply={handleReply}

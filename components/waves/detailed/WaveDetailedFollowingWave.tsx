@@ -33,6 +33,8 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
   };
 
   const onHover = (waveId: string) => {
+    if (waveId === activeWaveId) return;
+
     queryClient.prefetchQuery({
       queryKey: [QueryKey.WAVE, { wave_id: waveId }],
       queryFn: async () =>
@@ -69,15 +71,29 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
       staleTime: 60000,
     });
   };
+
+  const isActive = wave.id === activeWaveId;
+
   return (
-    <div key={wave.id} className="tw-my-2">
+    <div
+      key={wave.id}
+      className={`tw-py-2 tw-px-5 ${
+        isActive ? "tw-bg-primary-300/5 tw-text-iron-50" : ""
+      } `}
+    >
       <Link
         href={`/waves/${wave.id}`}
         onClick={(e) => handleClick(e, wave.id)}
         onMouseEnter={() => onHover(wave.id)}
-        className="tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group"
+        className="tw-ml-1 tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group"
       >
-        <div className="tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-900 tw-relative">
+        <div
+          className={`tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
+            isActive
+              ? "tw-ring-1 tw-ring-primary-400"
+              : "tw-ring-1 tw-ring-white/10"
+          }`}
+        >
           {wave.picture && (
             <img
               src={wave.picture}
@@ -91,9 +107,9 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
             </div>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-w-full">
+        <div className="tw-flex tw-justify-between tw-gap-x-2 tw-w-full">
           <span>{wave.name}</span>
-          <div className="tw-flex tw-items-center tw-text-right tw-whitespace-nowrap tw-pr-4 tw-text-xs tw-text-iron-400">
+          <div className="tw-mt-0.5 tw-text-right tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
             <span>{getTimeAgoShort(wave.metrics.latest_drop_timestamp)}</span>
           </div>
         </div>

@@ -7,7 +7,6 @@ import {
   useImperativeHandle,
   useCallback,
   useEffect,
-  useState,
   useRef,
 } from "react";
 import {
@@ -22,7 +21,6 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 
@@ -34,11 +32,8 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
-
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-
 import {
-  CreateDropConfig,
   MentionedUser,
   ReferencedNft,
 } from "../../../entities/IDrop";
@@ -60,10 +55,7 @@ import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlu
 import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { ActiveDropAction } from "./WaveDetailedContent";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import StormButton from "./StormButton";
-import CreateDropInputOptions from "./CreateDropInputOptions";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -98,44 +90,28 @@ const CreateDropInput = forwardRef<
   {
     readonly editorState: EditorState | null;
     readonly type: ActiveDropAction | null;
-    readonly drop: CreateDropConfig | null;
     readonly canSubmit: boolean;
-    readonly canAddPart: boolean;
     readonly isStormMode: boolean;
-    readonly isRequiredMetadataMissing: boolean;
-    readonly isRequiredMediaMissing: boolean;
     readonly submitting: boolean;
-    readonly setIsStormMode: (isStormMode: boolean) => void;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
       mentionedUser: Omit<MentionedUser, "current_handle">
     ) => void;
-    readonly setFiles: (files: File[]) => void;
-    readonly onDropPart: () => void;
-    readonly onAddMetadataClick: () => void;
   }
 >(
   (
     {
       editorState,
       type,
-      drop,
       canSubmit,
-      canAddPart,
       isStormMode,
-      isRequiredMetadataMissing,
-      isRequiredMediaMissing,
       submitting,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
       onDrop,
-      setFiles,
-      onDropPart,
-      setIsStormMode,
-      onAddMetadataClick,
     },
     ref
   ) => {
@@ -215,11 +191,6 @@ const CreateDropInput = forwardRef<
       },
     }));
 
-    const breakIntoStorm = () => {
-      onDropPart();
-      setIsStormMode(true);
-    };
-
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const isMentionsOpen = () => !!mentionsPluginRef.current?.isMentionsOpen();
 
@@ -246,32 +217,6 @@ const CreateDropInput = forwardRef<
       onDropRef.current();
     }, []);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        const files: File[] = Array.from(e.target.files);
-        setFiles(files);
-      }
-    };
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useClickAway(dropdownRef, () => {
-      if (isDropdownOpen) {
-        setIsDropdownOpen(false);
-      }
-    });
-
-    useKeyPressEvent("Escape", () => {
-      if (isDropdownOpen) {
-        setIsDropdownOpen(false);
-      }
-    });
-
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    const toggleDropdown = () => {
-      setIsDropdownOpen(!isDropdownOpen);
-    };
-
     return (
       <div className="tailwind-scope" ref={editorRef}>
         <LexicalComposer initialConfig={editorConfig}>
@@ -280,8 +225,8 @@ const CreateDropInput = forwardRef<
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
-                    className={`editor-input-one-liner tw-pr-24 tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-                    tw-pl-3 tw-py-2.5 ${
+                    className={`tw-max-h-[40vh] editor-input-one-liner tw-pr-24 tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                    tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ${
                       submitting ? "tw-opacity-50 tw-cursor-default" : ""
                     }`}
                     autoFocus={!submitting}
@@ -320,24 +265,6 @@ const CreateDropInput = forwardRef<
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={submitting}
-              />
-              <StormButton
-                isStormMode={isStormMode}
-                canAddPart={canAddPart}
-                submitting={submitting}
-                breakIntoStorm={breakIntoStorm}
-              />
-
-              <CreateDropInputOptions
-                dropdownRef={dropdownRef}
-                isRequiredMetadataMissing={isRequiredMetadataMissing}
-                isRequiredMediaMissing={isRequiredMediaMissing}
-                submitting={submitting}
-                toggleDropdown={toggleDropdown}
-                isDropdownOpen={isDropdownOpen}
-                handleFileChange={handleFileChange}
-                onAddMetadataClick={onAddMetadataClick}
-                setIsDropdownOpen={setIsDropdownOpen}
               />
             </div>
           </div>
