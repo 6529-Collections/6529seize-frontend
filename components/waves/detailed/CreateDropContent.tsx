@@ -871,7 +871,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               onEditorState={handleEditorStateChange}
               onReferencedNft={onReferencedNft}
               onMentionedUser={onMentionedUser}
-              setFiles={handleFileChange}
               onDrop={onDrop}
             />
           </div>

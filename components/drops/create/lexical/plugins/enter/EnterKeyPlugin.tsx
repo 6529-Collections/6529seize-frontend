@@ -62,7 +62,7 @@ export default function EnterKeyPlugin({
             $insertNodes([paragraphNode]);
             paragraphNode.select();
           });
-          return true; // Prevents the default behavior
+          return false; // Prevents the default behavior
         } else {
           // Handle Enter (Submit)
           event?.preventDefault();

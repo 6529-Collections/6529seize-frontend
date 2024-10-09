@@ -107,7 +107,6 @@ const CreateDropInput = forwardRef<
     readonly onMentionedUser: (
       mentionedUser: Omit<MentionedUser, "current_handle">
     ) => void;
-    readonly setFiles: (files: File[]) => void;
   }
 >(
   (
@@ -121,7 +120,6 @@ const CreateDropInput = forwardRef<
       onReferencedNft,
       onMentionedUser,
       onDrop,
-      setFiles,
     },
     ref
   ) => {
@@ -201,8 +199,6 @@ const CreateDropInput = forwardRef<
       },
     }));
 
-
-
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const isMentionsOpen = () => !!mentionsPluginRef.current?.isMentionsOpen();
 
@@ -228,32 +224,6 @@ const CreateDropInput = forwardRef<
       }
       onDropRef.current();
     }, []);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        const files: File[] = Array.from(e.target.files);
-        setFiles(files);
-      }
-    };
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useClickAway(dropdownRef, () => {
-      if (isDropdownOpen) {
-        setIsDropdownOpen(false);
-      }
-    });
-
-    useKeyPressEvent("Escape", () => {
-      if (isDropdownOpen) {
-        setIsDropdownOpen(false);
-      }
-    });
-
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    const toggleDropdown = () => {
-      setIsDropdownOpen(!isDropdownOpen);
-    };
 
     return (
       <div className="tailwind-scope" ref={editorRef}>
@@ -293,7 +263,7 @@ const CreateDropInput = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
-              <ListPlugin /> 
+              <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
