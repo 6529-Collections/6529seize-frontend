@@ -2,6 +2,7 @@ import Tippy from "@tippyjs/react";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import React, { memo } from "react";
 import StormButton from "./StormButton";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
@@ -29,6 +30,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     breakIntoStorm,
     setShowOptions,
   }) => {
+    const isMobile = useIsMobileDevice();
+
     const onSetShowIconsClick = () => {
       setShowOptions(true);
     };
@@ -50,14 +53,14 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
               transition={{ duration: 0.15 }}
               className="tw-flex tw-items-center tw-gap-x-2"
             >
-              <Tippy content={<span className="tw-text-xs">Add metadata</span>}>
+              <Tippy content={<span className="tw-text-xs">Add metadata</span>} disabled={isMobile}>
                 <button
                   onClick={onAddMetadataClick}
                   className={`tw-flex-shrink-0 ${
                     isRequiredMetadataMissing
                       ? "tw-text-yellow"
                       : "tw-text-iron-400"
-                  } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
+                  } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8  focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -76,15 +79,13 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   </svg>
                 </button>
               </Tippy>
-              <Tippy
-                content={<span className="tw-text-xs">Upload a file</span>}
-              >
+              <Tippy content={<span className="tw-text-xs">Upload a file</span>} disabled={isMobile}>
                 <label
                   className={`tw-flex-shrink-0 ${
                     isRequiredMediaMissing
                       ? "tw-text-yellow"
                       : "tw-text-iron-400"
-                  } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
+                  } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8  focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}
                 >
                   <input
                     type="file"
@@ -129,7 +130,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 isRequiredMetadataMissing || isRequiredMediaMissing
                   ? "tw-text-yellow"
                   : "tw-text-iron-400"
-              } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
+              } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8  focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
