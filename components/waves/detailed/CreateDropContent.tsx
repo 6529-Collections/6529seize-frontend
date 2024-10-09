@@ -395,6 +395,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 
+  const handleChevronClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    toggleChevron();
+    // Use the existing ref to focus the input
+    createDropInputRef.current?.focus();
+  };
+
   const getMarkdown = useMemo(
     () =>
       editorState?.read(() =>
@@ -726,8 +733,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles(updatedFiles);
   };
 
+  const [showChevron, setShowChevron] = useState(false);
+  const [hasContent, setHasContent] = useState(false);
+
   const handleEditorStateChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
+    const markdown = newEditorState.read(() =>
+      $convertToMarkdownString([
+        ...TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        HASHTAG_TRANSFORMER,
+        IMAGE_TRANSFORMER,
+      ])
+    );
+    setHasContent(!!markdown.trim());
+    setShowChevron(!!markdown.trim());
+  };
+
+  const toggleChevron = () => {
+    setShowChevron((prev) => !prev);
   };
 
   const removeFile = (file: File, partIndex?: number) => {
@@ -817,42 +841,84 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       />
       <div className="tw-flex tw-items-end tw-w-full">
         <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
-          <button className="tw-cursor-default tw-text-iron-400 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300 tw-h-9 tw-w-9">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="tw-size-[1.5rem] tw-flex-shrink-0"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="tw-cursor-default tw-text-iron-600 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300 tw-h-8 tw-w-8"
-          >
-            <svg
-              className="tw-size-5 tw-flex-shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          <AnimatePresence mode="wait">
+            {!hasContent || !showChevron ? (
+              <motion.div
+                key="default-buttons"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="tw-flex tw-items-center tw-gap-x-2"
+              >
+                <button className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-h-9 tw-w-9 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-iron-500 tw-border-0">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="tw-w-5 tw-h-5 tw-flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-h-9 tw-w-9 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-iron-500 tw-border-0"
+                >
+                  <svg
+                    className="tw-size-[18px] tw-flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </motion.div>
+            ) : (
+              <motion.button
+                key="chevron-button"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                type="button"
+                onClick={handleChevronClick}
+                aria-label="Open options"
+                className="tw-flex-shrink-0 tw-text-iron-600 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-h-8 tw-w-8 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-iron-500 tw-border-0"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  className="tw-w-5 tw-h-5 tw-flex-shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+
           <div className="tw-flex-grow tw-w-full">
             <CreateDropInput
               key={dropEditorRefreshKey}
