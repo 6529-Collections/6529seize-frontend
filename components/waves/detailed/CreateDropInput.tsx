@@ -7,7 +7,6 @@ import {
   useImperativeHandle,
   useCallback,
   useEffect,
-  useState,
   useRef,
 } from "react";
 import {
@@ -15,8 +14,6 @@ import {
   RootNode,
   COMMAND_PRIORITY_CRITICAL,
   createCommand,
-  TextNode,
-  $createTextNode,
 } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -24,23 +21,19 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { $createListItemNode, $createListNode } from "@lexical/list";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
-import { HeadingNode, QuoteNode, $createHeadingNode } from "@lexical/rich-text";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
-
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-
 import {
-  CreateDropConfig,
   MentionedUser,
   ReferencedNft,
 } from "../../../entities/IDrop";
@@ -62,7 +55,6 @@ import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlu
 import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { ActiveDropAction } from "./WaveDetailedContent";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 export interface CreateDropInputHandles {

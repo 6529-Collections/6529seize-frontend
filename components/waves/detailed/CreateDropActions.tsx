@@ -53,7 +53,10 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
               transition={{ duration: 0.15 }}
               className="tw-flex tw-items-center tw-gap-x-2"
             >
-              <Tippy content={<span className="tw-text-xs">Add metadata</span>} disabled={isMobile}>
+              <Tippy
+                content={<span className="tw-text-xs">Add metadata</span>}
+                disabled={isMobile}
+              >
                 <button
                   onClick={onAddMetadataClick}
                   className={`tw-flex-shrink-0 ${
@@ -79,8 +82,12 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   </svg>
                 </button>
               </Tippy>
-              <Tippy content={<span className="tw-text-xs">Upload a file</span>} disabled={isMobile}>
+              <Tippy
+                content={<span className="tw-text-xs">Upload a file</span>}
+                disabled={isMobile}
+              >
                 <label
+                  aria-label="Upload a file"
                   className={`tw-flex-shrink-0 ${
                     isRequiredMediaMissing
                       ? "tw-text-yellow"
@@ -93,6 +100,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     accept="image/*,video/*,audio/*"
                     multiple
                     onChange={onFiles}
+                    aria-hidden="true"
                   />
                   <svg
                     className="tw-flex-shrink-0 tw-h-5 tw-w-5"

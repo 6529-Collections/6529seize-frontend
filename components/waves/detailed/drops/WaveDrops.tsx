@@ -18,7 +18,6 @@ import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
-import useCapacitor from "../../../../hooks/useCapacitor";
 import { useRouter } from "next/router";
 
 interface WaveDropsProps {

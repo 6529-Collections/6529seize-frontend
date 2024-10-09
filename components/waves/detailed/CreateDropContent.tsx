@@ -32,8 +32,6 @@ import { WaveParticipationRequirement } from "../../../generated/models/WavePart
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
-import StormButton from "./StormButton";
-import Tippy from "@tippyjs/react";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
 
@@ -404,11 +402,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [showOptions, setShowOptions] = useState(breakpoint === "MD");
   useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
 
-  const onSetShowOptionsClick = (state: boolean) => {
-    setShowOptions(state);
-    createDropInputRef.current?.focus();
-  };
-
   const getMarkdown = useMemo(
     () =>
       editorState?.read(() =>
@@ -742,14 +735,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const handleEditorStateChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
-    const markdown = newEditorState.read(() =>
-      $convertToMarkdownString([
-        ...TRANSFORMERS,
-        MENTION_TRANSFORMER,
-        HASHTAG_TRANSFORMER,
-        IMAGE_TRANSFORMER,
-      ])
-    );
     if (breakpoint === "S") {
       setShowOptions(false);
     }
