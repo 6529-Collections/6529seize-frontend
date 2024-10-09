@@ -34,6 +34,8 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import StormButton from "./StormButton";
 import Tippy from "@tippyjs/react";
+import CreateDropActions from "./CreateDropActions";
+import { createBreakpoint } from "react-use";
 
 export type CreateDropMetadataType =
   | {
@@ -70,6 +72,8 @@ interface MissingRequirements {
   metadata: string[];
   media: WaveParticipationRequirement[];
 }
+
+const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
 
 const getPartMentions = (
   markdown: string | null,
@@ -389,6 +393,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   setIsStormMode,
   submitDrop,
 }) => {
+  const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
 
@@ -396,11 +401,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+  const [showOptions, setShowOptions] = useState(breakpoint === "MD");
+  useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
 
-  const handleChevronClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    toggleChevron();
-    // Use the existing ref to focus the input
+  const onSetShowOptionsClick = (state: boolean) => {
+    setShowOptions(state);
     createDropInputRef.current?.focus();
   };
 
@@ -735,9 +740,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles(updatedFiles);
   };
 
-  const [showChevron, setShowChevron] = useState(false);
-  const [hasContent, setHasContent] = useState(false);
-
   const handleEditorStateChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
     const markdown = newEditorState.read(() =>
@@ -748,12 +750,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         IMAGE_TRANSFORMER,
       ])
     );
-    setHasContent(!!markdown.trim());
-    setShowChevron(!!markdown.trim());
-  };
-
-  const toggleChevron = () => {
-    setShowChevron((prev) => !prev);
+    if (breakpoint === "S") {
+      setShowOptions(false);
+    }
   };
 
   const removeFile = (file: File, partIndex?: number) => {
@@ -834,9 +833,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   };
 
-  function breakIntoStorm(): void {
-    throw new Error("Function not implemented.");
-  }
+  const breakIntoStorm = () => {
+    finalizeAndAddDropPart();
+    setIsStormMode(true);
+  };
 
   return (
     <div className="tw-flex-grow">
@@ -847,113 +847,32 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       />
       <div className="tw-flex tw-items-end tw-w-full">
         <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
-          <AnimatePresence mode="wait">
-            {!hasContent || !showChevron ? (
-              <motion.div
-                key="default-buttons"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="tw-flex tw-items-center tw-gap-x-2"
-              >
-                <Tippy content={<span className="tw-text-xs">Add metadata</span>}>
-                  <button className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
-                      />
-                    </svg>
-                  </button>
-                </Tippy>
-                <Tippy content={<span className="tw-text-xs">Upload a file</span>}>
-                  <button className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0">
-                    <svg
-                      className="tw-flex-shrink-0 tw-h-5 tw-w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                      />
-                    </svg>
-                  </button>
-                </Tippy>
-                <StormButton
-                  isStormMode={isStormMode}
-                  canAddPart={canAddPart}
-                  submitting={submitting}
-                  breakIntoStorm={breakIntoStorm}
-                />
-              </motion.div>
-            ) : (
-              <motion.button
-                key="chevron-button"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                type="button"
-                onClick={handleChevronClick}
-                aria-label="Open options"
-                className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                  className="tw-w-5 tw-h-5 tw-flex-shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
-
+          <CreateDropActions
+            isStormMode={isStormMode}
+            canAddPart={canAddPart}
+            submitting={submitting}
+            showOptions={showOptions}
+            isRequiredMetadataMissing={!!missingRequirements.metadata.length}
+            isRequiredMediaMissing={!!missingRequirements.media.length}
+            handleFileChange={handleFileChange}
+            onAddMetadataClick={onAddMetadataClick}
+            breakIntoStorm={breakIntoStorm}
+            setShowOptions={setShowOptions}
+          />
           <div className="tw-flex-grow tw-w-full">
             <CreateDropInput
               key={dropEditorRefreshKey}
               ref={createDropInputRef}
               editorState={editorState}
               type={activeDrop?.action ?? null}
-              drop={drop}
               submitting={submitting}
               isStormMode={isStormMode}
-              setIsStormMode={setIsStormMode}
               canSubmit={canSubmit}
-              isRequiredMetadataMissing={!!missingRequirements.metadata.length}
-              isRequiredMediaMissing={!!missingRequirements.media.length}
-              canAddPart={canAddPart}
               onEditorState={handleEditorStateChange}
               onReferencedNft={onReferencedNft}
               onMentionedUser={onMentionedUser}
               setFiles={handleFileChange}
-              onDropPart={finalizeAndAddDropPart}
               onDrop={onDrop}
-              onAddMetadataClick={onAddMetadataClick}
             />
           </div>
         </div>
@@ -967,18 +886,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             <span className="tw-hidden lg:tw-inline">Drop</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              fill="none"
               viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              aria-hidden="true"
+              fill="currentColor"
               className="tw-size-5 lg:tw-hidden"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
-              />
+              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
             </svg>
           </PrimaryButton>
         </div>

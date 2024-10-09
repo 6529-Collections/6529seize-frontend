@@ -64,8 +64,6 @@ import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlu
 import { ActiveDropAction } from "./WaveDetailedContent";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import StormButton from "./StormButton";
-import CreateDropInputOptions from "./CreateDropInputOptions";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -100,14 +98,9 @@ const CreateDropInput = forwardRef<
   {
     readonly editorState: EditorState | null;
     readonly type: ActiveDropAction | null;
-    readonly drop: CreateDropConfig | null;
     readonly canSubmit: boolean;
-    readonly canAddPart: boolean;
     readonly isStormMode: boolean;
-    readonly isRequiredMetadataMissing: boolean;
-    readonly isRequiredMediaMissing: boolean;
     readonly submitting: boolean;
-    readonly setIsStormMode: (isStormMode: boolean) => void;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
@@ -115,29 +108,20 @@ const CreateDropInput = forwardRef<
       mentionedUser: Omit<MentionedUser, "current_handle">
     ) => void;
     readonly setFiles: (files: File[]) => void;
-    readonly onDropPart: () => void;
-    readonly onAddMetadataClick: () => void;
   }
 >(
   (
     {
       editorState,
       type,
-      drop,
       canSubmit,
-      canAddPart,
       isStormMode,
-      isRequiredMetadataMissing,
-      isRequiredMediaMissing,
       submitting,
       onEditorState,
       onReferencedNft,
       onMentionedUser,
       onDrop,
       setFiles,
-      onDropPart,
-      setIsStormMode,
-      onAddMetadataClick,
     },
     ref
   ) => {
@@ -217,10 +201,7 @@ const CreateDropInput = forwardRef<
       },
     }));
 
-    const breakIntoStorm = () => {
-      onDropPart();
-      setIsStormMode(true);
-    };
+
 
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const isMentionsOpen = () => !!mentionsPluginRef.current?.isMentionsOpen();
@@ -323,24 +304,6 @@ const CreateDropInput = forwardRef<
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={submitting}
               />
-          {/*     <StormButton
-                isStormMode={isStormMode}
-                canAddPart={canAddPart}
-                submitting={submitting}
-                breakIntoStorm={breakIntoStorm}
-              />
-
-              <CreateDropInputOptions
-                dropdownRef={dropdownRef}
-                isRequiredMetadataMissing={isRequiredMetadataMissing}
-                isRequiredMediaMissing={isRequiredMediaMissing}
-                submitting={submitting}
-                toggleDropdown={toggleDropdown}
-                isDropdownOpen={isDropdownOpen}
-                handleFileChange={handleFileChange}
-                onAddMetadataClick={onAddMetadataClick}
-                setIsDropdownOpen={setIsDropdownOpen}
-              /> */}
             </div>
           </div>
         </LexicalComposer>
