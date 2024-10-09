@@ -32,6 +32,8 @@ import { WaveParticipationRequirement } from "../../../generated/models/WavePart
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
+import StormButton from "./StormButton";
+import Tippy from "@tippyjs/react";
 
 export type CreateDropMetadataType =
   | {
@@ -832,6 +834,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   };
 
+  function breakIntoStorm(): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div className="tw-flex-grow">
       <CreateDropReplyingWrapper
@@ -851,42 +857,50 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                 transition={{ duration: 0.15 }}
                 className="tw-flex tw-items-center tw-gap-x-2"
               >
-                <button className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-h-9 tw-w-9 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-iron-500 tw-border-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="tw-w-5 tw-h-5 tw-flex-shrink-0"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-h-9 tw-w-9 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-iron-500 tw-border-0"
-                >
-                  <svg
-                    className="tw-size-[18px] tw-flex-shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                <Tippy content={<span className="tw-text-xs">Add metadata</span>}>
+                  <button className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
                       stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                      className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                      />
+                    </svg>
+                  </button>
+                </Tippy>
+                <Tippy content={<span className="tw-text-xs">Upload a file</span>}>
+                  <button className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0">
+                    <svg
+                      className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                      />
+                    </svg>
+                  </button>
+                </Tippy>
+                <StormButton
+                  isStormMode={isStormMode}
+                  canAddPart={canAddPart}
+                  submitting={submitting}
+                  breakIntoStorm={breakIntoStorm}
+                />
               </motion.div>
             ) : (
               <motion.button
@@ -898,7 +912,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                 type="button"
                 onClick={handleChevronClick}
                 aria-label="Open options"
-                className="tw-flex-shrink-0 tw-text-iron-600 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-h-8 tw-w-8 hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-iron-500 tw-border-0"
+                className="tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -953,11 +967,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             <span className="tw-hidden lg:tw-inline">Drop</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
+              fill="none"
               viewBox="0 0 24 24"
-              fill="currentColor"
+              strokeWidth="2"
+              stroke="currentColor"
+              aria-hidden="true"
               className="tw-size-5 lg:tw-hidden"
             >
-              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
+              />
             </svg>
           </PrimaryButton>
         </div>

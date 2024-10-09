@@ -323,7 +323,7 @@ const CreateDropInput = forwardRef<
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={submitting}
               />
-              <StormButton
+          {/*     <StormButton
                 isStormMode={isStormMode}
                 canAddPart={canAddPart}
                 submitting={submitting}
@@ -340,7 +340,7 @@ const CreateDropInput = forwardRef<
                 handleFileChange={handleFileChange}
                 onAddMetadataClick={onAddMetadataClick}
                 setIsDropdownOpen={setIsDropdownOpen}
-              />
+              /> */}
             </div>
           </div>
         </LexicalComposer>
