@@ -80,7 +80,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     <div className="tailwind-scope tw-bg-black">
       <div className="tw-mt-3 tw-px-4">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
-          <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-3 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[20.5rem] tw-w-full">
+          <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[22rem] tw-w-full">
             <div className="tw-flex tw-flex-1 tw-flex-col">
               <WaveDetailedAbout
                 wave={wave}
@@ -90,7 +90,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               />
             </div>
           </div>
-          <div className="tw-flex-1 tw-ml-[20.5rem]">
+          <div className="tw-flex-1 tw-ml-[22rem]">
             <div
               ref={contentWrapperRef}
               className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800"

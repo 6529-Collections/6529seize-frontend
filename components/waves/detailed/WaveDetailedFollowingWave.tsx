@@ -77,9 +77,9 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
   return (
     <div
       key={wave.id}
-      className={`tw-py-2 tw-px-2 ${
-        isActive ? "tw-bg-primary-300/5 tw-text-white" : ""
-      } tw-rounded-lg`}
+      className={`tw-py-2 tw-px-5 ${
+        isActive ? "tw-bg-primary-300/5 tw-text-iron-50" : ""
+      } `}
     >
       <Link
         href={`/waves/${wave.id}`}
@@ -107,9 +107,9 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
             </div>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-w-full">
+        <div className="tw-flex tw-justify-between tw-gap-x-2 tw-w-full">
           <span>{wave.name}</span>
-          <div className="tw-flex tw-items-center tw-text-right tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
+          <div className="tw-mt-0.5 tw-text-right tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
             <span>{getTimeAgoShort(wave.metrics.latest_drop_timestamp)}</span>
           </div>
         </div>

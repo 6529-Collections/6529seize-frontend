@@ -302,7 +302,7 @@ const getOptimisticDrop = (
     participation: { authenticated_user_eligible: boolean };
     voting: { authenticated_user_eligible: boolean };
   },
-  activeDrop: ActiveDropState | null,
+  activeDrop: ActiveDropState | null
 ): Drop | null => {
   if (!connectedProfile?.profile) {
     return null;
@@ -611,7 +611,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         requestBody,
         connectedProfile,
         wave,
-        activeDrop,
+        activeDrop
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
@@ -654,19 +654,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const getMissingRequirements = useMemo(() => {
-    const getMissingMetadata = () => 
+    const getMissingMetadata = () =>
       metadata
         .filter(isRequiredMetadataMissing)
-        .map(item => item.key as string);
+        .map((item) => item.key as string);
 
     const getMissingMedia = () =>
       wave.participation.required_media.filter(
-        media => !files.some(file => isMediaTypeMatching(file, media))
+        (media) => !files.some((file) => isMediaTypeMatching(file, media))
       );
 
     return (): MissingRequirements => ({
       metadata: getMissingMetadata(),
-      media: getMissingMedia()
+      media: getMissingMedia(),
     });
   }, [metadata, files, wave.participation.required_media]);
 
@@ -816,36 +816,85 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
       />
       <div className="tw-flex tw-items-end">
-        <div className="tw-flex-grow">
-          <CreateDropInput
-            key={dropEditorRefreshKey}
-            ref={createDropInputRef}
-            editorState={editorState}
-            type={activeDrop?.action ?? null}
-            drop={drop}
-            submitting={submitting}
-            isStormMode={isStormMode}
-            setIsStormMode={setIsStormMode}
-            canSubmit={canSubmit}
-            isRequiredMetadataMissing={!!missingRequirements.metadata.length}
-            isRequiredMediaMissing={!!missingRequirements.media.length}
-            canAddPart={canAddPart}
-            onEditorState={handleEditorStateChange}
-            onReferencedNft={onReferencedNft}
-            onMentionedUser={onMentionedUser}
-            setFiles={handleFileChange}
-            onDropPart={finalizeAndAddDropPart}
-            onDrop={onDrop}
-            onAddMetadataClick={onAddMetadataClick}
-          />
+        <div className="tw-flex tw-flex-grow tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+        {/*   <button className="tw-cursor-default tw-text-iron-400 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300 tw-h-9 tw-w-9">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="tw-size-[1.5rem] tw-flex-shrink-0"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="tw-cursor-default tw-text-iron-600 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300 tw-h-8 tw-w-8"
+          >
+            <svg
+              className="tw-size-5 tw-flex-shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button> */}
+
+          <div className="tw-flex-grow">
+            <CreateDropInput
+              key={dropEditorRefreshKey}
+              ref={createDropInputRef}
+              editorState={editorState}
+              type={activeDrop?.action ?? null}
+              drop={drop}
+              submitting={submitting}
+              isStormMode={isStormMode}
+              setIsStormMode={setIsStormMode}
+              canSubmit={canSubmit}
+              isRequiredMetadataMissing={!!missingRequirements.metadata.length}
+              isRequiredMediaMissing={!!missingRequirements.media.length}
+              canAddPart={canAddPart}
+              onEditorState={handleEditorStateChange}
+              onReferencedNft={onReferencedNft}
+              onMentionedUser={onMentionedUser}
+              setFiles={handleFileChange}
+              onDropPart={finalizeAndAddDropPart}
+              onDrop={onDrop}
+              onAddMetadataClick={onAddMetadataClick}
+            />
+          </div>
         </div>
-        <div className="tw-ml-3">
+
+        <div className="tw-ml-2 lg:tw-ml-3">
           <PrimaryButton
             onClicked={onDrop}
             loading={submitting}
             disabled={!canSubmit}
+            padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5"
           >
-            Drop
+            <span className="tw-hidden lg:tw-inline">Drop</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="tw-size-5 lg:tw-hidden"
+            >
+              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+            </svg>
           </PrimaryButton>
         </div>
       </div>
