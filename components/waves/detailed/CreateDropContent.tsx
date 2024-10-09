@@ -815,9 +815,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
       />
-      <div className="tw-flex tw-items-end">
-        <div className="tw-flex tw-flex-grow tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
-        {/*   <button className="tw-cursor-default tw-text-iron-400 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300 tw-h-9 tw-w-9">
+      <div className="tw-flex tw-items-end tw-w-full">
+        <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+          <button className="tw-cursor-default tw-text-iron-400 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-ease-out tw-transition tw-duration-300 tw-h-9 tw-w-9">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -852,9 +852,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                 strokeLinejoin="round"
               />
             </svg>
-          </button> */}
-
-          <div className="tw-flex-grow">
+          </button>
+          <div className="tw-flex-grow tw-w-full">
             <CreateDropInput
               key={dropEditorRefreshKey}
               ref={createDropInputRef}
@@ -878,7 +877,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             />
           </div>
         </div>
-
         <div className="tw-ml-2 lg:tw-ml-3">
           <PrimaryButton
             onClicked={onDrop}
