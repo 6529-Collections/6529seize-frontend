@@ -88,7 +88,8 @@ export default function DropListItemRateGiveSubmit({
     }
 
     const previousRate = drop.context_profile_context?.rating ?? 0;
-    const newRate = previousRate + rate * clickCount;
+    const rateIncrement = rate * clickCount;
+    const newRate = previousRate + rateIncrement;
 
     await rateChangeMutation.mutateAsync({
       rate: newRate,
