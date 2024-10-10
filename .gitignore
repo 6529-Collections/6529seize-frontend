@@ -7,6 +7,13 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/storageState.json
+/playwright/.auth/
+storageState.json
+/trace.zip
 
 # next.js
 /.next/
