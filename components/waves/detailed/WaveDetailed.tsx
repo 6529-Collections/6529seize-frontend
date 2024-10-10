@@ -15,20 +15,41 @@ interface WaveDetailedProps {
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function WaveDetailed({ wave}: WaveDetailedProps) {
+export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
     WaveDetailedView.CONTENT
   );
 
+  const [activeWave, setActiveWave] = useState(wave);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleWaveChange = (newWave: Wave) => {
+    setIsLoading(true);
+    setActiveWave(newWave);
+    setActiveView(WaveDetailedView.CONTENT);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
+
   const breakpoint = useBreakpoint();
 
   return breakpoint !== "LG" ? (
-    <WaveDetailedMobile wave={wave} view={activeView} setView={setActiveView} />
-  ) : (
-    <WaveDetailedDesktop
-      wave={wave}
+    <WaveDetailedMobile
+      wave={activeWave}
       view={activeView}
       setView={setActiveView}
+      isLoading={isLoading}
+      onWaveChange={handleWaveChange}
+      setIsLoading={setIsLoading}
+    />
+  ) : (
+    <WaveDetailedDesktop
+      wave={activeWave}
+      view={activeView}
+      setView={setActiveView}
+      onWaveChange={handleWaveChange}
+      setIsLoading={setIsLoading}
     />
   );
 }
