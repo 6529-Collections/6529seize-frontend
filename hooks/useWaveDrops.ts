@@ -55,7 +55,6 @@ export function useWaveDrops(
   >(undefined);
   const isTabVisible = useTabVisibility();
 
-  
 
   const queryKey = [
     QueryKey.DROPS,
