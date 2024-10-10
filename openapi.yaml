@@ -891,6 +891,28 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/NftsPage"
+  /nfts/{contract}/media:
+    get:
+      tags:
+        - NFTs
+      summary: Get NFT Media by Contract
+      operationId: getNftMediaByContract
+      parameters:
+        - name: contract
+          in: path
+          description: The NFT contract address to filter the media by
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation, returns an array of NFT media
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NftMedia"
   /notifications:
     get:
       tags:
@@ -1666,11 +1688,11 @@ paths:
       tags:
         - Ratings
       summary: >-
-        This is deprecated. Use bulk-rep instead.
-        Bulk rate. Supplied amount will be added to all target identities. If
-        same identity is supplied multiple times, all the additions will be
-        summed up. Targets must be represented as Ethereum wallet addresses. ENS
-        names and profile handles are not supported.
+        This is deprecated. Use bulk-rep instead. Bulk rate. Supplied amount
+        will be added to all target identities. If same identity is supplied
+        multiple times, all the additions will be summed up. Targets must be
+        represented as Ethereum wallet addresses. ENS names and profile handles
+        are not supported.
       deprecated: true
       operationId: bulkRate
       requestBody:
@@ -1921,7 +1943,9 @@ paths:
             $ref: "#/components/schemas/WavesOverviewType"
         - name: only_waves_followed_by_authenticated_user
           in: query
-          description: If true then result only includes waves what authenticated user follows
+          description: >-
+            If true then result only includes waves what authenticated user
+            follows
           required: false
           schema:
             type: boolean
@@ -2755,6 +2779,7 @@ components:
       type: object
       required:
         - wave_id
+        - type
       allOf:
         - $ref: "#/components/schemas/CreateWaveDropRequest"
       properties:
@@ -2762,6 +2787,8 @@ components:
           type: string
         reply_to:
           $ref: "#/components/schemas/ReplyToDrop"
+        drop_type:
+          $ref: "#/components/schemas/DropType"
     CreateGroup:
       type: object
       required:
@@ -3408,6 +3435,11 @@ components:
           type: string
         is_deleted:
           type: boolean
+    DropType:
+      type: string
+      enum:
+        - CHAT
+        - PARTICIPATORY
     DropVote:
       type: object
       required:
@@ -3428,6 +3460,7 @@ components:
       required:
         - id
         - serial_no
+        - drop_type
         - author
         - created_at
         - updated_at
@@ -3449,6 +3482,8 @@ components:
           description: Sequence number of the drop in Seize
           type: number
           format: int64
+        drop_type:
+          $ref: "#/components/schemas/DropType"
         reply_to:
           $ref: "#/components/schemas/ReplyToDropResponse"
         author:
@@ -3935,6 +3970,22 @@ components:
         highest_offer_from:
           type: string
           nullable: true
+    NftMedia:
+      type: object
+      required:
+        - id
+        - image
+        - animation
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the NFT media
+        image:
+          type: string
+          description: The URL of the NFT image
+        animation:
+          type: string
+          description: The URL of the NFT animation, if available
     NftOwner:
       type: object
       required:

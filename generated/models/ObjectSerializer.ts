@@ -56,6 +56,7 @@ export * from '../models/DropSearchStrategy';
 export * from '../models/DropSubscriptionActions';
 export * from '../models/DropSubscriptionTargetAction';
 export * from '../models/DropTraceItem';
+export * from '../models/DropType';
 export * from '../models/DropVote';
 export * from '../models/DropWithoutWave';
 export * from '../models/DropsPage';
@@ -79,6 +80,7 @@ export * from '../models/IntRange';
 export * from '../models/LoginRequest';
 export * from '../models/LoginResponse';
 export * from '../models/Nft';
+export * from '../models/NftMedia';
 export * from '../models/NftOwner';
 export * from '../models/NftOwnerPage';
 export * from '../models/NftsPage';
@@ -162,7 +164,7 @@ import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRating
 import { ChangeProfileRepRating } from '../models/ChangeProfileRepRating';
 import { ChangeProfileRepRatingResponse } from '../models/ChangeProfileRepRatingResponse';
 import { CreateDropPart } from '../models/CreateDropPart';
-import { CreateDropRequest } from '../models/CreateDropRequest';
+import { CreateDropRequest         } from '../models/CreateDropRequest';
 import { CreateGroup } from '../models/CreateGroup';
 import { CreateGroupDescription } from '../models/CreateGroupDescription';
 import { CreateMediaUploadUrlRequest } from '../models/CreateMediaUploadUrlRequest';
@@ -196,8 +198,9 @@ import { DropSearchStrategy } from '../models/DropSearchStrategy';
 import { DropSubscriptionActions } from '../models/DropSubscriptionActions';
 import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
 import { DropTraceItem } from '../models/DropTraceItem';
+import { DropType } from '../models/DropType';
 import { DropVote } from '../models/DropVote';
-import { DropWithoutWave } from '../models/DropWithoutWave';
+import { DropWithoutWave                   } from '../models/DropWithoutWave';
 import { DropsPage } from '../models/DropsPage';
 import { FeedItem    } from '../models/FeedItem';
 import { FeedItemType } from '../models/FeedItemType';
@@ -219,6 +222,7 @@ import { IntRange } from '../models/IntRange';
 import { LoginRequest } from '../models/LoginRequest';
 import { LoginResponse } from '../models/LoginResponse';
 import { Nft      , NftTokenTypeEnum                               } from '../models/Nft';
+import { NftMedia } from '../models/NftMedia';
 import { NftOwner } from '../models/NftOwner';
 import { NftOwnerPage } from '../models/NftOwnerPage';
 import { NftsPage } from '../models/NftsPage';
@@ -294,6 +298,7 @@ let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "DropSearchStrategy",
     "DropSubscriptionTargetAction",
+    "DropType",
     "FeedItemType",
     "GroupFilterDirection",
     "GroupOwnsNftNameEnum",
@@ -391,6 +396,7 @@ let typeMap: {[index: string]: any} = {
     "LoginRequest": LoginRequest,
     "LoginResponse": LoginResponse,
     "Nft": Nft,
+    "NftMedia": NftMedia,
     "NftOwner": NftOwner,
     "NftOwnerPage": NftOwnerPage,
     "NftsPage": NftsPage,
