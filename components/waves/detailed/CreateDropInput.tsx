@@ -229,7 +229,6 @@ const CreateDropInput = forwardRef<
                     tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ${
                       submitting ? "tw-opacity-50 tw-cursor-default" : ""
                     }`}
-                    autoFocus={!submitting}
                   />
                 }
                 placeholder={

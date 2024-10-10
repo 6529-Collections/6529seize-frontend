@@ -700,20 +700,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeDrop]);
-
   const handleFileChange = (newFiles: File[]) => {
     let updatedFiles = [...files, ...newFiles];
     let removedCount = 0;
