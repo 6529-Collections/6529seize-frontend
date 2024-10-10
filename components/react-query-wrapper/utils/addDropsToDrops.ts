@@ -2,6 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { Drop } from "../../../generated/models/Drop";
 import { QueryKey } from "../ReactQueryWrapper";
 import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
+import { DropType } from "../../../generated/models/DropType";
 
 type DropsQueryData = {
   pages?: WaveDropsFeed[];
@@ -25,7 +26,10 @@ const updateQueryData = (
   }
   const pages: WaveDropsFeed[] = JSON.parse(JSON.stringify(oldData.pages));
   if (pages[0]) {
-    pages[0].drops.unshift(drop);
+    pages[0].drops.unshift({
+      ...drop,
+      drop_type: DropType.Chat,
+    });
     return { ...oldData, pages };
   }
   return oldData;
