@@ -17,6 +17,7 @@ import { DropPart } from '../models/DropPart';
 import { DropRater } from '../models/DropRater';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
 import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
+import { DropType } from '../models/DropType';
 import { ProfileMin } from '../models/ProfileMin';
 import { ReplyToDropResponse } from '../models/ReplyToDropResponse';
 import { HttpFile } from '../http/http';
@@ -27,6 +28,7 @@ export class DropWithoutWave {
     * Sequence number of the drop in Seize
     */
     'serial_no': number;
+    'drop_type': DropType;
     'reply_to'?: ReplyToDropResponse;
     'author': ProfileMin;
     /**
@@ -66,6 +68,12 @@ export class DropWithoutWave {
             "baseName": "serial_no",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "drop_type",
+            "baseName": "drop_type",
+            "type": "DropType",
+            "format": ""
         },
         {
             "name": "reply_to",
@@ -165,4 +173,6 @@ export class DropWithoutWave {
     public constructor() {
     }
 }
+
+
 

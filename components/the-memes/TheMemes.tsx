@@ -1,7 +1,7 @@
 import styles from "./TheMemes.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col, Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
@@ -22,6 +22,7 @@ import { MemeSeason } from "../../entities/ISeason";
 import { commonApiFetch } from "../../services/api/common-api";
 import { AuthContext } from "../auth/Auth";
 import { MemeLabSort, MemesSort } from "../../enums";
+import LFGSlideshow from "../lfg-slideshow/LFGSlideshow";
 
 interface Meme {
   meme: number;
@@ -64,6 +65,8 @@ export function printVolumeTypeDropdown(
 
 export default function TheMemesComponent(props: Readonly<Props>) {
   const router = useRouter();
+
+  const [isSlideshowOpen, setIsSlideshowOpen] = useState(false);
 
   const { connectedProfile } = useContext(AuthContext);
   const [connectedConsolidationKey, setConnectedConsolidationKey] =
@@ -435,12 +438,17 @@ export default function TheMemesComponent(props: Readonly<Props>) {
           <Container className="pt-4">
             <>
               <Row>
-                <Col className="d-flex align-items-center justify-content-start">
-                  <h1>
-                    <span className="font-lightest">The</span> Memes
-                  </h1>
-                </Col>
-                <Col className="d-flex align-items-center justify-content-end">
+                <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                  <span className="d-flex align-items-center gap-3">
+                    <h1 className="no-wrap">
+                      <span className="font-lightest">The</span> Memes
+                    </h1>
+                    <Button
+                      onClick={() => setIsSlideshowOpen(true)}
+                      className={`${styles.lfgButton} no-wrap`}>
+                      LFG: Start the Show!
+                    </Button>
+                  </span>
                   <SeasonsDropdown
                     seasons={seasons.map((s) => s.id)}
                     selectedSeason={selectedSeason}
@@ -450,7 +458,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
               </Row>
               <Row className="pt-2">
                 <Col>
-                  MemesSort by&nbsp;&nbsp;
+                  Sort by&nbsp;&nbsp;
                   <FontAwesomeIcon
                     icon="chevron-circle-up"
                     onClick={() => setSortDir(SortDirection.ASC)}
@@ -504,6 +512,11 @@ export default function TheMemesComponent(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
+      <LFGSlideshow
+        contract={MEMES_CONTRACT}
+        isOpen={isSlideshowOpen}
+        setIsOpen={setIsSlideshowOpen}
+      />
     </Container>
   );
 }

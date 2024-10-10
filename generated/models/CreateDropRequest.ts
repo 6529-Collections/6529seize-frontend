@@ -14,12 +14,14 @@ import { CreateDropPart } from '../models/CreateDropPart';
 import { DropMentionedUser } from '../models/DropMentionedUser';
 import { DropMetadata } from '../models/DropMetadata';
 import { DropReferencedNFT } from '../models/DropReferencedNFT';
+import { DropType } from '../models/DropType';
 import { ReplyToDrop } from '../models/ReplyToDrop';
 import { HttpFile } from '../http/http';
 
 export class CreateDropRequest {
     'wave_id': string;
     'reply_to'?: ReplyToDrop;
+    'drop_type'?: DropType;
     'title'?: string | null;
     'parts': Array<CreateDropPart>;
     'referenced_nfts': Array<DropReferencedNFT>;
@@ -39,6 +41,12 @@ export class CreateDropRequest {
             "name": "reply_to",
             "baseName": "reply_to",
             "type": "ReplyToDrop",
+            "format": ""
+        },
+        {
+            "name": "drop_type",
+            "baseName": "drop_type",
+            "type": "DropType",
             "format": ""
         },
         {
@@ -79,4 +87,6 @@ export class CreateDropRequest {
     public constructor() {
     }
 }
+
+
 
