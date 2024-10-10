@@ -6,6 +6,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { NftMedia } from "../../generated/models/NftMedia";
 
 const DEFAULT_TIMEOUT = 5000;
+const VIDEO_ID = "lfg-slideshow-video";
 
 const LFGSlideshow: React.FC<{
   isOpen: boolean;
@@ -16,6 +17,8 @@ const LFGSlideshow: React.FC<{
   const [bodyOverflow, setBodyOverflow] = useState<string>();
 
   const [media, setMedia] = useState<NftMedia[]>([]);
+
+  let slideTimer: NodeJS.Timeout | null = null;
 
   const isVideo = (url: string) => {
     return url?.toLowerCase().endsWith(".mp4");
@@ -51,6 +54,9 @@ const LFGSlideshow: React.FC<{
   };
 
   const nextSlide = () => {
+    if (slideTimer) {
+      clearTimeout(slideTimer);
+    }
     setCurrentIndex((prevIndex) => (prevIndex + 1) % media.length);
   };
 
@@ -98,24 +104,27 @@ const LFGSlideshow: React.FC<{
 
     if (isVideo(currentMedia.animation)) {
       const videoElement = document.getElementById(
-        "currentVideo"
+        VIDEO_ID
       ) as HTMLVideoElement;
       if (videoElement) {
         const handleEnded = () => {
           nextSlide();
         };
-        if (videoElement.src !== media[currentIndex].animation) {
-          videoElement.src = media[currentIndex].animation;
-        }
+
         videoElement.addEventListener("ended", handleEnded);
         return () => {
           videoElement.removeEventListener("ended", handleEnded);
         };
       }
     } else {
-      const timer = setTimeout(nextSlide, DEFAULT_TIMEOUT);
-      return () => clearTimeout(timer);
+      slideTimer = setTimeout(nextSlide, DEFAULT_TIMEOUT);
     }
+
+    return () => {
+      if (slideTimer) {
+        clearTimeout(slideTimer);
+      }
+    };
   }, [isOpen, currentIndex, media]);
 
   if (!isOpen || media.length === 0) {
@@ -136,8 +145,13 @@ const LFGSlideshow: React.FC<{
       />
       <div className={styles.slide}>
         {isVideo(media[currentIndex].animation) ? (
-          <video id="currentVideo" autoPlay muted controls>
-            <source src={media[currentIndex].animation} type="video/mp4" />
+          <video
+            id={VIDEO_ID}
+            autoPlay
+            muted
+            controls
+            src={media[currentIndex].animation}
+            poster={media[currentIndex].image}>
             Your browser does not support the video tag.
           </video>
         ) : (
