@@ -89,7 +89,6 @@ export function useWaveDrops(
     });
   }, [wave])
 
-
   const {
     data,
     fetchNextPage,
