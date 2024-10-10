@@ -19,6 +19,8 @@ interface WaveDetailedAboutProps {
   readonly setActiveView?: (view: WaveDetailedMobileView) => void;
   readonly showRequiredMetadata: boolean;
   readonly showRequiredTypes: boolean;
+  readonly onWaveChange: (wave: Wave) => void;
+  readonly setIsLoading: (isLoading: boolean) => void;
 }
 
 const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
@@ -26,12 +28,23 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
   setView,
   setActiveView,
   showRequiredMetadata,
-  showRequiredTypes
+  showRequiredTypes,
+  onWaveChange,
+  setIsLoading,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handleWaveChange = (newWave: Wave) => {
+    setIsLoading(true);
+    onWaveChange(newWave);
+    setActiveView?.(WaveDetailedMobileView.CHAT);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
   };
 
   return (
@@ -97,7 +110,12 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <WaveDetailedFollowingWaves activeWaveId={wave.id} />
+      <WaveDetailedFollowingWaves 
+        activeWaveId={wave.id} 
+        onWaveChange={handleWaveChange}
+        setActiveView={setActiveView || (() => {})}
+        setIsLoading={setIsLoading}
+      />
     </>
   );
 };

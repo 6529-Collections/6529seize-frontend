@@ -9,13 +9,20 @@ import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
 import { useNewDropsCount } from "../../../hooks/useNewDropsCount";
 import WaveDetailedFollowingWave from "./WaveDetailedFollowingWave";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "../../react-query-wrapper/utils/query-utils";
+import { WaveDetailedMobileView } from "./WaveDetailedMobile";
 
 interface WaveDetailedFollowingWavesProps {
   readonly activeWaveId: string;
+  readonly onWaveChange: (wave: Wave) => void;
+  readonly setActiveView: (view: WaveDetailedMobileView) => void;
+  readonly setIsLoading: (isLoading: boolean) => void;
 }
 
 const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
   activeWaveId,
+  onWaveChange,
+  setActiveView,
+  setIsLoading,
 }) => {
   const [selectedSort, setSelectedSort] = useState<WavesOverviewType>(
     WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType
@@ -82,6 +89,15 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
   }, [data]);
   const memoizedWaves = useMemo(() => waves || [], [waves]);
 
+  const handleWaveChange = (wave: Wave) => {
+    setIsLoading(true);
+    onWaveChange(wave);
+    setActiveView(WaveDetailedMobileView.CHAT);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
+
   return (
     <div className="tw-mt-4 tw-mb-3">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-5">
@@ -103,6 +119,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
                 activeWaveId={activeWaveId}
                 newDropsCounts={newDropsCounts}
                 resetWaveCount={resetWaveCount}
+                onWaveChange={() => handleWaveChange(wave)}
               />
             ))}
             {isFetchingNextPage && (

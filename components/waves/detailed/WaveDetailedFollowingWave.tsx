@@ -13,6 +13,7 @@ interface WaveDetailedFollowingWaveProps {
   readonly activeWaveId: string;
   readonly newDropsCounts: Record<string, number>;
   readonly resetWaveCount: (waveId: string) => void;
+  readonly onWaveChange: () => void;
 }
 
 const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
@@ -20,6 +21,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
   activeWaveId,
   newDropsCounts,
   resetWaveCount,
+  onWaveChange,
 }) => {
   const queryClient = useQueryClient();
 
@@ -29,6 +31,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
   ) => {
     e.preventDefault();
     resetWaveCount(waveId);
+    onWaveChange();
     router.push(`/waves/${waveId}`, undefined, { shallow: true });
   };
 

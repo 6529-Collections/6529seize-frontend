@@ -84,7 +84,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
   wave,
 }: CreateDropProps) {
-  const capacitor = useCapacitor();
+const capacitor = useCapacitor();
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
