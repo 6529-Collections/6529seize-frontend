@@ -1,7 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "../ReactQueryWrapper";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "./query-utils";
-import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
 import { Wave } from "../../../generated/models/Wave";
 import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
 
