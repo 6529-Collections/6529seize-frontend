@@ -279,7 +279,7 @@ export default function RememePage(props: Readonly<Props>) {
                     <Col>
                       <a
                         className={styles.userLink}
-                        href={`https://twitter.com/${rememe.contract_opensea_data.twitterUsername}`}
+                        href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
                         target="_blank"
                         rel="noreferrer">
                         <Image
