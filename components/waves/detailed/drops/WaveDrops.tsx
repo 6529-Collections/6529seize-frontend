@@ -63,7 +63,6 @@ export default function WaveDrops({
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
-      console.log(targetDropRef.current);
       if (serialNo && targetDropRef.current) {
         targetDropRef.current.scrollIntoView({
           behavior: behavior,
@@ -132,7 +131,6 @@ export default function WaveDrops({
         setIsScrolling(false);
         setSerialNo(null);
       } else {
-        console.log("scrollToTop");
         scrollToTop();
         setTimeout(checkAndFetchNext, 1000);
       }

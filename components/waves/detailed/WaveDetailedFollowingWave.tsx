@@ -7,6 +7,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
 import router from "next/router";
+import { WAVE_DROPS_PARAMS } from "../../react-query-wrapper/utils/query-utils";
 
 interface WaveDetailedFollowingWaveProps {
   readonly wave: Wave;
@@ -51,13 +52,13 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
         QueryKey.DROPS,
         {
           waveId: waveId,
-          limit: 50,
+          limit: WAVE_DROPS_PARAMS.limit,
           dropId: null,
         },
       ],
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
-          limit: "50",
+          limit: WAVE_DROPS_PARAMS.limit.toString(),
         };
 
         if (pageParam) {
