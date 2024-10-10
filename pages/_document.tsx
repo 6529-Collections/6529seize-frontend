@@ -16,14 +16,9 @@ export default function Document() {
         <NextScript />
         <footer
           className="d-flex flex-column align-items-center justify-content-center gap-2"
-          id="footer"
-        >
+          id="footer">
           <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
-            <a
-              href="https://twitter.com/punk6529"
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a href="https://x.com/punk6529" target="_blank" rel="noreferrer">
               <img
                 width="0"
                 height="0"
@@ -35,10 +30,9 @@ export default function Document() {
             </a>
             |
             <a
-              href="https://twitter.com/6529Collections"
+              href="https://x.com/6529Collections"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <img
                 width="0"
                 height="0"
@@ -52,8 +46,7 @@ export default function Document() {
             <a
               href="https://discord.gg/join-om"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <img
                 width="0"
                 height="0"
@@ -78,8 +71,7 @@ export default function Document() {
             <a
               href="https://github.com/6529-Collections"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               <img
                 width="0"
                 height="0"
@@ -102,16 +94,14 @@ export default function Document() {
             <a
               href="https://api.seize.io/docs"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               API Documentation
             </a>
-            |{" "}
+            | <a href={`/about/${AboutSection.CONTACT_US}`}>Contact Us</a>|{" "}
             <a
               href={`https://status.seize.io/`}
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               Status
             </a>
           </span>

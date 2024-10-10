@@ -55,10 +55,7 @@ export default function AboutLicense() {
             that are not in the public domain. For example, Meme Card #1 is a
             derivative of Punk 6529, the copyright for which is owned by Yuga
             Labs. &#64;
-            <a
-              href="https://twitter.com/6529er"
-              target="_blank"
-              rel="noreferrer">
+            <a href="https://x.com/6529er" target="_blank" rel="noreferrer">
               6529er
             </a>{" "}
             , the artist, is putting whatever rights he may have in Meme Card #1
