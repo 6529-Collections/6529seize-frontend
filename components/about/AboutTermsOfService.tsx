@@ -134,10 +134,7 @@ export default function AboutTermsOfService() {
               <br />
               <br />
               &#64;
-              <a
-                href="https://twitter.com/punk6529"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/punk6529" target="_blank" rel="noreferrer">
                 punk6529
               </a>{" "}
               tweets a lot and has a lot of ideas that may change from time to

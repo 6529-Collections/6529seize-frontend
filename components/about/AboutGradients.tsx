@@ -55,10 +55,7 @@ export default function AboutGradients() {
           </p>
           <p>
             It is the artist&apos;s (&#64;
-            <a
-              href="https://twitter.com/6529er"
-              target="_blank"
-              rel="noreferrer">
+            <a href="https://x.com/6529er" target="_blank" rel="noreferrer">
               6529er
             </a>
             ) preferred interpretation of his work and his vision for it in its

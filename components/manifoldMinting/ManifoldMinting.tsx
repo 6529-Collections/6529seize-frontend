@@ -356,7 +356,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         <Col xs={12} className="font-color-h">
           Note: The start/end times have some variance. Watch this page or{" "}
           <a
-            href="https://twitter.com/6529collections"
+            href="https://x.com/6529collections"
             target="_blank"
             rel="noreferrer"
             className="font-color-h font-color-hover">

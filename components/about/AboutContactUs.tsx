@@ -15,35 +15,29 @@ export default function AboutContactUs() {
           <p>
             The best way to find us at:{" "}
             <a
-              href="https://twitter.com/6529collections"
+              href="https://x.com/6529collections"
               target="_blank"
               rel="noreferrer">
-              https://twitter.com/6529collections
+              https://x.com/6529collections
             </a>
+          </p>
+          <p>
+            or email us at <a href="mailto:support@6529.io">support@6529.io</a>
           </p>
           <br />
           <p>Alternative, but not as good, methods to contact us are:</p>
           <ul>
             <li>
               Trying to get the attention of &#64;
-              <a
-                href="https://twitter.com/punk6529"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/punk6529" target="_blank" rel="noreferrer">
                 punk6529
               </a>{" "}
               or &#64;
-              <a
-                href="https://twitter.com/6529er"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/6529er" target="_blank" rel="noreferrer">
                 6529er
               </a>{" "}
               or &#64;
-              <a
-                href="https://twitter.com/teexels"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/teexels" target="_blank" rel="noreferrer">
                 teexels
               </a>{" "}
               on Twitter
@@ -51,24 +45,15 @@ export default function AboutContactUs() {
             <br />
             <li>
               Trying to get the attention of &#64;
-              <a
-                href="https://twitter.com/punk6529"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/punk6529" target="_blank" rel="noreferrer">
                 punk6529
               </a>
               , &#64;
-              <a
-                href="https://twitter.com/6529er"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/6529er" target="_blank" rel="noreferrer">
                 6529er
               </a>{" "}
               or &#64;
-              <a
-                href="https://twitter.com/teexels"
-                target="_blank"
-                rel="noreferrer">
+              <a href="https://x.com/teexels" target="_blank" rel="noreferrer">
                 teexels
               </a>{" "}
               in the OM Discord (
