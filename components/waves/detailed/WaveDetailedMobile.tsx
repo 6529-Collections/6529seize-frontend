@@ -95,7 +95,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
             <div className="tw-absolute tw-inset-2 tw-border-4 tw-border-primary-300 tw-rounded-full tw-animate-ping"></div>
             <div className="tw-absolute tw-inset-4 tw-bg-primary-500 tw-rounded-full tw-animate-pulse"></div>
           </div>
-          <p className="tw-text-primary-300 tw-text-sm sm:tw-text-base tw-font-medium tw-tracking-widest tw-uppercase tw-animate-pulse">
+          <p className="tw-text-primary-300 tw-text-base tw-font-medium tw-animate-pulse">
             Loading chat...
           </p>
         </div>
@@ -121,7 +121,10 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   }
 
   return (
-    <div className="tailwind-scope tw-bg-black">
+    <div
+      className="tailwind-scope tw-bg-black"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
         <button
           onClick={() => setActiveView(WaveDetailedMobileView.CHAT)}

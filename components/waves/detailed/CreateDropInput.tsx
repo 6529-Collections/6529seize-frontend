@@ -33,10 +33,7 @@ import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import {
-  MentionedUser,
-  ReferencedNft,
-} from "../../../entities/IDrop";
+import { MentionedUser, ReferencedNft } from "../../../entities/IDrop";
 import { MentionNode } from "../../drops/create/lexical/nodes/MentionNode";
 import { HashtagNode } from "../../drops/create/lexical/nodes/HashtagNode";
 import { ImageNode } from "../../drops/create/lexical/nodes/ImageNode";
@@ -218,7 +215,10 @@ const CreateDropInput = forwardRef<
     }, []);
 
     return (
-      <div className="tailwind-scope" ref={editorRef}>
+      <div
+        className="tailwind-scope"
+        ref={editorRef}
+      >
         <LexicalComposer initialConfig={editorConfig}>
           <div className="tw-flex tw-items-end tw-gap-x-3">
             <div className="tw-relative tw-w-full">
