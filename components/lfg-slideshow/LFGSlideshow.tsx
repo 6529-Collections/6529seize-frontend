@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faForward, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExpand,
+  faForward,
+  faXmarkCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "../../services/api/common-api";
 import { NftMedia } from "../../generated/models/NftMedia";
+import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
 
-const DEFAULT_TIMEOUT = 5000;
+const DEFAULT_TIMEOUT = 10000;
+const SLIDESHOW_ID = "lfg-slideshow";
 const VIDEO_ID = "lfg-slideshow-video";
 
 const LFGSlideshow: React.FC<{
@@ -133,22 +139,30 @@ const LFGSlideshow: React.FC<{
 
   return (
     <div className={styles.slideshowContainer}>
-      <FontAwesomeIcon
-        icon={faForward}
-        className={`${styles.slideButton} ${styles.next}`}
-        onClick={nextSlide}
-      />
-      <FontAwesomeIcon
-        icon={faXmarkCircle}
-        className={`${styles.slideButton} ${styles.close}`}
-        onClick={toggleSlideshow}
-      />
-      <div className={styles.slide}>
+      <span className={styles.slideButtons}>
+        {fullScreenSupported() && (
+          <FontAwesomeIcon
+            icon={faExpand}
+            className={styles.slideButton}
+            onClick={() => enterArtFullScreen(SLIDESHOW_ID)}
+          />
+        )}
+        <FontAwesomeIcon
+          icon={faForward}
+          className={styles.slideButton}
+          onClick={nextSlide}
+        />
+        <FontAwesomeIcon
+          icon={faXmarkCircle}
+          className={styles.slideButton}
+          onClick={toggleSlideshow}
+        />
+      </span>
+      <div className={styles.slide} id={SLIDESHOW_ID}>
         {isVideo(media[currentIndex].animation) ? (
           <video
             id={VIDEO_ID}
             autoPlay
-            muted
             controls
             src={media[currentIndex].animation}
             poster={media[currentIndex].image}>
