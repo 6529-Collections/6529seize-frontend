@@ -1,282 +1,286 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
-export * from '../models/AggregatedActivity';
-export * from '../models/AggregatedActivityMemes';
-export * from '../models/AggregatedActivityPage';
-export * from '../models/ArtistItem';
-export * from '../models/ArtistNameItem';
-export * from '../models/ArtistsNft';
-export * from '../models/ArtistsPage';
-export * from '../models/ArtistsWork';
-export * from '../models/AvailableRatingCredit';
-export * from '../models/BlockItem';
-export * from '../models/BlocksPage';
-export * from '../models/BulkRateRequest';
-export * from '../models/BulkRateResponse';
-export * from '../models/BulkRateSkippedIdentity';
-export * from '../models/BulkRepRequest';
-export * from '../models/BulkRepTarget';
-export * from '../models/ChangeGroupVisibility';
-export * from '../models/ChangeProfileCicRating';
-export * from '../models/ChangeProfileCicRatingResponse';
-export * from '../models/ChangeProfileRepRating';
-export * from '../models/ChangeProfileRepRatingResponse';
-export * from '../models/CreateDropPart';
-export * from '../models/CreateDropRequest';
-export * from '../models/CreateGroup';
-export * from '../models/CreateGroupDescription';
-export * from '../models/CreateMediaUploadUrlRequest';
-export * from '../models/CreateMediaUrlResponse';
-export * from '../models/CreateNewProfileProxy';
-export * from '../models/CreateNewProfileProxyAllocateCicAction';
-export * from '../models/CreateNewProfileProxyAllocateRepAction';
-export * from '../models/CreateNewProfileProxyCreateWaveAction';
-export * from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
-export * from '../models/CreateNewProfileProxyRateWaveDropAction';
-export * from '../models/CreateNewProfileProxyReadWaveAction';
-export * from '../models/CreateNewWave';
-export * from '../models/CreateNewWaveParticipationConfig';
-export * from '../models/CreateNewWaveScope';
-export * from '../models/CreateNewWaveVisibilityConfig';
-export * from '../models/CreateNewWaveVotingConfig';
-export * from '../models/CreateWaveConfig';
-export * from '../models/CreateWaveDropRequest';
-export * from '../models/Drop';
-export * from '../models/DropAndDropVote';
-export * from '../models/DropContextProfileContext';
-export * from '../models/DropMedia';
-export * from '../models/DropMentionedUser';
-export * from '../models/DropMetadata';
-export * from '../models/DropPart';
-export * from '../models/DropPartContextProfileContext';
-export * from '../models/DropRater';
-export * from '../models/DropRatingRequest';
-export * from '../models/DropReferencedNFT';
-export * from '../models/DropSearchStrategy';
-export * from '../models/DropSubscriptionActions';
-export * from '../models/DropSubscriptionTargetAction';
-export * from '../models/DropTraceItem';
-export * from '../models/DropVote';
-export * from '../models/DropWithoutWave';
-export * from '../models/DropsPage';
-export * from '../models/FeedItem';
-export * from '../models/FeedItemType';
-export * from '../models/Group';
-export * from '../models/GroupCicFilter';
-export * from '../models/GroupDescription';
-export * from '../models/GroupFilterDirection';
-export * from '../models/GroupFull';
-export * from '../models/GroupLevelFilter';
-export * from '../models/GroupOwnsNft';
-export * from '../models/GroupRepFilter';
-export * from '../models/GroupTdhFilter';
-export * from '../models/IdentityAndSubscriptionActions';
-export * from '../models/IdentitySubscriptionActions';
-export * from '../models/IdentitySubscriptionTargetAction';
-export * from '../models/IdentitySubscriptionTargetType';
-export * from '../models/IncomingIdentitySubscriptionsPage';
-export * from '../models/IntRange';
-export * from '../models/LoginRequest';
-export * from '../models/LoginResponse';
-export * from '../models/Nft';
-export * from '../models/NftOwner';
-export * from '../models/NftOwnerPage';
-export * from '../models/NftsPage';
-export * from '../models/NonceResponse';
-export * from '../models/Notification';
-export * from '../models/NotificationCause';
-export * from '../models/NotificationsResponse';
-export * from '../models/OutgoingIdentitySubscriptionsPage';
-export * from '../models/OwnerBalance';
-export * from '../models/OwnerBalanceMemes';
-export * from '../models/OwnerBalancePage';
-export * from '../models/PageBase';
-export * from '../models/PageWithNextUriBase';
-export * from '../models/ProfileMin';
-export * from '../models/ProfileProxy';
-export * from '../models/ProfileProxyAction';
-export * from '../models/ProfileProxyActionType';
-export * from '../models/QuotedDrop';
-export * from '../models/QuotedDropResponse';
-export * from '../models/RateMatter';
-export * from '../models/RatingWithProfileInfoAndLevel';
-export * from '../models/RatingWithProfileInfoAndLevelPage';
-export * from '../models/RegisterPushNotificationTokenRequest';
-export * from '../models/RepRating';
-export * from '../models/ReplyToDrop';
-export * from '../models/ReplyToDropResponse';
-export * from '../models/SeizeSettings';
-export * from '../models/TargetAndSubscriptionActions';
-export * from '../models/Transaction';
-export * from '../models/TransactionPage';
-export * from '../models/UpdateDropRequest';
-export * from '../models/UpdateProxyActionRequest';
-export * from '../models/UpdateWaveRequest';
-export * from '../models/UploadItem';
-export * from '../models/UploadsPage';
-export * from '../models/Wave';
-export * from '../models/WaveConfig';
-export * from '../models/WaveContributorOverview';
-export * from '../models/WaveCreditScope';
-export * from '../models/WaveCreditType';
-export * from '../models/WaveDropsFeed';
-export * from '../models/WaveMetadataType';
-export * from '../models/WaveMetrics';
-export * from '../models/WaveMin';
-export * from '../models/WaveOutcome';
-export * from '../models/WaveOutcomeCredit';
-export * from '../models/WaveOutcomeSubType';
-export * from '../models/WaveOutcomeType';
-export * from '../models/WaveParticipationConfig';
-export * from '../models/WaveParticipationRequirement';
-export * from '../models/WaveRequiredMetadata';
-export * from '../models/WaveScope';
-export * from '../models/WaveSubscriptionActions';
-export * from '../models/WaveSubscriptionTargetAction';
-export * from '../models/WaveType';
-export * from '../models/WaveVisibilityConfig';
-export * from '../models/WaveVotingConfig';
-export * from '../models/WavesOverviewType';
+export * from '../models/ApiAggregatedActivity';
+export * from '../models/ApiAggregatedActivityMemes';
+export * from '../models/ApiAggregatedActivityPage';
+export * from '../models/ApiArtistItem';
+export * from '../models/ApiArtistNameItem';
+export * from '../models/ApiArtistsNft';
+export * from '../models/ApiArtistsPage';
+export * from '../models/ApiArtistsWork';
+export * from '../models/ApiAvailableRatingCredit';
+export * from '../models/ApiBlockItem';
+export * from '../models/ApiBlocksPage';
+export * from '../models/ApiBulkRateRequest';
+export * from '../models/ApiBulkRateResponse';
+export * from '../models/ApiBulkRateSkippedIdentity';
+export * from '../models/ApiBulkRepRequest';
+export * from '../models/ApiBulkRepTarget';
+export * from '../models/ApiChangeGroupVisibility';
+export * from '../models/ApiChangeProfileCicRating';
+export * from '../models/ApiChangeProfileCicRatingResponse';
+export * from '../models/ApiChangeProfileRepRating';
+export * from '../models/ApiChangeProfileRepRatingResponse';
+export * from '../models/ApiCreateDropPart';
+export * from '../models/ApiCreateDropRequest';
+export * from '../models/ApiCreateGroup';
+export * from '../models/ApiCreateGroupDescription';
+export * from '../models/ApiCreateMediaUploadUrlRequest';
+export * from '../models/ApiCreateMediaUrlResponse';
+export * from '../models/ApiCreateNewProfileProxy';
+export * from '../models/ApiCreateNewProfileProxyAllocateCicAction';
+export * from '../models/ApiCreateNewProfileProxyAllocateRepAction';
+export * from '../models/ApiCreateNewProfileProxyCreateWaveAction';
+export * from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
+export * from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
+export * from '../models/ApiCreateNewProfileProxyReadWaveAction';
+export * from '../models/ApiCreateNewWave';
+export * from '../models/ApiCreateNewWaveParticipationConfig';
+export * from '../models/ApiCreateNewWaveScope';
+export * from '../models/ApiCreateNewWaveVisibilityConfig';
+export * from '../models/ApiCreateNewWaveVotingConfig';
+export * from '../models/ApiCreateWaveConfig';
+export * from '../models/ApiCreateWaveDropRequest';
+export * from '../models/ApiDrop';
+export * from '../models/ApiDropAndDropVote';
+export * from '../models/ApiDropContextProfileContext';
+export * from '../models/ApiDropMedia';
+export * from '../models/ApiDropMentionedUser';
+export * from '../models/ApiDropMetadata';
+export * from '../models/ApiDropPart';
+export * from '../models/ApiDropPartContextProfileContext';
+export * from '../models/ApiDropRater';
+export * from '../models/ApiDropRatingRequest';
+export * from '../models/ApiDropReferencedNFT';
+export * from '../models/ApiDropSearchStrategy';
+export * from '../models/ApiDropSubscriptionActions';
+export * from '../models/ApiDropSubscriptionTargetAction';
+export * from '../models/ApiDropTraceItem';
+export * from '../models/ApiDropType';
+export * from '../models/ApiDropVote';
+export * from '../models/ApiDropWithoutWave';
+export * from '../models/ApiDropsPage';
+export * from '../models/ApiFeedItem';
+export * from '../models/ApiFeedItemType';
+export * from '../models/ApiGroup';
+export * from '../models/ApiGroupCicFilter';
+export * from '../models/ApiGroupDescription';
+export * from '../models/ApiGroupFilterDirection';
+export * from '../models/ApiGroupFull';
+export * from '../models/ApiGroupLevelFilter';
+export * from '../models/ApiGroupOwnsNft';
+export * from '../models/ApiGroupRepFilter';
+export * from '../models/ApiGroupTdhFilter';
+export * from '../models/ApiIdentityAndSubscriptionActions';
+export * from '../models/ApiIdentitySubscriptionActions';
+export * from '../models/ApiIdentitySubscriptionTargetAction';
+export * from '../models/ApiIdentitySubscriptionTargetType';
+export * from '../models/ApiIncomingIdentitySubscriptionsPage';
+export * from '../models/ApiIntRange';
+export * from '../models/ApiLoginRequest';
+export * from '../models/ApiLoginResponse';
+export * from '../models/ApiNft';
+export * from '../models/ApiNftMedia';
+export * from '../models/ApiNftOwner';
+export * from '../models/ApiNftOwnerPage';
+export * from '../models/ApiNftsPage';
+export * from '../models/ApiNonceResponse';
+export * from '../models/ApiNotification';
+export * from '../models/ApiNotificationCause';
+export * from '../models/ApiNotificationsResponse';
+export * from '../models/ApiOutgoingIdentitySubscriptionsPage';
+export * from '../models/ApiOwnerBalance';
+export * from '../models/ApiOwnerBalanceMemes';
+export * from '../models/ApiOwnerBalancePage';
+export * from '../models/ApiPageBase';
+export * from '../models/ApiPageWithNextUriBase';
+export * from '../models/ApiProfileMin';
+export * from '../models/ApiProfileProxy';
+export * from '../models/ApiProfileProxyAction';
+export * from '../models/ApiProfileProxyActionType';
+export * from '../models/ApiQuotedDrop';
+export * from '../models/ApiQuotedDropResponse';
+export * from '../models/ApiRateMatter';
+export * from '../models/ApiRatingWithProfileInfoAndLevel';
+export * from '../models/ApiRatingWithProfileInfoAndLevelPage';
+export * from '../models/ApiRegisterPushNotificationTokenRequest';
+export * from '../models/ApiRepRating';
+export * from '../models/ApiReplyToDrop';
+export * from '../models/ApiReplyToDropResponse';
+export * from '../models/ApiSeizeSettings';
+export * from '../models/ApiTargetAndSubscriptionActions';
+export * from '../models/ApiTransaction';
+export * from '../models/ApiTransactionPage';
+export * from '../models/ApiUpdateDropRequest';
+export * from '../models/ApiUpdateProxyActionRequest';
+export * from '../models/ApiUpdateWaveRequest';
+export * from '../models/ApiUploadItem';
+export * from '../models/ApiUploadsPage';
+export * from '../models/ApiWave';
+export * from '../models/ApiWaveConfig';
+export * from '../models/ApiWaveContributorOverview';
+export * from '../models/ApiWaveCreditScope';
+export * from '../models/ApiWaveCreditType';
+export * from '../models/ApiWaveDropsFeed';
+export * from '../models/ApiWaveMetadataType';
+export * from '../models/ApiWaveMetrics';
+export * from '../models/ApiWaveMin';
+export * from '../models/ApiWaveOutcome';
+export * from '../models/ApiWaveOutcomeCredit';
+export * from '../models/ApiWaveOutcomeSubType';
+export * from '../models/ApiWaveOutcomeType';
+export * from '../models/ApiWaveParticipationConfig';
+export * from '../models/ApiWaveParticipationRequirement';
+export * from '../models/ApiWaveRequiredMetadata';
+export * from '../models/ApiWaveScope';
+export * from '../models/ApiWaveSubscriptionActions';
+export * from '../models/ApiWaveSubscriptionTargetAction';
+export * from '../models/ApiWaveType';
+export * from '../models/ApiWaveVisibilityConfig';
+export * from '../models/ApiWaveVotingConfig';
+export * from '../models/ApiWavesOverviewType';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
-import { AggregatedActivity } from '../models/AggregatedActivity';
-import { AggregatedActivityMemes } from '../models/AggregatedActivityMemes';
-import { AggregatedActivityPage } from '../models/AggregatedActivityPage';
-import { ArtistItem } from '../models/ArtistItem';
-import { ArtistNameItem } from '../models/ArtistNameItem';
-import { ArtistsNft } from '../models/ArtistsNft';
-import { ArtistsPage } from '../models/ArtistsPage';
-import { ArtistsWork } from '../models/ArtistsWork';
-import { AvailableRatingCredit } from '../models/AvailableRatingCredit';
-import { BlockItem } from '../models/BlockItem';
-import { BlocksPage } from '../models/BlocksPage';
-import { BulkRateRequest     } from '../models/BulkRateRequest';
-import { BulkRateResponse } from '../models/BulkRateResponse';
-import { BulkRateSkippedIdentity } from '../models/BulkRateSkippedIdentity';
-import { BulkRepRequest } from '../models/BulkRepRequest';
-import { BulkRepTarget } from '../models/BulkRepTarget';
-import { ChangeGroupVisibility } from '../models/ChangeGroupVisibility';
-import { ChangeProfileCicRating } from '../models/ChangeProfileCicRating';
-import { ChangeProfileCicRatingResponse } from '../models/ChangeProfileCicRatingResponse';
-import { ChangeProfileRepRating } from '../models/ChangeProfileRepRating';
-import { ChangeProfileRepRatingResponse } from '../models/ChangeProfileRepRatingResponse';
-import { CreateDropPart } from '../models/CreateDropPart';
-import { CreateDropRequest } from '../models/CreateDropRequest';
-import { CreateGroup } from '../models/CreateGroup';
-import { CreateGroupDescription } from '../models/CreateGroupDescription';
-import { CreateMediaUploadUrlRequest } from '../models/CreateMediaUploadUrlRequest';
-import { CreateMediaUrlResponse } from '../models/CreateMediaUrlResponse';
-import { CreateNewProfileProxy } from '../models/CreateNewProfileProxy';
-import { CreateNewProfileProxyAllocateCicAction    } from '../models/CreateNewProfileProxyAllocateCicAction';
-import { CreateNewProfileProxyAllocateRepAction    } from '../models/CreateNewProfileProxyAllocateRepAction';
-import { CreateNewProfileProxyCreateWaveAction   } from '../models/CreateNewProfileProxyCreateWaveAction';
-import { CreateNewProfileProxyCreateWaveParticipationDropAction   } from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
-import { CreateNewProfileProxyRateWaveDropAction   } from '../models/CreateNewProfileProxyRateWaveDropAction';
-import { CreateNewProfileProxyReadWaveAction   } from '../models/CreateNewProfileProxyReadWaveAction';
-import { CreateNewWave } from '../models/CreateNewWave';
-import { CreateNewWaveParticipationConfig } from '../models/CreateNewWaveParticipationConfig';
-import { CreateNewWaveScope } from '../models/CreateNewWaveScope';
-import { CreateNewWaveVisibilityConfig } from '../models/CreateNewWaveVisibilityConfig';
-import { CreateNewWaveVotingConfig        } from '../models/CreateNewWaveVotingConfig';
-import { CreateWaveConfig       } from '../models/CreateWaveConfig';
-import { CreateWaveDropRequest } from '../models/CreateWaveDropRequest';
-import { Drop } from '../models/Drop';
-import { DropAndDropVote } from '../models/DropAndDropVote';
-import { DropContextProfileContext } from '../models/DropContextProfileContext';
-import { DropMedia } from '../models/DropMedia';
-import { DropMentionedUser } from '../models/DropMentionedUser';
-import { DropMetadata } from '../models/DropMetadata';
-import { DropPart } from '../models/DropPart';
-import { DropPartContextProfileContext } from '../models/DropPartContextProfileContext';
-import { DropRater } from '../models/DropRater';
-import { DropRatingRequest } from '../models/DropRatingRequest';
-import { DropReferencedNFT } from '../models/DropReferencedNFT';
-import { DropSearchStrategy } from '../models/DropSearchStrategy';
-import { DropSubscriptionActions } from '../models/DropSubscriptionActions';
-import { DropSubscriptionTargetAction } from '../models/DropSubscriptionTargetAction';
-import { DropTraceItem } from '../models/DropTraceItem';
-import { DropVote } from '../models/DropVote';
-import { DropWithoutWave } from '../models/DropWithoutWave';
-import { DropsPage } from '../models/DropsPage';
-import { FeedItem    } from '../models/FeedItem';
-import { FeedItemType } from '../models/FeedItemType';
-import { Group } from '../models/Group';
-import { GroupCicFilter     } from '../models/GroupCicFilter';
-import { GroupDescription } from '../models/GroupDescription';
-import { GroupFilterDirection } from '../models/GroupFilterDirection';
-import { GroupFull } from '../models/GroupFull';
-import { GroupLevelFilter } from '../models/GroupLevelFilter';
-import { GroupOwnsNft, GroupOwnsNftNameEnum    } from '../models/GroupOwnsNft';
-import { GroupRepFilter      } from '../models/GroupRepFilter';
-import { GroupTdhFilter } from '../models/GroupTdhFilter';
-import { IdentityAndSubscriptionActions } from '../models/IdentityAndSubscriptionActions';
-import { IdentitySubscriptionActions } from '../models/IdentitySubscriptionActions';
-import { IdentitySubscriptionTargetAction } from '../models/IdentitySubscriptionTargetAction';
-import { IdentitySubscriptionTargetType } from '../models/IdentitySubscriptionTargetType';
-import { IncomingIdentitySubscriptionsPage } from '../models/IncomingIdentitySubscriptionsPage';
-import { IntRange } from '../models/IntRange';
-import { LoginRequest } from '../models/LoginRequest';
-import { LoginResponse } from '../models/LoginResponse';
-import { Nft      , NftTokenTypeEnum                               } from '../models/Nft';
-import { NftOwner } from '../models/NftOwner';
-import { NftOwnerPage } from '../models/NftOwnerPage';
-import { NftsPage } from '../models/NftsPage';
-import { NonceResponse } from '../models/NonceResponse';
-import { Notification        } from '../models/Notification';
-import { NotificationCause } from '../models/NotificationCause';
-import { NotificationsResponse } from '../models/NotificationsResponse';
-import { OutgoingIdentitySubscriptionsPage } from '../models/OutgoingIdentitySubscriptionsPage';
-import { OwnerBalance } from '../models/OwnerBalance';
-import { OwnerBalanceMemes } from '../models/OwnerBalanceMemes';
-import { OwnerBalancePage } from '../models/OwnerBalancePage';
-import { PageBase } from '../models/PageBase';
-import { PageWithNextUriBase } from '../models/PageWithNextUriBase';
-import { ProfileMin } from '../models/ProfileMin';
-import { ProfileProxy } from '../models/ProfileProxy';
-import { ProfileProxyAction             } from '../models/ProfileProxyAction';
-import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
-import { QuotedDrop } from '../models/QuotedDrop';
-import { QuotedDropResponse } from '../models/QuotedDropResponse';
-import { RateMatter } from '../models/RateMatter';
-import { RatingWithProfileInfoAndLevel } from '../models/RatingWithProfileInfoAndLevel';
-import { RatingWithProfileInfoAndLevelPage } from '../models/RatingWithProfileInfoAndLevelPage';
-import { RegisterPushNotificationTokenRequest } from '../models/RegisterPushNotificationTokenRequest';
-import { RepRating } from '../models/RepRating';
-import { ReplyToDrop } from '../models/ReplyToDrop';
-import { ReplyToDropResponse } from '../models/ReplyToDropResponse';
-import { SeizeSettings } from '../models/SeizeSettings';
-import { TargetAndSubscriptionActions } from '../models/TargetAndSubscriptionActions';
-import { Transaction } from '../models/Transaction';
-import { TransactionPage } from '../models/TransactionPage';
-import { UpdateDropRequest } from '../models/UpdateDropRequest';
-import { UpdateProxyActionRequest } from '../models/UpdateProxyActionRequest';
-import { UpdateWaveRequest } from '../models/UpdateWaveRequest';
-import { UploadItem } from '../models/UploadItem';
-import { UploadsPage } from '../models/UploadsPage';
-import { Wave } from '../models/Wave';
-import { WaveConfig        } from '../models/WaveConfig';
-import { WaveContributorOverview } from '../models/WaveContributorOverview';
-import { WaveCreditScope } from '../models/WaveCreditScope';
-import { WaveCreditType } from '../models/WaveCreditType';
-import { WaveDropsFeed } from '../models/WaveDropsFeed';
-import { WaveMetadataType } from '../models/WaveMetadataType';
-import { WaveMetrics } from '../models/WaveMetrics';
-import { WaveMin } from '../models/WaveMin';
-import { WaveOutcome        } from '../models/WaveOutcome';
-import { WaveOutcomeCredit } from '../models/WaveOutcomeCredit';
-import { WaveOutcomeSubType } from '../models/WaveOutcomeSubType';
-import { WaveOutcomeType } from '../models/WaveOutcomeType';
-import { WaveParticipationConfig } from '../models/WaveParticipationConfig';
-import { WaveParticipationRequirement } from '../models/WaveParticipationRequirement';
-import { WaveRequiredMetadata   } from '../models/WaveRequiredMetadata';
-import { WaveScope } from '../models/WaveScope';
-import { WaveSubscriptionActions } from '../models/WaveSubscriptionActions';
-import { WaveSubscriptionTargetAction } from '../models/WaveSubscriptionTargetAction';
-import { WaveType } from '../models/WaveType';
-import { WaveVisibilityConfig } from '../models/WaveVisibilityConfig';
-import { WaveVotingConfig         } from '../models/WaveVotingConfig';
-import { WavesOverviewType } from '../models/WavesOverviewType';
+import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
+import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
+import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
+import { ApiArtistItem } from '../models/ApiArtistItem';
+import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
+import { ApiArtistsNft } from '../models/ApiArtistsNft';
+import { ApiArtistsPage } from '../models/ApiArtistsPage';
+import { ApiArtistsWork } from '../models/ApiArtistsWork';
+import { ApiAvailableRatingCredit } from '../models/ApiAvailableRatingCredit';
+import { ApiBlockItem } from '../models/ApiBlockItem';
+import { ApiBlocksPage } from '../models/ApiBlocksPage';
+import { ApiBulkRateRequest     } from '../models/ApiBulkRateRequest';
+import { ApiBulkRateResponse } from '../models/ApiBulkRateResponse';
+import { ApiBulkRateSkippedIdentity } from '../models/ApiBulkRateSkippedIdentity';
+import { ApiBulkRepRequest } from '../models/ApiBulkRepRequest';
+import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
+import { ApiChangeGroupVisibility } from '../models/ApiChangeGroupVisibility';
+import { ApiChangeProfileCicRating } from '../models/ApiChangeProfileCicRating';
+import { ApiChangeProfileCicRatingResponse } from '../models/ApiChangeProfileCicRatingResponse';
+import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
+import { ApiChangeProfileRepRatingResponse } from '../models/ApiChangeProfileRepRatingResponse';
+import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
+import { ApiCreateDropRequest         } from '../models/ApiCreateDropRequest';
+import { ApiCreateGroup } from '../models/ApiCreateGroup';
+import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
+import { ApiCreateMediaUploadUrlRequest } from '../models/ApiCreateMediaUploadUrlRequest';
+import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
+import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
+import { ApiCreateNewProfileProxyAllocateCicAction    } from '../models/ApiCreateNewProfileProxyAllocateCicAction';
+import { ApiCreateNewProfileProxyAllocateRepAction    } from '../models/ApiCreateNewProfileProxyAllocateRepAction';
+import { ApiCreateNewProfileProxyCreateWaveAction   } from '../models/ApiCreateNewProfileProxyCreateWaveAction';
+import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction   } from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
+import { ApiCreateNewProfileProxyRateWaveDropAction   } from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
+import { ApiCreateNewProfileProxyReadWaveAction   } from '../models/ApiCreateNewProfileProxyReadWaveAction';
+import { ApiCreateNewWave } from '../models/ApiCreateNewWave';
+import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
+import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
+import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
+import { ApiCreateNewWaveVotingConfig        } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateWaveConfig       } from '../models/ApiCreateWaveConfig';
+import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
+import { ApiDrop } from '../models/ApiDrop';
+import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
+import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
+import { ApiDropMedia } from '../models/ApiDropMedia';
+import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
+import { ApiDropMetadata } from '../models/ApiDropMetadata';
+import { ApiDropPart } from '../models/ApiDropPart';
+import { ApiDropPartContextProfileContext } from '../models/ApiDropPartContextProfileContext';
+import { ApiDropRater } from '../models/ApiDropRater';
+import { ApiDropRatingRequest } from '../models/ApiDropRatingRequest';
+import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
+import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
+import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
+import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
+import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
+import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropVote } from '../models/ApiDropVote';
+import { ApiDropWithoutWave                   } from '../models/ApiDropWithoutWave';
+import { ApiDropsPage } from '../models/ApiDropsPage';
+import { ApiFeedItem    } from '../models/ApiFeedItem';
+import { ApiFeedItemType } from '../models/ApiFeedItemType';
+import { ApiGroup } from '../models/ApiGroup';
+import { ApiGroupCicFilter     } from '../models/ApiGroupCicFilter';
+import { ApiGroupDescription } from '../models/ApiGroupDescription';
+import { ApiGroupFilterDirection } from '../models/ApiGroupFilterDirection';
+import { ApiGroupFull } from '../models/ApiGroupFull';
+import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
+import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupOwnsNft';
+import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
+import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
+import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
+import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
+import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
+import { ApiIdentitySubscriptionTargetType } from '../models/ApiIdentitySubscriptionTargetType';
+import { ApiIncomingIdentitySubscriptionsPage } from '../models/ApiIncomingIdentitySubscriptionsPage';
+import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiLoginRequest } from '../models/ApiLoginRequest';
+import { ApiLoginResponse } from '../models/ApiLoginResponse';
+import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
+import { ApiNftMedia } from '../models/ApiNftMedia';
+import { ApiNftOwner } from '../models/ApiNftOwner';
+import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
+import { ApiNftsPage } from '../models/ApiNftsPage';
+import { ApiNonceResponse } from '../models/ApiNonceResponse';
+import { ApiNotification        } from '../models/ApiNotification';
+import { ApiNotificationCause } from '../models/ApiNotificationCause';
+import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
+import { ApiOutgoingIdentitySubscriptionsPage } from '../models/ApiOutgoingIdentitySubscriptionsPage';
+import { ApiOwnerBalance } from '../models/ApiOwnerBalance';
+import { ApiOwnerBalanceMemes } from '../models/ApiOwnerBalanceMemes';
+import { ApiOwnerBalancePage } from '../models/ApiOwnerBalancePage';
+import { ApiPageBase } from '../models/ApiPageBase';
+import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiProfileProxy } from '../models/ApiProfileProxy';
+import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
+import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
+import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
+import { ApiRateMatter } from '../models/ApiRateMatter';
+import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
+import { ApiRatingWithProfileInfoAndLevelPage } from '../models/ApiRatingWithProfileInfoAndLevelPage';
+import { ApiRegisterPushNotificationTokenRequest } from '../models/ApiRegisterPushNotificationTokenRequest';
+import { ApiRepRating } from '../models/ApiRepRating';
+import { ApiReplyToDrop } from '../models/ApiReplyToDrop';
+import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
+import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
+import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
+import { ApiTransaction } from '../models/ApiTransaction';
+import { ApiTransactionPage } from '../models/ApiTransactionPage';
+import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
+import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
+import { ApiUpdateWaveRequest } from '../models/ApiUpdateWaveRequest';
+import { ApiUploadItem } from '../models/ApiUploadItem';
+import { ApiUploadsPage } from '../models/ApiUploadsPage';
+import { ApiWave } from '../models/ApiWave';
+import { ApiWaveConfig        } from '../models/ApiWaveConfig';
+import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
+import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
+import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
+import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
+import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
+import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
+import { ApiWaveMin } from '../models/ApiWaveMin';
+import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
+import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
+import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
+import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
+import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
+import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
+import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
+import { ApiWaveScope } from '../models/ApiWaveScope';
+import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
+import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
+import { ApiWaveType } from '../models/ApiWaveType';
+import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
+import { ApiWaveVotingConfig         } from '../models/ApiWaveVotingConfig';
+import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -292,150 +296,152 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
-    "DropSearchStrategy",
-    "DropSubscriptionTargetAction",
-    "FeedItemType",
-    "GroupFilterDirection",
-    "GroupOwnsNftNameEnum",
-    "IdentitySubscriptionTargetAction",
-    "IdentitySubscriptionTargetType",
-    "NftTokenTypeEnum",
-    "NotificationCause",
-    "ProfileProxyActionType",
-    "RateMatter",
-    "WaveCreditScope",
-    "WaveCreditType",
-    "WaveMetadataType",
-    "WaveOutcomeCredit",
-    "WaveOutcomeSubType",
-    "WaveOutcomeType",
-    "WaveParticipationRequirement",
-    "WaveSubscriptionTargetAction",
-    "WaveType",
-    "WavesOverviewType",
+    "ApiDropSearchStrategy",
+    "ApiDropSubscriptionTargetAction",
+    "ApiDropType",
+    "ApiFeedItemType",
+    "ApiGroupFilterDirection",
+    "ApiGroupOwnsNftNameEnum",
+    "ApiIdentitySubscriptionTargetAction",
+    "ApiIdentitySubscriptionTargetType",
+    "ApiNftTokenTypeEnum",
+    "ApiNotificationCause",
+    "ApiProfileProxyActionType",
+    "ApiRateMatter",
+    "ApiWaveCreditScope",
+    "ApiWaveCreditType",
+    "ApiWaveMetadataType",
+    "ApiWaveOutcomeCredit",
+    "ApiWaveOutcomeSubType",
+    "ApiWaveOutcomeType",
+    "ApiWaveParticipationRequirement",
+    "ApiWaveSubscriptionTargetAction",
+    "ApiWaveType",
+    "ApiWavesOverviewType",
 ]);
 
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
-    "AggregatedActivity": AggregatedActivity,
-    "AggregatedActivityMemes": AggregatedActivityMemes,
-    "AggregatedActivityPage": AggregatedActivityPage,
-    "ArtistItem": ArtistItem,
-    "ArtistNameItem": ArtistNameItem,
-    "ArtistsNft": ArtistsNft,
-    "ArtistsPage": ArtistsPage,
-    "ArtistsWork": ArtistsWork,
-    "AvailableRatingCredit": AvailableRatingCredit,
-    "BlockItem": BlockItem,
-    "BlocksPage": BlocksPage,
-    "BulkRateRequest": BulkRateRequest,
-    "BulkRateResponse": BulkRateResponse,
-    "BulkRateSkippedIdentity": BulkRateSkippedIdentity,
-    "BulkRepRequest": BulkRepRequest,
-    "BulkRepTarget": BulkRepTarget,
-    "ChangeGroupVisibility": ChangeGroupVisibility,
-    "ChangeProfileCicRating": ChangeProfileCicRating,
-    "ChangeProfileCicRatingResponse": ChangeProfileCicRatingResponse,
-    "ChangeProfileRepRating": ChangeProfileRepRating,
-    "ChangeProfileRepRatingResponse": ChangeProfileRepRatingResponse,
-    "CreateDropPart": CreateDropPart,
-    "CreateDropRequest": CreateDropRequest,
-    "CreateGroup": CreateGroup,
-    "CreateGroupDescription": CreateGroupDescription,
-    "CreateMediaUploadUrlRequest": CreateMediaUploadUrlRequest,
-    "CreateMediaUrlResponse": CreateMediaUrlResponse,
-    "CreateNewProfileProxy": CreateNewProfileProxy,
-    "CreateNewProfileProxyAllocateCicAction": CreateNewProfileProxyAllocateCicAction,
-    "CreateNewProfileProxyAllocateRepAction": CreateNewProfileProxyAllocateRepAction,
-    "CreateNewProfileProxyCreateWaveAction": CreateNewProfileProxyCreateWaveAction,
-    "CreateNewProfileProxyCreateWaveParticipationDropAction": CreateNewProfileProxyCreateWaveParticipationDropAction,
-    "CreateNewProfileProxyRateWaveDropAction": CreateNewProfileProxyRateWaveDropAction,
-    "CreateNewProfileProxyReadWaveAction": CreateNewProfileProxyReadWaveAction,
-    "CreateNewWave": CreateNewWave,
-    "CreateNewWaveParticipationConfig": CreateNewWaveParticipationConfig,
-    "CreateNewWaveScope": CreateNewWaveScope,
-    "CreateNewWaveVisibilityConfig": CreateNewWaveVisibilityConfig,
-    "CreateNewWaveVotingConfig": CreateNewWaveVotingConfig,
-    "CreateWaveConfig": CreateWaveConfig,
-    "CreateWaveDropRequest": CreateWaveDropRequest,
-    "Drop": Drop,
-    "DropAndDropVote": DropAndDropVote,
-    "DropContextProfileContext": DropContextProfileContext,
-    "DropMedia": DropMedia,
-    "DropMentionedUser": DropMentionedUser,
-    "DropMetadata": DropMetadata,
-    "DropPart": DropPart,
-    "DropPartContextProfileContext": DropPartContextProfileContext,
-    "DropRater": DropRater,
-    "DropRatingRequest": DropRatingRequest,
-    "DropReferencedNFT": DropReferencedNFT,
-    "DropSubscriptionActions": DropSubscriptionActions,
-    "DropTraceItem": DropTraceItem,
-    "DropVote": DropVote,
-    "DropWithoutWave": DropWithoutWave,
-    "DropsPage": DropsPage,
-    "FeedItem": FeedItem,
-    "Group": Group,
-    "GroupCicFilter": GroupCicFilter,
-    "GroupDescription": GroupDescription,
-    "GroupFull": GroupFull,
-    "GroupLevelFilter": GroupLevelFilter,
-    "GroupOwnsNft": GroupOwnsNft,
-    "GroupRepFilter": GroupRepFilter,
-    "GroupTdhFilter": GroupTdhFilter,
-    "IdentityAndSubscriptionActions": IdentityAndSubscriptionActions,
-    "IdentitySubscriptionActions": IdentitySubscriptionActions,
-    "IncomingIdentitySubscriptionsPage": IncomingIdentitySubscriptionsPage,
-    "IntRange": IntRange,
-    "LoginRequest": LoginRequest,
-    "LoginResponse": LoginResponse,
-    "Nft": Nft,
-    "NftOwner": NftOwner,
-    "NftOwnerPage": NftOwnerPage,
-    "NftsPage": NftsPage,
-    "NonceResponse": NonceResponse,
-    "Notification": Notification,
-    "NotificationsResponse": NotificationsResponse,
-    "OutgoingIdentitySubscriptionsPage": OutgoingIdentitySubscriptionsPage,
-    "OwnerBalance": OwnerBalance,
-    "OwnerBalanceMemes": OwnerBalanceMemes,
-    "OwnerBalancePage": OwnerBalancePage,
-    "PageBase": PageBase,
-    "PageWithNextUriBase": PageWithNextUriBase,
-    "ProfileMin": ProfileMin,
-    "ProfileProxy": ProfileProxy,
-    "ProfileProxyAction": ProfileProxyAction,
-    "QuotedDrop": QuotedDrop,
-    "QuotedDropResponse": QuotedDropResponse,
-    "RatingWithProfileInfoAndLevel": RatingWithProfileInfoAndLevel,
-    "RatingWithProfileInfoAndLevelPage": RatingWithProfileInfoAndLevelPage,
-    "RegisterPushNotificationTokenRequest": RegisterPushNotificationTokenRequest,
-    "RepRating": RepRating,
-    "ReplyToDrop": ReplyToDrop,
-    "ReplyToDropResponse": ReplyToDropResponse,
-    "SeizeSettings": SeizeSettings,
-    "TargetAndSubscriptionActions": TargetAndSubscriptionActions,
-    "Transaction": Transaction,
-    "TransactionPage": TransactionPage,
-    "UpdateDropRequest": UpdateDropRequest,
-    "UpdateProxyActionRequest": UpdateProxyActionRequest,
-    "UpdateWaveRequest": UpdateWaveRequest,
-    "UploadItem": UploadItem,
-    "UploadsPage": UploadsPage,
-    "Wave": Wave,
-    "WaveConfig": WaveConfig,
-    "WaveContributorOverview": WaveContributorOverview,
-    "WaveDropsFeed": WaveDropsFeed,
-    "WaveMetrics": WaveMetrics,
-    "WaveMin": WaveMin,
-    "WaveOutcome": WaveOutcome,
-    "WaveParticipationConfig": WaveParticipationConfig,
-    "WaveRequiredMetadata": WaveRequiredMetadata,
-    "WaveScope": WaveScope,
-    "WaveSubscriptionActions": WaveSubscriptionActions,
-    "WaveVisibilityConfig": WaveVisibilityConfig,
-    "WaveVotingConfig": WaveVotingConfig,
+    "ApiAggregatedActivity": ApiAggregatedActivity,
+    "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
+    "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
+    "ApiArtistItem": ApiArtistItem,
+    "ApiArtistNameItem": ApiArtistNameItem,
+    "ApiArtistsNft": ApiArtistsNft,
+    "ApiArtistsPage": ApiArtistsPage,
+    "ApiArtistsWork": ApiArtistsWork,
+    "ApiAvailableRatingCredit": ApiAvailableRatingCredit,
+    "ApiBlockItem": ApiBlockItem,
+    "ApiBlocksPage": ApiBlocksPage,
+    "ApiBulkRateRequest": ApiBulkRateRequest,
+    "ApiBulkRateResponse": ApiBulkRateResponse,
+    "ApiBulkRateSkippedIdentity": ApiBulkRateSkippedIdentity,
+    "ApiBulkRepRequest": ApiBulkRepRequest,
+    "ApiBulkRepTarget": ApiBulkRepTarget,
+    "ApiChangeGroupVisibility": ApiChangeGroupVisibility,
+    "ApiChangeProfileCicRating": ApiChangeProfileCicRating,
+    "ApiChangeProfileCicRatingResponse": ApiChangeProfileCicRatingResponse,
+    "ApiChangeProfileRepRating": ApiChangeProfileRepRating,
+    "ApiChangeProfileRepRatingResponse": ApiChangeProfileRepRatingResponse,
+    "ApiCreateDropPart": ApiCreateDropPart,
+    "ApiCreateDropRequest": ApiCreateDropRequest,
+    "ApiCreateGroup": ApiCreateGroup,
+    "ApiCreateGroupDescription": ApiCreateGroupDescription,
+    "ApiCreateMediaUploadUrlRequest": ApiCreateMediaUploadUrlRequest,
+    "ApiCreateMediaUrlResponse": ApiCreateMediaUrlResponse,
+    "ApiCreateNewProfileProxy": ApiCreateNewProfileProxy,
+    "ApiCreateNewProfileProxyAllocateCicAction": ApiCreateNewProfileProxyAllocateCicAction,
+    "ApiCreateNewProfileProxyAllocateRepAction": ApiCreateNewProfileProxyAllocateRepAction,
+    "ApiCreateNewProfileProxyCreateWaveAction": ApiCreateNewProfileProxyCreateWaveAction,
+    "ApiCreateNewProfileProxyCreateWaveParticipationDropAction": ApiCreateNewProfileProxyCreateWaveParticipationDropAction,
+    "ApiCreateNewProfileProxyRateWaveDropAction": ApiCreateNewProfileProxyRateWaveDropAction,
+    "ApiCreateNewProfileProxyReadWaveAction": ApiCreateNewProfileProxyReadWaveAction,
+    "ApiCreateNewWave": ApiCreateNewWave,
+    "ApiCreateNewWaveParticipationConfig": ApiCreateNewWaveParticipationConfig,
+    "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
+    "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
+    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
+    "ApiCreateWaveConfig": ApiCreateWaveConfig,
+    "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
+    "ApiDrop": ApiDrop,
+    "ApiDropAndDropVote": ApiDropAndDropVote,
+    "ApiDropContextProfileContext": ApiDropContextProfileContext,
+    "ApiDropMedia": ApiDropMedia,
+    "ApiDropMentionedUser": ApiDropMentionedUser,
+    "ApiDropMetadata": ApiDropMetadata,
+    "ApiDropPart": ApiDropPart,
+    "ApiDropPartContextProfileContext": ApiDropPartContextProfileContext,
+    "ApiDropRater": ApiDropRater,
+    "ApiDropRatingRequest": ApiDropRatingRequest,
+    "ApiDropReferencedNFT": ApiDropReferencedNFT,
+    "ApiDropSubscriptionActions": ApiDropSubscriptionActions,
+    "ApiDropTraceItem": ApiDropTraceItem,
+    "ApiDropVote": ApiDropVote,
+    "ApiDropWithoutWave": ApiDropWithoutWave,
+    "ApiDropsPage": ApiDropsPage,
+    "ApiFeedItem": ApiFeedItem,
+    "ApiGroup": ApiGroup,
+    "ApiGroupCicFilter": ApiGroupCicFilter,
+    "ApiGroupDescription": ApiGroupDescription,
+    "ApiGroupFull": ApiGroupFull,
+    "ApiGroupLevelFilter": ApiGroupLevelFilter,
+    "ApiGroupOwnsNft": ApiGroupOwnsNft,
+    "ApiGroupRepFilter": ApiGroupRepFilter,
+    "ApiGroupTdhFilter": ApiGroupTdhFilter,
+    "ApiIdentityAndSubscriptionActions": ApiIdentityAndSubscriptionActions,
+    "ApiIdentitySubscriptionActions": ApiIdentitySubscriptionActions,
+    "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
+    "ApiIntRange": ApiIntRange,
+    "ApiLoginRequest": ApiLoginRequest,
+    "ApiLoginResponse": ApiLoginResponse,
+    "ApiNft": ApiNft,
+    "ApiNftMedia": ApiNftMedia,
+    "ApiNftOwner": ApiNftOwner,
+    "ApiNftOwnerPage": ApiNftOwnerPage,
+    "ApiNftsPage": ApiNftsPage,
+    "ApiNonceResponse": ApiNonceResponse,
+    "ApiNotification": ApiNotification,
+    "ApiNotificationsResponse": ApiNotificationsResponse,
+    "ApiOutgoingIdentitySubscriptionsPage": ApiOutgoingIdentitySubscriptionsPage,
+    "ApiOwnerBalance": ApiOwnerBalance,
+    "ApiOwnerBalanceMemes": ApiOwnerBalanceMemes,
+    "ApiOwnerBalancePage": ApiOwnerBalancePage,
+    "ApiPageBase": ApiPageBase,
+    "ApiPageWithNextUriBase": ApiPageWithNextUriBase,
+    "ApiProfileMin": ApiProfileMin,
+    "ApiProfileProxy": ApiProfileProxy,
+    "ApiProfileProxyAction": ApiProfileProxyAction,
+    "ApiQuotedDrop": ApiQuotedDrop,
+    "ApiQuotedDropResponse": ApiQuotedDropResponse,
+    "ApiRatingWithProfileInfoAndLevel": ApiRatingWithProfileInfoAndLevel,
+    "ApiRatingWithProfileInfoAndLevelPage": ApiRatingWithProfileInfoAndLevelPage,
+    "ApiRegisterPushNotificationTokenRequest": ApiRegisterPushNotificationTokenRequest,
+    "ApiRepRating": ApiRepRating,
+    "ApiReplyToDrop": ApiReplyToDrop,
+    "ApiReplyToDropResponse": ApiReplyToDropResponse,
+    "ApiSeizeSettings": ApiSeizeSettings,
+    "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
+    "ApiTransaction": ApiTransaction,
+    "ApiTransactionPage": ApiTransactionPage,
+    "ApiUpdateDropRequest": ApiUpdateDropRequest,
+    "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,
+    "ApiUpdateWaveRequest": ApiUpdateWaveRequest,
+    "ApiUploadItem": ApiUploadItem,
+    "ApiUploadsPage": ApiUploadsPage,
+    "ApiWave": ApiWave,
+    "ApiWaveConfig": ApiWaveConfig,
+    "ApiWaveContributorOverview": ApiWaveContributorOverview,
+    "ApiWaveDropsFeed": ApiWaveDropsFeed,
+    "ApiWaveMetrics": ApiWaveMetrics,
+    "ApiWaveMin": ApiWaveMin,
+    "ApiWaveOutcome": ApiWaveOutcome,
+    "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
+    "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
+    "ApiWaveScope": ApiWaveScope,
+    "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
+    "ApiWaveVisibilityConfig": ApiWaveVisibilityConfig,
+    "ApiWaveVotingConfig": ApiWaveVotingConfig,
 }
 
 type MimeTypeDescriptor = {

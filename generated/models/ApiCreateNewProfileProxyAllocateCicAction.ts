@@ -10,15 +10,10 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateNewProfileProxyAllocateCicAction } from '../models/ApiCreateNewProfileProxyAllocateCicAction';
-import { ApiCreateNewProfileProxyAllocateRepAction } from '../models/ApiCreateNewProfileProxyAllocateRepAction';
-import { ApiCreateNewProfileProxyCreateWaveAction } from '../models/ApiCreateNewProfileProxyCreateWaveAction';
-import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
-import { ApiCreateNewProfileProxyReadWaveAction } from '../models/ApiCreateNewProfileProxyReadWaveAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
-export class AddActionToProxyRequest {
+export class ApiCreateNewProfileProxyAllocateCicAction {
     'action_type': ApiProfileProxyActionType;
     'end_time': number | null;
     'credit_amount': number;
@@ -46,7 +41,7 @@ export class AddActionToProxyRequest {
         }    ];
 
     static getAttributeTypeMap() {
-        return AddActionToProxyRequest.attributeTypeMap;
+        return ApiCreateNewProfileProxyAllocateCicAction.attributeTypeMap;
     }
 
     public constructor() {

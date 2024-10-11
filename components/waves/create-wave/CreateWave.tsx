@@ -57,7 +57,7 @@ export default function CreateWave({
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
     ReactQueryWrapperContext
   );
-  const initialType = WaveType.Chat;
+  const initialType = WaveType.Rank;
   const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
     type,
@@ -67,7 +67,7 @@ export default function CreateWave({
     overview: {
       type,
       signatureType: WaveSignatureType.NONE,
-      name: "",
+      name: "test",
       image: null,
     },
     groups: {
