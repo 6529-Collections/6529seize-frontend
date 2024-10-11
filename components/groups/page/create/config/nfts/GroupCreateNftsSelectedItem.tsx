@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { GroupOwnsNftNameEnum } from "../../../../../../generated/models/GroupOwnsNft";
+import { ApiGroupOwnsNftNameEnum } from "../../../../../../generated/models/ApiGroupOwnsNft";
 import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import {
   GRADIENT_CONTRACT,
@@ -8,7 +8,7 @@ import {
   NEXTGEN_CONTRACT,
 } from "../../../../../../constants";
 import { commonApiFetch } from "../../../../../../services/api/common-api";
-import { NftsPage } from "../../../../../../generated/models/NftsPage";
+import { ApiNftsPage } from "../../../../../../generated/models/ApiNftsPage";
 import {
   getScaledImageUri,
   ImageScale,
@@ -18,21 +18,24 @@ export default function GroupCreateNftsSelectedItem({
   nft,
   onRemove,
 }: {
-  readonly nft: { readonly name: GroupOwnsNftNameEnum; readonly token: string };
+  readonly nft: {
+    readonly name: ApiGroupOwnsNftNameEnum;
+    readonly token: string;
+  };
   readonly onRemove: () => void;
 }) {
-  const NAME_TO_CONTRACT_MAP: Record<GroupOwnsNftNameEnum, string> = {
-    [GroupOwnsNftNameEnum.Gradients]: GRADIENT_CONTRACT,
-    [GroupOwnsNftNameEnum.Memelab]: MEMELAB_CONTRACT,
-    [GroupOwnsNftNameEnum.Nextgen]: NEXTGEN_CONTRACT,
-    [GroupOwnsNftNameEnum.Memes]: MEMES_CONTRACT,
+  const NAME_TO_CONTRACT_MAP: Record<ApiGroupOwnsNftNameEnum, string> = {
+    [ApiGroupOwnsNftNameEnum.Gradients]: GRADIENT_CONTRACT,
+    [ApiGroupOwnsNftNameEnum.Memelab]: MEMELAB_CONTRACT,
+    [ApiGroupOwnsNftNameEnum.Nextgen]: NEXTGEN_CONTRACT,
+    [ApiGroupOwnsNftNameEnum.Memes]: MEMES_CONTRACT,
   };
 
-  const NAME_TO_NAME_MAP: Record<GroupOwnsNftNameEnum, string> = {
-    [GroupOwnsNftNameEnum.Gradients]: "Gradients",
-    [GroupOwnsNftNameEnum.Memelab]: "Memelab",
-    [GroupOwnsNftNameEnum.Nextgen]: "NextGen",
-    [GroupOwnsNftNameEnum.Memes]: "The Memes",
+  const NAME_TO_NAME_MAP: Record<ApiGroupOwnsNftNameEnum, string> = {
+    [ApiGroupOwnsNftNameEnum.Gradients]: "Gradients",
+    [ApiGroupOwnsNftNameEnum.Memelab]: "Memelab",
+    [ApiGroupOwnsNftNameEnum.Nextgen]: "NextGen",
+    [ApiGroupOwnsNftNameEnum.Memes]: "The Memes",
   };
 
   const { data } = useQuery({
@@ -44,7 +47,7 @@ export default function GroupCreateNftsSelectedItem({
       },
     ],
     queryFn: async () => {
-      return await commonApiFetch<NftsPage>({
+      return await commonApiFetch<ApiNftsPage>({
         endpoint: "nfts",
         params: {
           contract: NAME_TO_CONTRACT_MAP[nft.name],

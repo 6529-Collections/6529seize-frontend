@@ -1,5 +1,5 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
@@ -9,7 +9,7 @@ type DropActionHandler = ({
   drop,
   partId,
 }: {
-  drop: Drop;
+  drop: ApiDrop;
   partId: number;
 }) => void;
 
@@ -22,7 +22,7 @@ interface DropsListProps {
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
 }

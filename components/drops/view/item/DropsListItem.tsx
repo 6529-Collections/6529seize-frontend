@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import DropListItemContent from "./content/DropListItemContent";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { AuthContext } from "../../../auth/Auth";
 
 import DropReply, { DropReplyProps } from "./replies/DropReply";
@@ -47,8 +47,8 @@ export default function DropsListItem({
   onDiscussionStateChange,
   onDropDeleted,
 }: {
-  readonly drop: Drop;
-  readonly replyToDrop: Drop | null;
+  readonly drop: ApiDrop;
+  readonly replyToDrop: ApiDrop | null;
   readonly showFull?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;

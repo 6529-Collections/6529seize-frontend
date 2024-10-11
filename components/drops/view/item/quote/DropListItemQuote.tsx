@@ -3,16 +3,10 @@ import { AuthContext } from "../../../../auth/Auth";
 import CreateDrop, { CreateDropType } from "../../../create/CreateDrop";
 import { ProfileConnectedStatus } from "../../../../../entities/IProfile";
 import CommonInfoBox from "../../../../user/utils/connected-states/CommonInfoBox";
-import { Drop } from "../../../../../generated/models/Drop";
-
-interface DropListItemQuoteWaveProps {
-  readonly name: string;
-  readonly image: string | null;
-  readonly id: string;
-}
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 
 interface DropListItemQuoteProps {
-  readonly quotedDrop: Drop;
+  readonly quotedDrop: ApiDrop;
   readonly quotedPartId: number;
   readonly init: boolean;
   readonly onSuccessfulDrop: () => void;

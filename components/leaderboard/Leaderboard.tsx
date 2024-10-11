@@ -14,7 +14,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { MemeSeason } from "../../entities/ISeason";
 import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
 import LeaderboardInteractionsComponent from "./LeaderboardInteractions";
-import { BlocksPage } from "../../generated/models/BlocksPage";
+import { ApiBlocksPage } from "../../generated/models/ApiBlocksPage";
 
 export enum Content {
   ALL = "All",
@@ -74,7 +74,7 @@ export default function Leaderboard(
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
-      (response: BlocksPage) => {
+      (response: ApiBlocksPage) => {
         if (response.data.length > 0) {
           setLastTDH({
             block: response.data[0].block_number,

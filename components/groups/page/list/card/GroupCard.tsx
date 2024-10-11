@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { GroupFull } from "../../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import { getRandomColorWithSeed } from "../../../../../helpers/Helpers";
 import GroupCardView from "./GroupCardView";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
 import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
-import { RateMatter } from "../../../../../generated/models/RateMatter";
+import { ApiRateMatter } from "../../../../../generated/models/ApiRateMatter";
 
 export enum GroupCardState {
   IDLE = "IDLE",
@@ -23,7 +23,7 @@ export default function GroupCard({
   activeGroupIdVoteAll,
   setActiveGroupIdVoteAll,
 }: {
-  readonly group: GroupFull;
+  readonly group: ApiGroupFull;
   readonly activeGroupIdVoteAll: string | null;
   readonly setActiveGroupIdVoteAll: (value: string | null) => void;
 }) {
@@ -67,7 +67,7 @@ export default function GroupCard({
     }
   }, [connectedProfile?.profile?.handle]);
 
-  const onEditClick = (group: GroupFull) => {
+  const onEditClick = (group: ApiGroupFull) => {
     router.push(`/network/groups?edit=${group.id}`);
   };
 
@@ -84,14 +84,14 @@ export default function GroupCard({
       <GroupCardVoteAll
         group={group}
         onCancel={onActionCancel}
-        matter={RateMatter.Rep}
+        matter={ApiRateMatter.Rep}
       />
     ),
     [GroupCardState.NIC]: (
       <GroupCardVoteAll
         group={group}
         onCancel={onActionCancel}
-        matter={RateMatter.Cic}
+        matter={ApiRateMatter.Cic}
       />
     ),
   };
@@ -106,12 +106,14 @@ export default function GroupCard({
       className={`${
         state === GroupCardState.IDLE && "tw-group tw-cursor-pointer"
       } tw-col-span-1`}
-      onClick={goToCommunityView}>
+      onClick={goToCommunityView}
+    >
       <div
         className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
         style={{
           background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-        }}>
+        }}
+      >
         <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 group-hover:tw-ring-white/40 tw-ring-inset tw-pointer-events-none tw-transition tw-duration-500 tw-ease-out"></div>
       </div>
       <div
@@ -119,7 +121,8 @@ export default function GroupCard({
           connectedProfile?.profile?.handle
             ? "tw-min-h-[134px]"
             : "tw-h-[123.5px]"
-        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}>
+        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}
+      >
         {components[state]}
       </div>
     </div>

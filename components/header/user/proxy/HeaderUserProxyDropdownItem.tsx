@@ -1,13 +1,15 @@
-import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 
 export default function HeaderUserProxyDropdownItem({
   profileProxy,
   activeProfileProxy,
   onActivateProfileProxy,
 }: {
-  readonly profileProxy: ProfileProxy;
-  readonly activeProfileProxy: ProfileProxy | null;
-  readonly onActivateProfileProxy: (profileProxy: ProfileProxy | null) => void;
+  readonly profileProxy: ApiProfileProxy;
+  readonly activeProfileProxy: ApiProfileProxy | null;
+  readonly onActivateProfileProxy: (
+    profileProxy: ApiProfileProxy | null
+  ) => void;
 }) {
   const isActive = profileProxy.id === activeProfileProxy?.id;
 

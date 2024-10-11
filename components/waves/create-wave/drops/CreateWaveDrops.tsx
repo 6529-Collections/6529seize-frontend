@@ -1,5 +1,5 @@
-import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import {
   CreateWaveDropsConfig,
@@ -14,7 +14,7 @@ export default function CreateWaveDrops({
   errors,
   setDrops,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly drops: CreateWaveDropsConfig;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
@@ -43,7 +43,7 @@ export default function CreateWaveDrops({
     });
   };
 
-  const onRequiredTypeChange = (types: WaveParticipationRequirement[]) => {
+  const onRequiredTypeChange = (types: ApiWaveParticipationRequirement[]) => {
     setDrops({
       ...drops,
       requiredTypes: types,
@@ -59,7 +59,7 @@ export default function CreateWaveDrops({
     });
   };
 
-  const isNotChatType = waveType !== WaveType.Chat;
+  const isNotChatType = waveType !== ApiWaveType.Chat;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">

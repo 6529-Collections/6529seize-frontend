@@ -1,10 +1,10 @@
-import { GroupFull } from "../../../../../../../generated/models/GroupFull";
-import { Wave } from "../../../../../../../generated/models/Wave";
+import { ApiGroupFull } from "../../../../../../../generated/models/ApiGroupFull";
+import { ApiWave } from "../../../../../../../generated/models/ApiWave";
 import SelectGroupModalWrapper from "../../../../../../utils/select-group/SelectGroupModalWrapper";
 import { WaveGroupType } from "../WaveGroup";
 import { convertWaveToUpdateWave } from "../../../../../../../helpers/waves/waves.helpers";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupEdit({
   wave,
@@ -13,17 +13,17 @@ export default function WaveGroupEdit({
   setIsEditOpen,
   onEdit,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
+  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
   const getBody = ({
     group,
   }: {
-    readonly group: GroupFull;
-  }): UpdateWaveRequest => {
+    readonly group: ApiGroupFull;
+  }): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
     switch (type) {
       case WaveGroupType.VIEW:
@@ -76,7 +76,7 @@ export default function WaveGroupEdit({
     }
   };
 
-  const onGroupSelect = async (group: GroupFull): Promise<void> => {
+  const onGroupSelect = async (group: ApiGroupFull): Promise<void> => {
     const body = getBody({ group });
     await onEdit(body);
   };

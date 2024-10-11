@@ -2,10 +2,10 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
 import WaveDetailedFollowingWavesSort from "./WaveDetailedFollowingWavesSort";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 import { useNewDropsCount } from "../../../hooks/useNewDropsCount";
 import WaveDetailedFollowingWave from "./WaveDetailedFollowingWave";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "../../react-query-wrapper/utils/query-utils";
@@ -13,7 +13,7 @@ import { WaveDetailedMobileView } from "./WaveDetailedMobile";
 
 interface WaveDetailedFollowingWavesProps {
   readonly activeWaveId: string;
-  readonly onWaveChange: (wave: Wave) => void;
+  readonly onWaveChange: (wave: ApiWave) => void;
   readonly setActiveView: (view: WaveDetailedMobileView) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
@@ -24,7 +24,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
   setActiveView,
   setIsLoading,
 }) => {
-  const [selectedSort, setSelectedSort] = useState<WavesOverviewType>(
+  const [selectedSort, setSelectedSort] = useState<ApiWavesOverviewType>(
     WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType
   );
 
@@ -47,7 +47,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
           only_waves_followed_by_authenticated_user:
             WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user.toString(),
         };
-        return await commonApiFetch<Wave[]>({
+        return await commonApiFetch<ApiWave[]>({
           endpoint: `waves-overview`,
           params: queryParams,
         });
@@ -77,7 +77,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
     return data.pages.flatMap((page) => page);
   };
 
-  const [waves, setWaves] = useState<Wave[]>(getWaves());
+  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
   const { newDropsCounts, resetWaveCount } = useNewDropsCount(
     waves,
     activeWaveId
@@ -89,7 +89,7 @@ const WaveDetailedFollowingWaves: React.FC<WaveDetailedFollowingWavesProps> = ({
   }, [data]);
   const memoizedWaves = useMemo(() => waves || [], [waves]);
 
-  const handleWaveChange = (wave: Wave) => {
+  const handleWaveChange = (wave: ApiWave) => {
     setIsLoading(true);
     onWaveChange(wave);
     setActiveView(WaveDetailedMobileView.CHAT);

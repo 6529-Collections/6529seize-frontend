@@ -5,7 +5,7 @@ import { useDebounce } from "react-use";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
-import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { AuthContext } from "../../../../auth/Auth";
 
 const MIN_SEARCH_LENGTH = 3;
@@ -18,7 +18,7 @@ export default function ProxyCreateTargetSearch({
   loading,
   onTargetSelect,
 }: {
-  readonly profileProxy: ProfileProxy | null;
+  readonly profileProxy: ApiProfileProxy | null;
   readonly loading: boolean;
   readonly onTargetSelect: (target: CommunityMemberMinimal | null) => void;
 }) {

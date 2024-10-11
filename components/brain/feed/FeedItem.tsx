@@ -1,4 +1,4 @@
-import { FeedItemType } from "../../../generated/models/FeedItemType";
+import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
@@ -18,7 +18,7 @@ export default function FeedItem({
 }: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
-      case FeedItemType.WaveCreated:
+      case ApiFeedItemType.WaveCreated:
         return (
           <FeedItemWaveCreated
             item={item}
@@ -26,7 +26,7 @@ export default function FeedItem({
             availableCredit={availableCredit}
           />
         );
-      case FeedItemType.DropCreated:
+      case ApiFeedItemType.DropCreated:
         return (
           <FeedItemDropCreated
             item={item}
@@ -34,7 +34,7 @@ export default function FeedItem({
             showWaveInfo={showWaveInfo}
           />
         );
-      case FeedItemType.DropReplied:
+      case ApiFeedItemType.DropReplied:
         return (
           <FeedItemDropReplied
             item={item}

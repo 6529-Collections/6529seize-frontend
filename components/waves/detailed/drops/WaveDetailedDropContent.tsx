@@ -1,13 +1,13 @@
 import React from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropPart from "./WaveDetailedDropPart";
 
 interface WaveDetailedDropContentProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onDropClick: () => void;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
 }

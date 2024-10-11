@@ -1,9 +1,9 @@
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 import { useCallback, useEffect, useState } from "react";
-import { Wave } from "../generated/models/Wave";
+import { ApiWave } from "../generated/models/ApiWave";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
-import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
+import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -42,7 +42,7 @@ function useTabVisibility() {
 }
 
 export function useWaveDrops(
-  wave: Wave,
+  wave: ApiWave,
   connectedProfileHandle: string | undefined
 ) {
   const queryClient = useQueryClient();
@@ -51,7 +51,7 @@ export function useWaveDrops(
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
-    WaveDropsFeed | undefined
+  ApiWaveDropsFeed | undefined
   >(undefined);
   const isTabVisible = useTabVisibility();
 
@@ -76,7 +76,7 @@ export function useWaveDrops(
         if (pageParam) {
           params.serial_no_less_than = `${pageParam}`;
         }
-        return await commonApiFetch<WaveDropsFeed>({
+        return await commonApiFetch<ApiWaveDropsFeed>({
           endpoint: `waves/${wave.id}/drops`,
           params,
         });
@@ -113,7 +113,7 @@ export function useWaveDrops(
         params.search_strategy = `${pageParam.strategy}`;
       }
 
-      const results = await commonApiFetch<WaveDropsFeed>({
+      const results = await commonApiFetch<ApiWaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,
       });
@@ -148,7 +148,7 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: "1",
       };
-      return await commonApiFetch<WaveDropsFeed>({
+      return await commonApiFetch<ApiWaveDropsFeed>({
         endpoint: `waves/${wave.id}/drops`,
         params,
       });

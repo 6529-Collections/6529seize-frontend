@@ -4,7 +4,7 @@ import { AuthContext } from "../../auth/Auth";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import WaveItem from "../../waves/list/WaveItem";
 import CircleLoader, {
   CircleLoaderSize,
@@ -95,7 +95,7 @@ export default function UserPageWaves({
       if (debouncedParams.name) {
         queryParams.name = debouncedParams.name;
       }
-      return await commonApiFetch<Wave[]>({
+      return await commonApiFetch<ApiWave[]>({
         endpoint: `waves`,
         params: queryParams,
       });
@@ -127,7 +127,7 @@ export default function UserPageWaves({
       if (debouncedParams.name) {
         queryParams.name = debouncedParams.name;
       }
-      return await commonApiFetch<Wave[]>({
+      return await commonApiFetch<ApiWave[]>({
         endpoint: `waves-public`,
         params: queryParams,
       });
@@ -137,14 +137,14 @@ export default function UserPageWaves({
     enabled: usePublicWaves && !!haveProfile,
   });
 
-  const getWaves = (): Wave[] => {
+  const getWaves = (): ApiWave[] => {
     if (usePublicWaves) {
       return wavesPublic?.pages.flat() ?? [];
     }
     return wavesAuth?.pages.flat() ?? [];
   };
 
-  const [waves, setWaves] = useState<Wave[]>(getWaves());
+  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
   useEffect(
     () => setWaves(getWaves()),
     [wavesAuth, wavesPublic, usePublicWaves]

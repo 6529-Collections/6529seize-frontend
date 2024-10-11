@@ -1,5 +1,5 @@
-import { WaveCreditType } from "../../../../generated/models/WaveCreditType";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import { WAVE_VOTING_LABELS } from "../../../../helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
@@ -15,24 +15,24 @@ export default function CreateWaveVoting({
   setCategory,
   setProfileId,
 }: {
-  readonly waveType: WaveType;
-  readonly selectedType: WaveCreditType;
+  readonly waveType: ApiWaveType;
+  readonly selectedType: ApiWaveCreditType;
   readonly category: string | null;
   readonly profileId: string | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
-  readonly onTypeChange: (type: WaveCreditType) => void;
+  readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
 }) {
-  const TITLES: Record<WaveType, string> = {
-    [WaveType.Chat]: "How Drops are Rated",
-    [WaveType.Rank]: "How Drops are Voted",
-    [WaveType.Approve]: "How Drops are Voted",
+  const TITLES: Record<ApiWaveType, string> = {
+    [ApiWaveType.Chat]: "How Drops are Rated",
+    [ApiWaveType.Rank]: "How Drops are Voted",
+    [ApiWaveType.Approve]: "How Drops are Voted",
   };
 
-  const DISABLED_CREDIT_TYPES: WaveCreditType[] = [
-    WaveCreditType.Rep,
-    WaveCreditType.Unique,
+  const DISABLED_CREDIT_TYPES: ApiWaveCreditType[] = [
+    ApiWaveCreditType.Rep,
+    ApiWaveCreditType.Unique,
   ];
 
   return (
@@ -41,7 +41,7 @@ export default function CreateWaveVoting({
         {TITLES[waveType]}
       </p>
       <div className="tw-mt-3 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
-        {Object.values(WaveCreditType).map((votingType) => (
+        {Object.values(ApiWaveCreditType).map((votingType) => (
           <CommonBorderedRadioButton
             key={votingType}
             type={votingType}
@@ -51,7 +51,7 @@ export default function CreateWaveVoting({
             onChange={onTypeChange}
           />
         ))}
-        {selectedType === WaveCreditType.Rep && (
+        {selectedType === ApiWaveCreditType.Rep && (
           <div className="tw-col-span-full">
             <CreateWaveVotingRep
               category={category}

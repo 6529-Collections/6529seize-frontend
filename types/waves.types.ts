@@ -1,8 +1,8 @@
-import { WaveCreditType } from "../generated/models/WaveCreditType";
-import { WaveMetadataType } from "../generated/models/WaveMetadataType";
-import { WaveParticipationRequirement } from "../generated/models/WaveParticipationRequirement";
-import { WavesOverviewType } from "../generated/models/WavesOverviewType";
-import { WaveType } from "../generated/models/WaveType";
+import { ApiWaveCreditType } from "../generated/models/ApiWaveCreditType";
+import { ApiWaveMetadataType } from "../generated/models/ApiWaveMetadataType";
+import { ApiWaveParticipationRequirement } from "../generated/models/ApiWaveParticipationRequirement";
+import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
+import { ApiWaveType } from "../generated/models/ApiWaveType";
 
 export enum WaveSignatureType {
   NONE = "NONE",
@@ -19,7 +19,7 @@ export enum CreateWaveGroupConfigType {
 }
 
 export interface WaveOverviewConfig {
-  readonly type: WaveType;
+  readonly type: ApiWaveType;
   readonly signatureType: WaveSignatureType;
   readonly name: string;
   readonly image: File | null;
@@ -34,19 +34,19 @@ export interface WaveGroupsConfig {
 
 export interface CreateWaveDropsRequiredMetadata {
   readonly key: string;
-  readonly type: WaveMetadataType;
+  readonly type: ApiWaveMetadataType;
 }
 
 export interface CreateWaveDropsConfig {
   // TODO add to API, make sure that in CHAT its always true
   readonly allowDiscussionDrops: boolean;
   readonly noOfApplicationsAllowedPerParticipant: number | null;
-  readonly requiredTypes: WaveParticipationRequirement[];
+  readonly requiredTypes: ApiWaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }
 
 export interface CreateWaveVotingConfig {
-  readonly type: WaveCreditType;
+  readonly type: ApiWaveCreditType;
   readonly category: string | null;
   readonly profileId: string | null;
 }
@@ -131,5 +131,5 @@ export interface SearchWavesParams {
 export interface WavesOverviewParams {
   limit: number;
   offset: number;
-  type: WavesOverviewType;
+  type: ApiWavesOverviewType;
 }

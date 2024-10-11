@@ -5,7 +5,7 @@ import {
 } from "../../../../helpers/image.helpers";
 import Link from "next/link";
 import GroupItemWrapper from "./GroupItemWrapper";
-import { GroupFull } from "../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
 import { getTimeAgo } from "../../../../helpers/Helpers";
 
 export default function GroupItem({
@@ -13,7 +13,7 @@ export default function GroupItem({
   activeGroupId,
   onActiveGroupId,
 }: {
-  readonly group: GroupFull;
+  readonly group: ApiGroupFull;
   readonly activeGroupId: string | null;
   readonly onActiveGroupId?: (groupId: string | null) => void;
 }) {

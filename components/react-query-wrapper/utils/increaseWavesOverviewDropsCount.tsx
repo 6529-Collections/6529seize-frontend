@@ -1,11 +1,11 @@
 import { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "../ReactQueryWrapper";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "./query-utils";
-import { Wave } from "../../../generated/models/Wave";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 
 type WavesOverviewQueryData = {
-  pages?: Wave[][];
+  pages?: ApiWave[][];
 };
 
 export const increaseWavesOverviewDropsCount = (
@@ -16,7 +16,7 @@ export const increaseWavesOverviewDropsCount = (
     QueryKey.WAVES_OVERVIEW,
     {
       limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
-      type: WavesOverviewType.RecentlyDroppedTo,
+      type: ApiWavesOverviewType.RecentlyDroppedTo,
       only_waves_followed_by_authenticated_user:
         WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
     },
@@ -24,13 +24,15 @@ export const increaseWavesOverviewDropsCount = (
 
   queryClient.setQueryData<WavesOverviewQueryData | undefined>(
     queryKey,
-    (oldData: WavesOverviewQueryData | undefined): WavesOverviewQueryData | undefined => {
+    (
+      oldData: WavesOverviewQueryData | undefined
+    ): WavesOverviewQueryData | undefined => {
       if (!oldData?.pages || oldData.pages.length === 0) {
         return oldData;
       }
 
-      const pages: Wave[][] = JSON.parse(JSON.stringify(oldData.pages));
-      let matchingWave: Wave | undefined;
+      const pages: ApiWave[][] = JSON.parse(JSON.stringify(oldData.pages));
+      let matchingWave: ApiWave | undefined;
       let matchingWaveIndex: number = -1;
       let matchingWavePage: number = -1;
 

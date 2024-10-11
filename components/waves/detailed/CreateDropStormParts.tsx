@@ -1,6 +1,6 @@
 import React from "react";
 import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
-import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
+import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
 import { AuthContext } from "../../auth/Auth";
 import { cicToType } from "../../../helpers/Helpers";
 import UserCICAndLevel, {
@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
-  mentionedUsers: DropMentionedUser[];
+  mentionedUsers: ApiDropMentionedUser[];
   referencedNfts: ReferencedNft[];
   onRemovePart: (partIndex: number) => void;
 }

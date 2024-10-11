@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Wave } from "../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";
 import { canEditWave } from "../../../../../helpers/waves/waves.helpers";
 
-export default function WaveHeaderName({ wave }: { readonly wave: Wave }) {
+export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowEdit = () =>
     canEditWave({ connectedProfile, activeProfileProxy, wave });

@@ -1,8 +1,8 @@
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 
-export default function WaveSpecs({ wave }: { readonly wave: Wave }) {
+export default function WaveSpecs({ wave }: { readonly wave: ApiWave }) {
   return (
     <div className="tw-w-full">
       <div className="tw-group">

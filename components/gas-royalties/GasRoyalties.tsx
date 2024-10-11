@@ -12,7 +12,7 @@ import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import router from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
-import {ArtistNameItem} from "../../generated/models/ArtistNameItem";
+import { ApiArtistNameItem } from "../../generated/models/ApiArtistNameItem";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
@@ -77,9 +77,7 @@ export function getUrlParams(
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
-  const [artists, setArtists] = useState<ArtistNameItem[]>(
-    []
-  );
+  const [artists, setArtists] = useState<ApiArtistNameItem[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showBlockPicker, setShowBlockPicker] = useState(false);
   const [fromDate, setFromDate] = useState<Date>();
@@ -115,9 +113,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
     fetchUrl(`${process.env.API_ENDPOINT}/api/${path}/artists_names`).then(
-      (
-        res: ArtistNameItem[]
-      ) => {
+      (res: ApiArtistNameItem[]) => {
         setArtists(res);
       }
     );
@@ -192,7 +188,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     props.setFocus(GasRoyaltiesCollectionFocus.MEMES);
                   }
                 }}
-                aria-label="The Memes">
+                aria-label="The Memes"
+              >
                 The Memes
               </span>
               <span
@@ -209,7 +206,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB);
                   }
                 }}
-                aria-label="Meme Lab">
+                aria-label="Meme Lab"
+              >
                 Meme Lab
               </span>
             </span>
@@ -240,7 +238,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       props.setSelectedArtist("");
-                    }}>
+                    }}
+                  >
                     All
                   </Dropdown.Item>
                   {artists.map((a) => (
@@ -248,7 +247,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                       key={`artist-${a.name.replaceAll(" ", "-")}`}
                       onClick={() => {
                         props.setSelectedArtist(a.name);
-                      }}>
+                      }}
+                    >
                       {a.name}
                     </Dropdown.Item>
                   ))}
@@ -277,7 +277,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                           } else {
                             props.setDateSelection(dateSelection);
                           }
-                        }}>
+                        }}
+                      >
                         {dateSelection}
                       </Dropdown.Item>
                     )
@@ -285,7 +286,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       setShowBlockPicker(true);
-                    }}>
+                    }}
+                  >
                     Custom Blocks
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -335,14 +337,16 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
     <a
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
-      rel="noreferrer">
+      rel="noreferrer"
+    >
       <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
         <Tippy
           content={`${props.name}`}
           delay={0}
           placement={"auto"}
-          theme={"light"}>
+          theme={"light"}
+        >
           <Image
             loading={"lazy"}
             width={0}
@@ -358,7 +362,8 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
             <span>
               <FontAwesomeIcon
                 className={styles.infoIcon}
-                icon="info-circle"></FontAwesomeIcon>
+                icon="info-circle"
+              ></FontAwesomeIcon>
             </span>
           </Tippy>
         )}

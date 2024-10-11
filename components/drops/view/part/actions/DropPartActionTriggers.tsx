@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Drop } from "../../../../../generated/models/Drop";
-import { DropPart } from "../../../../../generated/models/DropPart";
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ApiDropPart } from "../../../../../generated/models/ApiDropPart";
 import { DropVoteState } from "../../item/DropsListItem";
 import DropListItemRateGive from "../../item/rate/give/DropListItemRateGive";
 import DropPartQuoteButton from "../quote/DropPartQuoteButton";
@@ -11,8 +11,8 @@ import DropPartActionTriggersVoteVotings from "./vote/DropPartActionTriggersVote
 import { useCopyToClipboard } from "react-use";
 
 interface DropPartActionTriggersProps {
-  readonly drop: Drop;
-  readonly dropPart: DropPart;
+  readonly drop: ApiDrop;
+  readonly dropPart: ApiDropPart;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;

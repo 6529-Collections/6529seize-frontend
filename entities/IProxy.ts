@@ -1,6 +1,6 @@
-import { ProfileProxyActionType } from "../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
 
-export interface CreateProxyActionBase<T extends ProfileProxyActionType> {
+export interface CreateProxyActionBase<T extends ApiProfileProxyActionType> {
   readonly action_type: T;
   readonly end_time: number | null;
 }
@@ -11,23 +11,23 @@ export interface CreateProxyAllocateCreditBase {
 
 export interface CreateProxyAllocateRepAction
   extends CreateProxyAllocateCreditBase,
-    CreateProxyActionBase<ProfileProxyActionType.AllocateRep> {}
+    CreateProxyActionBase<ApiProfileProxyActionType.AllocateRep> {}
 
 export interface CreateProxyAllocateCicAction
   extends CreateProxyAllocateCreditBase,
-    CreateProxyActionBase<ProfileProxyActionType.AllocateCic> {}
+    CreateProxyActionBase<ApiProfileProxyActionType.AllocateCic> {}
 
 export interface CreateProxyCreateWaveAction
-  extends CreateProxyActionBase<ProfileProxyActionType.CreateWave> {}
+  extends CreateProxyActionBase<ApiProfileProxyActionType.CreateWave> {}
 
 export interface CreateProxyReadWaveAction
-  extends CreateProxyActionBase<ProfileProxyActionType.ReadWave> {}
+  extends CreateProxyActionBase<ApiProfileProxyActionType.ReadWave> {}
 
 export interface CreateProxyCreateDropToWaveAction
-  extends CreateProxyActionBase<ProfileProxyActionType.CreateDropToWave> {}
+  extends CreateProxyActionBase<ApiProfileProxyActionType.CreateDropToWave> {}
 
 export interface CreateProxyRateWaveDropAction
-  extends CreateProxyActionBase<ProfileProxyActionType.RateWaveDrop> {}
+  extends CreateProxyActionBase<ApiProfileProxyActionType.RateWaveDrop> {}
 
 export type CreateProxyAction =
   | CreateProxyAllocateRepAction
@@ -42,15 +42,15 @@ export interface CreateNewProfileProxy {
 }
 
 export const PROFILE_PROXY_ACTION_LABELS: Record<
-  ProfileProxyActionType,
+  ApiProfileProxyActionType,
   string
 > = {
-  [ProfileProxyActionType.AllocateRep]: "Allocate Rep",
-  [ProfileProxyActionType.AllocateCic]: "Allocate NIC",
-  [ProfileProxyActionType.CreateWave]: "Create Wave",
-  [ProfileProxyActionType.ReadWave]: "Read Wave",
-  [ProfileProxyActionType.CreateDropToWave]: "Create Drop To Wave",
-  [ProfileProxyActionType.RateWaveDrop]: "Rate Wave Drop",
+  [ApiProfileProxyActionType.AllocateRep]: "Allocate Rep",
+  [ApiProfileProxyActionType.AllocateCic]: "Allocate NIC",
+  [ApiProfileProxyActionType.CreateWave]: "Create Wave",
+  [ApiProfileProxyActionType.ReadWave]: "Read Wave",
+  [ApiProfileProxyActionType.CreateDropToWave]: "Create Drop To Wave",
+  [ApiProfileProxyActionType.RateWaveDrop]: "Rate Wave Drop",
 };
 
 export enum ProfileProxySide {
@@ -66,18 +66,18 @@ export enum ProfileProxyActionStatus {
 }
 
 export const PROFILE_PROXY_ACTION_HAVE_CREDIT: Record<
-  ProfileProxyActionType,
+  ApiProfileProxyActionType,
   boolean
 > = {
-  [ProfileProxyActionType.AllocateRep]: true,
-  [ProfileProxyActionType.AllocateCic]: true,
-  [ProfileProxyActionType.CreateWave]: false,
-  [ProfileProxyActionType.ReadWave]: false,
-  [ProfileProxyActionType.CreateDropToWave]: false,
-  [ProfileProxyActionType.RateWaveDrop]: false,
+  [ApiProfileProxyActionType.AllocateRep]: true,
+  [ApiProfileProxyActionType.AllocateCic]: true,
+  [ApiProfileProxyActionType.CreateWave]: false,
+  [ApiProfileProxyActionType.ReadWave]: false,
+  [ApiProfileProxyActionType.CreateDropToWave]: false,
+  [ApiProfileProxyActionType.RateWaveDrop]: false,
 };
 
-export const PROFILE_PROXY_AVAILABLE_ACTIONS: ProfileProxyActionType[] = [
-  ProfileProxyActionType.AllocateRep,
-  ProfileProxyActionType.AllocateCic,
+export const PROFILE_PROXY_AVAILABLE_ACTIONS: ApiProfileProxyActionType[] = [
+  ApiProfileProxyActionType.AllocateRep,
+  ApiProfileProxyActionType.AllocateCic,
 ];
