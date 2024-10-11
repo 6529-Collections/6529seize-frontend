@@ -27,6 +27,7 @@ import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
+import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -1201,6 +1202,7 @@ export default function ReactQueryWrapper({
     readonly drop: Drop;
   }): Promise<void> => {
     addDropToDrops(queryClient, { drop });
+    increaseWavesOverviewDropsCount(queryClient, drop.wave.id);
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {

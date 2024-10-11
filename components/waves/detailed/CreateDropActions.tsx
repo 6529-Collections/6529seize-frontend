@@ -138,7 +138,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 isRequiredMetadataMissing || isRequiredMediaMissing
                   ? "tw-text-yellow"
                   : "tw-text-iron-400"
-              } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-9 lg:tw-size-8  focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
+              } tw-bg-iron-800 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
