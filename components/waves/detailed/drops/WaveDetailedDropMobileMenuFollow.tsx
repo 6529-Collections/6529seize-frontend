@@ -1,22 +1,25 @@
 import React, { useContext, useState } from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiDeleWithBody, commonApiPost } from "../../../../services/api/common-api";
+import {
+  commonApiDeleWithBody,
+  commonApiPost,
+} from "../../../../services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { IdentitySubscriptionTargetAction } from "../../../../generated/models/IdentitySubscriptionTargetAction";
-import { IdentitySubscriptionActions } from "../../../../generated/models/IdentitySubscriptionActions";
+import { ApiIdentitySubscriptionTargetAction } from "../../../../generated/models/ApiIdentitySubscriptionTargetAction";
+import { ApiIdentitySubscriptionActions } from "../../../../generated/models/ApiIdentitySubscriptionActions";
 
 interface WaveDetailedDropMobileMenuFollowProps {
-  readonly drop: Drop;
-  readonly onFollowChange: () => void
+  readonly drop: ApiDrop;
+  readonly onFollowChange: () => void;
 }
 
 const WaveDetailedDropMobileMenuFollow: React.FC<
   WaveDetailedDropMobileMenuFollowProps
 > = ({ drop, onFollowChange }) => {
-  const isFollowing = !!drop.author.subscribed_actions.length
-  const label = isFollowing ? "Unfollow" : "Follow"
+  const isFollowing = !!drop.author.subscribed_actions.length;
+  const label = isFollowing ? "Unfollow" : "Follow";
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -25,13 +28,13 @@ const WaveDetailedDropMobileMenuFollow: React.FC<
   const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<
-        IdentitySubscriptionActions,
-        IdentitySubscriptionActions
+        ApiIdentitySubscriptionActions,
+        ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${drop.author.id}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction).filter(
-            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
+            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
           ),
         },
       });
@@ -54,13 +57,13 @@ const WaveDetailedDropMobileMenuFollow: React.FC<
   const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
-        IdentitySubscriptionActions,
-        IdentitySubscriptionActions
+        ApiIdentitySubscriptionActions,
+        ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${drop.author.id}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction).filter(
-            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
+            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
           ),
         },
       });
@@ -98,7 +101,7 @@ const WaveDetailedDropMobileMenuFollow: React.FC<
       onClick={onFollow}
       disabled={mutating}
       className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
-        mutating ? 'tw-opacity-50 tw-cursor-default' : 'active:tw-bg-iron-800'
+        mutating ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
       } tw-transition-colors tw-duration-200`}
     >
       <svg

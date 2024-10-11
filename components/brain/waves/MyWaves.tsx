@@ -3,7 +3,7 @@ import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import WavesList, { WavesListType } from "./WavesList";
 
 type QueryParams = {
@@ -30,14 +30,14 @@ export default function MyWaves() {
   const { data } = useQuery({
     queryKey: [QueryKey.WAVES, params],
     queryFn: async () =>
-      await commonApiFetch<Wave[]>({
+      await commonApiFetch<ApiWave[]>({
         endpoint: `waves`,
         params,
       }),
     enabled: showWaves,
   });
 
-  const [waves, setWaves] = useState<Wave[]>([]);
+  const [waves, setWaves] = useState<ApiWave[]>([]);
 
   useEffect(() => {
     if (data) {
@@ -45,9 +45,5 @@ export default function MyWaves() {
     }
   }, [data]);
 
-
-
-  return (
-    <WavesList waves={waves} type={WavesListType.MY_WAVES} />
-  );
+  return <WavesList waves={waves} type={WavesListType.MY_WAVES} />;
 }

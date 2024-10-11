@@ -1,35 +1,35 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 
 interface WaveDetailedFollowingWavesSortProps {
-  readonly selectedOption: WavesOverviewType;
-  readonly setSelectedOption: (option: WavesOverviewType) => void;
+  readonly selectedOption: ApiWavesOverviewType;
+  readonly setSelectedOption: (option: ApiWavesOverviewType) => void;
 }
 
 const WaveDetailedFollowingWavesSort: React.FC<
   WaveDetailedFollowingWavesSortProps
 > = ({ selectedOption, setSelectedOption }) => {
-  const LABELS: Record<WavesOverviewType, string> = {
-    [WavesOverviewType.Latest]: "Recently Created",
-    [WavesOverviewType.MostSubscribed]: "Most Subscribed",
-    [WavesOverviewType.HighLevelAuthor]: "High Level Author",
-    [WavesOverviewType.AuthorYouHaveRepped]: "Author You Have Repped",
-    [WavesOverviewType.MostDropped]: "Most Dropped",
-    [WavesOverviewType.MostDroppedByYou]: "Most Dropped By You",
-    [WavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
-    [WavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped By You",
+  const LABELS: Record<ApiWavesOverviewType, string> = {
+    [ApiWavesOverviewType.Latest]: "Recently Created",
+    [ApiWavesOverviewType.MostSubscribed]: "Most Subscribed",
+    [ApiWavesOverviewType.HighLevelAuthor]: "High Level Author",
+    [ApiWavesOverviewType.AuthorYouHaveRepped]: "Author You Have Repped",
+    [ApiWavesOverviewType.MostDropped]: "Most Dropped",
+    [ApiWavesOverviewType.MostDroppedByYou]: "Most Dropped By You",
+    [ApiWavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
+    [ApiWavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped By You",
   };
 
-  const ORDER: WavesOverviewType[] = [
-    WavesOverviewType.RecentlyDroppedTo,
-    WavesOverviewType.RecentlyDroppedToByYou,
-    WavesOverviewType.MostDropped,
-    WavesOverviewType.MostDroppedByYou,
-    WavesOverviewType.MostSubscribed,
-    WavesOverviewType.HighLevelAuthor,
-    WavesOverviewType.AuthorYouHaveRepped,
-    WavesOverviewType.Latest,
+  const ORDER: ApiWavesOverviewType[] = [
+    ApiWavesOverviewType.RecentlyDroppedTo,
+    ApiWavesOverviewType.RecentlyDroppedToByYou,
+    ApiWavesOverviewType.MostDropped,
+    ApiWavesOverviewType.MostDroppedByYou,
+    ApiWavesOverviewType.MostSubscribed,
+    ApiWavesOverviewType.HighLevelAuthor,
+    ApiWavesOverviewType.AuthorYouHaveRepped,
+    ApiWavesOverviewType.Latest,
   ];
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleOptionSelect = (option: WavesOverviewType) => {
+  const handleOptionSelect = (option: ApiWavesOverviewType) => {
     setSelectedOption(option);
     setIsDropdownOpen(false);
   };

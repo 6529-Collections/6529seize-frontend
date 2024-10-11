@@ -8,7 +8,7 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SelectGroupModalItems from "./SelectGroupModalItems";
-import { GroupFull } from "../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
 
 export default function SelectGroupModal({
@@ -16,7 +16,7 @@ export default function SelectGroupModal({
   onGroupSelect,
 }: {
   readonly onClose: () => void;
-  readonly onGroupSelect: (group: GroupFull) => void;
+  readonly onGroupSelect: (group: ApiGroupFull) => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
@@ -41,7 +41,7 @@ export default function SelectGroupModal({
     }));
   };
 
-  const { data, isFetching } = useQuery<GroupFull[]>({
+  const { data, isFetching } = useQuery<ApiGroupFull[]>({
     queryKey: [QueryKey.GROUPS, filters],
     queryFn: async () => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
@@ -53,7 +53,7 @@ export default function SelectGroupModal({
       }
 
       return await commonApiFetch<
-        GroupFull[],
+        ApiGroupFull[],
         NonNullableNotRequired<GroupsRequestParams>
       >({
         endpoint: "groups",
@@ -63,7 +63,7 @@ export default function SelectGroupModal({
     placeholderData: keepPreviousData,
   });
 
-  const [groups, setGroups] = useState<GroupFull[]>([]);
+  const [groups, setGroups] = useState<ApiGroupFull[]>([]);
   useEffect(() => {
     if (data?.length) {
       setGroups(data);

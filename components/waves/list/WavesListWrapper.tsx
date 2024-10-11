@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { Wave } from "../../../generated/models/Wave";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 import WaveItem from "./WaveItem";
 import { AuthContext } from "../../auth/Auth";
 import { WavesOverviewParams } from "../../../types/waves.types";
@@ -12,15 +12,16 @@ import CircleLoader, {
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 
-const LABELS: Record<WavesOverviewType, string> = {
-  [WavesOverviewType.Latest]: "Latest",
-  [WavesOverviewType.MostSubscribed]: "Most Followed",
-  [WavesOverviewType.HighLevelAuthor]: "High Level Authors",
-  [WavesOverviewType.AuthorYouHaveRepped]: "Waves from Authors You Have Repped",
-  [WavesOverviewType.MostDropped]: "Most Dropped",
-  [WavesOverviewType.MostDroppedByYou]: "Most Dropped by You",
-  [WavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
-  [WavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped by You",
+const LABELS: Record<ApiWavesOverviewType, string> = {
+  [ApiWavesOverviewType.Latest]: "Latest",
+  [ApiWavesOverviewType.MostSubscribed]: "Most Followed",
+  [ApiWavesOverviewType.HighLevelAuthor]: "High Level Authors",
+  [ApiWavesOverviewType.AuthorYouHaveRepped]:
+    "Waves from Authors You Have Repped",
+  [ApiWavesOverviewType.MostDropped]: "Most Dropped",
+  [ApiWavesOverviewType.MostDroppedByYou]: "Most Dropped by You",
+  [ApiWavesOverviewType.RecentlyDroppedTo]: "Recently Dropped",
+  [ApiWavesOverviewType.RecentlyDroppedToByYou]: "Recently Dropped by You",
 };
 
 const SHOW_ALL_REQUEST_SIZE = 12;
@@ -31,9 +32,9 @@ export default function WavesListWrapper({
   showAllType,
   setShowAllType,
 }: {
-  readonly overviewType: WavesOverviewType;
-  readonly showAllType: WavesOverviewType | null;
-  readonly setShowAllType: (type: WavesOverviewType | null) => void;
+  readonly overviewType: ApiWavesOverviewType;
+  readonly showAllType: ApiWavesOverviewType | null;
+  readonly setShowAllType: (type: ApiWavesOverviewType | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isShowAll = showAllType === overviewType;
@@ -74,7 +75,7 @@ export default function WavesListWrapper({
         offset: `${pageParam}`,
         type: params.type,
       };
-      return await commonApiFetch<Wave[]>({
+      return await commonApiFetch<ApiWave[]>({
         endpoint: `waves-overview`,
         params: queryParams,
       });
@@ -99,7 +100,7 @@ export default function WavesListWrapper({
         offset: `${pageParam}`,
         type: params.type,
       };
-      return await commonApiFetch<Wave[]>({
+      return await commonApiFetch<ApiWave[]>({
         endpoint: `public/waves-overview`,
         params: queryParams,
       });
@@ -109,14 +110,14 @@ export default function WavesListWrapper({
     enabled: usePublicWaves,
   });
 
-  const getWaves = (): Wave[] => {
+  const getWaves = (): ApiWave[] => {
     if (usePublicWaves) {
       return wavesPublic?.pages.flat() ?? [];
     }
     return wavesAuth?.pages.flat() ?? [];
   };
 
-  const [waves, setWaves] = useState<Wave[]>(getWaves());
+  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
   useEffect(
     () => setWaves(getWaves()),
     [wavesAuth, wavesPublic, usePublicWaves]
@@ -182,10 +183,16 @@ export default function WavesListWrapper({
           <button
             onClick={onShowAll}
             className={`tw-group tw-whitespace-nowrap tw-bg-transparent tw-border-none tw-text-iron-400 hover:tw-text-iron-50 tw-text-sm tw-font-semibold tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center ${
-              !isShowAll ? 'hover:tw-translate-x-[-8px] -tw-mr-4' : ''
+              !isShowAll ? "hover:tw-translate-x-[-8px] -tw-mr-4" : ""
             }`}
           >
-            <span className={`${!isShowAll ? 'group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out' : ''}`}>
+            <span
+              className={`${
+                !isShowAll
+                  ? "group-hover:tw-translate-x-[-4px] tw-transition-transform tw-duration-300 tw-ease-out"
+                  : ""
+              }`}
+            >
               {isShowAll ? "Show less" : "Show all"}
             </span>
             {!isShowAll && (

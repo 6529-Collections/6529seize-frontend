@@ -1,37 +1,37 @@
-import { Drop } from "../generated/models/Drop";
-import { DropVote } from "../generated/models/DropVote";
-import { FeedItemType } from "../generated/models/FeedItemType";
-import { NotificationCause } from "../generated/models/NotificationCause";
-import { NotificationsResponse } from "../generated/models/NotificationsResponse";
-import { ProfileMin } from "../generated/models/ProfileMin";
-import { Wave } from "../generated/models/Wave";
+import { ApiDrop } from "../generated/models/ApiDrop";
+import { ApiDropVote } from "../generated/models/ApiDropVote";
+import { ApiFeedItemType } from "../generated/models/ApiFeedItemType";
+import { ApiNotificationCause } from "../generated/models/ApiNotificationCause";
+import { ApiNotificationsResponse } from "../generated/models/ApiNotificationsResponse";
+import { ApiProfileMin } from "../generated/models/ApiProfileMin";
+import { ApiWave } from "../generated/models/ApiWave";
 
 export type IFeedItemWaveCreated = {
   readonly serial_no: number;
-  readonly item: Wave;
-  readonly type: FeedItemType.WaveCreated;
+  readonly item: ApiWave;
+  readonly type: ApiFeedItemType.WaveCreated;
 };
 
 export type IFeedItemDropCreated = {
   readonly serial_no: number;
-  readonly item: Drop;
-  readonly type: FeedItemType.DropCreated;
+  readonly item: ApiDrop;
+  readonly type: ApiFeedItemType.DropCreated;
 };
 
 export type IFeedItemDropRepliedItem = {
-  readonly drop: Drop;
-  readonly reply: Drop;
+  readonly drop: ApiDrop;
+  readonly reply: ApiDrop;
 };
 
 export type IFeedItemDropReplied = {
   readonly serial_no: number;
   readonly item: IFeedItemDropRepliedItem;
-  readonly type: FeedItemType.DropReplied;
+  readonly type: ApiFeedItemType.DropReplied;
 };
 
 export type IFeedItemDropVotedItem = {
-  readonly drop: Drop;
-  readonly vote: DropVote;
+  readonly drop: ApiDrop;
+  readonly vote: ApiDropVote;
 };
 
 
@@ -42,28 +42,28 @@ export type TypedFeedItem =
 
 export type INotificationIdentitySubscribed = {
   readonly id: number;
-  readonly cause: NotificationCause.IdentitySubscribed;
+  readonly cause: ApiNotificationCause.IdentitySubscribed;
   readonly created_at: number;
   readonly read_at: number | null;
-  readonly related_identity: ProfileMin;
+  readonly related_identity: ApiProfileMin;
 };
 
 export type INotificationIdentityMentioned = {
   readonly id: number;
-  readonly cause: NotificationCause.IdentityMentioned;
+  readonly cause: ApiNotificationCause.IdentityMentioned;
   readonly created_at: number;
   readonly read_at: number | null;
-  readonly related_identity: ProfileMin;
-  readonly related_drops: Array<Drop>;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
 };
 
 export type INotificationDropVoted = {
   readonly id: number;
-  readonly cause: NotificationCause.DropVoted;
+  readonly cause: ApiNotificationCause.DropVoted;
   readonly created_at: number;
   readonly read_at: number | null;
-  readonly related_identity: ProfileMin;
-  readonly related_drops: Array<Drop>;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
   readonly additional_context: {
     readonly vote: number;
   };
@@ -71,11 +71,11 @@ export type INotificationDropVoted = {
 
 export type INotificationDropQuoted = {
   readonly id: number;
-  readonly cause: NotificationCause.DropQuoted;
+  readonly cause: ApiNotificationCause.DropQuoted;
   readonly created_at: number;
   readonly read_at: number | null;
-  readonly related_identity: ProfileMin;
-  readonly related_drops: Array<Drop>;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
   readonly additional_context: {
     readonly quote_drop_id: string;
     readonly quote_drop_part: string;
@@ -86,11 +86,11 @@ export type INotificationDropQuoted = {
 
 export type INotificationDropReplied = {
   readonly id: number;
-  readonly cause: NotificationCause.DropReplied;
+  readonly cause: ApiNotificationCause.DropReplied;
   readonly created_at: number;
   readonly read_at: number | null;
-  readonly related_identity: ProfileMin;
-  readonly related_drops: Array<Drop>;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
   readonly additional_context: {
     readonly reply_drop_id: string;
     readonly replied_drop_id: string;
@@ -106,6 +106,6 @@ export type TypedNotification =
   | INotificationDropReplied;
 
 export interface TypedNotificationsResponse
-  extends Omit<NotificationsResponse, "notifications"> {
+  extends Omit<ApiNotificationsResponse, "notifications"> {
   readonly notifications: TypedNotification[];
 }

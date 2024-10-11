@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
-import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import ProxyCreateActionSelectType from "./select-type/ProxyCreateActionSelectType";
 import CommonChangeAnimation from "../../../../utils/animation/CommonChangeAnimation";
-import { ProfileProxyActionType } from "../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
 import ProxyCreateActionConfig from "./config/ProxyCreateActionConfig";
 import { CreateProxyAction } from "../../../../../entities/IProxy";
 import { useMutation } from "@tanstack/react-query";
@@ -15,22 +15,20 @@ export default function ProxyCreateAction({
   onActionCreated,
   onCancel,
 }: {
-  readonly profileProxy: ProfileProxy;
+  readonly profileProxy: ApiProfileProxy;
   readonly onActionCreated: () => void;
   readonly onCancel?: () => void;
 }) {
-
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);
   const [selectedActionType, setSelectedActionType] =
-    useState<ProfileProxyActionType | null>(null);
-
+    useState<ApiProfileProxyActionType | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
 
   const createProxyActionMutation = useMutation({
     mutationFn: async (action: CreateProxyAction) => {
-      return await commonApiPost<CreateProxyAction, ProfileProxy>({
+      return await commonApiPost<CreateProxyAction, ApiProfileProxy>({
         endpoint: `proxies/${profileProxy.id}/actions`,
         body: action,
       });

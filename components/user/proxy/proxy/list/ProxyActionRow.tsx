@@ -1,5 +1,5 @@
-import { ProfileProxyAction } from "../../../../../generated/models/ProfileProxyAction";
-import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
+import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
+import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { useState } from "react";
 import ProxyActionRowDataMode from "./ProxyActionRowDataMode";
@@ -19,8 +19,8 @@ export default function ProxyActionRow({
   profile,
   isSelf,
 }: {
-  readonly action: ProfileProxyAction;
-  readonly profileProxy: ProfileProxy;
+  readonly action: ApiProfileProxyAction;
+  readonly profileProxy: ApiProfileProxy;
   readonly profile: IProfileAndConsolidations;
   readonly isSelf: boolean;
 }) {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CreateWaveDatesEndDateSelectPeriod from "./CreateWaveDatesEndDateSelectPeriod";
 import { Period } from "../../../../../helpers/Types";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
 import CreateWaveDatesEndDateSetTime from "./CreateWaveDatesEndDateSetTime";
 import CreateWaveDatesEndDateHeader from "./CreateWaveDatesEndDateHeader";
@@ -14,12 +14,12 @@ export default function CreateWaveDatesEndDate({
   errors,
   onEndTimestampChange,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly startTimestamp: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onEndTimestampChange: (timestamp: number | null) => void;
 }) {
-  const endDateIsOptional = waveType !== WaveType.Rank;
+  const endDateIsOptional = waveType !== ApiWaveType.Rank;
   const [time, setTime] = useState<number | null>(null);
   const [period, setPeriod] = useState<Period | null>(null);
 

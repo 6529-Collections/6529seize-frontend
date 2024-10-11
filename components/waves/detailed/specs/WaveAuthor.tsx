@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
 
-export default function WaveAuthor({ wave }: { readonly wave: Wave }) {
+export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
   return (
     <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
       <span className="tw-font-medium tw-text-iron-500">Created by</span>

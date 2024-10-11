@@ -8,7 +8,7 @@ import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 
@@ -62,7 +62,7 @@ interface WaveDetailedDropProps {
     partId: number;
   }) => void;
   readonly onReplyClick: (serialNo: number) => void;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDrop = ({

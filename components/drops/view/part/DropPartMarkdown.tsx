@@ -8,26 +8,26 @@ import { DropContentPartType } from "../item/content/DropListItemContent";
 import DropListItemContentPart, {
   DropListItemContentPartProps,
 } from "../item/content/DropListItemContentPart";
-import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
-import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
+import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDetailedDropQuoteWithDropId from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithDropId";
 import WaveDetailedDropQuoteWithSerialNo from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithSerialNo";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import {
   parseSeizeLink,
   SeizeLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
 
 export interface DropPartMarkdownProps {
-  readonly mentionedUsers: Array<DropMentionedUser>;
-  readonly referencedNfts: Array<DropReferencedNFT>;
+  readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
   readonly onImageLoaded: () => void;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md";
 }
 
@@ -55,8 +55,8 @@ function DropPartMarkdown({
     onImageLoaded,
   }: {
     readonly content: ReactNode | undefined;
-    readonly mentionedUsers: Array<DropMentionedUser>;
-    readonly referencedNfts: Array<DropReferencedNFT>;
+    readonly mentionedUsers: Array<ApiDropMentionedUser>;
+    readonly referencedNfts: Array<ApiDropReferencedNFT>;
     readonly onImageLoaded: () => void;
   }) => {
     if (typeof content !== "string") {
@@ -127,8 +127,8 @@ function DropPartMarkdown({
     onImageLoaded,
   }: {
     readonly content: ReactNode | undefined;
-    readonly mentionedUsers: Array<DropMentionedUser>;
-    readonly referencedNfts: Array<DropReferencedNFT>;
+    readonly mentionedUsers: Array<ApiDropMentionedUser>;
+    readonly referencedNfts: Array<ApiDropReferencedNFT>;
     readonly onImageLoaded: () => void;
   }) => {
     if (typeof content === "string") {
@@ -238,7 +238,7 @@ function DropPartMarkdown({
 
   const renderSeizeQuote = (
     seizeLinkInfo: SeizeLinkInfo,
-    onQuoteClick: (drop: Drop) => void
+    onQuoteClick: (drop: ApiDrop) => void
   ) => {
     const { waveId, serialNo, dropId } = seizeLinkInfo;
 

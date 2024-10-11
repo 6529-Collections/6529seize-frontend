@@ -7,7 +7,7 @@ import {
 import UserPageRepRepsTop from "./UserPageRepRepsTop";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "../../../auth/Auth";
-import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 
 const TOP_REPS_COUNT = 5;
 
@@ -59,7 +59,7 @@ export default function UserPageRepReps({
         return false;
       }
       return activeProfileProxy.actions.some(
-        (action) => action.action_type === ProfileProxyActionType.AllocateRep
+        (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
       );
     }
     if (myProfile.profile.handle === targetProfile.profile?.handle) {

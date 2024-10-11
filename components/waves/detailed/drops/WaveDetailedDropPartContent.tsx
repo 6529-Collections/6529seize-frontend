@@ -1,25 +1,25 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import { DropPart } from "../../../../generated/models/DropPart";
+import { ApiDropPart } from "../../../../generated/models/ApiDropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
-import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
+import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ReferencedNft } from "../../../../entities/IDrop";
-import { WaveMin } from "../../../../generated/models/WaveMin";
+import { ApiWaveMin } from "../../../../generated/models/ApiWaveMin";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDetailedDropQuoteWithDropId from "./WaveDetailedDropQuoteWithDropId";
-import { Drop } from "../../../../generated/models/ObjectSerializer";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropPartContentProps {
-  readonly mentionedUsers: DropMentionedUser[];
+  readonly mentionedUsers: ApiDropMentionedUser[];
   readonly referencedNfts: ReferencedNft[];
-  readonly wave: WaveMin;
-  readonly activePart: DropPart;
+  readonly wave: ApiWaveMin;
+  readonly activePart: ApiDropPart;
   readonly havePreviousPart: boolean;
   readonly haveNextPart: boolean;
   readonly isStorm: boolean;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDropPartContent: React.FC<

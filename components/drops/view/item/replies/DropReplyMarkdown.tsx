@@ -1,6 +1,6 @@
 import { AnchorHTMLAttributes, ClassAttributes, ReactNode } from "react";
-import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
-import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
+import { ApiDropMentionedUser } from "../../../../../generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "../../../../../generated/models/ApiDropReferencedNFT";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import DropListItemContentPart, { DropListItemContentPartProps } from "../content/DropListItemContentPart";
 import { DropContentPartType } from "../content/DropListItemContent";
@@ -15,8 +15,8 @@ export default function DropReplyMarkdown({
   partContent,
   onImageLoaded,
 }: {
-  readonly mentionedUsers: Array<DropMentionedUser>;
-  readonly referencedNfts: Array<DropReferencedNFT>;
+  readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
   readonly onImageLoaded: () => void;
 }) {
@@ -27,8 +27,8 @@ export default function DropReplyMarkdown({
     onImageLoaded,
   }: {
     readonly content: ReactNode | undefined;
-    readonly mentionedUsers: Array<DropMentionedUser>;
-    readonly referencedNfts: Array<DropReferencedNFT>;
+    readonly mentionedUsers: Array<ApiDropMentionedUser>;
+    readonly referencedNfts: Array<ApiDropReferencedNFT>;
     readonly onImageLoaded: () => void;
   }) => {
     if (typeof content !== "string") {

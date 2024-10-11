@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Wave } from "../../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import CommonAnimationWrapper from "../../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../../utils/animation/CommonAnimationOpacity";
 import WaveDeleteModal from "./WaveDeleteModal";
 
-export default function WaveDelete({ wave }: { readonly wave: Wave }) {
+export default function WaveDelete({ wave }: { readonly wave: ApiWave }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   return (
     <div>

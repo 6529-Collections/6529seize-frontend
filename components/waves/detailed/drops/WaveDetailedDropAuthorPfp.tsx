@@ -1,8 +1,8 @@
 import React from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropAuthorPfpProps {
-  drop: Drop;
+  readonly drop: ApiDrop;
 }
 
 const WaveDetailedDropAuthorPfp: React.FC<WaveDetailedDropAuthorPfpProps> = ({
