@@ -700,14 +700,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
+    if (!activeDrop) {
+      return;
+    }
     const timer = setTimeout(() => {
       createDropInputRef.current?.focus();
     }, 100);

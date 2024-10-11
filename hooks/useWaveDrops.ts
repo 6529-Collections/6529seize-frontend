@@ -55,6 +55,7 @@ export function useWaveDrops(
   >(undefined);
   const isTabVisible = useTabVisibility();
 
+
   const queryKey = [
     QueryKey.DROPS,
     {
@@ -63,6 +64,29 @@ export function useWaveDrops(
       dropId: null,
     },
   ];
+
+  useEffect(() => {
+    queryClient.prefetchInfiniteQuery({
+      queryKey,
+      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+        const params: Record<string, string> = {
+          limit: WAVE_DROPS_PARAMS.limit.toString(),
+        };
+
+        if (pageParam) {
+          params.serial_no_less_than = `${pageParam}`;
+        }
+        return await commonApiFetch<WaveDropsFeed>({
+          endpoint: `waves/${wave.id}/drops`,
+          params,
+        });
+      },
+      initialPageParam: null,
+      getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
+      pages: 3,
+      staleTime: 60000,
+    });
+  }, [wave])
 
   const {
     data,

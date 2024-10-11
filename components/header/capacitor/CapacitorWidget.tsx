@@ -16,7 +16,7 @@ import useCapacitor, {
 } from "../../../hooks/useCapacitor";
 
 export default function CapacitorWidget() {
-  const capacitor = useCapacitor();
+const capacitor = useCapacitor();
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
     useNavigationHistory();
 

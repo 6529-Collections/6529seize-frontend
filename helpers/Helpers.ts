@@ -169,36 +169,56 @@ export function areEqualAddresses(w1: any, w2: any) {
   return false;
 }
 
-export const fullScreenSupported = () => {
+export const fullScreenSupported = (): boolean => {
   const doc: any = document;
   const el: any = doc.body;
   const check =
-    el.requestFullscreen !== "undefined" ||
-    el.mozRequestFullScreen !== "undefined" ||
-    el.webkitRequestFullscreen !== "undefined" ||
-    el.msRequestFullscreen !== "undefined" ||
-    doc.exitFullscreen !== "undefined" ||
-    doc.mozCancelFullScreen !== "undefined" ||
-    doc.webkitExitFullscreen !== "undefined";
+    typeof el.requestFullscreen !== "undefined" ||
+    typeof el.mozRequestFullScreen !== "undefined" ||
+    typeof el.webkitRequestFullscreen !== "undefined" ||
+    typeof el.msRequestFullscreen !== "undefined" ||
+    typeof doc.exitFullscreen !== "undefined" ||
+    typeof doc.mozCancelFullScreen !== "undefined" ||
+    typeof doc.webkitExitFullscreen !== "undefined" ||
+    typeof doc.msExitFullscreen !== "undefined";
 
   return check;
 };
 
-export function enterArtFullScreen(elementId: string) {
+export const isInFullScreen = (): boolean => {
+  const doc: any = document;
+  return !!(
+    doc.fullscreenElement ||
+    doc.mozFullScreenElement ||
+    doc.webkitFullscreenElement ||
+    doc.msFullscreenElement
+  );
+};
+
+export const enterArtFullScreen = async (elementId: string): Promise<void> => {
   const element: any = document.getElementById(elementId);
 
-  if (!element) return;
-
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  } else if (element.mozRequestFullScreen) {
-    element.mozRequestFullScreen();
-  } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
-  } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen();
+  if (!element) {
+    console.error(`Element with ID '${elementId}' not found.`);
+    return;
   }
-}
+
+  const request =
+    element.requestFullscreen ||
+    element.mozRequestFullScreen ||
+    element.webkitRequestFullscreen ||
+    element.msRequestFullscreen;
+
+  if (request) {
+    try {
+      await request.call(element);
+    } catch (err) {
+      console.error(`Error attempting to enable fullscreen mode: ${err}`);
+    }
+  } else {
+    console.warn("Fullscreen API is not supported by this browser.");
+  }
+};
 
 export function nextTdh() {
   const now = new Date();

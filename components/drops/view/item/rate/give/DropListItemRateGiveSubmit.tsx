@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useCallback, useRef, useEffect } from "react";
 import { DropRateChangeRequest } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../services/api/common-api";
@@ -14,6 +14,7 @@ const DropListItemRateGiveClap = dynamic(
 );
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
+const DEBOUNCE_DELAY = 300; // milliseconds
 
 export default function DropListItemRateGiveSubmit({
   rate,
@@ -35,6 +36,8 @@ export default function DropListItemRateGiveSubmit({
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropChange } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState<boolean>(false);
+  const [clickCount, setClickCount] = useState<number>(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -47,7 +50,7 @@ export default function DropListItemRateGiveSubmit({
       }),
     onSuccess: (response: Drop) => {
       setToast({
-        message: "Voted successfully.",
+        message: `Voted successfully`,
         type: "success",
       });
       onDropChange({
@@ -64,10 +67,11 @@ export default function DropListItemRateGiveSubmit({
     },
     onSettled: () => {
       setMutating(false);
+      setClickCount(0);
     },
   });
 
-  const onRateSubmit = async () => {
+  const submitRate = useCallback(async () => {
     if (!canVote) {
       setToast({
         message: VOTE_STATE_ERRORS[voteState],
@@ -75,8 +79,7 @@ export default function DropListItemRateGiveSubmit({
       });
       return;
     }
-    if (!rate) return;
-    if (mutating) return;
+    if (!rate || mutating) return;
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -85,13 +88,33 @@ export default function DropListItemRateGiveSubmit({
     }
 
     const previousRate = drop.context_profile_context?.rating ?? 0;
-
-    const newRate = previousRate + rate;
+    const rateIncrement = rate * clickCount;
+    const newRate = previousRate + rateIncrement;
 
     await rateChangeMutation.mutateAsync({
       rate: newRate,
       category: DEFAULT_DROP_RATE_CATEGORY,
     });
+  }, [canVote, rate, mutating, requestAuth, drop, clickCount, rateChangeMutation, voteState, setToast]);
+
+  useEffect(() => {
+    if (clickCount > 0 && !mutating) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        submitRate();
+      }, DEBOUNCE_DELAY);
+    }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [clickCount, mutating, submitRate]);
+
+  const onRateSubmit = () => {
+    setClickCount((prevCount) => prevCount + 1);
   };
 
   return (

@@ -66,12 +66,12 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
       onClick={handleCloseModal}
     >
-      <div className="tw-fixed tw-inset-0 tw-bg-iron-900 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-60 tw-backdrop-blur-[1px]"></div>
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
-        <div className="tw-relative tw-max-w-[90vw] tw-max-h-[90vh] tw-my-8">
+        <div className="tw-relative tw-max-w-[95vw] tw-max-h-[95vh] tw-m-4">
           <button
             onClick={handleCloseModal}
-            className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-10 tw-right-0 lg:tw-top-0 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-0 lg:tw-top-0 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
             aria-label="Close modal"
           >
             <svg
@@ -94,7 +94,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
             <img
               src={src}
               alt={alt}
-              className="tw-max-w-[90vw] tw-max-h-[calc(90vh-30px)] tw-object-contain"
+              className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
               onClick={(e) => e.stopPropagation()}
             />
             <button

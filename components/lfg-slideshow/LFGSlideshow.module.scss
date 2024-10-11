@@ -14,9 +14,16 @@
   overflow: hidden;
 }
 
-.slideButton {
+.slideButtons {
   position: absolute;
   top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.slideButton {
   color: white;
   cursor: pointer;
   z-index: 1100;
@@ -27,14 +34,6 @@
   &:hover {
     color: $off-white;
   }
-}
-
-.next {
-  right: 60px;
-}
-
-.close {
-  right: 20px;
 }
 
 .slide {

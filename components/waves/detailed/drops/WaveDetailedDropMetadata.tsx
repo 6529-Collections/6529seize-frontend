@@ -3,6 +3,7 @@ import Tippy from "@tippyjs/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { DropMetadata } from "../../../../entities/IDrop";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface WaveDetailedDropMetadataProps {
   readonly metadata: DropMetadata[];
@@ -13,6 +14,7 @@ export default function WaveDetailedDropMetadata({
 }: WaveDetailedDropMetadataProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobileDevice();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -31,6 +33,7 @@ export default function WaveDetailedDropMetadata({
             </span>
           </div>
         }
+        disabled={isMobile}
       >
         <button
           type="button"

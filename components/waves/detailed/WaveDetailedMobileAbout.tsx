@@ -10,6 +10,8 @@ interface WaveDetailedMobileAboutProps {
   readonly showRequiredTypes: boolean;
   readonly setView: (view: WaveDetailedView) => void;
   readonly setActiveView: (view: WaveDetailedMobileView) => void;
+  readonly onWaveChange: (wave: Wave) => void;
+  readonly setIsLoading: (isLoading: boolean) => void;
 }
 
 const WaveDetailedMobileAbout: React.FC<WaveDetailedMobileAboutProps> = ({
@@ -18,6 +20,8 @@ const WaveDetailedMobileAbout: React.FC<WaveDetailedMobileAboutProps> = ({
   showRequiredTypes,
   setView,
   setActiveView,
+  onWaveChange,
+  setIsLoading,
 }) => {
   return (
     <div className="tw-px-4 md:tw-px-2 tw-mt-4">
@@ -28,6 +32,8 @@ const WaveDetailedMobileAbout: React.FC<WaveDetailedMobileAboutProps> = ({
           setActiveView={setActiveView}
           showRequiredMetadata={showRequiredMetadata}
           showRequiredTypes={showRequiredTypes}
+          onWaveChange={onWaveChange}
+          setIsLoading={setIsLoading}
         />
       </div>
     </div>

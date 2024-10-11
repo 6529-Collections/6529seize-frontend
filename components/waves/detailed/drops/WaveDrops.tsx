@@ -127,9 +127,8 @@ export default function WaveDrops({
       if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
         found = true;
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsScrolling(false);
         scrollToSerialNo("smooth");
-
+        setIsScrolling(false);
         setSerialNo(null);
       } else {
         scrollToTop();

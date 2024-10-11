@@ -7,7 +7,7 @@ function DropListItemContentMediaVideo({
   readonly src: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const capacitor = useCapacitor();
+const capacitor = useCapacitor();
 
   const handleVideoClick = useCallback((event: React.MouseEvent<HTMLVideoElement>) => {
     if (videoRef.current) {

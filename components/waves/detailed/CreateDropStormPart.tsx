@@ -32,13 +32,13 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
           onQuoteClick={() => {}}
         />
       </div>
-      <div className="tw-absolute tw-right-0 tw-top-1 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
+      <div className="tw-absolute tw-right-0 tw-top-1 group-hover:tw-block tw-hidden touch-visible tw-transition tw-duration-300 tw-ease-linear">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
             type="button"
             onClick={() => onRemovePart(partIndex)}
             aria-label="Remove storm part"
-            className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-900 tw-ring-iron-700 hover:tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-900 tw-ring-iron-700 active:tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out"
           >
             <svg
               className="tw-h-4 tw-w-4 tw-text-error tw-transition tw-duration-300 tw-ease-out"
