@@ -42,18 +42,23 @@ export default function MyStreamLayout({
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
+        <style>{`
+        body {
+          overflow: hidden !important;
+        }
+      `}</style>
       </Head>
 
       <div className="tailwind-scope lg:tw-min-h-screen tw-bg-black">
         <div>
-          <Header />
+          <Header isSmall={true} />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
 
         {showWaves && (
           <>
-            <div className="tw-pt-8 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-              <div className="tw-max-w-5xl tw-mx-auto">
+            <div>
+              {/* <div className="tw-max-w-5xl tw-mx-auto">
                 <div className="tw-rounded-xl tw-bg-white/[0.02] tw-p-4 tw-text-iron-500 tw-text-[13px] tw-leading-5 tw-mb-4">
                   <div className="tw-inline-flex tw-gap-x-3">
                     <svg
@@ -80,7 +85,7 @@ export default function MyStreamLayout({
                   </div>
                 </div>
                 <MyStreamLayoutTabs />
-              </div>
+              </div> */}
             </div>
             <div className="tw-h-full tw-w-full">
               <Brain>
