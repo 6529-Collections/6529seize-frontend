@@ -21,6 +21,7 @@ const LFGSlideshow: React.FC<{
 }> = ({ isOpen, contract, setIsOpen }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bodyOverflow, setBodyOverflow] = useState<string>();
+  const [isMuted, setIsMuted] = useState(false);
 
   const [media, setMedia] = useState<NftMedia[]>([]);
 
@@ -117,7 +118,12 @@ const LFGSlideshow: React.FC<{
           nextSlide();
         };
 
+        const handleVolumeChange = () => {
+          setIsMuted(videoElement.muted);
+        };
+
         videoElement.addEventListener("ended", handleEnded);
+        videoElement.addEventListener("volumechange", handleVolumeChange);
         return () => {
           videoElement.removeEventListener("ended", handleEnded);
         };
@@ -164,6 +170,7 @@ const LFGSlideshow: React.FC<{
             id={VIDEO_ID}
             autoPlay
             controls
+            muted={isMuted}
             src={media[currentIndex].animation}
             poster={media[currentIndex].image}>
             Your browser does not support the video tag.
