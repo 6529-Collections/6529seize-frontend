@@ -8,7 +8,7 @@ import { Page } from "../../../helpers/Types";
 import { CommunityMembersQuery } from "../../../pages/network/index";
 import { SortDirection } from "../../../entities/ISort";
 import { useEffect, useState } from "react";
-import { GroupFull } from "../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import { useDispatch } from "react-redux";
 import { setActiveGroupId } from "../../../store/groupSlice";
 import { CommunityMembersSortOption } from "../../../enums";
@@ -18,10 +18,10 @@ export default function GroupsSelectActiveGroup({
 }: {
   readonly activeGroupId: string;
 }) {
-  const { data } = useQuery<GroupFull>({
+  const { data } = useQuery<ApiGroupFull>({
     queryKey: [QueryKey.GROUP, activeGroupId],
     queryFn: async () =>
-      await commonApiFetch<GroupFull>({
+      await commonApiFetch<ApiGroupFull>({
         endpoint: `groups/${activeGroupId}`,
       }),
     placeholderData: keepPreviousData,
@@ -87,7 +87,8 @@ export default function GroupsSelectActiveGroup({
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-200">
+            className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-200"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

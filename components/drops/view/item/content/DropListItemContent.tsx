@@ -1,4 +1,4 @@
-import { Drop } from "../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
 import DropPartWrapper from "../../part/DropPartWrapper";
@@ -14,7 +14,7 @@ export enum DropContentPartType {
 }
 
 interface DropListItemContentProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly showFull?: boolean;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;

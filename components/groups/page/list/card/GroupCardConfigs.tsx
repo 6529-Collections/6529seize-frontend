@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { GroupDescriptionType } from "../../../../../entities/IGroup";
-import { GroupDescription } from "../../../../../generated/models/GroupDescription";
-import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";
-import { GroupFull } from "../../../../../generated/models/GroupFull";
+import { ApiGroupDescription } from "../../../../../generated/models/ApiGroupDescription";
+import { ApiGroupFilterDirection } from "../../../../../generated/models/ApiGroupFilterDirection";
+import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -13,11 +13,11 @@ export interface GroupCardConfigProps {
 export default function GroupCardConfigs({
   group,
 }: {
-  readonly group: GroupFull;
+  readonly group: ApiGroupFull;
 }) {
-  const directionLabels: Record<GroupFilterDirection, string> = {
-    [GroupFilterDirection.Received]: "from",
-    [GroupFilterDirection.Sent]: "to",
+  const directionLabels: Record<ApiGroupFilterDirection, string> = {
+    [ApiGroupFilterDirection.Received]: "from",
+    [ApiGroupFilterDirection.Sent]: "to",
   };
 
   const getMinMaxValue = ({
@@ -44,7 +44,7 @@ export default function GroupCardConfigs({
     direction,
   }: {
     readonly identity: string | null;
-    readonly direction: GroupFilterDirection | null;
+    readonly direction: ApiGroupFilterDirection | null;
   }): string | null => {
     if (!identity) {
       return null;
@@ -55,7 +55,7 @@ export default function GroupCardConfigs({
   };
 
   const getTdhConfig = (
-    tdh: GroupDescription["tdh"]
+    tdh: ApiGroupDescription["tdh"]
   ): GroupCardConfigProps | null => {
     const value = getMinMaxValue({ min: tdh.min, max: tdh.max });
     if (!value) {
@@ -68,7 +68,7 @@ export default function GroupCardConfigs({
   };
 
   const getRepConfig = (
-    rep: GroupDescription["rep"]
+    rep: ApiGroupDescription["rep"]
   ): GroupCardConfigProps | null => {
     const value = getMinMaxValue({ min: rep.min, max: rep.max });
     const category = rep.category?.length ? `category: ${rep.category}` : null;
@@ -87,7 +87,7 @@ export default function GroupCardConfigs({
   };
 
   const getCicConfig = (
-    cic: GroupDescription["cic"]
+    cic: ApiGroupDescription["cic"]
   ): GroupCardConfigProps | null => {
     const value = getMinMaxValue({ min: cic.min, max: cic.max });
     const identity = getIdentityValue({
@@ -106,7 +106,7 @@ export default function GroupCardConfigs({
   };
 
   const getLevelConfig = (
-    level: GroupDescription["level"]
+    level: ApiGroupDescription["level"]
   ): GroupCardConfigProps | null => {
     const value = getMinMaxValue({ min: level.min, max: level.max });
     if (!value) {
@@ -119,7 +119,7 @@ export default function GroupCardConfigs({
   };
 
   const getWalletsConfig = (
-    wallet_group_wallets_count: GroupDescription["identity_group_identities_count"]
+    wallet_group_wallets_count: ApiGroupDescription["identity_group_identities_count"]
   ): GroupCardConfigProps | null => {
     if (!wallet_group_wallets_count) {
       return null;
@@ -197,13 +197,15 @@ export default function GroupCardConfigs({
               e.stopPropagation();
               scrollContainer("left");
             }}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out">
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out"
+          >
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -217,7 +219,8 @@ export default function GroupCardConfigs({
         <div
           className="tw-flex tw-items-center tw-gap-x-3 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
           ref={containerRef}
-          onScroll={checkForHiddenContent}>
+          onScroll={checkForHiddenContent}
+        >
           {configs.map((config, i) => (
             <GroupCardConfig config={config} key={config.key} />
           ))}
@@ -228,13 +231,15 @@ export default function GroupCardConfigs({
               e.stopPropagation();
               scrollContainer("right");
             }}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out">
+            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[5] tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out"
+          >
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"

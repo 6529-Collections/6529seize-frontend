@@ -1,5 +1,5 @@
 import React from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import Tippy from "@tippyjs/react";
 import {
   getScaledImageUri,
@@ -8,7 +8,7 @@ import {
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 interface WaveDetailedDropRatingsProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
 }
 
 const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({

@@ -5,7 +5,7 @@ import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import dynamic from "next/dynamic";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { DropVoteState, VOTE_STATE_ERRORS } from "../../DropsListItem";
 
 const DropListItemRateGiveClap = dynamic(
@@ -26,7 +26,7 @@ export default function DropListItemRateGiveSubmit({
   isMobile = false
 }: {
   readonly rate: number;
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly availableCredit: number;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
@@ -41,14 +41,14 @@ export default function DropListItemRateGiveSubmit({
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
-      await commonApiPost<DropRateChangeRequest, Drop>({
+      await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${drop.id}/ratings`,
         body: {
           rating: param.rate,
           category: param.category,
         },
       }),
-    onSuccess: (response: Drop) => {
+    onSuccess: (response: ApiDrop) => {
       setToast({
         message: `Voted successfully`,
         type: "success",

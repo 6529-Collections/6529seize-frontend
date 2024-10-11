@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import {
   getRandomColorWithSeed,
   numberWithCommas,
@@ -9,9 +9,9 @@ import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import Tippy from "@tippyjs/react";
-import 'tippy.js/dist/tippy.css';
+import "tippy.js/dist/tippy.css";
 
-export default function WaveItem({ wave }: { readonly wave: Wave }) {
+export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
   const banner1 =
     wave.author.banner1_color ?? getRandomColorWithSeed(wave.author.handle);
   const banner2 =
@@ -108,10 +108,7 @@ export default function WaveItem({ wave }: { readonly wave: Wave }) {
               </svg>
               <span className="tw-font-medium">Chat</span>
             </div>
-            <Tippy
-              content="Followers"
-              className="xl:tw-inline-block tw-hidden"
-            >
+            <Tippy content="Followers" className="xl:tw-inline-block tw-hidden">
               <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-50">
                 <svg
                   className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"

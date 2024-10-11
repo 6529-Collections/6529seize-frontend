@@ -4,7 +4,7 @@ import { NFTSearchResult } from "../../../../../header/header-search/HeaderSearc
 import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import GroupCreateNftSearchItemsContent from "./GroupCreateNftSearchItemsContent";
-import { GroupOwnsNft } from "../../../../../../generated/models/GroupOwnsNft";
+import { ApiGroupOwnsNft } from "../../../../../../generated/models/ApiGroupOwnsNft";
 
 export default function GroupCreateNftSearchItems({
   open,
@@ -14,7 +14,7 @@ export default function GroupCreateNftSearchItems({
 }: {
   readonly open: boolean;
   readonly searchCriteria: string | null;
-  readonly selected: GroupOwnsNft[];
+  readonly selected: ApiGroupOwnsNft[];
   readonly onSelect: (item: NFTSearchResult) => void;
 }) {
   const { isFetching, data: nfts } = useQuery({

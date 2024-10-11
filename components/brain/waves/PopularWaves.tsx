@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { WavesOverviewParams } from "../../../types/waves.types";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import WavesList, { WavesListType } from "./WavesList";
 
 export default function PopularWaves() {
@@ -23,7 +23,7 @@ export default function PopularWaves() {
   const getParams = (): Omit<WavesOverviewParams, "offset"> => {
     const paramsBody: Omit<WavesOverviewParams, "offset"> = {
       limit: 10,
-      type: WavesOverviewType.MostSubscribed,
+      type: ApiWavesOverviewType.MostSubscribed,
     };
 
     return paramsBody;
@@ -40,7 +40,7 @@ export default function PopularWaves() {
         type: params.type,
       };
 
-      return await commonApiFetch<Wave[]>({
+      return await commonApiFetch<ApiWave[]>({
         endpoint: `waves-overview`,
         params: queryParams,
       });
@@ -59,7 +59,7 @@ export default function PopularWaves() {
         type: params.type,
       };
 
-      return await commonApiFetch<Wave[]>({
+      return await commonApiFetch<ApiWave[]>({
         endpoint: `public/waves-overview`,
         params: queryParams,
       });
@@ -69,14 +69,14 @@ export default function PopularWaves() {
     enabled: usePublicWaves,
   });
 
-  const getWaves = (): Wave[] => {
+  const getWaves = (): ApiWave[] => {
     if (usePublicWaves) {
       return wavesPublic?.pages.flat() ?? [];
     }
     return wavesAuth?.pages.flat() ?? [];
   };
 
-  const [waves, setWaves] = useState<Wave[]>(getWaves());
+  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
   useEffect(
     () => setWaves(getWaves()),
     [wavesAuth, wavesPublic, usePublicWaves]

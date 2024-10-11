@@ -1,5 +1,5 @@
 import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
-import { GroupFull } from "../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
 import SelectGroupModal from "./SelectGroupModal";
 
@@ -10,7 +10,7 @@ export default function SelectGroupModalWrapper({
 }: {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onGroupSelect: (group: GroupFull) => void;
+  readonly onGroupSelect: (group: ApiGroupFull) => void;
 }) {
   return (
     <CommonAnimationWrapper mode="sync" initial={true}>

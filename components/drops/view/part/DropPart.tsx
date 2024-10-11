@@ -1,15 +1,15 @@
 import { ReactNode, memo, useRef, useState, useEffect } from "react";
 
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
-import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
-import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
+import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
 import Link from "next/link";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import DropPartMarkdown from "./DropPartMarkdown";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useRouter } from "next/router";
 
 export enum DropPartSize {
@@ -32,8 +32,8 @@ export interface DropPartPropsWave {
 export interface DropPartProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly dropTitle: string | null;
-  readonly mentionedUsers: Array<DropMentionedUser>;
-  readonly referencedNfts: Array<DropReferencedNFT>;
+  readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
   readonly partMedias: DropPartPropsMedia[];
   readonly createdAt: number;
@@ -49,7 +49,6 @@ export interface DropPartProps {
   readonly onNextPart?: () => void;
   readonly onPrevPart?: () => void;
   readonly onContentClick?: () => void;
-
 }
 
 const DropPart = memo(
@@ -129,14 +128,10 @@ const DropPart = memo(
       }
     };
 
-    const onQuoteClick = (drop: Drop) => {
-      router.push(
-        `/waves/${drop.wave.id}?drop=${drop.serial_no}`,
-        undefined,
-        {
-          shallow: true,
-        }
-      );
+    const onQuoteClick = (drop: ApiDrop) => {
+      router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`, undefined, {
+        shallow: true,
+      });
     };
 
     return (
@@ -270,7 +265,11 @@ const DropPart = memo(
                       />
                     </div>
                     {!!partMedias.length && (
-                      <div className={`${partContent ? "tw-mt-4" : "tw-mt-1"} tw-space-y-2`}>
+                      <div
+                        className={`${
+                          partContent ? "tw-mt-4" : "tw-mt-1"
+                        } tw-space-y-2`}
+                      >
                         {partMedias.map((media, i) => (
                           <DropListItemContentMedia
                             key={`part-${currentPartCount}-media-${i}-${media.mediaSrc}`}

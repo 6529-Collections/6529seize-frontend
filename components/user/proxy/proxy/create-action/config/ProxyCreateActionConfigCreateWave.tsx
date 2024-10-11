@@ -1,5 +1,5 @@
 import { CreateProxyCreateWaveAction } from "../../../../../../entities/IProxy";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigCreateWave({
   endTime,
@@ -12,7 +12,7 @@ export default function ProxyCreateActionConfigCreateWave({
 }) {
   const handleSubmit = () =>
     onSubmit({
-      action_type: ProfileProxyActionType.CreateWave,
+      action_type: ApiProfileProxyActionType.CreateWave,
       end_time: endTime,
     });
   return (

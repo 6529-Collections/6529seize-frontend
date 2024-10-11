@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Wave } from "../../../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../../../generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
 import WaveGroupRemove from "./WaveGroupRemove";
-import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupRemoveButton({
   wave,
   type,
   onEdit,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
+  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   return (

@@ -8,8 +8,8 @@ import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
 } from "../../../../helpers/waves/waves.constants";
-import { GroupFull } from "../../../../generated/models/GroupFull";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import CreateWaveGroupItem from "./CreateWaveGroupItem";
 import SelectGroupModalWrapper from "../../../utils/select-group/SelectGroupModalWrapper";
 
@@ -18,15 +18,15 @@ export default function CreateWaveGroup({
   groupType,
   onGroupSelect,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly groupType: CreateWaveGroupConfigType;
-  readonly onGroupSelect: (group: GroupFull | null) => void;
+  readonly onGroupSelect: (group: ApiGroupFull | null) => void;
 }) {
   const [selected, setSelected] = useState<CreateWaveGroupStatus>(
     CreateWaveGroupStatus.NONE
   );
 
-  const [selectedGroup, setSelectedGroup] = useState<GroupFull | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<ApiGroupFull | null>(null);
 
   const switchSelected = (selectedType: CreateWaveGroupStatus) => {
     setSelected(selectedType);
@@ -34,7 +34,7 @@ export default function CreateWaveGroup({
     onGroupSelect(null);
   };
 
-  const setGroup = (group: GroupFull) => {
+  const setGroup = (group: ApiGroupFull) => {
     onGroupSelect(group);
     setSelectedGroup(group);
     setSelected(CreateWaveGroupStatus.GROUP);

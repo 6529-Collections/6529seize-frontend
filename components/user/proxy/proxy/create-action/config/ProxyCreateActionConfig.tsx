@@ -3,7 +3,7 @@ import {
   CreateProxyAction,
   PROFILE_PROXY_ACTION_LABELS,
 } from "../../../../../../entities/IProxy";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 import ProxyCreateActionConfigAllocateCic from "./ProxyCreateActionConfigAllocateCic";
 import ProxyCreateActionConfigAllocateRep from "./ProxyCreateActionConfigAllocateRep";
 import ProxyCreateActionConfigCreateDropToWave from "./ProxyCreateActionConfigCreateDropToWave";
@@ -19,7 +19,7 @@ export default function ProxyCreateActionConfig({
   onSubmit,
   onCancel,
 }: {
-  readonly selectedActionType: ProfileProxyActionType;
+  readonly selectedActionType: ApiProfileProxyActionType;
   readonly submitting: boolean;
   readonly onSubmit: (action: CreateProxyAction) => void;
   readonly onCancel: () => void;
@@ -38,8 +38,8 @@ export default function ProxyCreateActionConfig({
     onSubmit(action);
   };
 
-  const components: Record<ProfileProxyActionType, JSX.Element> = {
-    [ProfileProxyActionType.AllocateRep]: (
+  const components: Record<ApiProfileProxyActionType, JSX.Element> = {
+    [ApiProfileProxyActionType.AllocateRep]: (
       <ProxyCreateActionConfigAllocateRep
         endTime={endTime}
         submitting={submitting}
@@ -47,7 +47,7 @@ export default function ProxyCreateActionConfig({
         onCancel={onCancel}
       />
     ),
-    [ProfileProxyActionType.AllocateCic]: (
+    [ApiProfileProxyActionType.AllocateCic]: (
       <ProxyCreateActionConfigAllocateCic
         endTime={endTime}
         submitting={submitting}
@@ -55,28 +55,28 @@ export default function ProxyCreateActionConfig({
         onCancel={onCancel}
       />
     ),
-    [ProfileProxyActionType.CreateWave]: (
+    [ApiProfileProxyActionType.CreateWave]: (
       <ProxyCreateActionConfigCreateWave
         endTime={endTime}
         onSubmit={submit}
         onCancel={onCancel}
       />
     ),
-    [ProfileProxyActionType.ReadWave]: (
+    [ApiProfileProxyActionType.ReadWave]: (
       <ProxyCreateActionConfigReadWave
         endTime={endTime}
         onSubmit={submit}
         onCancel={onCancel}
       />
     ),
-    [ProfileProxyActionType.CreateDropToWave]: (
+    [ApiProfileProxyActionType.CreateDropToWave]: (
       <ProxyCreateActionConfigCreateDropToWave
         endTime={endTime}
         onSubmit={submit}
         onCancel={onCancel}
       />
     ),
-    [ProfileProxyActionType.RateWaveDrop]: (
+    [ApiProfileProxyActionType.RateWaveDrop]: (
       <ProxyCreateActionConfigRateWaveDrop
         endTime={endTime}
         onSubmit={submit}

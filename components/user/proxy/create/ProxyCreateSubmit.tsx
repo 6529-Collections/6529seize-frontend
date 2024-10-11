@@ -5,7 +5,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
-import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 
 export default function ProxyCreateSubmit({
   targetId,
@@ -23,7 +23,7 @@ export default function ProxyCreateSubmit({
 
   const createProxyMutation = useMutation({
     mutationFn: async (body: CreateNewProfileProxy) => {
-      return await commonApiPost<CreateNewProfileProxy, ProfileProxy>({
+      return await commonApiPost<CreateNewProfileProxy, ApiProfileProxy>({
         endpoint: `proxies`,
         body,
       });

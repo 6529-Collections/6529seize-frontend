@@ -1,5 +1,5 @@
-import { GroupFull } from "../../../../generated/models/GroupFull";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import {
   CreateWaveGroupConfigType,
   WaveGroupsConfig,
@@ -12,10 +12,10 @@ export default function CreateWaveGroups({
   groups,
   onGroupSelect,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly groups: WaveGroupsConfig;
   readonly onGroupSelect: (param: {
-    group: GroupFull | null;
+    group: ApiGroupFull | null;
     groupType: CreateWaveGroupConfigType;
   }) => void;
 }) {

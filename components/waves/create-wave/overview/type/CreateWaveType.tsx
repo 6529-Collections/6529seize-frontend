@@ -1,14 +1,14 @@
 
 
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveTypeInputs from "./CreateWaveTypeInputs";
 
 export default function CreateWaveType({
   selected,
   onChange,
 }: {
-  readonly selected: WaveType;
-  readonly onChange: (type: WaveType) => void;
+  readonly selected: ApiWaveType;
+  readonly onChange: (type: ApiWaveType) => void;
 }) {
   return (
     <div>

@@ -2,7 +2,7 @@ import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { useEffect, useState } from "react";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import { Time } from "../../../../helpers/time";
@@ -13,7 +13,7 @@ export default function CreateWaveDates({
   errors,
   setDates,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
@@ -21,7 +21,8 @@ export default function CreateWaveDates({
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const getHaveMultipleTimestamps = (): boolean => waveType === WaveType.Rank;
+  const getHaveMultipleTimestamps = (): boolean =>
+    waveType === ApiWaveType.Rank;
 
   // Submission start date is always the minimum timestamp
   const getMinTimestamp = (): number | null => {

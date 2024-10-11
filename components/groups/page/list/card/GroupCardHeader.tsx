@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GroupFull } from "../../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import { getTimeAgo } from "../../../../../helpers/Helpers";
 import { useContext } from "react";
 import { AuthContext } from "../../../../auth/Auth";
@@ -13,8 +13,8 @@ export default function GroupCardHeader({
   group,
   onEditClick,
 }: {
-  readonly group: GroupFull;
-  readonly onEditClick: (group: GroupFull) => void;
+  readonly group: ApiGroupFull;
+  readonly onEditClick: (group: ApiGroupFull) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());

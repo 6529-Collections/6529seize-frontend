@@ -1,4 +1,4 @@
-import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
+import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
 import GroupCreateConfigHeader from "../GroupCreateConfigHeader";
 import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
@@ -26,25 +26,25 @@ export default function GroupCreateConfig({
   setExcludeWallets,
   setNfts,
 }: {
-  readonly level: CreateGroupDescription["level"];
-  readonly tdh: CreateGroupDescription["tdh"];
-  readonly cic: CreateGroupDescription["cic"];
-  readonly rep: CreateGroupDescription["rep"];
-  readonly wallets: CreateGroupDescription["identity_addresses"];
-  readonly excludeWallets: CreateGroupDescription["excluded_identity_addresses"];
-  readonly nfts: CreateGroupDescription["owns_nfts"];
+  readonly level: ApiCreateGroupDescription["level"];
+  readonly tdh: ApiCreateGroupDescription["tdh"];
+  readonly cic: ApiCreateGroupDescription["cic"];
+  readonly rep: ApiCreateGroupDescription["rep"];
+  readonly wallets: ApiCreateGroupDescription["identity_addresses"];
+  readonly excludeWallets: ApiCreateGroupDescription["excluded_identity_addresses"];
+  readonly nfts: ApiCreateGroupDescription["owns_nfts"];
   readonly iAmIncluded: boolean;
-  readonly setLevel: (level: CreateGroupDescription["level"]) => void;
-  readonly setTDH: (tdh: CreateGroupDescription["tdh"]) => void;
-  readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
-  readonly setRep: (rep: CreateGroupDescription["rep"]) => void;
+  readonly setLevel: (level: ApiCreateGroupDescription["level"]) => void;
+  readonly setTDH: (tdh: ApiCreateGroupDescription["tdh"]) => void;
+  readonly setCIC: (cic: ApiCreateGroupDescription["cic"]) => void;
+  readonly setRep: (rep: ApiCreateGroupDescription["rep"]) => void;
   readonly setWallets: (
-    wallets: CreateGroupDescription["identity_addresses"]
+    wallets: ApiCreateGroupDescription["identity_addresses"]
   ) => void;
   readonly setExcludeWallets: (
-    wallets: CreateGroupDescription["excluded_identity_addresses"]
+    wallets: ApiCreateGroupDescription["excluded_identity_addresses"]
   ) => void;
-  readonly setNfts: (nfts: CreateGroupDescription["owns_nfts"]) => void;
+  readonly setNfts: (nfts: ApiCreateGroupDescription["owns_nfts"]) => void;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 sm:tw-gap-y-8">

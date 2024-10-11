@@ -1,18 +1,18 @@
 import { useState } from "react";
 import PencilIcon from "../../../../../../utils/icons/PencilIcon";
 import WaveGroupEdit from "./WaveGroupEdit";
-import { Wave } from "../../../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../../../generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
-import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupEditButton({
   wave,
   type,
   onEdit,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
+  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   return (

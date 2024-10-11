@@ -20,7 +20,7 @@ import {
   ReactQueryWrapperContext,
 } from "../../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
-import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -78,7 +78,7 @@ export default function UserPageRepModifyModal({
 
   const getProxyAvailableCredit = (): number | null => {
     const repProxy = activeProfileProxy?.actions.find(
-      (a) => a.action_type === ProfileProxyActionType.AllocateRep
+      (a) => a.action_type === ApiProfileProxyActionType.AllocateRep
     );
     if (!repProxy) {
       return null;

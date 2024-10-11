@@ -6,7 +6,7 @@ import CommunityMembers from "../../components/community/CommunityMembers";
 import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../store/groupSlice";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { GroupFull } from "../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../generated/models/ApiGroupFull";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
@@ -27,10 +27,10 @@ export default function CommunityPage() {
   }, []);
 
   const activeGroupId = useSelector(selectActiveGroupId);
-  const { data: activeGroup } = useQuery<GroupFull>({
+  const { data: activeGroup } = useQuery<ApiGroupFull>({
     queryKey: [QueryKey.GROUP, activeGroupId],
     queryFn: async () =>
-      await commonApiFetch<GroupFull>({
+      await commonApiFetch<ApiGroupFull>({
         endpoint: `groups/${activeGroupId}`,
       }),
     placeholderData: keepPreviousData,

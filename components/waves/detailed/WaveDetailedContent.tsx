@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { Wave } from "../../../generated/models/Wave";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -13,12 +13,12 @@ export enum ActiveDropAction {
 
 export interface ActiveDropState {
   action: ActiveDropAction;
-  drop: Drop;
+  drop: ApiDrop;
   partId: number;
 }
 
 interface WaveDetailedContentProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }
 
 export default function WaveDetailedContent({
@@ -42,7 +42,7 @@ export default function WaveDetailedContent({
     setSearchParamsDone(true);
   }, [searchParams, router]);
 
-  const onReply = (drop: Drop, partId: number) => {
+  const onReply = (drop: ApiDrop, partId: number) => {
     setActiveDrop({
       action: ActiveDropAction.REPLY,
       drop,
@@ -50,7 +50,7 @@ export default function WaveDetailedContent({
     });
   };
 
-  const onQuote = (drop: Drop, partId: number) => {
+  const onQuote = (drop: ApiDrop, partId: number) => {
     setActiveDrop({
       action: ActiveDropAction.QUOTE,
       drop,
@@ -58,11 +58,11 @@ export default function WaveDetailedContent({
     });
   };
 
-  const handleReply = ({ drop, partId }: { drop: Drop; partId: number }) => {
+  const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
     onReply(drop, partId);
   };
 
-  const handleQuote = ({ drop, partId }: { drop: Drop; partId: number }) => {
+  const handleQuote = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
     onQuote(drop, partId);
   };
 

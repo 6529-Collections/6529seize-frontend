@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { Wave } from "../../../../generated/models/Wave";
-import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
@@ -10,23 +10,23 @@ import {
   convertWaveToUpdateWave,
 } from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
-import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveRequiredType({
   wave,
   type,
 }: {
-  readonly wave: Wave;
-  readonly type: WaveParticipationRequirement;
+  readonly wave: ApiWave;
+  readonly type: ApiWaveParticipationRequirement;
 }) {
   const { setToast, requestAuth, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
 
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
-  const LABELS: Record<WaveParticipationRequirement, string> = {
-    [WaveParticipationRequirement.Image]: "Image",
-    [WaveParticipationRequirement.Audio]: "Audio",
-    [WaveParticipationRequirement.Video]: "Video",
+  const LABELS: Record<ApiWaveParticipationRequirement, string> = {
+    [ApiWaveParticipationRequirement.Image]: "Image",
+    [ApiWaveParticipationRequirement.Audio]: "Audio",
+    [ApiWaveParticipationRequirement.Video]: "Video",
   };
 
   const getShowEdit = () =>
@@ -42,8 +42,8 @@ export default function WaveRequiredType({
   const [mutating, setMutating] = useState(false);
 
   const changeRequiredTypeMutation = useMutation({
-    mutationFn: async (body: UpdateWaveRequest) =>
-      await commonApiPost<UpdateWaveRequest, Wave>({
+    mutationFn: async (body: ApiUpdateWaveRequest) =>
+      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -77,7 +77,7 @@ export default function WaveRequiredType({
       ? wave.participation.required_media.filter((t) => t !== type)
       : [...wave.participation.required_media, type];
 
-    const body: UpdateWaveRequest = {
+    const body: ApiUpdateWaveRequest = {
       ...originalBody,
       participation: {
         ...originalBody.participation,
@@ -91,7 +91,7 @@ export default function WaveRequiredType({
     <div className="tw-group tw-text-sm">
       <div className="tw-flex tw-w-full tw-justify-between">
         <div className="tw-inline-flex tw-items-center">
-          {type === WaveParticipationRequirement.Image && (
+          {type === ApiWaveParticipationRequirement.Image && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -108,7 +108,7 @@ export default function WaveRequiredType({
               />
             </svg>
           )}
-          {type === WaveParticipationRequirement.Audio && (
+          {type === ApiWaveParticipationRequirement.Audio && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -125,7 +125,7 @@ export default function WaveRequiredType({
               />
             </svg>
           )}
-          {type === WaveParticipationRequirement.Video && (
+          {type === ApiWaveParticipationRequirement.Video && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

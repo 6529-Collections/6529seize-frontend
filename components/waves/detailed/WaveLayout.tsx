@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { ReactNode, useContext, useEffect, useState } from "react";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -12,7 +12,7 @@ import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface WaveLayoutProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly children: ReactNode;
 }
 
@@ -21,15 +21,18 @@ const Header = dynamic(() => import("../../header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function WaveLayout({ wave: initialWave, children }: WaveLayoutProps) {
+export default function WaveLayout({
+  wave: initialWave,
+  children,
+}: WaveLayoutProps) {
   const { setTitle, title } = useContext(AuthContext);
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const { data: wave, isError } = useQuery<Wave>({
+  const { data: wave, isError } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
-      await commonApiFetch<Wave>({
+      await commonApiFetch<ApiWave>({
         endpoint: `waves/${wave_id}`,
       }),
     enabled: !!wave_id,
@@ -37,7 +40,7 @@ export default function WaveLayout({ wave: initialWave, children }: WaveLayoutPr
     initialData: initialWave,
   });
 
-    const getBreadCrumbs = (): Crumb[] => {
+  const getBreadCrumbs = (): Crumb[] => {
     return [
       { display: "Home", href: "/" },
       { display: "My Stream", href: "/my-stream" },
@@ -67,8 +70,8 @@ export default function WaveLayout({ wave: initialWave, children }: WaveLayoutPr
       }
     };
   }, []);
-  
-    return (
+
+  return (
     <>
       <Head>
         <title>{title}</title>
@@ -146,4 +149,4 @@ export default function WaveLayout({ wave: initialWave, children }: WaveLayoutPr
       </main>
     </>
   );
-};
+}

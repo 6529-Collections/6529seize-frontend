@@ -2,9 +2,9 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { IncomingIdentitySubscriptionsPage } from "../../../generated/models/IncomingIdentitySubscriptionsPage";
+import { ApiIncomingIdentitySubscriptionsPage } from "../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { useEffect, useState } from "react";
-import { IdentityAndSubscriptionActions } from "../../../generated/models/IdentityAndSubscriptionActions";
+import { ApiIdentityAndSubscriptionActions } from "../../../generated/models/ApiIdentityAndSubscriptionActions";
 import FollowersListWrapper from "../../utils/followers/FollowersListWrapper";
 const REQUEST_SIZE = 100;
 
@@ -44,7 +44,7 @@ export default function UserPageFollowers({
       if (pageParam) {
         params.page = `${pageParam}`;
       }
-      return await commonApiFetch<IncomingIdentitySubscriptionsPage>({
+      return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
         endpoint: `/identity-subscriptions/incoming/IDENTITY/${profile.profile?.external_id}`,
         params,
       });
@@ -54,9 +54,9 @@ export default function UserPageFollowers({
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
   });
 
-  const [followers, setFollowers] = useState<IdentityAndSubscriptionActions[]>(
-    []
-  );
+  const [followers, setFollowers] = useState<
+    ApiIdentityAndSubscriptionActions[]
+  >([]);
   useEffect(
     () => setFollowers(data?.pages.flatMap((page) => page.data) ?? []),
     [data]
