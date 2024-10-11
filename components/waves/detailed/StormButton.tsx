@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import Tippy from "@tippyjs/react";
 
 interface StormButtonProps {
@@ -12,10 +12,10 @@ const StormButton: React.FC<StormButtonProps> = ({
   isStormMode,
   canAddPart,
   submitting,
-  breakIntoStorm
+  breakIntoStorm,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-absolute tw-top-3 tw-right-10">
+    <div>
       <Tippy
         content={
           <div className="tw-text-center">
@@ -31,29 +31,12 @@ const StormButton: React.FC<StormButtonProps> = ({
           onClick={breakIntoStorm}
           disabled={!canAddPart || submitting}
           type="button"
-          className={`tw-border-0 tw-bg-transparent tw-flex tw-items-center tw-ease-out tw-transition tw-duration-300 tw-mr-2 ${
+          className={`tw-flex tw-items-center tw-justify-center tw-flex-shrink-0  tw-rounded-full tw-transition tw-duration-300 tw-size-9 lg:tw-size-8 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 ${
             canAddPart && !submitting
-              ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400"
-              : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600"
+              ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400 hover:tw-bg-primary-300/20 tw-bg-iron-800"
+              : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600 tw-bg-iron-900"
           }`}
         >
-          <svg
-            className={`tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5 ${
-              !canAddPart || submitting ? "tw-opacity-50" : ""
-            }`}
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
           <svg
             className={`tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0 ${
               !canAddPart || submitting ? "tw-opacity-50" : ""

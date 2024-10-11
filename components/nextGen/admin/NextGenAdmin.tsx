@@ -13,7 +13,6 @@ import {
   useCollectionArtist,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
-import ConnectWalletButton from "../../delegation/ConnectWalletButton";
 import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
 import NextGenAdminSetData from "./NextGenAdminSetData";
 import NextGenAdminSetCosts from "./NextGenAdminSetCosts";
@@ -41,6 +40,7 @@ import NextGenAdminUpdateCollection, {
   UpdateType,
 } from "./NextGenAdminUpdateCollection";
 import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
+import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 
 enum Focus {
   GLOBAL = "global",
@@ -942,7 +942,7 @@ export default function NextGenAdmin() {
 
   function printContent() {
     if (!account.isConnected) {
-      return <ConnectWalletButton chain_id={NEXTGEN_CHAIN_ID} />;
+      return <HeaderUserConnect />;
     }
 
     switch (focus) {

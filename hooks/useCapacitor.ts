@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { LocalNotifications } from "@capacitor/local-notifications";
 import { Capacitor } from "@capacitor/core";
+import { Keyboard } from "@capacitor/keyboard";
 
 export enum CapacitorOrientationType {
   PORTRAIT,
@@ -14,18 +14,13 @@ const useCapacitor = () => {
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
   );
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    if (isCapacitor) {
-      if (!isInitialized) {
-        initializePushNotifications();
-        setIsInitialized(true);
-      }
+    if (!isCapacitor) {
+      return;
     }
-  }, [isCapacitor]);
 
-  useEffect(() => {
     function isPortrait() {
       return window.matchMedia("(orientation: portrait)").matches;
     }
@@ -47,40 +42,41 @@ const useCapacitor = () => {
     };
   }, []);
 
-  function sendNotification(id: number, title: string, body: string) {
-    if (!isInitialized) {
-      console.error("Notifications not initialized");
+  useEffect(() => {
+    if (!isCapacitor) {
       return;
     }
 
-    LocalNotifications.schedule({
-      notifications: [
-        {
-          id,
-          title,
-          body,
-        },
-      ],
-    }).catch((error) => {
-      console.error("Error sending notification", error);
-    });
-  }
+    const addPushListeners = async () => {
+      await Keyboard.addListener("keyboardWillShow", () => {
+        setKeyboardVisible(true);
+      });
+      await Keyboard.addListener("keyboardWillHide", () => {
+        setKeyboardVisible(false);
+      });
+    };
 
-  return { isCapacitor, platform, orientation, sendNotification };
+    const removePushListeners = async () => {
+      await Keyboard.removeAllListeners();
+    };
+
+    const commonCatch = (error: any) => {
+      console.error("Keyboard plugin error:", error);
+    };
+
+    addPushListeners().catch(commonCatch);
+
+    return () => {
+      removePushListeners().catch(commonCatch);
+    };
+  }, []);
+
+  return {
+    isCapacitor,
+    platform,
+    orientation,
+    keyboardVisible,
+  };
 };
 
 export default useCapacitor;
-
-export function initializePushNotifications() {
-  LocalNotifications.requestPermissions()
-    .then((permission) => {
-      if (permission.display === "granted") {
-        console.log("Notifications permission granted");
-      } else {
-        console.error("Notifications permission denied");
-      }
-    })
-    .catch((error) => {
-      console.error("Error requesting notifications", error);
-    });
-}

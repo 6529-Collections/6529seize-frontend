@@ -9,6 +9,8 @@ import Link from "next/link";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import DropPartMarkdown from "./DropPartMarkdown";
+import { Drop } from "../../../../generated/models/Drop";
+import { useRouter } from "next/router";
 
 export enum DropPartSize {
   SMALL = "SMALL",
@@ -47,6 +49,7 @@ export interface DropPartProps {
   readonly onNextPart?: () => void;
   readonly onPrevPart?: () => void;
   readonly onContentClick?: () => void;
+
 }
 
 const DropPart = memo(
@@ -69,6 +72,7 @@ const DropPart = memo(
     onPrevPart,
     onContentClick,
   }: DropPartProps) => {
+    const router = useRouter();
     const isStorm = totalPartsCount && totalPartsCount > 1;
     const showPrevButton = currentPartCount && currentPartCount > 1;
     const showNextButton =
@@ -125,8 +129,18 @@ const DropPart = memo(
       }
     };
 
+    const onQuoteClick = (drop: Drop) => {
+      router.push(
+        `/waves/${drop.wave.id}?drop=${drop.serial_no}`,
+        undefined,
+        {
+          shallow: true,
+        }
+      );
+    };
+
     return (
-      <CommonAnimationHeight onAnimationCompleted={checkOverflow}>
+      <CommonAnimationHeight onAnimationCompleted={() => {}}>
         <div
           ref={containerRef}
           className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
@@ -252,6 +266,7 @@ const DropPart = memo(
                         referencedNfts={referencedNfts}
                         partContent={partContent}
                         onImageLoaded={onImageLoaded}
+                        onQuoteClick={onQuoteClick}
                       />
                     </div>
                     {!!partMedias.length && (

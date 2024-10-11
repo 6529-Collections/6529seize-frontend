@@ -4,31 +4,107 @@ import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import WaveDetailed from "../../components/waves/detailed/WaveDetailed";
 import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Wave } from "../../generated/models/Wave";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../components/auth/Auth";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  getCommonHeaders,
+  getWave,
+  getWaveDrops,
+  getWavesOverview,
+} from "../../helpers/server.helpers";
+import {
+  WAVE_DROPS_PARAMS,
+  WAVE_FOLLOWING_WAVES_PARAMS,
+} from "../../components/react-query-wrapper/utils/query-utils";
+import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
+
+interface Props {
+  readonly wave: Wave | null;
+  readonly wavesOverview: Wave[] | null;
+  readonly waveDrops: WaveDropsFeed | null;
+}
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function WavePage() {
+export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
+  const { setWave, setWavesOverviewPage, setWaveDrops } = useContext(
+    ReactQueryWrapperContext
+  );
   const { setTitle, title } = useContext(AuthContext);
+  const queryClient = useQueryClient();
+
+  if (pageProps.wave) {
+    const waveInit = queryClient.getQueryData<Wave>([
+      QueryKey.WAVE,
+      { wave_id: pageProps.wave.id },
+    ]);
+
+    if (!waveInit) {
+      setWave(pageProps.wave);
+    }
+  }
+
+  if (pageProps.wavesOverview) {
+    const followingWavesInit = queryClient.getQueryData<Wave[]>([
+      QueryKey.WAVES_OVERVIEW,
+      {
+        limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+        type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+        only_waves_followed_by_authenticated_user:
+          WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+      },
+    ]);
+
+    if (!followingWavesInit) {
+      setWavesOverviewPage(pageProps.wavesOverview);
+    }
+  }
+
+  if (pageProps.waveDrops && pageProps.wave) {
+    const waveDropsInit = queryClient.getQueryData<WaveDropsFeed>([
+      QueryKey.DROPS,
+      {
+        waveId: pageProps.wave.id,
+        limit: WAVE_DROPS_PARAMS.limit,
+        dropId: null,
+      },
+    ]);
+
+    if (!waveDropsInit) {
+      setWaveDrops({
+        waveDrops: pageProps.waveDrops,
+        waveId: pageProps.wave.id,
+      });
+    }
+  }
+
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const { data: wave, isError } = useQuery<Wave>({
+  const { data: wave } = useQuery<Wave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
       await commonApiFetch<Wave>({
         endpoint: `waves/${wave_id}`,
       }),
     enabled: !!wave_id,
+    staleTime: 60000,
+    initialData: pageProps.wave ?? undefined,
+    placeholderData: keepPreviousData,
   });
 
   const getBreadCrumbs = (): Crumb[] => {
@@ -79,65 +155,59 @@ export default function WavePage() {
         />
         <meta property="og:description" content="6529 SEIZE" />
         <style>{`
-          body {
-            overflow: hidden !important;
-          }
-        `}</style>
+        body {
+          overflow: hidden !important;
+        }
+      `}</style>
       </Head>
       <main className="tailwind-scope tw-bg-black tw-flex tw-flex-col tw-h-screen tw-overflow-hidden">
         <div>
           <Header isSmall={true} />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
-
-        <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
-          <AnimatePresence mode="wait">
-            {!wave && !isError && (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="tw-mt-4 tw-px-4"
-              >
-                <div className="lg:tw-flex lg:tw-items-start tw-justify-center tw-gap-x-4">
-                  <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-4 lg:tw-w-[20.5rem]">
-                    {[1, 2, 3].map((index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="tw-h-48 tw-bg-iron-900 tw-rounded-xl tw-animate-pulse"
-                      ></motion.div>
-                    ))}
-                  </div>
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.3 }}
-                    className="tw-flex-1"
-                  >
-                    <div className="tw-h-[calc(100vh-160px)] tw-bg-iron-950 tw-rounded-xl tw-animate-pulse"></div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-            {wave && !isError && (
-              <motion.div
-                key={`${wave.id}-content`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <WaveDetailed wave={wave} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 */}
+        <div className="tw-flex-1">{wave && <WaveDetailed wave={wave} />}</div>
       </main>
     </>
   );
+}
+
+export async function getServerSideProps(
+  req: any,
+  res: any,
+  resolvedUrl: any
+): Promise<{
+  props: Props;
+}> {
+  try {
+    const headers = getCommonHeaders(req);
+    const waveId = req.query.wave.toLowerCase() as string;
+    const [wave, wavesOverview, waveDrops] = await Promise.all([
+      getWave({ waveId, headers }),
+      getWavesOverview({
+        headers,
+        limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+        offset: 0,
+        type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+        onlyWavesFollowedByAuthenticatedUser:
+          WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+      }),
+      await getWaveDrops({ waveId, headers }),
+    ]);
+    return {
+      props: {
+        wave,
+        wavesOverview,
+        waveDrops,
+      },
+    };
+  } catch (e: any) {
+    return {
+      props: {
+        wave: null,
+        wavesOverview: null,
+        waveDrops: null,
+      },
+    };
+  }
 }

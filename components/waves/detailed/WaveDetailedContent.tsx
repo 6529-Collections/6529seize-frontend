@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Wave } from "../../../generated/models/Wave";
 import { Drop } from "../../../generated/models/Drop";
 import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
-import { AnimatePresence, motion } from "framer-motion";
-import WaveDetailedThread from "./WaveDetailedThread";
-import { createBreakpoint } from "react-use";
+import { useSearchParams, useRouter } from "next/navigation";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -19,25 +18,29 @@ export interface ActiveDropState {
 }
 
 interface WaveDetailedContentProps {
-  readonly activeDropId: string | null;
   readonly wave: Wave;
-  readonly onBackToList: () => void;
 }
 
-const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
-
 export default function WaveDetailedContent({
-  activeDropId,
   wave,
-  onBackToList,
 }: WaveDetailedContentProps) {
+  const capacitor = useCapacitor();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-  const [isThreadOpen, setIsThreadOpen] = useState(false);
+  const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const canDrop = wave.participation.authenticated_user_eligible;
-
+  const [searchParamsDone, setSearchParamsDone] = useState(false);
   useEffect(() => {
-    setIsThreadOpen(!!activeDropId);
-  }, [activeDropId]);
+    const dropParam = searchParams.get("drop");
+    if (dropParam) {
+      setInitialDrop(parseInt(dropParam));
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("drop");
+      router.replace(newUrl.pathname + newUrl.search);
+    }
+    setSearchParamsDone(true);
+  }, [searchParams, router]);
 
   const onReply = (drop: Drop, partId: number) => {
     setActiveDrop({
@@ -67,72 +70,40 @@ export default function WaveDetailedContent({
     setActiveDrop(null);
   };
 
-  const closeActiveDropId = () => {
-    onBackToList();
-    setIsThreadOpen(false);
-  };
+  const containerClassName = useMemo(() => {
+    return `tw-w-full tw-flex tw-flex-col ${
+      capacitor.isCapacitor
+        ? "tw-h-[calc(100vh-14.7rem)]"
+        : "tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-7.5rem)]"
+    }`;
+  }, [capacitor.isCapacitor]);
 
-  const breakpoint = useBreakpoint();
-
-  const threadAnimationVariants = {
-    S: {
-      initial: { opacity: 0, width: 0, x: "-100%" },
-      animate: { opacity: 1, width: "100%", x: 0 },
-      exit: { opacity: 0, width: 0, x: "-100%" },
-    },
-    default: {
-      initial: { width: 0, opacity: 0 },
-      animate: { width: "70%", opacity: 1 },
-      exit: { width: 0, opacity: 0 },
-    },
-  };
+  if (!searchParamsDone) {
+    return null;
+  }
 
   return (
-    <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
-      <div className="tw-w-full tw-flex tw-flex-col">
-        <WaveDrops
-          wave={wave}
-          onReply={handleReply}
-          onQuote={handleQuote}
-          activeDrop={activeDrop}
-          rootDropId={null}
-          onActiveDropClick={closeActiveDropId}
-        />
-        {canDrop && (
-          <div className="tw-mt-auto">
-            <CreateDrop
-              activeDrop={activeDrop}
-              onCancelReplyQuote={onCancelReplyQuote}
-              waveId={wave.id}
-              rootDropId={null}
-            />
-          </div>
-        )}
+    <div className="tw-relative tw-h-full">
+      <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
+        <div className={containerClassName}>
+          <WaveDrops
+            wave={wave}
+            onReply={handleReply}
+            onQuote={handleQuote}
+            activeDrop={activeDrop}
+            initialDrop={initialDrop}
+          />
+          {canDrop && (
+            <div className="tw-mt-auto">
+              <CreateDrop
+                activeDrop={activeDrop}
+                onCancelReplyQuote={onCancelReplyQuote}
+                wave={wave}
+              />
+            </div>
+          )}
+        </div>
       </div>
-      <AnimatePresence>
-        {isThreadOpen && (
-          <motion.div
-            variants={
-              threadAnimationVariants[breakpoint === "S" ? "S" : "default"]
-            }
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className={`tw-w-full ${
-              breakpoint === "S"
-                ? "tw-fixed tw-inset-x-0  tw-z-50 tw-bg-iron-900 tw-h-full"
-                : "tw-relative"
-            }`}
-          >
-            <WaveDetailedThread
-              wave={wave}
-              rootDropId={activeDropId}
-              closeActiveDropId={closeActiveDropId}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import PrimaryButton from "../../utils/button/PrimaryButton";
 import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -32,6 +32,8 @@ import { WaveParticipationRequirement } from "../../../generated/models/WavePart
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
+import CreateDropActions from "./CreateDropActions";
+import { createBreakpoint } from "react-use";
 
 export type CreateDropMetadataType =
   | {
@@ -53,24 +55,23 @@ export type CreateDropMetadataType =
       readonly required: boolean;
     };
 
-interface CreateDropContent {
-  readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
-  readonly onCancelReplyQuote: () => void;
-  readonly wave: Wave;
-  readonly drop: CreateDropConfig | null;
-  readonly setDrop: React.Dispatch<
-    React.SetStateAction<CreateDropConfig | null>
-  >;
-  readonly isStormMode: boolean;
-  readonly setIsStormMode: (isStormMode: boolean) => void;
-  readonly submitDrop: (dropRequest: CreateDropRequest) => void;
+interface CreateDropContentProps {
+  activeDrop: ActiveDropState | null;
+  onCancelReplyQuote: () => void;
+  wave: Wave;
+  drop: CreateDropConfig | null;
+  isStormMode: boolean;
+  setDrop: React.Dispatch<React.SetStateAction<CreateDropConfig | null>>;
+  setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
+  submitDrop: (dropRequest: CreateDropRequest) => void;
 }
 
 interface MissingRequirements {
   metadata: string[];
   media: WaveParticipationRequirement[];
 }
+
+const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
 
 const getPartMentions = (
   markdown: string | null,
@@ -305,8 +306,7 @@ const getOptimisticDrop = (
     participation: { authenticated_user_eligible: boolean };
     voting: { authenticated_user_eligible: boolean };
   },
-  activeDrop: ActiveDropState | null,
-  rootDropId: string | null
+  activeDrop: ActiveDropState | null
 ): Drop | null => {
   if (!connectedProfile?.profile) {
     return null;
@@ -317,13 +317,6 @@ const getOptimisticDrop = (
       return {
         drop_id: activeDrop.drop.id,
         drop_part_id: activeDrop.partId,
-        is_deleted: false,
-      };
-    }
-    if (rootDropId) {
-      return {
-        drop_id: rootDropId,
-        drop_part_id: 1,
         is_deleted: false,
       };
     }
@@ -388,17 +381,17 @@ const getOptimisticDrop = (
   };
 };
 
-export default function CreateDropContent({
+const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
-  rootDropId,
   onCancelReplyQuote,
   wave,
-  isStormMode,
   drop,
+  isStormMode,
   setDrop,
   setIsStormMode,
   submitDrop,
-}: CreateDropContent) {
+}) => {
+  const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
 
@@ -406,6 +399,8 @@ export default function CreateDropContent({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+  const [showOptions, setShowOptions] = useState(breakpoint === "MD");
+  useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
 
   const getMarkdown = useMemo(
     () =>
@@ -484,12 +479,6 @@ export default function CreateDropContent({
       return {
         drop_id: activeDrop.drop.id,
         drop_part_id: activeDrop.partId,
-      };
-    }
-    if (rootDropId) {
-      return {
-        drop_id: rootDropId,
-        drop_part_id: 1,
       };
     }
     return undefined;
@@ -629,11 +618,10 @@ export default function CreateDropContent({
         requestBody,
         connectedProfile,
         wave,
-        activeDrop,
-        rootDropId
+        activeDrop
       );
       if (optimisticDrop) {
-        addOptimisticDrop({ drop: optimisticDrop, rootDropId });
+        addOptimisticDrop({ drop: optimisticDrop });
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);
@@ -673,19 +661,19 @@ export default function CreateDropContent({
   };
 
   const getMissingRequirements = useMemo(() => {
-    const getMissingMetadata = () => 
+    const getMissingMetadata = () =>
       metadata
         .filter(isRequiredMetadataMissing)
-        .map(item => item.key as string);
+        .map((item) => item.key as string);
 
     const getMissingMedia = () =>
       wave.participation.required_media.filter(
-        media => !files.some(file => isMediaTypeMatching(file, media))
+        (media) => !files.some((file) => isMediaTypeMatching(file, media))
       );
 
     return (): MissingRequirements => ({
       metadata: getMissingMetadata(),
-      media: getMissingMedia()
+      media: getMissingMedia(),
     });
   }, [metadata, files, wave.participation.required_media]);
 
@@ -712,14 +700,11 @@ export default function CreateDropContent({
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
+    if (!activeDrop) {
+      return;
+    }
     const timer = setTimeout(() => {
       createDropInputRef.current?.focus();
     }, 100);
@@ -747,6 +732,9 @@ export default function CreateDropContent({
 
   const handleEditorStateChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
+    if (breakpoint === "S") {
+      setShowOptions(false);
+    }
   };
 
   const removeFile = (file: File, partIndex?: number) => {
@@ -827,6 +815,11 @@ export default function CreateDropContent({
     });
   };
 
+  const breakIntoStorm = () => {
+    finalizeAndAddDropPart();
+    setIsStormMode(true);
+  };
+
   return (
     <div className="tw-flex-grow">
       <CreateDropReplyingWrapper
@@ -834,37 +827,52 @@ export default function CreateDropContent({
         submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
       />
-      <div className="tw-flex tw-items-end">
-        <div className="tw-flex-grow">
-          <CreateDropInput
-            key={dropEditorRefreshKey}
-            ref={createDropInputRef}
-            editorState={editorState}
-            type={activeDrop?.action ?? null}
-            drop={drop}
-            submitting={submitting}
+      <div className="tw-flex tw-items-end tw-w-full">
+        <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+          <CreateDropActions
             isStormMode={isStormMode}
-            setIsStormMode={setIsStormMode}
-            canSubmit={canSubmit}
+            canAddPart={canAddPart}
+            submitting={submitting}
+            showOptions={showOptions}
             isRequiredMetadataMissing={!!missingRequirements.metadata.length}
             isRequiredMediaMissing={!!missingRequirements.media.length}
-            canAddPart={canAddPart}
-            onEditorState={handleEditorStateChange}
-            onReferencedNft={onReferencedNft}
-            onMentionedUser={onMentionedUser}
-            setFiles={handleFileChange}
-            onDropPart={finalizeAndAddDropPart}
-            onDrop={onDrop}
+            handleFileChange={handleFileChange}
             onAddMetadataClick={onAddMetadataClick}
+            breakIntoStorm={breakIntoStorm}
+            setShowOptions={setShowOptions}
           />
+          <div className="tw-flex-grow tw-w-full">
+            <CreateDropInput
+              key={dropEditorRefreshKey}
+              ref={createDropInputRef}
+              editorState={editorState}
+              type={activeDrop?.action ?? null}
+              submitting={submitting}
+              isStormMode={isStormMode}
+              canSubmit={canSubmit}
+              onEditorState={handleEditorStateChange}
+              onReferencedNft={onReferencedNft}
+              onMentionedUser={onMentionedUser}
+              onDrop={onDrop}
+            />
+          </div>
         </div>
-        <div className="tw-ml-3">
+        <div className="tw-ml-2 lg:tw-ml-3">
           <PrimaryButton
             onClicked={onDrop}
             loading={submitting}
             disabled={!canSubmit}
+            padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5"
           >
-            Drop
+            <span className="tw-hidden lg:tw-inline">Drop</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="tw-size-5 lg:tw-hidden"
+            >
+              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+            </svg>
           </PrimaryButton>
         </div>
       </div>
@@ -907,4 +915,6 @@ export default function CreateDropContent({
       />
     </div>
   );
-}
+};
+
+export default memo(CreateDropContent);

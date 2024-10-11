@@ -10,145 +10,41 @@
  * Do not edit the class manually.
  */
 
+import { AggregatedActivity } from '../models/AggregatedActivity';
 import { HttpFile } from '../http/http';
 
 export class AggregatedActivityPage {
-    'consolidation_key': string;
-    'primary_purchases_count': number;
-    'primary_purchases_value': number;
-    'secondary_purchases_count': number;
-    'secondary_purchases_value': number;
-    'sales_count': number;
-    'sales_value': number;
-    'transfers_in': number;
-    'transfers_out': number;
-    'airdrops': number;
-    'burns': number;
-    'handle': string;
-    'pfp_url': string | null;
-    'rep_score': number;
-    'cic_score': number;
-    'primary_wallet': string;
-    'consolidation_display': string;
-    'boosted_tdh': number;
-    'level': number;
+    'data': Array<AggregatedActivity>;
+    'count': number;
+    'page': number;
+    'next': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "consolidation_key",
-            "baseName": "consolidation_key",
-            "type": "string",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<AggregatedActivity>",
             "format": ""
         },
         {
-            "name": "primary_purchases_count",
-            "baseName": "primary_purchases_count",
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "primary_purchases_value",
-            "baseName": "primary_purchases_value",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "secondary_purchases_count",
-            "baseName": "secondary_purchases_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "secondary_purchases_value",
-            "baseName": "secondary_purchases_value",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "sales_count",
-            "baseName": "sales_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "sales_value",
-            "baseName": "sales_value",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "transfers_in",
-            "baseName": "transfers_in",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "transfers_out",
-            "baseName": "transfers_out",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "airdrops",
-            "baseName": "airdrops",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "burns",
-            "baseName": "burns",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "handle",
-            "baseName": "handle",
+            "name": "next",
+            "baseName": "next",
             "type": "string",
             "format": ""
-        },
-        {
-            "name": "pfp_url",
-            "baseName": "pfp_url",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "rep_score",
-            "baseName": "rep_score",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "cic_score",
-            "baseName": "cic_score",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "primary_wallet",
-            "baseName": "primary_wallet",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "consolidation_display",
-            "baseName": "consolidation_display",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "boosted_tdh",
-            "baseName": "boosted_tdh",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "level",
-            "baseName": "level",
-            "type": "number",
-            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

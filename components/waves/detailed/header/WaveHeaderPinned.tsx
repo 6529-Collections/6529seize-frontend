@@ -91,12 +91,13 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
                 }}
                 showWaveInfo={false}
                 activeDrop={null}
-                rootDropId={null}
+                onReplyClick={() => {}}
                 showReplyAndQuote={false}
                 onReply={() => {}}
                 onQuote={() => {}}
                 previousDrop={null}
                 nextDrop={null}
+                onQuoteClick={() => {}}
               />
             </motion.div>
           )}

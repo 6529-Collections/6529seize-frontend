@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useCallback, useEffect, useState, useRef } from "react";
 import WaveDetailedDropActions from "./WaveDetailedDropActions";
 import WaveDetailedDropReply from "./WaveDetailedDropReply";
 import WaveDetailedDropContent from "./WaveDetailedDropContent";
@@ -8,6 +8,9 @@ import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
 import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
+import { Drop } from "../../../../generated/models/Drop";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -15,8 +18,7 @@ enum GroupingThreshold {
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
-  otherDrop: ExtendedDrop | null,
-  rootDropId: string | null
+  otherDrop: ExtendedDrop | null
 ): boolean => {
   if (!otherDrop || currentDrop.parts.length > 1) {
     return false;
@@ -32,11 +34,10 @@ const shouldGroupWithDrop = (
   }
 
   const bothNotReplies = !currentDrop.reply_to && !otherDrop.reply_to;
-  const currentReplyToRoot = currentDrop.reply_to?.drop_id === rootDropId;
   const repliesInSameThread =
     currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
 
-  return bothNotReplies || currentReplyToRoot || repliesInSameThread;
+  return bothNotReplies || repliesInSameThread;
 };
 
 interface WaveDetailedDropProps {
@@ -45,7 +46,6 @@ interface WaveDetailedDropProps {
   readonly nextDrop: ExtendedDrop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
   readonly onReply: ({
     drop,
@@ -61,36 +61,35 @@ interface WaveDetailedDropProps {
     drop: ExtendedDrop;
     partId: number;
   }) => void;
-  readonly onActiveDropClick?: () => void;
+  readonly onReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
-export default function WaveDetailedDrop({
+const WaveDetailedDrop = ({
   drop,
   previousDrop,
   nextDrop,
   showWaveInfo,
   activeDrop,
-  rootDropId,
   onReply,
   onQuote,
+  onReplyClick,
+  onQuoteClick,
   showReplyAndQuote,
-  onActiveDropClick,
-}: WaveDetailedDropProps) {
+}: WaveDetailedDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
+  const [isSlideUp, setIsSlideUp] = useState(false);
+  const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(
-    drop,
-    previousDrop,
-    rootDropId
-  );
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(
-    drop,
-    nextDrop,
-    rootDropId
-  );
+  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop);
+
+  const isMobile = useIsMobileDevice();
 
   const getGroupingClass = () => {
     if (shouldGroupWithPreviousDrop) return "";
@@ -100,18 +99,83 @@ export default function WaveDetailedDrop({
 
   const groupingClass = getGroupingClass();
 
+  const handleLongPress = useCallback(() => {
+    if (!isMobile) return;
+    setLongPressTriggered(true);
+    setIsSlideUp(true);
+  }, [isMobile]);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
+      const touch = e.touches[0];
+      touchStartPosition.current = { x: touch.clientX, y: touch.clientY };
+      longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
+    },
+    [isMobile, handleLongPress]
+  );
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+    }
+    touchStartPosition.current = null;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartPosition.current) return;
+
+    const touch = e.touches[0];
+    const moveThreshold = 10; // pixels
+
+    const deltaX = Math.abs(touch.clientX - touchStartPosition.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartPosition.current.y);
+
+    if (deltaX > moveThreshold || deltaY > moveThreshold) {
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    }
+  }, []);
+
+  const handleDropClick = useCallback(() => {
+    if (isMobile) return;
+    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+  }, [onReply, drop, activePartIndex, isMobile]);
+
+  const handleOnReply = useCallback(() => {
+    setIsSlideUp(false);
+    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+  }, [onReply, drop, activePartIndex]);
+
+  const handleOnQuote = useCallback(() => {
+    setIsSlideUp(false);
+    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+  }, [onQuote, drop, activePartIndex]);
+
+  useEffect(() => {
+    return () => {
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div
       className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 ${
         isActiveDrop
           ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
-          : "tw-bg-iron-950 hover:tw-bg-iron-900"
+          : "tw-bg-iron-950 tw-rounded-xl"
       } ${groupingClass}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
     >
       {drop.reply_to &&
-        drop.reply_to.drop_id !== rootDropId &&
         drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
           <WaveDetailedDropReply
+            onReplyClick={onReplyClick}
             dropId={drop.reply_to.drop_id}
             dropPartId={drop.reply_to.drop_part_id}
             maybeDrop={
@@ -144,21 +208,20 @@ export default function WaveDetailedDrop({
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
-              onActiveDropClick={onActiveDropClick}
+              onLongPress={handleLongPress}
+              onDropClick={handleDropClick}
+              onQuoteClick={onQuoteClick}
+              setLongPressTriggered={setLongPressTriggered}
             />
           </div>
         </div>
       </div>
-      {showReplyAndQuote && (
+      {!isMobile && showReplyAndQuote && (
         <WaveDetailedDropActions
           drop={drop}
           activePartIndex={activePartIndex}
-          onReply={() =>
-            onReply({ drop, partId: drop.parts[activePartIndex].part_id })
-          }
-          onQuote={() =>
-            onQuote({ drop, partId: drop.parts[activePartIndex].part_id })
-          }
+          onReply={handleOnReply}
+          onQuote={handleOnQuote}
         />
       )}
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
@@ -167,6 +230,17 @@ export default function WaveDetailedDrop({
         )}
         {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
       </div>
+      <WaveDetailedDropMobileMenu
+        drop={drop}
+        isOpen={isSlideUp}
+        longPressTriggered={longPressTriggered}
+        showReplyAndQuote={showReplyAndQuote}
+        setOpen={setIsSlideUp}
+        onReply={handleOnReply}
+        onQuote={handleOnQuote}
+      />
     </div>
   );
-}
+};
+
+export default memo(WaveDetailedDrop);

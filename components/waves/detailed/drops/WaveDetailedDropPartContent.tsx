@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 import { DropPart } from "../../../../generated/models/DropPart";
 import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedias";
 import { DropMentionedUser } from "../../../../generated/models/DropMentionedUser";
 import { ReferencedNft } from "../../../../entities/IDrop";
 import { WaveMin } from "../../../../generated/models/WaveMin";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
+import WaveDetailedDropQuoteWithDropId from "./WaveDetailedDropQuoteWithDropId";
+import { Drop } from "../../../../generated/models/ObjectSerializer";
 
 interface WaveDetailedDropPartContentProps {
   readonly mentionedUsers: DropMentionedUser[];
@@ -18,8 +19,7 @@ interface WaveDetailedDropPartContentProps {
   readonly isStorm: boolean;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly checkOverflow: () => void;
-  readonly showMore: boolean;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropPartContent: React.FC<
@@ -34,39 +34,18 @@ const WaveDetailedDropPartContent: React.FC<
   isStorm,
   activePartIndex,
   setActivePartIndex,
-  checkOverflow,
-  showMore,
+  onQuoteClick,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(1000);
 
-  const updateContainerHeight = useCallback(() => {
-    if (!contentRef.current) return;
-    const firstImg = contentRef.current.querySelector("img");
-    if (firstImg?.complete) {
-      const imgRect = firstImg.getBoundingClientRect();
-      const containerRect = contentRef.current.getBoundingClientRect();
-      if (imgRect.top <= containerRect.bottom) {
-        setContainerHeight(288 + firstImg.height + 288);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    checkOverflow();
-    updateContainerHeight();
-  }, [checkOverflow, updateContainerHeight]);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.style.maxHeight = showMore
-        ? "100%"
-        : `${containerHeight}px`;
-    }
-  }, [showMore, containerHeight]);
-
-  const memoizedMentionedUsers = useMemo(() => mentionedUsers, [mentionedUsers]);
-  const memoizedReferencedNfts = useMemo(() => referencedNfts, [referencedNfts]);
+  const memoizedMentionedUsers = useMemo(
+    () => mentionedUsers,
+    [mentionedUsers]
+  );
+  const memoizedReferencedNfts = useMemo(
+    () => referencedNfts,
+    [referencedNfts]
+  );
 
   const renderNavigationButton = (direction: "previous" | "next") => {
     const isPrevious = direction === "previous";
@@ -81,7 +60,7 @@ const WaveDetailedDropPartContent: React.FC<
           isDisabled
             ? "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
             : "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
-        } tw-bg-transparent tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+        } tw-bg-transparent tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -114,7 +93,10 @@ const WaveDetailedDropPartContent: React.FC<
   return (
     <div className="tw-pt-1 tw-pb-1 tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
       {isStorm && renderNavigationButton("previous")}
-      <div className="tw-h-full tw-w-full" ref={contentRef}>
+      <div
+        className="tw-h-full tw-w-full xl:tw-pr-24 active:tw-bg-iron-800"
+        ref={contentRef}
+      >
         <motion.div
           key={activePartIndex}
           initial={{ opacity: 0 }}
@@ -126,24 +108,28 @@ const WaveDetailedDropPartContent: React.FC<
             mentionedUsers={memoizedMentionedUsers}
             referencedNfts={memoizedReferencedNfts}
             partContent={activePart.content}
-            onImageLoaded={updateContainerHeight}
+            onImageLoaded={() => {}}
+            onQuoteClick={onQuoteClick}
           />
           {activePart.quoted_drop?.drop_id && (
-            <WaveDetailedDropQuote
-              dropId={activePart.quoted_drop.drop_id}
-              partId={activePart.quoted_drop.drop_part_id}
-              maybeDrop={
-                activePart.quoted_drop.drop
-                  ? { ...activePart.quoted_drop.drop, wave: wave }
-                  : null
-              }
-            />
+            <div className="tw-mt-3">
+              <WaveDetailedDropQuoteWithDropId
+                dropId={activePart.quoted_drop.drop_id}
+                partId={activePart.quoted_drop.drop_part_id}
+                maybeDrop={
+                  activePart.quoted_drop.drop
+                    ? { ...activePart.quoted_drop.drop, wave: wave }
+                    : null
+                }
+                onQuoteClick={onQuoteClick}
+              />
+            </div>
           )}
         </motion.div>
         {!!activePart.media.length && (
           <WaveDetailedDropPartContentMedias
             activePart={activePart}
-            updateContainerHeight={updateContainerHeight}
+            updateContainerHeight={() => {}}
           />
         )}
       </div>

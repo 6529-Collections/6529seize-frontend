@@ -16,7 +16,7 @@ import useCapacitor, {
 } from "../../../hooks/useCapacitor";
 
 export default function CapacitorWidget() {
-  const capacitor = useCapacitor();
+const capacitor = useCapacitor();
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
     useNavigationHistory();
 
@@ -69,6 +69,10 @@ export default function CapacitorWidget() {
       hammer.off("swipeleft", goForward);
     };
   }, [canGoBack, canGoForward]);
+
+  if (capacitor.keyboardVisible) {
+    return <></>;
+  }
 
   return (
     <div

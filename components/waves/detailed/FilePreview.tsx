@@ -82,13 +82,13 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               <button
                 onClick={() => removeFile(file.file)}
                 disabled={disabled}
-                className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red tw-rounded-full tw-size-7 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 hover:tw-bg-iron-700 ${
+                className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red tw-rounded-full tw-size-7 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 hover:tw-bg-iron-700 ${
                   disabled ? "tw-pointer-events-none" : ""
                 }`}
                 aria-label="Remove file"
               >
                 <svg
-                  className="tw-size-5"
+                  className="tw-size-5 tw-flex-shrink-0"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"

@@ -15,6 +15,9 @@ import { HttpFile } from '../http/http';
 export class WaveMetrics {
     'subscribers_count': number;
     'drops_count': number;
+    'latest_drop_timestamp': number;
+    'your_drops_count'?: number;
+    'your_latest_drop_timestamp'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,6 +31,24 @@ export class WaveMetrics {
         {
             "name": "drops_count",
             "baseName": "drops_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "latest_drop_timestamp",
+            "baseName": "latest_drop_timestamp",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "your_drops_count",
+            "baseName": "your_drops_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "your_latest_drop_timestamp",
+            "baseName": "your_latest_drop_timestamp",
             "type": "number",
             "format": "int64"
         }    ];

@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo, RefObject, useCallback, memo } from "react";
 import { Drop } from "../../../generated/models/Drop";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
+
 type DropActionHandler = ({
   drop,
   partId,
@@ -17,69 +17,83 @@ interface DropsListProps {
   readonly drops: ExtendedDrop[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
-  readonly rootDropId: string | null;
   readonly showReplyAndQuote: boolean;
   readonly isFetchingNextPage: boolean;
-  readonly onIntersection: (state: boolean) => void;
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
-  readonly onActiveDropClick?: () => void;
+  readonly onReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: Drop) => void;
+  readonly serialNo: number | null;
+  readonly targetDropRef: RefObject<HTMLDivElement> | null;
 }
 
-export default function DropsList({
+const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
+
+const DropsList = memo(function DropsList({
   drops,
   showWaveInfo,
   activeDrop,
-  rootDropId,
   showReplyAndQuote,
   isFetchingNextPage,
-  onIntersection,
   onReply,
   onQuote,
-  onActiveDropClick,
+  onReplyClick,
+  serialNo,
+  targetDropRef,
+  onQuoteClick,
 }: DropsListProps) {
-  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
-    number | null
-  >(null);
-  const intersectionElementRef = useIntersectionObserver(onIntersection);
+  const handleReply = useCallback<DropActionHandler>(
+    ({ drop, partId }) => onReply({ drop, partId }),
+    [onReply]
+  );
 
-  useEffect(() => {
-    setIntersectionTargetIndex(drops.length >= 40 ? 30 : drops.length - 1);
-  }, [drops]);
+  const handleQuote = useCallback<DropActionHandler>(
+    ({ drop, partId }) => onQuote({ drop, partId }),
+    [onQuote]
+  );
+
+  const handleReplyClick = useCallback(
+    (dropSerialNo: number) => onReplyClick(dropSerialNo),
+    [onReplyClick]
+  );
 
   const memoizedDrops = useMemo(
     () =>
       drops.map((drop, i) => (
-        <div key={drop.stableKey}>
-          {intersectionTargetIndex === i && (
-            <div ref={intersectionElementRef}>
-              <CommonIntersectionElement onIntersection={onIntersection} />
-            </div>
-          )}
-          <WaveDetailedDrop
+        <div
+          key={drop.stableKey}
+          id={`drop-${drop.serial_no}`}
+          ref={serialNo === drop.serial_no ? targetDropRef : null}
+          className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
+         /*  style={{
+            contentVisibility: "auto",
+            containIntrinsicSize: "auto",
+          }} */
+        >
+          <MemoizedWaveDetailedDrop
+            onReplyClick={handleReplyClick}
             drop={drop}
             previousDrop={drops[i - 1] ?? null}
             nextDrop={drops[i + 1] ?? null}
             showWaveInfo={showWaveInfo}
             activeDrop={activeDrop}
-            onReply={onReply}
-            onQuote={onQuote}
-            rootDropId={rootDropId}
+            onReply={handleReply}
+            onQuote={handleQuote}
             showReplyAndQuote={showReplyAndQuote}
-            onActiveDropClick={onActiveDropClick}
+            onQuoteClick={onQuoteClick}
           />
         </div>
       )),
     [
       drops,
-      intersectionTargetIndex,
       showWaveInfo,
       activeDrop,
-      onReply,
-      onQuote,
-      rootDropId,
+      handleReply,
+      handleQuote,
       showReplyAndQuote,
-      onActiveDropClick,
+      serialNo,
+      targetDropRef,
+      handleReplyClick,
     ]
   );
 
@@ -93,4 +107,6 @@ export default function DropsList({
       {memoizedDrops}
     </div>
   );
-}
+});
+
+export default DropsList;

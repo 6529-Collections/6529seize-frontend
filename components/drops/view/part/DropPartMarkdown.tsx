@@ -12,14 +12,22 @@ import { DropMentionedUser } from "../../../../generated/models/DropMentionedUse
 import { DropReferencedNFT } from "../../../../generated/models/DropReferencedNFT";
 import { Tweet } from "react-tweet";
 import Link from "next/link";
-import WaveDetailedDropQuote from "../../../waves/detailed/drops/WaveDetailedDropQuote";
+
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
+import WaveDetailedDropQuoteWithDropId from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithDropId";
+import WaveDetailedDropQuoteWithSerialNo from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithSerialNo";
+import { Drop } from "../../../../generated/models/Drop";
+import {
+  parseSeizeLink,
+  SeizeLinkInfo,
+} from "../../../../helpers/SeizeLinkParser";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<DropMentionedUser>;
   readonly referencedNfts: Array<DropReferencedNFT>;
   readonly partContent: string | null;
   readonly onImageLoaded: () => void;
+  readonly onQuoteClick: (drop: Drop) => void;
   readonly textSize?: "sm" | "md";
 }
 
@@ -28,6 +36,7 @@ function DropPartMarkdown({
   referencedNfts,
   partContent,
   onImageLoaded,
+  onQuoteClick,
   textSize = "md",
 }: DropPartMarkdownProps) {
   const textSizeClass = (() => {
@@ -161,48 +170,57 @@ function DropPartMarkdown({
       return null;
     }
 
-    const baseEndpoint = process.env.BASE_ENDPOINT || "";
-    const regex =
-      /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
-    const match = href ? href.match(regex) : null;
-    const isSeizeLink = !!match;
-    const waveId = match ? match[1] : null;
-    const dropId = match ? match[2] : null;
-
-    if (isSeizeLink && dropId && waveId) {
-      return (
-        <WaveDetailedDropQuote dropId={dropId} partId={1} maybeDrop={null} />
-      );
+    const seizeLinkInfo = parseSeizeLink(href);
+    if (seizeLinkInfo) {
+      return renderSeizeQuote(seizeLinkInfo, onQuoteClick);
     }
 
-    const twitterRegex =
-      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
-    const twitterMatch = href ? href.match(twitterRegex) : null;
-
+    const twitterMatch = parseTwitterLink(href);
     if (twitterMatch) {
-      const tweetId = twitterMatch[3];
-      return (
-        <Link className="tw-no-underline" target="_blank" href={href}>
-          <Tweet id={tweetId} />
-        </Link>
-      );
+      return renderTweetEmbed(twitterMatch, href);
     }
 
-    const isValidLink =
-      href?.startsWith("..") || href?.startsWith("/") || !href?.includes(".");
-
-    if (isValidLink) {
+    if (!isValidLink(href)) {
       return <p>[invalid link]</p>;
     }
 
-    const isExternalLink =
-      href && baseEndpoint && !href.startsWith(baseEndpoint);
+    return renderExternalOrInternalLink(href, props);
+  };
+
+  const parseTwitterLink = (href: string): string | null => {
+    const twitterRegex =
+      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
+    const match = href.match(twitterRegex);
+    return match ? match[3] : null;
+  };
+
+  const renderTweetEmbed = (tweetId: string, href: string) => (
+    <Link className="tw-no-underline" target="_blank" href={href}>
+      <Tweet id={tweetId} />
+    </Link>
+  );
+
+  const isValidLink = (href: string): boolean => {
+    try {
+      new URL(href);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const renderExternalOrInternalLink = (
+    href: string,
+    props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
+  ) => {
+    const baseEndpoint = process.env.BASE_ENDPOINT || "";
+    const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
 
     if (isExternalLink) {
       props.rel = "noopener noreferrer nofollow";
       props.target = "_blank";
     } else {
-      props.href = href?.replace(baseEndpoint, "");
+      props.href = href.replace(baseEndpoint, "");
     }
 
     return (
@@ -216,6 +234,34 @@ function DropPartMarkdown({
         {...props}
       />
     );
+  };
+
+  const renderSeizeQuote = (
+    seizeLinkInfo: SeizeLinkInfo,
+    onQuoteClick: (drop: Drop) => void
+  ) => {
+    const { waveId, serialNo, dropId } = seizeLinkInfo;
+
+    if (serialNo) {
+      return (
+        <WaveDetailedDropQuoteWithSerialNo
+          serialNo={parseInt(serialNo)}
+          waveId={waveId}
+          onQuoteClick={onQuoteClick}
+        />
+      );
+    } else if (dropId) {
+      return (
+        <WaveDetailedDropQuoteWithDropId
+          dropId={dropId}
+          partId={1}
+          maybeDrop={null}
+          onQuoteClick={onQuoteClick}
+        />
+      );
+    }
+
+    return null;
   };
 
   return (

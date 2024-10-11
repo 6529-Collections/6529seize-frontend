@@ -1,8 +1,6 @@
 import { Wave } from "../../../generated/models/Wave";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -12,6 +10,9 @@ interface WaveDetailedMobileProps {
   readonly wave: Wave;
   readonly view: WaveDetailedView;
   readonly setView: (view: WaveDetailedView) => void;
+  readonly isLoading: boolean;
+  readonly onWaveChange: (wave: Wave) => void;
+  readonly setIsLoading: (isLoading: boolean) => void;
 }
 
 export enum WaveDetailedMobileView {
@@ -23,55 +24,16 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   wave,
   view,
   setView,
+  isLoading,
+  onWaveChange,
+  setIsLoading,
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const getActiveDropId = (): string | null => {
-    const dropId = searchParams.get("drop");
-    return dropId ?? null;
-  };
-
-  const [activeDropId, setActiveDropId] = useState<string | null>(
-    getActiveDropId()
-  );
-  useEffect(() => setActiveDropId(getActiveDropId()), [searchParams]);
 
   const [activeView, setActiveView] = useState<WaveDetailedMobileView>(
     WaveDetailedMobileView.CHAT
   );
-
-  const onBackToList = () => {
-    const updatedQuery = { ...router.query };
-    delete updatedQuery.drop;
-    router.replace(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const container = contentWrapperRef.current;
-
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      if (rect.top < 0) {
-        container.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "center",
-        });
-      }
-    }
-  }, [activeDropId]);
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -105,14 +67,18 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
+  const handleWaveChange = (newWave: Wave) => {
+    setIsLoading(true);
+    onWaveChange(newWave);
+    setActiveView(WaveDetailedMobileView.CHAT);
+    setView(WaveDetailedView.CONTENT);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
+
   const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: (
-      <WaveDetailedContent
-        activeDropId={activeDropId}
-        wave={wave}
-        onBackToList={onBackToList}
-      />
-    ),
+    [WaveDetailedView.CONTENT]: <WaveDetailedContent wave={wave} />,
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}
@@ -120,9 +86,23 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
       />
     ),
   };
-
   const components: Record<WaveDetailedMobileView, JSX.Element> = {
-    [WaveDetailedMobileView.CHAT]: chatComponents[view],
+    [WaveDetailedMobileView.CHAT]: isLoading ? (
+      <div className="tw-flex tw-items-center tw-justify-center tw-h-[calc(100vh-9rem)] tw-bg-iron-950">
+        <div className="tw-flex tw-flex-col tw-items-center tw-space-y-4">
+          <div className="tw-relative tw-w-16 tw-h-16">
+            <div className="tw-absolute tw-inset-0 tw-border-4 tw-border-primary-400 tw-rounded-full tw-animate-pulse"></div>
+            <div className="tw-absolute tw-inset-2 tw-border-4 tw-border-primary-300 tw-rounded-full tw-animate-ping"></div>
+            <div className="tw-absolute tw-inset-4 tw-bg-primary-500 tw-rounded-full tw-animate-pulse"></div>
+          </div>
+          <p className="tw-text-primary-300 tw-text-base tw-font-medium tw-animate-pulse">
+            Loading chat...
+          </p>
+        </div>
+      </div>
+    ) : (
+      chatComponents[view]
+    ),
     [WaveDetailedMobileView.ABOUT]: (
       <WaveDetailedMobileAbout
         wave={wave}
@@ -130,6 +110,8 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
         showRequiredTypes={showRequiredTypes}
         setView={setView}
         setActiveView={setActiveView}
+        onWaveChange={handleWaveChange}
+        setIsLoading={setIsLoading}
       />
     ),
   };
@@ -139,33 +121,34 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   }
 
   return (
-    <div className="tailwind-scope tw-bg-black">
-      <div className="tw-mt-4">
-        <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
-          <button
-            onClick={() => setActiveView(WaveDetailedMobileView.CHAT)}
-            className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
-              activeView === WaveDetailedMobileView.CHAT
-                ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
-                : "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-            }`}
-          >
-            Chat
-          </button>
-          <button
-            onClick={() => setActiveView(WaveDetailedMobileView.ABOUT)}
-            className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 ${
-              activeView === WaveDetailedMobileView.ABOUT
-                ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
-                : "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-            }`}
-          >
-            About
-          </button>
-        </div>
-        <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
-          {components[activeView]}
-        </div>
+    <div
+      className="tailwind-scope tw-bg-black"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
+        <button
+          onClick={() => setActiveView(WaveDetailedMobileView.CHAT)}
+          className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
+            activeView === WaveDetailedMobileView.CHAT
+              ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+              : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+          }`}
+        >
+          Chat
+        </button>
+        <button
+          onClick={() => setActiveView(WaveDetailedMobileView.ABOUT)}
+          className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 ${
+            activeView === WaveDetailedMobileView.ABOUT
+              ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+              : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+          }`}
+        >
+          About
+        </button>
+      </div>
+      <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
+        {components[activeView]}
       </div>
     </div>
   );

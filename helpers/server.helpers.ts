@@ -19,6 +19,9 @@ import {
 } from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { SortDirection } from "../entities/ISort";
 import { ProfileProxy } from "../generated/models/ProfileProxy";
+import { Wave } from "../generated/models/Wave";
+import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
+import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -255,6 +258,67 @@ export const getProfileRatingsByRater = async ({
       data: [],
     };
   }
+};
+
+export const getWave = async ({
+  waveId,
+  headers,
+}: {
+  waveId: string;
+  readonly headers: Record<string, string>;
+}) => {
+  return await commonApiFetch<Wave>({
+    endpoint: `waves/${waveId}`,
+    headers,
+  });
+};
+
+export const getWavesOverview = async ({
+  headers,
+  limit,
+  offset,
+  type,
+  onlyWavesFollowedByAuthenticatedUser,
+}: {
+  readonly headers: Record<string, string>;
+  readonly limit: number;
+  readonly offset: number;
+  readonly type: string;
+  readonly onlyWavesFollowedByAuthenticatedUser: boolean;
+}): Promise<Wave[]> => {
+  const queryParams: Record<string, string> = {
+    limit: `${limit}`,
+    offset: `${offset}`,
+    type: type,
+    only_waves_followed_by_authenticated_user:
+      onlyWavesFollowedByAuthenticatedUser.toString(),
+  };
+
+  return await commonApiFetch<Wave[]>({
+    endpoint: `waves-overview`,
+    params: queryParams,
+    headers,
+  });
+};
+
+export const getWaveDrops = async ({
+  waveId,
+  headers,
+}: {
+  readonly waveId: string;
+  readonly headers: Record<string, string>;
+}): Promise<WaveDropsFeed> => {
+  const params: Record<string, string> = {
+    limit: WAVE_DROPS_PARAMS.limit.toString(),
+  };
+
+  const results = await commonApiFetch<WaveDropsFeed>({
+    endpoint: `waves/${waveId}/drops`,
+    params,
+    headers,
+  });
+
+  return results;
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {

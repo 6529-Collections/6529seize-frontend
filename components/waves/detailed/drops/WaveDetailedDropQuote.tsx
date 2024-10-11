@@ -1,49 +1,24 @@
-import React, { useContext, useEffect, useState } from "react";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { AuthContext } from "../../../auth/Auth";
+import React, { useEffect, useState } from "react";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Drop } from "../../../../generated/models/Drop";
 import { DropPart } from "../../../../generated/models/DropPart";
-import { useRouter } from "next/router";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 interface WaveDetailedDropQuoteProps {
-  readonly dropId: string;
+  readonly drop: Drop | null;
   readonly partId: number;
-  readonly maybeDrop: Drop | null;
+  readonly onQuoteClick: (drop: Drop) => void;
 }
 
 const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
-  dropId,
+  drop,
   partId,
-  maybeDrop,
+  onQuoteClick,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
-  const router = useRouter();
-  const { data: drop } = useQuery<Drop>({
-    queryKey: [
-      QueryKey.DROP,
-      {
-        drop_id: dropId,
-        context_profile: connectedProfile?.profile?.handle,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<Drop>({
-        endpoint: `drops/${dropId}`,
-        params: connectedProfile?.profile?.handle
-          ? { context_profile: connectedProfile.profile.handle }
-          : {},
-      }),
-    placeholderData: keepPreviousData,
-    initialData: maybeDrop ?? undefined,
-  });
 
   const [quotedPart, setQuotedPart] = useState<DropPart | null>(null);
   useEffect(() => {
@@ -83,7 +58,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
 
   const navigateToDropInWave = () => {
     if (drop?.wave.id && drop?.id) {
-      router.push(`/waves/${drop.wave.id}?drop=${drop.id}`);
+      onQuoteClick(drop);
     }
   };
 
@@ -137,7 +112,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 navigateToDropInWave();
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
                   navigateToDropInWave();
@@ -152,6 +127,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 referencedNfts={drop?.referenced_nfts ?? []}
                 onImageLoaded={() => undefined}
                 textSize="sm"
+                onQuoteClick={onQuoteClick}
               />
             </div>
           </div>

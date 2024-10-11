@@ -67,7 +67,7 @@ export default function CreateDropFullDesktopMetadata({
           className="tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2.5 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
         >
           <svg
-            className="tw-w-5 tw-h-5"
+            className="tw-w-5 tw-h-5 tw-flex"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

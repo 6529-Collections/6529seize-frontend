@@ -110,7 +110,17 @@ export default function DropReply(props: DropReplyProps) {
 
   const onReplyClick = () => {
     router.push(
-      `/waves/${finalDrop?.wave.id}?drop=${finalDrop?.id}`,
+      `/waves/${finalDrop?.wave.id}?drop=${finalDrop?.serial_no}`,
+      undefined,
+      {
+        shallow: true,
+      }
+    );
+  };
+
+  const onQuoteClick = (drop: Drop) => {
+    router.push(
+      `/waves/${drop.wave.id}?drop=${drop.serial_no}`,
       undefined,
       {
         shallow: true,
@@ -145,6 +155,7 @@ export default function DropReply(props: DropReplyProps) {
             referencedNfts={finalDrop?.referenced_nfts ?? []}
             onImageLoaded={() => undefined}
             textSize="sm"
+            onQuoteClick={onQuoteClick}
           />
         </div>
       </div>

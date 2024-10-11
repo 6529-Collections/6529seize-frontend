@@ -30,61 +30,60 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
 }) => {
   return (
     <div className="tw-mt-2 tw-space-y-2">
-      <div>
-        <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
-          <span>
-            <span className="tw-text-xs tw-text-iron-300">Add Metadata</span>
-          </span>
-          <Tippy
-            content={
-              <div className="tw-text-center">
-                <span
-                  className={`tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
-                >
-                  Close
-                </span>
-              </div>
-            }
-            placement="top"
-            disabled={false}
-          >
-            <button
-              type="button"
-              onClick={closeMetadata}
-              className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="tw-size-5"
+      <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
+        <span>
+          <span className="tw-text-xs tw-text-iron-300">Add Metadata</span>
+        </span>
+        <Tippy
+          content={
+            <div className="tw-text-center">
+              <span
+                className={`tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18 18 6M6 6l12 12"
-                ></path>
-              </svg>
-            </button>
-          </Tippy>
-        </div>
-        <div className="tw-space-y-2 tw-w-full">
-          {metadata.map((item, index) => (
-            <CreateDropMetadataRow
-              key={index}
-              isError={missingRequiredMetadataKeys.includes(item.key)}
-              onRemove={onRemoveMetadata}
-              metadata={item}
-              index={index}
-              onChangeKey={onChangeKey}
-              onChangeValue={onChangeValue}
-              disabled={disabled}
-            />
-          ))}
-        </div>
+                Close
+              </span>
+            </div>
+          }
+          placement="top"
+          disabled={false}
+        >
+          <button
+            type="button"
+            onClick={closeMetadata}
+            className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="tw-size-5 tw-flex-shrink-0"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18 18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </Tippy>
       </div>
+      <div className="tw-space-y-2">
+        {metadata.map((item, index) => (
+          <CreateDropMetadataRow
+            key={index}
+            isError={missingRequiredMetadataKeys.includes(item.key)}
+            onRemove={onRemoveMetadata}
+            metadata={item}
+            index={index}
+            onChangeKey={onChangeKey}
+            onChangeValue={onChangeValue}
+            disabled={disabled}
+          />
+        ))}
+      </div>
+
       <button
         type="button"
         onClick={onAddMetadata}

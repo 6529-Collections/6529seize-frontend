@@ -1,5 +1,5 @@
 import { createContext, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import {
   ApiProfileRepRatesState,
   IProfileAndConsolidations,
@@ -22,6 +22,12 @@ import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
 import { FeedItemType } from "../../generated/models/FeedItemType";
 import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
 import { addDropToDrops } from "./utils/addDropsToDrops";
+import { Wave } from "../../generated/models/Wave";
+import {
+  WAVE_DROPS_PARAMS,
+  WAVE_FOLLOWING_WAVES_PARAMS,
+} from "./utils/query-utils";
+import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -120,6 +126,12 @@ export interface InitProfileIdentityPageParams {
 
 type ReactQueryWrapperContextType = {
   readonly setProfile: (profile: IProfileAndConsolidations) => void;
+  readonly setWave: (wave: Wave) => void;
+  readonly setWavesOverviewPage: (wavesOverview: Wave[]) => void;
+  readonly setWaveDrops: (params: {
+    readonly waveDrops: WaveDropsFeed;
+    readonly waveId: string;
+  }) => void;
   readonly setProfileProxy: (profileProxy: ProfileProxy) => void;
   readonly onProfileProxyModify: ({
     profileProxyId,
@@ -172,10 +184,7 @@ type ReactQueryWrapperContextType = {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
   waitAndInvalidateDrops: () => void;
-  addOptimisticDrop: (params: {
-    readonly drop: Drop;
-    readonly rootDropId: string | null;
-  }) => void;
+  addOptimisticDrop: (params: { readonly drop: Drop }) => void;
   onDropChange: (params: {
     readonly drop: Drop;
     readonly giverHandle: string | null;
@@ -194,7 +203,10 @@ type ReactQueryWrapperContextType = {
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
     setProfile: () => {},
+    setWavesOverviewPage: () => {},
     setProfileProxy: () => {},
+    setWave: () => {},
+    setWaveDrops: () => {},
     onProfileProxyModify: () => {},
     onProfileCICModify: () => {},
     onProfileRepModify: () => {},
@@ -277,6 +289,63 @@ export default function ReactQueryWrapper({
         [QueryKey.PROFILE, handle],
         profile
       );
+    }
+  };
+
+  const setWave = (wave: Wave) => {
+    queryClient.setQueryData<Wave>([QueryKey.WAVE, { wave_id: wave.id }], wave);
+  };
+
+  const setWavesOverviewPage = (wavesOverview: Wave[]) => {
+    const queryKey = [
+      QueryKey.WAVES_OVERVIEW,
+      {
+        limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+        type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+        only_waves_followed_by_authenticated_user:
+          WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+      },
+    ];
+
+    // Check if there's existing data
+    const existingData = queryClient.getQueryData(queryKey);
+    if (existingData) {
+      return;
+    } else {
+      // If there's no existing data, set the initial data
+      queryClient.setQueryData<InfiniteData<Wave[]>>(queryKey, {
+        pages: [wavesOverview],
+        pageParams: [undefined],
+      });
+    }
+  };
+
+  const setWaveDrops = ({
+    waveDrops,
+    waveId,
+  }: {
+    readonly waveDrops: WaveDropsFeed;
+    readonly waveId: string;
+  }) => {
+    const queryKey = [
+      QueryKey.DROPS,
+      {
+        waveId,
+        limit: WAVE_DROPS_PARAMS.limit,
+        dropId: null,
+      },
+    ];
+
+    // Check if there's existing data
+    const existingData = queryClient.getQueryData(queryKey);
+    if (existingData) {
+      return;
+    } else {
+      // If there's no existing data, set the initial data
+      queryClient.setQueryData<InfiniteData<WaveDropsFeed>>(queryKey, {
+        pages: [waveDrops],
+        pageParams: [undefined],
+      });
     }
   };
 
@@ -1129,12 +1198,11 @@ export default function ReactQueryWrapper({
 
   const addOptimisticDrop = async ({
     drop,
-    rootDropId,
   }: {
     readonly drop: Drop;
-    readonly rootDropId: string | null;
   }): Promise<void> => {
-    addDropToDrops(queryClient, { drop, rootDropId });
+    addDropToDrops(queryClient, { drop });
+    increaseWavesOverviewDropsCount(queryClient, drop.wave.id);
     increaseFeedItemsDropRedropCount({ drop });
     increaseDropsDropRedropCount({ drop });
     if (drop.reply_to) {
@@ -1361,6 +1429,9 @@ export default function ReactQueryWrapper({
   const value = useMemo(
     () => ({
       setProfile,
+      setWave,
+      setWavesOverviewPage,
+      setWaveDrops,
       setProfileProxy,
       onProfileProxyModify,
       onProfileCICModify,
@@ -1388,6 +1459,9 @@ export default function ReactQueryWrapper({
     }),
     [
       setProfile,
+      setWave,
+      setWavesOverviewPage,
+      setWaveDrops,
       setProfileProxy,
       onProfileProxyModify,
       onProfileCICModify,

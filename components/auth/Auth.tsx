@@ -61,8 +61,7 @@ type AuthContextType = {
   readonly title: string;
 };
 
-// TODO: change it back to 10
-export const WAVES_MIN_ACCESS_LEVEL = 0;
+export const WAVES_MIN_ACCESS_LEVEL = 10;
 const DEFAULT_TITLE = "6529 SEIZE";
 
 export const AuthContext = createContext<AuthContextType>({
@@ -78,6 +77,10 @@ export const AuthContext = createContext<AuthContextType>({
   title: DEFAULT_TITLE,
 });
 
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
 export default function Auth({
   children,
 }: {
@@ -85,19 +88,26 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { address } = useAccount();
+
   const { seizeDisconnect } = useSeizeConnect();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const { data: connectedProfile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, address?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
+  const [connectedProfile, setConnectedProfile] =
+    useState<IProfileAndConsolidations>();
+
+  useEffect(() => {
+    if (address && getAuthJwt()) {
+      commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${address}`,
-      }),
-    enabled: !!address,
-  });
+      }).then((profile) => {
+        setConnectedProfile(profile);
+      });
+    } else {
+      setConnectedProfile(undefined);
+    }
+  }, [address, getAuthJwt()]);
 
   const { data: profileProxies } = useQuery<ProfileProxy[]>({
     queryKey: [
@@ -141,11 +151,15 @@ export default function Auth({
     }
   }, [profileProxies, connectedProfile]);
 
+  function reset() {
+    removeAuthJwt();
+    invalidateAll();
+    setActiveProfileProxy(null);
+  }
+
   useEffect(() => {
     if (!address) {
-      removeAuthJwt();
-      invalidateAll();
-      setActiveProfileProxy(null);
+      reset();
       return;
     } else {
       const isAuth = validateJwt({
@@ -154,9 +168,7 @@ export default function Auth({
         role: activeProfileProxy?.created_by.id ?? null,
       });
       if (!isAuth) {
-        removeAuthJwt();
-        setActiveProfileProxy(null);
-        invalidateAll();
+        reset();
         setShowSignModal(true);
       }
     }

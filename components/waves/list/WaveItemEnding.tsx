@@ -1,12 +1,14 @@
 import { Wave } from "../../../generated/models/Wave";
 import { getTimeUntil } from "../../../helpers/Helpers";
+import Tippy from "@tippyjs/react";
+import 'tippy.js/dist/tippy.css';
 
 export default function WaveItemEnding({ wave }: { readonly wave: Wave }) {
   const ending = wave.wave.period?.max;
   const haveEnding = !!ending;
   const isPast = !!ending && ending < Date.now();
 
-  return (
+  const content = (
     <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300">
       <svg
         className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
@@ -25,22 +27,31 @@ export default function WaveItemEnding({ wave }: { readonly wave: Wave }) {
 
       {!haveEnding ? (
         <span>
-          <span className="tw-text-iron-400">Ending</span>{" "}
+          <span className="tw-text-iron-400 xl:tw-hidden">Ending</span>{" "}
           <span className="tw-font-medium tw-text-iron-50">Never</span>
         </span>
       ) : isPast ? (
         <span>
-          <span className="tw-text-iron-400">Ending</span>{" "}
+          <span className="tw-text-iron-400 xl:tw-hidden">Ending</span>{" "}
           <span className="tw-font-medium tw-text-iron-50">Ended</span>
         </span>
       ) : (
         <span>
-          <span className="tw-text-iron-400">Ending in</span>{" "}
+          <span className="tw-text-iron-400 xl:tw-hidden">Ending in</span>{" "}
           <span className="tw-font-medium tw-text-iron-50">
             {getTimeUntil(wave.wave.period?.max!).replace("in ", "")}
           </span>
         </span>
       )}
     </div>
+  );
+
+  return (
+    <Tippy
+      content="Ending"
+      className="xl:tw-inline-block tw-hidden"
+    >
+      {content}
+    </Tippy>
   );
 }

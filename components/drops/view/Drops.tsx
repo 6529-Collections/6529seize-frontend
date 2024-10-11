@@ -2,7 +2,7 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { Drop } from "../../../generated/models/Drop";
 import DropsList from "./DropsList";
@@ -14,6 +14,8 @@ export default function Drops() {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string).toLowerCase();
   const { connectedProfile } = useContext(AuthContext);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
     data,
@@ -57,39 +59,63 @@ export default function Drops() {
   useEffect(
     () =>
       setDrops(
-        data?.pages
-          .flat()
-          .map((drop) => ({
-            ...drop,
-            stableKey: drop.id,
-            stableHash: drop.id,
-          })) ?? []
+        data?.pages.flat().map((drop) => ({
+          ...drop,
+          stableKey: drop.id,
+          stableHash: drop.id,
+        })) ?? []
       ),
     [data]
   );
 
-  const onBottomIntersection = (state: boolean) => {
+  const onBottomIntersection = useCallback(() => {
     if (drops.length < REQUEST_SIZE) {
       return;
     }
 
-    if (!state) {
-      return;
-    }
-    if (status === "pending") {
-      return;
-    }
-    if (isFetching) {
-      return;
-    }
-    if (isFetchingNextPage) {
-      return;
-    }
-    if (!hasNextPage) {
+    if (status === "pending" || isFetching || isFetchingNextPage || !hasNextPage) {
       return;
     }
 
     fetchNextPage();
+  }, [drops.length, status, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        onBottomIntersection();
+      }
+    }, options);
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [onBottomIntersection]);
+
+  useEffect(() => {
+    if (bottomRef.current && observerRef.current) {
+      observerRef.current.observe(bottomRef.current);
+    }
+
+    return () => {
+      if (bottomRef.current && observerRef.current) {
+        observerRef.current.unobserve(bottomRef.current);
+      }
+    };
+  }, [drops]);
+
+  const onQuoteClick = (drop: Drop) => {
+    router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
   };
 
   if (!drops.length && !isFetching) {
@@ -105,14 +131,17 @@ export default function Drops() {
       <DropsList
         drops={drops}
         showWaveInfo={true}
-        onIntersection={onBottomIntersection}
         onReply={() => {}}
         onQuote={() => {}}
-        showReplyAndQuote={true}
+        onReplyClick={() => {}}
+        serialNo={null}
+        targetDropRef={null}
+        showReplyAndQuote={false}
         activeDrop={null}
-        rootDropId={null}
         isFetchingNextPage={isFetchingNextPage}
+        onQuoteClick={onQuoteClick}
       />
+      <div ref={bottomRef} style={{ height: "1px" }} />
     </div>
   );
 }
