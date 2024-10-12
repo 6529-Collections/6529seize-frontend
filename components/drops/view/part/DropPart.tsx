@@ -1,14 +1,10 @@
-import { ReactNode, memo, useRef, useState, useEffect } from "react";
-
-import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
+import { ReactNode, memo, useRef } from "react";
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
 import DropPfp from "../../create/utils/DropPfp";
 import DropAuthor from "../../create/utils/author/DropAuthor";
 import Link from "next/link";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
-import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
-import DropPartMarkdown from "./DropPartMarkdown";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useRouter } from "next/router";
 import DropPartContent from "./DropPartContent";

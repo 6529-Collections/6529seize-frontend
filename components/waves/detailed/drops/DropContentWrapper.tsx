@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface DropContentWrapperProps {
   readonly children: React.ReactNode;
