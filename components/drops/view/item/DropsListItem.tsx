@@ -37,7 +37,6 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
 export default function DropsListItem({
   drop,
   replyToDrop,
-  showFull = false,
   showWaveInfo = true,
   availableCredit,
   isReply = false,
@@ -49,7 +48,6 @@ export default function DropsListItem({
 }: {
   readonly drop: ApiDrop;
   readonly replyToDrop: ApiDrop | null;
-  readonly showFull?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
   readonly isReply?: boolean;
@@ -152,8 +150,7 @@ export default function DropsListItem({
   return (
     <div
       className={`${
-        !isReply &&
-        "tw-rounded-xl tw-overflow-hidden"
+        !isReply && "tw-rounded-xl tw-overflow-hidden"
       }  tw-relative tw-bg-iron-900 ${
         dropReplyDepth < 2 && ""
       }  tw-transition tw-duration-300 tw-ease-out`}
@@ -172,7 +169,6 @@ export default function DropsListItem({
             <DropListItemContent
               key={randomKey}
               drop={drop}
-              showFull={showFull}
               voteState={voteState}
               canVote={canVote}
               availableCredit={availableCredit}
