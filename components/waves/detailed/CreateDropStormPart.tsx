@@ -28,7 +28,6 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
           mentionedUsers={mentionedUsers}
           referencedNfts={referencedNfts}
           partContent={part.content ?? ""}
-          onImageLoaded={() => {}}
           onQuoteClick={() => {}}
         />
       </div>

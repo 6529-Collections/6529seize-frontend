@@ -84,7 +84,6 @@ export default function DropPartQuote({
           mimeType: media.mime_type,
           mediaSrc: media.url,
         }))}
-        showFull={false}
         createdAt={drop.created_at}
         dropTitle={drop.title}
         wave={{

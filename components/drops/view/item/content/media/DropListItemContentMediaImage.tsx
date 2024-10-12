@@ -2,13 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 
-function DropListItemContentMediaImage({
-  src,
-  onImageLoaded,
-}: {
-  readonly src: string;
-  readonly onImageLoaded: () => void;
-}) {
+function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
@@ -16,14 +10,13 @@ function DropListItemContentMediaImage({
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
-    onImageLoaded();
     if (imgRef.current) {
       setNaturalSize({
         width: imgRef.current.naturalWidth,
         height: imgRef.current.naturalHeight,
       });
     }
-  }, [onImageLoaded]);
+  }, []);
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLImageElement>) => {

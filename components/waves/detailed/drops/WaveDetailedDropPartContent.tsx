@@ -108,7 +108,6 @@ const WaveDetailedDropPartContent: React.FC<
             mentionedUsers={memoizedMentionedUsers}
             referencedNfts={memoizedReferencedNfts}
             partContent={activePart.content}
-            onImageLoaded={() => {}}
             onQuoteClick={onQuoteClick}
           />
           {activePart.quoted_drop?.drop_id && (
@@ -129,7 +128,6 @@ const WaveDetailedDropPartContent: React.FC<
         {!!activePart.media.length && (
           <WaveDetailedDropPartContentMedias
             activePart={activePart}
-            updateContainerHeight={() => {}}
           />
         )}
       </div>

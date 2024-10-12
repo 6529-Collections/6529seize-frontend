@@ -211,6 +211,7 @@ export default function WaveDrops({
             serialNo={serialNo}
             targetDropRef={targetDropRef}
             onQuoteClick={onQuoteClick}
+            parentContainerRef={scrollContainerRef}
           />
         </div>
       </WaveDropsScrollContainer>
