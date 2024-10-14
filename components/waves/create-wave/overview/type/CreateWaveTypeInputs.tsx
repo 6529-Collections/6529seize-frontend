@@ -1,4 +1,4 @@
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import { WAVE_LABELS } from "../../../../../helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "../../../../utils/radio/CommonBorderedRadioButton";
 
@@ -6,16 +6,19 @@ export default function CreateWaveTypeInputs({
   selected,
   onChange,
 }: {
-  readonly selected: WaveType;
-  readonly onChange: (type: WaveType) => void;
+  readonly selected: ApiWaveType;
+  readonly onChange: (type: ApiWaveType) => void;
 }) {
-  const waveTypes: WaveType[] = [
-    WaveType.Chat,
-    WaveType.Rank,
-    WaveType.Approve,
+  const waveTypes: ApiWaveType[] = [
+    ApiWaveType.Chat,
+    ApiWaveType.Rank,
+    ApiWaveType.Approve,
   ];
 
-  const DISABLED_WAVE_TYPES: WaveType[] = [WaveType.Rank, WaveType.Approve];
+  const DISABLED_WAVE_TYPES: ApiWaveType[] = [
+    ApiWaveType.Rank,
+    ApiWaveType.Approve,
+  ];
 
   return (
     <div className="tw-mt-3 tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">

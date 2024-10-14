@@ -1,21 +1,21 @@
-import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
+import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "../../../../utils/input/identity/IdentitySearch";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
-import { GroupFilterDirection } from "../../../../../generated/models/GroupFilterDirection";
+import { ApiGroupFilterDirection } from "../../../../../generated/models/ApiGroupFilterDirection";
 
 export default function GroupCreateCIC({
   cic,
   setCIC,
 }: {
-  readonly cic: CreateGroupDescription["cic"];
-  readonly setCIC: (cic: CreateGroupDescription["cic"]) => void;
+  readonly cic: ApiCreateGroupDescription["cic"];
+  readonly setCIC: (cic: ApiCreateGroupDescription["cic"]) => void;
 }) {
-  const IDENTITY_LABEL: Record<GroupFilterDirection, string> = {
-    [GroupFilterDirection.Received]: "From Identity",
-    [GroupFilterDirection.Sent]: "To Identity",
+  const IDENTITY_LABEL: Record<ApiGroupFilterDirection, string> = {
+    [ApiGroupFilterDirection.Received]: "From Identity",
+    [ApiGroupFilterDirection.Sent]: "To Identity",
   };
 
   const identityLabel = cic.direction

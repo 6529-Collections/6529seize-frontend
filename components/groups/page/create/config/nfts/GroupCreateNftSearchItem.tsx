@@ -5,9 +5,9 @@ import {
   NEXTGEN_CONTRACT,
 } from "../../../../../../constants";
 import {
-  GroupOwnsNft,
-  GroupOwnsNftNameEnum,
-} from "../../../../../../generated/models/GroupOwnsNft";
+  ApiGroupOwnsNft,
+  ApiGroupOwnsNftNameEnum,
+} from "../../../../../../generated/models/ApiGroupOwnsNft";
 import {
   getScaledImageUri,
   ImageScale,
@@ -20,21 +20,21 @@ export default function GroupCreateNftSearchItem({
   onSelect,
 }: {
   readonly item: NFTSearchResult;
-  readonly selected: GroupOwnsNft[];
+  readonly selected: ApiGroupOwnsNft[];
   readonly onSelect: (newV: NFTSearchResult) => void;
 }) {
-  const NAME_ENUMS: Record<string, GroupOwnsNftNameEnum> = {
-    [GRADIENT_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Gradients,
-    [MEMES_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Memes,
-    [MEMELAB_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Memelab,
-    [NEXTGEN_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Nextgen,
+  const NAME_ENUMS: Record<string, ApiGroupOwnsNftNameEnum> = {
+    [GRADIENT_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Gradients,
+    [MEMES_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Memes,
+    [MEMELAB_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Memelab,
+    [NEXTGEN_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Nextgen,
   };
 
-  const labels: Record<GroupOwnsNftNameEnum, string> = {
-    [GroupOwnsNftNameEnum.Gradients]: "Gradients",
-    [GroupOwnsNftNameEnum.Memes]: "The Memes",
-    [GroupOwnsNftNameEnum.Memelab]: "Meme Lab",
-    [GroupOwnsNftNameEnum.Nextgen]: "NextGen",
+  const labels: Record<ApiGroupOwnsNftNameEnum, string> = {
+    [ApiGroupOwnsNftNameEnum.Gradients]: "Gradients",
+    [ApiGroupOwnsNftNameEnum.Memes]: "The Memes",
+    [ApiGroupOwnsNftNameEnum.Memelab]: "Meme Lab",
+    [ApiGroupOwnsNftNameEnum.Nextgen]: "NextGen",
   };
 
   const nameEnum = NAME_ENUMS[item.contract.toLowerCase()];
@@ -58,7 +58,8 @@ export default function GroupCreateNftSearchItem({
       <button
         type="button"
         className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-        onClick={() => onSelect(item)}>
+        onClick={() => onSelect(item)}
+      >
         <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
           <div className="tw-flex tw-space-x-2 tw-items-center">
             <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-900">
@@ -90,7 +91,8 @@ export default function GroupCreateNftSearchItem({
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M20 6L9 17L4 12"
                 stroke="currentColor"

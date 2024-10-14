@@ -1,4 +1,4 @@
-import { WaveType } from "../../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../../generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../../helpers/waves/create-wave.helpers";
 import { CreateWaveOutcomeConfig } from "../../../../../../types/waves.types";
 import CreateWaveOutcomesRow from "./CreateWaveOutcomesRow";
@@ -9,7 +9,7 @@ export default function CreateWaveOutcomesRows({
   outcomes,
   setOutcomes,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly setOutcomes: (outcomes: CreateWaveOutcomeConfig[]) => void;

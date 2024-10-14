@@ -1,5 +1,5 @@
 import { AcceptActionRequestActionEnum } from "../generated/models/AcceptActionRequest";
-import { ProfileProxyActionType } from "../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
 
 export interface IProfileWallet {
@@ -294,7 +294,7 @@ export interface ProfileActivityLogProxyActionCreated
   readonly contents: {
     readonly action_id: string;
     readonly proxy_id: string;
-    readonly type: ProfileProxyActionType;
+    readonly type: ApiProfileProxyActionType;
   };
 }
 
@@ -305,7 +305,7 @@ export interface ProfileActivityLogProxyActionStateChanged
     readonly action_id: string;
     readonly proxy_id: string;
     readonly state_change_type: AcceptActionRequestActionEnum;
-    readonly type: ProfileProxyActionType;
+    readonly type: ApiProfileProxyActionType;
   };
 }
 
@@ -317,7 +317,7 @@ export interface ProfileActivityLogProxyActionChanged
     readonly end_time?: number | null;
     readonly credit_amount?: number;
     readonly proxy_id: string;
-    readonly type: ProfileProxyActionType;
+    readonly type: ApiProfileProxyActionType;
   };
 }
 

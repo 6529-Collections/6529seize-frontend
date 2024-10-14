@@ -19,16 +19,16 @@ import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/Has
 import { IMAGE_TRANSFORMER } from "../../drops/create/lexical/transformers/ImageTransformer";
 import { AuthContext } from "../../auth/Auth";
 import { commonApiPost } from "../../../services/api/common-api";
-import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
-import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiCreateDropRequest } from "../../../generated/models/ApiCreateDropRequest";
+import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
-import { Wave } from "../../../generated/models/Wave";
-import { WaveMetadataType } from "../../../generated/models/WaveMetadataType";
-import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataType";
+import { ApiWaveParticipationRequirement } from "../../../generated/models/ApiWaveParticipationRequirement";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
@@ -38,13 +38,13 @@ import { createBreakpoint } from "react-use";
 export type CreateDropMetadataType =
   | {
       key: string;
-      readonly type: WaveMetadataType.String;
+      readonly type: ApiWaveMetadataType.String;
       value: string | null;
       readonly required: boolean;
     }
   | {
       key: string;
-      readonly type: WaveMetadataType.Number;
+      readonly type: ApiWaveMetadataType.Number;
       value: number | null;
       readonly required: boolean;
     }
@@ -58,17 +58,17 @@ export type CreateDropMetadataType =
 interface CreateDropContentProps {
   activeDrop: ActiveDropState | null;
   onCancelReplyQuote: () => void;
-  wave: Wave;
+  wave: ApiWave;
   drop: CreateDropConfig | null;
   isStormMode: boolean;
   setDrop: React.Dispatch<React.SetStateAction<CreateDropConfig | null>>;
   setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
-  submitDrop: (dropRequest: CreateDropRequest) => void;
+  submitDrop: (dropRequest: ApiCreateDropRequest) => void;
 }
 
 interface MissingRequirements {
   metadata: string[];
-  media: WaveParticipationRequirement[];
+  media: ApiWaveParticipationRequirement[];
 }
 
 const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
@@ -84,7 +84,7 @@ const getPartMentions = (
 
 const getUpdatedMentions = (
   partMentions: Omit<MentionedUser, "current_handle">[],
-  existingMentions: DropMentionedUser[]
+  existingMentions: ApiDropMentionedUser[]
 ) => {
   const notAddedMentions = partMentions.filter(
     (mention) =>
@@ -140,14 +140,14 @@ const convertMetadataToDropMetadata = (
 };
 
 type HandleDropPartResult = {
-  updatedMentions: DropMentionedUser[];
+  updatedMentions: ApiDropMentionedUser[];
   updatedNfts: ReferencedNft[];
   updatedMarkdown: string;
 };
 
 const handleDropPart = (
   markdown: string | null,
-  existingMentions: DropMentionedUser[],
+  existingMentions: ApiDropMentionedUser[],
   existingNfts: ReferencedNft[],
   mentionedUsers: Omit<MentionedUser, "current_handle">[],
   referencedNfts: ReferencedNft[]
@@ -296,7 +296,7 @@ const generateParts = async (
 };
 
 const getOptimisticDrop = (
-  dropRequest: CreateDropRequest,
+  dropRequest: ApiCreateDropRequest,
   connectedProfile: IProfileAndConsolidations | null,
   wave: {
     id: string;
@@ -307,7 +307,7 @@ const getOptimisticDrop = (
     voting: { authenticated_user_eligible: boolean };
   },
   activeDrop: ActiveDropState | null
-): Drop | null => {
+): ApiDrop | null => {
   if (!connectedProfile?.profile) {
     return null;
   }
@@ -501,7 +501,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const createCurrentDrop = (
     markdown: string | null,
-    allMentions: DropMentionedUser[],
+    allMentions: ApiDropMentionedUser[],
     allNfts: ReferencedNft[]
   ): CreateDropConfig => {
     return {
@@ -561,9 +561,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     mentionedUsers,
     parts,
   }: {
-    readonly mentionedUsers: DropMentionedUser[];
+    readonly mentionedUsers: ApiDropMentionedUser[];
     readonly parts: CreateDropPart[];
-  }): DropMentionedUser[] =>
+  }): ApiDropMentionedUser[] =>
     mentionedUsers.filter((user) =>
       parts.some((part) =>
         part.content?.includes(`@[${user.handle_in_content}]`)
@@ -605,7 +605,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         return;
       }
 
-      const requestBody: CreateDropRequest = {
+      const requestBody: ApiCreateDropRequest = {
         ...dropRequest,
         mentioned_users: filterMentionedUsers({
           mentionedUsers: dropRequest.mentioned_users,
@@ -646,14 +646,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const isMediaTypeMatching = (
     file: File,
-    mediaType: WaveParticipationRequirement
+    mediaType: ApiWaveParticipationRequirement
   ): boolean => {
     switch (mediaType) {
-      case WaveParticipationRequirement.Image:
+      case ApiWaveParticipationRequirement.Image:
         return file.type.startsWith("image/");
-      case WaveParticipationRequirement.Audio:
+      case ApiWaveParticipationRequirement.Audio:
         return file.type.startsWith("audio/");
-      case WaveParticipationRequirement.Video:
+      case ApiWaveParticipationRequirement.Video:
         return file.type.startsWith("video/");
       default:
         return false;

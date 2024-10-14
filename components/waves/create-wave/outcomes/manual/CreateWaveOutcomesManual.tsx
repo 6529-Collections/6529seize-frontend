@@ -4,7 +4,7 @@ import {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
 
 export default function CreateWaveOutcomesManual({
@@ -13,7 +13,7 @@ export default function CreateWaveOutcomesManual({
   onOutcome,
   onCancel,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
@@ -34,7 +34,7 @@ export default function CreateWaveOutcomesManual({
 
   useEffect(() => setIsInputEmptyError(false), [value]);
 
-  const isApproveWave = waveType === WaveType.Approve;
+  const isApproveWave = waveType === ApiWaveType.Approve;
 
   const onSubmit = () => {
     if (!value) {

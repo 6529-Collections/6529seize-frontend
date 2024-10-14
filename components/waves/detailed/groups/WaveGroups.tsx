@@ -1,10 +1,10 @@
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import WaveGroup, { WaveGroupType } from "../specs/groups/group/WaveGroup";
 
-export default function WaveGroups({ wave }: { readonly wave: Wave }) {
+export default function WaveGroups({ wave }: { readonly wave: ApiWave }) {
   return (
     <div className="tw-w-full">
-      <div >
+      <div>
         <div className="tw-bg-iron-950 tw-relative tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl">
           <div className="tw-space-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-800">
             <div className="tw-px-5 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">

@@ -21,10 +21,10 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-import { NonceResponse } from "../../generated/models/NonceResponse";
-import { LoginRequest } from "../../generated/models/LoginRequest";
-import { LoginResponse } from "../../generated/models/LoginResponse";
-import { ProfileProxy } from "../../generated/models/ProfileProxy";
+import { ApiNonceResponse } from "../../generated/models/ApiNonceResponse";
+import { ApiLoginRequest } from "../../generated/models/ApiLoginRequest";
+import { ApiLoginResponse } from "../../generated/models/ApiLoginResponse";
+import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
@@ -40,8 +40,8 @@ export enum TitleType {
 type AuthContextType = {
   readonly connectedProfile: IProfileAndConsolidations | null;
   readonly connectionStatus: ProfileConnectedStatus;
-  readonly receivedProfileProxies: ProfileProxy[];
-  readonly activeProfileProxy: ProfileProxy | null;
+  readonly receivedProfileProxies: ApiProfileProxy[];
+  readonly activeProfileProxy: ApiProfileProxy | null;
   readonly showWaves: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: ({
@@ -52,7 +52,7 @@ type AuthContextType = {
     type: TypeOptions;
   }) => void;
   readonly setActiveProfileProxy: (
-    profileProxy: ProfileProxy | null
+    profileProxy: ApiProfileProxy | null
   ) => Promise<void>;
   readonly setTitle: (param: {
     title: string | null;
@@ -109,20 +109,20 @@ export default function Auth({
     }
   }, [address, getAuthJwt()]);
 
-  const { data: profileProxies } = useQuery<ProfileProxy[]>({
+  const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
       { handleOrWallet: connectedProfile?.input_identity },
     ],
     queryFn: async () =>
-      await commonApiFetch<ProfileProxy[]>({
+      await commonApiFetch<ApiProfileProxy[]>({
         endpoint: `profiles/${connectedProfile?.input_identity}/proxies/`,
       }),
     enabled: !!connectedProfile?.input_identity,
   });
 
   const [receivedProfileProxies, setReceivedProfileProxies] = useState<
-    ProfileProxy[]
+    ApiProfileProxy[]
   >(
     groupProfileProxies({
       profileProxies: profileProxies ?? [],
@@ -132,7 +132,7 @@ export default function Auth({
   );
 
   const [activeProfileProxy, setActiveProfileProxy] =
-    useState<ProfileProxy | null>(null);
+    useState<ApiProfileProxy | null>(null);
 
   useEffect(() => {
     const receivedProxies = groupProfileProxies({
@@ -178,9 +178,9 @@ export default function Auth({
     signerAddress,
   }: {
     signerAddress: string;
-  }): Promise<NonceResponse | null> => {
+  }): Promise<ApiNonceResponse | null> => {
     try {
-      return await commonApiFetch<NonceResponse>({
+      return await commonApiFetch<ApiNonceResponse>({
         endpoint: "auth/nonce",
         params: {
           signer_address: signerAddress,
@@ -274,7 +274,10 @@ export default function Auth({
       return { success: false };
     }
     try {
-      const tokenResponse = await commonApiPost<LoginRequest, LoginResponse>({
+      const tokenResponse = await commonApiPost<
+        ApiLoginRequest,
+        ApiLoginResponse
+      >({
         endpoint: "auth/login",
         body: {
           server_signature,
@@ -359,7 +362,7 @@ export default function Auth({
   };
 
   const onActiveProfileProxy = async (
-    profileProxy: ProfileProxy | null
+    profileProxy: ApiProfileProxy | null
   ): Promise<void> => {
     removeAuthJwt();
     if (!address) {

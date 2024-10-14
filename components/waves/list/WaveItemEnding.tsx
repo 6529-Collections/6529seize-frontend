@@ -1,9 +1,9 @@
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { getTimeUntil } from "../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
-import 'tippy.js/dist/tippy.css';
+import "tippy.js/dist/tippy.css";
 
-export default function WaveItemEnding({ wave }: { readonly wave: Wave }) {
+export default function WaveItemEnding({ wave }: { readonly wave: ApiWave }) {
   const ending = wave.wave.period?.max;
   const haveEnding = !!ending;
   const isPast = !!ending && ending < Date.now();
@@ -47,10 +47,7 @@ export default function WaveItemEnding({ wave }: { readonly wave: Wave }) {
   );
 
   return (
-    <Tippy
-      content="Ending"
-      className="xl:tw-inline-block tw-hidden"
-    >
+    <Tippy content="Ending" className="xl:tw-inline-block tw-hidden">
       {content}
     </Tippy>
   );

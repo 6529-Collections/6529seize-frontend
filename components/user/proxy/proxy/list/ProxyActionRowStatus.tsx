@@ -2,7 +2,7 @@ import {
   ProfileProxyActionStatus,
   ProfileProxySide,
 } from "../../../../../entities/IProxy";
-import { ProfileMin } from "../../../../../generated/models/ProfileMin";
+import { ApiProfileMin } from "../../../../../generated/models/ApiProfileMin";
 import Tippy from "@tippyjs/react";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
@@ -39,7 +39,7 @@ export default function ProxyActionRowStatus({
   side,
 }: {
   readonly status: ProfileProxyActionStatus;
-  readonly statusOwnerProfile: ProfileMin;
+  readonly statusOwnerProfile: ApiProfileMin;
   readonly side: ProfileProxySide;
 }) {
   return (

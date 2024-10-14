@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropReplyAuthorProps {
   isFetching: boolean;
-  drop?: Drop;
+  drop?: ApiDrop;
 }
 
 const WaveDetailedDropReplyAuthor: React.FC<

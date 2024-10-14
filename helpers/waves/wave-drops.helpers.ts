@@ -1,17 +1,17 @@
-import { Drop } from "../../generated/models/Drop";
-import { DropWithoutWave } from "../../generated/models/DropWithoutWave";
-import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
-import { WaveMin } from "../../generated/models/WaveMin";
+import { ApiDrop } from "../../generated/models/ApiDrop";
+import { ApiDropWithoutWave } from "../../generated/models/ApiDropWithoutWave";
+import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
+import { ApiWaveMin } from "../../generated/models/ApiWaveMin";
 import { getStableDropKey } from "./drop.helpers";
 
-export interface ExtendedDrop extends Drop {
+export interface ExtendedDrop extends ApiDrop {
   readonly stableKey: string;
   readonly stableHash: string;
 }
 
 export const createExtendedDrop = (
-  drop: DropWithoutWave,
-  wave: WaveMin,
+  drop: ApiDropWithoutWave,
+  wave: ApiWaveMin,
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop => {
   const { key, hash } = getStableDropKey({ ...drop, wave }, prevDrops);
@@ -24,7 +24,7 @@ export const createExtendedDrop = (
 };
 
 export const processWaveDropsFeed = (
-  page: WaveDropsFeed,
+  page: ApiWaveDropsFeed,
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop[] => {
   return page.drops.map((drop) =>
@@ -33,7 +33,7 @@ export const processWaveDropsFeed = (
 };
 
 export const mapToExtendedDrops = (
-  pages: WaveDropsFeed[],
+  pages: ApiWaveDropsFeed[],
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop[] => {
   return pages

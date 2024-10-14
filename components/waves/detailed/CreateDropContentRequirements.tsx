@@ -1,7 +1,7 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Wave } from "../../../generated/models/Wave";
-import { WaveParticipationRequirement } from "../../../generated/models/WaveParticipationRequirement";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWaveParticipationRequirement } from "../../../generated/models/ApiWaveParticipationRequirement";
 import CreateDropContentRequirementsItem from "./CreateDropContentRequirementsItem";
 
 export enum DropRequirementType {
@@ -11,8 +11,8 @@ export enum DropRequirementType {
 
 interface CreateDropContentRequirementsProps {
   readonly canSubmit: boolean;
-  readonly wave: Wave;
-  readonly missingMedia: WaveParticipationRequirement[];
+  readonly wave: ApiWave;
+  readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: string[];
   readonly disabled: boolean;
   readonly onOpenMetadata: () => void;

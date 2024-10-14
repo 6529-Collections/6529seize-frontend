@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
 import { AuthContext } from "../../../auth/Auth";
@@ -16,7 +16,7 @@ export default function WaveHeader({
   wave,
   onFollowersClick,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);

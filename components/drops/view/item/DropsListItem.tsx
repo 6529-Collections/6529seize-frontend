@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import DropListItemContent from "./content/DropListItemContent";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { AuthContext } from "../../../auth/Auth";
 
 import DropReply, { DropReplyProps } from "./replies/DropReply";
@@ -37,7 +37,6 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
 export default function DropsListItem({
   drop,
   replyToDrop,
-  showFull = false,
   showWaveInfo = true,
   availableCredit,
   isReply = false,
@@ -47,9 +46,8 @@ export default function DropsListItem({
   onDiscussionStateChange,
   onDropDeleted,
 }: {
-  readonly drop: Drop;
-  readonly replyToDrop: Drop | null;
-  readonly showFull?: boolean;
+  readonly drop: ApiDrop;
+  readonly replyToDrop: ApiDrop | null;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
   readonly isReply?: boolean;
@@ -152,8 +150,7 @@ export default function DropsListItem({
   return (
     <div
       className={`${
-        !isReply &&
-        "tw-rounded-xl tw-overflow-hidden"
+        !isReply && "tw-rounded-xl tw-overflow-hidden"
       }  tw-relative tw-bg-iron-900 ${
         dropReplyDepth < 2 && ""
       }  tw-transition tw-duration-300 tw-ease-out`}
@@ -172,7 +169,6 @@ export default function DropsListItem({
             <DropListItemContent
               key={randomKey}
               drop={drop}
-              showFull={showFull}
               voteState={voteState}
               canVote={canVote}
               availableCredit={availableCredit}

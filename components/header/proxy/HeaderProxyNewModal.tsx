@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { ProfileMin } from "../../../generated/models/ProfileMin";
+import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
 
 export default function HeaderProxyNewModal({
   connectedProfile,
@@ -9,7 +9,7 @@ export default function HeaderProxyNewModal({
   onClose,
 }: {
   readonly connectedProfile: IProfileAndConsolidations;
-  readonly proxyGrantor: ProfileMin;
+  readonly proxyGrantor: ApiProfileMin;
   readonly onClose: (setAsDontShowAgain: boolean) => void;
 }) {
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);

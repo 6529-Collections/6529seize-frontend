@@ -1,10 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { IncomingIdentitySubscriptionsPage } from "../../../../generated/models/IncomingIdentitySubscriptionsPage";
+import { ApiIncomingIdentitySubscriptionsPage } from "../../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { useEffect, useState } from "react";
-import { IdentityAndSubscriptionActions } from "../../../../generated/models/IdentityAndSubscriptionActions";
+import { ApiIdentityAndSubscriptionActions } from "../../../../generated/models/ApiIdentityAndSubscriptionActions";
 import FollowersListWrapper from "../../../utils/followers/FollowersListWrapper";
 
 const REQUEST_SIZE = 100;
@@ -17,7 +17,7 @@ export default function WaveDetailedFollowers({
   wave,
   onBackClick,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly onBackClick: () => void;
 }) {
   const query: Query = {
@@ -47,7 +47,7 @@ export default function WaveDetailedFollowers({
       if (pageParam) {
         params.page = `${pageParam}`;
       }
-      return await commonApiFetch<IncomingIdentitySubscriptionsPage>({
+      return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
         endpoint: `/identity-subscriptions/incoming/WAVE/${wave.id}`,
         params,
       });
@@ -56,10 +56,13 @@ export default function WaveDetailedFollowers({
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
   });
 
-  const [followers, setFollowers] = useState<IdentityAndSubscriptionActions[]>(
-    []
+  const [followers, setFollowers] = useState<
+    ApiIdentityAndSubscriptionActions[]
+  >([]);
+  useEffect(
+    () => setFollowers(data?.pages.flatMap((page) => page.data) ?? []),
+    [data]
   );
-  useEffect(() => setFollowers(data?.pages.flatMap(page => page.data) ?? []), [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (followers.length < REQUEST_SIZE) {
@@ -111,7 +114,11 @@ export default function WaveDetailedFollowers({
           Followers
         </div>
 
-      <FollowersListWrapper followers={followers} loading={isFetching} onBottomIntersection={onBottomIntersection} />
+        <FollowersListWrapper
+          followers={followers}
+          loading={isFetching}
+          onBottomIntersection={onBottomIntersection}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Drop } from "../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import DropsListItemFollowDrop from "./follow/DropsListItemFollowDrop";
@@ -10,7 +10,7 @@ export default function DropsListItemOptions({
   drop,
   onDropDeleted,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly onDropDeleted?: () => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);

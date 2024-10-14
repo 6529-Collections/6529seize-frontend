@@ -3,7 +3,7 @@ import { RatingStats } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
 import Link from "next/link";
-import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 
 export default function UserPageRepModifyModalRaterStats({
   repState,
@@ -20,7 +20,7 @@ export default function UserPageRepModifyModalRaterStats({
   const { activeProfileProxy } = useContext(AuthContext);
   const getProxyAvailableCredit = (): number | null => {
     const repProxy = activeProfileProxy?.actions.find(
-      (action) => action.action_type === ProfileProxyActionType.AllocateRep
+      (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
     );
     if (!repProxy) {
       return null;

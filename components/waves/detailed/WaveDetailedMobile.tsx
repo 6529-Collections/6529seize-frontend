@@ -1,4 +1,4 @@
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
@@ -7,11 +7,11 @@ import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
 
 interface WaveDetailedMobileProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly view: WaveDetailedView;
   readonly setView: (view: WaveDetailedView) => void;
   readonly isLoading: boolean;
-  readonly onWaveChange: (wave: Wave) => void;
+  readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
 
@@ -67,7 +67,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-  const handleWaveChange = (newWave: Wave) => {
+  const handleWaveChange = (newWave: ApiWave) => {
     setIsLoading(true);
     onWaveChange(newWave);
     setActiveView(WaveDetailedMobileView.CHAT);

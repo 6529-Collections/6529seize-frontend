@@ -6,12 +6,12 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { ProfileAvailableDropRateResponse } from "../../../../entities/IProfile";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
 import DropListItemRateGive from "../../../drops/view/item/rate/give/DropListItemRateGive";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropActionsRateProps {
-  drop: Drop;
+  readonly drop: ApiDrop;
   readonly onRated?: () => void;
-  isMobile?: boolean;
+  readonly isMobile?: boolean;
 }
 
 const WaveDetailedDropActionsRate: React.FC<

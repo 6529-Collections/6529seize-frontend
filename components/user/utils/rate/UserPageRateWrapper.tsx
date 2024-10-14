@@ -6,7 +6,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { amIUser } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
-import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
 
@@ -41,11 +41,13 @@ export default function UserPageRateWrapper({
     switch (type) {
       case RateMatter.NIC:
         return !!activeProfileProxy?.actions.find(
-          (action) => action.action_type === ProfileProxyActionType.AllocateCic
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.AllocateCic
         );
       case RateMatter.REP:
         return !!activeProfileProxy?.actions.find(
-          (action) => action.action_type === ProfileProxyActionType.AllocateRep
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.AllocateRep
         );
       case RateMatter.DROP_REP:
         return false;

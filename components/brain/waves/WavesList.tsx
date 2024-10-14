@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import { useContext } from "react";
 import { AuthContext } from "../../auth/Auth";
@@ -14,7 +14,7 @@ export default function WavesList({
   waves,
   type,
 }: {
-  readonly waves: Wave[];
+  readonly waves: ApiWave[];
   readonly type: WavesListType;
 }) {
   const { connectedProfile } = useContext(AuthContext);

@@ -1,4 +1,4 @@
-import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
+import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateWaveDropsType from "./CreateWaveDropsType";
 
@@ -12,9 +12,9 @@ export default function CreateWaveDropsTypes({
   requiredTypes,
   onRequiredTypeChange,
 }: {
-  readonly requiredTypes: WaveParticipationRequirement[];
+  readonly requiredTypes: ApiWaveParticipationRequirement[];
   readonly onRequiredTypeChange: (
-    types: WaveParticipationRequirement[]
+    types: ApiWaveParticipationRequirement[]
   ) => void;
 }) {
   const checkIsChecked = (
@@ -24,11 +24,11 @@ export default function CreateWaveDropsTypes({
       case ExtendedWaveParticipationRequirement.NONE:
         return requiredTypes.length === 0;
       case ExtendedWaveParticipationRequirement.IMAGE:
-        return requiredTypes.includes(WaveParticipationRequirement.Image);
+        return requiredTypes.includes(ApiWaveParticipationRequirement.Image);
       case ExtendedWaveParticipationRequirement.AUDIO:
-        return requiredTypes.includes(WaveParticipationRequirement.Audio);
+        return requiredTypes.includes(ApiWaveParticipationRequirement.Audio);
       case ExtendedWaveParticipationRequirement.VIDEO:
-        return requiredTypes.includes(WaveParticipationRequirement.Video);
+        return requiredTypes.includes(ApiWaveParticipationRequirement.Video);
       default:
         assertUnreachable(type);
         return false;
@@ -37,16 +37,16 @@ export default function CreateWaveDropsTypes({
 
   const extendedTypeToWaveParticipationRequirement = (
     type: ExtendedWaveParticipationRequirement
-  ): WaveParticipationRequirement | null => {
+  ): ApiWaveParticipationRequirement | null => {
     switch (type) {
       case ExtendedWaveParticipationRequirement.NONE:
         return null;
       case ExtendedWaveParticipationRequirement.IMAGE:
-        return WaveParticipationRequirement.Image;
+        return ApiWaveParticipationRequirement.Image;
       case ExtendedWaveParticipationRequirement.AUDIO:
-        return WaveParticipationRequirement.Audio;
+        return ApiWaveParticipationRequirement.Audio;
       case ExtendedWaveParticipationRequirement.VIDEO:
-        return WaveParticipationRequirement.Video;
+        return ApiWaveParticipationRequirement.Video;
       default:
         assertUnreachable(type);
         return null;

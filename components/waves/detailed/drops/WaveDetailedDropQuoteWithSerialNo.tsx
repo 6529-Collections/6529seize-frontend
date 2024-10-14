@@ -5,19 +5,19 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { WaveDropsSearchStrategy } from "../../../../hooks/useWaveDrops";
-import { WaveDropsFeed } from "../../../../generated/models/WaveDropsFeed";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiWaveDropsFeed } from "../../../../generated/models/ApiWaveDropsFeed";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropQuoteWithSerialNoProps {
   readonly serialNo: number;
   readonly waveId: string;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDropQuoteWithSerialNo: React.FC<
   WaveDetailedDropQuoteWithSerialNoProps
 > = ({ serialNo, waveId, onQuoteClick }) => {
-  const { data } = useQuery<WaveDropsFeed>({
+  const { data } = useQuery<ApiWaveDropsFeed>({
     queryKey: [
       QueryKey.DROPS,
       {
@@ -35,7 +35,7 @@ const WaveDetailedDropQuoteWithSerialNo: React.FC<
         search_strategy: WaveDropsSearchStrategy.FIND_BOTH,
       };
 
-      const results = await commonApiFetch<WaveDropsFeed>({
+      const results = await commonApiFetch<ApiWaveDropsFeed>({
         endpoint: `waves/${waveId}/drops`,
         params,
       });
@@ -43,14 +43,16 @@ const WaveDetailedDropQuoteWithSerialNo: React.FC<
       return results;
     },
   });
-  const [drop, setDrop] = useState<Drop | null>(null);
+  const [drop, setDrop] = useState<ApiDrop | null>(null);
   useEffect(() => {
     const targetDrop = data?.drops.find((drop) => drop.serial_no === serialNo);
     if (targetDrop && data?.wave) {
       setDrop({ ...targetDrop, wave: data.wave });
     }
   }, [data]);
-  return <WaveDetailedDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />;
+  return (
+    <WaveDetailedDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />
+  );
 };
 
 export default WaveDetailedDropQuoteWithSerialNo;

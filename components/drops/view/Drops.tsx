@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "./DropsList";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
@@ -44,7 +44,7 @@ export default function Drops() {
       if (connectedProfile?.profile?.handle) {
         params.context_profile = connectedProfile.profile.handle;
       }
-      return await commonApiFetch<Drop[]>({
+      return await commonApiFetch<ApiDrop[]>({
         endpoint: `/drops`,
         params,
       });
@@ -114,7 +114,7 @@ export default function Drops() {
     };
   }, [drops]);
 
-  const onQuoteClick = (drop: Drop) => {
+  const onQuoteClick = (drop: ApiDrop) => {
     router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
   };
 

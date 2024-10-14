@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../../../auth/Auth";
-import { GroupFull } from "../../../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";
 import { AnimatePresence, motion } from "framer-motion";
 import GroupCardDelete from "./delete/GroupCardDelete";
 
@@ -9,8 +9,8 @@ export default function GroupCardEditActions({
   group,
   onEditClick,
 }: {
-  readonly group: GroupFull;
-  readonly onEditClick: (group: GroupFull) => void;
+  readonly group: ApiGroupFull;
+  readonly onEditClick: (group: ApiGroupFull) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
