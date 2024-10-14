@@ -13,6 +13,7 @@ export default function WaveGroupTitle({
     [WaveGroupType.VIEW]: "View",
     [WaveGroupType.DROP]: "Drop",
     [WaveGroupType.VOTE]: "Vote",
+    [WaveGroupType.CHAT]: "Chat",
     [WaveGroupType.ADMIN]: "Admin",
   };
 
@@ -20,6 +21,8 @@ export default function WaveGroupTitle({
     [WaveGroupType.VIEW]: <WaveGroupViewIcon />,
     [WaveGroupType.DROP]: <WaveGroupDropIcon />,
     [WaveGroupType.VOTE]: <WaveGroupVoteIcon />,
+    // TODO: Add chat icon
+    [WaveGroupType.CHAT]: <WaveGroupDropIcon />,
     [WaveGroupType.ADMIN]: <WaveGroupAdminIcon />,
   };
   return (

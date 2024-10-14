@@ -12,6 +12,7 @@
 
 import { ApiDrop } from '../models/ApiDrop';
 import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveConfig } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
@@ -45,6 +46,7 @@ export class ApiWave {
     'voting': ApiWaveVotingConfig;
     'visibility': ApiWaveVisibilityConfig;
     'participation': ApiWaveParticipationConfig;
+    'chat': ApiWaveChatConfig;
     'wave': ApiWaveConfig;
     'outcomes': Array<ApiWaveOutcome>;
     'contributors_overview': Array<ApiWaveContributorOverview>;
@@ -112,6 +114,12 @@ export class ApiWave {
             "name": "participation",
             "baseName": "participation",
             "type": "ApiWaveParticipationConfig",
+            "format": ""
+        },
+        {
+            "name": "chat",
+            "baseName": "chat",
+            "type": "ApiWaveChatConfig",
             "format": ""
         },
         {
