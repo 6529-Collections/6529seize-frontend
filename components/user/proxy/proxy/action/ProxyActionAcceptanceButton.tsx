@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
-import { ProfileProxyAction } from "../../../../../generated/models/ProfileProxyAction";
+import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
 import { AuthContext } from "../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
@@ -38,9 +38,9 @@ export default function ProxyActionAcceptanceButton({
   profile,
   profileProxy,
 }: {
-  readonly action: ProfileProxyAction;
+  readonly action: ApiProfileProxyAction;
   readonly profile: IProfileAndConsolidations;
-  readonly profileProxy: ProfileProxy;
+  readonly profileProxy: ApiProfileProxy;
 }) {
   const { setToast, connectedProfile, requestAuth } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);
@@ -104,7 +104,7 @@ export default function ProxyActionAcceptanceButton({
 
   const profileProxyAcceptanceMutation = useMutation({
     mutationFn: async (body: AcceptActionRequest) => {
-      return await commonApiPost<AcceptActionRequest, ProfileProxyAction>({
+      return await commonApiPost<AcceptActionRequest, ApiProfileProxyAction>({
         endpoint: `proxies/${profileProxy.id}/actions/${action.id}/acceptance`,
         body,
       });

@@ -1,4 +1,4 @@
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
+import { ApiWaveMetadataType } from "../../../../generated/models/ApiWaveMetadataType";
 import { CreateWaveDropsRequiredMetadata } from "../../../../types/waves.types";
 import WaveRequiredMetadataAddTypeSelect from "./WaveRequiredMetadataAddTypeSelect";
 
@@ -13,7 +13,7 @@ export default function WaveRequiredMetadataAddInput({
     setMetadata({ ...metadata, key: event.target.value });
   };
 
-  const onTypeChange = (type: WaveMetadataType) => {
+  const onTypeChange = (type: ApiWaveMetadataType) => {
     setMetadata({ ...metadata, type });
   };
 

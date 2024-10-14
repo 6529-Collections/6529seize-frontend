@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 export interface WaveDetailedDropReplyProps {
   readonly dropId: string;
   readonly dropPartId: number;
-  readonly maybeDrop: Drop | null;
+  readonly maybeDrop: ApiDrop | null;
   readonly onReplyClick: (serialNo: number) => void;
 }
 
@@ -22,10 +22,10 @@ export default function WaveDetailedDropReply({
     data: drop,
     isFetching,
     error,
-  } = useQuery<Drop>({
+  } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
-      await commonApiFetch<Drop>({
+      await commonApiFetch<ApiDrop>({
         endpoint: `drops/${dropId}`,
       }),
     placeholderData: keepPreviousData,

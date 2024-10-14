@@ -1,4 +1,4 @@
-import { WaveType } from "../../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../../generated/models/ApiWaveType";
 import {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
@@ -12,7 +12,7 @@ export default function CreateWaveOutcomesRow({
   outcome,
   removeOutcome,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly outcome: CreateWaveOutcomeConfig;
   readonly removeOutcome: () => void;
 }) {

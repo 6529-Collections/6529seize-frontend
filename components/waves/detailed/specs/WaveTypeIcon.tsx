@@ -1,13 +1,13 @@
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { WAVE_LABELS } from "../../../../helpers/waves/waves.constants";
 
 export default function WaveTypeIcon({
   waveType,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
 }) {
-  const iconComponents: Record<WaveType, JSX.Element> = {
-    [WaveType.Approve]: (
+  const iconComponents: Record<ApiWaveType, JSX.Element> = {
+    [ApiWaveType.Approve]: (
       <svg
         className="tw-size-5 tw-text-iron-300"
         viewBox="0 0 24 24"
@@ -24,7 +24,7 @@ export default function WaveTypeIcon({
         />
       </svg>
     ),
-    [WaveType.Rank]: (
+    [ApiWaveType.Rank]: (
       <svg
         className="tw-size-5 tw-text-iron-300"
         viewBox="0 0 24 24"
@@ -40,7 +40,7 @@ export default function WaveTypeIcon({
         />
       </svg>
     ),
-    [WaveType.Chat]: (
+    [ApiWaveType.Chat]: (
       <svg
         className="tw-size-5 tw-text-iron-300"
         xmlns="http://www.w3.org/2000/svg"

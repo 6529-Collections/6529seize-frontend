@@ -1,8 +1,8 @@
-import { Drop } from "../../generated/models/Drop";
+import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ActiveDropAction } from "./detailed/WaveDetailedContent";
 
 interface CreateDropReplyingProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly action: ActiveDropAction;
   readonly onCancel: () => void;
   readonly disabled: boolean;

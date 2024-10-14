@@ -1,4 +1,4 @@
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { useState } from "react";
 import WaveDetailedDesktop from "./WaveDetailedDesktop";
 import { createBreakpoint } from "react-use";
@@ -10,7 +10,7 @@ export enum WaveDetailedView {
 }
 
 interface WaveDetailedProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
@@ -23,7 +23,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeWave, setActiveWave] = useState(wave);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleWaveChange = (newWave: Wave) => {
+  const handleWaveChange = (newWave: ApiWave) => {
     setIsLoading(true);
     setActiveWave(newWave);
     setActiveView(WaveDetailedView.CONTENT);

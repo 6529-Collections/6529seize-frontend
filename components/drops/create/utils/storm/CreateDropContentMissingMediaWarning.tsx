@@ -1,18 +1,18 @@
 import Tippy from "@tippyjs/react";
-import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
+import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
 
 export default function CreateDropContentMissingMediaWarning({
   missingMedia,
 }: {
-  readonly missingMedia: WaveParticipationRequirement[];
+  readonly missingMedia: ApiWaveParticipationRequirement[];
 }) {
-  const LABELS: Record<WaveParticipationRequirement, string> = {
+  const LABELS: Record<ApiWaveParticipationRequirement, string> = {
     AUDIO: "Audio is required",
     VIDEO: "Video is required",
     IMAGE: "Image is required",
   };
 
-  const TOOLTIP: Record<WaveParticipationRequirement, string> = {
+  const TOOLTIP: Record<ApiWaveParticipationRequirement, string> = {
     AUDIO: "Please upload an audio file",
     VIDEO: "Please upload a video file",
     IMAGE: "Please upload an image file",

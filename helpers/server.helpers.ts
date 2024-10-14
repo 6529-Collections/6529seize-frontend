@@ -18,9 +18,9 @@ import {
   ProfileRatersParamsOrderBy,
 } from "../components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { SortDirection } from "../entities/ISort";
-import { ProfileProxy } from "../generated/models/ProfileProxy";
-import { Wave } from "../generated/models/Wave";
-import { WaveDropsFeed } from "../generated/models/WaveDropsFeed";
+import { ApiProfileProxy } from "../generated/models/ApiProfileProxy";
+import { ApiWave } from "../generated/models/ApiWave";
+import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 
 export interface CommonUserServerSideProps {
@@ -48,8 +48,8 @@ export const getProxyById = async ({
 }: {
   proxyId: string;
   headers: Record<string, string>;
-}): Promise<ProfileProxy> => {
-  return await commonApiFetch<ProfileProxy>({
+}): Promise<ApiProfileProxy> => {
+  return await commonApiFetch<ApiProfileProxy>({
     endpoint: `proxies/${proxyId}`,
     headers: headers,
   });
@@ -267,7 +267,7 @@ export const getWave = async ({
   waveId: string;
   readonly headers: Record<string, string>;
 }) => {
-  return await commonApiFetch<Wave>({
+  return await commonApiFetch<ApiWave>({
     endpoint: `waves/${waveId}`,
     headers,
   });
@@ -285,7 +285,7 @@ export const getWavesOverview = async ({
   readonly offset: number;
   readonly type: string;
   readonly onlyWavesFollowedByAuthenticatedUser: boolean;
-}): Promise<Wave[]> => {
+}): Promise<ApiWave[]> => {
   const queryParams: Record<string, string> = {
     limit: `${limit}`,
     offset: `${offset}`,
@@ -294,7 +294,7 @@ export const getWavesOverview = async ({
       onlyWavesFollowedByAuthenticatedUser.toString(),
   };
 
-  return await commonApiFetch<Wave[]>({
+  return await commonApiFetch<ApiWave[]>({
     endpoint: `waves-overview`,
     params: queryParams,
     headers,
@@ -307,12 +307,12 @@ export const getWaveDrops = async ({
 }: {
   readonly waveId: string;
   readonly headers: Record<string, string>;
-}): Promise<WaveDropsFeed> => {
+}): Promise<ApiWaveDropsFeed> => {
   const params: Record<string, string> = {
     limit: WAVE_DROPS_PARAMS.limit.toString(),
   };
 
-  const results = await commonApiFetch<WaveDropsFeed>({
+  const results = await commonApiFetch<ApiWaveDropsFeed>({
     endpoint: `waves/${waveId}/drops`,
     params,
     headers,

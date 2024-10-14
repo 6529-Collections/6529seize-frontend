@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
@@ -8,10 +8,10 @@ import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
 
 interface WaveDetailedDesktopProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly view: WaveDetailedView;
   readonly setView: (view: WaveDetailedView) => void;
-  readonly onWaveChange: (wave: Wave) => void;
+  readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
 

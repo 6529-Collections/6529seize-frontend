@@ -4,7 +4,7 @@ import ProxyList from "./list/ProxyList";
 import ProxyCreate from "./create/ProxyCreate";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ProfileProxy } from "../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../generated/models/ApiProfileProxy";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
@@ -59,13 +59,13 @@ export default function UserPageProxy({
     [connectedProfile, profile, activeProfileProxy]
   );
 
-  const { data: profileProxies, isFetching } = useQuery<ProfileProxy[]>({
+  const { data: profileProxies, isFetching } = useQuery<ApiProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
       { handleOrWallet: profile.profile?.handle },
     ],
     queryFn: async () =>
-      await commonApiFetch<ProfileProxy[]>({
+      await commonApiFetch<ApiProfileProxy[]>({
         endpoint: `profiles/${profile.input_identity}/proxies/`,
       }),
     enabled: !!profile.profile?.handle,
@@ -73,8 +73,8 @@ export default function UserPageProxy({
   });
 
   const [profileProxiesFiltered, setProfileProxiesFiltered] = useState<{
-    readonly granted: ProfileProxy[];
-    readonly received: ProfileProxy[];
+    readonly granted: ApiProfileProxy[];
+    readonly received: ApiProfileProxy[];
   }>(
     groupProfileProxies({
       profileProxies: profileProxies ?? [],

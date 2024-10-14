@@ -1,10 +1,11 @@
 import { QueryClient } from "@tanstack/react-query";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { QueryKey } from "../ReactQueryWrapper";
-import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
+import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 type DropsQueryData = {
-  pages?: WaveDropsFeed[];
+  pages?: ApiWaveDropsFeed[];
 };
 
 type DropsQueryParams = {
@@ -18,14 +19,17 @@ const getDropsQueryKey = (params: DropsQueryParams) =>
 
 const updateQueryData = (
   oldData: DropsQueryData | undefined,
-  drop: Drop
+  drop: ApiDrop
 ): DropsQueryData | undefined => {
   if (!oldData?.pages || oldData.pages.length === 0) {
     return oldData;
   }
-  const pages: WaveDropsFeed[] = JSON.parse(JSON.stringify(oldData.pages));
+  const pages: ApiWaveDropsFeed[] = JSON.parse(JSON.stringify(oldData.pages));
   if (pages[0]) {
-    pages[0].drops.unshift(drop);
+    pages[0].drops.unshift({
+      ...drop,
+      drop_type: ApiDropType.Chat,
+    });
     return { ...oldData, pages };
   }
   return oldData;
@@ -34,7 +38,7 @@ const updateQueryData = (
 const updateDropsQuery = (
   queryClient: QueryClient,
   queryParams: DropsQueryParams,
-  drop: Drop
+  drop: ApiDrop
 ) => {
   const queryKey = getDropsQueryKey(queryParams);
   queryClient.cancelQueries({ queryKey });
@@ -45,7 +49,7 @@ const updateDropsQuery = (
 
 export const addDropToDrops = (
   queryClient: QueryClient,
-  { drop }: { readonly drop: Drop }
+  { drop }: { readonly drop: ApiDrop }
 ): void => {
   const baseQueryParams: Omit<DropsQueryParams, "dropId"> = {
     limit: 50,

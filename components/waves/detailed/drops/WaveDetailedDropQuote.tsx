@@ -4,14 +4,14 @@ import UserCICAndLevel, {
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import { Drop } from "../../../../generated/models/Drop";
-import { DropPart } from "../../../../generated/models/DropPart";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDropPart } from "../../../../generated/models/ApiDropPart";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 
 interface WaveDetailedDropQuoteProps {
-  readonly drop: Drop | null;
+  readonly drop: ApiDrop | null;
   readonly partId: number;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
@@ -19,8 +19,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
   partId,
   onQuoteClick,
 }) => {
-
-  const [quotedPart, setQuotedPart] = useState<DropPart | null>(null);
+  const [quotedPart, setQuotedPart] = useState<ApiDropPart | null>(null);
   useEffect(() => {
     if (!drop) {
       return;
@@ -125,7 +124,6 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}
                 referencedNfts={drop?.referenced_nfts ?? []}
-                onImageLoaded={() => undefined}
                 textSize="sm"
                 onQuoteClick={onQuoteClick}
               />

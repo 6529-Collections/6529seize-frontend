@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import WaveDetailedDrop from "../drops/WaveDetailedDrop";
 
 interface WaveHeaderPinnedProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }
 
 const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
@@ -19,8 +19,8 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useClickAway(dropdownRef, () => {
@@ -60,7 +60,9 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
           {isOpen && (
             <motion.div
               ref={portalRef}
-              initial={isMobile ? { opacity: 0, y: 10 } : { opacity: 0, x: -10 }}
+              initial={
+                isMobile ? { opacity: 0, y: 10 } : { opacity: 0, x: -10 }
+              }
               animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
               exit={isMobile ? { opacity: 0, y: 10 } : { opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
@@ -68,13 +70,17 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
                 position: "absolute",
                 ...(isMobile
                   ? {
-                      top: (buttonRef.current?.getBoundingClientRect().bottom ?? 0) + 8,
+                      top:
+                        (buttonRef.current?.getBoundingClientRect().bottom ??
+                          0) + 8,
                       left: 0,
                       right: 0,
                     }
                   : {
                       top: buttonRef.current?.getBoundingClientRect().top ?? 0,
-                      left: (buttonRef.current?.getBoundingClientRect().right ?? 0) + 8,
+                      left:
+                        (buttonRef.current?.getBoundingClientRect().right ??
+                          0) + 8,
                     }),
               }}
               className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 ${

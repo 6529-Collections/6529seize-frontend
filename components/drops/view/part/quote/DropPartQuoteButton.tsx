@@ -1,11 +1,11 @@
 import Tippy from "@tippyjs/react";
-import { DropPart } from "../../../../../generated/models/DropPart";
+import { ApiDropPart } from "../../../../../generated/models/ApiDropPart";
 
 export default function DropPartQuoteButton({
   dropPart,
   onQuote,
 }: {
-  readonly dropPart: DropPart;
+  readonly dropPart: ApiDropPart;
   readonly onQuote: (dropPartId: number) => void;
 }) {
   const quotesCount = dropPart.quotes_count;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import CommonAnimationWrapper from "../../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../../utils/animation/CommonAnimationOpacity";
 import DropsListItemDeleteDropModal from "./DropsListItemDeleteDropModal";
@@ -8,7 +8,7 @@ export default function DropsListItemDeleteDrop({
   drop,
   onDropDeleted,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly onDropDeleted?: () => void;
 }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);

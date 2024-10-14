@@ -1,5 +1,5 @@
 import { CreateProxyRateWaveDropAction } from "../../../../../../entities/IProxy";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigRateWaveDrop({
   endTime,
@@ -12,7 +12,7 @@ export default function ProxyCreateActionConfigRateWaveDrop({
 }) {
   const handleSubmit = () =>
     onSubmit({
-      action_type: ProfileProxyActionType.RateWaveDrop,
+      action_type: ApiProfileProxyActionType.RateWaveDrop,
       end_time: endTime,
     });
   return (

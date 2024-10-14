@@ -5,7 +5,7 @@ import {
   CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import RepCategorySearch from "../../../../utils/input/rep-category/RepCategorySearch";
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
 
 export default function CreateWaveOutcomesRepApprove({
@@ -14,7 +14,7 @@ export default function CreateWaveOutcomesRepApprove({
   onOutcome,
   onCancel,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;

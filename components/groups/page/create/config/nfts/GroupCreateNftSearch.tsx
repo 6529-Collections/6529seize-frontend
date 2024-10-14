@@ -2,13 +2,13 @@ import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { NFTSearchResult } from "../../../../../header/header-search/HeaderSearchModalItem";
 import GroupCreateNftSearchItems from "./GroupCreateNftSearchItems";
-import { GroupOwnsNft } from "../../../../../../generated/models/GroupOwnsNft";
+import { ApiGroupOwnsNft } from "../../../../../../generated/models/ApiGroupOwnsNft";
 
 export default function GroupCreateNftSearch({
   selected,
   onSelect,
 }: {
-  readonly selected: GroupOwnsNft[];
+  readonly selected: ApiGroupOwnsNft[];
   readonly onSelect: (item: NFTSearchResult) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);

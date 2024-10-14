@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { RateMatter } from "../../../../../../generated/models/RateMatter";
+import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import CircleLoader, {
   CircleLoaderSize,
@@ -8,7 +8,7 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../../services/api/common-api";
-import { AvailableRatingCredit } from "../../../../../../generated/models/AvailableRatingCredit";
+import { ApiAvailableRatingCredit } from "../../../../../../generated/models/ApiAvailableRatingCredit";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 
 export default function GroupCardActionStats({
@@ -16,13 +16,13 @@ export default function GroupCardActionStats({
   membersCount,
   loadingMembersCount,
 }: {
-  readonly matter: RateMatter;
+  readonly matter: ApiRateMatter;
   readonly membersCount: number | null;
   readonly loadingMembersCount: boolean;
 }) {
-  const MATTER_LABEL: Record<RateMatter, string> = {
-    [RateMatter.Rep]: "Rep",
-    [RateMatter.Cic]: "Nic",
+  const MATTER_LABEL: Record<ApiRateMatter, string> = {
+    [ApiRateMatter.Rep]: "Rep",
+    [ApiRateMatter.Cic]: "Nic",
   };
 
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -48,7 +48,7 @@ export default function GroupCardActionStats({
     setRaterRepresentative(null);
   }, [connectedProfile, activeProfileProxy]);
 
-  const { data: creditLeft } = useQuery<AvailableRatingCredit | null>({
+  const { data: creditLeft } = useQuery<ApiAvailableRatingCredit | null>({
     queryKey: [
       QueryKey.IDENTITY_AVAILABLE_CREDIT,
       {
@@ -72,7 +72,7 @@ export default function GroupCardActionStats({
       }
 
       return await commonApiFetch<
-        AvailableRatingCredit,
+        ApiAvailableRatingCredit,
         { rater: string; rater_representative?: string }
       >({
         endpoint: `ratings/credit`,
@@ -85,9 +85,9 @@ export default function GroupCardActionStats({
 
   const getCreditLeft = () => {
     switch (matter) {
-      case RateMatter.Rep:
+      case ApiRateMatter.Rep:
         return creditLeft?.rep_credit ?? null;
-      case RateMatter.Cic:
+      case ApiRateMatter.Cic:
         return creditLeft?.cic_credit ?? null;
       default:
         assertUnreachable(matter);

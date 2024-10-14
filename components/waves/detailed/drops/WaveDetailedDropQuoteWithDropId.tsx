@@ -3,22 +3,22 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 import WaveDetailedDropQuote from "./WaveDetailedDropQuote";
 
 interface WaveDetailedDropQuoteWithDropIdProps {
   readonly dropId: string;
   readonly partId: number;
-  readonly maybeDrop: Drop | null;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly maybeDrop: ApiDrop | null;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDropQuoteWithDropId: React.FC<
   WaveDetailedDropQuoteWithDropIdProps
 > = ({ dropId, partId, maybeDrop, onQuoteClick }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const { data: drop } = useQuery<Drop>({
+  const { data: drop } = useQuery<ApiDrop>({
     queryKey: [
       QueryKey.DROP,
       {
@@ -27,7 +27,7 @@ const WaveDetailedDropQuoteWithDropId: React.FC<
       },
     ],
     queryFn: async () =>
-      await commonApiFetch<Drop>({
+      await commonApiFetch<ApiDrop>({
         endpoint: `drops/${dropId}`,
         params: connectedProfile?.profile?.handle
           ? { context_profile: connectedProfile.profile.handle }

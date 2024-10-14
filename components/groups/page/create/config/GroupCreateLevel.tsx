@@ -1,12 +1,12 @@
-import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
+import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
 export default function GroupCreateLevel({
   level,
   setLevel,
 }: {
-  readonly level: CreateGroupDescription["level"];
-  readonly setLevel: (level: CreateGroupDescription["level"]) => void;
+  readonly level: ApiCreateGroupDescription["level"];
+  readonly setLevel: (level: ApiCreateGroupDescription["level"]) => void;
 }) {
   return (
     <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">

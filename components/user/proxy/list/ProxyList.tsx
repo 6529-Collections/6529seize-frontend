@@ -2,7 +2,7 @@ import { ProxyMode } from "../UserPageProxy";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
-import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import ProxyListItem from "./ProxyListItem";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 
@@ -25,8 +25,8 @@ export default function ProxyList({
   loading,
 }: {
   readonly onModeChange: (mode: ProxyMode) => void;
-  readonly receivedProfileProxies: ProfileProxy[];
-  readonly grantedProfileProxies: ProfileProxy[];
+  readonly receivedProfileProxies: ApiProfileProxy[];
+  readonly grantedProfileProxies: ApiProfileProxy[];
   readonly isSelf: boolean;
   readonly profile: IProfileAndConsolidations;
   readonly loading: boolean;

@@ -1,18 +1,18 @@
 import Tippy from "@tippyjs/react";
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
+import { ApiWaveMetadataType } from "../../../../generated/models/ApiWaveMetadataType";
 
 export default function WaveRequiredMetadataItemIcon({
   type,
 }: {
-  readonly type: WaveMetadataType;
+  readonly type: ApiWaveMetadataType;
 }) {
-  const LABELS: Record<WaveMetadataType, string> = {
-    [WaveMetadataType.Number]: "Number",
-    [WaveMetadataType.String]: "Text",
+  const LABELS: Record<ApiWaveMetadataType, string> = {
+    [ApiWaveMetadataType.Number]: "Number",
+    [ApiWaveMetadataType.String]: "Text",
   };
 
-  const ICONS: Record<WaveMetadataType, JSX.Element> = {
-    [WaveMetadataType.Number]: (
+  const ICONS: Record<ApiWaveMetadataType, JSX.Element> = {
+    [ApiWaveMetadataType.Number]: (
       <svg
         className="tw-size-4 tw-flex-shrink-0"
         xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +25,7 @@ export default function WaveRequiredMetadataItemIcon({
         />
       </svg>
     ),
-    [WaveMetadataType.String]: (
+    [ApiWaveMetadataType.String]: (
       <svg
         className="tw-size-4 tw-flex-shrink-0"
         viewBox="0 0 24 24"

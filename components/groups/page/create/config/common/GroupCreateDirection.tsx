@@ -1,4 +1,4 @@
-import { GroupFilterDirection } from "../../../../../../generated/models/GroupFilterDirection";
+import { ApiGroupFilterDirection } from "../../../../../../generated/models/ApiGroupFilterDirection";
 import { CommonSelectItem } from "../../../../../utils/select/CommonSelect";
 import CommonTabs from "../../../../../utils/select/tabs/CommonTabs";
 
@@ -7,20 +7,20 @@ export default function GroupCreateDirection({
   label,
   setDirection,
 }: {
-  readonly direction: GroupFilterDirection;
+  readonly direction: ApiGroupFilterDirection;
   readonly label: string;
-  readonly setDirection: (newV: GroupFilterDirection) => void;
+  readonly setDirection: (newV: ApiGroupFilterDirection) => void;
 }) {
-  const items: CommonSelectItem<GroupFilterDirection>[] = [
+  const items: CommonSelectItem<ApiGroupFilterDirection>[] = [
     {
       label: `${label} to`,
-      value: GroupFilterDirection.Sent,
-      key: GroupFilterDirection.Sent,
+      value: ApiGroupFilterDirection.Sent,
+      key: ApiGroupFilterDirection.Sent,
     },
     {
       label: `${label} from`,
-      value: GroupFilterDirection.Received,
-      key: GroupFilterDirection.Received,
+      value: ApiGroupFilterDirection.Received,
+      key: ApiGroupFilterDirection.Received,
     },
   ];
   return (

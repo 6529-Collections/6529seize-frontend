@@ -28,7 +28,9 @@ export default function Waves() {
     !activeProfileProxy;
 
   const [viewMode, setViewMode] = useState(
-    true || getShouldSetCreateNewWave() ? WavesViewMode.CREATE : WavesViewMode.VIEW
+    true || getShouldSetCreateNewWave()
+      ? WavesViewMode.CREATE
+      : WavesViewMode.VIEW
   );
 
   const getShowCreateNewWaveButton = () =>
@@ -37,10 +39,6 @@ export default function Waves() {
   const [showCreateNewWaveButton, setShowCreateNewWaveButton] = useState(
     getShowCreateNewWaveButton()
   );
-
-  // useEffect(() => {
-  //   setShowCreateNewWaveButton(getShowCreateNewWaveButton());
-  // }, [connectedProfile, activeProfileProxy]);
 
   const onViewModeChange = async (mode: WavesViewMode): Promise<void> => {
     if (mode === WavesViewMode.CREATE) {
@@ -56,11 +54,12 @@ export default function Waves() {
     }
   }, [isCreateNewWave]);
 
-  useEffect(() => {
-    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
-      onViewModeChange(WavesViewMode.VIEW);
-    }
-  }, [connectedProfile, activeProfileProxy]);
+  // useEffect(() => {
+  //   if (!connectedProfile?.profile?.handle || activeProfileProxy) {
+  //     onViewModeChange(WavesViewMode.VIEW);
+  //   }
+  //   setShowCreateNewWaveButton(getShowCreateNewWaveButton())
+  // }, [connectedProfile, activeProfileProxy]);
 
   const components: Record<WavesViewMode, JSX.Element> = {
     [WavesViewMode.VIEW]: (

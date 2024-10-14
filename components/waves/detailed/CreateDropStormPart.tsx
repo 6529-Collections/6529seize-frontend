@@ -1,12 +1,12 @@
 import React from "react";
 import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
-import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
+import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
 import DropPartMarkdown from "../../drops/view/part/DropPartMarkdown";
 
 interface CreateDropStormPartProps {
   readonly partIndex: number;
   readonly part: CreateDropPart;
-  readonly mentionedUsers: DropMentionedUser[];
+  readonly mentionedUsers: ApiDropMentionedUser[];
   readonly referencedNfts: ReferencedNft[];
   readonly onRemovePart: (partIndex: number) => void;
 }
@@ -28,7 +28,6 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
           mentionedUsers={mentionedUsers}
           referencedNfts={referencedNfts}
           partContent={part.content ?? ""}
-          onImageLoaded={() => {}}
           onQuoteClick={() => {}}
         />
       </div>

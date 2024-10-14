@@ -5,7 +5,7 @@ import {
 } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
-import { ProfileProxyActionType } from "../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -45,7 +45,7 @@ export default function UserPageRepNewRepSearchHeader({
     proxyCreditLeft: number | null;
   } => {
     const repProxy = activeProfileProxy?.actions.find(
-      (a) => a.action_type === ProfileProxyActionType.AllocateRep
+      (a) => a.action_type === ApiProfileProxyActionType.AllocateRep
     );
     if (!repProxy) {
       return {

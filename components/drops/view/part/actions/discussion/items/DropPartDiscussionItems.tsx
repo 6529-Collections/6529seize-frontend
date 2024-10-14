@@ -4,8 +4,8 @@ import { useDebounce } from "react-use";
 import { QueryKey } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../../../services/api/common-api";
 import { Page } from "../../../../../../../helpers/Types";
-import { Drop } from "../../../../../../../generated/models/Drop";
-import { DropPart } from "../../../../../../../generated/models/DropPart";
+import { ApiDrop } from "../../../../../../../generated/models/ApiDrop";
+import { ApiDropPart } from "../../../../../../../generated/models/ApiDropPart";
 import CommonIntersectionElement from "../../../../../../utils/CommonIntersectionElement";
 import DropsListItem, {
   DropConnectingLineType,
@@ -22,8 +22,8 @@ export default function DropPartDiscussionItems({
   setActiveDiscussionDropId,
   setRepliesOpen,
 }: {
-  readonly drop: Drop;
-  readonly dropPart: DropPart;
+  readonly drop: ApiDrop;
+  readonly dropPart: ApiDropPart;
   readonly dropReplyDepth: number;
   readonly availableCredit: number | null;
   readonly activeDiscussionDropId: string | null;
@@ -59,7 +59,7 @@ export default function DropPartDiscussionItems({
       if (pageParam) {
         params.page = `${pageParam}`;
       }
-      return await commonApiFetch<Page<Drop>>({
+      return await commonApiFetch<Page<ApiDrop>>({
         endpoint: `drops/${drop.id}/parts/${dropPart.part_id}/replies`,
         params,
       });
@@ -70,7 +70,7 @@ export default function DropPartDiscussionItems({
     enabled: requestAllowed,
   });
 
-  const [replies, setReplies] = useState<Drop[]>([]);
+  const [replies, setReplies] = useState<ApiDrop[]>([]);
   useEffect(() => {
     const results = items?.pages.flatMap((page) => page.data) ?? [];
     if (!activeDiscussionDropId) {

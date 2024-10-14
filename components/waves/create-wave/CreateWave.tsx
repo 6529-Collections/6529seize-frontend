@@ -15,9 +15,9 @@ import {
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
-import { GroupFull } from "../../../generated/models/GroupFull";
-import { WaveCreditType } from "../../../generated/models/WaveCreditType";
-import { WaveType } from "../../../generated/models/WaveType";
+import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
+import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
 import CreateWaveDescription, {
   CreateWaveDescriptionHandles,
@@ -28,7 +28,7 @@ import {
   getCreateNewWaveBody,
   getCreateWaveValidationErrors,
 } from "../../../helpers/waves/create-wave.helpers";
-import { CreateNewWave } from "../../../generated/models/CreateNewWave";
+import { ApiCreateNewWave } from "../../../generated/models/ApiCreateNewWave";
 import { AuthContext } from "../../auth/Auth";
 import {
   CreateDropPart,
@@ -38,11 +38,11 @@ import {
 import { commonApiPost } from "../../../services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { CreateWaveDropRequest } from "../../../generated/models/CreateWaveDropRequest";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
-import { GroupFilterDirection } from "../../../generated/models/GroupFilterDirection";
-import { CreateGroup } from "../../../generated/models/CreateGroup";
+import { ApiGroupFilterDirection } from "../../../generated/models/ApiGroupFilterDirection";
+import { ApiCreateGroup } from "../../../generated/models/ApiCreateGroup";
 import { Time } from "../../../helpers/time";
 
 export default function CreateWave({
@@ -57,12 +57,12 @@ export default function CreateWave({
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
     ReactQueryWrapperContext
   );
-  const initialType = WaveType.Rank;
+  const initialType = ApiWaveType.Rank;
   const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
     type,
   }: {
-    readonly type: WaveType;
+    readonly type: ApiWaveType;
   }): CreateWaveConfig => ({
     overview: {
       type,
@@ -88,7 +88,7 @@ export default function CreateWave({
       requiredMetadata: [],
     },
     voting: {
-      type: WaveCreditType.Tdh,
+      type: ApiWaveCreditType.Tdh,
       category: null,
       profileId: null,
     },
@@ -173,7 +173,7 @@ export default function CreateWave({
     group,
     groupType,
   }: {
-    readonly group: GroupFull | null;
+    readonly group: ApiGroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
   }) => {
     switch (groupType) {
@@ -218,7 +218,7 @@ export default function CreateWave({
     }
   };
 
-  const onVotingTypeChange = (type: WaveCreditType) => {
+  const onVotingTypeChange = (type: ApiWaveCreditType) => {
     setConfig((prev) => ({
       ...prev,
       voting: {
@@ -356,8 +356,8 @@ export default function CreateWave({
   };
 
   const addWaveMutation = useMutation({
-    mutationFn: async (body: CreateNewWave) =>
-      await commonApiPost<CreateNewWave, Wave>({
+    mutationFn: async (body: ApiCreateNewWave) =>
+      await commonApiPost<ApiCreateNewWave, ApiWave>({
         endpoint: `waves`,
         body,
       }),
@@ -391,7 +391,7 @@ export default function CreateWave({
     }) =>
       await commonApiPost<
         { visible: true; old_version_id: string | null },
-        GroupFull
+        ApiGroupFull
       >({
         endpoint: `groups/${param.id}/visible`,
         body: param.body,
@@ -406,8 +406,8 @@ export default function CreateWave({
   });
 
   const createNewGroupMutation = useMutation({
-    mutationFn: async (body: CreateGroup) =>
-      await commonApiPost<CreateGroup, GroupFull>({
+    mutationFn: async (body: ApiCreateGroup) =>
+      await commonApiPost<ApiCreateGroup, ApiGroupFull>({
         endpoint: `groups`,
         body,
       }),
@@ -425,21 +425,21 @@ export default function CreateWave({
   }: {
     readonly primaryWallet: string;
   }): Promise<string | null> => {
-    const groupConfig: CreateGroup = {
+    const groupConfig: ApiCreateGroup = {
       name: `Only ${connectedProfile?.profile?.handle}`,
       group: {
         tdh: { min: null, max: null },
         rep: {
           min: null,
           max: null,
-          direction: GroupFilterDirection.Received,
+          direction: ApiGroupFilterDirection.Received,
           user_identity: null,
           category: null,
         },
         cic: {
           min: null,
           max: null,
-          direction: GroupFilterDirection.Received,
+          direction: ApiGroupFilterDirection.Received,
           user_identity: null,
         },
         level: { min: null, max: null },
@@ -500,7 +500,7 @@ export default function CreateWave({
       drop.parts.map((part) => generateDropPart(part))
     );
 
-    const dropRequest: CreateWaveDropRequest = {
+    const dropRequest: ApiCreateWaveDropRequest = {
       title: drop.title,
       parts: dropParts.map((part) => ({
         content: part.content,

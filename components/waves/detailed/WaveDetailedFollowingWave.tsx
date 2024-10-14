@@ -1,16 +1,16 @@
 import React from "react";
 import Link from "next/link";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { getTimeAgoShort } from "../../../helpers/Helpers";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
+import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import router from "next/router";
 import { WAVE_DROPS_PARAMS } from "../../react-query-wrapper/utils/query-utils";
 
 interface WaveDetailedFollowingWaveProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly activeWaveId: string;
   readonly newDropsCounts: Record<string, number>;
   readonly resetWaveCount: (waveId: string) => void;
@@ -42,7 +42,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
     queryClient.prefetchQuery({
       queryKey: [QueryKey.WAVE, { wave_id: waveId }],
       queryFn: async () =>
-        await commonApiFetch<Wave>({
+        await commonApiFetch<ApiWave>({
           endpoint: `waves/${waveId}`,
         }),
       staleTime: 60000,
@@ -64,7 +64,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
         if (pageParam) {
           params.serial_no_less_than = `${pageParam}`;
         }
-        return await commonApiFetch<WaveDropsFeed>({
+        return await commonApiFetch<ApiWaveDropsFeed>({
           endpoint: `waves/${waveId}/drops`,
           params,
         });

@@ -1,6 +1,6 @@
 
-import { CreateDropRequest } from "../generated/models/CreateDropRequest";
-import { ProfileMin } from "../generated/models/ProfileMin";
+import { ApiCreateDropRequest } from "../generated/models/ApiCreateDropRequest";
+import { ProfileMinWithoutSubs } from "../helpers/ProfileTypes";
 import { FullPageRequest } from "../helpers/Types";
 import {
   ProfileActivityLogDropCreated,
@@ -57,17 +57,17 @@ export type DropActivityLogBase =
 
 export interface DropActivityLogDiscussion
   extends ProfileActivityLogDropComment {
-  readonly author: ProfileMin | null;
+  readonly author: ProfileMinWithoutSubs | null;
 }
 
 export interface DropActivityLogRepEdit
   extends ProfileActivityLogDropRatingEdit {
-  readonly author: ProfileMin | null;
+  readonly author: ProfileMinWithoutSubs | null;
 }
 
 export interface DropActivityLogDropCreated
   extends ProfileActivityLogDropCreated {
-  readonly author: ProfileMin | null;
+  readonly author: ProfileMinWithoutSubs | null;
 }
 export type DropActivityLog =
   | DropActivityLogDiscussion
@@ -93,7 +93,7 @@ export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
 }
 
 export interface CreateDropConfig
-  extends Omit<CreateDropRequest, "parts" | "wave_id"> {
+  extends Omit<ApiCreateDropRequest, "parts" | "wave_id"> {
   readonly parts: Array<CreateDropPart>;
 }
 

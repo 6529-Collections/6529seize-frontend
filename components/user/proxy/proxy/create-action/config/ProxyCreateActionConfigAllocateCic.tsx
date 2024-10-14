@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CreateProxyAllocateCicAction } from "../../../../../../entities/IProxy";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 import CommonInput from "../../../../../utils/input/CommonInput";
 import CircleLoader, {
   CircleLoaderSize,
@@ -21,7 +21,7 @@ export default function ProxyCreateActionConfigAllocateCic({
 
   const handleSubmit = () =>
     onSubmit({
-      action_type: ProfileProxyActionType.AllocateCic,
+      action_type: ApiProfileProxyActionType.AllocateCic,
       end_time: endTime,
       credit_amount: creditAmount,
     });
