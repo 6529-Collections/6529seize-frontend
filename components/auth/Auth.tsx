@@ -122,7 +122,7 @@ export default function Auth({
   });
 
   const [receivedProfileProxies, setReceivedProfileProxies] = useState<
-  ApiProfileProxy[]
+    ApiProfileProxy[]
   >(
     groupProfileProxies({
       profileProxies: profileProxies ?? [],
@@ -274,7 +274,10 @@ export default function Auth({
       return { success: false };
     }
     try {
-      const tokenResponse = await commonApiPost<ApiLoginRequest, ApiLoginResponse>({
+      const tokenResponse = await commonApiPost<
+        ApiLoginRequest,
+        ApiLoginResponse
+      >({
         endpoint: "auth/login",
         body: {
           server_signature,

@@ -63,6 +63,7 @@ interface WaveDetailedDropProps {
   }) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
 const WaveDetailedDrop = ({
@@ -76,6 +77,7 @@ const WaveDetailedDrop = ({
   onReplyClick,
   onQuoteClick,
   showReplyAndQuote,
+  parentContainerRef
 }: WaveDetailedDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -212,6 +214,7 @@ const WaveDetailedDrop = ({
               onDropClick={handleDropClick}
               onQuoteClick={onQuoteClick}
               setLongPressTriggered={setLongPressTriggered}
+              parentContainerRef={parentContainerRef}
             />
           </div>
         </div>

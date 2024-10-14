@@ -4,12 +4,11 @@ import DropListItemContentMedia from "../../../drops/view/item/content/media/Dro
 
 interface WaveDetailedDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
-  readonly updateContainerHeight: () => void;
 }
 
 const WaveDetailedDropPartContentMedias: React.FC<
   WaveDetailedDropPartContentMediasProps
-> = ({ activePart, updateContainerHeight }) => {
+> = ({ activePart }) => {
   if (!activePart.media.length) {
     return null;
   }
@@ -23,7 +22,6 @@ const WaveDetailedDropPartContentMedias: React.FC<
           key={`part-${i}-media-${media.url}`}
           media_mime_type={media.mime_type}
           media_url={media.url}
-          onImageLoaded={updateContainerHeight}
         />
       ))}
     </div>
