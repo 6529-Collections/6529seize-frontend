@@ -7,7 +7,7 @@ import {
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "../../services/api/common-api";
-import { NftMedia } from "../../generated/models/NftMedia";
+import { ApiNftMedia } from "../../generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
 
 const DEFAULT_TIMEOUT = 10000;
@@ -23,7 +23,7 @@ const LFGSlideshow: React.FC<{
   const [bodyOverflow, setBodyOverflow] = useState<string>();
   const [isMuted, setIsMuted] = useState(false);
 
-  const [media, setMedia] = useState<NftMedia[]>([]);
+  const [media, setMedia] = useState<ApiNftMedia[]>([]);
 
   let slideTimer: NodeJS.Timeout | null = null;
 
@@ -42,7 +42,7 @@ const LFGSlideshow: React.FC<{
     preloadMedia(nextMedia);
   };
 
-  const preloadMedia = (media: NftMedia) => {
+  const preloadMedia = (media: ApiNftMedia) => {
     if (isVideo(media.animation)) {
       const video = document.createElement("video");
       video.src = media.animation;
@@ -94,7 +94,7 @@ const LFGSlideshow: React.FC<{
   }, [isOpen]);
 
   useEffect(() => {
-    commonApiFetch<NftMedia[]>({
+    commonApiFetch<ApiNftMedia[]>({
       endpoint: `nfts/${contract}/media`,
     }).then((media) => {
       setMedia(media);
@@ -173,7 +173,7 @@ const LFGSlideshow: React.FC<{
             muted={isMuted}
             src={media[currentIndex].animation}
             poster={media[currentIndex].image}>
-            <track kind="subtitles" src="" srcLang="en" label="English" />
+            <track kind="captions" src="" srcLang="en" label="English" />
             Your browser does not support the video tag.
           </video>
         ) : (
