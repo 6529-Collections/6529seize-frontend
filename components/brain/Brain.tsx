@@ -14,6 +14,20 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
     getShowConnectedIdentityWaves()
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [waves, setWaves] = useState([
+    { id: 1, name: "Wave A" },
+    { id: 2, name: "Wave B" },
+    { id: 3, name: "Wave C" },
+    // Add more waves as needed
+  ]);
+
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+
+  const filteredWaves = waves.filter((wave) =>
+    wave.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(
     () => setShowConnectedIdentityWaves(getShowConnectedIdentityWaves()),
@@ -21,7 +35,7 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
   );
 
   return (
-    <div className="tw-relative tw-h-screen tw-overflow-hidden tw-flex tw-flex-col">
+    <div className="tw-relative tw-flex tw-flex-col">
       <div
         className={`tailwind-scope tw-relative tw-flex tw-flex-grow ${
           isCollapsed
@@ -34,104 +48,177 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
             isCollapsed ? "" : "tw-mr-[20.5rem]"
           }`}
         >
-          <div className="tw-pt-8 tw-overflow-y-auto lg:tw-w-[20.5rem] tw-w-full no-scrollbar">
-            <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-[10px]">
-              <button className="tw-border-0 tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-bg-iron-800 tw-rounded-md">
-                <span className="tw-font-inter tw-font-semibold tw-text-sm tw-text-iron-300">
-                  My Stream
-                </span>
-              </button>
-              <button className="tw-border-0 tw-bg-iron-950 tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-md">
-                <span className="tw-font-inter tw-font-semibold tw-text-sm tw-text-iron-400">
-                  Notifications
-                </span>
-                <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
-              </button>
-            </div>
-            <div className="tw-mt-4 tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-400 tw-to-primary-500">
-              <Link
-                href="/waves?new=true"
-                className="tw-no-underline tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600 hover:tw-text-white tw-w-full tw-flex tw-justify-center tw-gap-x-1.5 tw-items-center tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
-              >
-                <svg
-                  className="tw-size-5 -tw-ml-1 tw-flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 5V19M5 12H19"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>Create a Wave</span>
-              </Link>
-            </div>
-            <div className="tw-relative tw-mt-4">
-              <div className="tw-relative">
-                <svg
-                  className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                <input
-                  type="text"
-                  className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-11 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-400 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
-                  placeholder="Search a Wave"
-                  value=""
-                />
+          <div className="tw-flex tw-flex-col tw-h-[calc(100vh-6.25rem)] tw-overflow-y-auto lg:tw-w-[20.5rem] tw-w-full no-scrollbar">
+            <div className="tw-py-8 tw-flex-1">
+              <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-[10px]">
+                <button className="tw-border-0 tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-bg-iron-800 tw-rounded-md">
+                  <span className="tw-font-inter tw-font-semibold tw-text-sm tw-text-iron-300">
+                    My Stream
+                  </span>
+                </button>
+                <button className="tw-border-0 tw-bg-iron-950 tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-md">
+                  <span className="tw-font-inter tw-font-semibold tw-text-sm tw-text-iron-400">
+                    Notifications
+                  </span>
+                  <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
+                </button>
               </div>
-            </div>
-            <div className="tw-flex-grow tw-overflow-y-auto no-scrollbar">
-              {showConnectedIdentityWaves && (
-                <>
-                  <WavesListWrapper type={WavesListType.MY_WAVES} />
-                  {/* <WavesListWrapper type={WavesListType.FOLLOWING} /> */}
-                </>
-              )}
-              <WaveDetailedFollowingWaves />
-              <WavesListWrapper type={WavesListType.POPULAR} />
+              <div className="tw-mt-4 tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-400 tw-to-primary-500">
+                <Link
+                  href="/waves?new=true"
+                  className="tw-no-underline tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600 hover:tw-text-white tw-w-full tw-flex tw-justify-center tw-gap-x-1.5 tw-items-center tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
+                >
+                  <svg
+                    className="tw-size-5 -tw-ml-1 tw-flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 5V19M5 12H19"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>Create a Wave</span>
+                </Link>
+              </div>
+              <div className="tw-relative tw-mt-4">
+                <div className="tw-relative">
+                  <svg
+                    className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                  <input
+                    type="text"
+                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-11 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-400 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
+                    placeholder="Search a Wave"
+                    value=""
+                  />
+                </div>
+              </div>
+              <div>
+                {showConnectedIdentityWaves && (
+                  <>
+                    <WavesListWrapper type={WavesListType.MY_WAVES} />
+                    {/* <WavesListWrapper type={WavesListType.FOLLOWING} /> */}
+                  </>
+                )}
+                <WaveDetailedFollowingWaves />
+                <WavesListWrapper type={WavesListType.POPULAR} />
+              </div>
             </div>
           </div>
-          <div className="tw-mt-8 tw-flex-1 tw-flex tw-flex-col tw-h-full tw-overflow-y-auto no-scrollbar tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
+
+          <div className="tw-mt-8 tw-flex-1 tw-h-full tw-flex tw-flex-col tw-overflow-y-auto no-scrollbar">
             <div className="tw-flex tw-items-center tw-gap-4 tw-mb-4">
-              <div className="tw-w-14 tw-h-14 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-                <img
-                  src="/path-to-memes-chat-icon.jpg"
-                  alt="#"
-                  className="tw-w-full tw-h-full tw-object-cover"
-                />
-              </div>
-              <div className="tw-w-12 tw-h-12 tw-rounded-full tw-bg-transparent tw-border tw-border-dashed tw-border-iron-600 tw-text-iron-600 tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-border-iron-300 hover:tw-text-iron-300 hover:tw-bg-iron-900 tw-transition-all tw-duration-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                  className="tw-size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
+              <div className="tw-relative tw-group">
+                <div className="tw-w-14 tw-h-14 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-ring-2 hover:tw-ring-primary-400 tw-transition-all tw-duration-300">
+                  <img
+                    src="/path-to-memes-chat-icon.jpg"
+                    alt="#"
+                    className="tw-w-full tw-h-full tw-object-cover"
                   />
-                </svg>
+                </div>
+                <button className="tw-border-0 tw-absolute -tw-top-2 -tw-right-2 tw-bg-iron-700 tw-rounded-full tw-p-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="tw-h-4 tw-w-4 tw-text-iron-300 tw-flex-shrink-0"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="tw-relative">
+                <div
+                  className="tw-w-12 tw-h-12 tw-rounded-full tw-bg-transparent tw-border tw-border-dashed tw-border-iron-600 tw-text-iron-600 tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-border-iron-300 hover:tw-text-iron-300 hover:tw-bg-iron-900 tw-transition-all tw-duration-300"
+                  onClick={toggleDropdown}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                    className="tw-size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                </div>
+                {isDropdownOpen && (
+                  <div className="tw-absolute tw-top-full tw-left-0 tw-mt-2 tw-w-72 tw-bg-gradient-to-b tw-from-iron-900 tw-to-iron-950 tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-shadow-2xl tw-z-50 tw-transition-all tw-duration-300 tw-ease-in-out">
+                    <div className="tw-p-4">
+                      <div className="tw-relative">
+                        <input
+                          type="text"
+                          placeholder="Search waves..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="tw-w-full tw-px-4 tw-py-3 tw-bg-iron-800/70 tw-text-iron-200 tw-rounded-xl tw-border tw-border-iron-700/30 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 tw-transition-all tw-duration-300 tw-placeholder-iron-500"
+                        />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="tw-h-5 tw-w-5 tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-text-iron-500 tw-transition-colors tw-duration-300"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <ul className="tw-max-h-72 tw-list-none tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-primary-400 tw-scrollbar-track-iron-900 tw-space-y-1 tw-px-4 tw-pb-1">
+                      {filteredWaves.map((wave) => (
+                        <li
+                          key={wave.id}
+                          className="tw-px-2 tw-py-2.5 tw-rounded-xl hover:tw-bg-iron-800/70 tw-cursor-pointer tw-text-iron-200 tw-transition-all tw-duration-300 tw-ease-in-out hover:tw-scale-105 tw-transform"
+                        >
+                          <div className="tw-flex tw-items-center tw-space-x-3">
+                            <div className="tw-size-8 tw-rounded-full tw-bg-gradient-to-br tw-from-primary-400 tw-to-primary-600 tw-flex tw-items-center tw-justify-center tw-text-white tw-font-bold tw-shadow-md">
+                              <span className="tw-text-sm">
+                                {wave.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <span className="tw-text-iron-200 tw-font-medium tw-text-sm">
+                              {wave.name}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
-            <div className="tw-sticky tw-top-0 tw-bg-black tw-z-50">
+            <div className="tw-sticky tw-top-0 tw-bg-black tw-z-40">
               <div className="tw-flex tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-p-4 tw-shadow-lg">
                 <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
                   <CreateDropActions />
@@ -168,6 +255,7 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
             </div>
           </div>
         </div>
+
         <div
           className={`tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-transition-all tw-duration-300 tw-ease-in-out ${
             isCollapsed ? "tw-w-0" : "tw-w-[20.5rem]"
@@ -199,7 +287,6 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
               />
             </svg>
           </button>
-
           <div className="tw-pt-32 tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
             <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
               <div className="tw-px-5">
