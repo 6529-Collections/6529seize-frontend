@@ -6,7 +6,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { ApiNftMedia } from "../../generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
 
-const DEFAULT_TIMEOUT = 2000;
+const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
 const VIDEO_ID = "lfg-slideshow-video";
 
