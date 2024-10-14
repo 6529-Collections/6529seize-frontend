@@ -573,6 +573,11 @@ export const getCreateNewWaveBody = ({
         max: config.dates.endDate,
       },
     },
+    chat: {
+      scope: {
+        group_id: config.groups.canChat,
+      },
+    },
     wave: {
       type: config.overview.type,
       winning_thresholds: getWinningThreshold({ config }),

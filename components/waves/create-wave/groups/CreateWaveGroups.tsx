@@ -20,9 +20,21 @@ export default function CreateWaveGroups({
   }) => void;
 }) {
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
+
+  const groupTypes =
+    waveType === ApiWaveType.Chat
+      ? Object.values(CreateWaveGroupConfigType).filter(
+          (groupType) =>
+            ![
+              CreateWaveGroupConfigType.CAN_DROP,
+              CreateWaveGroupConfigType.CAN_VOTE,
+            ].includes(groupType)
+        )
+      : Object.values(CreateWaveGroupConfigType);
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      {Object.values(CreateWaveGroupConfigType).map((groupType) => (
+      {groupTypes.map((groupType) => (
         <CreateWaveGroup
           key={groupType}
           groupType={groupType}

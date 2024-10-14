@@ -74,6 +74,7 @@ export default function CreateWave({
       canView: null,
       canDrop: null,
       canVote: null,
+      canChat: null,
       admin: null,
     },
     dates: {
@@ -201,6 +202,15 @@ export default function CreateWave({
           groups: {
             ...prev.groups,
             canVote: group?.id ?? null,
+          },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_CHAT:
+        setConfig((prev) => ({
+          ...prev,
+          groups: {
+            ...prev.groups,
+            canChat: group?.id ?? null,
           },
         }));
         break;
@@ -665,19 +675,6 @@ export default function CreateWave({
               <div className="tw-relative tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-w-full">
-                    {/* <AnimatePresence mode="wait">
-                      <CommonAnimationHeight>
-                        <motion.div
-                          key={step}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {stepComponent[step]}
-                        </motion.div>
-                      </CommonAnimationHeight>
-                    </AnimatePresence> */}
                     {stepComponent[step]}
                   </div>
                   {!selectedOutcomeType && (

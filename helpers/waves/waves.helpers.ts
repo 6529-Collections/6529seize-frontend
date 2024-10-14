@@ -52,6 +52,11 @@ export const convertWaveToUpdateWave = (
     signature_required: !!wave.participation.signature_required,
     period: wave.participation.period,
   },
+  chat: {
+    scope: {
+      group_id: wave.chat.scope.group?.id ?? null,
+    },
+  },
   wave: {
     type: wave.wave.type,
     winning_thresholds:

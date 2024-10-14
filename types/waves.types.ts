@@ -15,6 +15,7 @@ export enum CreateWaveGroupConfigType {
   CAN_VIEW = "CAN_VIEW",
   CAN_DROP = "CAN_DROP",
   CAN_VOTE = "CAN_VOTE",
+  CAN_CHAT = "CAN_CHAT",
   ADMIN = "ADMIN",
 }
 
@@ -29,6 +30,7 @@ export interface WaveGroupsConfig {
   readonly canView: string | null;
   readonly canDrop: string | null;
   readonly canVote: string | null;
+  readonly canChat: string | null;
   readonly admin: string | null;
 }
 

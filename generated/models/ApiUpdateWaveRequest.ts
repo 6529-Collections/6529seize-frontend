@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
@@ -29,6 +30,7 @@ export class ApiUpdateWaveRequest {
     'voting': ApiCreateNewWaveVotingConfig;
     'visibility': ApiCreateNewWaveVisibilityConfig;
     'participation': ApiCreateNewWaveParticipationConfig;
+    'chat': ApiCreateNewWaveChatConfig;
     'wave': ApiCreateWaveConfig;
     'outcomes': Array<ApiWaveOutcome>;
 
@@ -63,6 +65,12 @@ export class ApiUpdateWaveRequest {
             "name": "participation",
             "baseName": "participation",
             "type": "ApiCreateNewWaveParticipationConfig",
+            "format": ""
+        },
+        {
+            "name": "chat",
+            "baseName": "chat",
+            "type": "ApiCreateNewWaveChatConfig",
             "format": ""
         },
         {
