@@ -9,7 +9,10 @@
     "prebuild": "npm run generate",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:watch": "nodemon --watch tests --watch src --ext ts,tsx,js,jsx --exec \"npx playwright test\""
   },
   "dependencies": {
     "@capacitor/device": "^6.0.1",
@@ -72,6 +75,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.4",
+    "@playwright/test": "^1.47.0",
     "@tanstack/eslint-plugin-query": "^5.43.1",
     "@types/hammerjs": "^2.0.45",
     "@types/js-cookie": "^3.0.6",
@@ -82,9 +86,11 @@
     "@types/react-toggle": "^4.0.5",
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.4.19",
+    "dotenv": "^16.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",
     "next-unused": "^0.0.6",
+    "nodemon": "^3.1.4",
     "postcss": "^8.4.38",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.4",
