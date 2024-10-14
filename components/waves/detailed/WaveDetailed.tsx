@@ -3,7 +3,6 @@ import { useState } from "react";
 import WaveDetailedDesktop from "./WaveDetailedDesktop";
 import { createBreakpoint } from "react-use";
 import WaveDetailedMobile from "./WaveDetailedMobile";
-import { WaveDropsFeed } from "../../../generated/models/WaveDropsFeed";
 
 export enum WaveDetailedView {
   CONTENT = "CONTENT",
