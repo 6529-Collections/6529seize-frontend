@@ -17,7 +17,7 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [waves, setWaves] = useState([
-    { id: 1, name: "Wave A" },
+    { id: 1, name: "Memes-Chat" },
     { id: 2, name: "Wave B" },
     { id: 3, name: "Wave C" },
     // Add more waves as needed
@@ -122,34 +122,67 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
           </div>
 
           <div className="tw-mt-8 tw-flex-1 tw-h-full tw-flex tw-flex-col tw-overflow-y-auto no-scrollbar">
-            <div className="tw-flex tw-items-center tw-gap-4 tw-mb-4">
-              <div className="tw-relative tw-group">
-                <div className="tw-w-14 tw-h-14 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-ring-2 hover:tw-ring-primary-400 tw-transition-all tw-duration-300">
-                  <img
-                    src="/path-to-memes-chat-icon.jpg"
-                    alt="#"
-                    className="tw-w-full tw-h-full tw-object-cover"
-                  />
+            <div className="tw-flex tw-gap-4 tw-mb-4">
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <div className="tw-relative tw-group">
+                  <div className="tw-flex tw-flex-col tw-items-center">
+                    <div className="tw-relative tw-w-14 tw-h-14 tw-rounded-full tw-bg-indigo-900 tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300">
+                      <div className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-gradient-to-tr tw-from-indigo-400 tw-via-blue-500 tw-to-indigo-600 tw-animate-gradient-xy"></div>
+                      <div className="tw-absolute tw-inset-0.5 tw-rounded-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center">
+                        <div className="tw-absolute tw-inset-0.5 tw-rounded-full tw-overflow-hidden"></div>
+                      </div>
+                    </div>
+                    <span className="tw-text-iron-200 tw-text-[11px] tw-font-semibold tw-mt-1 tw-text-center">
+                      Stage the Wave
+                    </span>
+                  </div>
+                  <button className="tw-flex-shrink-0 tw-border-0 tw-absolute -tw-top-2 tw-right-4 tw-bg-iron-700 tw-rounded-full tw-size-6 tw-flex tw-items-center tw-justify-center tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="tw-h-4 tw-w-4 tw-text-iron-300 tw-flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
                 </div>
-                <button className="tw-border-0 tw-absolute -tw-top-2 -tw-right-2 tw-bg-iron-700 tw-rounded-full tw-p-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="tw-h-4 tw-w-4 tw-text-iron-300 tw-flex-shrink-0"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
+                <div className="tw-relative tw-group tw-opacity-50">
+                  <div className="tw-flex tw-flex-col tw-items-center">
+                    <div className="tw-relative tw-w-14 tw-h-14 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300">
+                      <div className="tw-absolute tw-inset-0.5 tw-rounded-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center">
+                        <div className="tw-absolute tw-inset-0.5 tw-rounded-full tw-overflow-hidden"></div>
+                      </div>
+                    </div>
+                    <span className="tw-text-iron-400 tw-text-[11px] tw-font-medium tw-mt-1 tw-text-center">
+                      Wave123
+                    </span>
+                  </div>
+                  <button className="tw-flex-shrink-0 tw-border-0 tw-absolute -tw-top-2 tw-right-4 tw-bg-iron-700 tw-rounded-full tw-size-6 tw-flex tw-items-center tw-justify-center tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="tw-h-4 tw-w-4 tw-text-iron-300 tw-flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div className="tw-relative">
+              <div className="tw-relative tw-mt-2">
                 <div
-                  className="tw-w-12 tw-h-12 tw-rounded-full tw-bg-transparent tw-border tw-border-dashed tw-border-iron-600 tw-text-iron-600 tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-border-iron-300 hover:tw-text-iron-300 hover:tw-bg-iron-900 tw-transition-all tw-duration-300"
+                  className="tw-size-10 tw-rounded-full tw-bg-transparent tw-border tw-border-dashed tw-border-iron-600 tw-text-iron-600 tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-border-iron-300 hover:tw-text-iron-300 hover:tw-bg-iron-900 tw-transition-all tw-duration-300"
                   onClick={toggleDropdown}
                 >
                   <svg
@@ -224,8 +257,8 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
                   <CreateDropActions />
                   <input
                     type="text"
-                    placeholder="Create a drop"
-                    className="tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                    placeholder="Create a drop in Stage the Wave"
+                    className="tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
                     tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900"
                   />
                 </div>
@@ -295,7 +328,7 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
                   <div className="tw-group tw-flex tw-items-center tw-space-x-2">
                     <a href="" className="tw-no-underline">
                       <h1 className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-text-iron-200 tw-font-semibold tw-tracking-tight hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                        Memes-Chat
+                        Stage the Wave
                       </h1>
                     </a>
                   </div>
@@ -402,7 +435,7 @@ export default function Brain({ children }: { readonly children: ReactNode }) {
                       </span>
                       <div className="tw-flex tw-flex-col tw-gap-y-1.5">
                         <span className="tw-font-medium tw-text-iron-200 tw-text-md">
-                          punk6529
+                          simo
                         </span>
                       </div>
                     </div>
