@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faExpand,
-  faForward,
-  faXmarkCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ApiNftMedia } from "../../generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
 
-const DEFAULT_TIMEOUT = 10000;
+const DEFAULT_TIMEOUT = 2000;
 const SLIDESHOW_ID = "lfg-slideshow";
 const VIDEO_ID = "lfg-slideshow-video";
 
@@ -153,11 +149,6 @@ const LFGSlideshow: React.FC<{
             onClick={() => enterArtFullScreen(SLIDESHOW_ID)}
           />
         )}
-        <FontAwesomeIcon
-          icon={faForward}
-          className={styles.slideButton}
-          onClick={nextSlide}
-        />
         <FontAwesomeIcon
           icon={faXmarkCircle}
           className={styles.slideButton}
