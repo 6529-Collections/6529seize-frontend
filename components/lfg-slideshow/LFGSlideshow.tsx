@@ -173,6 +173,7 @@ const LFGSlideshow: React.FC<{
             muted={isMuted}
             src={media[currentIndex].animation}
             poster={media[currentIndex].image}>
+            <track kind="subtitles" src="" srcLang="en" label="English" />
             Your browser does not support the video tag.
           </video>
         ) : (
