@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
-import { RateMatter } from "../../../../../generated/models/RateMatter";
+import { ApiRateMatter } from "../../../../../generated/models/ApiRateMatter";
 
 export default function GroupCardActionWrapper({
   loading,
@@ -18,15 +18,15 @@ export default function GroupCardActionWrapper({
   readonly addingRates: boolean;
   readonly membersCount: number | null;
   readonly doneMembersCount: number | null;
-  readonly matter: RateMatter;
+  readonly matter: ApiRateMatter;
   readonly onSave: () => void;
   readonly onCancel: () => void;
 
   readonly children: React.ReactNode;
 }) {
-  const MATTER_LABEL: Record<RateMatter, string> = {
-    [RateMatter.Rep]: "Rep",
-    [RateMatter.Cic]: "NIC",
+  const MATTER_LABEL: Record<ApiRateMatter, string> = {
+    [ApiRateMatter.Rep]: "Rep",
+    [ApiRateMatter.Cic]: "NIC",
   };
   const getProgress = (): string => {
     if (
@@ -64,7 +64,8 @@ export default function GroupCardActionWrapper({
                 style={{
                   width: progress,
                   transition: "width 0.5s ease-out",
-                }}></div>
+                }}
+              ></div>
             </div>
           </div>
         ) : (

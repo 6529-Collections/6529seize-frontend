@@ -8,7 +8,7 @@ import GroupItems from "./GroupItems";
 import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../../store/groupSlice";
 import GroupsSelectActiveGroup from "./GroupsSelectActiveGroup";
-import { GroupFull } from "../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
 import IdentitySearch, {
   IdentitySearchSize,
@@ -44,7 +44,7 @@ export default function GroupSelect() {
         params.created_at_less_than = `${pageParam}`;
       }
       return await commonApiFetch<
-        GroupFull[],
+        ApiGroupFull[],
         NonNullableNotRequired<GroupsRequestParams>
       >({
         endpoint: "groups",
@@ -70,7 +70,7 @@ export default function GroupSelect() {
     }));
   };
 
-  const [groups, setGroups] = useState<GroupFull[]>([]);
+  const [groups, setGroups] = useState<ApiGroupFull[]>([]);
 
   useEffect(() => setGroups(data?.pages?.flat() ?? []), [data, activeGroupId]);
 

@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Wave } from "../../../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../../../generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../../services/api/common-api";
@@ -7,7 +7,7 @@ import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/
 import { AuthContext } from "../../../../../../auth/Auth";
 import WaveGroupEditButton from "./WaveGroupEditButton";
 import WaveGroupRemoveButton from "./WaveGroupRemoveButton";
-import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
 import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function WaveGroupEditButtons({
@@ -16,7 +16,7 @@ export default function WaveGroupEditButtons({
   type,
 }: {
   readonly haveGroup: boolean;
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly type: WaveGroupType;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -24,8 +24,8 @@ export default function WaveGroupEditButtons({
   const [mutating, setMutating] = useState(false);
 
   const editWaveMutation = useMutation({
-    mutationFn: async (body: UpdateWaveRequest) =>
-      await commonApiPost<UpdateWaveRequest, Wave>({
+    mutationFn: async (body: ApiUpdateWaveRequest) =>
+      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -43,7 +43,7 @@ export default function WaveGroupEditButtons({
     },
   });
 
-  const onEdit = async (body: UpdateWaveRequest) => {
+  const onEdit = async (body: ApiUpdateWaveRequest) => {
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {

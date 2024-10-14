@@ -1,11 +1,11 @@
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { numberWithCommas } from "../../../../helpers/Helpers";
 
 export default function WaveHeaderFollowers({
   wave,
   onFollowersClick,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
 }) {
   return (

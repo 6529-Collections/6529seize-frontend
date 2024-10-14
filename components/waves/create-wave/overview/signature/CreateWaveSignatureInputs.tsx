@@ -1,4 +1,4 @@
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import { WAVE_SIGNATURE_LABELS } from "../../../../../helpers/waves/waves.constants";
 import { WaveSignatureType } from "../../../../../types/waves.types";
 import CommonBorderedRadioButton from "../../../../utils/radio/CommonBorderedRadioButton";
@@ -8,7 +8,7 @@ export default function CreateWaveSignatureInputs({
   selectedSignatureType,
   onChange,
 }: {
-  readonly selectedWaveType: WaveType;
+  readonly selectedWaveType: ApiWaveType;
   readonly selectedSignatureType: WaveSignatureType;
   readonly onChange: (type: WaveSignatureType) => void;
 }) {

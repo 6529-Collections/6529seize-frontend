@@ -1,12 +1,14 @@
 import { PROFILE_PROXY_ACTION_LABELS } from "../../../../../../entities/IProxy";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionSelectTypeItem({
   actionType,
   setSelectedActionType,
 }: {
-  readonly actionType: ProfileProxyActionType;
-  readonly setSelectedActionType: (actionType: ProfileProxyActionType) => void;
+  readonly actionType: ApiProfileProxyActionType;
+  readonly setSelectedActionType: (
+    actionType: ApiProfileProxyActionType
+  ) => void;
 }) {
   return (
     <li className="tw-ring-1 tw-ring-iron-600 tw-rounded-lg">

@@ -1,16 +1,16 @@
 import { useContext, useState } from "react";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import WaveRequiredMetadataAddButton from "./WaveRequiredMetadataAddButton";
 import WaveRequiredMetadataAddInput from "./WaveRequiredMetadataAddInput";
 import { CreateWaveDropsRequiredMetadata } from "../../../../types/waves.types";
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
+import { ApiWaveMetadataType } from "../../../../generated/models/ApiWaveMetadataType";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
-import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../generated/models/ApiUpdateWaveRequest";
 
 enum Mode {
   IDLE = "IDLE",
@@ -20,7 +20,7 @@ enum Mode {
 export default function WaveRequiredMetadataAdd({
   wave,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
@@ -28,20 +28,20 @@ export default function WaveRequiredMetadataAdd({
   const [mode, setMode] = useState<Mode>(Mode.IDLE);
   const [metadata, setMetadata] = useState<CreateWaveDropsRequiredMetadata>({
     key: "",
-    type: WaveMetadataType.String,
+    type: ApiWaveMetadataType.String,
   });
 
   const setIdleAndReset = () => {
     setMode(Mode.IDLE);
     setMetadata({
       key: "",
-      type: WaveMetadataType.String,
+      type: ApiWaveMetadataType.String,
     });
   };
 
   const addMetadataMutation = useMutation({
-    mutationFn: async (body: UpdateWaveRequest) =>
-      await commonApiPost<UpdateWaveRequest, Wave>({
+    mutationFn: async (body: ApiUpdateWaveRequest) =>
+      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -82,7 +82,7 @@ export default function WaveRequiredMetadataAdd({
       type: metadata.type,
     });
 
-    const body: UpdateWaveRequest = {
+    const body: ApiUpdateWaveRequest = {
       ...originalBody,
       participation: {
         ...originalBody.participation,
@@ -101,10 +101,10 @@ export default function WaveRequiredMetadataAdd({
       ) : (
         <>
           <div className="tw-mt-2">
-          <WaveRequiredMetadataAddInput
-            metadata={metadata}
-            setMetadata={setMetadata}
-          />
+            <WaveRequiredMetadataAddInput
+              metadata={metadata}
+              setMetadata={setMetadata}
+            />
           </div>
           <div className="tw-mt-3 sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
             <button

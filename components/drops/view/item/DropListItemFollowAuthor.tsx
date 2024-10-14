@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import Tippy from "@tippyjs/react";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -11,8 +11,8 @@ import {
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
-import { IdentitySubscriptionActions } from "../../../../generated/models/IdentitySubscriptionActions";
-import { IdentitySubscriptionTargetAction } from "../../../../generated/models/IdentitySubscriptionTargetAction";
+import { ApiIdentitySubscriptionActions } from "../../../../generated/models/ApiIdentitySubscriptionActions";
+import { ApiIdentitySubscriptionTargetAction } from "../../../../generated/models/ApiIdentitySubscriptionTargetAction";
 
 enum FOLLOW_STATE {
   FOLLOWING = "FOLLOWING",
@@ -22,7 +22,7 @@ enum FOLLOW_STATE {
 export default function DropListItemFollowAuthor({
   drop,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
 }) {
   const followState = drop.author.subscribed_actions.length
     ? FOLLOW_STATE.FOLLOWING
@@ -84,13 +84,13 @@ export default function DropListItemFollowAuthor({
   const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<
-        IdentitySubscriptionActions,
-        IdentitySubscriptionActions
+        ApiIdentitySubscriptionActions,
+        ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${drop.author.id}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction).filter(
-            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
+            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
           ),
         },
       });
@@ -112,13 +112,13 @@ export default function DropListItemFollowAuthor({
   const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
-        IdentitySubscriptionActions,
-        IdentitySubscriptionActions
+        ApiIdentitySubscriptionActions,
+        ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${drop.author.id}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction).filter(
-            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
+            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
           ),
         },
       });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GroupFull } from "../../../../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../../../../generated/models/ApiGroupFull";
 import CommonAnimationWrapper from "../../../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../../../utils/animation/CommonAnimationOpacity";
 import GroupCardDeleteModal from "./GroupCardDeleteModal";
@@ -7,7 +7,7 @@ import GroupCardDeleteModal from "./GroupCardDeleteModal";
 export default function GroupCardDelete({
   group,
 }: {
-  readonly group: GroupFull;
+  readonly group: ApiGroupFull;
 }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   return (

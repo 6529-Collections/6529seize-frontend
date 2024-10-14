@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
 import { AuthContext } from "../../../auth/Auth";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -11,14 +11,14 @@ import {
 } from "../../../../helpers/waves/waves.helpers";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import WaveRequiredMetadataItemIcon from "./WaveRequiredMetadataItemIcon";
-import { UpdateWaveRequest } from "../../../../generated/models/UpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveRequiredMetadataItem({
   metadata,
   wave,
 }: {
-  readonly metadata: WaveRequiredMetadata;
-  readonly wave: Wave;
+  readonly metadata: ApiWaveRequiredMetadata;
+  readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
     useContext(AuthContext);
@@ -31,8 +31,8 @@ export default function WaveRequiredMetadataItem({
   useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
 
   const removeMetadataMutation = useMutation({
-    mutationFn: async (body: UpdateWaveRequest) =>
-      await commonApiPost<UpdateWaveRequest, Wave>({
+    mutationFn: async (body: ApiUpdateWaveRequest) =>
+      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
         endpoint: `waves/${wave.id}`,
         body,
       }),
@@ -67,7 +67,7 @@ export default function WaveRequiredMetadataItem({
       (md) => md.name.toLowerCase() !== metadata.name.toLowerCase()
     );
 
-    const body: UpdateWaveRequest = {
+    const body: ApiUpdateWaveRequest = {
       ...originalBody,
       participation: {
         ...originalBody.participation,

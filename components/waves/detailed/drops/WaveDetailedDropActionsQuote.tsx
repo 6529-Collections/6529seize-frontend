@@ -1,10 +1,10 @@
 import React from "react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropActionsQuoteProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly onQuote: () => void;
   readonly activePartIndex: number;
 }

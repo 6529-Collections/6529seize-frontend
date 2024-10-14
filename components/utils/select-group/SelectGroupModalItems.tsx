@@ -1,4 +1,4 @@
-import { GroupFull } from "../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
@@ -9,9 +9,9 @@ export default function SelectGroupModalItems({
   loading,
   onGroupSelect,
 }: {
-  readonly groups: GroupFull[];
+  readonly groups: ApiGroupFull[];
   readonly loading: boolean;
-  readonly onGroupSelect: (group: GroupFull) => void;
+  readonly onGroupSelect: (group: ApiGroupFull) => void;
 }) {
   if (loading) {
     return (

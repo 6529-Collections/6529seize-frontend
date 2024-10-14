@@ -1,13 +1,13 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QuotedDrop } from "../../../../../generated/models/QuotedDrop";
-import { Drop } from "../../../../../generated/models/Drop";
+import { ApiQuotedDrop } from "../../../../../generated/models/ApiQuotedDrop";
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
-import { DropPart as IDropPart } from "../../../../../generated/models/DropPart";
+import { ApiDropPart } from "../../../../../generated/models/ApiDropPart";
 import DropPart, { DropPartSize } from "../../../view/part/DropPart";
-import { DropMentionedUser } from "../../../../../generated/models/DropMentionedUser";
-import { DropReferencedNFT } from "../../../../../generated/models/DropReferencedNFT";
+import { ApiDropMentionedUser } from "../../../../../generated/models/ApiDropMentionedUser";
+import { ApiDropReferencedNFT } from "../../../../../generated/models/ApiDropReferencedNFT";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 interface PartConfigWave {
@@ -17,9 +17,9 @@ interface PartConfigWave {
 }
 
 interface PartConfig {
-  readonly part: IDropPart;
-  readonly mentionedUsers: Array<DropMentionedUser>;
-  readonly referencedNfts: Array<DropReferencedNFT>;
+  readonly part: ApiDropPart;
+  readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly createdAt: number;
   readonly wave: PartConfigWave;
   readonly dropTitle: string | null;
@@ -30,12 +30,12 @@ export default function CreateDropStormViewPartQuote({
   quotedDrop,
 }: {
   readonly profile: ProfileMinWithoutSubs;
-  readonly quotedDrop: QuotedDrop;
+  readonly quotedDrop: ApiQuotedDrop;
 }) {
-  const { data: drop } = useQuery<Drop>({
+  const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, quotedDrop.drop_id],
     queryFn: async () =>
-      await commonApiFetch<Drop>({
+      await commonApiFetch<ApiDrop>({
         endpoint: `/drops/${quotedDrop.drop_id}`,
       }),
     enabled: typeof quotedDrop.drop_id === "string",
@@ -85,7 +85,6 @@ export default function CreateDropStormViewPartQuote({
           }))}
           createdAt={partConfig.createdAt}
           wave={partConfig.wave}
-          showFull={false}
           dropTitle={partConfig.dropTitle}
           size={DropPartSize.SMALL}
         />

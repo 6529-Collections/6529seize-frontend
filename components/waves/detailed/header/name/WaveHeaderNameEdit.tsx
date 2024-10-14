@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { Wave } from "../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
 import PencilIcon from "../../../../utils/icons/PencilIcon";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
 import WaveHeaderNameEditModal from "./WaveHeaderNameEditModal";
 
-export default function WaveHeaderNameEdit({ wave }: { readonly wave: Wave }) {
+export default function WaveHeaderNameEdit({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
   const [isEditNameOpen, setIsEditNameOpen] = useState(false);
   return (
     <div>

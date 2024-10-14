@@ -3,7 +3,7 @@ import { AuthContext } from "../../../../auth/Auth";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { ProfileProxyActionType } from "../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
 
 export default function UserPageIdentityHeaderCICRateStats({
   isTooltip,
@@ -22,7 +22,7 @@ export default function UserPageIdentityHeaderCICRateStats({
   const { activeProfileProxy } = useContext(AuthContext);
   const getProxyAvailableCredit = (): number | null => {
     const proxy = activeProfileProxy?.actions.find(
-      (action) => action.action_type === ProfileProxyActionType.AllocateCic
+      (action) => action.action_type === ApiProfileProxyActionType.AllocateCic
     );
     if (!proxy) {
       return null;
@@ -56,7 +56,8 @@ export default function UserPageIdentityHeaderCICRateStats({
     <div
       className={`${
         isTooltip ? "tw-text-sm" : "tw-text-base"
-      } tw-flex tw-flex-col tw-space-y-1`}>
+      } tw-flex tw-flex-col tw-space-y-1`}
+    >
       {!!activeProfileProxy && (
         <span className="tw-block tw-text-iron-300 tw-font-normal">
           <span>You are acting as proxy for:</span>

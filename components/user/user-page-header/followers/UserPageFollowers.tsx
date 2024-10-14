@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { IncomingIdentitySubscriptionsPage } from "../../../../generated/models/IncomingIdentitySubscriptionsPage";
+import { ApiIncomingIdentitySubscriptionsPage } from "../../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import CircleLoader, {
@@ -15,13 +15,17 @@ export default function UserPageFollowers({
   readonly profile: IProfileAndConsolidations;
 }) {
   const { data: followers, isFetching } =
-    useQuery<IncomingIdentitySubscriptionsPage>({
+    useQuery<ApiIncomingIdentitySubscriptionsPage>({
       queryKey: [
         QueryKey.IDENTITY_FOLLOWERS,
-        { profile_id: profile.profile?.external_id, page_size: 1,  target_type: "IDENTITY", },
+        {
+          profile_id: profile.profile?.external_id,
+          page_size: 1,
+          target_type: "IDENTITY",
+        },
       ],
       queryFn: async () =>
-        await commonApiFetch<IncomingIdentitySubscriptionsPage>({
+        await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
           endpoint: `identity-subscriptions/incoming/IDENTITY/${profile.profile?.external_id}`,
           params: {
             page_size: "1",
@@ -31,7 +35,10 @@ export default function UserPageFollowers({
     });
 
   return (
-    <Link href={`/${profile.profile?.handle}/followers`} className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 hover:tw-underline tw-transition tw-duration-300 tw-ease-out">
+    <Link
+      href={`/${profile.profile?.handle}/followers`}
+      className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+    >
       {isFetching ? (
         <CircleLoader size={CircleLoaderSize.SMALL} />
       ) : (

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { ProfileProxy } from "../../../../../../../generated/models/ProfileProxy";
-import { ProfileProxyAction } from "../../../../../../../generated/models/ProfileProxyAction";
+import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
 import { AuthContext } from "../../../../../../auth/Auth";
 import { getTimeUntil } from "../../../../../../../helpers/Helpers";
 import PencilIcon, {
@@ -12,8 +12,8 @@ export default function ProfileProxyEndTime({
   profileProxyAction,
   onEndTimeEdit,
 }: {
-  readonly profileProxy: ProfileProxy;
-  readonly profileProxyAction: ProfileProxyAction;
+  readonly profileProxy: ApiProfileProxy;
+  readonly profileProxyAction: ApiProfileProxyAction;
   readonly onEndTimeEdit: () => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);

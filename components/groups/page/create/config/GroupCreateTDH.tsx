@@ -1,12 +1,12 @@
-import { CreateGroupDescription } from "../../../../../generated/models/CreateGroupDescription";
+import { ApiCreateGroupDescription } from "../../../../../generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
 export default function GroupCreateTDH({
   tdh,
   setTDH,
 }: {
-  readonly tdh: CreateGroupDescription["tdh"];
-  readonly setTDH: (tdh: CreateGroupDescription["tdh"]) => void;
+  readonly tdh: ApiCreateGroupDescription["tdh"];
+  readonly setTDH: (tdh: ApiCreateGroupDescription["tdh"]) => void;
 }) {
   return (
     <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">

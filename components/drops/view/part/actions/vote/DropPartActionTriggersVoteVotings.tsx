@@ -1,11 +1,11 @@
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 
 export default function DropPartActionTriggersVoteVotings({
   drop,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
 }) {
   return (
     <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">

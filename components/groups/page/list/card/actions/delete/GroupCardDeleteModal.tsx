@@ -1,5 +1,5 @@
 import { useContext, useRef, useState } from "react";
-import { GroupFull } from "../../../../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../../../../generated/models/ApiGroupFull";
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import {
@@ -17,7 +17,7 @@ export default function GroupCardDeleteModal({
   group,
   onClose,
 }: {
-  readonly group: GroupFull;
+  readonly group: ApiGroupFull;
   readonly onClose: () => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -32,7 +32,7 @@ export default function GroupCardDeleteModal({
 
   const makeFilterNotVisibleMutation = useMutation({
     mutationFn: async (param: { id: string; body: { visible: false } }) =>
-      await commonApiPost<{ visible: false }, GroupFull>({
+      await commonApiPost<{ visible: false }, ApiGroupFull>({
         endpoint: `groups/${param.id}/visible`,
         body: param.body,
       }),

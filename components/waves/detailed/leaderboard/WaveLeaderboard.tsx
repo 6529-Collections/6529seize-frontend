@@ -1,13 +1,13 @@
-import { Wave } from "../../../../generated/models/Wave";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WaveLeaderboardApprove from "./WaveLeaderboardApprove";
 import WaveLeaderboardRank from "./WaveLeaderboardRank";
 
-export default function WaveLeaderboard({ wave }: { readonly wave: Wave }) {
-  const components: Record<WaveType, JSX.Element> = {
-    [WaveType.Chat]: <WaveLeaderboardRank />,
-    [WaveType.Rank]: <WaveLeaderboardRank />,
-    [WaveType.Approve]: <WaveLeaderboardApprove />,
+export default function WaveLeaderboard({ wave }: { readonly wave: ApiWave }) {
+  const components: Record<ApiWaveType, JSX.Element> = {
+    [ApiWaveType.Chat]: <WaveLeaderboardRank />,
+    [ApiWaveType.Rank]: <WaveLeaderboardRank />,
+    [ApiWaveType.Approve]: <WaveLeaderboardApprove />,
   };
   return (
     <div className="tw-w-full">

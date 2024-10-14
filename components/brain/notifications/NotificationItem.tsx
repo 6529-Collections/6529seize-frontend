@@ -1,4 +1,4 @@
-import { NotificationCause } from "../../../generated/models/NotificationCause";
+import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { TypedNotification } from "../../../types/feed.types";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
@@ -16,35 +16,35 @@ export default function NotificationItem({
 }) {
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
-      case NotificationCause.DropQuoted:
+      case ApiNotificationCause.DropQuoted:
         return (
           <NotificationDropQuoted
             notification={notification}
             availableCredit={availableCredit}
           />
         );
-      case NotificationCause.DropReplied:
+      case ApiNotificationCause.DropReplied:
         return (
           <NotificationDropReplied
             notification={notification}
             availableCredit={availableCredit}
           />
         );
-      case NotificationCause.DropVoted:
+      case ApiNotificationCause.DropVoted:
         return (
           <NotificationDropVoted
             notification={notification}
             availableCredit={availableCredit}
           />
         );
-      case NotificationCause.IdentityMentioned:
+      case ApiNotificationCause.IdentityMentioned:
         return (
           <NotificationIdentityMentioned
             notification={notification}
             availableCredit={availableCredit}
           />
         );
-      case NotificationCause.IdentitySubscribed:
+      case ApiNotificationCause.IdentitySubscribed:
         return <NotificationIdentitySubscribed notification={notification} />;
       default:
         assertUnreachable(notification);

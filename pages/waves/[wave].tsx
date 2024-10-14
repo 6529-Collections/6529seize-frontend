@@ -13,7 +13,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../components/react-query-wrapper/ReactQueryWrapper";
-import { Wave } from "../../generated/models/Wave";
+import { ApiWave } from "../../generated/models/ApiWave";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../components/auth/Auth";
@@ -27,12 +27,12 @@ import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "../../components/react-query-wrapper/utils/query-utils";
-import { WaveDropsFeed } from "../../generated/models/WaveDropsFeed";
+import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
 
 interface Props {
-  readonly wave: Wave | null;
-  readonly wavesOverview: Wave[] | null;
-  readonly waveDrops: WaveDropsFeed | null;
+  readonly wave: ApiWave | null;
+  readonly wavesOverview: ApiWave[] | null;
+  readonly waveDrops: ApiWaveDropsFeed | null;
 }
 
 const Header = dynamic(() => import("../../components/header/Header"), {
@@ -48,7 +48,7 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
   const queryClient = useQueryClient();
 
   if (pageProps.wave) {
-    const waveInit = queryClient.getQueryData<Wave>([
+    const waveInit = queryClient.getQueryData<ApiWave>([
       QueryKey.WAVE,
       { wave_id: pageProps.wave.id },
     ]);
@@ -59,7 +59,7 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
   }
 
   if (pageProps.wavesOverview) {
-    const followingWavesInit = queryClient.getQueryData<Wave[]>([
+    const followingWavesInit = queryClient.getQueryData<ApiWave[]>([
       QueryKey.WAVES_OVERVIEW,
       {
         limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -75,7 +75,7 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
   }
 
   if (pageProps.waveDrops && pageProps.wave) {
-    const waveDropsInit = queryClient.getQueryData<WaveDropsFeed>([
+    const waveDropsInit = queryClient.getQueryData<ApiWaveDropsFeed>([
       QueryKey.DROPS,
       {
         waveId: pageProps.wave.id,
@@ -95,10 +95,10 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
   const router = useRouter();
   const wave_id = (router.query.wave as string)?.toLowerCase();
 
-  const { data: wave } = useQuery<Wave>({
+  const { data: wave } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id }],
     queryFn: async () =>
-      await commonApiFetch<Wave>({
+      await commonApiFetch<ApiWave>({
         endpoint: `waves/${wave_id}`,
       }),
     enabled: !!wave_id,

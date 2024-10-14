@@ -1,14 +1,14 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropMobileMenuDelete from "./WaveDetailedDropMobileMenuDelete";
 import WaveDetailedDropMobileMenuFollow from "./WaveDetailedDropMobileMenuFollow";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
 
 interface WaveDetailedDropMobileMenuProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly isOpen: boolean;
   readonly showReplyAndQuote: boolean;
   readonly longPressTriggered: boolean;

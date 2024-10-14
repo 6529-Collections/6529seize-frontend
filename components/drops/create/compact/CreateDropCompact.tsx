@@ -17,8 +17,8 @@ import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
-import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 
 export interface CreateDropCompactHandles {
@@ -39,8 +39,8 @@ interface CreateDropCompactProps {
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
   readonly showDropError?: boolean;
-  readonly missingMedia: WaveParticipationRequirement[];
-  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly missingMedia: ApiWaveParticipationRequirement[];
+  readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataRemove: (key: string) => void;

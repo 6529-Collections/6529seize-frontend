@@ -4,8 +4,8 @@ import {
   PROFILE_PROXY_ACTION_LABELS,
   ProfileProxySide,
 } from "../../../../../entities/IProxy";
-import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
-import { ProfileProxyAction } from "../../../../../generated/models/ProfileProxyAction";
+import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
 import { getTimeAgo } from "../../../../../helpers/Helpers";
 import { getProfileProxyActionStatus } from "../../../../../helpers/profile-proxy.helpers";
 import ProxyActionAcceptanceButton from "../action/ProxyActionAcceptanceButton";
@@ -21,8 +21,8 @@ export default function ProxyActionRowDataMode({
   isSelf,
   setViewMode,
 }: {
-  readonly action: ProfileProxyAction;
-  readonly profileProxy: ProfileProxy;
+  readonly action: ApiProfileProxyAction;
+  readonly profileProxy: ApiProfileProxy;
   readonly profile: IProfileAndConsolidations;
   readonly isSelf: boolean;
   readonly setViewMode: (mode: PROXY_ACTION_ROW_VIEW_MODE) => void;

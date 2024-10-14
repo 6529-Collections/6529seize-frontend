@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
-import { Wave } from "../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import WaveDelete from "./delete/WaveDelete";
 
-export default function WaveHeaderOptions({ wave }: { readonly wave: Wave }) {
+export default function WaveHeaderOptions({ wave }: { readonly wave: ApiWave }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 

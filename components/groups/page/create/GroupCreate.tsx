@@ -4,10 +4,10 @@ import GroupCreateActions from "./actions/GroupCreateActions";
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
-import { GroupFilterDirection } from "../../../../generated/models/GroupFilterDirection";
-import { CreateGroup } from "../../../../generated/models/CreateGroup";
+import { ApiGroupFilterDirection } from "../../../../generated/models/ApiGroupFilterDirection";
+import { ApiCreateGroup } from "../../../../generated/models/ApiCreateGroup";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { GroupFull } from "../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
@@ -23,10 +23,10 @@ export default function GroupCreate({
   const isEditMode = !!edit && edit !== "new";
   const { connectedProfile } = useContext(AuthContext);
   const { data: originalGroup, isFetching: loadingOriginalGroup } =
-    useQuery<GroupFull>({
+    useQuery<ApiGroupFull>({
       queryKey: [QueryKey.GROUP, edit],
       queryFn: async () =>
-        await commonApiFetch<GroupFull>({
+        await commonApiFetch<ApiGroupFull>({
           endpoint: `groups/${edit}`,
         }),
       placeholderData: keepPreviousData,
@@ -58,21 +58,21 @@ export default function GroupCreate({
     setIsFetching(loadingOriginalGroup || loadingOriginalGroupWallets);
   }, [loadingOriginalGroup, loadingOriginalGroupWallets]);
 
-  const [groupConfig, setGroupConfig] = useState<CreateGroup>({
+  const [groupConfig, setGroupConfig] = useState<ApiCreateGroup>({
     name: "",
     group: {
       tdh: { min: null, max: null },
       rep: {
         min: null,
         max: null,
-        direction: GroupFilterDirection.Received,
+        direction: ApiGroupFilterDirection.Received,
         user_identity: null,
         category: null,
       },
       cic: {
         min: null,
         max: null,
-        direction: GroupFilterDirection.Received,
+        direction: ApiGroupFilterDirection.Received,
         user_identity: null,
       },
       level: { min: null, max: null },

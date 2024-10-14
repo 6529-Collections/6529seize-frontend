@@ -1,16 +1,16 @@
 import React from "react";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { WaveDetailedView } from "./WaveDetailed";
 import { WaveDetailedMobileView } from "./WaveDetailedMobile";
 import WaveDetailedAbout from "./WaveDetailedAbout";
 
 interface WaveDetailedMobileAboutProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly showRequiredMetadata: boolean;
   readonly showRequiredTypes: boolean;
   readonly setView: (view: WaveDetailedView) => void;
   readonly setActiveView: (view: WaveDetailedMobileView) => void;
-  readonly onWaveChange: (wave: Wave) => void;
+  readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
 

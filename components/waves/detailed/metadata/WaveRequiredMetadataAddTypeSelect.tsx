@@ -1,12 +1,12 @@
 import Tippy from "@tippyjs/react";
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
+import { ApiWaveMetadataType } from "../../../../generated/models/ApiWaveMetadataType";
 
 export default function WaveRequiredMetadataAddTypeSelect({
   activeType,
   onTypeChange,
 }: {
-  readonly activeType: WaveMetadataType;
-  readonly onTypeChange: (type: WaveMetadataType) => void;
+  readonly activeType: ApiWaveMetadataType;
+  readonly onTypeChange: (type: ApiWaveMetadataType) => void;
 }) {
   const activeClasses =
     "tw-ring-primary-400 tw-bg-[#202B45] tw-text-primary-400 tw-z-10";
@@ -14,15 +14,15 @@ export default function WaveRequiredMetadataAddTypeSelect({
     "tw-ring-iron-650 tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-300";
 
   const STRING_CLASSES =
-    activeType === WaveMetadataType.String ? activeClasses : inactiveClasses;
+    activeType === ApiWaveMetadataType.String ? activeClasses : inactiveClasses;
   const NUMBER_CLASSES =
-    activeType === WaveMetadataType.Number ? activeClasses : inactiveClasses;
+    activeType === ApiWaveMetadataType.Number ? activeClasses : inactiveClasses;
 
   return (
     <span className="tw-isolate tw-inline-flex tw-rounded-lg tw-shadow-sm">
       <Tippy content="Text">
         <button
-          onClick={() => onTypeChange(WaveMetadataType.String)}
+          onClick={() => onTypeChange(ApiWaveMetadataType.String)}
           title="Text"
           className={`${STRING_CLASSES} tw-flex-shrink-0 tw-ring-1 tw-ring-inset focus:tw-z-10 tw-rounded-l-lg tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-8 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
           type="button"
@@ -46,7 +46,7 @@ export default function WaveRequiredMetadataAddTypeSelect({
       </Tippy>
       <Tippy content="Number">
         <button
-          onClick={() => onTypeChange(WaveMetadataType.Number)}
+          onClick={() => onTypeChange(ApiWaveMetadataType.Number)}
           title="Number"
           className={`${NUMBER_CLASSES} tw-flex-shrink-0 -tw-ml-px focus:tw-z-10 tw-ring-1 tw-ring-inset tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-8 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
           type="button"

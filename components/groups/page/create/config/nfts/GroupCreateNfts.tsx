@@ -1,8 +1,8 @@
 import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
 import {
-  GroupOwnsNft,
-  GroupOwnsNftNameEnum,
-} from "../../../../../../generated/models/GroupOwnsNft";
+  ApiGroupOwnsNft,
+  ApiGroupOwnsNftNameEnum,
+} from "../../../../../../generated/models/ApiGroupOwnsNft";
 import { NFTSearchResult } from "../../../../../header/header-search/HeaderSearchModalItem";
 import {
   GRADIENT_CONTRACT,
@@ -10,21 +10,21 @@ import {
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "../../../../../../constants";
-import { CreateGroupDescription } from "../../../../../../generated/models/CreateGroupDescription";
+import { ApiCreateGroupDescription } from "../../../../../../generated/models/ApiCreateGroupDescription";
 import GroupCreateNftsSelected from "./GroupCreateNftsSelected";
 
 export default function GroupCreateNfts({
   nfts,
   setNfts,
 }: {
-  readonly nfts: CreateGroupDescription["owns_nfts"];
-  readonly setNfts: (nfts: CreateGroupDescription["owns_nfts"]) => void;
+  readonly nfts: ApiCreateGroupDescription["owns_nfts"];
+  readonly setNfts: (nfts: ApiCreateGroupDescription["owns_nfts"]) => void;
 }) {
-  const NAME_ENUMS: Record<string, GroupOwnsNftNameEnum> = {
-    [GRADIENT_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Gradients,
-    [MEMES_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Memes,
-    [MEMELAB_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Memelab,
-    [NEXTGEN_CONTRACT.toLowerCase()]: GroupOwnsNftNameEnum.Nextgen,
+  const NAME_ENUMS: Record<string, ApiGroupOwnsNftNameEnum> = {
+    [GRADIENT_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Gradients,
+    [MEMES_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Memes,
+    [MEMELAB_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Memelab,
+    [NEXTGEN_CONTRACT.toLowerCase()]: ApiGroupOwnsNftNameEnum.Nextgen,
   };
 
   const onSelect = (item: NFTSearchResult) => {
@@ -32,7 +32,7 @@ export default function GroupCreateNfts({
     if (!nameEnum) {
       return;
     }
-    const group: GroupOwnsNft = nfts.find((g) => g.name === nameEnum) ?? {
+    const group: ApiGroupOwnsNft = nfts.find((g) => g.name === nameEnum) ?? {
       name: nameEnum,
       tokens: [],
     };
@@ -53,7 +53,7 @@ export default function GroupCreateNfts({
     name,
     token,
   }: {
-    name: GroupOwnsNftNameEnum;
+    name: ApiGroupOwnsNftNameEnum;
     token: string;
   }) => {
     const updatedNfts = nfts

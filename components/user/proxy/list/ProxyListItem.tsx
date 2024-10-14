@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import ProxyActions from "../proxy/list/ProxyActions";
 import { AuthContext } from "../../../auth/Auth";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
@@ -19,7 +19,7 @@ export default function ProxyListItem({
   profile,
 }: {
   readonly isSelf: boolean;
-  readonly profileProxy: ProfileProxy;
+  readonly profileProxy: ApiProfileProxy;
   readonly profile: IProfileAndConsolidations;
 }) {
   const { connectedProfile } = useContext(AuthContext);

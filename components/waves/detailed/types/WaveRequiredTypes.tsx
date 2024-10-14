@@ -1,10 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import { Wave } from "../../../../generated/models/Wave";
-import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import WaveRequiredType from "./WaveRequiredType";
 import { AuthContext } from "../../../auth/Auth";
 
-export default function WaveRequiredTypes({ wave }: { readonly wave: Wave }) {
+export default function WaveRequiredTypes({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const getIsAuthorAndNotProxy = () =>
@@ -21,7 +25,7 @@ export default function WaveRequiredTypes({ wave }: { readonly wave: Wave }) {
   );
 
   const getTypesToShow = () => {
-    const values = Object.values(WaveParticipationRequirement);
+    const values = Object.values(ApiWaveParticipationRequirement);
     if (isAuthorAndNotProxy) {
       return values;
     }

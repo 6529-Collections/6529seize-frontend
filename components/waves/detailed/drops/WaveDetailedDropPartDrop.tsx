@@ -1,18 +1,18 @@
-import React from 'react';
-import { Drop } from '../../../../generated/models/Drop';
-import { DropPart } from '../../../../generated/models/DropPart';
-import WaveDetailedDropPartTitle from './WaveDetailedDropPartTitle';
-import WaveDetailedDropPartContent from './WaveDetailedDropPartContent';
+import React from "react";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDropPart } from "../../../../generated/models/ApiDropPart";
+import WaveDetailedDropPartTitle from "./WaveDetailedDropPartTitle";
+import WaveDetailedDropPartContent from "./WaveDetailedDropPartContent";
 
 interface WaveDetailedDropPartDropProps {
-  drop: Drop;
-  activePart: DropPart;
+  drop: ApiDrop;
+  activePart: ApiDropPart;
   havePreviousPart: boolean;
   haveNextPart: boolean;
   isStorm: boolean;
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
-  onQuoteClick: (drop: Drop) => void;
+  onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDropPartDrop: React.FC<WaveDetailedDropPartDropProps> = ({

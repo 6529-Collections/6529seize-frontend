@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import { ProfileProxyActionStatus, ProfileProxySide } from "../entities/IProxy";
-import { ProfileProxy } from "../generated/models/ProfileProxy";
-import { ProfileProxyAction } from "../generated/models/ProfileProxyAction";
+import { ApiProfileProxy } from "../generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "../generated/models/ApiProfileProxyAction";
 import { assertUnreachable } from "./AllowlistToolHelpers";
 import { Time } from "./time";
 import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "../constants";
@@ -10,7 +10,7 @@ export const getProfileProxyActionStatus = ({
   action,
   side,
 }: {
-  action: ProfileProxyAction;
+  action: ApiProfileProxyAction;
   side: ProfileProxySide;
 }): ProfileProxyActionStatus => {
   switch (side) {
@@ -37,9 +37,9 @@ const getProxiesFiltered = ({
   profileProxies,
   onlyActive,
 }: {
-  readonly profileProxies: ProfileProxy[];
+  readonly profileProxies: ApiProfileProxy[];
   readonly onlyActive: boolean;
-}): ProfileProxy[] => {
+}): ApiProfileProxy[] => {
   const now = Time.currentMillis();
   if (!onlyActive) {
     return profileProxies.filter((p) => !!p.actions.length);
@@ -66,11 +66,11 @@ export const groupProfileProxies = ({
   profileId,
 }: {
   readonly onlyActive: boolean;
-  readonly profileProxies: ProfileProxy[];
+  readonly profileProxies: ApiProfileProxy[];
   readonly profileId: string | null;
 }): {
-  readonly granted: ProfileProxy[];
-  readonly received: ProfileProxy[];
+  readonly granted: ApiProfileProxy[];
+  readonly received: ApiProfileProxy[];
 } => {
   if (!profileProxies.length || !profileId)
     return { granted: [], received: [] };

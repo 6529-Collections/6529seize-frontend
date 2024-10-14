@@ -1,9 +1,9 @@
-import { WaveScope } from "../../../../../../generated/models/WaveScope";
+import { ApiWaveScope } from "../../../../../../generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
-import { Wave } from "../../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import { canEditWave } from "../../../../../../helpers/waves/waves.helpers";
 import WaveGroupScope from "./WaveGroupScope";
 
@@ -20,10 +20,10 @@ export default function WaveGroup({
   isEligible,
   wave,
 }: {
-  readonly scope: WaveScope;
+  readonly scope: ApiWaveScope;
   readonly type: WaveGroupType;
   readonly isEligible: boolean;
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowEdit = () =>

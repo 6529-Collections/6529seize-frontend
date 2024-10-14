@@ -2,9 +2,9 @@ import { ProxyMode } from "../UserPageProxy";
 import { CommunityMemberMinimal } from "../../../../entities/IProfile";
 import ProxyCreateTargetSearch from "./target/ProxyCreateTargetSearch";
 import { useMutation } from "@tanstack/react-query";
-import { CreateNewProfileProxy } from "../../../../generated/models/CreateNewProfileProxy";
+import { ApiCreateNewProfileProxy } from "../../../../generated/models/ApiCreateNewProfileProxy";
 import { commonApiPost } from "../../../../services/api/common-api";
-import { ProfileProxy } from "../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -14,7 +14,7 @@ export default function ProxyCreate({
   profileProxies,
   onModeChange,
 }: {
-  readonly profileProxies: ProfileProxy[];
+  readonly profileProxies: ApiProfileProxy[];
   readonly onModeChange: (mode: ProxyMode) => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -22,13 +22,12 @@ export default function ProxyCreate({
     ReactQueryWrapperContext
   );
   const [submitting, setSubmitting] = useState(false);
-  const [newProfileProxy, setNewProfileProxy] = useState<ProfileProxy | null>(
-    null
-  );
+  const [newProfileProxy, setNewProfileProxy] =
+    useState<ApiProfileProxy | null>(null);
 
   const createProxyMutation = useMutation({
-    mutationFn: async (body: CreateNewProfileProxy) => {
-      return await commonApiPost<CreateNewProfileProxy, ProfileProxy>({
+    mutationFn: async (body: ApiCreateNewProfileProxy) => {
+      return await commonApiPost<ApiCreateNewProfileProxy, ApiProfileProxy>({
         endpoint: `proxies`,
         body,
       });
@@ -49,7 +48,7 @@ export default function ProxyCreate({
 
   const alreadyProxied = (
     target: CommunityMemberMinimal
-  ): ProfileProxy | null =>
+  ): ApiProfileProxy | null =>
     profileProxies?.find(
       (proxy) =>
         proxy.granted_to.handle?.toLowerCase() === target.handle?.toLowerCase()

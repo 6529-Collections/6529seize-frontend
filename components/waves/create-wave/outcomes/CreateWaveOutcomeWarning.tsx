@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CreateWaveWarning from "../utils/CreateWaveWarning";
 
@@ -8,11 +8,11 @@ export default function CreateWaveOutcomeWarning({
   dates,
   maxWinners,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly maxWinners: number | null;
 }) {
-  const isApproveWave = waveType === WaveType.Approve;
+  const isApproveWave = waveType === ApiWaveType.Approve;
 
   const [warning, setWarning] = useState<{
     readonly title: string;

@@ -1,13 +1,13 @@
-import { CreateNewWave } from "../../generated/models/CreateNewWave";
-import { CreateWaveDropRequest } from "../../generated/models/CreateWaveDropRequest";
-import { IntRange } from "../../generated/models/IntRange";
-import { WaveCreditScope } from "../../generated/models/WaveCreditScope";
-import { WaveCreditType } from "../../generated/models/WaveCreditType";
-import { WaveOutcome } from "../../generated/models/WaveOutcome";
-import { WaveOutcomeCredit } from "../../generated/models/WaveOutcomeCredit";
-import { WaveOutcomeSubType } from "../../generated/models/WaveOutcomeSubType";
-import { WaveOutcomeType } from "../../generated/models/WaveOutcomeType";
-import { WaveType } from "../../generated/models/WaveType";
+import { ApiCreateNewWave } from "../../generated/models/ApiCreateNewWave";
+import { ApiCreateWaveDropRequest } from "../../generated/models/ApiCreateWaveDropRequest";
+import { ApiIntRange } from "../../generated/models/ApiIntRange";
+import { ApiWaveCreditScope } from "../../generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
+import { ApiWaveOutcome } from "../../generated/models/ApiWaveOutcome";
+import { ApiWaveOutcomeCredit } from "../../generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeSubType } from "../../generated/models/ApiWaveOutcomeSubType";
+import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
+import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import {
   CreateWaveApprovalConfig,
   CreateWaveConfig,
@@ -49,7 +49,7 @@ export const getCreateWaveNextStep = ({
   waveType,
 }: {
   readonly step: CreateWaveStep;
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
 }): CreateWaveStep | null => {
   switch (step) {
     case CreateWaveStep.OVERVIEW:
@@ -61,10 +61,10 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DROPS:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
-      if (waveType === WaveType.Approve) {
+      if (waveType === ApiWaveType.Approve) {
         return CreateWaveStep.APPROVAL;
       }
-      if (waveType === WaveType.Chat) {
+      if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.DESCRIPTION;
       }
       return CreateWaveStep.OUTCOMES;
@@ -85,7 +85,7 @@ export const getCreateWavePreviousStep = ({
   waveType,
 }: {
   readonly step: CreateWaveStep;
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
 }): CreateWaveStep | null => {
   switch (step) {
     case CreateWaveStep.OVERVIEW:
@@ -101,12 +101,12 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
-      if (waveType === WaveType.Approve) {
+      if (waveType === ApiWaveType.Approve) {
         return CreateWaveStep.APPROVAL;
       }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
-      if (waveType === WaveType.Chat) {
+      if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.VOTING;
       }
       return CreateWaveStep.OUTCOMES;
@@ -132,7 +132,7 @@ const getDatesValidationErrors = ({
   waveType,
   dates,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
@@ -142,7 +142,7 @@ const getDatesValidationErrors = ({
   if (!dates.votingStartDate) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_REQUIRED);
   }
-  if (waveType !== WaveType.Rank) {
+  if (waveType !== ApiWaveType.Rank) {
     if (dates.submissionStartDate !== dates.votingStartDate) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE
@@ -202,8 +202,8 @@ const getVotingValidationErrors = ({
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (
-    voting.type === WaveCreditType.Tdh ||
-    voting.type === WaveCreditType.Unique
+    voting.type === ApiWaveCreditType.Tdh ||
+    voting.type === ApiWaveCreditType.Unique
   ) {
     if (voting.profileId) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_MUST_BE_EMPTY);
@@ -227,12 +227,12 @@ const getApprovalValidationErrors = ({
   approval,
   dates,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly approval: CreateWaveApprovalConfig;
   readonly dates: CreateWaveDatesConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (waveType !== WaveType.Approve) {
+  if (waveType !== ApiWaveType.Approve) {
     return errors;
   }
   if (!approval.threshold) {
@@ -255,11 +255,11 @@ const getOutcomesValidationErrors = ({
   waveType,
   outcomes,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly outcomes: CreateWaveOutcomeConfig[];
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (waveType === WaveType.Chat) {
+  if (waveType === ApiWaveType.Chat) {
     return errors;
   }
   if (!outcomes.length) {
@@ -353,16 +353,16 @@ const getWinningThreshold = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): IntRange | null => {
+}): ApiIntRange | null => {
   const waveType = config.overview.type;
   switch (waveType) {
-    case WaveType.Approve:
+    case ApiWaveType.Approve:
       return {
         min: config.approval.threshold,
         max: config.approval.threshold,
       };
-    case WaveType.Rank:
-    case WaveType.Chat:
+    case ApiWaveType.Rank:
+    case ApiWaveType.Chat:
       return null;
     default:
       assertUnreachable(waveType);
@@ -416,12 +416,12 @@ const getRankOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): WaveOutcome[] => {
-  const outcomes: WaveOutcome[] = [];
+}): ApiWaveOutcome[] => {
+  const outcomes: ApiWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
     if (outcome.type === CreateWaveOutcomeType.MANUAL && outcome.title) {
       outcomes.push({
-        type: WaveOutcomeType.Manual,
+        type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
       });
     } else if (
@@ -430,10 +430,10 @@ const getRankOutcomes = ({
       outcome.winnersConfig?.totalAmount
     ) {
       outcomes.push({
-        type: WaveOutcomeType.Automatic,
-        subtype: WaveOutcomeSubType.CreditDistribution,
+        type: ApiWaveOutcomeType.Automatic,
+        subtype: ApiWaveOutcomeSubType.CreditDistribution,
         description: "",
-        credit: WaveOutcomeCredit.Rep,
+        credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
         amount: outcome.winnersConfig.totalAmount,
         distribution: getOutcomesDistribution({
@@ -445,10 +445,10 @@ const getRankOutcomes = ({
       outcome.winnersConfig?.totalAmount
     ) {
       outcomes.push({
-        type: WaveOutcomeType.Automatic,
-        subtype: WaveOutcomeSubType.CreditDistribution,
+        type: ApiWaveOutcomeType.Automatic,
+        subtype: ApiWaveOutcomeSubType.CreditDistribution,
         description: "",
-        credit: WaveOutcomeCredit.Cic,
+        credit: ApiWaveOutcomeCredit.Cic,
         amount: outcome.winnersConfig.totalAmount,
         distribution: getOutcomesDistribution({
           winnersConfig: outcome.winnersConfig,
@@ -463,8 +463,8 @@ const getApproveOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): WaveOutcome[] => {
-  const outcomes: WaveOutcome[] = [];
+}): ApiWaveOutcome[] => {
+  const outcomes: ApiWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
@@ -472,7 +472,7 @@ const getApproveOutcomes = ({
       outcome.maxWinners
     ) {
       outcomes.push({
-        type: WaveOutcomeType.Manual,
+        type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
       });
     } else if (
@@ -481,19 +481,19 @@ const getApproveOutcomes = ({
       outcome.credit
     ) {
       outcomes.push({
-        type: WaveOutcomeType.Automatic,
-        subtype: WaveOutcomeSubType.CreditDistribution,
+        type: ApiWaveOutcomeType.Automatic,
+        subtype: ApiWaveOutcomeSubType.CreditDistribution,
         description: "",
-        credit: WaveOutcomeCredit.Rep,
+        credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
         amount: outcome.credit,
       });
     } else if (outcome.type === CreateWaveOutcomeType.NIC && outcome.credit) {
       outcomes.push({
-        type: WaveOutcomeType.Automatic,
-        subtype: WaveOutcomeSubType.CreditDistribution,
+        type: ApiWaveOutcomeType.Automatic,
+        subtype: ApiWaveOutcomeSubType.CreditDistribution,
         description: "",
-        credit: WaveOutcomeCredit.Cic,
+        credit: ApiWaveOutcomeCredit.Cic,
         amount: outcome.credit,
       });
     }
@@ -505,15 +505,15 @@ const getOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): WaveOutcome[] => {
+}): ApiWaveOutcome[] => {
   const waveType = config.overview.type;
   switch (waveType) {
-    case WaveType.Chat:
+    case ApiWaveType.Chat:
       return [];
-    case WaveType.Approve:
+    case ApiWaveType.Approve:
       // TODO add max winners
       return getApproveOutcomes({ config });
-    case WaveType.Rank:
+    case ApiWaveType.Rank:
       // TODO add max winners
       return getRankOutcomes({ config });
     default:
@@ -527,10 +527,10 @@ export const getCreateNewWaveBody = ({
   picture,
   config,
 }: {
-  readonly drop: CreateWaveDropRequest;
+  readonly drop: ApiCreateWaveDropRequest;
   readonly picture: string | null;
   readonly config: CreateWaveConfig;
-}): CreateNewWave => {
+}): ApiCreateNewWave => {
   return {
     name: config.overview.name,
     description_drop: drop,
@@ -540,7 +540,7 @@ export const getCreateNewWaveBody = ({
         group_id: config.groups.canVote,
       },
       credit_type: config.voting.type,
-      credit_scope: WaveCreditScope.Wave,
+      credit_scope: ApiWaveCreditScope.Wave,
       credit_category: config.voting.category,
       creditor_id: config.voting.profileId,
       signature_required: getIsVotingSignatureRequired({ config }),

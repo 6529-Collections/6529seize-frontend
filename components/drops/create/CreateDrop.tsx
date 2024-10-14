@@ -15,14 +15,14 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
-import { DropMedia } from "../../../generated/models/DropMedia";
+import { ApiDropMedia } from "../../../generated/models/ApiDropMedia";
 import DropEditor from "./DropEditor";
-import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
+import { ApiCreateDropRequest } from "../../../generated/models/ApiCreateDropRequest";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
-import { DropMentionedUser } from "../../../generated/models/DropMentionedUser";
-import { Drop } from "../../../generated/models/Drop";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 
 export enum CreateDropType {
@@ -76,22 +76,22 @@ export default function CreateDrop({
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
-  const { data: waveDetailed } = useQuery<Wave>({
+  const { data: waveDetailed } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
     queryFn: async () =>
-      await commonApiFetch<Wave>({
+      await commonApiFetch<ApiWave>({
         endpoint: `waves/${wave.id}`,
       }),
     enabled: !!wave.id,
   });
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: CreateDropRequest) =>
-      await commonApiPost<CreateDropRequest, Drop>({
+    mutationFn: async (body: ApiCreateDropRequest) =>
+      await commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body,
       }),
-    onSuccess: (response: Drop) => {
+    onSuccess: (response: ApiDrop) => {
       setDropEditorRefreshKey((prev) => prev + 1);
       if (onSuccessfulDrop) {
         onSuccessfulDrop();
@@ -113,7 +113,7 @@ export default function CreateDrop({
     return null;
   }
 
-  const generateMediaForPart = async (media: File): Promise<DropMedia> => {
+  const generateMediaForPart = async (media: File): Promise<ApiDropMedia> => {
     const prep = await commonApiPost<
       {
         content_type: string;
@@ -149,9 +149,9 @@ export default function CreateDrop({
     mentionedUsers,
     parts,
   }: {
-    readonly mentionedUsers: DropMentionedUser[];
+    readonly mentionedUsers: ApiDropMentionedUser[];
     readonly parts: CreateDropPart[];
-  }): DropMentionedUser[] =>
+  }): ApiDropMentionedUser[] =>
     mentionedUsers.filter((user) =>
       parts.some((part) =>
         part.content?.includes(`@[${user.handle_in_content}]`)
@@ -186,7 +186,9 @@ export default function CreateDrop({
     }
   };
 
-  const getOptimisticDrop = (dropRequest: CreateDropRequest): Drop | null => {
+  const getOptimisticDrop = (
+    dropRequest: ApiCreateDropRequest
+  ): ApiDrop | null => {
     if (!profileMin) {
       return null;
     }
@@ -266,7 +268,7 @@ export default function CreateDrop({
       return;
     }
 
-    const requestBody: CreateDropRequest = {
+    const requestBody: ApiCreateDropRequest = {
       ...dropRequest,
       mentioned_users: filterMentionedUsers({
         mentionedUsers: dropRequest.mentioned_users,

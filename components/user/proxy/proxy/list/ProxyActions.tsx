@@ -1,5 +1,5 @@
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
-import { ProfileProxy } from "../../../../../generated/models/ProfileProxy";
+import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { Time } from "../../../../../helpers/time";
 import ProxyActionRow from "./ProxyActionRow";
 
@@ -8,7 +8,7 @@ export default function ProxyActions({
   profile,
   isSelf,
 }: {
-  readonly profileProxy: ProfileProxy;
+  readonly profileProxy: ApiProfileProxy;
   readonly profile: IProfileAndConsolidations;
   readonly isSelf: boolean;
 }) {

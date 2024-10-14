@@ -1,5 +1,5 @@
 import Tippy from "@tippyjs/react";
-import { DropPart } from "../../../../../../generated/models/DropPart";
+import { ApiDropPart } from "../../../../../../generated/models/ApiDropPart";
 import DiscussOutlineIcon from "../../../../../utils/icons/DiscussOutlineIcon";
 import DiscussSolidIcon from "../../../../../utils/icons/DiscussSolidIcon";
 
@@ -7,12 +7,11 @@ export default function DropPartDiscussionButton({
   dropPart,
   onDiscussionButtonClick,
 }: {
-  readonly dropPart: DropPart;
+  readonly dropPart: ApiDropPart;
   readonly onDiscussionButtonClick: () => void;
 }) {
   const discussionCount = dropPart.replies_count;
   const userHaveDiscussed = !!dropPart.context_profile_context?.replies_count;
-
 
   return (
     <Tippy content="Replies">

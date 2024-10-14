@@ -1,4 +1,4 @@
-import { GroupFull } from "../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
 import {
   getScaledImageUri,
   ImageScale,
@@ -11,7 +11,7 @@ export default function CreateWaveGroupItem({
   switchSelected,
   onSelectedClick,
 }: {
-  readonly selectedGroup: GroupFull | null;
+  readonly selectedGroup: ApiGroupFull | null;
   readonly switchSelected: (selectedType: CreateWaveGroupStatus) => void;
   readonly onSelectedClick: () => void;
 }) {
@@ -52,9 +52,7 @@ export default function CreateWaveGroupItem({
     <CommonBorderedRadioButton
       type={CreateWaveGroupStatus.GROUP}
       selected={
-        selectedGroup
-          ? CreateWaveGroupStatus.GROUP
-          : CreateWaveGroupStatus.NONE
+        selectedGroup ? CreateWaveGroupStatus.GROUP : CreateWaveGroupStatus.NONE
       }
       label="A Group"
       onChange={switchSelected}

@@ -24,12 +24,12 @@ import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer"
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import { useQuery } from "@tanstack/react-query";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
-import { WaveMetadataType } from "../../../../generated/models/WaveMetadataType";
-import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
+import { ApiWaveMetadataType } from "../../../../generated/models/ApiWaveMetadataType";
+import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 
@@ -131,10 +131,10 @@ const CreateDropWrapper = forwardRef<
       }
     }, [breakpoint]);
 
-    const { data: wave } = useQuery<Wave>({
+    const { data: wave } = useQuery<ApiWave>({
       queryKey: [QueryKey.WAVE, { wave_id: waveProps?.id }],
       queryFn: async () =>
-        await commonApiFetch<Wave>({
+        await commonApiFetch<ApiWave>({
           endpoint: `waves/${waveProps?.id}`,
         }),
       enabled: !!waveProps?.id,
@@ -179,7 +179,7 @@ const CreateDropWrapper = forwardRef<
         ])
       ) ?? null;
 
-    const getMissingRequiredMetadata = (): WaveRequiredMetadata[] => {
+    const getMissingRequiredMetadata = (): ApiWaveRequiredMetadata[] => {
       if (!waveProps?.id) {
         return [];
       }
@@ -200,7 +200,7 @@ const CreateDropWrapper = forwardRef<
           return true;
         }
         if (
-          i.type === WaveMetadataType.Number &&
+          i.type === ApiWaveMetadataType.Number &&
           isNaN(Number(item.data_value))
         ) {
           return true;
@@ -211,13 +211,13 @@ const CreateDropWrapper = forwardRef<
 
     const getRequirementFromFileType = (
       file: File
-    ): WaveParticipationRequirement | null => {
+    ): ApiWaveParticipationRequirement | null => {
       if (file.type.startsWith("image/"))
-        return WaveParticipationRequirement.Image;
+        return ApiWaveParticipationRequirement.Image;
       if (file.type.startsWith("audio/"))
-        return WaveParticipationRequirement.Audio;
+        return ApiWaveParticipationRequirement.Audio;
       if (file.type.startsWith("video/"))
-        return WaveParticipationRequirement.Video;
+        return ApiWaveParticipationRequirement.Video;
       return null; // Unknown or unsupported file type
     };
 
@@ -231,7 +231,7 @@ const CreateDropWrapper = forwardRef<
       return files
     };
 
-    const getMissingRequiredMedia = (): WaveParticipationRequirement[] => {
+    const getMissingRequiredMedia = (): ApiWaveParticipationRequirement[] => {
       if (!waveProps?.id) {
         return [];
       }
@@ -253,11 +253,11 @@ const CreateDropWrapper = forwardRef<
     };
 
     const [missingMedia, setMissingMedia] = useState<
-      WaveParticipationRequirement[]
+      ApiWaveParticipationRequirement[]
     >(getMissingRequiredMedia());
 
     const [missingMetadata, setMissingMetadata] = useState<
-      WaveRequiredMetadata[]
+      ApiWaveRequiredMetadata[]
     >(getMissingRequiredMetadata());
 
     useEffect(() => {

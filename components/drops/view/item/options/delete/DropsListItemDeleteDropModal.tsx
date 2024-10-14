@@ -1,5 +1,5 @@
 import { useContext, useRef, useState } from "react";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { AuthContext } from "../../../../../auth/Auth";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
@@ -12,7 +12,7 @@ export default function DropsListItemDeleteDropModal({
   closeModal,
   onDropDeleted
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly closeModal: () => void;
   readonly onDropDeleted?: () => void;
 }) {

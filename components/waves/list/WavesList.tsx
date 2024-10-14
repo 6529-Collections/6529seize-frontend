@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { AuthContext, WAVES_MIN_ACCESS_LEVEL } from "../../auth/Auth";
-import { WavesOverviewType } from "../../../generated/models/WavesOverviewType";
+import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
 import WavesListWrapper from "./WavesListWrapper";
 import WavesListHeader from "./header/WavesListHeader";
 import WavesListSearchResults from "./WavesListSearchResults";
@@ -15,14 +15,18 @@ export default function WavesList({
 }) {
   const router = useRouter();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [showAllType, setShowAllType] = useState<WavesOverviewType | null>(null);
+  const [showAllType, setShowAllType] = useState<ApiWavesOverviewType | null>(
+    null
+  );
 
-  const getWaveOverviewTypes = (): WavesOverviewType[] => {
+  const getWaveOverviewTypes = (): ApiWavesOverviewType[] => {
     const types = showAllType
-      ? Object.values(WavesOverviewType).filter((t) => t === showAllType)
-      : Object.values(WavesOverviewType);
+      ? Object.values(ApiWavesOverviewType).filter((t) => t === showAllType)
+      : Object.values(ApiWavesOverviewType);
     if (!connectedProfile?.profile?.handle || !!activeProfileProxy) {
-      return types.filter((t) => t !== WavesOverviewType.AuthorYouHaveRepped);
+      return types.filter(
+        (t) => t !== ApiWavesOverviewType.AuthorYouHaveRepped
+      );
     }
     return types;
   };
@@ -46,14 +50,20 @@ export default function WavesList({
     } else {
       newQuery.identity = newIdentity;
     }
-    router.push({
-      pathname: router.pathname,
-      query: newQuery,
-    }, undefined, { shallow: true });
+    router.push(
+      {
+        pathname: router.pathname,
+        query: newQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const getShowSearchResults = () => !!identity || !!waveName;
-  const [showSearchResults, setShowSearchResults] = useState(getShowSearchResults());
+  const [showSearchResults, setShowSearchResults] = useState(
+    getShowSearchResults()
+  );
 
   useEffect(() => {
     setShowSearchResults(getShowSearchResults());

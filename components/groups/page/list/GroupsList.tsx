@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { GroupsRequestParams } from "../../../../entities/IGroup";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { GroupFull } from "../../../../generated/models/GroupFull";
+import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../../helpers/Types";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -58,7 +58,7 @@ export default function GroupsList({
         params.created_at_less_than = `${pageParam}`;
       }
       return await commonApiFetch<
-        GroupFull[],
+        ApiGroupFull[],
         NonNullableNotRequired<GroupsRequestParams>
       >({
         endpoint: "groups",
@@ -70,7 +70,7 @@ export default function GroupsList({
     placeholderData: keepPreviousData,
   });
 
-  const [groups, setGroups] = useState<GroupFull[]>([]);
+  const [groups, setGroups] = useState<ApiGroupFull[]>([]);
 
   useEffect(() => setGroups(data?.pages?.flat() ?? []), [data]);
 

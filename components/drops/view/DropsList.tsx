@@ -1,5 +1,5 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
@@ -9,7 +9,7 @@ type DropActionHandler = ({
   drop,
   partId,
 }: {
-  drop: Drop;
+  drop: ApiDrop;
   partId: number;
 }) => void;
 
@@ -22,9 +22,10 @@ interface DropsListProps {
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
-  readonly onQuoteClick: (drop: Drop) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
+  readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
 const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
@@ -40,6 +41,7 @@ const DropsList = memo(function DropsList({
   onReplyClick,
   serialNo,
   targetDropRef,
+  parentContainerRef,
   onQuoteClick,
 }: DropsListProps) {
   const handleReply = useCallback<DropActionHandler>(
@@ -81,6 +83,7 @@ const DropsList = memo(function DropsList({
             onQuote={handleQuote}
             showReplyAndQuote={showReplyAndQuote}
             onQuoteClick={onQuoteClick}
+            parentContainerRef={parentContainerRef}
           />
         </div>
       )),

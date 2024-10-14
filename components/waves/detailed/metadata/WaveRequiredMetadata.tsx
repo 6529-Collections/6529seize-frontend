@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import WaveRequiredMetadataAdd from "./WaveRequiredMetadataAdd";
 import WaveRequiredMetadatItems from "./WaveRequiredMetadataItems";
 import { AuthContext } from "../../../auth/Auth";
@@ -8,7 +8,7 @@ import { canEditWave } from "../../../../helpers/waves/waves.helpers";
 export default function WaveRequiredMetadata({
   wave,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowEdit = () =>

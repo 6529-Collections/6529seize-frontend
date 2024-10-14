@@ -3,9 +3,8 @@ import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { Wave } from "../../../generated/models/Wave";
-
-import { OutgoingIdentitySubscriptionsPage } from "../../../generated/models/OutgoingIdentitySubscriptionsPage";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiOutgoingIdentitySubscriptionsPage } from "../../../generated/models/ApiOutgoingIdentitySubscriptionsPage";
 import WavesList, { WavesListType } from "./WavesList";
 
 export default function FollowingWaves() {
@@ -27,7 +26,7 @@ export default function FollowingWaves() {
       },
     ],
     queryFn: async () =>
-      await commonApiFetch<OutgoingIdentitySubscriptionsPage>({
+      await commonApiFetch<ApiOutgoingIdentitySubscriptionsPage>({
         endpoint: `/identity-subscriptions/outgoing/WAVE`,
       }),
     enabled: showWaves,
@@ -37,10 +36,10 @@ export default function FollowingWaves() {
     if (!data?.data.length) {
       return [];
     }
-    return data.data.map((wave) => wave.target as Wave);
+    return data.data.map((wave) => wave.target as ApiWave);
   };
 
-  const [waves, setWaves] = useState<Wave[]>(getWaves());
+  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
 
   useEffect(() => {
     if (data) {

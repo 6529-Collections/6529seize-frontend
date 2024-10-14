@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Drop } from "../../../../../../generated/models/Drop";
-import { DropPart } from "../../../../../../generated/models/DropPart";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
+import { ApiDropPart } from "../../../../../../generated/models/ApiDropPart";
 import DropReplyInput, { DropReplyInputHandles } from "./DropReplyInput";
 import { EditorState } from "lexical";
 import {
@@ -16,11 +16,11 @@ import { MENTION_TRANSFORMER } from "../../../../create/lexical/transformers/Men
 import { HASHTAG_TRANSFORMER } from "../../../../create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../../../../create/lexical/transformers/ImageTransformer";
 import { useMutation } from "@tanstack/react-query";
-import { CreateDropRequest } from "../../../../../../generated/models/CreateDropRequest";
+import { ApiCreateDropRequest } from "../../../../../../generated/models/ApiCreateDropRequest";
 import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
-import { DropMedia } from "../../../../../../generated/models/DropMedia";
+import { ApiDropMedia } from "../../../../../../generated/models/ApiDropMedia";
 import { getOptimisticDropId } from "../../../../../../helpers/waves/drop.helpers";
 
 export default function DropReplyInputWrapper({
@@ -28,8 +28,8 @@ export default function DropReplyInputWrapper({
   dropPart,
   onReply,
 }: {
-  readonly drop: Drop;
-  readonly dropPart: DropPart;
+  readonly drop: ApiDrop;
+  readonly dropPart: ApiDropPart;
   readonly onReply: () => void;
 }) {
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
@@ -88,12 +88,12 @@ export default function DropReplyInputWrapper({
   };
 
   const addReplyMutation = useMutation({
-    mutationFn: async (body: CreateDropRequest) =>
-      await commonApiPost<CreateDropRequest, Drop>({
+    mutationFn: async (body: ApiCreateDropRequest) =>
+      await commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body,
       }),
-    onSuccess: (respone: Drop) => {
+    onSuccess: (respone: ApiDrop) => {
       setDrop(null);
       waitAndInvalidateDrops();
       onReply();
@@ -168,7 +168,7 @@ export default function DropReplyInputWrapper({
 
   const generateMediaForPart = async (
     part: CreateDropPart
-  ): Promise<Array<DropMedia>> => {
+  ): Promise<Array<ApiDropMedia>> => {
     if (!part.media.length) {
       return [];
     }
@@ -232,7 +232,7 @@ export default function DropReplyInputWrapper({
     }
   };
 
-  const getOptimisticDrop = (dropRequest: CreateDropRequest): Drop | null => {
+  const getOptimisticDrop = (dropRequest: ApiCreateDropRequest): ApiDrop | null => {
     if (!connectedProfile?.profile) {
       return null;
     }
@@ -305,7 +305,7 @@ export default function DropReplyInputWrapper({
       return;
     }
 
-    const requestBody: CreateDropRequest = {
+    const requestBody: ApiCreateDropRequest = {
       wave_id: originalDrop.wave.id,
       reply_to: {
         drop_id: originalDrop.id,

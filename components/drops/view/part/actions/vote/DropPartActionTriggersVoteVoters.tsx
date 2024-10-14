@@ -1,5 +1,5 @@
 import Tippy from "@tippyjs/react";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import {
   getScaledImageUri,
@@ -9,7 +9,7 @@ import {
 export default function DropPartActionTriggersVoteVoters({
   drop,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
 }) {
   const label = drop.raters_count === 1 ? "rater" : "raters";
 

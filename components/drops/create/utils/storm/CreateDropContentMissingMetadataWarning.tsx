@@ -1,12 +1,12 @@
 import Tippy from "@tippyjs/react";
-import { WaveRequiredMetadata } from "../../../../../generated/models/WaveRequiredMetadata";
+import { ApiWaveRequiredMetadata } from "../../../../../generated/models/ApiWaveRequiredMetadata";
 
 export default function CreateDropContentMissingMetadataWarning({
   missingMetadata,
 }: {
-  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly missingMetadata: ApiWaveRequiredMetadata[];
 }) {
-  const TYPE_LABELS: Record<WaveRequiredMetadata["type"], string> = {
+  const TYPE_LABELS: Record<ApiWaveRequiredMetadata["type"], string> = {
     STRING: "text",
     NUMBER: "number",
   };

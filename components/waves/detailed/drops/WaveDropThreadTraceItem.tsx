@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import React from "react";
@@ -11,10 +11,10 @@ export default function WaveDropThreadTraceItem({
   readonly dropId: string;
   readonly showLine: boolean;
 }) {
-  const { data: drop } = useQuery<Drop>({
+  const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
-      await commonApiFetch<Drop>({
+      await commonApiFetch<ApiDrop>({
         endpoint: `drops/${dropId}`,
       }),
     placeholderData: keepPreviousData,

@@ -1,12 +1,12 @@
 import { useContext, useState } from "react";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { useMutation } from "@tanstack/react-query";
 import {
   commonApiDeleWithBody,
   commonApiPost,
 } from "../../../../../../services/api/common-api";
-import { DropSubscriptionActions } from "../../../../../../generated/models/DropSubscriptionActions";
-import { DropSubscriptionTargetAction } from "../../../../../../generated/models/DropSubscriptionTargetAction";
+import { ApiDropSubscriptionActions } from "../../../../../../generated/models/ApiDropSubscriptionActions";
+import { ApiDropSubscriptionTargetAction } from "../../../../../../generated/models/ApiDropSubscriptionTargetAction";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../../../../auth/Auth";
 import CircleLoader, {
@@ -17,7 +17,7 @@ export default function DropsListItemFollowDrop({
   drop,
   closeOptions,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly closeOptions: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -29,10 +29,13 @@ export default function DropsListItemFollowDrop({
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      await commonApiPost<DropSubscriptionActions, DropSubscriptionActions>({
+      await commonApiPost<
+        ApiDropSubscriptionActions,
+        ApiDropSubscriptionActions
+      >({
         endpoint: `drops/${drop.id}/subscriptions`,
         body: {
-          actions: Object.values(DropSubscriptionTargetAction),
+          actions: Object.values(ApiDropSubscriptionTargetAction),
         },
       });
     },
@@ -54,12 +57,12 @@ export default function DropsListItemFollowDrop({
   const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
-        DropSubscriptionActions,
-        DropSubscriptionActions
+        ApiDropSubscriptionActions,
+        ApiDropSubscriptionActions
       >({
         endpoint: `drops/${drop.id}/subscriptions`,
         body: {
-          actions: Object.values(DropSubscriptionTargetAction),
+          actions: Object.values(ApiDropSubscriptionTargetAction),
         },
       });
     },

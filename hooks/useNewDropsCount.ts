@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Wave } from "../generated/models/Wave";
+import { ApiWave } from "../generated/models/ApiWave";
 
-export const useNewDropsCount = (waves: Wave[], activeWaveId: string) => {
+export const useNewDropsCount = (waves: ApiWave[], activeWaveId: string) => {
   const [initialDropsCounts, setInitialDropsCounts] = useState<
     Record<string, number>
   >({});

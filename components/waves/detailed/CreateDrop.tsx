@@ -12,11 +12,11 @@ import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import { useMutation } from "@tanstack/react-query";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPost } from "../../../services/api/common-api";
-import { CreateDropRequest } from "../../../generated/models/CreateDropRequest";
-import { Drop } from "../../../generated/models/Drop";
+import { ApiCreateDropRequest } from "../../../generated/models/ApiCreateDropRequest";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
@@ -26,7 +26,7 @@ import useCapacitor from "../../../hooks/useCapacitor";
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -84,7 +84,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
   wave,
 }: CreateDropProps) {
-const capacitor = useCapacitor();
+  const capacitor = useCapacitor();
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
@@ -111,8 +111,8 @@ const capacitor = useCapacitor();
   useResizeObserver(containerRef, fixedBottomRef);
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: CreateDropRequest) =>
-      await commonApiPost<CreateDropRequest, Drop>({
+    mutationFn: async (body: ApiCreateDropRequest) =>
+      await commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body,
       }),
@@ -128,10 +128,10 @@ const capacitor = useCapacitor();
   const [queueSize, setQueueSize] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasQueueChanged, setHasQueueChanged] = useState(false);
-  const queueRef = useRef<CreateDropRequest[]>([]);
+  const queueRef = useRef<ApiCreateDropRequest[]>([]);
 
   const addToQueue = useCallback(
-    (dropRequest: CreateDropRequest) => {
+    (dropRequest: ApiCreateDropRequest) => {
       queueRef.current.push(dropRequest);
       const newQueueSize = queueRef.current.length;
       if (newQueueSize !== queueSize) {
@@ -196,7 +196,7 @@ const capacitor = useCapacitor();
   }, [processQueue, queueSize]);
 
   const submitDrop = useCallback(
-    (dropRequest: CreateDropRequest) => {
+    (dropRequest: ApiCreateDropRequest) => {
       addToQueue(dropRequest);
       onCancelReplyQuote();
     },

@@ -1,10 +1,10 @@
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import WaveRequiredMetadataItem from "./WaveRequiredMetadataItem";
 
 export default function WaveRequiredMetadatItems({
   wave,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
 }) {
   return (
     <div className="tw-flex tw-flex-col">

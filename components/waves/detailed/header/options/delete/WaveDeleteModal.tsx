@@ -1,5 +1,5 @@
 import { useContext, useRef, useState } from "react";
-import { Wave } from "../../../../../../generated/models/Wave";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import { AuthContext } from "../../../../../auth/Auth";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
@@ -12,7 +12,7 @@ export default function WaveDeleteModal({
   wave,
   closeModal,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly closeModal: () => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);

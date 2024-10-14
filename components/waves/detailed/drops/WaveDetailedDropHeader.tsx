@@ -3,10 +3,10 @@ import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedDropHeaderProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly isStorm: boolean;
   readonly currentPartIndex: number;
   readonly partsCount: number;

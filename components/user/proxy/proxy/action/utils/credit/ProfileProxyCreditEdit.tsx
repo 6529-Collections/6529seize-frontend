@@ -1,22 +1,24 @@
 import { useContext, useEffect, useState } from "react";
 import CommonInput from "../../../../../../utils/input/CommonInput";
-import { ProfileProxy } from "../../../../../../../generated/models/ProfileProxy";
-import { ProfileProxyAction } from "../../../../../../../generated/models/ProfileProxyAction";
+import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
 import { AuthContext } from "../../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPut } from "../../../../../../../services/api/common-api";
 
-import CircleLoader, { CircleLoaderSize } from "../../../../../../distribution-plan-tool/common/CircleLoader";
-import { UpdateProxyActionRequest } from "../../../../../../../generated/models/UpdateProxyActionRequest";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../../../../distribution-plan-tool/common/CircleLoader";
+import { ApiUpdateProxyActionRequest } from "../../../../../../../generated/models/ApiUpdateProxyActionRequest";
 
 export default function ProfileProxyCreditEdit({
   profileProxy,
   profileProxyAction,
   setViewMode,
 }: {
-  readonly profileProxy: ProfileProxy;
-  readonly profileProxyAction: ProfileProxyAction;
+  readonly profileProxy: ApiProfileProxy;
+  readonly profileProxyAction: ApiProfileProxyAction;
   readonly setViewMode: () => void;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -43,8 +45,11 @@ export default function ProfileProxyCreditEdit({
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
-    mutationFn: async (body: UpdateProxyActionRequest) => {
-      return await commonApiPut<UpdateProxyActionRequest, ProfileProxyAction>({
+    mutationFn: async (body: ApiUpdateProxyActionRequest) => {
+      return await commonApiPut<
+        ApiUpdateProxyActionRequest,
+        ApiProfileProxyAction
+      >({
         endpoint: `proxies/${profileProxy.id}/actions/${profileProxyAction.id}`,
         body,
       });

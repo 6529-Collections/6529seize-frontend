@@ -1,7 +1,7 @@
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { getTimeUntil } from "../../../../helpers/Helpers";
 
-export default function WaveEnding({ wave }: { readonly wave: Wave }) {
+export default function WaveEnding({ wave }: { readonly wave: ApiWave }) {
   const endTime = wave.wave.period?.max
     ? getTimeUntil(wave.wave.period.max)
     : "Never";

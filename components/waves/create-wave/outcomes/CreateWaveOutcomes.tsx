@@ -9,7 +9,7 @@ import {
   CreateWaveOutcomeType,
 } from "../../../../types/waves.types";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 
 export default function WavesOutcome({
@@ -23,7 +23,7 @@ export default function WavesOutcome({
 }: {
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly outcomeType: CreateWaveOutcomeType | null;
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly dates: CreateWaveDatesConfig;
   readonly setOutcomeType: (outcomeType: CreateWaveOutcomeType | null) => void;

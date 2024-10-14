@@ -1,11 +1,11 @@
 import React, { useRef, useState } from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import DropsListItemDeleteDrop from "../../../drops/view/item/options/delete/DropsListItemDeleteDrop";
 
 interface WaveDetailedDropActionsOptionsProps {
-  drop: Drop;
+  readonly drop: ApiDrop;
 }
 
 const WaveDetailedDropActionsOptions: React.FC<

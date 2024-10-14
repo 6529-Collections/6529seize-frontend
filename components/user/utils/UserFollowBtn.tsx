@@ -5,13 +5,13 @@ import {
 } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../auth/Auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { IdentitySubscriptionActions } from "../../../generated/models/IdentitySubscriptionActions";
+import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleWithBody,
   commonApiFetch,
   commonApiPost,
 } from "../../../services/api/common-api";
-import { IdentitySubscriptionTargetAction } from "../../../generated/models/IdentitySubscriptionTargetAction";
+import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
@@ -47,10 +47,10 @@ export default function UserFollowBtn({
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const { data: subscriptions, isFetching } =
-    useQuery<IdentitySubscriptionActions>({
+    useQuery<ApiIdentitySubscriptionActions>({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
       queryFn: async () =>
-        await commonApiFetch<IdentitySubscriptionActions>({
+        await commonApiFetch<ApiIdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
         }),
     });
@@ -68,13 +68,13 @@ export default function UserFollowBtn({
   const followMutation = useMutation({
     mutationFn: async () => {
       await commonApiPost<
-        IdentitySubscriptionActions,
-        IdentitySubscriptionActions
+        ApiIdentitySubscriptionActions,
+        ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${handle}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction).filter(
-            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
+            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
           ),
         },
       });
@@ -96,13 +96,13 @@ export default function UserFollowBtn({
   const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
-        IdentitySubscriptionActions,
-        IdentitySubscriptionActions
+        ApiIdentitySubscriptionActions,
+        ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${handle}/subscriptions`,
         body: {
-          actions: Object.values(IdentitySubscriptionTargetAction).filter(
-            (i) => i !== IdentitySubscriptionTargetAction.DropVoted
+          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
+            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
           ),
         },
       });

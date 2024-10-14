@@ -1,4 +1,4 @@
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
 import WaveDetailedDropActionsReply from "./WaveDetailedDropActionsReply";
 import WaveDetailedDropActionsQuote from "./WaveDetailedDropActionsQuote";
@@ -9,7 +9,7 @@ import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
 
 interface WaveDetailedDropActionsProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly activePartIndex: number;
   readonly onReply: () => void;
   readonly onQuote: () => void;
@@ -31,7 +31,7 @@ export default function WaveDetailedDropActions({
       return false;
     }
 
-    if (drop.id.startsWith('temp-')) {
+    if (drop.id.startsWith("temp-")) {
       return false;
     }
 

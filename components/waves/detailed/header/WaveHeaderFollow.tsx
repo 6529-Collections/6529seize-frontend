@@ -1,17 +1,19 @@
 import { useContext, useState } from "react";
-import { Wave } from "../../../../generated/models/Wave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
-import { WaveSubscriptionActions } from "../../../../generated/models/WaveSubscriptionActions";
-import { WaveSubscriptionTargetAction } from "../../../../generated/models/WaveSubscriptionTargetAction";
+import { ApiWaveSubscriptionActions } from "../../../../generated/models/ApiWaveSubscriptionActions";
+import { ApiWaveSubscriptionTargetAction } from "../../../../generated/models/ApiWaveSubscriptionTargetAction";
 import {
   commonApiDeleWithBody,
   commonApiPost,
 } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import CircleLoader, { CircleLoaderSize } from "../../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../../distribution-plan-tool/common/CircleLoader";
 
-export default function WaveHeaderFollow({ wave }: { readonly wave: Wave }) {
+export default function WaveHeaderFollow({ wave }: { readonly wave: ApiWave }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
   const following = !!wave.subscribed_actions.length;
@@ -20,10 +22,13 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: Wave }) {
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      await commonApiPost<WaveSubscriptionActions, WaveSubscriptionActions>({
+      await commonApiPost<
+        ApiWaveSubscriptionActions,
+        ApiWaveSubscriptionActions
+      >({
         endpoint: `waves/${wave.id}/subscriptions`,
         body: {
-          actions: Object.values(WaveSubscriptionTargetAction),
+          actions: Object.values(ApiWaveSubscriptionTargetAction),
         },
       });
     },
@@ -44,12 +49,12 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: Wave }) {
   const unFollowMutation = useMutation({
     mutationFn: async () => {
       await commonApiDeleWithBody<
-        WaveSubscriptionActions,
-        WaveSubscriptionActions
+        ApiWaveSubscriptionActions,
+        ApiWaveSubscriptionActions
       >({
         endpoint: `waves/${wave.id}/subscriptions`,
         body: {
-          actions: Object.values(WaveSubscriptionTargetAction),
+          actions: Object.values(ApiWaveSubscriptionTargetAction),
         },
       });
     },

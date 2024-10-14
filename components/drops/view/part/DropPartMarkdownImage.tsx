@@ -5,13 +5,11 @@ import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 interface DropPartMarkdownImageProps {
   readonly src: string;
   readonly alt?: string;
-  readonly onImageLoaded: () => void;
 }
 
 const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   src,
   alt = "Seize",
-  onImageLoaded,
   ...props
 }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,14 +19,13 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
-    onImageLoaded();
     if (imgRef.current) {
       setNaturalSize({
         width: imgRef.current.naturalWidth,
         height: imgRef.current.naturalHeight,
       });
     }
-  }, [onImageLoaded]);
+  }, []);
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLImageElement>) => {

@@ -1,4 +1,4 @@
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import { WaveSignatureType } from "../../../../../types/waves.types";
 import CreateWaveSignatureInputs from "./CreateWaveSignatureInputs";
 
@@ -7,7 +7,7 @@ export default function CreateWaveSignature({
   selectedSignatureType,
   onChange,
 }: {
-  readonly selectedWaveType: WaveType;
+  readonly selectedWaveType: ApiWaveType;
   readonly selectedSignatureType: WaveSignatureType;
   readonly onChange: (type: WaveSignatureType) => void;
 }) {

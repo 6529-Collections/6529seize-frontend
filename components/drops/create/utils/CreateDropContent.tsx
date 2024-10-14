@@ -51,9 +51,9 @@ import {
 } from "react";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
-import { WaveParticipationRequirement } from "../../../../generated/models/WaveParticipationRequirement";
+import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
-import { WaveRequiredMetadata } from "../../../../generated/models/WaveRequiredMetadata";
+import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
 import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMissingMetadataWarning";
 import DragDropPastePlugin from "../lexical/plugins/DragDropPastePlugin";
 import { ImageNode } from "../lexical/nodes/ImageNode";
@@ -77,8 +77,8 @@ const CreateDropContent = forwardRef<
     readonly drop: CreateDropConfig | null;
     readonly canAddPart: boolean;
     readonly canSubmit: boolean;
-    readonly missingMedia: WaveParticipationRequirement[];
-    readonly missingMetadata: WaveRequiredMetadata[];
+    readonly missingMedia: ApiWaveParticipationRequirement[];
+    readonly missingMetadata: ApiWaveRequiredMetadata[];
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;

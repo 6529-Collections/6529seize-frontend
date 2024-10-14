@@ -3,7 +3,7 @@ import { CreateWaveDropsRequiredMetadata } from "../../../../../types/waves.type
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
-import { WaveMetadataType } from "../../../../../generated/models/WaveMetadataType";
+import { ApiWaveMetadataType } from "../../../../../generated/models/ApiWaveMetadataType";
 
 export default function CreateWaveDropsMetadata({
   requiredMetadata,
@@ -16,7 +16,6 @@ export default function CreateWaveDropsMetadata({
     requiredMetadata: CreateWaveDropsRequiredMetadata[]
   ) => void;
 }) {
-
   const onItemChange = ({
     index,
     key,
@@ -24,7 +23,7 @@ export default function CreateWaveDropsMetadata({
   }: {
     readonly index: number;
     readonly key: string;
-    readonly type: WaveMetadataType;
+    readonly type: ApiWaveMetadataType;
   }) => {
     const newItems = [...requiredMetadata];
     newItems[index] = { key, type };
@@ -34,7 +33,7 @@ export default function CreateWaveDropsMetadata({
   const onAddNewRow = () => {
     onRequiredMetadataChange([
       ...requiredMetadata,
-      { key: "", type: WaveMetadataType.String },
+      { key: "", type: ApiWaveMetadataType.String },
     ]);
   };
 

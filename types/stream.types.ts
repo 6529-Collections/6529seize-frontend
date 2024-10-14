@@ -1,7 +1,7 @@
-import { Drop } from "../generated/models/Drop";
-import { DropVote } from "../generated/models/DropVote";
-import { ProfileMin } from "../generated/models/ProfileMin";
-import { Wave } from "../generated/models/Wave";
+import { ApiDrop } from "../generated/models/ApiDrop";
+import { ApiDropVote } from "../generated/models/ApiDropVote";
+import { ApiProfileMin } from "../generated/models/ApiProfileMin";
+import { ApiWave } from "../generated/models/ApiWave";
 
 export enum StreamType {
   WAVE_CREATED = "WAVE_CREATED",
@@ -14,19 +14,19 @@ export enum StreamType {
 
 export type WaveCreatedStream = {
   readonly id: string;
-  readonly data: Wave;
+  readonly data: ApiWave;
   readonly type: StreamType.WAVE_CREATED;
 };
 
 export type DropCreatedStream = {
   readonly id: string;
-  readonly data: Drop;
+  readonly data: ApiDrop;
   readonly type: StreamType.DROP_CREATED;
 };
 
 export type DropRepliedDataStream = {
-  readonly drop: Drop;
-  readonly reply: Drop;
+  readonly drop: ApiDrop;
+  readonly reply: ApiDrop;
 };
 
 export type DropRepliedStream = {
@@ -36,8 +36,8 @@ export type DropRepliedStream = {
 };
 
 export type DropVotedDataStream = {
-  readonly drop: Drop;
-  readonly vote: DropVote;
+  readonly drop: ApiDrop;
+  readonly vote: ApiDropVote;
 };
 
 export type DropVotedStream = {
@@ -49,7 +49,7 @@ export type DropVotedStream = {
 export type IdentitySubscribedDataStream = {
   readonly createdAt: number;
   readonly readAt: number | null;
-  readonly relatedIdentity: ProfileMin;
+  readonly relatedIdentity: ApiProfileMin;
 };
 
 export type IdentitySubscribedStream = {
@@ -61,8 +61,8 @@ export type IdentitySubscribedStream = {
 export type IdentityMentionedDataStream = {
   readonly createdAt: number;
   readonly readAt: number | null;
-  readonly relatedIdentity: ProfileMin;
-  readonly relatedDrops: Array<Drop>;
+  readonly relatedIdentity: ApiProfileMin;
+  readonly relatedDrops: Array<ApiDrop>;
 };
 
 export type IdentityMentionedStream = {

@@ -15,8 +15,8 @@ import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
-import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
-import { WaveRequiredMetadata } from "../../../../../generated/models/WaveRequiredMetadata";
+import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "../../../../../generated/models/ApiWaveRequiredMetadata";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 enum TITLE_STATE {
@@ -41,8 +41,8 @@ interface CreateDropFullDesktopProps {
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
   readonly showDropError?: boolean;
-  readonly missingMedia: WaveParticipationRequirement[];
-  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly missingMedia: ApiWaveParticipationRequirement[];
+  readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;

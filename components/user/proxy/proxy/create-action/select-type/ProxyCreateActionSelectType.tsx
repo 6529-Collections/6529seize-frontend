@@ -1,6 +1,6 @@
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../../../entities/IProxy";
-import { ProfileProxyAction } from "../../../../../../generated/models/ProfileProxyAction";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyAction } from "../../../../../../generated/models/ApiProfileProxyAction";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
 import ProxyCreateActionSelectTypeItem from "./ProxyCreateActionSelectTypeItem";
 
@@ -9,39 +9,47 @@ export default function ProxyCreateActionSelectType({
   setSelectedActionType,
   onCancel,
 }: {
-  readonly currentActions: ProfileProxyAction[];
-  readonly setSelectedActionType: (actionType: ProfileProxyActionType) => void;
+  readonly currentActions: ApiProfileProxyAction[];
+  readonly setSelectedActionType: (
+    actionType: ApiProfileProxyActionType
+  ) => void;
   readonly onCancel?: () => void;
 }) {
-  const isActionAvailable = (actionType: ProfileProxyActionType): boolean => {
+  const isActionAvailable = (
+    actionType: ApiProfileProxyActionType
+  ): boolean => {
     if (!PROFILE_PROXY_AVAILABLE_ACTIONS.includes(actionType)) {
       return false;
     }
     switch (actionType) {
-      case ProfileProxyActionType.AllocateRep:
-        return !currentActions.some(
-          (action) => action.action_type === ProfileProxyActionType.AllocateRep
-        );
-      case ProfileProxyActionType.AllocateCic:
-        return !currentActions.some(
-          (action) => action.action_type === ProfileProxyActionType.AllocateCic
-        );
-      case ProfileProxyActionType.CreateWave:
-        return !currentActions.some(
-          (action) => action.action_type === ProfileProxyActionType.CreateWave
-        );
-      case ProfileProxyActionType.ReadWave:
-        return !currentActions.some(
-          (action) => action.action_type === ProfileProxyActionType.ReadWave
-        );
-      case ProfileProxyActionType.CreateDropToWave:
+      case ApiProfileProxyActionType.AllocateRep:
         return !currentActions.some(
           (action) =>
-            action.action_type === ProfileProxyActionType.CreateDropToWave
+            action.action_type === ApiProfileProxyActionType.AllocateRep
         );
-      case ProfileProxyActionType.RateWaveDrop:
+      case ApiProfileProxyActionType.AllocateCic:
         return !currentActions.some(
-          (action) => action.action_type === ProfileProxyActionType.RateWaveDrop
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.AllocateCic
+        );
+      case ApiProfileProxyActionType.CreateWave:
+        return !currentActions.some(
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.CreateWave
+        );
+      case ApiProfileProxyActionType.ReadWave:
+        return !currentActions.some(
+          (action) => action.action_type === ApiProfileProxyActionType.ReadWave
+        );
+      case ApiProfileProxyActionType.CreateDropToWave:
+        return !currentActions.some(
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.CreateDropToWave
+        );
+      case ApiProfileProxyActionType.RateWaveDrop:
+        return !currentActions.some(
+          (action) =>
+            action.action_type === ApiProfileProxyActionType.RateWaveDrop
         );
       default:
         assertUnreachable(actionType);
@@ -49,7 +57,7 @@ export default function ProxyCreateActionSelectType({
     }
   };
 
-  const availableActions = Object.values(ProfileProxyActionType).filter(
+  const availableActions = Object.values(ApiProfileProxyActionType).filter(
     isActionAvailable
   );
 

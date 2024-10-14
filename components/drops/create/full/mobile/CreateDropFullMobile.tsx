@@ -16,8 +16,8 @@ import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";
-import { WaveParticipationRequirement } from "../../../../../generated/models/WaveParticipationRequirement";
-import { WaveRequiredMetadata } from "../../../../../generated/models/WaveRequiredMetadata";
+import { ApiWaveParticipationRequirement } from "../../../../../generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "../../../../../generated/models/ApiWaveRequiredMetadata";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
 enum TITLE_STATE {
@@ -41,8 +41,8 @@ interface CreateDropFullMobileProps {
   readonly loading: boolean;
   readonly showSubmit: boolean;
   readonly drop: CreateDropConfig | null;
-  readonly missingMedia: WaveParticipationRequirement[];
-  readonly missingMetadata: WaveRequiredMetadata[];
+  readonly missingMedia: ApiWaveParticipationRequirement[];
+  readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;

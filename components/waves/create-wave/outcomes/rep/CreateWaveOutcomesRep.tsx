@@ -2,7 +2,7 @@ import {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
 } from "../../../../../types/waves.types";
-import { WaveType } from "../../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomesRepRank from "./CreateWaveOutcomesRepRank";
 import CreateWaveOutcomesRepApprove from "./CreateWaveOutcomesRepApprove";
 
@@ -12,13 +12,13 @@ export default function CreateWaveOutcomesRep({
   onOutcome,
   onCancel,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
 }) {
-  const components: Record<WaveType, JSX.Element> = {
-    [WaveType.Approve]: (
+  const components: Record<ApiWaveType, JSX.Element> = {
+    [ApiWaveType.Approve]: (
       <CreateWaveOutcomesRepApprove
         onOutcome={onOutcome}
         onCancel={onCancel}
@@ -26,10 +26,10 @@ export default function CreateWaveOutcomesRep({
         waveType={waveType}
       />
     ),
-    [WaveType.Rank]: (
+    [ApiWaveType.Rank]: (
       <CreateWaveOutcomesRepRank onOutcome={onOutcome} onCancel={onCancel} />
     ),
-    [WaveType.Chat]: <div />,
+    [ApiWaveType.Chat]: <div />,
   };
 
   return components[waveType];

@@ -1,5 +1,5 @@
-import { DropPart } from "../../../../../../generated/models/DropPart";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDropPart } from "../../../../../../generated/models/ApiDropPart";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import DropPartDiscussionItems from "./items/DropPartDiscussionItems";
 
 export default function DropPartDiscussion({
@@ -12,8 +12,8 @@ export default function DropPartDiscussion({
   setActiveDiscussionDropId,
   setRepliesOpen,
 }: {
-  readonly drop: Drop;
-  readonly dropPart: DropPart;
+  readonly drop: ApiDrop;
+  readonly dropPart: ApiDropPart;
   readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly activeDiscussionDropId: string | null

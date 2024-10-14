@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { QuotedDrop } from "../../../../../generated/models/QuotedDrop";
+import { ApiQuotedDrop } from "../../../../../generated/models/ApiQuotedDrop";
 import { AuthContext } from "../../../../auth/Auth";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Drop } from "../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 
-import { DropPart as IDropPart } from "../../../../../generated/models/DropPart";
+import { ApiDropPart } from "../../../../../generated/models/ApiDropPart";
 import DropPart, { DropPartSize } from "../DropPart";
 
 export default function DropPartQuote({
@@ -14,13 +14,13 @@ export default function DropPartQuote({
   marginLeft = true,
   onRedropClick,
 }: {
-  readonly quotedDrop: QuotedDrop;
+  readonly quotedDrop: ApiQuotedDrop;
   readonly marginLeft?: boolean;
   readonly onRedropClick?: (serialNo: number) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
-  const { data: drop, error } = useQuery<Drop>({
+  const { data: drop, error } = useQuery<ApiDrop>({
     queryKey: [
       QueryKey.DROP,
       {
@@ -29,7 +29,7 @@ export default function DropPartQuote({
       },
     ],
     queryFn: async () =>
-      await commonApiFetch<Drop>({
+      await commonApiFetch<ApiDrop>({
         endpoint: `drops/${quotedDrop.drop_id}`,
         params: connectedProfile?.profile?.handle
           ? { context_profile: connectedProfile.profile.handle }
@@ -38,7 +38,7 @@ export default function DropPartQuote({
     placeholderData: keepPreviousData,
   });
 
-  const [quotedPart, setQuotedPart] = useState<IDropPart | null>(null);
+  const [quotedPart, setQuotedPart] = useState<ApiDropPart | null>(null);
   useEffect(() => {
     if (!drop) {
       return;
@@ -80,12 +80,10 @@ export default function DropPartQuote({
         referencedNfts={drop.referenced_nfts}
         partContent={quotedPart.content ?? null}
         smallMenuIsShown={false}
-        partMedias={
-          quotedPart.media.map(media => ({
-            mimeType: media.mime_type,
-            mediaSrc: media.url,
-          }))}
-        showFull={false}
+        partMedias={quotedPart.media.map((media) => ({
+          mimeType: media.mime_type,
+          mediaSrc: media.url,
+        }))}
         createdAt={drop.created_at}
         dropTitle={drop.title}
         wave={{
@@ -94,9 +92,7 @@ export default function DropPartQuote({
           id: drop.wave.id,
         }}
         size={DropPartSize.SMALL}
-        onContentClick={() =>
-          onRedropClick && onRedropClick(drop.serial_no)
-        }
+        onContentClick={() => onRedropClick && onRedropClick(drop.serial_no)}
       />
     </div>
   );

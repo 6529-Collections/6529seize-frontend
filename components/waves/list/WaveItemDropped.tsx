@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import { numberWithCommas } from "../../../helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 
-export default function WaveItemDropped({ wave }: { readonly wave: Wave }) {
+export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
   const firstXContributors = wave.contributors_overview.slice(0, 5);
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">

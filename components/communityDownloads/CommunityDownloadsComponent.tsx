@@ -5,8 +5,8 @@ import { fetchUrl } from "../../services/6529api";
 import styles from "./CommunityDownloads.module.scss";
 import Pagination from "../pagination/Pagination";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-import {UploadsPage} from "../../generated/models/UploadsPage";
-import {UploadItem} from "../../generated/models/UploadItem";
+import { ApiUploadsPage } from "../../generated/models/ApiUploadsPage";
+import { ApiUploadItem } from "../../generated/models/ApiUploadItem";
 
 const PAGE_SIZE = 25;
 
@@ -55,13 +55,13 @@ interface Props {
 export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   const router = useRouter();
 
-  const [downloads, setDownloads] = useState<UploadItem[]>();
+  const [downloads, setDownloads] = useState<ApiUploadItem[]>();
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
   function fetchResults(mypage: number) {
     let url = `${props.url}?page_size=${PAGE_SIZE}&page=${mypage}`;
-    fetchUrl(url).then((response: UploadsPage) => {
+    fetchUrl(url).then((response: ApiUploadsPage) => {
       setTotalResults(response.count);
       setDownloads(response.data);
     });

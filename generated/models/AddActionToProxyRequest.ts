@@ -10,16 +10,16 @@
  * Do not edit the class manually.
  */
 
-import { CreateNewProfileProxyAllocateCicAction } from '../models/CreateNewProfileProxyAllocateCicAction';
-import { CreateNewProfileProxyAllocateRepAction } from '../models/CreateNewProfileProxyAllocateRepAction';
-import { CreateNewProfileProxyCreateWaveAction } from '../models/CreateNewProfileProxyCreateWaveAction';
-import { CreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/CreateNewProfileProxyCreateWaveParticipationDropAction';
-import { CreateNewProfileProxyReadWaveAction } from '../models/CreateNewProfileProxyReadWaveAction';
-import { ProfileProxyActionType } from '../models/ProfileProxyActionType';
+import { ApiCreateNewProfileProxyAllocateCicAction } from '../models/ApiCreateNewProfileProxyAllocateCicAction';
+import { ApiCreateNewProfileProxyAllocateRepAction } from '../models/ApiCreateNewProfileProxyAllocateRepAction';
+import { ApiCreateNewProfileProxyCreateWaveAction } from '../models/ApiCreateNewProfileProxyCreateWaveAction';
+import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
+import { ApiCreateNewProfileProxyReadWaveAction } from '../models/ApiCreateNewProfileProxyReadWaveAction';
+import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
 export class AddActionToProxyRequest {
-    'action_type': ProfileProxyActionType;
+    'action_type': ApiProfileProxyActionType;
     'end_time': number | null;
     'credit_amount': number;
 
@@ -29,7 +29,7 @@ export class AddActionToProxyRequest {
         {
             "name": "action_type",
             "baseName": "action_type",
-            "type": "ProfileProxyActionType",
+            "type": "ApiProfileProxyActionType",
             "format": ""
         },
         {

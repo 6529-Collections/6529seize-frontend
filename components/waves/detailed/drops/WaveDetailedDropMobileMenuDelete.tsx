@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import DropsListItemDeleteDropModal from "../../../drops/view/item/options/delete/DropsListItemDeleteDropModal";
 
 interface WaveDetailedDropMobileMenuDeleteProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
 }
 
 const WaveDetailedDropMobileMenuDelete: React.FC<

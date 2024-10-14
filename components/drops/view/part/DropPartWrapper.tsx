@@ -1,10 +1,10 @@
-import { DropPart } from "../../../../generated/models/DropPart";
+import { ApiDropPart } from "../../../../generated/models/ApiDropPart";
 import DropPartDiscussion from "./actions/discussion/DropPartDiscussion";
 import DropPartActionTriggers from "./actions/DropPartActionTriggers";
 import { useEffect, useState } from "react";
-import { Drop } from "../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import DropPartQuote from "./quote/DropPartQuote";
-import { QuotedDrop } from "../../../../generated/models/QuotedDrop";
+import { ApiQuotedDrop } from "../../../../generated/models/ApiQuotedDrop";
 import { DropConnectingLineType, DropVoteState } from "../item/DropsListItem";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
@@ -12,8 +12,8 @@ import DropListItemQuote from "../item/quote/DropListItemQuote";
 import DropInputWrapper from "../../utils/DropInputWrapper";
 
 export interface DropPartWrapperProps {
-  readonly drop: Drop;
-  readonly dropPart: DropPart;
+  readonly drop: ApiDrop;
+  readonly dropPart: ApiDropPart;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
@@ -43,7 +43,7 @@ export default function DropPartWrapper({
   children,
 }: DropPartWrapperProps) {
   const [showReplyInput, setShowReplyInput] = useState(false);
-  const quotedDrop: QuotedDrop | null = dropPart.quoted_drop ?? null;
+  const quotedDrop: ApiQuotedDrop | null = dropPart.quoted_drop ?? null;
 
   const [quoteModePartId, setQuoteModePartId] = useState<number | null>(null);
 

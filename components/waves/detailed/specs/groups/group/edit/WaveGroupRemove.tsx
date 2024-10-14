@@ -1,5 +1,5 @@
-import { UpdateWaveRequest } from "../../../../../../../generated/models/UpdateWaveRequest";
-import { Wave } from "../../../../../../../generated/models/Wave";
+import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
+import { ApiWave } from "../../../../../../../generated/models/ApiWave";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
 import { convertWaveToUpdateWave } from "../../../../../../../helpers/waves/waves.helpers";
 import CommonAnimationOpacity from "../../../../../../utils/animation/CommonAnimationOpacity";
@@ -14,13 +14,13 @@ export default function WaveGroupRemove({
   setIsEditOpen,
   onEdit,
 }: {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: UpdateWaveRequest) => Promise<void>;
+  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
-  const getBody = (): UpdateWaveRequest => {
+  const getBody = (): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
     switch (type) {
       case WaveGroupType.VIEW:

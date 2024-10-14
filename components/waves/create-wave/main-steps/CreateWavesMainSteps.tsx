@@ -1,4 +1,4 @@
-import { WaveType } from "../../../../generated/models/WaveType";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import {
   CREATE_WAVE_MAIN_STEPS,
   CREATE_WAVE_STEPS_LABELS,
@@ -11,7 +11,7 @@ export default function CreateWavesMainSteps({
   activeStep,
   onStep,
 }: {
-  readonly waveType: WaveType;
+  readonly waveType: ApiWaveType;
   readonly activeStep: CreateWaveStep;
   readonly onStep: (step: CreateWaveStep) => void;
 }) {

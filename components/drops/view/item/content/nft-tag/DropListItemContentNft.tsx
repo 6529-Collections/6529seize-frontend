@@ -19,10 +19,8 @@ import { isMemesEcosystemContract } from "../../../../../../helpers/nft.helpers"
 
 export default function DropListItemContentNft({
   nft: { contract, token, name },
-  onImageLoaded,
 }: {
   readonly nft: ReferencedNft;
-  readonly onImageLoaded: () => void;
 }) {
   const { data: nfts } = useQuery<ReservoirTokensResponseTokenElement[]>({
     queryKey: [QueryKey.RESERVOIR_NFT, { contract, token }],
@@ -49,10 +47,6 @@ export default function DropListItemContentNft({
   }, [nfts]);
 
   const elementRef = useRef<HTMLDivElement>(null);
-
-  const handleImageLoad = () => {
-    onImageLoaded();
-  };
 
   const getNftHref = () => {
     if (areEqualAddresses(contract, MEMES_CONTRACT)) {
@@ -95,7 +89,6 @@ export default function DropListItemContentNft({
               src={nft.token.imageLarge}
               alt="NFT token"
               className="tw-w-full tw-h-full tw-object-center tw-object-contain lg:tw-max-h-[516px]"
-              onLoad={handleImageLoad}
             />
           )}
         </div>

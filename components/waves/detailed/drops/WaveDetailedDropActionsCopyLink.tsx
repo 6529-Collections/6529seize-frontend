@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
-import { Drop } from '../../../../generated/models/Drop';
+import React, { useState } from "react";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 
 interface WaveDetailedDropActionsCopyLinkProps {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
 }
 
-const WaveDetailedDropActionsCopyLink: React.FC<WaveDetailedDropActionsCopyLinkProps> = ({ drop }) => {
+const WaveDetailedDropActionsCopyLink: React.FC<
+  WaveDetailedDropActionsCopyLinkProps
+> = ({ drop }) => {
   const [copied, setCopied] = useState(false);
 
-  const isTemporaryDrop = (drop: Drop): boolean => {
-    return drop.id.startsWith('temp-');
+  const isTemporaryDrop = (drop: ApiDrop): boolean => {
+    return drop.id.startsWith("temp-");
   };
 
   const copyToClipboard = () => {
@@ -43,7 +45,7 @@ const WaveDetailedDropActionsCopyLink: React.FC<WaveDetailedDropActionsCopyLinkP
       <div>
         <button
           className={`tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
-            isDisabled ? 'tw-opacity-50 tw-cursor-default' : 'tw-cursor-pointer'
+            isDisabled ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
           }`}
           onClick={copyToClipboard}
           disabled={isDisabled}

@@ -1,4 +1,4 @@
-import { WaveMetadataType } from "../../../../../generated/models/WaveMetadataType";
+import { ApiWaveMetadataType } from "../../../../../generated/models/ApiWaveMetadataType";
 import { CreateWaveDropsRequiredMetadata } from "../../../../../types/waves.types";
 import CreateWaveDropsMetadataRowType from "./CreateWaveDropsMetadataRowType";
 
@@ -15,7 +15,7 @@ export default function CreateWaveDropsMetadataRow({
   readonly onItemChange: (args: {
     readonly index: number;
     readonly key: string;
-    readonly type: WaveMetadataType;
+    readonly type: ApiWaveMetadataType;
   }) => void;
   readonly onItemRemove: (index: number) => void;
 }) {
@@ -27,7 +27,7 @@ export default function CreateWaveDropsMetadataRow({
     });
   };
 
-  const onTypeChange = (type: WaveMetadataType) => {
+  const onTypeChange = (type: ApiWaveMetadataType) => {
     onItemChange({
       index,
       key: item.key,

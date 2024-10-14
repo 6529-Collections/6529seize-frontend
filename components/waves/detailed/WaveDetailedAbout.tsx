@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Wave } from "../../../generated/models/Wave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import WaveHeader from "./header/WaveHeader";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -14,12 +14,12 @@ import { WaveDetailedView } from "./WaveDetailed";
 import { WaveDetailedMobileView } from "./WaveDetailedMobile";
 
 interface WaveDetailedAboutProps {
-  readonly wave: Wave;
+  readonly wave: ApiWave;
   readonly setView: (view: WaveDetailedView) => void;
   readonly setActiveView?: (view: WaveDetailedMobileView) => void;
   readonly showRequiredMetadata: boolean;
   readonly showRequiredTypes: boolean;
-  readonly onWaveChange: (wave: Wave) => void;
+  readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
 
@@ -38,7 +38,7 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
     setIsExpanded(!isExpanded);
   };
 
-  const handleWaveChange = (newWave: Wave) => {
+  const handleWaveChange = (newWave: ApiWave) => {
     setIsLoading(true);
     onWaveChange(newWave);
     setActiveView?.(WaveDetailedMobileView.CHAT);
@@ -110,8 +110,8 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-      <WaveDetailedFollowingWaves 
-        activeWaveId={wave.id} 
+      <WaveDetailedFollowingWaves
+        activeWaveId={wave.id}
         onWaveChange={handleWaveChange}
         setActiveView={setActiveView || (() => {})}
         setIsLoading={setIsLoading}

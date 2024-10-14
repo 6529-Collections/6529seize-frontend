@@ -1,19 +1,19 @@
 import {
-  GroupOwnsNft,
-  GroupOwnsNftNameEnum,
-} from "../../../../../../generated/models/GroupOwnsNft";
+  ApiGroupOwnsNft,
+  ApiGroupOwnsNftNameEnum,
+} from "../../../../../../generated/models/ApiGroupOwnsNft";
 import GroupCreateNftsSelectedItem from "./GroupCreateNftsSelectedItem";
 
 export default function GroupCreateNftsSelected({
   selected,
   onRemove,
 }: {
-  readonly selected: GroupOwnsNft[];
+  readonly selected: ApiGroupOwnsNft[];
   readonly onRemove: ({
     name,
     token,
   }: {
-    name: GroupOwnsNftNameEnum;
+    name: ApiGroupOwnsNftNameEnum;
     token: string;
   }) => void;
 }) {

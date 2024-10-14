@@ -1,4 +1,4 @@
-import { IdentityAndSubscriptionActions } from "../../../generated/models/IdentityAndSubscriptionActions";
+import { ApiIdentityAndSubscriptionActions } from "../../../generated/models/ApiIdentityAndSubscriptionActions";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
@@ -10,7 +10,7 @@ export default function FollowersListWrapper({
   loading,
   onBottomIntersection,
 }: {
-  readonly followers: IdentityAndSubscriptionActions[];
+  readonly followers: ApiIdentityAndSubscriptionActions[];
   readonly loading: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
 }) {

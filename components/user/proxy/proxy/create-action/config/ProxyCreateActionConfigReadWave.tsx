@@ -1,5 +1,5 @@
 import { CreateProxyReadWaveAction } from "../../../../../../entities/IProxy";
-import { ProfileProxyActionType } from "../../../../../../generated/models/ProfileProxyActionType";
+import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigReadWave({
   endTime,
@@ -12,7 +12,7 @@ export default function ProxyCreateActionConfigReadWave({
 }) {
   const handleSubmit = () =>
     onSubmit({
-      action_type: ProfileProxyActionType.ReadWave,
+      action_type: ApiProfileProxyActionType.ReadWave,
       end_time: endTime,
     });
   return (

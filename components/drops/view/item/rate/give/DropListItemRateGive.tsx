@@ -3,7 +3,7 @@ import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
-import { Drop } from "../../../../../../generated/models/Drop";
+import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { DropVoteState } from "../../DropsListItem";
 import Tippy from "@tippyjs/react";
 
@@ -20,7 +20,7 @@ export default function DropListItemRateGive({
   onRated,
   isMobile = false,
 }: {
-  readonly drop: Drop;
+  readonly drop: ApiDrop;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number;
