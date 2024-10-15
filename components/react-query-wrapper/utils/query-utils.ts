@@ -1,4 +1,5 @@
 import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
+import { ApiWaveSubscriptionTargetAction } from "../../../generated/models/ApiWaveSubscriptionTargetAction";
 
 export const WAVE_FOLLOWING_WAVES_PARAMS = {
   limit: 20,
@@ -9,3 +10,7 @@ export const WAVE_FOLLOWING_WAVES_PARAMS = {
 export const WAVE_DROPS_PARAMS = {
   limit: 50,
 };
+
+export const WAVE_DEFAULT_SUBSCRIPTION_ACTIONS = Object.values(
+  ApiWaveSubscriptionTargetAction
+);

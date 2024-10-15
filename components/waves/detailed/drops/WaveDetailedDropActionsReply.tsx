@@ -14,7 +14,7 @@ const WaveDetailedDropActionsReply: React.FC<
 > = ({ onReply, drop, activePartIndex }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReply =
-    drop.wave.authenticated_user_eligible_to_participate && !isTemporaryDrop;
+    drop.wave.authenticated_user_eligible_to_chat && !isTemporaryDrop;
   const repliesCount = drop.parts[activePartIndex].replies_count;
   const contextProfileReplied =
     !!drop.parts[activePartIndex].context_profile_context?.replies_count;
