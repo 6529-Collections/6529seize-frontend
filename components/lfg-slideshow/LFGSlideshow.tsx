@@ -40,6 +40,7 @@ const LFGSlideshow: React.FC<{
   };
 
   const preloadMedia = (media: ApiNftMedia) => {
+    if (!media) return;
     if (isVideo(media.animation)) {
       const video = document.createElement("video");
       video.src = media.animation;
