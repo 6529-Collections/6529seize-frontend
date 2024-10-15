@@ -12,7 +12,7 @@ interface WaveDetailedDropActionsQuoteProps {
 const WaveDetailedDropActionsQuote: React.FC<
   WaveDetailedDropActionsQuoteProps
 > = ({ onQuote, drop, activePartIndex }) => {
-  const canQuote = drop.wave.authenticated_user_eligible_to_participate;
+  const canQuote = drop.wave.authenticated_user_eligible_to_chat;
   const quotesCount = drop.parts[activePartIndex].quotes_count;
   const contextProfileQuoted =
     !!drop.parts[activePartIndex].context_profile_context?.quotes_count;

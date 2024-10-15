@@ -3,6 +3,7 @@ import styles from "./NextGen.module.scss";
 import { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
 import Image from "next/image";
+import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
 
 export enum NextGenView {
   COLLECTIONS = "Collections",
@@ -79,7 +80,7 @@ export default function NextGenNavigationHeader(
           height: isMobile ? "auto" : "90px",
           paddingTop: isMobile ? "20px" : "0",
         }}>
-        <div>
+        <div className="d-flex align-items-center gap-3">
           <Image
             priority
             width="0"
@@ -100,6 +101,7 @@ export default function NextGenNavigationHeader(
               }
             }}
           />
+          <LFGButton contract={"nextgen"} />
         </div>
         <div
           className={`d-flex align-items-center ${

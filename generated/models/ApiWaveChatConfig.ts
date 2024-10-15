@@ -15,6 +15,8 @@ import { HttpFile } from '../http/http';
 
 export class ApiWaveChatConfig {
     'scope': ApiWaveScope;
+    'enabled': boolean;
+    'authenticated_user_eligible': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,6 +25,18 @@ export class ApiWaveChatConfig {
             "name": "scope",
             "baseName": "scope",
             "type": "ApiWaveScope",
+            "format": ""
+        },
+        {
+            "name": "enabled",
+            "baseName": "enabled",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_eligible",
+            "baseName": "authenticated_user_eligible",
+            "type": "boolean",
             "format": ""
         }    ];
 

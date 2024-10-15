@@ -24,7 +24,7 @@ export default function DropInputWrapper({
         return "Proxy can't drop";
 
       case ProfileConnectedStatus.HAVE_PROFILE:
-        if (!drop.wave.authenticated_user_eligible_to_participate) {
+        if (!drop.wave.authenticated_user_eligible_to_chat) {
           return "You are not eligible to create a drop in this wave";
         }
         return null;

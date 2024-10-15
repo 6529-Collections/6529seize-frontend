@@ -15,6 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveChatConfig {
     'scope': ApiCreateNewWaveScope;
+    'enabled': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,6 +24,12 @@ export class ApiCreateNewWaveChatConfig {
             "name": "scope",
             "baseName": "scope",
             "type": "ApiCreateNewWaveScope",
+            "format": ""
+        },
+        {
+            "name": "enabled",
+            "baseName": "enabled",
+            "type": "boolean",
             "format": ""
         }    ];
 

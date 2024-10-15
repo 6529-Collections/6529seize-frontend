@@ -29,7 +29,7 @@ export default function WaveDetailedContent({
   const router = useRouter();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
-  const canDrop = wave.participation.authenticated_user_eligible;
+  const canDrop = wave.chat.authenticated_user_eligible;
   const [searchParamsDone, setSearchParamsDone] = useState(false);
   useEffect(() => {
     const dropParam = searchParams.get("drop");

@@ -109,6 +109,9 @@ export interface CreateWaveConfig {
   readonly groups: WaveGroupsConfig;
   readonly dates: CreateWaveDatesConfig;
   readonly drops: CreateWaveDropsConfig;
+  readonly chat: {
+    readonly enabled: boolean;
+  };
   readonly voting: CreateWaveVotingConfig;
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly approval: CreateWaveApprovalConfig;

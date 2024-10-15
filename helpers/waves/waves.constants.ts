@@ -69,6 +69,31 @@ export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
   ],
 };
 
+export const CREATE_WAVE_GROUPS: Record<
+  ApiWaveType,
+  CreateWaveGroupConfigType[]
+> = {
+  [ApiWaveType.Chat]: [
+    CreateWaveGroupConfigType.CAN_VIEW,
+    CreateWaveGroupConfigType.CAN_CHAT,
+    CreateWaveGroupConfigType.ADMIN,
+  ],
+  [ApiWaveType.Rank]: [
+    CreateWaveGroupConfigType.CAN_VIEW,
+    CreateWaveGroupConfigType.CAN_DROP,
+    CreateWaveGroupConfigType.CAN_VOTE,
+    CreateWaveGroupConfigType.CAN_CHAT,
+    CreateWaveGroupConfigType.ADMIN,
+  ],
+  [ApiWaveType.Approve]: [
+    CreateWaveGroupConfigType.CAN_VIEW,
+    CreateWaveGroupConfigType.CAN_DROP,
+    CreateWaveGroupConfigType.CAN_VOTE,
+    CreateWaveGroupConfigType.CAN_CHAT,
+    CreateWaveGroupConfigType.ADMIN,
+  ],
+};
+
 export const CREATE_WAVE_STEPS_LABELS: Record<
   ApiWaveType,
   Record<CreateWaveStep, string>
@@ -130,7 +155,6 @@ export const CREATE_WAVE_SELECT_GROUP_LABELS: Record<
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
-
 };
 
 export const CREATE_WAVE_NONE_GROUP_LABELS: Record<

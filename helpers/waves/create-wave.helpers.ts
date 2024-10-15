@@ -577,6 +577,7 @@ export const getCreateNewWaveBody = ({
       scope: {
         group_id: config.groups.canChat,
       },
+      enabled: config.chat.enabled,
     },
     wave: {
       type: config.overview.type,

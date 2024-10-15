@@ -59,6 +59,17 @@ export default function WaveGroupEdit({
             },
           },
         };
+      case WaveGroupType.CHAT:
+        return {
+          ...originalBody,
+          chat: {
+            ...originalBody.chat,
+            scope: {
+              ...originalBody.chat.scope,
+              group_id: group.id,
+            },
+          },
+        };
       case WaveGroupType.ADMIN:
         return {
           ...originalBody,

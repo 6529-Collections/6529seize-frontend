@@ -3030,9 +3030,12 @@ components:
       type: object
       required:
         - scope
+        - enabled
       properties:
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        enabled:
+          type: boolean
     ApiCreateNewWaveParticipationConfig:
       type: object
       required:
@@ -4875,9 +4878,15 @@ components:
       type: object
       required:
         - scope
+        - enabled
+        - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
+        enabled:
+          type: boolean
+        authenticated_user_eligible:
+          type: boolean
     ApiWaveConfig:
       type: object
       required:
@@ -5011,6 +5020,7 @@ components:
         - description_drop_id
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
+        - authenticated_user_eligible_to_chat
       properties:
         id:
           type: string
@@ -5023,6 +5033,8 @@ components:
         authenticated_user_eligible_to_vote:
           type: boolean
         authenticated_user_eligible_to_participate:
+          type: boolean
+        authenticated_user_eligible_to_chat:
           type: boolean
     ApiWaveOutcome:
       type: object

@@ -77,6 +77,9 @@ export default function CreateWave({
       canChat: null,
       admin: null,
     },
+    chat: {
+      enabled: true,
+    },
     dates: {
       submissionStartDate: Time.currentMillis(),
       votingStartDate: Time.currentMillis(),

@@ -41,6 +41,12 @@ export const convertWaveToUpdateWave = (
       group_id: wave.visibility.scope.group?.id ?? null,
     },
   },
+  chat: {
+    scope: {
+      group_id: wave.chat.scope.group?.id ?? null,
+    },
+    enabled: wave.chat.enabled,
+  },
   participation: {
     scope: {
       group_id: wave.participation.scope.group?.id ?? null,
@@ -51,11 +57,6 @@ export const convertWaveToUpdateWave = (
     required_metadata: wave.participation.required_metadata,
     signature_required: !!wave.participation.signature_required,
     period: wave.participation.period,
-  },
-  chat: {
-    scope: {
-      group_id: wave.chat.scope.group?.id ?? null,
-    },
   },
   wave: {
     type: wave.wave.type,
