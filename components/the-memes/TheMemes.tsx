@@ -1,7 +1,7 @@
 import styles from "./TheMemes.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
+import { Container, Row, Col, Dropdown } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
@@ -65,8 +65,6 @@ export function printVolumeTypeDropdown(
 
 export default function TheMemesComponent(props: Readonly<Props>) {
   const router = useRouter();
-
-  const [isSlideshowOpen, setIsSlideshowOpen] = useState(false);
 
   const { connectedProfile } = useContext(AuthContext);
   const [connectedConsolidationKey, setConnectedConsolidationKey] =
