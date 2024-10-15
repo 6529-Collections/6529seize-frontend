@@ -22,22 +22,15 @@ export type DropListItemContentPartProps =
 
 export default function DropListItemContentPart({
   part,
-  onImageLoaded,
 }: {
   readonly part: DropListItemContentPartProps;
-  readonly onImageLoaded: () => void;
 }) {
   const { type, value } = part;
   switch (type) {
     case DropContentPartType.MENTION:
       return <DropListItemContentMention user={value} />;
     case DropContentPartType.HASHTAG:
-      return (
-        <DropListItemContentNft
-          nft={value}
-          onImageLoaded={onImageLoaded}
-        />
-      );
+      return <DropListItemContentNft nft={value} />;
     default:
       assertUnreachable(type);
   }

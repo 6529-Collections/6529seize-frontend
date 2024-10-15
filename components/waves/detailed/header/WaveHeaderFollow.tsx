@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
 import { ApiWaveSubscriptionActions } from "../../../../generated/models/ApiWaveSubscriptionActions";
-import { ApiWaveSubscriptionTargetAction } from "../../../../generated/models/ApiWaveSubscriptionTargetAction";
 import {
   commonApiDeleWithBody,
   commonApiPost,
@@ -12,6 +11,7 @@ import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQuer
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
+import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "../../../react-query-wrapper/utils/query-utils";
 
 export default function WaveHeaderFollow({ wave }: { readonly wave: ApiWave }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -28,12 +28,15 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: ApiWave }) {
       >({
         endpoint: `waves/${wave.id}/subscriptions`,
         body: {
-          actions: Object.values(ApiWaveSubscriptionTargetAction),
+          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
     },
     onSuccess: () => {
-      onWaveFollowChange();
+      onWaveFollowChange({
+        waveId: wave.id,
+        following: true,
+      });
     },
     onError: (error) => {
       setToast({
@@ -54,12 +57,15 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: ApiWave }) {
       >({
         endpoint: `waves/${wave.id}/subscriptions`,
         body: {
-          actions: Object.values(ApiWaveSubscriptionTargetAction),
+          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
     },
     onSuccess: () => {
-      onWaveFollowChange();
+      onWaveFollowChange({
+        waveId: wave.id,
+        following: false,
+      });
     },
     onError: (error) => {
       setToast({

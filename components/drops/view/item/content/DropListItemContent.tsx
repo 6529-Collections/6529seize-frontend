@@ -15,7 +15,6 @@ export enum DropContentPartType {
 
 interface DropListItemContentProps {
   readonly drop: ApiDrop;
-  readonly showFull?: boolean;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly availableCredit: number | null;
@@ -29,7 +28,6 @@ interface DropListItemContentProps {
 
 export default function DropListItemContent({
   drop,
-  showFull = false,
   voteState,
   canVote,
   availableCredit,
@@ -130,7 +128,6 @@ export default function DropListItemContent({
               mimeType: media.mime_type,
               mediaSrc: media.url,
             }))}
-            showFull={showFull}
             wave={
               showWaveInfo
                 ? {

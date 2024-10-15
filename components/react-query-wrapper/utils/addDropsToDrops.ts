@@ -42,8 +42,12 @@ const updateDropsQuery = (
 ) => {
   const queryKey = getDropsQueryKey(queryParams);
   queryClient.cancelQueries({ queryKey });
-  queryClient.setQueryData<DropsQueryData | undefined>(queryKey, (oldData) =>
-    updateQueryData(oldData, drop)
+  queryClient.setQueryData<DropsQueryData | undefined>(
+    queryKey,
+    (oldData) => updateQueryData(oldData, drop),
+    {
+      updatedAt: Date.now(),
+    }
   );
 };
 

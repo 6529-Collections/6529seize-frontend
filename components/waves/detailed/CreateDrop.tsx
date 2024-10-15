@@ -154,6 +154,7 @@ export default function CreateDrop({
   useProgressiveDebounce(
     () => {
       if (queueSize === 0 && !isProcessing && hasQueueChanged) {
+        console.log("are you sure its called?????");
         waitAndInvalidateDrops();
       }
     },

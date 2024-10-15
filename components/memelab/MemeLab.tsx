@@ -19,6 +19,7 @@ import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { MEMELAB_CONTRACT } from "../../constants";
 import { printVolumeTypeDropdown, SortButton } from "../the-memes/TheMemes";
 import { MemeLabSort } from "../../enums";
+import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 
 interface Props {
   wallets: string[];
@@ -657,10 +658,11 @@ export default function MemeLabComponent(props: Readonly<Props>) {
           <Container className="pt-4">
             <>
               <Row>
-                <Col>
+                <Col className="d-flex align-items-center gap-3">
                   <h1>
                     <span className="font-lightest">Meme</span> Lab
                   </h1>
+                  <LFGButton contract={MEMELAB_CONTRACT} />
                 </Col>
               </Row>
               <Row className="pt-2">

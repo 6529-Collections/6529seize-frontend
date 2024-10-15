@@ -25,6 +25,7 @@ interface DropsListProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
+  readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
 const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
@@ -40,6 +41,7 @@ const DropsList = memo(function DropsList({
   onReplyClick,
   serialNo,
   targetDropRef,
+  parentContainerRef,
   onQuoteClick,
 }: DropsListProps) {
   const handleReply = useCallback<DropActionHandler>(
@@ -81,6 +83,7 @@ const DropsList = memo(function DropsList({
             onQuote={handleQuote}
             showReplyAndQuote={showReplyAndQuote}
             onQuoteClick={onQuoteClick}
+            parentContainerRef={parentContainerRef}
           />
         </div>
       )),

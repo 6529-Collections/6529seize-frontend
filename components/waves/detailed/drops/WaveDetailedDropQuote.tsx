@@ -124,7 +124,6 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}
                 referencedNfts={drop?.referenced_nfts ?? []}
-                onImageLoaded={() => undefined}
                 textSize="sm"
                 onQuoteClick={onQuoteClick}
               />

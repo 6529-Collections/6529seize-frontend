@@ -37,7 +37,6 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
 export default function DropsListItem({
   drop,
   replyToDrop,
-  showFull = false,
   showWaveInfo = true,
   availableCredit,
   isReply = false,
@@ -49,7 +48,6 @@ export default function DropsListItem({
 }: {
   readonly drop: ApiDrop;
   readonly replyToDrop: ApiDrop | null;
-  readonly showFull?: boolean;
   readonly showWaveInfo?: boolean;
   readonly availableCredit: number | null;
   readonly isReply?: boolean;
@@ -76,9 +74,6 @@ export default function DropsListItem({
     }
     if (connectedProfile.profile.handle === drop.author.handle) {
       return DropVoteState.AUTHOR;
-    }
-    if (!drop.wave.authenticated_user_eligible_to_vote) {
-      return DropVoteState.CANT_VOTE;
     }
     if (!availableCredit) {
       return DropVoteState.NO_CREDIT;
@@ -152,9 +147,8 @@ export default function DropsListItem({
   return (
     <div
       className={`${
-        !isReply &&
-        "tw-rounded-xl tw-overflow-hidden"
-      }  tw-relative tw-bg-iron-950 ${
+        !isReply && "tw-rounded-xl tw-overflow-hidden"
+      }  tw-relative tw-bg-iron-900 ${
         dropReplyDepth < 2 && ""
       }  tw-transition tw-duration-300 tw-ease-out tw-ring-1 tw-ring-inset tw-ring-iron-800`}
     >
@@ -172,7 +166,6 @@ export default function DropsListItem({
             <DropListItemContent
               key={randomKey}
               drop={drop}
-              showFull={showFull}
               voteState={voteState}
               canVote={canVote}
               availableCredit={availableCredit}

@@ -1,5 +1,5 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import WaveDetailedDesktop from "./WaveDetailedDesktop";
 import { createBreakpoint } from "react-use";
 import WaveDetailedMobile from "./WaveDetailedMobile";
@@ -21,7 +21,12 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   );
 
   const [activeWave, setActiveWave] = useState(wave);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setActiveWave(wave);
+  }, [wave]);
 
   const handleWaveChange = (newWave: ApiWave) => {
     setIsLoading(true);

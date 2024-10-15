@@ -1,0 +1,68 @@
+@import "../../styles/variables.scss";
+
+.slideshowContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.slideButtons {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.slideButton {
+  color: white;
+  cursor: pointer;
+  z-index: 1100;
+  height: 28px;
+  width: 28px;
+
+  &:hover {
+    color: $off-white;
+  }
+}
+
+.slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 90%;
+  max-height: 90%;
+  position: relative;
+}
+
+.slide img,
+.slide video {
+  width: 100%;
+  height: auto;
+  max-width: 85vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+.lfgButton {
+  background-color: #39ff14;
+  border-color: #39ff14;
+  color: $very-dark-grey !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: darken(#39ff14, 10%) !important;
+    border-color: darken(#39ff14, 10%) !important;
+  }
+}

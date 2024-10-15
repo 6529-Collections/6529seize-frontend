@@ -153,7 +153,6 @@ export default function DropReply(props: DropReplyProps) {
             partContent={replyContent}
             mentionedUsers={finalDrop?.mentioned_users ?? []}
             referencedNfts={finalDrop?.referenced_nfts ?? []}
-            onImageLoaded={() => undefined}
             textSize="sm"
             onQuoteClick={onQuoteClick}
           />

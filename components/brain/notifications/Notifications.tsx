@@ -15,10 +15,35 @@ import {
 } from "../../../types/feed.types";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
+import { useRouter } from "next/router";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+
+  const router = useRouter();
+  const { reload } = router.query;
+
+  useEffect(() => {
+    if (reload === "true") {
+      refetch()
+        .then(() => {
+          return markAllAsReadMutation.mutateAsync();
+        })
+        .catch((error) => {
+          console.error("Error during refetch:", error);
+        });
+      const { reload, ...restQuery } = router.query;
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: restQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [reload]);
 
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
@@ -49,6 +74,7 @@ export default function Notifications() {
     isFetching,
     isFetchingNextPage,
     status,
+    refetch,
   } = useInfiniteQuery({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,

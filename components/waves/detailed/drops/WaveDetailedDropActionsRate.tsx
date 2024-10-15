@@ -55,9 +55,7 @@ const WaveDetailedDropActionsRate: React.FC<
     if (connectedProfile.profile.handle === drop.author.handle) {
       return DropVoteState.AUTHOR;
     }
-    if (!drop.wave.authenticated_user_eligible_to_vote) {
-      return DropVoteState.CANT_VOTE;
-    }
+
     if (!availableCredit) {
       return DropVoteState.NO_CREDIT;
     }

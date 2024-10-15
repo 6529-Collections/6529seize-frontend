@@ -26,7 +26,6 @@ export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
-  readonly onImageLoaded: () => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md";
 }
@@ -35,7 +34,6 @@ function DropPartMarkdown({
   mentionedUsers,
   referencedNfts,
   partContent,
-  onImageLoaded,
   onQuoteClick,
   textSize = "md",
 }: DropPartMarkdownProps) {
@@ -52,12 +50,10 @@ function DropPartMarkdown({
     content,
     mentionedUsers,
     referencedNfts,
-    onImageLoaded,
   }: {
     readonly content: ReactNode | undefined;
     readonly mentionedUsers: Array<ApiDropMentionedUser>;
     readonly referencedNfts: Array<ApiDropReferencedNFT>;
-    readonly onImageLoaded: () => void;
   }) => {
     if (typeof content !== "string") {
       return content;
@@ -105,13 +101,7 @@ function DropPartMarkdown({
         const partProps = values[part];
         if (partProps) {
           const randomId = getRandomObjectId();
-          return (
-            <DropListItemContentPart
-              key={randomId}
-              part={partProps}
-              onImageLoaded={onImageLoaded}
-            />
-          );
+          return <DropListItemContentPart key={randomId} part={partProps} />;
         } else {
           return part;
         }
@@ -124,19 +114,16 @@ function DropPartMarkdown({
     content,
     mentionedUsers,
     referencedNfts,
-    onImageLoaded,
   }: {
     readonly content: ReactNode | undefined;
     readonly mentionedUsers: Array<ApiDropMentionedUser>;
     readonly referencedNfts: Array<ApiDropReferencedNFT>;
-    readonly onImageLoaded: () => void;
   }) => {
     if (typeof content === "string") {
       return customPartRenderer({
         content,
         mentionedUsers,
         referencedNfts,
-        onImageLoaded,
       });
     }
 
@@ -147,7 +134,6 @@ function DropPartMarkdown({
             content: child,
             mentionedUsers,
             referencedNfts,
-            onImageLoaded,
           });
         }
 
@@ -286,7 +272,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </h5>
         ),
@@ -296,7 +281,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </h4>
         ),
@@ -306,7 +290,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </h3>
         ),
@@ -316,7 +299,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </h2>
         ),
@@ -326,7 +308,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </h1>
         ),
@@ -338,7 +319,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </p>
         ),
@@ -348,7 +328,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </li>
         ),
@@ -361,7 +340,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </code>
         ),
@@ -369,7 +347,6 @@ function DropPartMarkdown({
         img: (params) => (
           <DropPartMarkdownImage
             src={params.src ?? ""}
-            onImageLoaded={onImageLoaded}
           />
         ),
         blockquote: (params) => (
@@ -378,7 +355,6 @@ function DropPartMarkdown({
               content: params.children,
               mentionedUsers,
               referencedNfts,
-              onImageLoaded,
             })}
           </blockquote>
         ),
