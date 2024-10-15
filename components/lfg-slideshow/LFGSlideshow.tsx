@@ -5,6 +5,7 @@ import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ApiNftMedia } from "../../generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
+import { Button } from "react-bootstrap";
 
 const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
@@ -179,3 +180,20 @@ const LFGSlideshow: React.FC<{
 };
 
 export default LFGSlideshow;
+
+export const LFGButton: React.FC<{
+  contract: string;
+}> = ({ contract }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <LFGSlideshow contract={contract} isOpen={isOpen} setIsOpen={setIsOpen} />
+      <Button
+        onClick={() => setIsOpen(true)}
+        className={`${styles.lfgButton} no-wrap`}>
+        LFG: Start the Show!
+      </Button>
+    </>
+  );
+};

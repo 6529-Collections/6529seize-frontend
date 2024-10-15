@@ -22,7 +22,7 @@ import { MemeSeason } from "../../entities/ISeason";
 import { commonApiFetch } from "../../services/api/common-api";
 import { AuthContext } from "../auth/Auth";
 import { MemeLabSort, MemesSort } from "../../enums";
-import LFGSlideshow from "../lfg-slideshow/LFGSlideshow";
+import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 
 interface Meme {
   meme: number;
@@ -443,11 +443,7 @@ export default function TheMemesComponent(props: Readonly<Props>) {
                     <h1 className="no-wrap">
                       <span className="font-lightest">The</span> Memes
                     </h1>
-                    <Button
-                      onClick={() => setIsSlideshowOpen(true)}
-                      className={`${styles.lfgButton} no-wrap`}>
-                      LFG: Start the Show!
-                    </Button>
+                    <LFGButton contract={MEMES_CONTRACT} />
                   </span>
                   <SeasonsDropdown
                     seasons={seasons.map((s) => s.id)}
@@ -512,11 +508,6 @@ export default function TheMemesComponent(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
-      <LFGSlideshow
-        contract={MEMES_CONTRACT}
-        isOpen={isSlideshowOpen}
-        setIsOpen={setIsSlideshowOpen}
-      />
     </Container>
   );
 }
