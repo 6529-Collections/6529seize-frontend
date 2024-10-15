@@ -38,6 +38,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   };
 
   const breakpoint = useBreakpoint();
+  console.log(wave)
 
   return breakpoint !== "LG" ? (
     <WaveDetailedMobile

@@ -63,45 +63,48 @@ export default function CreateWave({
     type,
   }: {
     readonly type: ApiWaveType;
-  }): CreateWaveConfig => ({
-    overview: {
-      type,
-      signatureType: WaveSignatureType.NONE,
-      name: "test",
-      image: null,
-    },
-    groups: {
-      canView: null,
-      canDrop: null,
-      canVote: null,
-      canChat: null,
-      admin: null,
-    },
-    chat: {
-      enabled: true,
-    },
-    dates: {
-      submissionStartDate: Time.currentMillis(),
-      votingStartDate: Time.currentMillis(),
-      endDate: null,
-    },
-    drops: {
-      allowDiscussionDrops: true,
-      noOfApplicationsAllowedPerParticipant: null,
-      requiredTypes: [],
-      requiredMetadata: [],
-    },
-    voting: {
-      type: ApiWaveCreditType.Tdh,
-      category: null,
-      profileId: null,
-    },
-    outcomes: [],
-    approval: {
-      threshold: null,
-      thresholdTimeMs: null,
-    },
-  });
+  }): CreateWaveConfig => {
+    const now = Time.currentMillis();
+    return {
+      overview: {
+        type,
+        signatureType: WaveSignatureType.NONE,
+        name: "test",
+        image: null,
+      },
+      groups: {
+        canView: null,
+        canDrop: null,
+        canVote: null,
+        canChat: null,
+        admin: null,
+      },
+      chat: {
+        enabled: true,
+      },
+      dates: {
+        submissionStartDate: now,
+        votingStartDate: now,
+        endDate: null,
+      },
+      drops: {
+        allowDiscussionDrops: true,
+        noOfApplicationsAllowedPerParticipant: null,
+        requiredTypes: [],
+        requiredMetadata: [],
+      },
+      voting: {
+        type: ApiWaveCreditType.Tdh,
+        category: null,
+        profileId: null,
+      },
+      outcomes: [],
+      approval: {
+        threshold: null,
+        thresholdTimeMs: null,
+      },
+    };
+  };
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
@@ -135,6 +138,7 @@ export default function CreateWave({
   }) => {
     if (direction === "forward") {
       const newErrors = getCreateWaveValidationErrors({ config, step });
+      console.log(config);
       if (newErrors.length) {
         setErrors(newErrors);
         return;
