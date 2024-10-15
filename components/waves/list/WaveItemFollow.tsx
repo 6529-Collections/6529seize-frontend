@@ -8,8 +8,8 @@ import {
   commonApiPost,
 } from "../../../services/api/common-api";
 import { ApiWaveSubscriptionActions } from "../../../generated/models/ApiWaveSubscriptionActions";
-import { ApiWaveSubscriptionTargetAction } from "../../../generated/models/ApiWaveSubscriptionTargetAction";
 import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
+import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "../../react-query-wrapper/utils/query-utils";
 
 enum WaveItemFollowState {
   FOLLOWING = "FOLLOWING",
@@ -66,12 +66,15 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
       >({
         endpoint: `waves/${wave.id}/subscriptions`,
         body: {
-          actions: Object.values(ApiWaveSubscriptionTargetAction),
+          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
     },
     onSuccess: () => {
-      onWaveFollowChange();
+      onWaveFollowChange({
+        waveId: wave.id,
+        following: true,
+      });
     },
     onError: (error) => {
       setToast({
@@ -92,12 +95,15 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
       >({
         endpoint: `waves/${wave.id}/subscriptions`,
         body: {
-          actions: Object.values(ApiWaveSubscriptionTargetAction),
+          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
     },
     onSuccess: () => {
-      onWaveFollowChange();
+      onWaveFollowChange({
+        waveId: wave.id,
+        following: false,
+      });
     },
     onError: (error) => {
       setToast({

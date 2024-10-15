@@ -64,8 +64,9 @@ export default function CreateDrop({
   onSuccessfulDrop,
 }: CreateDropProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
-  const { waitAndInvalidateDrops, addOptimisticDrop } =
-    useContext(ReactQueryWrapperContext);
+  const { waitAndInvalidateDrops, addOptimisticDrop } = useContext(
+    ReactQueryWrapperContext
+  );
   const [init, setInit] = useState(isClient);
   useEffect(() => setInit(true), []);
   const [submitting, setSubmitting] = useState(false);
@@ -209,6 +210,8 @@ export default function CreateDrop({
           waveDetailed.participation.authenticated_user_eligible,
         authenticated_user_eligible_to_vote:
           waveDetailed.voting.authenticated_user_eligible,
+        authenticated_user_eligible_to_chat:
+          waveDetailed.chat.authenticated_user_eligible,
       },
       author: {
         ...profileMin,

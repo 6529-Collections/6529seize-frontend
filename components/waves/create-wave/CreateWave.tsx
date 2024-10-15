@@ -74,7 +74,11 @@ export default function CreateWave({
       canView: null,
       canDrop: null,
       canVote: null,
+      canChat: null,
       admin: null,
+    },
+    chat: {
+      enabled: true,
     },
     dates: {
       submissionStartDate: Time.currentMillis(),
@@ -201,6 +205,15 @@ export default function CreateWave({
           groups: {
             ...prev.groups,
             canVote: group?.id ?? null,
+          },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_CHAT:
+        setConfig((prev) => ({
+          ...prev,
+          groups: {
+            ...prev.groups,
+            canChat: group?.id ?? null,
           },
         }));
         break;
