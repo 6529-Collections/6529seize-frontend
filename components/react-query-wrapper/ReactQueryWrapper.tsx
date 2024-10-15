@@ -1423,7 +1423,6 @@ export default function ReactQueryWrapper({
     readonly following: boolean;
   }) => {
     toggleWaveFollowing({ waveId, following, queryClient });
-    // TODO: add set timeout and run then
     setTimeout(() => {
       invalidateAllWaves();
     }, 1000);

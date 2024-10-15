@@ -8,7 +8,6 @@ import {
   commonApiPost,
 } from "../../../services/api/common-api";
 import { ApiWaveSubscriptionActions } from "../../../generated/models/ApiWaveSubscriptionActions";
-import { ApiWaveSubscriptionTargetAction } from "../../../generated/models/ApiWaveSubscriptionTargetAction";
 import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "../../react-query-wrapper/utils/query-utils";
 
