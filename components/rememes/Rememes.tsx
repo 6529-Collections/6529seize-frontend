@@ -206,20 +206,22 @@ export default function Rememes() {
             <Row className="d-flex justify-content-between">
               <Col
                 className={`d-flex flex-wrap align-items-center gap-2 justify-content-between`}>
-                <span className="d-flex align-items-center gap-3 pt-2 pb-2">
-                  <Image
-                    loading={"eager"}
-                    width="0"
-                    height="0"
-                    style={{ width: "250px", height: "auto" }}
-                    src="/re-memes.png"
-                    alt="re-memes"
-                  />
-                  {totalResults > 0 && (
-                    <span className="font-color-h font-larger">
-                      (x{numberWithCommas(totalResults)})
-                    </span>
-                  )}
+                <span className="d-flex align-items-center gap-3 pt-3 pb-2">
+                  <span className="d-flex align-items-center gap-2">
+                    <Image
+                      loading={"eager"}
+                      width="0"
+                      height="0"
+                      style={{ width: "250px", height: "auto" }}
+                      src="/re-memes.png"
+                      alt="re-memes"
+                    />
+                    {totalResults > 0 && (
+                      <span className="font-color-h font-larger">
+                        (x{numberWithCommas(totalResults)})
+                      </span>
+                    )}
+                  </span>
                   <LFGButton contract={"rememes"} />
                 </span>
                 <span className="pt-2 pb-2">
