@@ -365,16 +365,3 @@
     }
   }
 }
-
-.lfgButton {
-  background-color: #39ff14;
-  border-color: #39ff14;
-  color: $very-dark-grey !important;
-
-  &:hover,
-  &:focus,
-  &:active {
-    background-color: darken(#39ff14, 10%) !important;
-    border-color: darken(#39ff14, 10%) !important;
-  }
-}
