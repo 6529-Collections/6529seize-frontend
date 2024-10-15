@@ -35,6 +35,7 @@ export * from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropActi
 export * from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
 export * from '../models/ApiCreateNewProfileProxyReadWaveAction';
 export * from '../models/ApiCreateNewWave';
+export * from '../models/ApiCreateNewWaveChatConfig';
 export * from '../models/ApiCreateNewWaveParticipationConfig';
 export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
@@ -117,6 +118,7 @@ export * from '../models/ApiUpdateWaveRequest';
 export * from '../models/ApiUploadItem';
 export * from '../models/ApiUploadsPage';
 export * from '../models/ApiWave';
+export * from '../models/ApiWaveChatConfig';
 export * from '../models/ApiWaveConfig';
 export * from '../models/ApiWaveContributorOverview';
 export * from '../models/ApiWaveCreditScope';
@@ -177,6 +179,7 @@ import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction   } from '../
 import { ApiCreateNewProfileProxyRateWaveDropAction   } from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
 import { ApiCreateNewProfileProxyReadWaveAction   } from '../models/ApiCreateNewProfileProxyReadWaveAction';
 import { ApiCreateNewWave } from '../models/ApiCreateNewWave';
+import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
@@ -259,6 +262,7 @@ import { ApiUpdateWaveRequest } from '../models/ApiUpdateWaveRequest';
 import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiWave } from '../models/ApiWave';
+import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveConfig        } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
@@ -358,6 +362,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewProfileProxyRateWaveDropAction": ApiCreateNewProfileProxyRateWaveDropAction,
     "ApiCreateNewProfileProxyReadWaveAction": ApiCreateNewProfileProxyReadWaveAction,
     "ApiCreateNewWave": ApiCreateNewWave,
+    "ApiCreateNewWaveChatConfig": ApiCreateNewWaveChatConfig,
     "ApiCreateNewWaveParticipationConfig": ApiCreateNewWaveParticipationConfig,
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
@@ -430,6 +435,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUploadItem": ApiUploadItem,
     "ApiUploadsPage": ApiUploadsPage,
     "ApiWave": ApiWave,
+    "ApiWaveChatConfig": ApiWaveChatConfig,
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveDropsFeed": ApiWaveDropsFeed,

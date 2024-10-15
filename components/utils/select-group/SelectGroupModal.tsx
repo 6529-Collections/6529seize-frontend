@@ -10,6 +10,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import SelectGroupModalItems from "./SelectGroupModalItems";
 import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
+import { createPortal } from "react-dom";
 
 export default function SelectGroupModal({
   onClose,
@@ -72,8 +73,8 @@ export default function SelectGroupModal({
     }
   }, [data]);
 
-  return (
-    <div className="tw-relative tw-z-10 tailwind-scope">
+  return createPortal(
+    <div className="tw-relative tw-z-1000 tailwind-scope">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
@@ -98,6 +99,7 @@ export default function SelectGroupModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

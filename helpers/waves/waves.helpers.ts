@@ -41,6 +41,12 @@ export const convertWaveToUpdateWave = (
       group_id: wave.visibility.scope.group?.id ?? null,
     },
   },
+  chat: {
+    scope: {
+      group_id: wave.chat.scope.group?.id ?? null,
+    },
+    enabled: wave.chat.enabled,
+  },
   participation: {
     scope: {
       group_id: wave.participation.scope.group?.id ?? null,

@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiUpdateWaveRequest } from "../../../../../generated/models/ApiUpdateWaveRequest";
+import { createPortal } from "react-dom";
 
 export default function WaveHeaderNameEditModal({
   wave,
@@ -69,7 +70,7 @@ export default function WaveHeaderNameEditModal({
     };
     await editNameMutation.mutateAsync(body);
   };
-  return (
+  return createPortal(
     <div className="tw-relative tw-z-10">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
@@ -124,6 +125,7 @@ export default function WaveHeaderNameEditModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

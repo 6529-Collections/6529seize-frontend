@@ -19,6 +19,7 @@ export class ApiWaveMin {
     'description_drop_id': string;
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
+    'authenticated_user_eligible_to_chat': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -56,6 +57,12 @@ export class ApiWaveMin {
         {
             "name": "authenticated_user_eligible_to_participate",
             "baseName": "authenticated_user_eligible_to_participate",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_eligible_to_chat",
+            "baseName": "authenticated_user_eligible_to_chat",
             "type": "boolean",
             "format": ""
         }    ];

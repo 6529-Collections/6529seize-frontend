@@ -28,6 +28,7 @@ import {
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
+import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -195,7 +196,10 @@ type ReactQueryWrapperContextType = {
   onGroupCreate: () => void;
   onIdentityBulkRate: () => void;
   onWaveCreated: () => void;
-  onWaveFollowChange: () => void;
+  onWaveFollowChange: (param: {
+    readonly waveId: string;
+    following: boolean;
+  }) => void;
   invalidateAll: () => void;
   invalidateNotifications: () => void;
 };
@@ -1411,7 +1415,18 @@ export default function ReactQueryWrapper({
 
   const onWaveCreated = () => invalidateAllWaves();
 
-  const onWaveFollowChange = () => invalidateAllWaves();
+  const onWaveFollowChange = ({
+    waveId,
+    following,
+  }: {
+    readonly waveId: string;
+    readonly following: boolean;
+  }) => {
+    toggleWaveFollowing({ waveId, following, queryClient });
+    setTimeout(() => {
+      invalidateAllWaves();
+    }, 1000);
+  };
   const onIdentityFollowChange = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],

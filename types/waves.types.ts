@@ -15,6 +15,7 @@ export enum CreateWaveGroupConfigType {
   CAN_VIEW = "CAN_VIEW",
   CAN_DROP = "CAN_DROP",
   CAN_VOTE = "CAN_VOTE",
+  CAN_CHAT = "CAN_CHAT",
   ADMIN = "ADMIN",
 }
 
@@ -30,6 +31,7 @@ export interface WaveGroupsConfig {
   readonly canDrop: string | null;
   readonly canVote: string | null;
   readonly admin: string | null;
+  readonly canChat: string | null;
 }
 
 export interface CreateWaveDropsRequiredMetadata {
@@ -107,6 +109,9 @@ export interface CreateWaveConfig {
   readonly groups: WaveGroupsConfig;
   readonly dates: CreateWaveDatesConfig;
   readonly drops: CreateWaveDropsConfig;
+  readonly chat: {
+    readonly enabled: boolean;
+  };
   readonly voting: CreateWaveVotingConfig;
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly approval: CreateWaveApprovalConfig;

@@ -33,7 +33,7 @@ export default function DropListItemQuote({
     [ProfileConnectedStatus.HAVE_PROFILE]: (
       <>
         {connectedProfile &&
-        quotedDrop.wave.authenticated_user_eligible_to_participate ? (
+        quotedDrop.wave.authenticated_user_eligible_to_chat ? (
           <CreateDrop
             profile={connectedProfile}
             quotedDrop={{

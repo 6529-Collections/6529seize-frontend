@@ -92,7 +92,7 @@ export default function GroupCreateNfts({
           </svg>
         </span>
         <p className="tw-mb-0 tw-text-xl sm:tw-text-2xl tw-font-semibold tw-text-iron-50">
-          Owns NFT&apos;s
+          Owns NFTs
         </p>
       </div>
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4 sm:tw-gap-6">

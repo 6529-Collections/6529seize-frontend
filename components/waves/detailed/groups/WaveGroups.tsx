@@ -1,4 +1,5 @@
 import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WaveGroup, { WaveGroupType } from "../specs/groups/group/WaveGroup";
 
 export default function WaveGroups({ wave }: { readonly wave: ApiWave }) {
@@ -19,18 +20,30 @@ export default function WaveGroups({ wave }: { readonly wave: ApiWave }) {
                 isEligible={true}
                 wave={wave}
               />
+              {wave.wave.type !== ApiWaveType.Chat && (
+                <>
+                  <WaveGroup
+                    scope={wave.participation.scope}
+                    type={WaveGroupType.DROP}
+                    isEligible={wave.participation.authenticated_user_eligible}
+                    wave={wave}
+                  />
+                  <WaveGroup
+                    scope={wave.voting.scope}
+                    type={WaveGroupType.VOTE}
+                    isEligible={wave.voting.authenticated_user_eligible}
+                    wave={wave}
+                  />
+                </>
+              )}
+
               <WaveGroup
-                scope={wave.participation.scope}
-                type={WaveGroupType.DROP}
-                isEligible={wave.participation.authenticated_user_eligible}
+                scope={wave.chat.scope}
+                type={WaveGroupType.CHAT}
+                isEligible={wave.chat.authenticated_user_eligible}
                 wave={wave}
               />
-              <WaveGroup
-                scope={wave.voting.scope}
-                type={WaveGroupType.VOTE}
-                isEligible={wave.voting.authenticated_user_eligible}
-                wave={wave}
-              />
+
               <WaveGroup
                 scope={wave.wave.admin_group}
                 type={WaveGroupType.ADMIN}

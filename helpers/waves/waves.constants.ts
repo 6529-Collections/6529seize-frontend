@@ -69,6 +69,31 @@ export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
   ],
 };
 
+export const CREATE_WAVE_GROUPS: Record<
+  ApiWaveType,
+  CreateWaveGroupConfigType[]
+> = {
+  [ApiWaveType.Chat]: [
+    CreateWaveGroupConfigType.CAN_VIEW,
+    CreateWaveGroupConfigType.CAN_CHAT,
+    CreateWaveGroupConfigType.ADMIN,
+  ],
+  [ApiWaveType.Rank]: [
+    CreateWaveGroupConfigType.CAN_VIEW,
+    CreateWaveGroupConfigType.CAN_DROP,
+    CreateWaveGroupConfigType.CAN_VOTE,
+    CreateWaveGroupConfigType.CAN_CHAT,
+    CreateWaveGroupConfigType.ADMIN,
+  ],
+  [ApiWaveType.Approve]: [
+    CreateWaveGroupConfigType.CAN_VIEW,
+    CreateWaveGroupConfigType.CAN_DROP,
+    CreateWaveGroupConfigType.CAN_VOTE,
+    CreateWaveGroupConfigType.CAN_CHAT,
+    CreateWaveGroupConfigType.ADMIN,
+  ],
+};
+
 export const CREATE_WAVE_STEPS_LABELS: Record<
   ApiWaveType,
   Record<CreateWaveStep, string>
@@ -113,18 +138,21 @@ export const CREATE_WAVE_SELECT_GROUP_LABELS: Record<
     [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can rate",
+    [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
   [ApiWaveType.Rank]: {
     [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
+    [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
   [ApiWaveType.Approve]: {
     [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
+    [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
     [CreateWaveGroupConfigType.ADMIN]: "Admin",
   },
 };
@@ -137,6 +165,7 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
   [CreateWaveGroupConfigType.CAN_DROP]: "Anyone",
   [CreateWaveGroupConfigType.CAN_VOTE]: "Anyone",
   [CreateWaveGroupConfigType.ADMIN]: "Only me",
+  [CreateWaveGroupConfigType.CAN_CHAT]: "Anyone",
 };
 
 export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {

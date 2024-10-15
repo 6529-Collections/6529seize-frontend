@@ -56,6 +56,17 @@ export default function WaveGroupRemove({
             },
           },
         };
+      case WaveGroupType.CHAT:
+        return {
+          ...originalBody,
+          chat: {
+            ...originalBody.chat,
+            scope: {
+              ...originalBody.chat.scope,
+              group_id: null,
+            },
+          },
+        };
       case WaveGroupType.ADMIN:
         return {
           ...originalBody,
@@ -75,6 +86,7 @@ export default function WaveGroupRemove({
 
   const onRemove = async (): Promise<void> => {
     const body = getBody();
+    console.log("body", body);
     await onEdit(body);
   };
 

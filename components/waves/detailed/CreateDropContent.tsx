@@ -305,6 +305,7 @@ const getOptimisticDrop = (
     description_drop: { id: string };
     participation: { authenticated_user_eligible: boolean };
     voting: { authenticated_user_eligible: boolean };
+    chat: { authenticated_user_eligible: boolean };
   },
   activeDrop: ActiveDropState | null
 ): ApiDrop | null => {
@@ -336,6 +337,8 @@ const getOptimisticDrop = (
         wave.participation.authenticated_user_eligible,
       authenticated_user_eligible_to_vote:
         wave.voting.authenticated_user_eligible,
+      authenticated_user_eligible_to_chat:
+        wave.chat.authenticated_user_eligible,
     },
     author: {
       id: connectedProfile.profile.external_id,
