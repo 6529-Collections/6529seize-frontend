@@ -114,6 +114,8 @@ import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
 import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 import useCapacitor from "../hooks/useCapacitor";
 import { NotificationsProvider } from "../components/notifications/NotificationsContext";
+import Footer from "../components/footer/Footer";
+import { useRouter } from "next/router";
 
 library.add(
   faArrowUp,
@@ -265,6 +267,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   const capacitor = useCapacitor();
 
+  const router = useRouter();
+  const hideFooter = router.pathname.startsWith("/waves");
+
   useEffect(() => {
     if (capacitor.isCapacitor) {
       document.body.classList.add("capacitor-native");
@@ -293,6 +298,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
               </NotificationsProvider>
             </Auth>
           </ReactQueryWrapper>
+          {!hideFooter && <Footer />}
         </WagmiProvider>
       </Provider>
       <ReactQueryDevtools initialIsOpen={false} />
