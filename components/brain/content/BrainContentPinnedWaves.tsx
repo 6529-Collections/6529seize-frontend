@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();
-  const { pinnedIds, addId, removeId, getAllIds } = usePinnedWaves();
+  const { pinnedIds, addId } = usePinnedWaves();
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -15,6 +15,11 @@ const BrainContentPinnedWaves: React.FC = () => {
       addId(wave);
     }
   }, [router.query, addId, pinnedIds]);
+
+  if (!pinnedIds.length) {
+    return null;
+  }
+
   return (
     <div className="tw-flex tw-gap-4 tw-mb-4">
       <div className="tw-flex tw-items-center tw-gap-2">

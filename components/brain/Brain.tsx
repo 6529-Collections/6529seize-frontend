@@ -6,14 +6,7 @@ import BrainRightSidebar from "./right-sidebar/BrainRightSidebar";
 
 export default function Brain({ children }: { readonly children: ReactNode }) {
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
-  useEffect(() => {
-    const waveId = router.query.wave;
-    if (!waveId) {
-      setIsCollapsed(true);
-    }
-  }, [router.query.wave]);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className="tw-relative tw-flex tw-flex-col">
