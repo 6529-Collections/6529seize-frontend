@@ -87,7 +87,7 @@ export default function WaveDetailedContent({
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
           <WaveDrops
-            wave={wave}
+            waveId={wave.id}
             onReply={handleReply}
             onQuote={handleQuote}
             activeDrop={activeDrop}

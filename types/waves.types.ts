@@ -137,4 +137,5 @@ export interface WavesOverviewParams {
   limit: number;
   offset: number;
   type: ApiWavesOverviewType;
+  only_waves_followed_by_authenticated_user?: boolean;
 }

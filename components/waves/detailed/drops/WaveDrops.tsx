@@ -21,7 +21,7 @@ import CircleLoader, {
 import { useRouter } from "next/router";
 
 interface WaveDropsProps {
-  readonly wave: ApiWave;
+  readonly waveId: string;
   readonly onReply: ({
     drop,
     partId,
@@ -41,7 +41,7 @@ interface WaveDropsProps {
 }
 
 export default function WaveDrops({
-  wave,
+  waveId,
   onReply,
   onQuote,
   activeDrop,
@@ -58,7 +58,7 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDrops(wave, connectedProfile?.profile?.handle);
+  } = useWaveDrops(waveId, connectedProfile?.profile?.handle, true);
 
   const {
     scrollContainerRef,
@@ -178,13 +178,13 @@ export default function WaveDrops({
 
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
-      if (drop.wave.id !== wave.id) {
+      if (drop.wave.id !== waveId) {
         router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
       } else {
         setSerialNo(drop.serial_no);
       }
     },
-    [router, wave.id, setSerialNo]
+    [router, waveId, setSerialNo]
   );
 
   const memoizedDrops = useMemo(() => drops, [drops]);
