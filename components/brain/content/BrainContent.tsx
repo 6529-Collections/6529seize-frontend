@@ -14,7 +14,7 @@ const BrainContent: React.FC<BrainContentProps> = ({ children }) => {
       <div className="tw-sticky tw-top-0 tw-bg-black tw-z-40">
         <div className="tw-flex tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-p-4 tw-shadow-lg">
           <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
-            <CreateDropActions />
+            {/* <CreateDropActions /> */}
             <input
               type="text"
               placeholder="Create a drop in Stage the Wave"
