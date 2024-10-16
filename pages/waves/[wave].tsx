@@ -123,21 +123,6 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
     setBreadcrumbs(getBreadCrumbs());
   }, [wave]);
 
-  useEffect(() => {
-    const elementToRemove = document.getElementById("footer");
-    if (elementToRemove) {
-      elementToRemove.remove();
-    }
-
-    // Cleanup function to restore the removed element
-    return () => {
-      const parentElement = document.body; // Adjust this if the parent is different
-      if (elementToRemove) {
-        parentElement.appendChild(elementToRemove);
-      }
-    };
-  }, []);
-
   return (
     <>
       <Head>
