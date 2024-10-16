@@ -24,6 +24,10 @@ export default function Footer() {
     );
   }
 
+  function printSeparator() {
+    return <span>|</span>;
+  }
+
   return (
     <footer
       className="d-flex flex-column align-items-center justify-content-center gap-2"
@@ -32,22 +36,23 @@ export default function Footer() {
         {printLinkWithImage(
           "https://x.com/punk6529",
           "/twitter.png",
-          "punk6529"
-        )}{" "}
-        |{" "}
+          "@punk6529"
+        )}
+        {printSeparator()}
         {printLinkWithImage(
           "https://x.com/6529Collections",
           "/twitter.png",
-          "6529Collections"
+          "@6529Collections"
         )}
-        |{" "}
+        {printSeparator()}
         {printLinkWithImage(
           "https://discord.gg/join-om",
           "/discord.png",
           "OM Discord"
         )}
-        |{" "}
-        {printLinkWithImage("https://6529.io", "/Seize_Logo_2.png", "6529.io")}|{" "}
+        {printSeparator()}
+        {printLinkWithImage("https://6529.io", "/Seize_Logo_2.png", "6529.io")}
+        {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",
           "/github_w.png",
@@ -59,12 +64,19 @@ export default function Footer() {
           `/about/${AboutSection.TERMS_OF_SERVICE}`,
           "Terms of Service"
         )}
-        | {printLink(`/about/${AboutSection.PRIVACY_POLICY}`, "Privacy Policy")}
-        | {printLink(`/about/${AboutSection.COPYRIGHT}`, "Copyright")}|{" "}
-        {printLink(`/about/${AboutSection.COOKIE_POLICY}`, "Cookie Policy")}|{" "}
-        {printLink(`/about/${AboutSection.LICENSE}`, "License")}|{" "}
-        {printLink("https://api.seize.io/docs", "API Documentation")}|{" "}
-        {printLink(`/about/${AboutSection.CONTACT_US}`, "Contact Us")}|{" "}
+        {printSeparator()}
+        {printLink(`/about/${AboutSection.PRIVACY_POLICY}`, "Privacy Policy")}
+        {printSeparator()}
+        {printLink(`/about/${AboutSection.COPYRIGHT}`, "Copyright")}
+        {printSeparator()}
+        {printLink(`/about/${AboutSection.COOKIE_POLICY}`, "Cookie Policy")}
+        {printSeparator()}
+        {printLink(`/about/${AboutSection.LICENSE}`, "License")}
+        {printSeparator()}
+        {printLink("https://api.seize.io/docs", "API Documentation")}
+        {printSeparator()}
+        {printLink(`/about/${AboutSection.CONTACT_US}`, "Contact Us")}
+        {printSeparator()}
         {printLink("https://status.seize.io/", "Status")}
       </span>
     </footer>
