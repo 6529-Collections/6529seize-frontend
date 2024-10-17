@@ -38,7 +38,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className={`tw-border-0 tw-absolute tw-top-28 tw-text-iron-500 hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-800 tw-rounded-lg tw-size-7 tw-flex tw-items-center tw-justify-center tw-shadow-lg hover:tw-shadow-primary-400/20${
+        className={`tw-border-0 tw-absolute tw-z-50 tw-top-28 tw-text-iron-500 hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-800 tw-rounded-lg tw-size-7 tw-flex tw-items-center tw-justify-center tw-shadow-lg hover:tw-shadow-primary-400/20${
           isCollapsed ? " -tw-left-12" : " -tw-left-4"
         } `}
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -61,13 +61,17 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           />
         </svg>
       </button>
-      <div className="tw-pt-32 tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
+      <div className="tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
         <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-          {wave && <WaveHeader wave={wave} onFollowersClick={() => {}} />
-        }
-          {wave && <WaveSpecs wave={wave} />}
-
-          {wave && <WaveGroups wave={wave} />}
+          {wave && (
+            <WaveHeader
+              wave={wave}
+              onFollowersClick={() => {}}
+              useRing={false}
+            />
+          )}
+          {wave && <WaveSpecs wave={wave} useRing={false} />}
+          {wave && <WaveGroups wave={wave} useRing={false} />}
         </div>
       </div>
     </div>

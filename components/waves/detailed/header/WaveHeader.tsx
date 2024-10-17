@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
@@ -12,13 +12,17 @@ import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinned from "./WaveHeaderPinned";
 
+interface WaveHeaderProps {
+  readonly wave: ApiWave;
+  readonly onFollowersClick: () => void;
+  readonly useRing?: boolean;
+}
+
 export default function WaveHeader({
   wave,
   onFollowersClick,
-}: {
-  readonly wave: ApiWave;
-  readonly onFollowersClick: () => void;
-}) {
+  useRing = true,
+}: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeUntil(wave.created_at);
   const ending = wave.wave.period?.max
@@ -26,9 +30,14 @@ export default function WaveHeader({
     : null;
 
   const firstXContributors = wave.contributors_overview.slice(0, 10);
+
+  const ringClasses = useRing
+    ? 'tw-ring-1 tw-ring-inset tw-ring-iron-800'
+    : '';
+
   return (
-    <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-overflow-auto">
+    <div>
+      <div className={`tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-overflow-auto ${ringClasses}`}>
         <div className="tw-rounded-t-xl tw-overflow-hidden">
           <div
             className="tw-h-14 tw-w-full tw-object-cover"
