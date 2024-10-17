@@ -36,11 +36,7 @@ const BrainLeftSidebarWavesMyWaves: React.FC<
         <div className="tw-mt-2 tw-max-h-96 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
             {memoizedWaves.map((wave) => (
-              <BrainLeftSidebarWave
-                key={wave.id}
-                wave={wave}
-                activeWaveId={null}
-              />
+              <BrainLeftSidebarWave key={wave.id} wave={wave} />
             ))}
             {isFetchingNextPage && (
               <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">

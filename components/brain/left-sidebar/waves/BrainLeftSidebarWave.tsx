@@ -1,21 +1,19 @@
 import React from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
+import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: ApiWave;
-  readonly activeWaveId: string | null;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
-  activeWaveId,
 }) => {
-  const queryClient = useQueryClient();
   const router = useRouter();
+  const prefetchWaveData = usePrefetchWaveData();
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -26,46 +24,16 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   };
 
   const onHover = (waveId: string) => {
-    if (waveId === activeWaveId) return;
-
-    // queryClient.prefetchQuery({
-    //   queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-    //   queryFn: async () =>
-    //     await commonApiFetch<ApiWave>({
-    //       endpoint: `waves/${waveId}`,
-    //     }),
-    //   staleTime: 60000,
-    // });
-    // queryClient.prefetchInfiniteQuery({
-    //   queryKey: [
-    //     QueryKey.DROPS,
-    //     {
-    //       waveId: waveId,
-    //       limit: WAVE_DROPS_PARAMS.limit,
-    //       dropId: null,
-    //     },
-    //   ],
-    //   queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-    //     const params: Record<string, string> = {
-    //       limit: WAVE_DROPS_PARAMS.limit.toString(),
-    //     };
-
-    //     if (pageParam) {
-    //       params.serial_no_less_than = `${pageParam}`;
-    //     }
-    //     return await commonApiFetch<ApiWaveDropsFeed>({
-    //       endpoint: `waves/${waveId}/drops`,
-    //       params,
-    //     });
-    //   },
-    //   initialPageParam: null,
-    //   getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
-    //   pages: 1,
-    //   staleTime: 60000,
-    // });
+    if (waveId === router.query.wave) return;
+    prefetchWaveData(waveId);
   };
 
-  const isActive = wave.id === activeWaveId;
+  const isActive = wave.id === router.query.wave;
+
+  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    router.push(getHref(wave.id), undefined, { shallow: true });
+  };
 
   return (
     <div
@@ -77,6 +45,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       <Link
         href={getHref(wave.id)}
         onMouseEnter={() => onHover(wave.id)}
+        onClick={onLinkClick}
         className="tw-ml-1 tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group"
       >
         <div

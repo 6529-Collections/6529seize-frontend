@@ -6,6 +6,8 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import Tippy from "@tippyjs/react";
 import { useRouter } from "next/router";
+import { usePrefetchWaveData } from "../../../hooks/usePrefetchWaveData";
+import { useWaveData } from "../../../hooks/useWaveData";
 
 interface BrainContentPinnedWaveProps {
   readonly waveId: string;
@@ -21,15 +23,8 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   onMouseLeave,
 }) => {
   const router = useRouter();
-  const { data: wave } = useQuery<ApiWave>({
-    queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
-        endpoint: `waves/${waveId}`,
-      }),
-    staleTime: 60000,
-  });
-
+  const prefetchWaveData = usePrefetchWaveData();
+  const { data: wave } = useWaveData(waveId);
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -38,16 +33,29 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
     }
     return `/my-stream?wave=${waveId}`;
   };
+
+  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    onMouseLeave();
+    router.push(getHref(waveId), undefined, { shallow: true });
+  };
+
+  const onHover = () => {
+    onMouseEnter(waveId);
+    if (waveId === router.query.wave) return;
+    prefetchWaveData(waveId);
+  };
+
   return (
     <Tippy content={wave?.name || ""}>
       <div
         className={`tw-relative tw-group ${!active ? "tw-opacity-80" : ""}`}
-        onMouseEnter={() => onMouseEnter(waveId)}
+        onMouseEnter={onHover}
         onMouseLeave={onMouseLeave}
       >
         <Link
           href={getHref(waveId)}
-          onClick={() => onMouseLeave()}
+          onClick={onLinkClick}
           className="tw-flex tw-flex-col tw-items-center tw-no-underline"
         >
           <div
