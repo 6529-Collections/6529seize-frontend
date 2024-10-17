@@ -88,7 +88,6 @@ export const useWavesOverview = ({
 
   const [waves, setWaves] = useState<ApiWave[]>(getWaves());
   useEffect(() => {
-    console.log(getWaves());
     setWaves(getWaves());
   }, [authQuery.data, publicQuery.data, usePublicWaves]);
 
