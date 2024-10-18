@@ -16,12 +16,14 @@ interface WaveHeaderProps {
   readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
   readonly useRing?: boolean;
+  readonly useRounded?: boolean;
 }
 
 export default function WaveHeader({
   wave,
   onFollowersClick,
   useRing = true,
+  useRounded = true,
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeUntil(wave.created_at);
@@ -32,13 +34,13 @@ export default function WaveHeader({
   const firstXContributors = wave.contributors_overview.slice(0, 10);
 
   const ringClasses = useRing
-    ? 'tw-ring-1 tw-ring-inset tw-ring-iron-800'
+    ? 'tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800'
     : '';
 
   return (
     <div>
-      <div className={`tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-overflow-auto ${ringClasses}`}>
-        <div className="tw-rounded-t-xl tw-overflow-hidden">
+      <div className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}>
+        <div className={`${useRounded ? 'tw-rounded-t-xl' : ''} tw-overflow-hidden`}>
           <div
             className="tw-h-14 tw-w-full tw-object-cover"
             style={{

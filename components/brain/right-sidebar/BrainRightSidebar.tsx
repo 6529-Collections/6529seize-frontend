@@ -31,9 +31,9 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
   return (
     <div
-      className={`tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-transition-all tw-duration-300 tw-ease-in-out ${
-        isCollapsed ? "tw-w-0" : "tw-w-[20.5rem]"
-      } tw-bg-iron-950 tw-border-l tw-border-iron-800 tw-flex tw-flex-col`}
+      className={`tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-transition-transform tw-duration-300 tw-ease-in-out ${
+        isCollapsed ? "tw-translate-x-full" : "tw-translate-x-0"
+      } tw-bg-iron-950 tw-border-l tw-border-iron-800 tw-border-solid tw-border-y-0 tw-border-r-0 tw-flex tw-flex-col tw-w-[20.5rem]`}
     >
       <button
         type="button"
@@ -68,6 +68,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
               wave={wave}
               onFollowersClick={() => {}}
               useRing={false}
+              useRounded={false}
             />
           )}
           {wave && <WaveSpecs wave={wave} useRing={false} />}

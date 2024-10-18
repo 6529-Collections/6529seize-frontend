@@ -9,6 +9,8 @@ interface BrainContentPinnedWaveProps {
   readonly active: boolean;
   readonly onMouseEnter: (waveId: string) => void;
   readonly onMouseLeave: () => void;
+  readonly onToggleActive: (waveId: string) => void;
+  readonly onRemove: (waveId: string) => void;
 }
 
 const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
@@ -16,6 +18,8 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   active,
   onMouseEnter,
   onMouseLeave,
+  onToggleActive,
+  onRemove,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
@@ -43,7 +47,9 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
 
   return (
     <div
-      className={`tw-relative tw-group ${!active ? "tw-opacity-80" : ""}`}
+      className={`tw-pt-1 tw-relative tw-group tw-transition-all tw-duration-300 ${
+        !active ? "tw-opacity-60" : ""
+      }`}
       onMouseEnter={onHover}
       onMouseLeave={onMouseLeave}
     >
@@ -58,7 +64,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           }`}
         >
           <div
-            className={`tw-absolute tw-inset-0 tw-rounded-full tw-bg-gradient-to-tr tw-from-indigo-400 tw-via-blue-500 tw-to-indigo-600 tw-transition-opacity tw-duration-300 ${
+            className={`tw-absolute tw-inset-0 tw-rounded-full tw-bg-gradient-to-tr tw-from-indigo-300 tw-via-blue-500 tw-to-indigo-600 tw-transition-all tw-duration-300 ${
               active ? "tw-opacity-100" : "tw-opacity-0"
             }`}
           ></div>
@@ -73,8 +79,33 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               )}
             </div>
           </div>
+          <button
+            type="button"
+            aria-label="Remove wave"
+            className="tw-border-0 tw-bg-iron-800 tw-rounded-full tw-size-5 tw-p-0 -tw-top-1 -tw-right-5 tw-absolute tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-0 group-hover:tw-opacity-100 hover:tw-text-red hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
+          >
+            <svg
+              className="tw-size-5 tw-flex-shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 7L7 17M7 7L17 17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
-        <span className="tw-mt-2 tw-text-xs tw-text-iron-500 tw-text-center tw-truncate tw-max-w-[6rem]">
+        <span
+          className={`tw-mt-2 tw-text-[11px] tw-font-medium tw-text-center tw-truncate tw-max-w-[7rem] tw-transition-all tw-duration-300 ${
+            active ? "tw-text-primary-300" : "tw-text-iron-500"
+          }`}
+        >
           {wave?.name ?? ""}
         </span>
       </Link>
