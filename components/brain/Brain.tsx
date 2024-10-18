@@ -1,60 +1,43 @@
-import { ReactNode, useContext, useEffect, useState } from "react";
-import Link from "next/link";
-
-import WavesListWrapper, { WavesListType } from "./waves/WavesListWrapper";
-import { AuthContext } from "../auth/Auth";
+import { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
+import BrainContent from "./content/BrainContent";
+import BrainRightSidebar from "./right-sidebar/BrainRightSidebar";
 
 export default function Brain({ children }: { readonly children: ReactNode }) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowConnectedIdentityWaves = () =>
-    !!connectedProfile?.profile?.handle && !activeProfileProxy;
-  const [showConnectedIdentityWaves, setShowConnectedIdentityWaves] = useState(
-    getShowConnectedIdentityWaves()
-  );
+  const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showRightSidebar, setShowRightSidebar] = useState(false);
 
-  useEffect(
-    () => setShowConnectedIdentityWaves(getShowConnectedIdentityWaves()),
-    [connectedProfile, activeProfileProxy]
-  );
+  useEffect(() => {
+    setShowRightSidebar(!!router.query.wave);
+  }, [router.query.wave]);
+
+  const contentClasses = showRightSidebar
+    ? isCollapsed
+      ? "tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto"
+      : "tw-px-6"
+    : "tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto";
 
   return (
-    <div>
-      <div className="tailwind-scope tw-pt-6 tw-pb-14 lg:tw-pb-24 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-        <div className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-center tw-gap-x-5 tw-gap-y-4">
-          <div>{children}</div>
-          <div className="lg:tw-w-[27%]">
-            <div>
-              <Link
-                href="/waves?new=true"
-                className="tw-no-underline tw-w-full tw-justify-center tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white hover:tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out"
-              >
-                <svg
-                  className="tw-size-5 tw-mr-1.5 -tw-ml-1 tw-flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 5V19M5 12H19"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>Create a Wave</span>
-              </Link>
-            </div>
-            {showConnectedIdentityWaves && (
-              <>
-                <WavesListWrapper type={WavesListType.MY_WAVES} />
-                <WavesListWrapper type={WavesListType.FOLLOWING} />
-              </>
-            )}
-            <WavesListWrapper type={WavesListType.POPULAR} />
-          </div>
+    <div className="tw-relative tw-flex tw-flex-col">
+      <div className={`tailwind-scope tw-relative tw-flex tw-flex-grow ${contentClasses}`}>
+        <div
+          className={`tw-h-screen tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-transition-all tw-duration-300 ${
+            showRightSidebar && !isCollapsed ? "tw-mr-[20.5rem]" : ""
+          }`}
+        >
+          <BrainLeftSidebar />
+          <BrainContent>{children}</BrainContent>
         </div>
+
+        {showRightSidebar && (
+          <BrainRightSidebar
+            isCollapsed={isCollapsed}
+            setIsCollapsed={setIsCollapsed}
+            waveId={router.query.wave as string}
+          />
+        )}
       </div>
     </div>
   );

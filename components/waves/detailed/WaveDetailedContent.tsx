@@ -5,6 +5,7 @@ import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import { useSearchParams, useRouter } from "next/navigation";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -87,7 +88,7 @@ export default function WaveDetailedContent({
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
           <WaveDrops
-            wave={wave}
+            waveId={wave.id}
             onReply={handleReply}
             onQuote={handleQuote}
             activeDrop={activeDrop}
@@ -95,11 +96,13 @@ export default function WaveDetailedContent({
           />
           {canDrop && (
             <div className="tw-mt-auto">
-              <CreateDrop
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                wave={wave}
-              />
+              <CreateDropWaveWrapper>
+                <CreateDrop
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  wave={wave}
+                />
+              </CreateDropWaveWrapper>
             </div>
           )}
         </div>

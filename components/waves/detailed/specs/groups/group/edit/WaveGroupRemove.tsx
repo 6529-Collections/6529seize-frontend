@@ -86,7 +86,6 @@ export default function WaveGroupRemove({
 
   const onRemove = async (): Promise<void> => {
     const body = getBody();
-    console.log("body", body);
     await onEdit(body);
   };
 

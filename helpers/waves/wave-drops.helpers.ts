@@ -34,11 +34,13 @@ export const processWaveDropsFeed = (
 
 export const mapToExtendedDrops = (
   pages: ApiWaveDropsFeed[],
-  prevDrops: ExtendedDrop[]
+  prevDrops: ExtendedDrop[],
+  reverse: boolean = false
 ): ExtendedDrop[] => {
-  return pages
-    .flatMap((page) => processWaveDropsFeed(page, prevDrops))
-    .reverse();
+  const mappedDrops = pages.flatMap((page) =>
+    processWaveDropsFeed(page, prevDrops)
+  );
+  return reverse ? mappedDrops.reverse() : mappedDrops;
 };
 
 const incrementKeyCount = (

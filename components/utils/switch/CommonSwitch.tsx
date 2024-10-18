@@ -22,18 +22,17 @@ export default function CommonSwitch({
       <button
         onClick={onToggle}
         type="button"
-        className={`${backGroundColor} tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500`}
+        className={`${backGroundColor} tw-p-0 tw-relative tw-flex tw-items-center tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none`}
         role="switch"
         aria-checked="false"
-        aria-labelledby="annual-billing-label"
       >
         <span
           aria-hidden="true"
-          className={`${togglePosition} tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-white tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out`}
+          className={`${togglePosition} tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out`}
         ></span>
       </button>
-      <span className="tw-ml-3 tw-text-sm" id="annual-billing-label">
-        <span className="tw-font-medium tw-text-gray-100">{label}</span>
+      <span className="tw-ml-3 tw-text-sm">
+        <span className="tw-font-medium tw-text-iron-300">{label}</span>
       </span>
     </div>
   );

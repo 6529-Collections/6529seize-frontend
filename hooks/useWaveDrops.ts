@@ -42,8 +42,9 @@ function useTabVisibility() {
 }
 
 export function useWaveDrops(
-  wave: ApiWave,
-  connectedProfileHandle: string | undefined
+  waveId: string,
+  connectedProfileHandle: string | undefined,
+  reverse: boolean = false
 ) {
   const queryClient = useQueryClient();
 
@@ -51,15 +52,14 @@ export function useWaveDrops(
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
-  ApiWaveDropsFeed | undefined
+    ApiWaveDropsFeed | undefined
   >(undefined);
   const isTabVisible = useTabVisibility();
-
 
   const queryKey = [
     QueryKey.DROPS,
     {
-      waveId: wave.id,
+      waveId,
       limit: WAVE_DROPS_PARAMS.limit,
       dropId: null,
     },
@@ -77,7 +77,7 @@ export function useWaveDrops(
           params.serial_no_less_than = `${pageParam}`;
         }
         return await commonApiFetch<ApiWaveDropsFeed>({
-          endpoint: `waves/${wave.id}/drops`,
+          endpoint: `waves/${waveId}/drops`,
           params,
         });
       },
@@ -86,7 +86,7 @@ export function useWaveDrops(
       pages: 3,
       staleTime: 60000,
     });
-  }, [wave])
+  }, [waveId]);
 
   const {
     data,
@@ -114,7 +114,7 @@ export function useWaveDrops(
       }
 
       const results = await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${wave.id}/drops`,
+        endpoint: `waves/${waveId}/drops`,
         params,
       });
 
@@ -135,10 +135,12 @@ export function useWaveDrops(
 
   useEffect(() => {
     setDrops((prev) => {
-      const newDrops = data?.pages ? mapToExtendedDrops(data.pages, prev) : [];
+      const newDrops = data?.pages
+        ? mapToExtendedDrops(data.pages, prev, reverse)
+        : [];
       return generateUniqueKeys(newDrops, prev);
     });
-  }, [data]);
+  }, [data, reverse]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
@@ -149,7 +151,7 @@ export function useWaveDrops(
         limit: "1",
       };
       return await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${wave.id}/drops`,
+        endpoint: `waves/${waveId}/drops`,
         params,
       });
     },
@@ -210,10 +212,10 @@ export function useWaveDrops(
   useEffect(() => {
     return () => {
       queryClient.removeQueries({
-        queryKey: [QueryKey.DROPS, { waveId: wave.id }],
+        queryKey: [QueryKey.DROPS, { waveId }],
       });
     };
-  }, [wave.id, queryClient]);
+  }, [waveId, queryClient]);
 
   const manualFetch = useCallback(async () => {
     if (hasNextPage) {
