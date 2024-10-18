@@ -22,7 +22,7 @@ const BrainContentPinnedWaves: React.FC = () => {
 
   return (
     <div className="tw-flex tw-gap-4 tw-mb-4">
-      <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-items-center tw-gap-4 tw-overflow-x-auto">
         {pinnedIds.map((id, i) => (
           <BrainContentPinnedWave
             key={id}
