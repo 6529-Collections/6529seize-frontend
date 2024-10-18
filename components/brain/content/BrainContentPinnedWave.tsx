@@ -9,8 +9,6 @@ interface BrainContentPinnedWaveProps {
   readonly active: boolean;
   readonly onMouseEnter: (waveId: string) => void;
   readonly onMouseLeave: () => void;
-  readonly onToggleActive: (waveId: string) => void;
-  readonly onRemove: (waveId: string) => void;
 }
 
 const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
@@ -18,8 +16,6 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   active,
   onMouseEnter,
   onMouseLeave,
-  onToggleActive,
-  onRemove,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
