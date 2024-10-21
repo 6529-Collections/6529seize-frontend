@@ -242,7 +242,7 @@ export default function CreateDrop({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: ANIMATION_DURATION }}u
+            transition={{ duration: ANIMATION_DURATION }}
           >
             <CreateDropStormParts
               parts={drop?.parts ?? []}
