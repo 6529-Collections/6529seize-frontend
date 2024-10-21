@@ -4,19 +4,22 @@ import FeedItem from "./FeedItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { getFeedItemKey } from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
+import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
   readonly onBottomIntersection: (state: boolean) => void;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
 }
 
 export default function FeedItems({
   items,
   showWaveInfo,
-  availableCredit,
   onBottomIntersection,
+  onReply,
+  onQuote,
 }: FeedItemsProps) {
   const getIntersectionTargetIndex = () => {
     if (items.length < 5) {
@@ -41,7 +44,8 @@ export default function FeedItems({
             <FeedItem
               item={item}
               showWaveInfo={showWaveInfo}
-              availableCredit={availableCredit}
+              onReply={onReply}
+              onQuote={onQuote}
             />
           </CommonChangeAnimation>
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (

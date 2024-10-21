@@ -9,6 +9,7 @@ interface BrainContentPinnedWaveProps {
   readonly active: boolean;
   readonly onMouseEnter: (waveId: string) => void;
   readonly onMouseLeave: () => void;
+  readonly onRemove: (waveId: string) => void;
 }
 
 const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
@@ -16,6 +17,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   active,
   onMouseEnter,
   onMouseLeave,
+  onRemove,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
@@ -39,6 +41,12 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
     onMouseEnter(waveId);
     if (waveId === router.query.wave) return;
     prefetchWaveData(waveId);
+  };
+
+  const onRemoveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onRemove(waveId);
   };
 
   return (
@@ -77,6 +85,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           </div>
           <button
             type="button"
+            onClick={onRemoveClick}
             aria-label="Remove wave"
             className="tw-border-0 tw-bg-iron-800 tw-rounded-full tw-size-5 tw-p-0 -tw-top-1 -tw-right-5 tw-absolute tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-0 group-hover:tw-opacity-100 hover:tw-text-red hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
           >

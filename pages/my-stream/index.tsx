@@ -18,9 +18,7 @@ interface Props {
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
   <HydrationBoundary state={pageProps.dehydratedState}>
-    <div className="tailwind-scope">
-      <MyStreamWrapper />
-    </div>
+    <MyStreamWrapper />
   </HydrationBoundary>
 );
 Page.getLayout = (page: ReactElement) => (
@@ -33,9 +31,10 @@ export async function getServerSideProps(
 ): Promise<{
   props: Props;
 }> {
+
   const queryClient = new QueryClient();
   const headers = getCommonHeaders(context);
-  const waveId = context.query.wave as string | undefined ?? null;
+  const waveId = (context.query.wave as string | undefined) ?? null;
   await prefetchWavesOverview({ queryClient, headers, waveId });
   return { props: { dehydratedState: dehydrate(queryClient) } };
 }

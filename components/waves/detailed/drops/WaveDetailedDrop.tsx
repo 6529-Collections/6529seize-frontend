@@ -12,6 +12,11 @@ import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 
+export interface DropInteractionParams {
+  drop: ExtendedDrop;
+  partId: number;
+}
+
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
@@ -47,20 +52,8 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly onReply: ({
-    drop,
-    partId,
-  }: {
-    drop: ExtendedDrop;
-    partId: number;
-  }) => void;
-  readonly onQuote: ({
-    drop,
-    partId,
-  }: {
-    drop: ExtendedDrop;
-    partId: number;
-  }) => void;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
@@ -77,7 +70,7 @@ const WaveDetailedDrop = ({
   onReplyClick,
   onQuoteClick,
   showReplyAndQuote,
-  parentContainerRef
+  parentContainerRef,
 }: WaveDetailedDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);

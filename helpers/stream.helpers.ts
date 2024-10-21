@@ -9,7 +9,7 @@ import {
 } from "../components/react-query-wrapper/utils/query-utils";
 import { jwtDecode } from "jwt-decode";
 import { getUserProfile } from "./server.helpers";
-import { TypedFeedItem } from "../types/feed.types";
+import { TypedFeedItem, TypedNotificationsResponse } from "../types/feed.types";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 
 const getWalletFromJwt = (headers: Record<string, string>): string | null => {
@@ -25,6 +25,15 @@ const getWalletFromJwt = (headers: Record<string, string>): string | null => {
     exp: number;
   }>(jwt);
   return decodedJwt.sub;
+};
+
+const getHandleFromJwt = async (
+  headers: Record<string, string>
+): Promise<string | null> => {
+  const wallet = getWalletFromJwt(headers);
+  if (!wallet) return null;
+  const profile = await getUserProfile({ user: wallet, headers });
+  return profile.profile?.handle ?? null;
 };
 
 const prefetchAuthenticatedWavesOverview = async ({
@@ -71,35 +80,28 @@ const prefetchAuthenticatedWavesOverview = async ({
 const prefetchAuthenticatedWaves = async ({
   queryClient,
   headers,
-  wallet,
+  handle,
 }: {
   queryClient: QueryClient;
   headers: Record<string, string>;
-  wallet: string;
+  handle: string;
 }) => {
-  const profile = await getUserProfile({ user: wallet, headers });
-
-  if (!profile) {
-    return;
-  }
   await queryClient.prefetchInfiniteQuery({
     queryKey: [
       QueryKey.WAVES,
       {
-        author: profile.profile?.handle,
+        author: handle,
         limit: 20,
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {
         limit: "20",
+        author: handle,
       };
 
       if (pageParam) {
         queryParams.serial_no_less_than = `${pageParam}`;
-      }
-      if (profile.profile?.handle) {
-        queryParams.author = profile.profile.handle;
       }
       return await commonApiFetch<ApiWave[]>({
         endpoint: `waves`,
@@ -223,23 +225,35 @@ const prefetchAuthenticatedWave = async ({
         headers,
       });
     },
+    staleTime: 60000,
   });
+};
+
+const prefetchAuthenticatedMyStreamContext = async ({
+  queryClient,
+  headers,
+  handle,
+}: {
+  queryClient: QueryClient;
+  headers: Record<string, string>;
+  handle: string;
+}) => {
+  await Promise.all([
+    prefetchAuthenticatedWavesOverview({ queryClient, headers }),
+    prefetchAuthenticatedWaves({ queryClient, headers, handle }),
+  ]);
 };
 
 const prefetchAuthenticatedStreamQueries = async ({
   queryClient,
   headers,
-  wallet,
   waveId,
 }: {
   queryClient: QueryClient;
   headers: Record<string, string>;
-  wallet: string;
   waveId: string | null;
 }) => {
   await Promise.all([
-    prefetchAuthenticatedWavesOverview({ queryClient, headers }),
-    prefetchAuthenticatedWaves({ queryClient, headers, wallet }),
     prefetchAuthenticatedFeedItems({ queryClient, headers, waveId }),
     prefetchAuthenticatedWave({ queryClient, headers, waveId }),
   ]);
@@ -254,13 +268,70 @@ export const prefetchWavesOverview = async ({
   headers: Record<string, string>;
   waveId: string | null;
 }) => {
-  const wallet = getWalletFromJwt(headers);
-  if (wallet) {
-    await prefetchAuthenticatedStreamQueries({
+  const handle = await getHandleFromJwt(headers);
+  if (handle) {
+    const params = {
       queryClient,
       headers,
-      wallet,
+      handle,
       waveId,
-    });
+    };
+    await Promise.all([
+      prefetchAuthenticatedStreamQueries(params),
+      prefetchAuthenticatedMyStreamContext(params),
+    ]);
   }
+};
+
+const prefetchAuthenticatedNotificationsItems = async ({
+  queryClient,
+  headers,
+  handle,
+}: {
+  queryClient: QueryClient;
+  headers: Record<string, string>;
+  handle: string;
+}) => {
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: [
+      QueryKey.IDENTITY_NOTIFICATIONS,
+      { identity: handle, limit: "10" },
+    ],
+    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+      const params: Record<string, string> = {
+        limit: "10",
+      };
+      if (pageParam) {
+        params.id_less_than = `${pageParam}`;
+      }
+      return await commonApiFetch<TypedNotificationsResponse>({
+        endpoint: `notifications`,
+        params,
+        headers,
+      });
+    },
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
+    pages: 1,
+    staleTime: 60000,
+  });
+};
+
+export const prefetchAuthenticatedNotifications = async ({
+  queryClient,
+  headers,
+}: {
+  queryClient: QueryClient;
+  headers: Record<string, string>;
+}) => {
+  const handle = await getHandleFromJwt(headers);
+  if (!handle) return;
+  await Promise.all([
+    prefetchAuthenticatedNotificationsItems({
+      queryClient,
+      headers,
+      handle,
+    }),
+    prefetchAuthenticatedMyStreamContext({ queryClient, headers, handle }),
+  ]);
 };

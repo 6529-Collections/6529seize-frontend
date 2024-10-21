@@ -1,21 +1,34 @@
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
 import { IFeedItemDropReplied } from "../../../../../types/feed.types";
+import WaveDetailedDrop, { DropInteractionParams } from "../../../../waves/detailed/drops/WaveDetailedDrop";
 
 export default function FeedItemDropReplied({
   item,
   showWaveInfo,
-  availableCredit,
+  onReply,
+  onQuote,
 }: {
   readonly item: IFeedItemDropReplied;
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
 }) {
   return (
-    <DropsListItem
-      drop={item.item.reply}
-      replyToDrop={item.item.drop}
+    <WaveDetailedDrop
+      drop={{
+        ...item.item.reply,
+        stableKey: "",
+        stableHash: "",
+      }}
+      previousDrop={null}
+      nextDrop={null}
       showWaveInfo={showWaveInfo}
-      availableCredit={availableCredit}
+      activeDrop={null}
+      showReplyAndQuote={true}
+      onReply={onReply}
+      onQuote={onQuote}
+      onReplyClick={() => {}}
+      onQuoteClick={() => {}}
     />
   );
 }
