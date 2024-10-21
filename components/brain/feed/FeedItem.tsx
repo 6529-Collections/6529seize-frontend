@@ -8,40 +8,17 @@ import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 export interface FeedItemProps {
   readonly item: TypedFeedItem;
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
 }
 
-export default function FeedItem({
-  item,
-  showWaveInfo,
-  availableCredit,
-}: FeedItemProps) {
+export default function FeedItem({ item, showWaveInfo }: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
       case ApiFeedItemType.WaveCreated:
-        return (
-          <FeedItemWaveCreated
-            item={item}
-            showWaveInfo={showWaveInfo}
-            availableCredit={availableCredit}
-          />
-        );
+        return <FeedItemWaveCreated item={item} showWaveInfo={showWaveInfo} />;
       case ApiFeedItemType.DropCreated:
-        return (
-          <FeedItemDropCreated
-            item={item}
-            availableCredit={availableCredit}
-            showWaveInfo={showWaveInfo}
-          />
-        );
+        return <FeedItemDropCreated item={item} showWaveInfo={showWaveInfo} />;
       case ApiFeedItemType.DropReplied:
-        return (
-          <FeedItemDropReplied
-            item={item}
-            availableCredit={availableCredit}
-            showWaveInfo={showWaveInfo}
-          />
-        );
+        return <FeedItemDropReplied item={item} showWaveInfo={showWaveInfo} />;
       default:
         assertUnreachable(item);
         return <div />;

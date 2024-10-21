@@ -20,7 +20,6 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
-import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;

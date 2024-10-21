@@ -1,21 +1,29 @@
 import { IFeedItemDropCreated } from "../../../../../types/feed.types";
-import DropsListItem from "../../../../drops/view/item/DropsListItem";
+import WaveDetailedDrop from "../../../../waves/detailed/drops/WaveDetailedDrop";
 
 export default function FeedItemDropCreated({
   item,
   showWaveInfo,
-  availableCredit,
 }: {
   readonly item: IFeedItemDropCreated;
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
 }) {
   return (
-    <DropsListItem
-      drop={item.item}
-      replyToDrop={null}
+    <WaveDetailedDrop
+      drop={{
+        ...item.item,
+        stableKey: "",
+        stableHash: "",
+      }}
+      previousDrop={null}
+      nextDrop={null}
       showWaveInfo={showWaveInfo}
-      availableCredit={availableCredit}
+      activeDrop={null}
+      showReplyAndQuote={true}
+      onReply={() => {}}
+      onQuote={() => {}}
+      onReplyClick={() => {}}
+      onQuoteClick={() => {}}
     />
   );
 }

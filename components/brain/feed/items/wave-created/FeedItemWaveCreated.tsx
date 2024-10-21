@@ -1,14 +1,13 @@
 import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
 import DropsListItem from "../../../../drops/view/item/DropsListItem";
+import WaveDetailedDrop from "../../../../waves/detailed/drops/WaveDetailedDrop";
 
 export default function FeedItemWaveCreated({
   item,
   showWaveInfo,
-  availableCredit,
 }: {
   readonly item: IFeedItemWaveCreated;
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
 }) {
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
@@ -37,11 +36,21 @@ export default function FeedItemWaveCreated({
           </span>
         </div>
 
-        <DropsListItem
-          drop={item.item.description_drop}
-          replyToDrop={null}
+        <WaveDetailedDrop
+          drop={{
+            ...item.item.description_drop,
+            stableKey: "",
+            stableHash: "",
+          }}
+          previousDrop={null}
+          nextDrop={null}
           showWaveInfo={showWaveInfo}
-          availableCredit={availableCredit}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          onReply={() => {}}
+          onQuote={() => {}}
+          onReplyClick={() => {}}
+          onQuoteClick={() => {}}
         />
       </div>
     </div>

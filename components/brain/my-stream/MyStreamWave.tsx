@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useWaveDrops } from "../../../hooks/useWaveDrops";
 import FeedWrapper from "../feed/FeedWrapper";
-import { useAvailableDropRateQuery } from "../../../hooks/useMyStreamQuery";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
@@ -12,7 +11,7 @@ interface MyStreamWaveProps {
 }
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const {
     drops,
     fetchNextPage,
@@ -21,11 +20,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     isFetchingNextPage,
     haveNewDrops,
   } = useWaveDrops(waveId, connectedProfile?.profile?.handle, false);
-
-  const { availableCredit } = useAvailableDropRateQuery(
-    connectedProfile,
-    activeProfileProxy
-  );
 
   const onBottomIntersection = (state: boolean) => {
     if (state && !isFetching && !isFetchingNextPage && hasNextPage) {
@@ -71,7 +65,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         items={items}
         loading={isFetching}
         showWaveInfo={false}
-        availableCredit={availableCredit}
         onBottomIntersection={onBottomIntersection}
       />
     </div>

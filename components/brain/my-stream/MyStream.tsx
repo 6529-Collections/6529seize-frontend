@@ -2,14 +2,12 @@ import { useContext, useEffect } from "react";
 import { AuthContext, TitleType } from "../../auth/Auth";
 import FeedWrapper from "../feed/FeedWrapper";
 import {
-  useAvailableDropRateQuery,
   useMyStreamQuery,
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
 
 export default function MyStream() {
-  const { connectedProfile, activeProfileProxy, setTitle } =
-    useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
 
   const {
     items,
@@ -23,11 +21,6 @@ export default function MyStream() {
   } = useMyStreamQuery();
 
   const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
-
-  const { availableCredit } = useAvailableDropRateQuery(
-    connectedProfile,
-    activeProfileProxy
-  );
 
   const onBottomIntersection = (state: boolean) => {
     if (
@@ -76,7 +69,6 @@ export default function MyStream() {
         items={items}
         loading={isFetching}
         showWaveInfo={true}
-        availableCredit={availableCredit}
         onBottomIntersection={onBottomIntersection}
       />
     </div>
