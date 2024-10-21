@@ -51,9 +51,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         <div
           className={`tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
             isActive
-              ? "tw-ring-1 tw-ring-primary-400"
-              : "tw-ring-1 tw-ring-white/10"
-          }`}
+              ? "tw-ring-1 tw-ring-inset tw-ring-primary-400"
+              : "tw-ring-1 tw-ring-inset tw-ring-white/10"
+          } ${!wave.picture ? "tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-800" : ""}`}
         >
           {wave.picture && (
             <img

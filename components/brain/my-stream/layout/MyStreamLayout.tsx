@@ -41,17 +41,19 @@ export default function MyStreamLayout({
           content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
         />
         <meta property="og:description" content="6529 SEIZE" />
-        <style>{`
+       <style>{`
         body {
           overflow: hidden !important;
         }
-      `}</style>
+      `}</style> 
       </Head>
 
-      <div className="tailwind-scope lg:tw-min-h-screen tw-bg-black">
+      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
         <div>
           <Header isSmall={true} />
-          <Breadcrumb breadcrumbs={breadcrumbs} />
+          <div className="tw-z-50">
+            <Breadcrumb breadcrumbs={breadcrumbs} />
+          </div>
         </div>
 
         {showWaves && (
@@ -86,7 +88,7 @@ export default function MyStreamLayout({
                 <MyStreamLayoutTabs />
               </div> */}
             </div>
-            <div className="tw-h-full tw-w-full">
+            <div className="tw-flex-1">
               <Brain>
                 <div>{children}</div>
               </Brain>
