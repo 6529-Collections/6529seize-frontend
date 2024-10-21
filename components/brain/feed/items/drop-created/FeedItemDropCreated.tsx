@@ -1,12 +1,18 @@
 import { IFeedItemDropCreated } from "../../../../../types/feed.types";
-import WaveDetailedDrop from "../../../../waves/detailed/drops/WaveDetailedDrop";
+import WaveDetailedDrop, {
+  DropInteractionParams,
+} from "../../../../waves/detailed/drops/WaveDetailedDrop";
 
 export default function FeedItemDropCreated({
   item,
   showWaveInfo,
+  onReply,
+  onQuote,
 }: {
   readonly item: IFeedItemDropCreated;
   readonly showWaveInfo: boolean;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
 }) {
   return (
     <WaveDetailedDrop
@@ -20,8 +26,8 @@ export default function FeedItemDropCreated({
       showWaveInfo={showWaveInfo}
       activeDrop={null}
       showReplyAndQuote={true}
-      onReply={() => {}}
-      onQuote={() => {}}
+      onReply={onReply}
+      onQuote={onQuote}
       onReplyClick={() => {}}
       onQuoteClick={() => {}}
     />

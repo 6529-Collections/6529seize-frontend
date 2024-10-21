@@ -1,18 +1,16 @@
 import React from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../helpers/image.helpers";
+import BrainLeftSidebarSearchWaveItem from "./BrainLeftSidebarSearchWaveItem";
 
 interface BrainLeftSidebarSearchWaveDropdownContentProps {
   readonly loading: boolean;
   readonly waves: ApiWave[];
+  readonly onClose: () => void;
 }
 
 const BrainLeftSidebarSearchWaveDropdownContent: React.FC<
   BrainLeftSidebarSearchWaveDropdownContentProps
-> = ({ loading, waves }) => {
+> = ({ loading, waves, onClose }) => {
   if (loading) {
     return (
       <li className="tw-py-2 tw-w-full tw-h-full tw-text-sm tw-font-normal tw-text-iron-300 tw-rounded-lg tw-relative tw-select-none tw-px-2 tw-flex tw-items-center tw-gap-x-2">
@@ -43,52 +41,11 @@ const BrainLeftSidebarSearchWaveDropdownContent: React.FC<
     return (
       <>
         {waves.map((wave) => (
-          <li className="tw-h-full" key={wave.id}>
-            <button
-              type="button"
-              className="hover:tw-bg-iron-800 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
-                <div className="tw-flex tw-space-x-3 tw-items-center">
-                  {wave.picture && (
-                    <div className="tw-h-8 tw-w-8 tw-rounded-full tw-overflow-hidden tw-ring-2 tw-ring-inset tw-ring-white/10 tw-bg-iron-900">
-                      <img
-                        src={getScaledImageUri(
-                          wave.picture,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt="Wave Picture"
-                        className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="tw-w-[14rem] tw-truncate">
-                    <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50 tw-truncate tw-whitespace-nowrap">
-                      {wave.name}
-                    </p>
-                    <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
-                      By {wave.author.handle}
-                    </p>
-                  </div>
-                </div>
-                <svg
-                  className="tw-flex-shrink-0 tw-size-5 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20 6L9 17L4 12"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </button>
-          </li>
+          <BrainLeftSidebarSearchWaveItem
+            wave={wave}
+            key={wave.id}
+            onClose={onClose}
+          />
         ))}
       </>
     );

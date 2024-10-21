@@ -7,10 +7,11 @@ import { useWaves } from "../../../../hooks/useWaves";
 interface BrainLeftSidebarSearchWaveDropdownProps {
   readonly open: boolean;
   readonly searchCriteria: string | null;
+  readonly onClose: () => void;
 }
 const BrainLeftSidebarSearchWaveDropdown: React.FC<
   BrainLeftSidebarSearchWaveDropdownProps
-> = ({ open, searchCriteria }) => {
+> = ({ open, searchCriteria, onClose }) => {
   const { waves, isFetching } = useWaves({
     identity: null,
     waveName: searchCriteria,
@@ -33,6 +34,7 @@ const BrainLeftSidebarSearchWaveDropdown: React.FC<
                 <BrainLeftSidebarSearchWaveDropdownContent
                   loading={isFetching}
                   waves={waves}
+                  onClose={onClose}
                 />
               </ul>
             </div>

@@ -58,9 +58,7 @@ export default function MyStreamLayout({
 
         {showWaves && (
           <div className="tw-flex-1">
-            <Brain>
-              <div>{children}</div>
-            </Brain>
+            <Brain>{children}</Brain>
           </div>
         )}
       </div>

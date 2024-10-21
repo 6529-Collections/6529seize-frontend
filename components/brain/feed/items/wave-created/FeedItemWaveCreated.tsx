@@ -1,13 +1,18 @@
 import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
-import DropsListItem from "../../../../drops/view/item/DropsListItem";
-import WaveDetailedDrop from "../../../../waves/detailed/drops/WaveDetailedDrop";
+import WaveDetailedDrop, {
+  DropInteractionParams,
+} from "../../../../waves/detailed/drops/WaveDetailedDrop";
 
 export default function FeedItemWaveCreated({
   item,
   showWaveInfo,
+  onReply,
+  onQuote,
 }: {
   readonly item: IFeedItemWaveCreated;
   readonly showWaveInfo: boolean;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
 }) {
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
@@ -47,8 +52,8 @@ export default function FeedItemWaveCreated({
           showWaveInfo={showWaveInfo}
           activeDrop={null}
           showReplyAndQuote={true}
-          onReply={() => {}}
-          onQuote={() => {}}
+          onReply={onReply}
+          onQuote={onQuote}
           onReplyClick={() => {}}
           onQuoteClick={() => {}}
         />

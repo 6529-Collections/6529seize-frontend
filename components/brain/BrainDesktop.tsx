@@ -1,6 +1,5 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
-import BrainContent from "./content/BrainContent";
 import BrainRightSidebar from "./right-sidebar/BrainRightSidebar";
 import { useRouter } from "next/router";
 
@@ -10,7 +9,7 @@ interface Props {
 
 const BrainDesktop: React.FC<Props> = ({ children }) => {
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
 
   useEffect(() => {
@@ -34,7 +33,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
           }`}
         >
           <BrainLeftSidebar />
-          <BrainContent>{children}</BrainContent>
+          {children}
         </div>
 
         {showRightSidebar && (

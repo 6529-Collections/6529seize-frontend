@@ -1,14 +1,20 @@
 import React, { useMemo } from "react";
-import { useRouter } from "next/router";
 import { useWaveData } from "../../../../hooks/useWaveData";
 import CreateDrop from "../../../waves/detailed/CreateDrop";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { ActiveDropState } from "../../../waves/detailed/WaveDetailedContent";
 
-interface BrainContentInputProps {}
+interface BrainContentInputProps {
+  readonly waveId: string | null;
+  readonly activeDrop: ActiveDropState | null;
+  readonly onCancelReplyQuote: () => void;
+}
 
-const BrainContentInput: React.FC<BrainContentInputProps> = () => {
-  const router = useRouter();
-  const waveId = router.query.wave as string;
+const BrainContentInput: React.FC<BrainContentInputProps> = ({
+  waveId,
+  activeDrop,
+  onCancelReplyQuote,
+}) => {
   const capacitor = useCapacitor();
   const { data: wave } = useWaveData(waveId);
   // TODO: Correct heights
@@ -25,8 +31,8 @@ const BrainContentInput: React.FC<BrainContentInputProps> = () => {
     >
       <CreateDrop
         wave={wave}
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
+        activeDrop={activeDrop}
+        onCancelReplyQuote={onCancelReplyQuote}
         key={wave.id}
       />
     </div>

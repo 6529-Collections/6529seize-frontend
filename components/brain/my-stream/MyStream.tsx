@@ -5,8 +5,14 @@ import {
   useMyStreamQuery,
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
+import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 
-export default function MyStream() {
+interface MyStreamProps {
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
+}
+
+export default function MyStream({ onReply, onQuote }: MyStreamProps) {
   const { setTitle } = useContext(AuthContext);
 
   const {
@@ -70,6 +76,8 @@ export default function MyStream() {
         loading={isFetching}
         showWaveInfo={true}
         onBottomIntersection={onBottomIntersection}
+        onReply={onReply}
+        onQuote={onQuote}
       />
     </div>
   );

@@ -3,7 +3,9 @@ import { useKeyPressEvent } from "react-use";
 import { useClickAway } from "react-use";
 import BrainLeftSidebarSearchWaveDropdown from "./BrainLeftSidebarSearchWaveDropdown";
 
-interface BrainLeftSidebarSearchWaveProps {}
+interface BrainLeftSidebarSearchWaveProps {
+
+}
 
 const BrainLeftSidebarSearchWave: React.FC<
   BrainLeftSidebarSearchWaveProps
@@ -54,6 +56,7 @@ const BrainLeftSidebarSearchWave: React.FC<
         <BrainLeftSidebarSearchWaveDropdown
           open={isOpen}
           searchCriteria={searchCriteria}
+          onClose={() => setIsOpen(false)}
         />
       </div>
     </div>

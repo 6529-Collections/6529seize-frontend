@@ -4,21 +4,50 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
+import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 
 export interface FeedItemProps {
   readonly item: TypedFeedItem;
   readonly showWaveInfo: boolean;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
 }
 
-export default function FeedItem({ item, showWaveInfo }: FeedItemProps) {
+export default function FeedItem({
+  item,
+  showWaveInfo,
+  onReply,
+  onQuote,
+}: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
       case ApiFeedItemType.WaveCreated:
-        return <FeedItemWaveCreated item={item} showWaveInfo={showWaveInfo} />;
+        return (
+          <FeedItemWaveCreated
+            item={item}
+            showWaveInfo={showWaveInfo}
+            onReply={onReply}
+            onQuote={onQuote}
+          />
+        );
       case ApiFeedItemType.DropCreated:
-        return <FeedItemDropCreated item={item} showWaveInfo={showWaveInfo} />;
+        return (
+          <FeedItemDropCreated
+            item={item}
+            showWaveInfo={showWaveInfo}
+            onReply={onReply}
+            onQuote={onQuote}
+          />
+        );
       case ApiFeedItemType.DropReplied:
-        return <FeedItemDropReplied item={item} showWaveInfo={showWaveInfo} />;
+        return (
+          <FeedItemDropReplied
+            item={item}
+            showWaveInfo={showWaveInfo}
+            onReply={onReply}
+            onQuote={onQuote}
+          />
+        );
       default:
         assertUnreachable(item);
         return <div />;

@@ -5,12 +5,19 @@ import FeedWrapper from "../feed/FeedWrapper";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
+import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
 }
 
-const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
+const MyStreamWave: React.FC<MyStreamWaveProps> = ({
+  waveId,
+  onReply,
+  onQuote,
+}) => {
   const { connectedProfile } = useContext(AuthContext);
   const {
     drops,
@@ -66,6 +73,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         loading={isFetching}
         showWaveInfo={false}
         onBottomIntersection={onBottomIntersection}
+        onReply={onReply}
+        onQuote={onQuote}
       />
     </div>
   );

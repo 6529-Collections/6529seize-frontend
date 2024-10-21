@@ -1,7 +1,5 @@
 import React, { ReactNode, useState } from "react";
-
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
-import BrainContent from "./content/BrainContent";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 
 interface Props {
@@ -18,11 +16,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           onWavesButtonClick={setIsWavesButtonActive}
           isWavesButtonActive={isWavesButtonActive}
         />
-        {isWavesButtonActive ? (
-          <BrainMobileWaves />
-        ) : (
-          <BrainContent showPinnedWaves={true}>{children}</BrainContent>
-        )}
+        {isWavesButtonActive ? <BrainMobileWaves /> : children}
       </div>
     </div>
   );
