@@ -264,11 +264,10 @@ type AppPropsWithLayout = AppProps & {
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout ?? ((page) => page);
-
   const capacitor = useCapacitor();
 
   const router = useRouter();
-  const hideFooter = router.pathname.startsWith("/waves");
+  const hideFooter = ["/waves", "/my-stream"].some(path => router.pathname.startsWith(path));
 
   useEffect(() => {
     if (capacitor.isCapacitor) {
