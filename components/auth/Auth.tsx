@@ -60,7 +60,7 @@ type AuthContextType = {
   }) => void;
   readonly title: string;
 };
-
+// change back to 0
 export const WAVES_MIN_ACCESS_LEVEL = 10;
 const DEFAULT_TITLE = "6529 SEIZE";
 
@@ -142,6 +142,7 @@ export default function Auth({
     }).received;
     setReceivedProfileProxies(receivedProxies);
     const role = getRole({ jwt: getAuthJwt() });
+
     if (role) {
       const activeProxy = receivedProxies?.find(
         (proxy) => proxy.created_by.id === role
@@ -305,6 +306,7 @@ export default function Auth({
       exp: number;
       role: string;
     }>(jwt);
+
     return decodedJwt.role;
   };
 
