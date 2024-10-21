@@ -227,7 +227,7 @@ export default function CreateDrop({
 
   const containerClassName = useMemo(() => {
     return capacitor.isCapacitor
-      ? "tw-max-h-[calc(100vh-14.7rem)]"
+      ? "tw-max-h-[calc(100vh-14.7rem)] tw-mb-[3.75rem]"
       : "tw-max-h-[calc(100vh-8.8rem)] lg:tw-max-h-[calc(100vh-7.5rem)]";
   }, [capacitor.isCapacitor]);
 
@@ -242,7 +242,7 @@ export default function CreateDrop({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: ANIMATION_DURATION }}
+            transition={{ duration: ANIMATION_DURATION }}u
           >
             <CreateDropStormParts
               parts={drop?.parts ?? []}
