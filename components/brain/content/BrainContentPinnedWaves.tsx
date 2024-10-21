@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();
-  const { pinnedIds, addId } = usePinnedWaves();
+  const { pinnedIds, addId, removeId } = usePinnedWaves();
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,6 +20,13 @@ const BrainContentPinnedWaves: React.FC = () => {
     return null;
   }
 
+  const onRemove = async (waveId: string) => {
+    if (router.query.wave === waveId) {
+      await router.replace("/my-stream", undefined, { shallow: true });
+    }
+    removeId(waveId);
+  };
+
   return (
     <div className="tw-flex tw-gap-4 tw-mb-4">
       <div className="tw-flex tw-items-center tw-gap-4 tw-overflow-x-auto tw-w-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
@@ -30,6 +37,7 @@ const BrainContentPinnedWaves: React.FC = () => {
             active={router.query.wave === id || onHoverWaveId === id}
             onMouseEnter={setOnHoverWaveId}
             onMouseLeave={() => setOnHoverWaveId(null)}
+            onRemove={onRemove}
           />
         ))}
       </div>
