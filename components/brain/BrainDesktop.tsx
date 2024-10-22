@@ -32,7 +32,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
             showRightSidebar && !isCollapsed ? "tw-mr-[20.5rem]" : ""
           }`}
         >
-          <BrainLeftSidebar />
+          <BrainLeftSidebar activeWaveId={router.query.wave as string} />
           {children}
         </div>
 

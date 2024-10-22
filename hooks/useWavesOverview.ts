@@ -11,12 +11,14 @@ interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;
   readonly limit?: number;
   readonly following?: boolean;
+  readonly refetchInterval?: number;
 }
 
 export const useWavesOverview = ({
   type,
   limit = 20,
   following = false,
+  refetchInterval,
 }: UseWavesOverviewProps) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -55,6 +57,7 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     enabled: !usePublicWaves,
     placeholderData: keepPreviousData,
+    refetchInterval: refetchInterval ?? false,
   });
 
   const publicQuery = useInfiniteQuery({
@@ -77,6 +80,7 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     enabled: usePublicWaves,
     placeholderData: keepPreviousData,
+    refetchInterval: refetchInterval ?? false,
   });
 
   const getWaves = (): ApiWave[] => {

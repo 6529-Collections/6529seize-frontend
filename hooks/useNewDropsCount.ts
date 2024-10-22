@@ -1,7 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 
-export const useNewDropsCount = (waves: ApiWave[], activeWaveId: string) => {
+export const useNewDropsCount = (
+  waves: ApiWave[],
+  activeWaveId: string | null
+) => {
   const [initialDropsCounts, setInitialDropsCounts] = useState<
     Record<string, number>
   >({});
@@ -55,7 +58,9 @@ export const useNewDropsCount = (waves: ApiWave[], activeWaveId: string) => {
 
   // Reset active wave count
   useEffect(() => {
-    resetWaveCount(activeWaveId);
+    if (activeWaveId) {
+      resetWaveCount(activeWaveId);
+    }
   }, [activeWaveId, waves]);
 
   return { newDropsCounts, resetWaveCount };

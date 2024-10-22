@@ -97,7 +97,7 @@ export default function MyStreamNoItems() {
         <h1 className="tw-relative tw-z-10 tw-block tw-float-none tw-text-4xl">
           Stream
         </h1>
-        <p className="tw-max-w-xl tw-mt-2 tw-text-lg tw-text-iron-400 tw-font-normal">
+        <p className="tw-max-w-3xl tw-mt-2 tw-text-lg tw-text-iron-400 tw-font-normal">
           Engage with the community and get started by{" "}
           <span className="tw-font-semibold tw-text-transparent tw-bg-clip-text tw-bg-gradient-to-r tw-from-indigo-400 tw-to-indigo-500">
             following or creating a{" "}

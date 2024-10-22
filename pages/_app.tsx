@@ -101,9 +101,15 @@ import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
 import { ReactElement, ReactNode, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
+import ReactQueryWrapper, {
+  QueryKey,
+} from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";
@@ -249,6 +255,7 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 10000,
       refetchOnWindowFocus: false,
+      gcTime: 1000 * 60 * 60 * 24,
     },
   },
 });
@@ -267,7 +274,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const capacitor = useCapacitor();
 
   const router = useRouter();
-  const hideFooter = ["/waves", "/my-stream"].some(path => router.pathname.startsWith(path));
+  const hideFooter = ["/waves", "/my-stream"].some((path) =>
+    router.pathname.startsWith(path)
+  );
 
   useEffect(() => {
     if (capacitor.isCapacitor) {

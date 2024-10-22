@@ -20,9 +20,15 @@ interface UseWavesParams {
   readonly identity: string | null;
   readonly waveName: string | null;
   readonly limit?: number;
+  readonly refetchInterval?: number;
 }
 
-export function useWaves({ identity, waveName, limit = 20 }: UseWavesParams) {
+export function useWaves({
+  identity,
+  waveName,
+  limit = 20,
+  refetchInterval,
+}: UseWavesParams) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const getUsePublicWaves = () =>
@@ -68,6 +74,7 @@ export function useWaves({ identity, waveName, limit = 20 }: UseWavesParams) {
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: !usePublicWaves,
+    refetchInterval: refetchInterval ?? false,
   });
 
   const publicQuery = useInfiniteQuery({
@@ -91,6 +98,7 @@ export function useWaves({ identity, waveName, limit = 20 }: UseWavesParams) {
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: usePublicWaves,
+    refetchInterval: refetchInterval ?? false,
   });
 
   const getWaves = (): ApiWave[] => {

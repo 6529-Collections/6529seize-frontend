@@ -4,11 +4,12 @@ import CircleLoader, {
 } from "../../distribution-plan-tool/common/CircleLoader";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 import FeedItems from "./FeedItems";
-
+import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
   readonly loading: boolean;
   readonly showWaveInfo: boolean;
+  readonly activeDrop: ActiveDropState | null;
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
@@ -18,6 +19,7 @@ export default function FeedWrapper({
   items,
   loading,
   showWaveInfo,
+  activeDrop,
   onBottomIntersection,
   onReply,
   onQuote,
@@ -27,6 +29,7 @@ export default function FeedWrapper({
       <FeedItems
         items={items}
         showWaveInfo={showWaveInfo}
+        activeDrop={activeDrop}
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}

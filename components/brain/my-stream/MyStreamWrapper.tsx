@@ -60,9 +60,10 @@ const MyStreamWrapper: React.FC = () => {
       waveId={serialisedWaveId}
       onReply={onReply}
       onQuote={onQuote}
+      activeDrop={activeDrop}
     />
   ) : (
-    <MyStream onReply={onReply} onQuote={onQuote} />
+    <MyStream onReply={onReply} onQuote={onQuote} activeDrop={activeDrop} />
   );
   return (
     <BrainContent
