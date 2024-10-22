@@ -11,6 +11,8 @@ import {
 } from "@tanstack/react-query";
 import { prefetchWavesOverview } from "../../helpers/stream.helpers";
 import { GetServerSidePropsContext } from "next";
+import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { Time } from "../../helpers/time";
 
 interface Props {
   dehydratedState: DehydratedState;
@@ -31,10 +33,14 @@ export async function getServerSideProps(
 ): Promise<{
   props: Props;
 }> {
-
   const queryClient = new QueryClient();
   const headers = getCommonHeaders(context);
-  const waveId = (context.query.wave as string | undefined) ?? null;
-  await prefetchWavesOverview({ queryClient, headers, waveId });
+  const feedItemsFetched =
+    context?.req.cookies[[QueryKey.FEED_ITEMS].toString()];
+
+  if (feedItemsFetched && +feedItemsFetched < Time.now().toMillis() - 60000) {
+    const waveId = (context.query.wave as string | undefined) ?? null;
+    await prefetchWavesOverview({ queryClient, headers, waveId });
+  }
   return { props: { dehydratedState: dehydrate(queryClient) } };
 }

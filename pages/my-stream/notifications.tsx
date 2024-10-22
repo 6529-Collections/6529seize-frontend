@@ -11,6 +11,8 @@ import {
 import { GetServerSidePropsContext } from "next";
 import { getCommonHeaders } from "../../helpers/server.helpers";
 import { prefetchAuthenticatedNotifications } from "../../helpers/stream.helpers";
+import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { Time } from "../../helpers/time";
 
 interface Props {
   dehydratedState: DehydratedState;
@@ -35,6 +37,16 @@ export async function getServerSideProps(
 }> {
   const queryClient = new QueryClient();
   const headers = getCommonHeaders(context);
-  await prefetchAuthenticatedNotifications({ queryClient, headers });
+
+  const notificationsFetched =
+    context?.req.cookies[[QueryKey.IDENTITY_NOTIFICATIONS].toString()];
+
+  if (
+    notificationsFetched &&
+    +notificationsFetched < Time.now().toMillis() - 60000
+  ) {
+    await prefetchAuthenticatedNotifications({ queryClient, headers, context });
+  }
+
   return { props: { dehydratedState: dehydrate(queryClient) } };
 }
