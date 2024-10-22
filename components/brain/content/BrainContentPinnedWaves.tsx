@@ -11,10 +11,10 @@ const BrainContentPinnedWaves: React.FC = () => {
 
   useEffect(() => {
     const { wave } = router.query;
-    if (wave && typeof wave === "string" && !pinnedIds.includes(wave)) {
+    if (wave && typeof wave === "string") {
       addId(wave);
     }
-  }, [router.query, addId, pinnedIds]);
+  }, [router.query, addId]);
 
   if (!pinnedIds.length) {
     return null;

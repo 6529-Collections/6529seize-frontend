@@ -1,19 +1,33 @@
+import { useRouter } from "next/router";
 import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
 import WaveDetailedDrop, {
   DropInteractionParams,
 } from "../../../../waves/detailed/drops/WaveDetailedDrop";
+import { ActiveDropState } from "../../../../waves/detailed/WaveDetailedContent";
+import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 
 export default function FeedItemWaveCreated({
   item,
   showWaveInfo,
+  activeDrop,
   onReply,
   onQuote,
 }: {
   readonly item: IFeedItemWaveCreated;
   readonly showWaveInfo: boolean;
+  readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
 }) {
+  const router = useRouter();
+  const onReplyClick = (serialNo: number) => {
+    router.push(`/waves/${item.item.id}?drop=${serialNo}/`);
+  };
+
+  const onQuoteClick = (quote: ApiDrop) => {
+    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+  };
+
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-space-y-2">
@@ -50,12 +64,13 @@ export default function FeedItemWaveCreated({
           previousDrop={null}
           nextDrop={null}
           showWaveInfo={showWaveInfo}
-          activeDrop={null}
+          activeDrop={activeDrop}
           showReplyAndQuote={true}
+          border={true}
           onReply={onReply}
           onQuote={onQuote}
-          onReplyClick={() => {}}
-          onQuoteClick={() => {}}
+          onReplyClick={onReplyClick}
+          onQuoteClick={onQuoteClick}
         />
       </div>
     </div>

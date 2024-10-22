@@ -249,6 +249,7 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 10000,
       refetchOnWindowFocus: false,
+      gcTime: 1000 * 60 * 60 * 24,
     },
   },
 });
@@ -267,7 +268,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const capacitor = useCapacitor();
 
   const router = useRouter();
-  const hideFooter = ["/waves", "/my-stream"].some(path => router.pathname.startsWith(path));
+  const hideFooter = ["/waves", "/my-stream"].some((path) =>
+    router.pathname.startsWith(path)
+  );
 
   useEffect(() => {
     if (capacitor.isCapacitor) {

@@ -5,10 +5,12 @@ import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
+import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 
 export interface FeedItemProps {
   readonly item: TypedFeedItem;
   readonly showWaveInfo: boolean;
+  readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
 }
@@ -16,6 +18,7 @@ export interface FeedItemProps {
 export default function FeedItem({
   item,
   showWaveInfo,
+  activeDrop,
   onReply,
   onQuote,
 }: FeedItemProps) {
@@ -26,6 +29,7 @@ export default function FeedItem({
           <FeedItemWaveCreated
             item={item}
             showWaveInfo={showWaveInfo}
+            activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
           />
@@ -35,6 +39,7 @@ export default function FeedItem({
           <FeedItemDropCreated
             item={item}
             showWaveInfo={showWaveInfo}
+            activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
           />
@@ -44,6 +49,7 @@ export default function FeedItem({
           <FeedItemDropReplied
             item={item}
             showWaveInfo={showWaveInfo}
+            activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
           />

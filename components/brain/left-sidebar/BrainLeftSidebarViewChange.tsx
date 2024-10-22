@@ -25,7 +25,9 @@ export const BrainLeftSidebarViewChange: React.FC<
 
   const getLinkClasses = (path: string) =>
     `tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg tw-transition-colors tw-duration-300 tw-ease-in-out tw-relative z-10 ${
-      isLinkActive(path) ? "tw-text-iron-300" : "tw-text-iron-400 hover:tw-text-iron-300"
+      isLinkActive(path)
+        ? "tw-text-iron-300"
+        : "tw-text-iron-400 hover:tw-text-iron-300"
     }`;
 
   return (
@@ -44,9 +46,7 @@ export const BrainLeftSidebarViewChange: React.FC<
         href="/my-stream/notifications"
         className={getLinkClasses("/my-stream/notifications")}
       >
-        <span className="tw-font-semibold tw-text-sm">
-          Notifications
-        </span>
+        <span className="tw-font-semibold tw-text-sm">Notifications</span>
         {haveUnreadNotifications && (
           <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
         )}

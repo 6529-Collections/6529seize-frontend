@@ -45,6 +45,23 @@ const shouldGroupWithDrop = (
   return bothNotReplies || repliesInSameThread;
 };
 
+const getDropClasses = (
+  isActiveDrop: boolean,
+  groupingClass: string,
+  border: boolean
+): string => {
+  const baseClasses =
+    "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+  const activeClasses =
+    "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
+  const inactiveClasses = "tw-bg-iron-950 tw-rounded-xl";
+  const borderClasses = "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+
+  return `${baseClasses} ${
+    isActiveDrop ? activeClasses : inactiveClasses
+  } ${groupingClass} ${border ? borderClasses : ""}`.trim();
+};
+
 interface WaveDetailedDropProps {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -52,6 +69,7 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
+  readonly border?: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
@@ -65,6 +83,7 @@ const WaveDetailedDrop = ({
   nextDrop,
   showWaveInfo,
   activeDrop,
+  border = false,
   onReply,
   onQuote,
   onReplyClick,
@@ -156,13 +175,11 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
+  const dropClasses = getDropClasses(isActiveDrop, groupingClass, border);
+
   return (
     <div
-      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 ${
-        isActiveDrop
-          ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
-          : "tw-bg-iron-950 tw-rounded-xl"
-      } ${groupingClass}`}
+      className={dropClasses}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}

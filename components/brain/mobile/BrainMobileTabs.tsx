@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
+import { AuthContext } from "../../auth/Auth";
+import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 
 interface BrainMobileTabsProps {
   readonly onWavesButtonClick: (activate: boolean) => void;
@@ -12,6 +14,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   isWavesButtonActive,
 }) => {
   const router = useRouter();
+  const { connectedProfile } = useContext(AuthContext);
+  const { haveUnreadNotifications } = useUnreadNotifications(
+    connectedProfile?.profile?.handle
+  );
 
   React.useEffect(() => {
     const handleRouteChange = () => {
@@ -95,7 +101,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <span className={getTextClasses("/my-stream/notifications")}>
             Notifications
           </span>
-          <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
+          {haveUnreadNotifications && (
+            <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
+          )}
         </Link>
       </div>
     </div>

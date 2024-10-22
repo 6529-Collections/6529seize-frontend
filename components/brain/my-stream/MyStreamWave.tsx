@@ -6,15 +6,17 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-
+import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 interface MyStreamWaveProps {
   readonly waveId: string;
+  readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
 }
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({
   waveId,
+  activeDrop,
   onReply,
   onQuote,
 }) => {
@@ -72,6 +74,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
         items={items}
         loading={isFetching}
         showWaveInfo={false}
+        activeDrop={activeDrop}
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
