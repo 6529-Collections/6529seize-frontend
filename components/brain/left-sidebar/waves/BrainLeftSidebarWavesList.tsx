@@ -7,12 +7,15 @@ import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserv
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { AuthContext } from "../../../auth/Auth";
+import { useNewDropsCount } from "../../../../hooks/useNewDropsCount";
 
-interface BrainLeftSidebarWavesListProps {}
+interface BrainLeftSidebarWavesListProps {
+  readonly activeWaveId: string | null;
+}
 
 const BrainLeftSidebarWavesList: React.FC<
   BrainLeftSidebarWavesListProps
-> = () => {
+> = ({ activeWaveId }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getIsConnectedIdentity = () =>
     !!connectedProfile?.profile?.handle && !activeProfileProxy;
@@ -33,6 +36,7 @@ const BrainLeftSidebarWavesList: React.FC<
       type: selectedSort,
       limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
       following: isConnectedIdentity && isFollowing,
+      refetchInterval: 10000,
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {
@@ -40,6 +44,11 @@ const BrainLeftSidebarWavesList: React.FC<
       fetchNextPage();
     }
   });
+
+  const { newDropsCounts, resetWaveCount } = useNewDropsCount(
+    waves,
+    activeWaveId
+  );
 
   const memoizedWaves = useMemo(() => waves || [], [waves]);
 
@@ -67,7 +76,12 @@ const BrainLeftSidebarWavesList: React.FC<
         <div className="tw-mt-2 tw-max-h-96 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
             {memoizedWaves.map((wave) => (
-              <BrainLeftSidebarWave key={wave.id} wave={wave} />
+              <BrainLeftSidebarWave
+                key={wave.id}
+                wave={wave}
+                newDropsCounts={newDropsCounts}
+                resetWaveCount={resetWaveCount}
+              />
             ))}
             {isFetchingNextPage && (
               <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">

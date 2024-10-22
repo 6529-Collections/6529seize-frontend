@@ -2,18 +2,21 @@ import React, { useMemo } from "react";
 import { useWaves } from "../../../../hooks/useWaves";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
+import { useNewDropsCount } from "../../../../hooks/useNewDropsCount";
 
 interface BrainLeftSidebarWavesMyWavesProps {
   readonly identity: string;
+  readonly activeWaveId: string | null;
 }
 
 const BrainLeftSidebarWavesMyWaves: React.FC<
   BrainLeftSidebarWavesMyWavesProps
-> = ({ identity }) => {
+> = ({ identity, activeWaveId }) => {
   const { waves, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useWaves({
       identity,
       waveName: null,
+      refetchInterval: 10000,
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {
@@ -21,6 +24,11 @@ const BrainLeftSidebarWavesMyWaves: React.FC<
       fetchNextPage();
     }
   });
+
+  const { newDropsCounts, resetWaveCount } = useNewDropsCount(
+    waves,
+    activeWaveId
+  );
 
   const memoizedWaves = useMemo(() => waves || [], [waves]);
   return (
@@ -36,7 +44,12 @@ const BrainLeftSidebarWavesMyWaves: React.FC<
         <div className="tw-mt-2 tw-max-h-96 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
             {memoizedWaves.map((wave) => (
-              <BrainLeftSidebarWave key={wave.id} wave={wave} />
+              <BrainLeftSidebarWave
+                key={wave.id}
+                wave={wave}
+                newDropsCounts={newDropsCounts}
+                resetWaveCount={resetWaveCount}
+              />
             ))}
             {isFetchingNextPage && (
               <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
