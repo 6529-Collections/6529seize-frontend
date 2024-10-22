@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 import { usePrefetchWaveData } from "../../../hooks/usePrefetchWaveData";
 import { useWaveData } from "../../../hooks/useWaveData";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface BrainContentPinnedWaveProps {
   readonly waveId: string;
@@ -23,6 +24,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
   const { data: wave } = useWaveData(waveId);
+  const isMobile = useIsMobileDevice();
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -63,7 +65,12 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
         onClick={onLinkClick}
         className="tw-flex tw-flex-col tw-items-center tw-no-underline"
       >
-        <Tippy content={wave?.name ?? ""} placement="top">
+        <Tippy
+          disabled={isMobile}
+          content={<span className="tw-text-xs">{wave?.name ?? ""}</span>}
+          placement="top"
+          theme="dark"
+        >
           <div
             className={`tw-relative tw-w-14 tw-h-14 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300 ${
               active ? "tw-bg-indigo-900" : "tw-bg-iron-800"
@@ -91,7 +98,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               type="button"
               onClick={onRemoveClick}
               aria-label="Remove wave"
-              className="tw-border-0 tw-bg-iron-800 tw-rounded-full tw-size-5 tw-p-0 -tw-top-1 -tw-right-5 tw-absolute tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-0 group-hover:tw-opacity-100 hover:tw-text-red hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
+              className="tw-border-0 tw-bg-iron-800 tw-rounded-full tw-size-5 tw-p-0 -tw-top-1 -tw-right-5 tw-absolute tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100 md:tw-opacity-0 group-hover:tw-opacity-100 md:hover:tw-text-red md:hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
             >
               <svg
                 className="tw-size-5 tw-flex-shrink-0"
@@ -111,7 +118,6 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
             </button>
           </div>
         </Tippy>
-      
       </Link>
     </div>
   );

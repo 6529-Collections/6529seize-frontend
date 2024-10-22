@@ -17,15 +17,13 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
-    if (currentWaveId === waveId) {
-      return "/my-stream";
-    }
-    return `/my-stream?wave=${waveId}`;
+    return currentWaveId === waveId
+      ? "/my-stream"
+      : `/my-stream?wave=${waveId}`;
   };
 
   const onHover = (waveId: string) => {
-    if (waveId === router.query.wave) return;
-    prefetchWaveData(waveId);
+    if (waveId !== router.query.wave) prefetchWaveData(waveId);
   };
 
   const isActive = wave.id === router.query.wave;
@@ -35,41 +33,72 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     router.push(getHref(wave.id), undefined, { shallow: true });
   };
 
+  const onChatClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    router.push(`/waves/${wave.id}/chat`);
+  };
+
   return (
-    <div
-      key={wave.id}
-      className={`tw-py-2 tw-px-5 ${
-        isActive ? "tw-bg-primary-300/5 tw-text-iron-50" : ""
-      } `}
-    >
+    <div className="tw-flex tw-px-5 tw-transition-colors tw-duration-200 tw-ease-in-out hover:tw-bg-iron-900">
       <Link
         href={getHref(wave.id)}
         onMouseEnter={() => onHover(wave.id)}
         onClick={onLinkClick}
-        className="tw-ml-1 tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group"
+        className={`tw-flex tw-items-center tw-flex-1 tw-space-x-3 tw-no-underline tw-py-2 tw-transition-colors tw-duration-200 tw-ease-in-out hover:tw-bg-iron-900 ${
+          isActive
+            ? "tw-text-primary-400 hover:tw-text-primary-400"
+            : "tw-text-iron-200 hover:tw-text-iron-50"
+        } `}
       >
         <div
-          className={`tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
+          className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden ${
             isActive
-              ? "tw-ring-1 tw-ring-primary-400"
-              : "tw-ring-1 tw-ring-inset tw-ring-white/10"
-          } ${!wave.picture ? "tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-800" : ""}`}
+              ? "tw-ring-2 tw-ring-primary-400"
+              : "tw-ring-1 tw-ring-iron-700"
+          }`}
         >
-          {wave.picture && (
+          {wave.picture ? (
             <img
               src={wave.picture}
               alt={wave.name}
-              className="tw-w-full tw-h-full tw-rounded-full tw-object-contain"
+              className="tw-w-full tw-h-full tw-object-cover"
             />
+          ) : (
+            <div className="tw-w-full tw-h-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700" />
           )}
         </div>
-        <div className="tw-flex tw-justify-between tw-gap-x-2 tw-w-full">
-          <span>{wave.name}</span>
-          <div className="tw-mt-0.5 tw-text-right tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
-            <span>{getTimeAgoShort(wave.metrics.latest_drop_timestamp)}</span>
+        <div className="tw-flex-1 tw-min-w-0">
+          <div className="tw-font-medium tw-truncate tw-text-sm">
+            {wave.name}
+          </div>
+          <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
+            <span className="tw-pr-1">Last drop</span>
+            <span className="tw-text-iron-400">
+              {getTimeAgoShort(wave.metrics.latest_drop_timestamp)}
+            </span>
           </div>
         </div>
       </Link>
+      <button
+        className="tw-size-6 tw-mt-2 tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-rounded-full tw-text-iron-400 md:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out "
+        aria-label="Open chat"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          aria-hidden="true"
+          className="tw-size-4 tw-flex-shrink-0"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+          />
+        </svg>
+      </button>
     </div>
   );
 };
