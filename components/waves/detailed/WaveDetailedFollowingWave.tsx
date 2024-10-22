@@ -94,7 +94,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
         <div
           className={`tw-mr-3 tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
             isActive
-              ? "tw-ring-1 tw-ring-inset tw-ring-primary-400"
+              ? "tw-ring-1 tw-ring-primary-400"
               : "tw-ring-1 tw-ring-inset tw-ring-white/10"
           }`}
         >

@@ -18,7 +18,7 @@ interface Props {
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
   <HydrationBoundary state={pageProps.dehydratedState}>
-    <div className="tailwind-scope">
+    <div className="tailwind-scope tw-flex-1">
       <Notifications />
     </div>
   </HydrationBoundary>

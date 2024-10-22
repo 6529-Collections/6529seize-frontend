@@ -19,7 +19,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
 }) => {
   return (
-    <div className="tw-mt-8 tw-pb-8 tw-flex-1 tw-h-full tw-flex tw-flex-col tw-overflow-y-auto no-scrollbar tailwind-scope">
+    <div className="lg:tw-mt-8 tw-pb-2 lg:tw-pb-8 tw-flex tw-flex-col tw-h-[calc(100vh-10.75rem)] lg:tw-h-full lg:tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 no-scrollbar tailwind-scope">
       {showPinnedWaves && <BrainContentPinnedWaves />}
       <BrainContentInput
         waveId={waveId}
