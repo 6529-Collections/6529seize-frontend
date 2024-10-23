@@ -90,7 +90,7 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
       <Tippy content="Go to wave">
         <Link
           href={`/waves/${wave.id}`}
-          className="tw-size-6 tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-rounded-full tw-text-iron-400 md:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+          className="tw-size-7 sm:tw-size-6 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-rounded-full tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           aria-label="Open chat"
         >
           <svg
@@ -100,7 +100,7 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
             strokeWidth="1.5"
             stroke="currentColor"
             aria-hidden="true"
-            className="tw-size-4 tw-flex-shrink-0"
+            className="tw-size-5 sm:tw-size-4 tw-flex-shrink-0"
           >
             <path
               strokeLinecap="round"

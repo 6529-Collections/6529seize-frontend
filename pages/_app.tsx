@@ -6,6 +6,7 @@ import "../styles/swiper.scss";
 import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
+import { setAuthJwt } from "../services/auth/auth.utils";
 import {
   CW_PROJECT_ID,
   DELEGATION_CONTRACT,

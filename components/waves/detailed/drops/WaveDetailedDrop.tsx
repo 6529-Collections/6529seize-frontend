@@ -230,12 +230,12 @@ const WaveDetailedDrop = ({
         </div>
       </div>
       {!isMobile && showReplyAndQuote && (
-        <WaveDetailedDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          onReply={handleOnReply}
-          onQuote={handleOnQuote}
-        />
+          <WaveDetailedDropActions
+            drop={drop}
+            activePartIndex={activePartIndex}
+            onReply={handleOnReply}
+            onQuote={handleOnQuote}
+          />
       )}
       <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
         {drop.metadata.length > 0 && (
