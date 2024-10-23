@@ -72,7 +72,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           theme="dark"
         >
           <div
-            className={`tw-relative tw-w-14 tw-h-14 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300 ${
+            className={`tw-relative tw-size-16 md:tw-size-14 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300 ${
               active ? "tw-bg-indigo-900" : "tw-bg-iron-800"
             }`}
           >
