@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -6,11 +6,18 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import WaveSpecs from "../../waves/detailed/specs/WaveSpecs";
 import WaveGroups from "../../waves/detailed/groups/WaveGroups";
 import WaveHeader from "../../waves/detailed/header/WaveHeader";
+import BrainRightSidebarContent from "./BrainRightSidebarContent";
+import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 
 interface BrainRightSidebarProps {
   readonly isCollapsed: boolean;
   readonly setIsCollapsed: (isCollapsed: boolean) => void;
   readonly waveId: string;
+}
+
+enum Mode {
+  CONTENT = "CONTENT",
+  FOLLOWERS = "FOLLOWERS",
 }
 
 const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
@@ -28,6 +35,16 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
     staleTime: 60000,
     placeholderData: keepPreviousData,
   });
+
+  const [mode, setMode] = useState<Mode>(Mode.CONTENT);
+
+  const onFollowersClick = () => {
+    if (mode === Mode.FOLLOWERS) {
+      setMode(Mode.CONTENT);
+    } else {
+      setMode(Mode.FOLLOWERS);
+    }
+  };
 
   return (
     <div
@@ -65,15 +82,24 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
         <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
           {wave && (
-            <WaveHeader
-              wave={wave}
-              onFollowersClick={() => {}}
-              useRing={false}
-              useRounded={false}
-            />
+            <>
+              <WaveHeader
+                wave={wave}
+                onFollowersClick={onFollowersClick}
+                useRing={false}
+                useRounded={false}
+              />
+              {mode === Mode.CONTENT && (
+                <BrainRightSidebarContent wave={wave} />
+              )}
+              {mode === Mode.FOLLOWERS && (
+                <BrainRightSidebarFollowers
+                  wave={wave}
+                  closeFollowers={() => setMode(Mode.CONTENT)}
+                />
+              )}
+            </>
           )}
-          {wave && <WaveSpecs wave={wave} useRing={false} />}
-          {wave && <WaveGroups wave={wave} useRing={false} />}
         </div>
       </div>
     </div>

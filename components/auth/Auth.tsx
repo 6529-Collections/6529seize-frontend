@@ -87,8 +87,7 @@ export default function Auth({
   readonly children: React.ReactNode;
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
-/*   const { address } = useAccount(); */
-  const address = "0xce8D729a2bFAdD694C3A2d04C47D2C89690C73f1"
+  const { address } = useAccount();
 
   const { seizeDisconnect } = useSeizeConnect();
 

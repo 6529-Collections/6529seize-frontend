@@ -1,12 +1,14 @@
 import React, { ReactNode, useState } from "react";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
+import { useRouter } from "next/router";
 
 interface Props {
   children: ReactNode;
 }
 
 const BrainMobile: React.FC<Props> = ({ children }) => {
+  const router = useRouter();
   const [isWavesButtonActive, setIsWavesButtonActive] = useState(false);
 
   return (
@@ -16,7 +18,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           onWavesButtonClick={setIsWavesButtonActive}
           isWavesButtonActive={isWavesButtonActive}
         />
-        {isWavesButtonActive ? <BrainMobileWaves /> : children}
+        {isWavesButtonActive ? <BrainMobileWaves activeWaveId={router.query.wave as string}/> : children}
   
     </div>
   );

@@ -271,7 +271,7 @@ type AppPropsWithLayout = AppProps & {
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
-  setAuthJwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiNWZjZWI3LTI1NTctNDhiZS1hNjk5LWE5NDdmMGQ5ZWZiOSIsInN1YiI6IjB4Y2U4ZDcyOWEyYmZhZGQ2OTRjM2EyZDA0YzQ3ZDJjODk2OTBjNzNmMSIsInJvbGUiOiIzOTA5ODhiYi0yY2NjLTRmMTQtYmFkYi05YzAzNDdhYWE1NDEiLCJpYXQiOjE3Mjk1MTA4MjMsImV4cCI6MTcyOTY3NzIyM30.bFqNVpOv1EqSMkwr3n5iTNLj4gBwsK8nbb-HYmDzYaM")
+
   const getLayout = Component.getLayout ?? ((page) => page);
   const capacitor = useCapacitor();
 

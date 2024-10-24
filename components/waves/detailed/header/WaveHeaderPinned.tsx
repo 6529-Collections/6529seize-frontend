@@ -7,9 +7,18 @@ import WaveDetailedDrop from "../drops/WaveDetailedDrop";
 
 interface WaveHeaderPinnedProps {
   readonly wave: ApiWave;
+  readonly side?: WaveHeaderPinnedSide;
 }
 
-const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
+export enum WaveHeaderPinnedSide {
+  LEFT = "LEFT",
+  RIGHT = "RIGHT",
+}
+
+const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({
+  wave,
+  side = WaveHeaderPinnedSide.RIGHT,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
