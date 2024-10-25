@@ -4,10 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState, useRef } from "react";
 import { Modal } from "react-bootstrap";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 const QRCode = require("qrcode");
 
 export default function HeaderQR() {
+  const capacitor = useCapacitor();
   const router = useRouter();
   const [qrCodeSrc, setQrCodeSrc] = useState<string>("");
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
@@ -54,6 +56,10 @@ export default function HeaderQR() {
         console.error("Error generating QR code:", err);
       });
   };
+
+  if (capacitor.isCapacitor) {
+    return <></>;
+  }
 
   return (
     <div className="tailwind-scope tw-relative xl:tw-mr-3 tw-self-center">
