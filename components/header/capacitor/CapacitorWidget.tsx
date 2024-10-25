@@ -14,15 +14,19 @@ import Hammer from "hammerjs";
 import useCapacitor, {
   CapacitorOrientationType,
 } from "../../../hooks/useCapacitor";
+import { App } from "@capacitor/app";
+import { useRouter } from "next/router";
 
 export default function CapacitorWidget() {
-const capacitor = useCapacitor();
+  const capacitor = useCapacitor();
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
     useNavigationHistory();
 
   const [enableScrollTop, setEnableScrollTop] = useState(false);
 
   const [isShareOpen, setIsShareOpen] = useState(false);
+
+  const router = useRouter();
 
   const toggleShare = async () => {
     await Share.share({
@@ -69,6 +73,29 @@ const capacitor = useCapacitor();
       hammer.off("swipeleft", goForward);
     };
   }, [canGoBack, canGoForward]);
+
+  useEffect(() => {
+    const listener = App.addListener("appUrlOpen", (data) => {
+      console.log("appUrlOpen", data);
+      const url = new URL(data.url);
+      console.log("url", url);
+      const path = url.pathname;
+      console.log("path", path);
+      const queryParams = Object.fromEntries(url.searchParams.entries());
+      console.log("queryParams", queryParams);
+
+      console.log("pushing", path, queryParams);
+
+      router.push({
+        pathname: path,
+        query: queryParams,
+      });
+    });
+
+    return () => {
+      listener.then((handle) => handle.remove());
+    };
+  }, [router]);
 
   if (capacitor.keyboardVisible) {
     return <></>;
