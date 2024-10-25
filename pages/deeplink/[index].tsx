@@ -30,7 +30,7 @@ const DeeplinkPage = () => {
       }}>
       <h1>Redirecting...</h1>
       <p>
-        If you're not redirected,{" "}
+        If you&apos;re not redirected,{" "}
         <a href={`mobileStaging6529://${router.query.index}`}>click here</a>.
       </p>
     </div>
