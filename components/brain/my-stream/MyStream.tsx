@@ -1,79 +1,25 @@
-import { useContext, useEffect } from "react";
-import { AuthContext, TitleType } from "../../auth/Auth";
 import FeedWrapper from "../feed/FeedWrapper";
-import {
-  useMyStreamQuery,
-  usePollingQuery,
-} from "../../../hooks/useMyStreamQuery";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { TypedFeedItem } from "../../../types/feed.types";
 
 interface MyStreamProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly activeDrop: ActiveDropState | null;
+  readonly items: TypedFeedItem[];
+  readonly isFetching: boolean;
+  readonly onBottomIntersection: (state: boolean) => void;
 }
 
 export default function MyStream({
   onReply,
   onQuote,
   activeDrop,
+  items,
+  isFetching,
+  onBottomIntersection,
 }: MyStreamProps) {
-  const { setTitle } = useContext(AuthContext);
-
-  const {
-    items,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-    refetch,
-    isInitialQueryDone,
-  } = useMyStreamQuery();
-
-  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
-
-  const onBottomIntersection = (state: boolean) => {
-    if (
-      state &&
-      status !== "pending" &&
-      !isFetching &&
-      !isFetchingNextPage &&
-      hasNextPage
-    ) {
-      fetchNextPage();
-    }
-  };
-
-  useEffect(() => {
-    setTitle({
-      title: haveNewItems ? "New Stream Items Available | 6529 SEIZE" : null,
-      type: TitleType.MY_STREAM,
-    });
-
-    return () => {
-      setTitle({
-        title: null,
-        type: TitleType.MY_STREAM,
-      });
-    };
-  }, [haveNewItems]);
-
-  useEffect(() => {
-    const checkAndRefetch = () => {
-      if (haveNewItems && document.visibilityState === "visible") {
-        refetch();
-      }
-    };
-
-    checkAndRefetch();
-    document.addEventListener("visibilitychange", checkAndRefetch);
-
-    return () => {
-      document.removeEventListener("visibilitychange", checkAndRefetch);
-    };
-  }, [haveNewItems]);
 
   return (
     <div className="tw-flex-shrink-0">

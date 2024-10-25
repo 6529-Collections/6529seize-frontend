@@ -12,11 +12,17 @@ import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinned from "./WaveHeaderPinned";
 
+export enum WaveHeaderPinnedSide {
+  LEFT = "LEFT",
+  RIGHT = "RIGHT",
+}
+
 interface WaveHeaderProps {
   readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
   readonly useRing?: boolean;
   readonly useRounded?: boolean;
+  readonly pinnedSide?: WaveHeaderPinnedSide;
 }
 
 export default function WaveHeader({
@@ -24,6 +30,7 @@ export default function WaveHeader({
   onFollowersClick,
   useRing = true,
   useRounded = true,
+  pinnedSide = WaveHeaderPinnedSide.RIGHT,
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeUntil(wave.created_at);
@@ -113,7 +120,7 @@ export default function WaveHeader({
                 wave={wave}
                 onFollowersClick={onFollowersClick}
               />
-              <WaveHeaderPinned wave={wave} />
+              <WaveHeaderPinned wave={wave} side={pinnedSide} />
             </div>
             {!!firstXContributors.length && (
               <div className="tw-flex tw-items-center">

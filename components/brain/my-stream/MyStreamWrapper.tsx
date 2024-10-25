@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";
 import MyStreamWave from "./MyStreamWave";
@@ -8,8 +8,11 @@ import {
   ActiveDropState,
 } from "../../waves/detailed/WaveDetailedContent";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
+import { AuthContext, TitleType } from "../../auth/Auth";
+import { useMyStreamQuery, usePollingQuery } from "../../../hooks/useMyStreamQuery";
 
 const MyStreamWrapper: React.FC = () => {
+  const { setTitle } = useContext(AuthContext);
   const router = useRouter();
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
 
@@ -55,6 +58,60 @@ const MyStreamWrapper: React.FC = () => {
     setActiveDrop(null);
   };
 
+  const {
+    items,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+    refetch,
+    isInitialQueryDone,
+  } = useMyStreamQuery();
+
+  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
+
+  const onBottomIntersection = (state: boolean) => {
+    if (
+      state &&
+      status !== "pending" &&
+      !isFetching &&
+      !isFetchingNextPage &&
+      hasNextPage
+    ) {
+      fetchNextPage();
+    }
+  };
+
+  useEffect(() => {
+    setTitle({
+      title: haveNewItems ? "New Stream Items Available | 6529 SEIZE" : null,
+      type: TitleType.MY_STREAM,
+    });
+
+    return () => {
+      setTitle({
+        title: null,
+        type: TitleType.MY_STREAM,
+      });
+    };
+  }, [haveNewItems]);
+
+  useEffect(() => {
+    const checkAndRefetch = () => {
+      if (haveNewItems && document.visibilityState === "visible") {
+        refetch();
+      }
+    };
+
+    checkAndRefetch();
+    document.addEventListener("visibilitychange", checkAndRefetch);
+
+    return () => {
+      document.removeEventListener("visibilitychange", checkAndRefetch);
+    };
+  }, [haveNewItems]);
+
   const component = serialisedWaveId ? (
     <MyStreamWave
       waveId={serialisedWaveId}
@@ -63,7 +120,14 @@ const MyStreamWrapper: React.FC = () => {
       activeDrop={activeDrop}
     />
   ) : (
-    <MyStream onReply={onReply} onQuote={onQuote} activeDrop={activeDrop} />
+    <MyStream
+      onReply={onReply}
+      onQuote={onQuote}
+      activeDrop={activeDrop}
+      items={items}
+      isFetching={isFetching}
+      onBottomIntersection={onBottomIntersection}
+    />
   );
   return (
     <BrainContent
