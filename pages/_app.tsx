@@ -268,7 +268,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const capacitor = useCapacitor();
 
   const router = useRouter();
-  const hideFooter = router.pathname.startsWith("/waves");
+  const hideFooter = ["/waves", "/my-stream", "/deeplink"].some((path) =>
+    router.pathname.startsWith(path)
+  );
 
   useEffect(() => {
     if (capacitor.isCapacitor) {

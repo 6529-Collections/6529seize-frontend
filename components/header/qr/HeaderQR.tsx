@@ -16,41 +16,23 @@ export default function HeaderQR() {
   const watermarkSrc = "watermark.png";
 
   const openQR = () => {
-    const url = `mobile6529://${router.asPath}`;
+    let routerPath = router.asPath;
+    if (routerPath.startsWith("/")) {
+      routerPath = routerPath.slice(1);
+    }
+    const url = `mobileStaging6529://${routerPath}`;
+
+    console.log("url", url);
 
     // Create a hidden canvas to add the QR code and watermark
     const canvas = document.createElement("canvas");
     canvas.width = 500;
     canvas.height = 500;
-    const ctx = canvas.getContext("2d");
 
-    QRCode.toCanvas(canvas, url, {
-      width: 500,
-      margin: 0,
-      color: {
-        dark: "#000000",
-        light: "#ffffff",
-      },
-      errorCorrectionLevel: "H",
-    })
-      .then(() => {
-        const watermark = document.createElement("img") as HTMLImageElement;
-        watermark.src = watermarkSrc;
-        watermark.onload = () => {
-          // Draw the watermark image on top of the QR code
-          const watermarkSize = 40; // Customize size as needed
-          ctx?.drawImage(
-            watermark,
-            (canvas.width - watermarkSize) / 2,
-            (canvas.height - watermarkSize) / 2,
-            watermarkSize,
-            watermarkSize
-          );
-
-          // Convert the final canvas to a data URL
-          setQrCodeSrc(canvas.toDataURL());
-          setShowQRModal(true);
-        };
+    QRCode.toDataURL(url, { width: 500, margin: 0 })
+      .then((dataUrl: string) => {
+        setQrCodeSrc(dataUrl);
+        setShowQRModal(true);
       })
       .catch((err: any) => {
         console.error("Error generating QR code:", err);
