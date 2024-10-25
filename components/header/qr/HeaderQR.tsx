@@ -20,7 +20,7 @@ export default function HeaderQR() {
     if (routerPath.startsWith("/")) {
       routerPath = routerPath.slice(1);
     }
-    const url = `mobileStaging6529://${routerPath}`;
+    const url = `https://staging.seize.io/deeplink/${routerPath}`;
 
     console.log("url", url);
 
