@@ -6,6 +6,7 @@ import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
+import WaveDetailedRightSidebar from "./WaveDetailedRightSidebar";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
@@ -59,6 +60,8 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CONTENT]: (
       <WaveDetailedContent
@@ -82,7 +85,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     <div className="tailwind-scope tw-bg-black">
       <div className="tw-mt-3 tw-px-4">
         <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
-          <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[22rem] tw-w-full">
+          <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[21.5rem] tw-w-full">
             <div className="tw-flex tw-flex-1 tw-flex-col">
               <WaveDetailedAbout
                 wave={wave}
@@ -94,7 +97,19 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               />
             </div>
           </div>
-          <div className="tw-flex-1 tw-ml-[22rem]">
+          <div
+            className={`tw-flex-1 tw-ml-[21.5rem] ${
+              isSidebarOpen ? "tw-mr-[19.5rem]" : ""
+            } tw-transition-all tw-duration-300`}
+          >
+            <div className="tw-flex tw-space-x-2 tw-mb-3">
+              <button className="tw-px-3 tw-py-1.5 tw-border-0 tw-rounded-full tw-text-xs tw-font-medium tw-bg-primary-400 tw-text-white tw-shadow-sm hover:tw-bg-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 tw-transition-colors">
+                All
+              </button>
+              <button className="tw-px-3 tw-py-1.5 tw-border-0 tw-rounded-full tw-text-xs tw-font-medium tw-bg-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 tw-transition-colors">
+                Drops
+              </button>
+            </div>
             <div
               ref={contentWrapperRef}
               className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800"
@@ -112,6 +127,10 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               </AnimatePresence>
             </div>
           </div>
+          <WaveDetailedRightSidebar
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
         </div>
       </div>
     </div>
