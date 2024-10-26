@@ -45,6 +45,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
         <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
           {getTimeAgoShort(drop.created_at)}
         </p>
+        <div className="tw-text-yellow">HERE IS WINNER</div>
       </div>
       <div className="tw-mt-0.5">
         {showWaveInfo && (
@@ -56,6 +57,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
           </Link>
         )}
       </div>
+
       {isStorm && (
         <div className="tw-mt-2 tw-inline-flex tw-relative">
           <span className="tw-text-xs tw-text-iron-50">
