@@ -12,7 +12,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
 }) => {
   return (
     <motion.div
-      className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-border-l tw-border-iron-800 tw-border-solid tw-border-y-0 tw-border-r-0 tw-flex tw-flex-col tw-w-full lg:tw-w-[20.5rem]"
+      className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col tw-w-full lg:tw-w-[20.5rem]"
       initial={false}
       animate={{ x: isOpen ? 0 : "100%" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -27,7 +27,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          strokeWidth="2"
+          strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
           className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-ease-in-out"
@@ -46,7 +46,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
             <h2 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-3">
               Leaderboard
             </h2>
-            <ul className="tw-space-y-2 tw-pl-0">
+            <ul className="tw-space-y-3 tw-pl-0">
               <li className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-iron-900 tw-py-2.5 tw-px-2">
                 <div className="tw-flex tw-items-center tw-space-x-4">
                   <svg
@@ -255,13 +255,15 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
             <h2 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-3">
               Outcome
             </h2>
-            <div className="tw-space-y-2">
+            <div className="tw-space-y-3">
               <div className="tw-grid tw-grid-cols-3 tw-px-2">
-                <span className="tw-pr-2"></span>
-                <span className="tw-px-2 tw-text-iron-500 tw-font-normal tw-uppercase tw-text-[10px] tw-leading-3 tw-tracking-wide tw-text-right">
+                <span className="tw-pr-2 tw-text-iron-500 tw-font-normal tw-text-xs tw-uppercase">
+                  Category
+                </span>
+                <span className="tw-px-2 tw-text-iron-500 tw-font-normal tw-text-xs tw-text-right tw-uppercase">
                   Winners
                 </span>
-                <span className="tw-pl-2 tw-text-iron-500 tw-font-normal tw-uppercase tw-text-[10px] tw-leading-3 tw-text-right tw-tracking-wide">
+                <span className="tw-pl-2 tw-text-iron-500 tw-font-normal tw-text-xs tw-text-right tw-uppercase">
                   Prize
                 </span>
               </div>

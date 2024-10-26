@@ -703,7 +703,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
-
   useEffect(() => {
     if (!activeDrop) {
       return;
@@ -861,22 +860,48 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           </div>
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
-          <PrimaryButton
-            onClicked={onDrop}
-            loading={submitting}
-            disabled={!canSubmit}
-            padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5"
-          >
-            <span className="tw-hidden lg:tw-inline">Drop</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="tw-size-5 lg:tw-hidden"
+          <div className="tw-flex tw-items-center tw-gap-x-3">
+            <button
+              type="button"
+              className="tw-size-9 tw-flex tw-items-center tw-justify-center tw-border-t tw-border-b-0 tw-border-x-0 tw-border-solid tw-border-iron-600 tw-rounded-full tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 hover:tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-border-iron-700 active:tw-text-iron-300 active:tw-bg-iron-700 active:tw-border-iron-700 tw-transform tw-transition-transform tw-duration-300 tw-ease-in-out active:tw-scale-90"
             >
-              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-            </svg>
-          </PrimaryButton>
+              <svg
+                className="tw-size-5 tw-flex-shrink-0 tw-transition-colors tw-duration-300 tw-ease-in-out group-active:tw-fill-current"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.12514 11.4002C3.19352 11.4002 1.62207 9.8287 1.62207 7.89708C1.62207 7.6076 1.62207 6.72658 3.13123 4.34465C3.84008 3.2259 4.53816 2.3146 4.56755 2.2764L5.12514 1.55029L5.68274 2.2764C5.71213 2.31464 6.41025 3.2259 7.11906 4.34465C8.62826 6.72658 8.62826 7.6076 8.62826 7.89708C8.62826 9.8287 7.05676 11.4002 5.12514 11.4002ZM5.12514 3.89111C4.12193 5.30934 3.02825 7.14112 3.02825 7.89708C3.02825 9.05329 3.96894 9.99397 5.12514 9.99397C6.2814 9.99397 7.22208 9.05329 7.22208 7.89708C7.22208 7.14117 6.12836 5.30934 5.12514 3.89111Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M19.6382 7.67056C18.1275 7.67056 16.8986 6.44156 16.8986 4.93095C16.8986 4.11799 17.542 3.00843 18.026 2.24454C18.5461 1.42362 19.059 0.75418 19.0806 0.726057L19.6382 0L20.1958 0.726104C20.2173 0.754227 20.7302 1.42366 21.2504 2.24459C21.7344 3.00847 22.3778 4.11804 22.3778 4.931C22.3778 6.44161 21.1488 7.67056 19.6382 7.67056ZM19.6349 2.35151C18.8008 3.55702 18.3047 4.5788 18.3047 4.93095C18.3047 5.66624 18.9029 6.26439 19.6382 6.26439C20.3734 6.26439 20.9716 5.6662 20.9716 4.93095C20.9716 4.84761 20.9278 4.36276 20.0625 2.99718C19.9159 2.76572 19.7689 2.54593 19.6349 2.35151Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M13.1227 24.0002C9.68884 24.0002 6.89514 21.2065 6.89514 17.7726C6.89514 16.3719 7.86123 14.137 9.76656 11.1298C11.1487 8.94825 12.5079 7.17407 12.5651 7.09964L13.1227 6.37354L13.6803 7.09964C13.7375 7.17412 15.0966 8.9483 16.4788 11.1298C18.3841 14.137 19.3502 16.3719 19.3502 17.7726C19.3503 21.2066 16.5566 24.0002 13.1227 24.0002ZM13.1228 8.70146C11.3941 11.0634 8.30132 15.7152 8.30132 17.7726C8.30132 20.4311 10.4642 22.594 13.1227 22.594C15.7813 22.594 17.9441 20.4311 17.9441 17.7726C17.9441 15.7137 14.8515 11.0629 13.1228 8.70146Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <PrimaryButton
+              onClicked={onDrop}
+              loading={submitting}
+              disabled={!canSubmit}
+              padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5"
+            >
+              <span className="tw-hidden lg:tw-inline">Drop</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="tw-size-5 lg:tw-hidden"
+              >
+                <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+              </svg>
+            </PrimaryButton>
+          </div>
         </div>
       </div>
       <CreateDropContentRequirements
