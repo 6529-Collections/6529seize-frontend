@@ -28,7 +28,6 @@ const updateQueryData = (
   if (pages[0]) {
     pages[0].drops.unshift({
       ...drop,
-      drop_type: ApiDropType.Chat,
     });
     return { ...oldData, pages };
   }

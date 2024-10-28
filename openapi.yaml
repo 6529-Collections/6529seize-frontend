@@ -3200,6 +3200,7 @@ components:
       required:
         - id
         - serial_no
+        - drop_type
         - wave
         - author
         - created_at
@@ -3222,6 +3223,8 @@ components:
           description: Sequence number of the drop in Seize
           type: number
           format: int64
+        drop_type:
+          $ref: "#/components/schemas/ApiDropType"
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
         reply_to:

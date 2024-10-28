@@ -22,6 +22,7 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiDropMedia } from "../../../../../../generated/models/ApiDropMedia";
 import { getOptimisticDropId } from "../../../../../../helpers/waves/drop.helpers";
+import { ApiDropType } from "../../../../../../generated/models/ObjectSerializer";
 
 export default function DropReplyInputWrapper({
   drop: originalDrop,
@@ -287,6 +288,7 @@ export default function DropReplyInputWrapper({
       raters_count: 0,
       context_profile_context: null,
       subscribed_actions: [],
+      drop_type: ApiDropType.Chat,
     };
   };
 

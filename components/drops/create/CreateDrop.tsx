@@ -24,6 +24,7 @@ import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentioned
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -245,6 +246,7 @@ export default function CreateDrop({
       raters_count: 0,
       context_profile_context: null,
       subscribed_actions: [],
+      drop_type: ApiDropType.Chat,
     };
   };
 

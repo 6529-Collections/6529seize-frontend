@@ -314,7 +314,8 @@ const getOptimisticDrop = (
     voting: { authenticated_user_eligible: boolean };
     chat: { authenticated_user_eligible: boolean };
   },
-  activeDrop: ActiveDropState | null
+  activeDrop: ActiveDropState | null,
+  dropType: ApiDropType
 ): ApiDrop | null => {
   if (!connectedProfile?.profile) {
     return null;
@@ -388,6 +389,7 @@ const getOptimisticDrop = (
     raters_count: 0,
     context_profile_context: null,
     subscribed_actions: [],
+    drop_type: dropType,
   };
 };
 
@@ -633,7 +635,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         requestBody,
         connectedProfile,
         wave,
-        activeDrop
+        activeDrop,
+        isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
