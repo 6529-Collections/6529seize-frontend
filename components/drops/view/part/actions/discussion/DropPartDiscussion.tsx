@@ -5,7 +5,6 @@ import DropPartDiscussionItems from "./items/DropPartDiscussionItems";
 export default function DropPartDiscussion({
   drop,
   dropPart,
-  availableCredit,
   dropReplyDepth,
   activeDiscussionDropId,
   showWaveInfo = true,
@@ -14,7 +13,6 @@ export default function DropPartDiscussion({
 }: {
   readonly drop: ApiDrop;
   readonly dropPart: ApiDropPart;
-  readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly activeDiscussionDropId: string | null
   readonly showWaveInfo?: boolean;
@@ -25,7 +23,6 @@ export default function DropPartDiscussion({
     <DropPartDiscussionItems
       drop={drop}
       dropPart={dropPart}
-      availableCredit={availableCredit}
       dropReplyDepth={dropReplyDepth}
       activeDiscussionDropId={activeDiscussionDropId}
       showWaveInfo={showWaveInfo}

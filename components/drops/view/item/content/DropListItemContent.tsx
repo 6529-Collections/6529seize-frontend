@@ -17,7 +17,6 @@ interface DropListItemContentProps {
   readonly drop: ApiDrop;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
-  readonly availableCredit: number | null;
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
   readonly dropReplyDepth: number;
@@ -30,7 +29,6 @@ export default function DropListItemContent({
   drop,
   voteState,
   canVote,
-  availableCredit,
   showWaveInfo = true,
   smallMenuIsShown,
   dropReplyDepth,
@@ -109,7 +107,6 @@ export default function DropListItemContent({
           voteState={voteState}
           canVote={canVote}
           size={size}
-          availableCredit={availableCredit}
           dropReplyDepth={dropReplyDepth}
           isDiscussionOpen={isDiscussionOpen}
           connectingLineType={connectingLineType}

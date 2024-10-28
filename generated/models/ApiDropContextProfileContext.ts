@@ -14,6 +14,9 @@ import { HttpFile } from '../http/http';
 
 export class ApiDropContextProfileContext {
     'rating': number;
+    'min_rating': number;
+    'max_rating': number;
+    'rating_currency'?: ApiDropContextProfileContextRatingCurrencyEnum;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,6 +26,24 @@ export class ApiDropContextProfileContext {
             "baseName": "rating",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "min_rating",
+            "baseName": "min_rating",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "max_rating",
+            "baseName": "max_rating",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "rating_currency",
+            "baseName": "rating_currency",
+            "type": "ApiDropContextProfileContextRatingCurrencyEnum",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -31,5 +52,11 @@ export class ApiDropContextProfileContext {
 
     public constructor() {
     }
+}
+
+
+export enum ApiDropContextProfileContextRatingCurrencyEnum {
+    Rep = 'REP',
+    Tdh = 'TDH'
 }
 

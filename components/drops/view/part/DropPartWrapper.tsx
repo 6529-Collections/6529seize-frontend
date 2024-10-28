@@ -16,7 +16,6 @@ export interface DropPartWrapperProps {
   readonly dropPart: ApiDropPart;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
-  readonly availableCredit: number | null;
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
   readonly showWaveInfo?: boolean;
@@ -32,7 +31,6 @@ export default function DropPartWrapper({
   dropPart,
   voteState,
   canVote,
-  availableCredit,
   dropReplyDepth,
   isDiscussionOpen,
   showWaveInfo = true,
@@ -159,7 +157,6 @@ export default function DropPartWrapper({
               dropPart={dropPart}
               voteState={voteState}
               canVote={canVote}
-              availableCredit={availableCredit ?? 0}
               onDiscussionButtonClick={onDiscussionOpen}
               onQuote={onQuote}
               onReplyButtonClick={onReplyButtonClick}
@@ -215,7 +212,6 @@ export default function DropPartWrapper({
               <DropPartDiscussion
                 dropPart={dropPart}
                 drop={drop}
-                availableCredit={availableCredit}
                 dropReplyDepth={dropReplyDepth}
                 activeDiscussionDropId={activeDiscussionDropId}
                 showWaveInfo={showWaveInfo}

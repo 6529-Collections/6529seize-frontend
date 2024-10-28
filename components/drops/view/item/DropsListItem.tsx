@@ -38,7 +38,6 @@ export default function DropsListItem({
   drop,
   replyToDrop,
   showWaveInfo = true,
-  availableCredit,
   isReply = false,
   dropReplyDepth = 0,
   connectingLineType = DropConnectingLineType.BOTTOM,
@@ -49,7 +48,6 @@ export default function DropsListItem({
   readonly drop: ApiDrop;
   readonly replyToDrop: ApiDrop | null;
   readonly showWaveInfo?: boolean;
-  readonly availableCredit: number | null;
   readonly isReply?: boolean;
   readonly dropReplyDepth?: number;
   readonly connectingLineType?: DropConnectingLineType | null;
@@ -75,7 +73,10 @@ export default function DropsListItem({
     if (connectedProfile.profile.handle === drop.author.handle) {
       return DropVoteState.AUTHOR;
     }
-    if (!availableCredit) {
+    if (
+      !drop.context_profile_context?.max_rating ||
+      !drop.context_profile_context?.min_rating
+    ) {
       return DropVoteState.NO_CREDIT;
     }
 
@@ -86,7 +87,7 @@ export default function DropsListItem({
 
   useEffect(() => {
     setVoteState(getVoteState());
-  }, [connectedProfile, activeProfileProxy, drop, availableCredit]);
+  }, [connectedProfile, activeProfileProxy, drop]);
 
   const getCanVote = () => voteState === DropVoteState.CAN_VOTE;
   const [canVote, setCanVote] = useState(getCanVote());
@@ -168,7 +169,6 @@ export default function DropsListItem({
               drop={drop}
               voteState={voteState}
               canVote={canVote}
-              availableCredit={availableCredit}
               showWaveInfo={showWaveInfo}
               smallMenuIsShown={showOptions}
               dropReplyDepth={dropReplyDepth}

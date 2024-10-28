@@ -8,7 +8,6 @@ interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
   readonly loading: boolean;
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
   readonly onBottomIntersection: (state: boolean) => void;
 }
 
@@ -16,7 +15,6 @@ export default function FeedWrapper({
   items,
   loading,
   showWaveInfo,
-  availableCredit,
   onBottomIntersection,
 }: FeedWrapperProps) {
   return (
@@ -24,7 +22,6 @@ export default function FeedWrapper({
       <FeedItems
         items={items}
         showWaveInfo={showWaveInfo}
-        availableCredit={availableCredit}
         onBottomIntersection={onBottomIntersection}
       />
       {loading && (
