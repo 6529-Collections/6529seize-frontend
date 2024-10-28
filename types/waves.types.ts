@@ -30,8 +30,8 @@ export interface WaveGroupsConfig {
   readonly canView: string | null;
   readonly canDrop: string | null;
   readonly canVote: string | null;
-  readonly admin: string | null;
   readonly canChat: string | null;
+  readonly admin: string | null;
 }
 
 export interface CreateWaveDropsRequiredMetadata {

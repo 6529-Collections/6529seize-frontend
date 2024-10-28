@@ -57,51 +57,54 @@ export default function CreateWave({
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
     ReactQueryWrapperContext
   );
-  const initialType = ApiWaveType.Chat;
+  const initialType = ApiWaveType.Rank;
   const initialStep = CreateWaveStep.OVERVIEW;
   const getInitialConfig = ({
     type,
   }: {
     readonly type: ApiWaveType;
-  }): CreateWaveConfig => ({
-    overview: {
-      type,
-      signatureType: WaveSignatureType.NONE,
-      name: "",
-      image: null,
-    },
-    groups: {
-      canView: null,
-      canDrop: null,
-      canVote: null,
-      canChat: null,
-      admin: null,
-    },
-    chat: {
-      enabled: true,
-    },
-    dates: {
-      submissionStartDate: Time.currentMillis(),
-      votingStartDate: Time.currentMillis(),
-      endDate: null,
-    },
-    drops: {
-      allowDiscussionDrops: true,
-      noOfApplicationsAllowedPerParticipant: null,
-      requiredTypes: [],
-      requiredMetadata: [],
-    },
-    voting: {
-      type: ApiWaveCreditType.Tdh,
-      category: null,
-      profileId: null,
-    },
-    outcomes: [],
-    approval: {
-      threshold: null,
-      thresholdTimeMs: null,
-    },
-  });
+  }): CreateWaveConfig => {
+    const now = Time.currentMillis();
+    return {
+      overview: {
+        type,
+        signatureType: WaveSignatureType.NONE,
+        name: "test",
+        image: null,
+      },
+      groups: {
+        canView: null,
+        canDrop: null,
+        canVote: null,
+        canChat: null,
+        admin: null,
+      },
+      chat: {
+        enabled: true,
+      },
+      dates: {
+        submissionStartDate: now,
+        votingStartDate: now,
+        endDate: null,
+      },
+      drops: {
+        allowDiscussionDrops: true,
+        noOfApplicationsAllowedPerParticipant: null,
+        requiredTypes: [],
+        requiredMetadata: [],
+      },
+      voting: {
+        type: ApiWaveCreditType.Tdh,
+        category: null,
+        profileId: null,
+      },
+      outcomes: [],
+      approval: {
+        threshold: null,
+        thresholdTimeMs: null,
+      },
+    };
+  };
 
   const [config, setConfig] = useState<CreateWaveConfig>(
     getInitialConfig({
@@ -135,6 +138,7 @@ export default function CreateWave({
   }) => {
     if (direction === "forward") {
       const newErrors = getCreateWaveValidationErrors({ config, step });
+      console.log(config);
       if (newErrors.length) {
         setErrors(newErrors);
         return;
@@ -678,19 +682,6 @@ export default function CreateWave({
               <div className="tw-relative tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-w-full">
-                    {/* <AnimatePresence mode="wait">
-                      <CommonAnimationHeight>
-                        <motion.div
-                          key={step}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {stepComponent[step]}
-                        </motion.div>
-                      </CommonAnimationHeight>
-                    </AnimatePresence> */}
                     {stepComponent[step]}
                   </div>
                   {!selectedOutcomeType && (
