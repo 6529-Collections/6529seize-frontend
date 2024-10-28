@@ -34,6 +34,8 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 
 export type CreateDropMetadataType =
   | {
@@ -404,6 +406,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [showOptions, setShowOptions] = useState(breakpoint === "MD");
   useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
+
+  // Add this new state near other useState declarations
+  const [isDropMode, setisDropMode] = useState(false);
 
   const getMarkdown = useMemo(
     () =>
@@ -861,30 +866,40 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            <button
-              type="button"
-              className="tw-size-9 tw-flex tw-items-center tw-justify-center tw-border-t tw-border-b-0 tw-border-x-0 tw-border-solid tw-border-iron-600 tw-rounded-full tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 hover:tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-border-iron-700 active:tw-text-iron-300 active:tw-bg-iron-700 active:tw-border-iron-700 tw-transform tw-transition-transform tw-duration-300 tw-ease-in-out active:tw-scale-90"
+            <Tippy
+              content={<span className="tw-text-xs">Drop Mode</span>}
+              placement="top"
             >
-              <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-transition-colors tw-duration-300 tw-ease-in-out group-active:tw-fill-current"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+              <button
+                type="button"
+                onClick={() => setisDropMode(!isDropMode)}
+                className={`tw-cursor-pointer tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90 ${
+                  isDropMode
+                    ? "tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
+                    : "tw-bg-iron-800 tw-backdrop-blur-sm tw-text-iron-500 desktop-hover:hover:tw-bg-iron-700 active:tw-bg-iron-700/90 focus-visible:tw-outline-iron-700 tw-ring-1 tw-ring-iron-700/50"
+                }`}
               >
-                <path
-                  d="M5.12514 11.4002C3.19352 11.4002 1.62207 9.8287 1.62207 7.89708C1.62207 7.6076 1.62207 6.72658 3.13123 4.34465C3.84008 3.2259 4.53816 2.3146 4.56755 2.2764L5.12514 1.55029L5.68274 2.2764C5.71213 2.31464 6.41025 3.2259 7.11906 4.34465C8.62826 6.72658 8.62826 7.6076 8.62826 7.89708C8.62826 9.8287 7.05676 11.4002 5.12514 11.4002ZM5.12514 3.89111C4.12193 5.30934 3.02825 7.14112 3.02825 7.89708C3.02825 9.05329 3.96894 9.99397 5.12514 9.99397C6.2814 9.99397 7.22208 9.05329 7.22208 7.89708C7.22208 7.14117 6.12836 5.30934 5.12514 3.89111Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M19.6382 7.67056C18.1275 7.67056 16.8986 6.44156 16.8986 4.93095C16.8986 4.11799 17.542 3.00843 18.026 2.24454C18.5461 1.42362 19.059 0.75418 19.0806 0.726057L19.6382 0L20.1958 0.726104C20.2173 0.754227 20.7302 1.42366 21.2504 2.24459C21.7344 3.00847 22.3778 4.11804 22.3778 4.931C22.3778 6.44161 21.1488 7.67056 19.6382 7.67056ZM19.6349 2.35151C18.8008 3.55702 18.3047 4.5788 18.3047 4.93095C18.3047 5.66624 18.9029 6.26439 19.6382 6.26439C20.3734 6.26439 20.9716 5.6662 20.9716 4.93095C20.9716 4.84761 20.9278 4.36276 20.0625 2.99718C19.9159 2.76572 19.7689 2.54593 19.6349 2.35151Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M13.1227 24.0002C9.68884 24.0002 6.89514 21.2065 6.89514 17.7726C6.89514 16.3719 7.86123 14.137 9.76656 11.1298C11.1487 8.94825 12.5079 7.17407 12.5651 7.09964L13.1227 6.37354L13.6803 7.09964C13.7375 7.17412 15.0966 8.9483 16.4788 11.1298C18.3841 14.137 19.3502 16.3719 19.3502 17.7726C19.3503 21.2066 16.5566 24.0002 13.1227 24.0002ZM13.1228 8.70146C11.3941 11.0634 8.30132 15.7152 8.30132 17.7726C8.30132 20.4311 10.4642 22.594 13.1227 22.594C15.7813 22.594 17.9441 20.4311 17.9441 17.7726C17.9441 15.7137 14.8515 11.0629 13.1228 8.70146Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="tw-size-4 tw-flex-shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8.62826 7.89684C8.62826 7.60735 8.62826 6.72633 7.11906 4.34441C6.41025 3.22565 5.71213 2.3144 5.68274 2.27615L5.12514 1.55005L4.56755 2.27615C4.53816 2.3144 3.84008 3.2257 3.13123 4.34441C1.62207 6.72633 1.62207 7.60735 1.62207 7.89684C1.62207 9.82846 3.19352 11.3999 5.12514 11.3999C7.05676 11.3999 8.62826 9.82846 8.62826 7.89684Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M21.2502 2.24459C20.7301 1.42366 20.2173 0.754227 20.1956 0.726104L19.638 0L19.0805 0.726104C19.0589 0.754227 18.546 1.42366 18.0259 2.24459C17.5419 3.00847 16.8984 4.11804 16.8984 4.931C16.8984 6.44166 18.1274 7.67061 19.638 7.67061C21.1487 7.67061 22.3777 6.44161 22.3777 4.931C22.3777 4.11799 21.7342 3.00847 21.2502 2.24459Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M13.6806 7.0994L13.1231 6.37329L12.5655 7.0994C12.5083 7.17388 11.1491 8.94805 9.76692 11.1295C7.8616 14.1367 6.89551 16.3717 6.89551 17.7724C6.89551 21.2063 9.68921 24 13.1231 24C16.557 24 19.3506 21.2063 19.3506 17.7724C19.3506 16.3717 18.3845 14.1367 16.4792 11.1295C15.097 8.94805 13.7379 7.17388 13.6806 7.0994Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+            </Tippy>
             <PrimaryButton
               onClicked={onDrop}
               loading={submitting}
