@@ -46,7 +46,6 @@ export enum QueryKey {
   PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
   PROFILE_DROPS = "PROFILE_DROPS",
-  PROFILE_AVAILABLE_DROP_RATE = "PROFILE_AVAILABLE_DROP_RATE",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
   IDENTITY_FOLLOWING_ACTIONS = "IDENTITY_FOLLOWING_ACTIONS",
   IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
@@ -1318,11 +1317,6 @@ export default function ReactQueryWrapper({
       },
       (oldData: any) => dropsDropChangeMutation({ oldData, drop })
     );
-    if (giverHandle) {
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_RATE, giverHandle],
-      });
-    }
     invalidateQueries({
       key: QueryKey.DROP_DISCUSSION,
       values: [{ drop_id: drop.id }],
@@ -1335,6 +1329,9 @@ export default function ReactQueryWrapper({
     invalidateQueries({
       key: QueryKey.DROP,
       values: [{ drop_id: drop.id }],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.FEED_ITEMS],

@@ -3,7 +3,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TypedFeedItem } from "../types/feed.types";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
-import { ProfileAvailableDropRateResponse } from "../entities/IProfile";
 
 
 export function useMyStreamQuery() {
@@ -85,17 +84,4 @@ export function usePollingQuery(isInitialQueryDone: boolean, items: TypedFeedIte
   }, [pollingResult, items]);
 
   return { haveNewItems };
-}
-
-export function useAvailableDropRateQuery(connectedProfile: any, activeProfileProxy: any) {
-  const { data: availableRateResponse } = useQuery<ProfileAvailableDropRateResponse>({
-    queryKey: [QueryKey.PROFILE_AVAILABLE_DROP_RATE, connectedProfile?.profile?.handle],
-    queryFn: async () =>
-      await commonApiFetch<ProfileAvailableDropRateResponse>({
-        endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
-      }),
-    enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
-  });
-
-  return { availableCredit: availableRateResponse?.available_credit_for_rating ?? null };
 }

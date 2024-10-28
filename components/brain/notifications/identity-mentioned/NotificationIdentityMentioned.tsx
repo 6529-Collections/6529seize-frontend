@@ -9,10 +9,8 @@ import DropsListItem from "../../../drops/view/item/DropsListItem";
 
 export default function NotificationIdentityMentioned({
   notification,
-  availableCredit
 }: {
   readonly notification: INotificationIdentityMentioned;
-  readonly availableCredit: number | null;
 }) {
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
@@ -71,7 +69,6 @@ export default function NotificationIdentityMentioned({
           drop={notification.related_drops[0]}
           replyToDrop={notification.related_drops[1]}
           showWaveInfo={true}
-          availableCredit={availableCredit}
         />
       </div>
     </div>

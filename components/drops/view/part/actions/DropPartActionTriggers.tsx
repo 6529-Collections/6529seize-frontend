@@ -15,7 +15,6 @@ interface DropPartActionTriggersProps {
   readonly dropPart: ApiDropPart;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
-  readonly availableCredit: number | null;
   readonly onDiscussionButtonClick: () => void;
   readonly onQuote: (dropPartId: number) => void;
   readonly onReplyButtonClick: () => void;
@@ -26,7 +25,6 @@ export default function DropPartActionTriggers({
   dropPart,
   voteState,
   canVote,
-  availableCredit,
   onDiscussionButtonClick,
   onQuote,
   onReplyButtonClick,
@@ -91,7 +89,6 @@ export default function DropPartActionTriggers({
           drop={drop}
           voteState={voteState}
           canVote={canVote}
-          availableCredit={availableCredit ?? 0}
         />
       </div>
     </div>

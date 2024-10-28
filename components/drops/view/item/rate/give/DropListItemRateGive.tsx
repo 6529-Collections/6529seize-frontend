@@ -16,14 +16,12 @@ export default function DropListItemRateGive({
   drop,
   voteState,
   canVote,
-  availableCredit,
   onRated,
   isMobile = false,
 }: {
   readonly drop: ApiDrop;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
-  readonly availableCredit: number;
   readonly onRated?: () => void;
   readonly isMobile?: boolean;
 }) {
@@ -32,6 +30,10 @@ export default function DropListItemRateGive({
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
   const [onProgressRate, setOnProgressRate] = useState<number>(1);
+  const availableCredit = Math.abs(
+    (drop.context_profile_context?.max_rating ?? 0) -
+      (drop.context_profile_context?.rating ?? 0)
+  );
 
   useEffect(() => {
     if (!canVote) {
@@ -45,7 +47,7 @@ export default function DropListItemRateGive({
       return;
     }
     setOnProgressRate(1);
-  }, [canVote, availableCredit]);
+  }, [canVote, drop]);
 
   const onSuccessfulRateChange = () => {
     setOnProgressRate(1);
@@ -223,7 +225,11 @@ export default function DropListItemRateGive({
       }
     >
       <div className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center">
-        <div  className={`${isMobile ? "tw-gap-x-4" : ""} tw-w-full tw-inline-flex tw-items-center`}>
+        <div
+          className={`${
+            isMobile ? "tw-gap-x-4" : ""
+          } tw-w-full tw-inline-flex tw-items-center`}
+        >
           <DropListItemRateGiveChangeButton
             canVote={canVote}
             type={RateChangeType.DECREASE}

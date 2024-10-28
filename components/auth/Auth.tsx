@@ -60,7 +60,7 @@ type AuthContextType = {
   }) => void;
   readonly title: string;
 };
-// change back to 10
+// TODO: change back to 10
 export const WAVES_MIN_ACCESS_LEVEL = 0;
 const DEFAULT_TITLE = "6529 SEIZE";
 
