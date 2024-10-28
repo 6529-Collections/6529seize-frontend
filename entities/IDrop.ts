@@ -1,5 +1,5 @@
-
 import { ApiCreateDropRequest } from "../generated/models/ApiCreateDropRequest";
+import { ApiDropType } from "../generated/models/ApiDropType";
 import { ProfileMinWithoutSubs } from "../helpers/ProfileTypes";
 import { FullPageRequest } from "../helpers/Types";
 import {

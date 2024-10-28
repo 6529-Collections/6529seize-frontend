@@ -31,7 +31,7 @@ export default function FeedItemDropReplied({
   return (
     <WaveDetailedDrop
       drop={{
-        ...item.item.reply,
+        ...item.item.drop,
         stableKey: "",
         stableHash: "",
       }}

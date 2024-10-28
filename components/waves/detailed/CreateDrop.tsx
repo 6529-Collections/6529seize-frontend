@@ -39,6 +39,7 @@ export default function CreateDrop({
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
+  const [isDropMode, setIsDropMode] = useState(false);
 
   const onRemovePart = useCallback((partIndex: number) => {
     setDrop((prevDrop) => {
@@ -153,8 +154,10 @@ export default function CreateDrop({
       onCancelReplyQuote,
       drop,
       isStormMode,
+      isDropMode,
       setDrop,
       setIsStormMode,
+      setIsDropMode,
       submitDrop,
     }),
     [
@@ -162,8 +165,10 @@ export default function CreateDrop({
       onCancelReplyQuote,
       drop,
       isStormMode,
+      isDropMode,
       setDrop,
       setIsStormMode,
+      setIsDropMode,
       submitDrop,
     ]
   );

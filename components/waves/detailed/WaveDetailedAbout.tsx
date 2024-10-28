@@ -7,7 +7,6 @@ import WaveSpecs from "./specs/WaveSpecs";
 import WaveRequiredTypes from "./types/WaveRequiredTypes";
 import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
 import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
-import WaveOutcomes from "./outcome/WaveOutcomes";
 import WaveDetailedFollowingWaves from "./WaveDetailedFollowingWaves";
 import WaveGroups from "./groups/WaveGroups";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -103,7 +102,6 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
               {false && (
                 <>
                   <WaveLeaderboard wave={wave} />
-                  <WaveOutcomes wave={wave} />
                 </>
               )}
             </div>

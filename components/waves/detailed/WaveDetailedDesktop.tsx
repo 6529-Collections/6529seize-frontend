@@ -7,6 +7,7 @@ import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
 import WaveDetailedRightSidebar from "./WaveDetailedRightSidebar";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
@@ -60,7 +61,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CONTENT]: (
@@ -76,6 +77,8 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
       />
     ),
   };
+
+  const showRightSidebar = wave.wave.type !== ApiWaveType.Chat;
 
   if (!showWaves) {
     return null;
@@ -99,7 +102,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
           </div>
           <div
             className={`tw-flex-1 tw-ml-[21.5rem] ${
-              isSidebarOpen ? "tw-mr-[19.5rem]" : ""
+              isSidebarOpen && showRightSidebar ? "tw-mr-[19.5rem]" : ""
             } tw-transition-all tw-duration-300`}
           >
             <div
@@ -128,10 +131,13 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               </AnimatePresence>
             </div>
           </div>
-          <WaveDetailedRightSidebar
-            isOpen={isSidebarOpen}
-            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-          />
+          {showRightSidebar && (
+            <WaveDetailedRightSidebar
+              isOpen={isSidebarOpen}
+              wave={wave}
+              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -36,6 +36,7 @@ import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
+import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 
 export type CreateDropMetadataType =
   | {
@@ -58,14 +59,18 @@ export type CreateDropMetadataType =
     };
 
 interface CreateDropContentProps {
-  activeDrop: ActiveDropState | null;
-  onCancelReplyQuote: () => void;
-  wave: ApiWave;
-  drop: CreateDropConfig | null;
-  isStormMode: boolean;
-  setDrop: React.Dispatch<React.SetStateAction<CreateDropConfig | null>>;
-  setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
-  submitDrop: (dropRequest: ApiCreateDropRequest) => void;
+  readonly activeDrop: ActiveDropState | null;
+  readonly onCancelReplyQuote: () => void;
+  readonly wave: ApiWave;
+  readonly drop: CreateDropConfig | null;
+  readonly isStormMode: boolean;
+  readonly isDropMode: boolean;
+  readonly setDrop: React.Dispatch<
+    React.SetStateAction<CreateDropConfig | null>
+  >;
+  readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly setIsDropMode: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly submitDrop: (dropRequest: ApiCreateDropRequest) => void;
 }
 
 interface MissingRequirements {
@@ -392,8 +397,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   wave,
   drop,
   isStormMode,
+  isDropMode,
   setDrop,
   setIsStormMode,
+  setIsDropMode,
   submitDrop,
 }) => {
   const breakpoint = useBreakpoint();
@@ -406,9 +413,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [showOptions, setShowOptions] = useState(breakpoint === "MD");
   useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
-
-  // Add this new state near other useState declarations
-  const [isDropMode, setisDropMode] = useState(false);
 
   const getMarkdown = useMemo(
     () =>
@@ -502,6 +506,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: convertMetadataToDropMetadata(metadata),
+        drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       };
     }
     return null;
@@ -514,6 +519,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   ): CreateDropConfig => {
     return {
       title: null,
+      drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       reply_to: getReplyTo(),
       parts: [
         ...(drop?.parts ?? []),
@@ -587,6 +593,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setMentionedUsers([]);
     setReferencedNfts([]);
     setDrop(null);
+    setIsDropMode(false);
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
@@ -872,7 +879,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             >
               <button
                 type="button"
-                onClick={() => setisDropMode(!isDropMode)}
+                onClick={() => setIsDropMode(!isDropMode)}
                 className={`tw-cursor-pointer tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90 ${
                   isDropMode
                     ? "tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
