@@ -8,13 +8,11 @@ import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 export interface FeedItemProps {
   readonly item: TypedFeedItem;
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
 }
 
 export default function FeedItem({
   item,
   showWaveInfo,
-  availableCredit,
 }: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
@@ -23,14 +21,12 @@ export default function FeedItem({
           <FeedItemWaveCreated
             item={item}
             showWaveInfo={showWaveInfo}
-            availableCredit={availableCredit}
           />
         );
       case ApiFeedItemType.DropCreated:
         return (
           <FeedItemDropCreated
             item={item}
-            availableCredit={availableCredit}
             showWaveInfo={showWaveInfo}
           />
         );
@@ -38,7 +34,6 @@ export default function FeedItem({
         return (
           <FeedItemDropReplied
             item={item}
-            availableCredit={availableCredit}
             showWaveInfo={showWaveInfo}
           />
         );

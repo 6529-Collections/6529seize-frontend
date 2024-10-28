@@ -188,7 +188,7 @@ import { ApiCreateWaveConfig       } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiDrop } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
-import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
+import { ApiDropContextProfileContext   , ApiDropContextProfileContextRatingCurrencyEnum   } from '../models/ApiDropContextProfileContext';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -300,6 +300,7 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
+    "ApiDropContextProfileContextRatingCurrencyEnum",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
