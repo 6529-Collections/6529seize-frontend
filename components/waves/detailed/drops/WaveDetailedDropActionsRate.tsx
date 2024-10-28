@@ -1,9 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../../auth/Auth";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { ProfileAvailableDropRateResponse } from "../../../../entities/IProfile";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
 import DropListItemRateGive from "../../../drops/view/item/rate/give/DropListItemRateGive";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
