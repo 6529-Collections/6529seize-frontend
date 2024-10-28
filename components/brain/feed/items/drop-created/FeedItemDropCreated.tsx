@@ -25,7 +25,6 @@ export default function FeedItemDropCreated({
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    console.log('waat')
     router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
   };
   return (

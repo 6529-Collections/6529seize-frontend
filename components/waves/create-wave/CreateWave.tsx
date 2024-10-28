@@ -138,7 +138,6 @@ export default function CreateWave({
   }) => {
     if (direction === "forward") {
       const newErrors = getCreateWaveValidationErrors({ config, step });
-      console.log(config);
       if (newErrors.length) {
         setErrors(newErrors);
         return;
