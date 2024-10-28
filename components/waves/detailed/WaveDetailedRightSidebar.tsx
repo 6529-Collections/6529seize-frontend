@@ -507,11 +507,8 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
                       </svg>
                     </div>
                     <div className="tw-min-w-0">
-                      {" "}
-                      {/* Added min-width to enable text truncation */}
                       <div className="tw-flex tw-items-center tw-gap-x-2">
-                        {" "}
-                        {/* Added margin bottom */}
+
                         <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
                           1k NIC
                         </span>
@@ -600,11 +597,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
                       </svg>
                     </div>
                     <div className="tw-min-w-0">
-                      {" "}
-                      {/* Added min-width to enable text truncation */}
                       <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-                        {" "}
-                        {/* Added margin bottom */}
                         <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
                           Manual
                         </span>
