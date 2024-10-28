@@ -1,8 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { ApiWave } from "../../../generated/models/ObjectSerializer";
 
 interface WaveDetailedRightSidebarProps {
   readonly isOpen: boolean;
+  readonly wave: ApiWave;
   readonly onToggle: () => void;
 }
 
@@ -622,8 +624,8 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
 
                 <div className="tw-bg-iron-900/30 tw-px-4 tw-py-3">
                   <p className="tw-text-iron-200 tw-text-sm">
-                    I'll take you to Cuba! We'll dance salsa, drink mojitos, and
-                    watch the sunset over Havana.
+                    I&apos;ll take you to Cuba! We&apos;ll dance salsa, drink
+                    mojitos, and watch the sunset over Havana.
                   </p>
                 </div>
               </div>
