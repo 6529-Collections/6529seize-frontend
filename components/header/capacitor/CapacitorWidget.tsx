@@ -79,14 +79,21 @@ export default function CapacitorWidget() {
       console.log("appUrlOpen", data);
 
       const urlString = data.url;
-      const schemeEndIndex = urlString.indexOf("://") + 3;
-      const pathStartIndex = urlString.indexOf("/", schemeEndIndex);
-      const path =
-        pathStartIndex > -1 ? urlString.substring(pathStartIndex) : "/";
+      console.log("urlString", urlString);
 
-      const queryString = urlString.includes("?")
-        ? urlString.split("?")[1]
+      const schemeEndIndex = urlString.indexOf("://") + 3;
+      console.log("schemeEndIndex", schemeEndIndex);
+      const urlWithoutScheme = urlString.slice(schemeEndIndex);
+      console.log("urlWithoutScheme", urlWithoutScheme);
+
+      const path = urlWithoutScheme.split("?")[0];
+      console.log("path", path);
+
+      const queryString = urlWithoutScheme.includes("?")
+        ? urlWithoutScheme.split("?")[1]
         : "";
+      console.log("queryString", queryString);
+
       const searchParams = new URLSearchParams(queryString);
       const queryParams = Object.fromEntries(searchParams.entries());
 
@@ -94,7 +101,7 @@ export default function CapacitorWidget() {
       console.log("Query Params:", queryParams);
 
       router.push({
-        pathname: path,
+        pathname: `/${path}`,
         query: queryParams,
       });
     });
