@@ -7,16 +7,12 @@ import {
   ReactQueryWrapperContext,
 } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { CreditDirection } from "../GroupCard";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../../helpers/Types";
 import { CommunityMembersQuery } from "../../../../../../pages/network/index";
 import { SortDirection } from "../../../../../../entities/ISort";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../../../../services/api/common-api";
-import { ApiBulkRateRequest } from "../../../../../../generated/models/ApiBulkRateRequest";
-import { ApiBulkRateResponse } from "../../../../../../generated/models/ApiBulkRateResponse";
+import { commonApiFetch } from "../../../../../../services/api/common-api";
+
 import GroupCardActionWrapper from "../GroupCardActionWrapper";
 import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
@@ -130,20 +126,20 @@ export default function GroupCardVoteAll({
     [amountToAdd, membersCount, loading, category]
   );
 
-  const bulkRateMutation = useMutation({
-    mutationFn: async (body: ApiBulkRateRequest) =>
-      await commonApiPost<ApiBulkRateRequest, ApiBulkRateResponse>({
-        endpoint: `ratings`,
-        body: body,
-      }),
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-      throw error;
-    },
-  });
+  // const bulkRateMutation = useMutation({
+  //   mutationFn: async (body: ApiBulkRateRequest) =>
+  //     await commonApiPost<ApiBulkRateRequest, ApiBulkRateResponse>({
+  //       endpoint: `ratings`,
+  //       body: body,
+  //     }),
+  //   onError: (error) => {
+  //     setToast({
+  //       message: error as unknown as string,
+  //       type: "error",
+  //     });
+  //     throw error;
+  //   },
+  // });
 
   const getMembersPage = async (
     page: number
@@ -186,15 +182,15 @@ export default function GroupCardVoteAll({
       }
       const members = membersPage.data;
       try {
-        await bulkRateMutation.mutateAsync({
-          matter,
-          category,
-          amount_to_add:
-            creditDirection === CreditDirection.ADD
-              ? amountToAdd
-              : -amountToAdd,
-          target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
-        });
+        // await bulkRateMutation.mutateAsync({
+        //   matter,
+        //   category,
+        //   amount_to_add:
+        //     creditDirection === CreditDirection.ADD
+        //       ? amountToAdd
+        //       : -amountToAdd,
+        //   target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
+        // });
         setDoneMembersCount((prev) => prev + members.length);
       } catch {
         setDoingRates(false);

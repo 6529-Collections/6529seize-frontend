@@ -1698,33 +1698,6 @@ paths:
           description: successful operation
         "400":
           description: Invalid request
-  /ratings:
-    post:
-      tags:
-        - Ratings
-      summary: >-
-        This is deprecated. Use bulk-rep instead. Bulk rate. Supplied amount
-        will be added to all target identities. If same identity is supplied
-        multiple times, all the additions will be summed up. Targets must be
-        represented as Ethereum wallet addresses. ENS names and profile handles
-        are not supported.
-      deprecated: true
-      operationId: bulkRate
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApiBulkRateRequest"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiBulkRateResponse"
-        "400":
-          description: Invalid request
   /ratings/credit:
     get:
       tags:
@@ -2644,55 +2617,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiBlockItem"
-    ApiBulkRateRequest:
-      type: object
-      required:
-        - matter
-        - category
-        - amount_to_add
-        - target_wallet_addresses
-      properties:
-        matter:
-          $ref: "#/components/schemas/ApiRateMatter"
-        category:
-          type: string
-          maxLength: 100
-          nullable: true
-          pattern: ^[a-zA-Z0-9?!,."() ]$
-          description: >-
-            Category of the rating must be set when matter is REP and null if
-            matter is CIC
-        amount_to_add:
-          type: number
-          format: int64
-          example: 1
-        target_wallet_addresses:
-          type: array
-          items:
-            type: string
-            minLength: 1
-            maxLength: 100
-            pattern: 0x[a-fA-F0-9]{40}
-            description: Wallet address of the target profile
-    ApiBulkRateResponse:
-      type: object
-      required:
-        - skipped
-      properties:
-        skipped:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiBulkRateSkippedIdentity"
-    ApiBulkRateSkippedIdentity:
-      type: object
-      required:
-        - identity
-        - reason
-      properties:
-        identity:
-          type: string
-        reason:
-          type: string
     ApiBulkRepRequest:
       type: object
       required:

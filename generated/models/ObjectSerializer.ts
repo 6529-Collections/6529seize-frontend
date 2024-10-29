@@ -11,9 +11,6 @@ export * from '../models/ApiArtistsWork';
 export * from '../models/ApiAvailableRatingCredit';
 export * from '../models/ApiBlockItem';
 export * from '../models/ApiBlocksPage';
-export * from '../models/ApiBulkRateRequest';
-export * from '../models/ApiBulkRateResponse';
-export * from '../models/ApiBulkRateSkippedIdentity';
 export * from '../models/ApiBulkRepRequest';
 export * from '../models/ApiBulkRepTarget';
 export * from '../models/ApiChangeGroupVisibility';
@@ -155,9 +152,6 @@ import { ApiArtistsWork } from '../models/ApiArtistsWork';
 import { ApiAvailableRatingCredit } from '../models/ApiAvailableRatingCredit';
 import { ApiBlockItem } from '../models/ApiBlockItem';
 import { ApiBlocksPage } from '../models/ApiBlocksPage';
-import { ApiBulkRateRequest     } from '../models/ApiBulkRateRequest';
-import { ApiBulkRateResponse } from '../models/ApiBulkRateResponse';
-import { ApiBulkRateSkippedIdentity } from '../models/ApiBulkRateSkippedIdentity';
 import { ApiBulkRepRequest } from '../models/ApiBulkRepRequest';
 import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
 import { ApiChangeGroupVisibility } from '../models/ApiChangeGroupVisibility';
@@ -339,9 +333,6 @@ let typeMap: {[index: string]: any} = {
     "ApiAvailableRatingCredit": ApiAvailableRatingCredit,
     "ApiBlockItem": ApiBlockItem,
     "ApiBlocksPage": ApiBlocksPage,
-    "ApiBulkRateRequest": ApiBulkRateRequest,
-    "ApiBulkRateResponse": ApiBulkRateResponse,
-    "ApiBulkRateSkippedIdentity": ApiBulkRateSkippedIdentity,
     "ApiBulkRepRequest": ApiBulkRepRequest,
     "ApiBulkRepTarget": ApiBulkRepTarget,
     "ApiChangeGroupVisibility": ApiChangeGroupVisibility,

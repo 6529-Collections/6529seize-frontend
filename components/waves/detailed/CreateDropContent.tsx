@@ -36,10 +36,8 @@ import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
-import {
-  ApiDropType,
-  ApiWaveType,
-} from "../../../generated/models/ObjectSerializer";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 
 export type CreateDropMetadataType =
   | {
