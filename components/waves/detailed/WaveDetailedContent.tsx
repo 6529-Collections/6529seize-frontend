@@ -6,6 +6,7 @@ import WaveDrops from "./drops/WaveDrops";
 import { useSearchParams, useRouter } from "next/navigation";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -76,7 +77,7 @@ export default function WaveDetailedContent({
       capacitor.isCapacitor
         ? "tw-h-[calc(100vh-14.7rem)]"
         : "tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-7.5rem)]"
-    }`;
+    } ${wave.wave.type !== ApiWaveType.Chat ? "tw-pt-10" : ""}`;
   }, [capacitor.isCapacitor]);
 
   if (!searchParamsDone) {
