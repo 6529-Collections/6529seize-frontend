@@ -16,7 +16,6 @@ export default function DropPartDiscussionItems({
   drop,
   dropPart,
   dropReplyDepth,
-  availableCredit,
   activeDiscussionDropId,
   showWaveInfo = true,
   setActiveDiscussionDropId,
@@ -25,7 +24,6 @@ export default function DropPartDiscussionItems({
   readonly drop: ApiDrop;
   readonly dropPart: ApiDropPart;
   readonly dropReplyDepth: number;
-  readonly availableCredit: number | null;
   readonly activeDiscussionDropId: string | null;
   readonly showWaveInfo?: boolean;
   readonly setActiveDiscussionDropId: (id: string | null) => void;
@@ -114,7 +112,6 @@ export default function DropPartDiscussionItems({
             drop={item}
             replyToDrop={null}
             showWaveInfo={showWaveInfo}
-            availableCredit={availableCredit}
             isReply={true}
             dropReplyDepth={activeDiscussionDropId ? 1 : dropReplyDepth + 1}
             connectingLineType={DropConnectingLineType.FULL}

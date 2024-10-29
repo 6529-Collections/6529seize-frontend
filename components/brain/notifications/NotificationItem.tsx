@@ -9,41 +9,19 @@ import NotificationIdentitySubscribed from "./identity-subscribed/NotificationId
 
 export default function NotificationItem({
   notification,
-  availableCredit,
 }: {
   readonly notification: TypedNotification;
-  readonly availableCredit: number | null;
 }) {
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
       case ApiNotificationCause.DropQuoted:
-        return (
-          <NotificationDropQuoted
-            notification={notification}
-            availableCredit={availableCredit}
-          />
-        );
+        return <NotificationDropQuoted notification={notification} />;
       case ApiNotificationCause.DropReplied:
-        return (
-          <NotificationDropReplied
-            notification={notification}
-            availableCredit={availableCredit}
-          />
-        );
+        return <NotificationDropReplied notification={notification} />;
       case ApiNotificationCause.DropVoted:
-        return (
-          <NotificationDropVoted
-            notification={notification}
-            availableCredit={availableCredit}
-          />
-        );
+        return <NotificationDropVoted notification={notification} />;
       case ApiNotificationCause.IdentityMentioned:
-        return (
-          <NotificationIdentityMentioned
-            notification={notification}
-            availableCredit={availableCredit}
-          />
-        );
+        return <NotificationIdentityMentioned notification={notification} />;
       case ApiNotificationCause.IdentitySubscribed:
         return <NotificationIdentitySubscribed notification={notification} />;
       default:

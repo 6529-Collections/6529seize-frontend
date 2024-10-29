@@ -3297,10 +3297,22 @@ components:
       type: object
       required:
         - rating
+        - min_rating
+        - max_rating
       properties:
         rating:
           type: number
           format: int64
+        min_rating:
+          type: number
+          format: int64
+        max_rating:
+          type: number
+          format: int64
+        rating_currency:
+          enum:
+            - REP
+            - TDH
     ApiDropMedia:
       type: object
       required:

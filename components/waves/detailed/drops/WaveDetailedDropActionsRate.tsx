@@ -1,9 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../../auth/Auth";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { ProfileAvailableDropRateResponse } from "../../../../entities/IProfile";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
 import DropListItemRateGive from "../../../drops/view/item/rate/give/DropListItemRateGive";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
@@ -19,28 +15,10 @@ const WaveDetailedDropActionsRate: React.FC<
 > = ({ drop, onRated, isMobile = false }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const { data: availableRateResponse } =
-    useQuery<ProfileAvailableDropRateResponse>({
-      queryKey: [
-        QueryKey.PROFILE_AVAILABLE_DROP_RATE,
-        connectedProfile?.profile?.handle,
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ProfileAvailableDropRateResponse>({
-          endpoint: `profiles/${connectedProfile?.profile?.handle}/drops/available-credit-for-rating`,
-        }),
-      enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
-    });
-
-  const [availableCredit, setAvailableCredit] = useState<number | null>(
-    availableRateResponse?.available_credit_for_rating ?? null
+  const availableCredit = Math.abs(
+    (drop.context_profile_context?.max_rating ?? 0) -
+      (drop.context_profile_context?.rating ?? 0)
   );
-
-  useEffect(() => {
-    setAvailableCredit(
-      availableRateResponse?.available_credit_for_rating ?? null
-    );
-  }, [availableRateResponse]);
 
   const getVoteState = (): DropVoteState => {
     if (!connectedProfile) {
@@ -96,7 +74,6 @@ const WaveDetailedDropActionsRate: React.FC<
             drop={drop}
             voteState={voteState}
             canVote={canVote}
-            availableCredit={availableCredit ?? 0}
             onRated={onRated}
             isMobile={isMobile}
           />

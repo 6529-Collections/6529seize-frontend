@@ -8,14 +8,12 @@ import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
   readonly showWaveInfo: boolean;
-  readonly availableCredit: number | null;
   readonly onBottomIntersection: (state: boolean) => void;
 }
 
 export default function FeedItems({
   items,
   showWaveInfo,
-  availableCredit,
   onBottomIntersection,
 }: FeedItemsProps) {
   const getIntersectionTargetIndex = () => {
@@ -41,7 +39,6 @@ export default function FeedItems({
             <FeedItem
               item={item}
               showWaveInfo={showWaveInfo}
-              availableCredit={availableCredit}
             />
           </CommonChangeAnimation>
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (
