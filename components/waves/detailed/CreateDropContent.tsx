@@ -34,6 +34,7 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 export type CreateDropMetadataType =
   | {
@@ -381,6 +382,7 @@ const getOptimisticDrop = (
     raters_count: 0,
     context_profile_context: null,
     subscribed_actions: [],
+    drop_type: ApiDropType.Chat
   };
 };
 
