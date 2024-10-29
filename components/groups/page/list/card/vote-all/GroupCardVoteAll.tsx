@@ -7,14 +7,11 @@ import {
   ReactQueryWrapperContext,
 } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { CreditDirection } from "../GroupCard";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../../helpers/Types";
 import { CommunityMembersQuery } from "../../../../../../pages/network/index";
 import { SortDirection } from "../../../../../../entities/ISort";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "../../../../../../services/api/common-api";
+import { commonApiFetch } from "../../../../../../services/api/common-api";
 
 import GroupCardActionWrapper from "../GroupCardActionWrapper";
 import { ApiRateMatter } from "../../../../../../generated/models/ApiRateMatter";
