@@ -194,12 +194,12 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
-  const dropClasses = getDropClasses(
-    isActiveDrop,
-    groupingClass,
-    border,
-    drop.drop_type === ApiDropType.Chat ? null : 1
-  );
+  const rank =
+    drop.drop_type === ApiDropType.Chat
+      ? null
+      : Math.floor(Math.random() * 5) + 1;
+
+  const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
 
   return (
     /*   <div className="tw-px-3 tw-py-2"> when drops, wip */
@@ -238,6 +238,7 @@ const WaveDetailedDrop = ({
               isStorm={isStorm}
               currentPartIndex={activePartIndex}
               partsCount={drop.parts.length}
+              rank={rank}
             />
           )}
           <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>
