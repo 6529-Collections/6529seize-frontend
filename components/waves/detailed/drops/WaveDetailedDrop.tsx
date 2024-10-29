@@ -57,7 +57,7 @@ const getRankClasses = (rank: number | null): string => {
   if (rank === 3) {
     return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.77)_3.56%,rgba(32,31,31,0.92)_98.78%)] tw-border tw-border-solid tw-border-[#D9A962]/10";
   }
-  return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.77)_3.56%,#1F1F25_98.78%)]";
+  return "tw-bg-iron-900";
 };
 
 const getDropClasses = (
@@ -202,7 +202,7 @@ const WaveDetailedDrop = ({
   const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
 
   return (
-    /*   <div className="tw-px-3 tw-py-2"> when drops, wip */
+  <div > 
     <div
       className={dropClasses}
       onTouchStart={handleTouchStart}
@@ -278,6 +278,7 @@ const WaveDetailedDrop = ({
         onReply={handleOnReply}
         onQuote={handleOnQuote}
       />
+    </div>
     </div>
   );
 };
