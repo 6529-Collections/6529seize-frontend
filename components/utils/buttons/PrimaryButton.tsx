@@ -28,7 +28,7 @@ export default function PrimaryButton({
 
   const DISABLED_CLASSES = "tw-opacity-50 tw-text-iron-200";
   const ENABLED_CLASSES =
-    "tw-text-white  hover:tw-ring-primary-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset hover:tw-bg-primary-600";
+    "tw-text-white desktop-hover:hover:tw-ring-primary-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset desktop-hover:hover:tw-bg-primary-600";
 
   const classes = `${BUTTON_CLASSES[size]} ${
     disabled ? DISABLED_CLASSES : ENABLED_CLASSES

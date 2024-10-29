@@ -225,7 +225,7 @@ export default function WaveDrops({
         <>
           <div className="tw-absolute tw-inset-0 tw-bg-iron-900 tw-bg-opacity-50 tw-z-10" />
           <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-z-20">
-            <div className="tw-bg-iron-800 tw-rounded-full tw-p-4">
+            <div className="tw-rounded-full tw-p-4">
               <CircleLoader size={CircleLoaderSize.XXLARGE} />
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { ApiWaveOutcome } from "../../../../generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface WaveDetailedNICOutcomeProps {
   readonly outcome: ApiWaveOutcome;
@@ -58,63 +59,70 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               {formatNumberWithCommas(outcome.amount ?? 0)} NIC
             </span>
             <span className="tw-text-xs tw-font-medium tw-text-blue-300">
-              {formatNumberWithCommas(winnersCount)} Winners
+              {formatNumberWithCommas(winnersCount)}{" "}
+              {winnersCount === 1 ? "Winner" : "Winners"}
             </span>
           </div>
         </div>
-        <svg
+        <motion.svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="2"
           stroke="currentColor"
-          className={`tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-300 ${
-            isOpen ? "tw-rotate-0" : "-tw-rotate-90"
-          }`}
+          className="tw-flex-shrink-0 tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-300"
+          animate={{ rotate: isOpen ? 0 : -90 }}
+          transition={{ duration: 0.2 }}
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
             d="m19.5 8.25-7.5 7.5-7.5-7.5"
           />
-        </svg>
+        </motion.svg>
       </button>
 
-      <div
-        className={`tw-transition-all tw-duration-200 tw-ease-in-out ${
-          isOpen ? "tw-max-h-[500px]" : "tw-max-h-0"
-        }`}
-      >
-        <div className="tw-divide-y tw-divide-iron-900 tw-divide-solid tw-divide-x-0">
-          {amounts.map((amount, index) => (
-            <div
-              key={index}
-              className="tw-px-4 tw-py-2 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/30"
-            >
-              <div className="tw-flex tw-items-center tw-gap-3">
-                <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-blue-400/5 tw-text-blue-300 tw-text-xs tw-font-medium">
-                  {index + 1}
-                </span>
-                <span className="tw-text-blue-300 tw-text-sm tw-font-medium">
-                  {formatNumberWithCommas(amount)} NIC
-                </span>
-              </div>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="tw-overflow-hidden"
+          >
+            <div className="tw-divide-y tw-divide-iron-900 tw-divide-solid tw-divide-x-0">
+              {amounts.map((amount, index) => (
+                <div
+                  key={`wave-detailed-nic-outcome-row-${index}`}
+                  className="tw-px-4 tw-py-2 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/30"
+                >
+                  <div className="tw-flex tw-items-center tw-gap-3">
+                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-blue-400/5 tw-text-blue-300 tw-text-xs tw-font-medium">
+                      {index + 1}
+                    </span>
+                    <span className="tw-text-blue-300 tw-text-sm tw-font-medium">
+                      {formatNumberWithCommas(amount)} NIC
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs hover:tw-text-primary-300 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900/30"
+                >
+                  <span>View more</span>
+                  <span className="tw-ml-1 tw-text-iron-400">•</span>
+                  <span className="tw-ml-1 tw-text-iron-400">
+                    {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more
+                  </span>
+                </button>
+              )}
             </div>
-          ))}
-          {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
-            <button
-              onClick={() => setShowAll(true)}
-              className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs hover:tw-text-primary-300 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900/30"
-            >
-              <span>View more</span>
-              <span className="tw-ml-1 tw-text-iron-400">•</span>
-              <span className="tw-ml-1 tw-text-iron-400">
-                {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more
-              </span>
-            </button>
-          )}
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
