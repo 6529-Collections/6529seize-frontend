@@ -116,11 +116,16 @@ const WaveDetailedDrop = ({
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
 
+  const rank =
+  drop.drop_type === ApiDropType.Chat
+    ? null
+    : Math.floor(Math.random() * 5) + 1;
+
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop);
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop);
+  const shouldGroupWithPreviousDrop = !rank && shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop = !rank && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
 
@@ -194,10 +199,7 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
-  const rank =
-    drop.drop_type === ApiDropType.Chat
-      ? null
-      : Math.floor(Math.random() * 5) + 1;
+
 
   const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
 
