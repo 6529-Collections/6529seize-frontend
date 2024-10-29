@@ -30,22 +30,23 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   }, [showAll]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-transition-all tw-duration-200 hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-flex-col tw-bg-iron-900/50 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900 group"
+        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-flex-col tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50 group"
       >
         <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
           <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-emerald-400/5">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-[#75E0A7]/5">
               <svg
-                className="tw-size-5 tw-text-emerald-300"
+                className="tw-size-5 tw-text-[#ABEFC6]"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g clip-path="url(#clip0_4054_1029)">
+                <g clipPath="url(#clip0_4054_1029)">
                   <path
                     d="M14.8483 16.2358C15.7808 15.4333 16.3723 14.2452 16.3723 12.9213V12.6908C16.3723 10.2798 14.4108 8.31836 11.9998 8.31836C9.58884 8.31836 7.62735 10.2798 7.62735 12.6908V12.9213C7.62735 14.2452 8.21882 15.4334 9.15131 16.2358C6.14047 17.1605 3.94531 19.9671 3.94531 23.277C3.94531 23.6583 4.25441 23.9674 4.63569 23.9674H19.3639C19.7452 23.9674 20.0543 23.6583 20.0543 23.277C20.0543 19.9671 17.8592 17.1605 14.8483 16.2358ZM9.00815 12.9214V12.6909C9.00815 11.0412 10.3502 9.69921 11.9998 9.69921C13.6494 9.69921 14.9915 11.0413 14.9915 12.6909V12.9214C14.9915 14.571 13.6494 15.913 11.9998 15.913C10.3502 15.913 9.00815 14.5709 9.00815 12.9214ZM5.36567 22.5866C5.70894 19.6113 8.24362 17.2937 11.3094 17.2937H12.6902C15.756 17.2937 18.2907 19.6113 18.634 22.5867L5.36567 22.5866Z"
                     fill="currentColor"
@@ -70,11 +71,11 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                 </defs>
               </svg>
             </div>
-            <div className="tw-flex tw-items-center tw-gap-x-2">
+            <div className="tw-flex tw-flex-col">
               <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
                 {formatNumberWithCommas(outcome.amount ?? 0)} Rep
               </span>
-              <span className="tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-rounded-md tw-bg-emerald-400/10 tw-text-emerald-300">
+              <span className="tw-text-xs tw-font-medium tw-text-[#ABEFC6]">
                 {formatNumberWithCommas(winnersCount)} winners
               </span>
             </div>
@@ -85,8 +86,8 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
             viewBox="0 0 24 24"
             strokeWidth="2"
             stroke="currentColor"
-            className="tw-flex-shrink-0 tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-200 group-hover:tw-text-iron-300"
-            animate={{ rotate: isOpen ? 180 : 0 }}
+            className="tw-flex-shrink-0 tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-300"
+            animate={{ rotate: isOpen ? 0 : -90 }}
             transition={{ duration: 0.2 }}
           >
             <path
@@ -96,7 +97,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
             />
           </motion.svg>
         </div>
-        <div className="tw-mt-2 tw-text-iron-300 tw-text-sm tw-text-left tw-break-words">
+        <div className="tw-mt-2 tw-text-iron-300 tw-text-sm tw-text-left tw-break-words tw-line-clamp-3">
           {outcome.rep_category}
         </div>
       </button>
@@ -117,10 +118,10 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                   className="tw-px-4 tw-py-2 tw-bg-iron-900/30"
                 >
                   <div className="tw-flex tw-items-center tw-gap-3">
-                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-emerald-400/5 tw-text-emerald-300 tw-text-xs tw-font-medium">
+                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-[#75E0A7]/5 tw-text-[#ABEFC6] tw-text-xs tw-font-medium">
                       {i + 1}
                     </span>
-                    <span className="tw-whitespace-nowrap tw-text-emerald-300 tw-text-sm tw-font-medium">
+                    <span className="tw-whitespace-nowrap tw-text-[#ABEFC6] tw-text-sm tw-font-medium">
                       {formatNumberWithCommas(amount)} Rep
                     </span>
                   </div>
@@ -132,7 +133,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                   className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs hover:tw-text-primary-300 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900/30"
                   onClick={() => setShowAll(true)}
                 >
-                  View more
+                  <span>View more</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
                     {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more
@@ -154,9 +155,9 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   //   >
   //     <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
   //       <div className="tw-flex tw-items-center tw-gap-3">
-  //         <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-emerald-400/5">
+  //         <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-[#75E0A7]/5">
   //           <svg
-  //             className="tw-size-5 tw-text-emerald-300"
+  //             className="tw-size-5 tw-text-[#ABEFC6]"
   //             viewBox="0 0 24 24"
   //             fill="none"
   //             xmlns="http://www.w3.org/2000/svg"
@@ -190,7 +191,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   //           <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
   //             1k Rep
   //           </span>
-  //           <span className="tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-rounded-md tw-bg-emerald-400/10 tw-text-emerald-300">
+  //           <span className="tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-rounded-md tw-bg-[#75E0A7]/10 tw-text-[#ABEFC6]">
   //             Rank 11-20
   //           </span>
   //         </div>
@@ -218,10 +219,10 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   //   <div className="tw-divide-y tw-divide-iron-900 tw-divide-solid tw-divide-x-0">
   //     <div className="tw-px-4 tw-py-2 tw-bg-iron-900/30">
   //       <div className="tw-flex tw-items-center tw-gap-3">
-  //         <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-emerald-400/5 tw-text-emerald-300 tw-text-xs tw-font-medium">
+  //         <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-[#75E0A7]/5 tw-text-[#ABEFC6] tw-text-xs tw-font-medium">
   //           1
   //         </span>
-  //         <span className="tw-whitespace-nowrap tw-text-emerald-300 tw-text-sm tw-font-medium">
+  //         <span className="tw-whitespace-nowrap tw-text-[#ABEFC6] tw-text-sm tw-font-medium">
   //           300 Rep
   //         </span>
   //       </div>
@@ -229,10 +230,10 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
 
   //     <div className="tw-px-4 tw-py-2 tw-bg-iron-900/30">
   //       <div className="tw-flex tw-items-center tw-gap-3">
-  //         <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-emerald-400/5 tw-text-emerald-300 tw-text-xs tw-font-medium">
+  //         <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-[#75E0A7]/5 tw-text-[#ABEFC6] tw-text-xs tw-font-medium">
   //           2
   //         </span>
-  //         <span className="tw-whitespace-nowrap tw-text-emerald-300 tw-text-sm tw-font-medium">
+  //         <span className="tw-whitespace-nowrap tw-text-[#ABEFC6] tw-text-sm tw-font-medium">
   //           150 Rep
   //         </span>
   //       </div>
@@ -240,10 +241,10 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
 
   //     <div className="tw-px-4 tw-py-2 tw-bg-iron-900/30">
   //       <div className="tw-flex tw-items-center tw-gap-3">
-  //         <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-emerald-400/5 tw-text-emerald-300 tw-text-xs tw-font-medium">
+  //         <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-[#75E0A7]/5 tw-text-[#ABEFC6] tw-text-xs tw-font-medium">
   //           3
   //         </span>
-  //         <span className="tw-whitespace-nowrap tw-text-emerald-300 tw-text-sm tw-font-medium">
+  //         <span className="tw-whitespace-nowrap tw-text-[#ABEFC6] tw-text-sm tw-font-medium">
   //           75 Rep
   //         </span>
   //       </div>

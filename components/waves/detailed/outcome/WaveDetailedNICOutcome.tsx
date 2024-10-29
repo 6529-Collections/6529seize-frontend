@@ -16,7 +16,6 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
   const winnersCount = outcome.distribution?.filter((d) => !!d).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
 
-
   const getAmounts = (): number[] => {
     if (showAll) {
       return outcome.distribution?.map((d) => d ?? 0) ?? [];
@@ -30,11 +29,11 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
   }, [showAll]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-transition-all tw-duration-200 hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/50 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900 group"
+        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50"
       >
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-blue-400/5">
@@ -44,6 +43,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
+              aria-hidden="true"
               className="tw-size-6 tw-text-blue-300"
             >
               <path
@@ -53,15 +53,13 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               />
             </svg>
           </div>
-          <div className="tw-min-w-0">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
+          <div className="tw-flex tw-flex-col">
+            <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
               {formatNumberWithCommas(outcome.amount ?? 0)} NIC
-              </span>
-              <span className="tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-rounded-md tw-bg-blue-400/10 tw-text-blue-300">
-                {formatNumberWithCommas(winnersCount)} Winners
-              </span>
-            </div>
+            </span>
+            <span className="tw-text-xs tw-font-medium tw-text-blue-300">
+              {formatNumberWithCommas(winnersCount)} Winners
+            </span>
           </div>
         </div>
         <svg
@@ -70,8 +68,8 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
           viewBox="0 0 24 24"
           strokeWidth="2"
           stroke="currentColor"
-          className={`tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-200 group-hover:tw-text-iron-300 ${
-            isOpen ? "tw-rotate-180" : ""
+          className={`tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-300 ${
+            isOpen ? "tw-rotate-0" : "-tw-rotate-90"
           }`}
         >
           <path
@@ -108,7 +106,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               onClick={() => setShowAll(true)}
               className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs hover:tw-text-primary-300 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900/30"
             >
-              View more
+              <span>View more</span>
               <span className="tw-ml-1 tw-text-iron-400">•</span>
               <span className="tw-ml-1 tw-text-iron-400">
                 {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more

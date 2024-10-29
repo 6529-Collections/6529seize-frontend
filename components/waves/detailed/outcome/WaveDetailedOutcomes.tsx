@@ -1,8 +1,5 @@
 import { FC } from "react";
 import { ApiWave } from "../../../../generated/models/ObjectSerializer";
-import { WaveDetailedRepOutcome } from "./WaveDetailedRepOutcome";
-import { WaveDetailedNICOutcome } from "./WaveDetailedNICOutcome";
-import { WaveDetailedManualOutcome } from "./WaveDetailedManualOutcome";
 import { WaveDetailedOutcome } from "./WaveDetailedOutcome";
 
 interface WaveDetailedOutcomesProps {
@@ -14,7 +11,7 @@ export const WaveDetailedOutcomes: FC<WaveDetailedOutcomesProps> = ({
 }) => {
   return (
     <div className="tw-p-4">
-      <h2 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-6">
+      <h2 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-4">
         Outcome
       </h2>
       <div className="tw-space-y-4">

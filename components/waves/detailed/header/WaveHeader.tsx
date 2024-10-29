@@ -93,7 +93,7 @@ export default function WaveHeader({
 
         <div className="tw-px-5 tw-pb-5 tw-mt-2 tw-min-w-0 tw-flex-1">
           <WaveHeaderName wave={wave} />
-          <div className="tw-flex tw-items-center tw-gap-x-2 tw-mt-1">
+          <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-mt-1">
             <div className="tw-text-sm">
               <span className="tw-font-normal tw-text-iron-400 tw-pr-0.5">
                 Created

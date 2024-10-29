@@ -12,11 +12,11 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-transition-all tw-duration-200 hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/50 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900 group"
+        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50 tw-group"
       >
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-purple-400/5">
@@ -24,6 +24,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
               className="tw-size-5 tw-flex-shrink-0 tw-text-purple-300"
               viewBox="0 0 24 24"
               fill="none"
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
@@ -35,22 +36,18 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
               />
             </svg>
           </div>
-          <div className="tw-min-w-0">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-              <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
-                Manual
-              </span>
-            </div>
-          </div>
+          <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
+            Manual
+          </span>
         </div>
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          strokeWidth={2}
+          strokeWidth="2"
           stroke="currentColor"
-          className="tw-size-4 tw-text-iron-400 group-hover:tw-text-iron-300"
-          animate={{ rotate: isOpen ? 180 : 0 }}
+          className="tw-size-4 tw-text-iron-400"
+          animate={{ rotate: isOpen ? 0 : -95 }}
           transition={{ duration: 0.2 }}
         >
           <path
@@ -71,7 +68,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
             className="tw-overflow-hidden"
           >
             <div className="tw-bg-iron-900/30 tw-px-4 tw-py-3">
-              <p className="tw-text-iron-200 tw-text-sm">
+              <p className="tw-text-iron-200 tw-text-sm tw-mb-0">
                 {outcome.description}
               </p>
             </div>
