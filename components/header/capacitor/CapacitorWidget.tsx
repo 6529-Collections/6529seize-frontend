@@ -77,14 +77,21 @@ export default function CapacitorWidget() {
   useEffect(() => {
     const listener = App.addListener("appUrlOpen", (data) => {
       console.log("appUrlOpen", data);
-      const url = new URL(data.url);
-      console.log("url", url);
-      const path = url.pathname;
-      console.log("path", path);
-      const queryParams = Object.fromEntries(url.searchParams.entries());
-      console.log("queryParams", queryParams);
 
-      console.log("pushing", path, queryParams);
+      const urlString = data.url;
+      const schemeEndIndex = urlString.indexOf("://") + 3;
+      const pathStartIndex = urlString.indexOf("/", schemeEndIndex);
+      const path =
+        pathStartIndex > -1 ? urlString.substring(pathStartIndex) : "/";
+
+      const queryString = urlString.includes("?")
+        ? urlString.split("?")[1]
+        : "";
+      const searchParams = new URLSearchParams(queryString);
+      const queryParams = Object.fromEntries(searchParams.entries());
+
+      console.log("Parsed Path:", path);
+      console.log("Query Params:", queryParams);
 
       router.push({
         pathname: path,

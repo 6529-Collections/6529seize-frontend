@@ -20,14 +20,9 @@ export default function HeaderQR() {
     if (routerPath.startsWith("/")) {
       routerPath = routerPath.slice(1);
     }
-    const url = `https://staging.seize.io/deeplink/${routerPath}`;
+    const url = `mobileStaging6529://${routerPath}`;
 
     console.log("url", url);
-
-    // Create a hidden canvas to add the QR code and watermark
-    const canvas = document.createElement("canvas");
-    canvas.width = 500;
-    canvas.height = 500;
 
     QRCode.toDataURL(url, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
