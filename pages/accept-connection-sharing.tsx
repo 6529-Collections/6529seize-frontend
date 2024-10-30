@@ -133,7 +133,7 @@ export default function AcceptConnectionSharing() {
                   sm={12}
                   md={6}
                   className="d-flex flex-column align-items-center justify-content-center">
-                  {connectedAddress ? (
+                  {connectedAddress && !acceptingConnection ? (
                     <>
                       <p className="text-center">
                         Existing connection detected, disconnect first!
