@@ -29,7 +29,7 @@ import {
 import { NextGenMintingFor } from "./NextGenMintShared";
 import { NextGenCollection } from "../../../../../entities/INextgen";
 import { Spinner } from "./NextGenMint";
-import { useSeizeConnect } from "../../../../../hooks/useSeizeConnect";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
 interface Props {
   collection: NextGenCollection;
@@ -46,7 +46,7 @@ interface Props {
 export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const account = useAccount();
   const chainId = useChainId();
-  const { seizeConnect } = useSeizeConnect();
+  const { seizeConnect } = useSeizeConnectContext();
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,

@@ -1,9 +1,10 @@
 import HeaderUserConnected from "./HeaderUserConnected";
 import HeaderUserConnect from "./HeaderUserConnect";
-import { useSeizeConnect } from "../../../hooks/useSeizeConnect";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 export default function HeaderUser() {
-  const { address } = useSeizeConnect();
+  const { address } = useSeizeConnectContext();
+
   return (
     <div className="tailwind-scope">
       {address ? (

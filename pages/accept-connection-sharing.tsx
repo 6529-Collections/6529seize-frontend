@@ -2,14 +2,16 @@ import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import Head from "next/head";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../components/auth/Auth";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { formatAddress } from "../helpers/Helpers";
-import { useSeizeConnect } from "../hooks/useSeizeConnect";
+import { areEqualAddresses } from "../helpers/Helpers";
 import { setAuthJwt } from "../services/auth/auth.utils";
+import { commonApiPost } from "../services/api/common-api";
+import { Spinner } from "../components/dotLoader/DotLoader";
+import { useSeizeConnectContext } from "../components/auth/SeizeConnectContext";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -17,15 +19,21 @@ const Header = dynamic(() => import("../components/header/Header"), {
 });
 
 export default function AcceptConnectionSharing() {
-  const { setTitle, title } = useContext(AuthContext);
-  const { address: connectedAddress, seizeDisconnectAndLogout } =
-    useSeizeConnect();
+  const { setTitle, title, setToast } = useContext(AuthContext);
+  const {
+    address: connectedAddress,
+    seizeDisconnectAndLogout,
+    seizeAcceptConnection,
+  } = useSeizeConnectContext();
+
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "Accept Connection Sharing" },
   ];
 
   const router = useRouter();
+
+  const [acceptingConnection, setAcceptingConnection] = useState(false);
 
   const { token, address, role } = router.query as {
     token: string;
@@ -38,6 +46,41 @@ export default function AcceptConnectionSharing() {
       title: "Accept Connection Sharing",
     });
   }, []);
+
+  const acceptConnection = async () => {
+    try {
+      const redeemResponse = await commonApiPost<
+        { token: string },
+        { address: string; token: string }
+      >({
+        endpoint: "auth/redeem-refresh-token",
+        body: {
+          token,
+        },
+      });
+      if (
+        redeemResponse.address &&
+        redeemResponse.token &&
+        areEqualAddresses(redeemResponse.address, address)
+      ) {
+        setAuthJwt(
+          redeemResponse.address,
+          redeemResponse.token,
+          token,
+          role ?? undefined
+        );
+        seizeAcceptConnection(redeemResponse.address);
+        router.push("/");
+      }
+    } catch (error) {
+      console.error(error);
+      setToast({
+        message: "Failed to accept connection",
+        type: "error",
+      });
+      setAcceptingConnection(false);
+    }
+  };
 
   return (
     <>
@@ -104,11 +147,18 @@ export default function AcceptConnectionSharing() {
                   ) : (
                     <Button
                       size="lg"
+                      className="d-flex align-items-center justify-content-center gap-2"
                       onClick={() => {
-                        setAuthJwt(address, "", token, role ?? undefined);
-                        router.push("/");
+                        setAcceptingConnection(true);
+                        acceptConnection();
                       }}>
-                      ACCEPT CONNECTION
+                      {acceptingConnection ? (
+                        <>
+                          PROCESSING <Spinner dimension={18} />
+                        </>
+                      ) : (
+                        "ACCEPT CONNECTION"
+                      )}
                     </Button>
                   )}
                 </Col>

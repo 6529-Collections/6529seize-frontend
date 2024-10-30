@@ -11,14 +11,13 @@ import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
 import HeaderUser from "./user/HeaderUser";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
-import { AuthContext } from "../auth/Auth";
+import { AuthContext, useAuth } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
 import CapacitorWidget, { DeepLinkScope } from "./capacitor/CapacitorWidget";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import { useSeizeConnect } from "../../hooks/useSeizeConnect";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderQR from "./qr/HeaderQR";
-
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
@@ -33,11 +32,10 @@ export interface HeaderLink {
 
 export default function Header(props: Readonly<Props>) {
   const capacitor = useCapacitor();
-  const { seizeConnectOpen } = useSeizeConnect();
+  const { address, seizeConnectOpen } = useSeizeConnectContext();
 
-  const { showWaves } = useContext(AuthContext);
+  const { showWaves } = useAuth();
   const router = useRouter();
-  const { address } = useSeizeConnect();
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 

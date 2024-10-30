@@ -1,10 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { AuthContext } from "../../auth/Auth";
+import { useAuth } from "../../auth/Auth";
 import Link from "next/link";
-import { useSeizeConnect } from "../../../hooks/useSeizeConnect";
 import Tippy from "@tippyjs/react";
-
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 interface UserContent {
   readonly label: string;
   readonly isProxy: boolean;
@@ -17,8 +16,8 @@ export default function HeaderUserProfile({
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { activeProfileProxy } = useContext(AuthContext);
-  const { address, isConnected } = useSeizeConnect();
+  const { activeProfileProxy } = useAuth();
+  const { address, isConnected } = useSeizeConnectContext();
   const getLabel = (): string => {
     if (activeProfileProxy) {
       return `${activeProfileProxy.created_by.handle}`;

@@ -2,14 +2,14 @@ import Link from "next/link";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import HeaderUserProfile from "./HeaderUserProfile";
 import HeaderUserProxy from "./proxy/HeaderUserProxy";
-import { useSeizeConnect } from "../../../hooks/useSeizeConnect";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 export default function HeaderUserContext({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { address } = useSeizeConnect();
+  const { address } = useSeizeConnectContext();
   const haveProfile = !!profile.profile?.handle;
   return (
     <div className="tailwind-scope">

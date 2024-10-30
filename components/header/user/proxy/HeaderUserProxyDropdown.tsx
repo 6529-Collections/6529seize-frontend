@@ -5,7 +5,6 @@ import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
-import { useSeizeConnect } from "../../../../hooks/useSeizeConnect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDoorOpen,
@@ -13,6 +12,7 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { removeAuthJwt } from "../../../../services/auth/auth.utils";
+import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -29,7 +29,7 @@ export default function HeaderUserProxyDropdown({
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
-  } = useSeizeConnect();
+  } = useSeizeConnectContext();
 
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);

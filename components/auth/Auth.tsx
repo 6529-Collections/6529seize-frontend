@@ -31,8 +31,8 @@ import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
-import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 import { areEqualAddresses } from "../../helpers/Helpers";
+import { useSeizeConnectContext } from "./SeizeConnectContext";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -92,7 +92,7 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, isConnected, seizeDisconnect } = useSeizeConnect();
+  const { address, seizeDisconnect } = useSeizeConnectContext();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -458,6 +458,7 @@ export default function Auth({
   const [showWaves, setShowWaves] = useState(getShowWaves());
 
   useEffect(() => {
+    console.log("i am getShowWaves", getShowWaves());
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
 
