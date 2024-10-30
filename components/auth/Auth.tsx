@@ -337,12 +337,13 @@ export default function Auth({
         return false;
       }
       const redeemResponse = await commonApiPost<
-        { token: string },
+        { token: string; role: string | null },
         { address: string; token: string }
       >({
         endpoint: "auth/redeem-refresh-token",
         body: {
           token: refreshToken,
+          role,
         },
       });
       if (areEqualAddresses(wallet, redeemResponse.address)) {
