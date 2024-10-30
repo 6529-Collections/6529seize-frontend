@@ -27,8 +27,8 @@ export default function NotificationDropVoted({
     <div className="tw-flex tw-gap-x-3 tw-w-full">
       <div className="tw-space-y-2 tw-w-full">
         <div className="tw-inline-flex tw-items-center">
-          <div className="md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
-            <div className="tw-h-[1.15rem] tw-w-[1.15rem] -tw-mt-2.5 tw-text-iron-300">
+          <div className="tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
+            <div className="md:tw-size-[1.15rem] -tw-mt-2.5 tw-text-iron-300">
               <RateClapOutlineIcon />
             </div>
           </div>

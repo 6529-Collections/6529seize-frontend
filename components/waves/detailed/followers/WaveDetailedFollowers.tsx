@@ -1,17 +1,6 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { ApiIncomingIdentitySubscriptionsPage } from "../../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
-import { useEffect, useState } from "react";
-import { ApiIdentityAndSubscriptionActions } from "../../../../generated/models/ApiIdentityAndSubscriptionActions";
 import FollowersListWrapper from "../../../utils/followers/FollowersListWrapper";
-
-const REQUEST_SIZE = 100;
-
-type Query = {
-  readonly page_size: string;
-};
+import { useWaveFollowers } from "../../../../hooks/useWaveFollowers";
 
 export default function WaveDetailedFollowers({
   wave,
@@ -20,71 +9,9 @@ export default function WaveDetailedFollowers({
   readonly wave: ApiWave;
   readonly onBackClick: () => void;
 }) {
-  const query: Query = {
-    page_size: `${REQUEST_SIZE}`,
-  };
-
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: [
-      QueryKey.WAVE_FOLLOWERS,
-      {
-        ...query,
-        target_type: "WAVE",
-        wave_id: wave.id,
-      },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        ...query,
-      };
-      if (pageParam) {
-        params.page = `${pageParam}`;
-      }
-      return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-        endpoint: `/identity-subscriptions/incoming/WAVE/${wave.id}`,
-        params,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
-  });
-
-  const [followers, setFollowers] = useState<
-    ApiIdentityAndSubscriptionActions[]
-  >([]);
-  useEffect(
-    () => setFollowers(data?.pages.flatMap((page) => page.data) ?? []),
-    [data]
+  const { followers, isFetching, onBottomIntersection } = useWaveFollowers(
+    wave.id
   );
-
-  const onBottomIntersection = (state: boolean) => {
-    if (followers.length < REQUEST_SIZE) {
-      return;
-    }
-    if (!state) {
-      return;
-    }
-    if (status === "pending") {
-      return;
-    }
-    if (isFetching) {
-      return;
-    }
-    if (isFetchingNextPage) {
-      return;
-    }
-    if (!hasNextPage) {
-      return;
-    }
-    fetchNextPage();
-  };
 
   return (
     <div className="tw-px-4 tw-py-4">

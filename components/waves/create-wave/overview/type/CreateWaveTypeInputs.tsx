@@ -15,11 +15,6 @@ export default function CreateWaveTypeInputs({
     ApiWaveType.Approve,
   ];
 
-  const DISABLED_WAVE_TYPES: ApiWaveType[] = [
-    ApiWaveType.Rank,
-    ApiWaveType.Approve,
-  ];
-
   return (
     <div className="tw-mt-3 tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
       {waveTypes.map((waveType) => (
@@ -27,7 +22,7 @@ export default function CreateWaveTypeInputs({
           key={waveType}
           type={waveType}
           selected={selected}
-          disabled={DISABLED_WAVE_TYPES.includes(waveType)}
+          disabled={waveType !== ApiWaveType.Chat}
           label={WAVE_LABELS[waveType]}
           onChange={onChange}
         />

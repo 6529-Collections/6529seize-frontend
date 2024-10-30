@@ -21,6 +21,7 @@ export default function CreateWaveGroups({
   }) => void;
 }) {
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       {CREATE_WAVE_GROUPS[waveType].map((groupType) => (

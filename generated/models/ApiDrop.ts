@@ -17,6 +17,7 @@ import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
+import { ApiDropType } from '../models/ApiDropType';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiWaveMin } from '../models/ApiWaveMin';
@@ -28,6 +29,7 @@ export class ApiDrop {
     * Sequence number of the drop in Seize
     */
     'serial_no': number;
+    'drop_type': ApiDropType;
     'wave': ApiWaveMin;
     'reply_to'?: ApiReplyToDropResponse;
     'author': ApiProfileMin;
@@ -68,6 +70,12 @@ export class ApiDrop {
             "baseName": "serial_no",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "drop_type",
+            "baseName": "drop_type",
+            "type": "ApiDropType",
+            "format": ""
         },
         {
             "name": "wave",
@@ -173,4 +181,6 @@ export class ApiDrop {
     public constructor() {
     }
 }
+
+
 

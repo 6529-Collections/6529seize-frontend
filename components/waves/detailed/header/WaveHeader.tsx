@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { getTimeUntil, numberWithCommas } from "../../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
@@ -12,13 +12,26 @@ import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinned from "./WaveHeaderPinned";
 
+export enum WaveHeaderPinnedSide {
+  LEFT = "LEFT",
+  RIGHT = "RIGHT",
+}
+
+interface WaveHeaderProps {
+  readonly wave: ApiWave;
+  readonly onFollowersClick: () => void;
+  readonly useRing?: boolean;
+  readonly useRounded?: boolean;
+  readonly pinnedSide?: WaveHeaderPinnedSide;
+}
+
 export default function WaveHeader({
   wave,
   onFollowersClick,
-}: {
-  readonly wave: ApiWave;
-  readonly onFollowersClick: () => void;
-}) {
+  useRing = true,
+  useRounded = true,
+  pinnedSide = WaveHeaderPinnedSide.RIGHT,
+}: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeUntil(wave.created_at);
   const ending = wave.wave.period?.max
@@ -26,10 +39,21 @@ export default function WaveHeader({
     : null;
 
   const firstXContributors = wave.contributors_overview.slice(0, 10);
+
+  const ringClasses = useRing
+    ? "tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
+    : "";
+
   return (
-    <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-overflow-auto">
-        <div className="tw-rounded-t-xl tw-overflow-hidden">
+    <div>
+      <div
+        className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
+      >
+        <div
+          className={`${
+            useRounded ? "tw-rounded-t-xl" : ""
+          } tw-overflow-hidden`}
+        >
           <div
             className="tw-h-14 tw-w-full tw-object-cover"
             style={{
@@ -42,7 +66,7 @@ export default function WaveHeader({
           <div className="tw-flex">
             {wave.picture ? (
               <img
-                className="tw-h-20 tw-w-20 tw-object-contain tw-rounded-full tw-ring-[3px] tw-ring-iron-950 tw-bg-iron-900"
+                className="tw-h-20 tw-w-20 tw-object-contain tw-rounded-full tw-ring-[3px] tw-shadow-lg tw-ring-white/5 tw-bg-iron-900"
                 src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
                 alt="Wave image"
               />
@@ -69,9 +93,9 @@ export default function WaveHeader({
 
         <div className="tw-px-5 tw-pb-5 tw-mt-2 tw-min-w-0 tw-flex-1">
           <WaveHeaderName wave={wave} />
-          <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2">
-            <div className="tw-text-xs">
-              <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+          <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-mt-1">
+            <div className="tw-text-sm">
+              <span className="tw-font-normal tw-text-iron-400 tw-pr-0.5">
                 Created
               </span>
               <span className="tw-font-normal tw-text-iron-400">{created}</span>
@@ -79,8 +103,8 @@ export default function WaveHeader({
             {ending && (
               <>
                 <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
-                <div className="tw-text-xs">
-                  <span className="tw-font-normal tw-text-iron-400 tw-pr-1">
+                <div className="tw-text-sm">
+                  <span className="tw-font-normal tw-text-iron-400 tw-pr-0.5">
                     Ending
                   </span>
                   <span className="tw-font-normal tw-text-iron-400">
@@ -96,7 +120,7 @@ export default function WaveHeader({
                 wave={wave}
                 onFollowersClick={onFollowersClick}
               />
-              <WaveHeaderPinned wave={wave} />
+              <WaveHeaderPinned wave={wave} side={pinnedSide} />
             </div>
             {!!firstXContributors.length && (
               <div className="tw-flex tw-items-center">
@@ -104,19 +128,19 @@ export default function WaveHeader({
                   {firstXContributors.map((item) => (
                     <img
                       key={item.contributor_identity}
-                      className="tw-inline-block tw-h-6 tw-w-6 tw-rounded-md tw-ring-2 tw-ring-black tw-bg-iron-900"
+                      className="tw-inline-block tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-bg-iron-900"
                       src={getScaledImageUri(
                         item.contributor_pfp,
                         ImageScale.W_AUTO_H_50
                       )}
-                      alt=""
+                      alt="Profile image"
                     />
                   ))}
                 </div>
                 <span className="tw-font-normal tw-ml-2 tw-text-iron-400 tw-text-sm">
-                  <span className="tw-text-iron-200">
+                  <span className="tw-text-iron-200 tw-pr-0.5">
                     {numberWithCommas(wave.metrics.drops_count)}
-                  </span>{" "}
+                  </span>
                   {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
                 </span>
               </div>

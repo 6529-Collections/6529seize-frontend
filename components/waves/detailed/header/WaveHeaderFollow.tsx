@@ -104,7 +104,7 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: ApiWave }) {
         onClick={onFollow}
         disabled={mutating}
         type="button"
-        className={`tw-flex tw-gap-x-1.5 tw-items-center tw-border tw-border-solid tw-rounded-lg tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-flex tw-gap-x-1.5 tw-items-center tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transition tw-duration-300 tw-ease-out ${
           following
             ? "tw-bg-iron-800 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-text-iron-300 focus-visible:tw-outline-iron-700"
             : "tw-border-primary-500 tw-bg-primary-500 hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline-primary-600 tw-text-white"
@@ -116,7 +116,7 @@ export default function WaveHeaderFollow({ wave }: { readonly wave: ApiWave }) {
           </div>
         ) : following ? (
           <svg
-            className="tw-h-3 tw-w-3"
+            className="tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-0.5"
             width="17"
             height="15"
             viewBox="0 0 17 15"

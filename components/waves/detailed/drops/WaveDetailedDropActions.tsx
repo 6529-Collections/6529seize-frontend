@@ -39,7 +39,7 @@ export default function WaveDetailedDropActions({
   };
 
   return (
-    <div className="tw-absolute tw-right-2 tw-top-0 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
+    <div className="tw-absolute tw-z-10 tw-right-2 tw-top-0 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           {connectedProfile?.profile?.handle !== drop.author.handle &&

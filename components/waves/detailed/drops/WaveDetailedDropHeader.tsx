@@ -4,6 +4,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import WaveDetailedDropHeaderRank from "./WaveDetailedDropHeaderRank";
 
 interface WaveDetailedDropHeaderProps {
   readonly drop: ApiDrop;
@@ -11,6 +12,7 @@ interface WaveDetailedDropHeaderProps {
   readonly currentPartIndex: number;
   readonly partsCount: number;
   readonly showWaveInfo: boolean;
+  readonly rank: number | null;
 }
 
 const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
@@ -19,32 +21,37 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
   currentPartIndex,
   partsCount,
   showWaveInfo,
+  rank,
 }) => {
   const cicType = cicToType(drop.author.cic);
+
   return (
     <>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <UserCICAndLevel
-            level={drop.author.level}
-            cicType={cicType}
-            size={UserCICAndLevelSize.SMALL}
-          />
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <UserCICAndLevel
+              level={drop.author.level}
+              cicType={cicType}
+              size={UserCICAndLevelSize.SMALL}
+            />
 
-          <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-            <Link
-              href={`/${drop.author.handle}`}
-              className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-            >
-              {drop.author.handle}
-            </Link>
+            <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+              <Link
+                href={`/${drop.author.handle}`}
+                className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
+              >
+                {drop.author.handle}
+              </Link>
+            </p>
+          </div>
+
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+            {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
-
-        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-        <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-          {getTimeAgoShort(drop.created_at)}
-        </p>
+        {rank && <WaveDetailedDropHeaderRank rank={rank} />}
       </div>
       <div className="tw-mt-0.5">
         {showWaveInfo && (
@@ -56,6 +63,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
           </Link>
         )}
       </div>
+
       {isStorm && (
         <div className="tw-mt-2 tw-inline-flex tw-relative">
           <span className="tw-text-xs tw-text-iron-50">

@@ -29,6 +29,9 @@ import {
 } from "./utils/query-utils";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
+import { useQueryKeyListener } from "../../hooks/useQueryKeyListener";
+import Cookies from "js-cookie";
+import { Time } from "../../helpers/time";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -1442,6 +1445,17 @@ export default function ReactQueryWrapper({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
     });
   };
+
+  useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
+    Cookies.set([QueryKey.FEED_ITEMS].toString(), `${Time.now().toMillis()}`);
+  });
+
+  useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
+    Cookies.set(
+      [QueryKey.IDENTITY_NOTIFICATIONS].toString(),
+      `${Time.now().toMillis()}`
+    );
+  });
 
   const value = useMemo(
     () => ({

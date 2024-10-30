@@ -5,6 +5,8 @@ import CreateDrop from "./CreateDrop";
 import WaveDrops from "./drops/WaveDrops";
 import { useSearchParams, useRouter } from "next/navigation";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -75,7 +77,7 @@ export default function WaveDetailedContent({
       capacitor.isCapacitor
         ? "tw-h-[calc(100vh-14.7rem)]"
         : "tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-7.5rem)]"
-    }`;
+    } ${wave.wave.type !== ApiWaveType.Chat ? "tw-pt-10" : ""}`;
   }, [capacitor.isCapacitor]);
 
   if (!searchParamsDone) {
@@ -87,7 +89,7 @@ export default function WaveDetailedContent({
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
           <WaveDrops
-            wave={wave}
+            waveId={wave.id}
             onReply={handleReply}
             onQuote={handleQuote}
             activeDrop={activeDrop}
@@ -95,11 +97,13 @@ export default function WaveDetailedContent({
           />
           {canDrop && (
             <div className="tw-mt-auto">
-              <CreateDrop
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                wave={wave}
-              />
+              <CreateDropWaveWrapper>
+                <CreateDrop
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  wave={wave}
+                />
+              </CreateDropWaveWrapper>
             </div>
           )}
         </div>

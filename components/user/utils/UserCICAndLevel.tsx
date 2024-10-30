@@ -35,7 +35,7 @@ export default function UserCICAndLevel({
   return (
     <div className="tw-relative">
       <div
-        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-ring-2 tw-ring-${mainColor} tw-text-${mainColor}`}>
+        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-ring-1 tw-ring-${mainColor} tw-text-${mainColor}`}>
         {level}
       </div>
       <span

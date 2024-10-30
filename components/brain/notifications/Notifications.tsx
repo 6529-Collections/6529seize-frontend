@@ -123,24 +123,20 @@ export default function Notifications() {
   };
 
   return (
-    <div className="lg:tw-w-[672px] tw-flex-shrink-0">
-      <div>
-        {!items.length && !isFetching ? (
-          <div className="tw-mt-20">
-            <MyStreamNoItems />
-          </div>
-        ) : (
-          <>
-            <div>
-              <NotificationsWrapper
-                items={items}
-                loading={isFetching}
-                onBottomIntersection={onBottomIntersection}
-              />
-            </div>{" "}
-          </>
-        )}
-      </div>
+    <div className="tw-pt-2 lg:tw-mt-8 tw-pb-2 lg:tw-pb-8 tw-flex-1 tw-flex tw-flex-col tw-h-[calc(100vh-10.75rem)] lg:tw-h-full tw-overflow-y-auto no-scrollbar">
+      {!items.length && !isFetching ? (
+          <MyStreamNoItems />
+      ) : (
+        <>
+          <div>
+            <NotificationsWrapper
+              items={items}
+              loading={isFetching}
+              onBottomIntersection={onBottomIntersection}
+            />
+          </div>{" "}
+        </>
+      )}
     </div>
   );
 }

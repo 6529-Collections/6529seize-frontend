@@ -377,23 +377,25 @@ const calculatePercentages = ({
   values: number[];
   totalAmount: number;
 }): number[] => {
-  // Step 1: Verify the sum of values matches the total amount
   const sum = values.reduce((acc, value) => acc + value, 0);
   if (sum !== totalAmount) {
     throw new Error("Total amount does not match the sum of the values.");
   }
 
-  // Step 2: Calculate raw percentages
-  let percentages = values.map((value) => (value / totalAmount) * 100);
+  // Calculate raw percentages and floor them
+  let percentages = values.map((value) => Math.floor((value / totalAmount) * 100));
+  
+  // Calculate remaining points to distribute (due to rounding down)
+  const remainingPoints = 100 - percentages.reduce((acc, p) => acc + p, 0);
+  
+  // Distribute remaining points to the largest original values first
+  const indexesOrderedByValue = values
+    .map((value, index) => ({ value, index }))
+    .sort((a, b) => b.value - a.value)
+    .map(item => item.index);
 
-  // Step 3: Round percentages to two decimal places and calculate the rounding error
-  percentages = percentages.map((p) => Math.round(p * 100) / 100);
-  const roundingError = 100 - percentages.reduce((acc, p) => acc + p, 0);
-
-  // Step 4: Distribute the rounding error
-  // Note: This simple approach adds the error to the first element. For more complex scenarios, distribute it more evenly.
-  if (roundingError !== 0) {
-    percentages[0] = Math.round((percentages[0] + roundingError) * 100) / 100;
+  for (let i = 0; i < remainingPoints; i++) {
+    percentages[indexesOrderedByValue[i % indexesOrderedByValue.length]]++;
   }
 
   return percentages;
@@ -406,7 +408,7 @@ const getOutcomesDistribution = ({
 }): number[] =>
   winnersConfig.creditValueType ===
   CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
-    ? winnersConfig.winners.map((winner) => winner.value)
+    ? winnersConfig.winners.map((winner) => +winner.value)
     : calculatePercentages({
         values: winnersConfig.winners.map((winner) => winner.value),
         totalAmount: winnersConfig.totalAmount,
@@ -432,7 +434,7 @@ const getRankOutcomes = ({
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
         subtype: ApiWaveOutcomeSubType.CreditDistribution,
-        description: "",
+        description: "Rep distribution",
         credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
         amount: outcome.winnersConfig.totalAmount,
@@ -447,7 +449,7 @@ const getRankOutcomes = ({
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
         subtype: ApiWaveOutcomeSubType.CreditDistribution,
-        description: "",
+        description: "NIC distribution",
         credit: ApiWaveOutcomeCredit.Cic,
         amount: outcome.winnersConfig.totalAmount,
         distribution: getOutcomesDistribution({

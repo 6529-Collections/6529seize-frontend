@@ -152,7 +152,7 @@ export default function WaveDetailedDropFollowAuthor({
   };
 
   return (
-    <Tippy content={tooltipText[followState]} placement="top">
+    <Tippy content={<span className="tw-text-xs">{tooltipText[followState]}</span>} placement="top">
       <button
         onClick={(e) => {
           e.stopPropagation();

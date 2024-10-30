@@ -11,6 +11,12 @@ import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
+import { ApiDropType } from "../../../../generated/models/ApiDropType";
+
+export interface DropInteractionParams {
+  drop: ExtendedDrop;
+  partId: number;
+}
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -40,6 +46,41 @@ const shouldGroupWithDrop = (
   return bothNotReplies || repliesInSameThread;
 };
 
+const getRankClasses = (rank: number | null): string => {
+  if (rank === null) return "tw-bg-iron-950";
+  if (rank === 1) {
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border tw-border-solid tw-border-[#E8D48A]/5";
+  }
+  if (rank === 2) {
+    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(35,35,36,0.6)_100%)] tw-border tw-border-solid tw-border-[#DDDDDD]/5";
+  }
+  if (rank === 3) {
+    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(32,31,31,0.6)_100%)] tw-border tw-border-solid tw-border-[#D9A962]/5";
+  }
+  return "tw-bg-iron-900/80";
+};
+
+const getDropClasses = (
+  isActiveDrop: boolean,
+  groupingClass: string,
+  border: boolean,
+  rank: number | null
+): string => {
+  const baseClasses =
+    "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+
+  const activeClasses =
+    "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
+  const inactiveClasses = "tw-rounded-lg";
+  const borderClasses = "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+
+  const rankClasses = getRankClasses(rank);
+
+  return `${baseClasses} ${
+    isActiveDrop ? activeClasses : inactiveClasses
+  } ${groupingClass} ${border ? borderClasses : ""} ${rankClasses}`.trim();
+};
+
 interface WaveDetailedDropProps {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -47,20 +88,9 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly onReply: ({
-    drop,
-    partId,
-  }: {
-    drop: ExtendedDrop;
-    partId: number;
-  }) => void;
-  readonly onQuote: ({
-    drop,
-    partId,
-  }: {
-    drop: ExtendedDrop;
-    partId: number;
-  }) => void;
+  readonly border?: boolean;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
@@ -72,12 +102,13 @@ const WaveDetailedDrop = ({
   nextDrop,
   showWaveInfo,
   activeDrop,
+  border = false,
   onReply,
   onQuote,
   onReplyClick,
   onQuoteClick,
   showReplyAndQuote,
-  parentContainerRef
+  parentContainerRef,
 }: WaveDetailedDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -85,11 +116,17 @@ const WaveDetailedDrop = ({
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
 
+  const rank =
+    drop.drop_type === ApiDropType.Chat
+      ? null
+      : Math.floor(Math.random() * 5) + 1;
+
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
 
-  const shouldGroupWithPreviousDrop = shouldGroupWithDrop(drop, previousDrop);
-  const shouldGroupWithNextDrop = shouldGroupWithDrop(drop, nextDrop);
+  const shouldGroupWithPreviousDrop =
+    !rank && shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop = !rank && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
 
@@ -163,85 +200,86 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
+  const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
+
   return (
-    <div
-      className={`tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 ${
-        isActiveDrop
-          ? "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0"
-          : "tw-bg-iron-950 tw-rounded-xl"
-      } ${groupingClass}`}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
-    >
-      {drop.reply_to &&
-        drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
-          <WaveDetailedDropReply
-            onReplyClick={onReplyClick}
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
-      <div className="tw-flex tw-gap-x-3">
-        {!shouldGroupWithPreviousDrop && (
-          <WaveDetailedDropAuthorPfp drop={drop} />
-        )}
-        <div
-          className={`${
-            shouldGroupWithPreviousDrop ? "" : "tw-mt-1"
-          } tw-flex tw-flex-col tw-w-full`}
-        >
-          {!shouldGroupWithPreviousDrop && (
-            <WaveDetailedDropHeader
-              drop={drop}
-              showWaveInfo={showWaveInfo}
-              isStorm={isStorm}
-              currentPartIndex={activePartIndex}
-              partsCount={drop.parts.length}
+    <div className={rank ? "tw-px-4 tw-py-2" : ""}>
+      <div
+        className={dropClasses}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
+      >
+        {drop.reply_to &&
+          drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
+            <WaveDetailedDropReply
+              onReplyClick={onReplyClick}
+              dropId={drop.reply_to.drop_id}
+              dropPartId={drop.reply_to.drop_part_id}
+              maybeDrop={
+                drop.reply_to.drop
+                  ? { ...drop.reply_to.drop, wave: drop.wave }
+                  : null
+              }
             />
           )}
-          <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>
-            <WaveDetailedDropContent
-              drop={drop}
-              activePartIndex={activePartIndex}
-              setActivePartIndex={setActivePartIndex}
-              onLongPress={handleLongPress}
-              onDropClick={handleDropClick}
-              onQuoteClick={onQuoteClick}
-              setLongPressTriggered={setLongPressTriggered}
-              parentContainerRef={parentContainerRef}
-            />
+        <div className="tw-flex tw-gap-x-3">
+          {!shouldGroupWithPreviousDrop && (
+            <WaveDetailedDropAuthorPfp drop={drop} />
+          )}
+          <div
+            className={`${
+              shouldGroupWithPreviousDrop ? "" : "tw-mt-1"
+            } tw-flex tw-flex-col tw-w-full`}
+          >
+            {!shouldGroupWithPreviousDrop && (
+              <WaveDetailedDropHeader
+                drop={drop}
+                showWaveInfo={showWaveInfo}
+                isStorm={isStorm}
+                currentPartIndex={activePartIndex}
+                partsCount={drop.parts.length}
+                rank={rank}
+              />
+            )}
+            <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>
+              <WaveDetailedDropContent
+                drop={drop}
+                activePartIndex={activePartIndex}
+                setActivePartIndex={setActivePartIndex}
+                onLongPress={handleLongPress}
+                onDropClick={handleDropClick}
+                onQuoteClick={onQuoteClick}
+                setLongPressTriggered={setLongPressTriggered}
+                parentContainerRef={parentContainerRef}
+              />
+            </div>
           </div>
         </div>
-      </div>
-      {!isMobile && showReplyAndQuote && (
-        <WaveDetailedDropActions
+        {!isMobile && showReplyAndQuote && (
+          <WaveDetailedDropActions
+            drop={drop}
+            activePartIndex={activePartIndex}
+            onReply={handleOnReply}
+            onQuote={handleOnQuote}
+          />
+        )}
+        <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
+          {drop.metadata.length > 0 && (
+            <WaveDetailedDropMetadata metadata={drop.metadata} />
+          )}
+          {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
+        </div>
+        <WaveDetailedDropMobileMenu
           drop={drop}
-          activePartIndex={activePartIndex}
+          isOpen={isSlideUp}
+          longPressTriggered={longPressTriggered}
+          showReplyAndQuote={showReplyAndQuote}
+          setOpen={setIsSlideUp}
           onReply={handleOnReply}
           onQuote={handleOnQuote}
         />
-      )}
-      <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
-        {drop.metadata.length > 0 && (
-          <WaveDetailedDropMetadata metadata={drop.metadata} />
-        )}
-        {!!drop.raters_count && <WaveDetailedDropRatings drop={drop} />}
       </div>
-      <WaveDetailedDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onQuote={handleOnQuote}
-      />
     </div>
   );
 };
