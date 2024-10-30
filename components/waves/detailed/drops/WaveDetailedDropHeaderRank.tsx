@@ -1,5 +1,4 @@
 import React from "react";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 interface WaveDetailedDropHeaderRankProps {

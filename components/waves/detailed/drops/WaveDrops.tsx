@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../WaveDetailedContent";
 import DropsList from "../../../drops/view/DropsList";

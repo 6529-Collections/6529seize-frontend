@@ -203,7 +203,7 @@ const WaveDetailedDrop = ({
   const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
 
   return (
-    <div className={!!rank ? "tw-px-4 tw-py-2" : ""}>
+    <div className={rank ? "tw-px-4 tw-py-2" : ""}>
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}

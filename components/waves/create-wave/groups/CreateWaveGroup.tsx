@@ -50,7 +50,7 @@ export default function CreateWaveGroup({
         <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
           {CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType]}
         </p>
-        {groupType === CreateWaveGroupConfigType.CAN_CHAT && (
+        {false && groupType === CreateWaveGroupConfigType.CAN_CHAT && (
           <div className="tw-pl-4">
             {/* SMALL toggle, make as component smallToggle
              */}
@@ -71,9 +71,7 @@ export default function CreateWaveGroup({
                     role="switch"
                     aria-checked="false"
                   >
-                    {/* Active classes:
-            tw-translate-x-5
-          */}
+                    {/* Active classes: tw-translate-x-5  */}
                     <span
                       aria-hidden="true"
                       className="tw-pointer-events-none tw-inline-block tw-size-4 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out tw-translate-x-0"

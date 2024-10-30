@@ -1,5 +1,4 @@
 import { ApiCreateDropRequest } from "../generated/models/ApiCreateDropRequest";
-import { ApiDropType } from "../generated/models/ApiDropType";
 import { ProfileMinWithoutSubs } from "../helpers/ProfileTypes";
 import { FullPageRequest } from "../helpers/Types";
 import {
@@ -79,14 +78,6 @@ export interface CreateDropRequestPart {
   readonly quoted_drop: QuotedDrop | null;
   readonly media: Array<DropMedia>;
 }
-
-// export interface CreateDropRequest {
-//   readonly title: string | null;
-//   readonly parts: Array<CreateDropRequestPart>;
-//   readonly referenced_nfts: Array<ReferencedNft>;
-//   readonly mentioned_users: Array<Omit<MentionedUser, "current_handle">>;
-//   readonly metadata: Array<DropMetadata>;
-// }
 
 export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
   readonly media: Array<File>;

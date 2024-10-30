@@ -1,7 +1,6 @@
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 import { useCallback, useEffect, useState } from "react";
-import { ApiWave } from "../generated/models/ApiWave";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import {

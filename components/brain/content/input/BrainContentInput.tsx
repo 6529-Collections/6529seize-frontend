@@ -17,7 +17,6 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
 }) => {
   const capacitor = useCapacitor();
   const { data: wave } = useWaveData(waveId);
-  // TODO: Correct heights
   const containerClassName = useMemo(() => {
     return capacitor.isCapacitor
       ? "tw-max-h-[calc(100vh-14.7rem)]"

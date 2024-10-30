@@ -22,7 +22,7 @@ export default function CreateWaveTypeInputs({
           key={waveType}
           type={waveType}
           selected={selected}
-          disabled={waveType === ApiWaveType.Approve}
+          disabled={waveType !== ApiWaveType.Chat}
           label={WAVE_LABELS[waveType]}
           onChange={onChange}
         />

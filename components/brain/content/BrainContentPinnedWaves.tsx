@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import BrainContentPinnedWavesAdd from "./BrainContentPinnedWavesAdd";
 import BrainContentPinnedWave from "./BrainContentPinnedWave";
 import { usePinnedWaves } from "../../../hooks/usePinnedWaves";
 import { useRouter } from "next/router";
@@ -41,7 +40,6 @@ const BrainContentPinnedWaves: React.FC = () => {
           />
         ))}
       </div>
-      {/*  <BrainContentPinnedWavesAdd /> */}
     </div>
   );
 };

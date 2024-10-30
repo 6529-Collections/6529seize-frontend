@@ -21,14 +21,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
   onQuote,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const {
-    drops,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    haveNewDrops,
-  } = useWaveDrops(waveId, connectedProfile?.profile?.handle, false);
+  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useWaveDrops(waveId, connectedProfile?.profile?.handle, false);
 
   const onBottomIntersection = (state: boolean) => {
     if (state && !isFetching && !isFetchingNextPage && hasNextPage) {

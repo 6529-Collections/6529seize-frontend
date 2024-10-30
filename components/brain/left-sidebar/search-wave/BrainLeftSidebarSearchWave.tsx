@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useKeyPressEvent } from "react-use";
-import { useClickAway } from "react-use";
+import { useClickAway, useKeyPressEvent } from "react-use";
 import BrainLeftSidebarSearchWaveDropdown from "./BrainLeftSidebarSearchWaveDropdown";
 
 interface BrainLeftSidebarSearchWaveProps {

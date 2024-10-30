@@ -6,7 +6,6 @@ import "../styles/swiper.scss";
 import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import { wrapper } from "../store/store";
-import { setAuthJwt } from "../services/auth/auth.utils";
 import {
   CW_PROJECT_ID,
   DELEGATION_CONTRACT,
@@ -102,15 +101,9 @@ import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
 import { ReactElement, ReactNode, useEffect } from "react";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import ReactQueryWrapper, {
-  QueryKey,
-} from "../components/react-query-wrapper/ReactQueryWrapper";
+import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import "../components/drops/create/lexical/lexical.styles.scss";
 import CookiesBanner from "../components/cookies/CookiesBanner";

@@ -4,7 +4,6 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { ApiDropType } from "../../../../generated/models/ObjectSerializer";
 import WaveDetailedDropHeaderRank from "./WaveDetailedDropHeaderRank";
 
 interface WaveDetailedDropHeaderProps {

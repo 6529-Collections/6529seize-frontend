@@ -2,7 +2,6 @@ import { QueryClient } from "@tanstack/react-query";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { QueryKey } from "../ReactQueryWrapper";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 type DropsQueryData = {
   pages?: ApiWaveDropsFeed[];
