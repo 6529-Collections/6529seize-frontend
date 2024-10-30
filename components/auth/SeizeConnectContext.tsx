@@ -25,12 +25,10 @@ interface SeizeConnectContextType {
   isAuthenticated: boolean;
 }
 
-// Create the context
 const SeizeConnectContext = createContext<SeizeConnectContextType | undefined>(
   undefined
 );
 
-// Provider component
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -59,7 +57,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         connector: connection.connector,
       });
     }
-    setConnectedAddress(null);
     invalidateAll();
   }, [connections, disconnect, invalidateAll]);
 
@@ -117,7 +114,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Hook to access the SeizeConnect context
 export const useSeizeConnectContext = (): SeizeConnectContextType => {
   const context = useContext(SeizeConnectContext);
   if (!context) {
