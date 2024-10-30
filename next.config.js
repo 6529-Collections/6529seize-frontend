@@ -69,6 +69,7 @@ const nextConfig = {
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     VERSION: VERSION,
     NEXTGEN_CHAIN_ID: process.env.NEXTGEN_CHAIN_ID,
+    MOBILE_APP_SCHEME: process.env.MOBILE_APP_SCHEME,
   },
   async generateBuildId() {
     return VERSION;

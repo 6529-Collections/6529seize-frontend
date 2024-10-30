@@ -14,6 +14,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiLoginResponse {
     'token': string;
+    'refresh_token': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -21,6 +22,12 @@ export class ApiLoginResponse {
         {
             "name": "token",
             "baseName": "token",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "refresh_token",
+            "baseName": "refresh_token",
             "type": "string",
             "format": ""
         }    ];

@@ -4,11 +4,15 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
-import { useAccount } from "wagmi";
 import HeaderUserProxyDropdownChains from "./HeaderUserProxyDropdownChains";
 import { useSeizeConnect } from "../../../../hooks/useSeizeConnect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRepeat } from "@fortawesome/free-solid-svg-icons";
+import {
+  faDoorOpen,
+  faRepeat,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
+import { removeAuthJwt } from "../../../../services/auth/auth.utils";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -19,8 +23,13 @@ export default function HeaderUserProxyDropdown({
   readonly profile: IProfileAndConsolidations;
   readonly onClose: () => void;
 }) {
-  const { address } = useAccount();
-  const { seizeDisconnect } = useSeizeConnect();
+  const {
+    address,
+    isConnected,
+    seizeConnect,
+    seizeDisconnect,
+    seizeDisconnectAndLogout,
+  } = useSeizeConnect();
 
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
@@ -60,14 +69,12 @@ export default function HeaderUserProxyDropdown({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
+            transition={{ duration: 0.2 }}>
             <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-2 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                 <div
                   role="list"
-                  className="tw-flex tw-flex-col tw-gap-y-2 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0"
-                >
+                  className="tw-flex tw-flex-col tw-gap-y-2 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
                   <div className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0">
                     <div className="tw-h-full">
                       <button
@@ -77,8 +84,7 @@ export default function HeaderUserProxyDropdown({
                             ? "tw-bg-transparent hover:tw-bg-iron-700"
                             : "tw-bg-iron-700"
                         } tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
-                        onClick={() => onActivateProfileProxy(null)}
-                      >
+                        onClick={() => onActivateProfileProxy(null)}>
                         {profile.profile?.pfp_url ? (
                           <img
                             src={profile.profile?.pfp_url}
@@ -91,8 +97,7 @@ export default function HeaderUserProxyDropdown({
                               !activeProfileProxy
                                 ? "tw-bg-iron-600"
                                 : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
-                            } tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
-                          ></div>
+                            } tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}></div>
                         )}
                         <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                           <span className="tw-text-md tw-font-medium tw-text-white">
@@ -104,8 +109,7 @@ export default function HeaderUserProxyDropdown({
                               viewBox="0 0 24 24"
                               fill="none"
                               aria-hidden="true"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
+                              xmlns="http://www.w3.org/2000/svg">
                               <path
                                 d="M20 6L9 17L4 12"
                                 stroke="currentColor"
@@ -129,42 +133,58 @@ export default function HeaderUserProxyDropdown({
                   </div>
                   <HeaderUserProxyDropdownChains />
                   <div className="tw-h-full tw-px-2 tw-pt-2">
+                    {isConnected ? (
+                      <button
+                        onClick={() => seizeDisconnect()}
+                        type="button"
+                        aria-label="Connect"
+                        title="Connect"
+                        className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                        <FontAwesomeIcon
+                          icon={faDoorOpen}
+                          height={16}
+                          width={16}
+                        />
+                        <span>Disconnect Wallet</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => seizeConnect()}
+                        type="button"
+                        aria-label="Connect"
+                        title="Connect"
+                        className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                        <FontAwesomeIcon
+                          icon={faDoorOpen}
+                          height={16}
+                          width={16}
+                        />
+                        <span>Connect Wallet</span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="tw-h-full tw-px-2 tw-pt-2">
                     <button
-                      onClick={() => seizeDisconnect(true)}
+                      onClick={() => seizeDisconnectAndLogout(true)}
                       type="button"
                       aria-label="Switch Account"
                       title="Switch Account"
-                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                    >
+                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                       <FontAwesomeIcon icon={faRepeat} height={16} width={16} />
                       <span>Switch Account</span>
                     </button>
                     <button
-                      onClick={() => {
-                        seizeDisconnect();
-                      }}
+                      onClick={() => seizeDisconnectAndLogout()}
                       type="button"
                       aria-label="Disconnect"
                       title="Disconnect"
-                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                    >
-                      <svg
-                        className="tw-h-5 tw-w-5 tw-flex-shrink-0"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M16 17L21 12M21 12L16 7M21 12H9M12 17C12 17.93 12 18.395 11.8978 18.7765C11.6204 19.8117 10.8117 20.6204 9.77646 20.8978C9.39496 21 8.92997 21 8 21H7.5C6.10218 21 5.40326 21 4.85195 20.7716C4.11687 20.4672 3.53284 19.8831 3.22836 19.1481C3 18.5967 3 17.8978 3 16.5V7.5C3 6.10217 3 5.40326 3.22836 4.85195C3.53284 4.11687 4.11687 3.53284 4.85195 3.22836C5.40326 3 6.10218 3 7.5 3H8C8.92997 3 9.39496 3 9.77646 3.10222C10.8117 3.37962 11.6204 4.18827 11.8978 5.22354C12 5.60504 12 6.07003 12 7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span>Disconnect</span>
+                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                      <FontAwesomeIcon
+                        icon={faRightFromBracket}
+                        height={16}
+                        width={16}
+                      />
+                      <span>Disconnect & Logout</span>
                     </button>
                   </div>
                 </div>

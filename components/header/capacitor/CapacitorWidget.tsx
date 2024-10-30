@@ -17,6 +17,11 @@ import useCapacitor, {
 import { App } from "@capacitor/app";
 import { useRouter } from "next/router";
 
+export enum DeepLinkScope {
+  NAVIGATE = "navigate",
+  SHARE_CONNECTION = "share-connection",
+}
+
 export default function CapacitorWidget() {
   const capacitor = useCapacitor();
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
@@ -74,6 +79,18 @@ export default function CapacitorWidget() {
     };
   }, [canGoBack, canGoForward]);
 
+  const doNavigation = (
+    pathname: string,
+    queryParams: Record<string, string | number>
+  ) => {
+    const isSamePath = router.asPath.includes(pathname);
+    const navigationMethod = isSamePath ? "replace" : "push";
+
+    router[navigationMethod]({ pathname, query: queryParams }, undefined, {
+      shallow: false,
+    });
+  };
+
   useEffect(() => {
     const listener = App.addListener("appUrlOpen", (data) => {
       const urlString = data.url;
@@ -81,23 +98,30 @@ export default function CapacitorWidget() {
       const schemeEndIndex = urlString.indexOf("://") + 3;
       const urlWithoutScheme = urlString.slice(schemeEndIndex);
 
-      const path = urlWithoutScheme.split("?")[0];
+      const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
 
       const queryString = urlWithoutScheme.includes("?")
         ? urlWithoutScheme.split("?")[1]
         : "";
 
       const searchParams = new URLSearchParams(queryString);
-      const queryParams = Object.fromEntries(searchParams.entries());
-
-      router.push(
-        {
-          pathname: `/${path}`,
-          query: { ...queryParams, _t: Date.now() / 1000 },
-        },
-        undefined,
-        { shallow: true }
+      const queryParams: Record<string, string | number> = Object.fromEntries(
+        searchParams.entries()
       );
+      queryParams["_t"] = Date.now() / 1000;
+
+      switch (scope) {
+        case DeepLinkScope.NAVIGATE:
+          const path = pathParts.join("/");
+          doNavigation(`/${path}`, queryParams);
+          break;
+        case DeepLinkScope.SHARE_CONNECTION:
+          doNavigation("/accept-connection-sharing", queryParams);
+          break;
+        default:
+          console.log("Unknown Deep Link Scope", scope);
+          break;
+      }
     });
 
     return () => {

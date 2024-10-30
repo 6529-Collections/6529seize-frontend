@@ -7,7 +7,6 @@ import { AboutSection } from "../../pages/about/[section]";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
-import { useAccount } from "wagmi";
 import HeaderDesktopLink from "./HeaderDesktopLink";
 import Link from "next/link";
 import HeaderUser from "./user/HeaderUser";
@@ -15,7 +14,7 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { AuthContext } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
-import CapacitorWidget from "./capacitor/CapacitorWidget";
+import CapacitorWidget, { DeepLinkScope } from "./capacitor/CapacitorWidget";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnect } from "../../hooks/useSeizeConnect";
 import HeaderQR from "./qr/HeaderQR";
@@ -38,7 +37,7 @@ export default function Header(props: Readonly<Props>) {
 
   const { showWaves } = useContext(AuthContext);
   const router = useRouter();
-  const account = useAccount();
+  const { address } = useSeizeConnect();
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 
@@ -89,25 +88,25 @@ export default function Header(props: Readonly<Props>) {
       const isConsolidation = consolidations.length > 1;
       if (isConsolidation) {
         props.onSetWallets(consolidations);
-      } else if (account.address) {
-        props.onSetWallets([account.address]);
+      } else if (address) {
+        props.onSetWallets([address]);
       } else {
         props.onSetWallets([]);
       }
     }
-  }, [consolidations, account.address]);
+  }, [consolidations, address]);
 
   useEffect(() => {
-    if (account.address) {
+    if (address) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/consolidations/${account.address}`
+        `${process.env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
         setConsolidations(Array.from(response.data));
       });
     } else {
       setConsolidations([]);
     }
-  }, [account.address]);
+  }, [address]);
 
   useEffect(() => {
     if (seizeConnectOpen) {

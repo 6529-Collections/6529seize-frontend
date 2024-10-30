@@ -1,9 +1,9 @@
-import { useAccount } from "wagmi";
 import HeaderUserConnected from "./HeaderUserConnected";
 import HeaderUserConnect from "./HeaderUserConnect";
+import { useSeizeConnect } from "../../../hooks/useSeizeConnect";
 
 export default function HeaderUser() {
-  const { address } = useAccount();
+  const { address } = useSeizeConnect();
   return (
     <div className="tailwind-scope">
       {address ? (

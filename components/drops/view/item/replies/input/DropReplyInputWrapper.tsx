@@ -22,6 +22,7 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiDropMedia } from "../../../../../../generated/models/ApiDropMedia";
 import { getOptimisticDropId } from "../../../../../../helpers/waves/drop.helpers";
+import { ApiDropType } from "../../../../../../generated/models/ApiDropType";
 
 export default function DropReplyInputWrapper({
   drop: originalDrop,
@@ -232,7 +233,9 @@ export default function DropReplyInputWrapper({
     }
   };
 
-  const getOptimisticDrop = (dropRequest: ApiCreateDropRequest): ApiDrop | null => {
+  const getOptimisticDrop = (
+    dropRequest: ApiCreateDropRequest
+  ): ApiDrop | null => {
     if (!connectedProfile?.profile) {
       return null;
     }
@@ -287,6 +290,7 @@ export default function DropReplyInputWrapper({
       raters_count: 0,
       context_profile_context: null,
       subscribed_actions: [],
+      drop_type: ApiDropType.Chat,
     };
   };
 
@@ -335,8 +339,7 @@ export default function DropReplyInputWrapper({
         onEditorState={setEditorState}
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
-        onFileChange={setFile}
-      >
+        onFileChange={setFile}>
         <PrimaryButton onClick={onDrop} disabled={!canSubmit} loading={loading}>
           Reply
         </PrimaryButton>

@@ -38,6 +38,9 @@ export const DELEGATION_ALL_ADDRESS =
 
 export const API_AUTH_COOKIE = "x-6529-auth";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
+export const WALLET_ADDRESS_COOKIE = "wallet-address";
+export const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
+export const WALLET_ROLE_COOKIE = "wallet-role";
 export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const PROFILE_PROXY_ACCEPTANCE_COOKIE = "profile-proxy-acceptance";

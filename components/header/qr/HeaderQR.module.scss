@@ -1,0 +1,18 @@
+@import "../../../styles/variables.scss";
+
+.disabledMenuBtn {
+  pointer-events: none;
+}
+
+.modalBody {
+  background-color: $very-dark-grey;
+}
+
+.url {
+  margin-top: 10px;
+  font-size: smaller;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $lighter-grey;
+}
