@@ -184,7 +184,7 @@ export default function HeaderUserProxyDropdown({
                         height={16}
                         width={16}
                       />
-                      <span>Disconnect & Logout</span>
+                      <span>{isConnected && `Disconnect & `}Logout</span>
                     </button>
                   </div>
                 </div>
