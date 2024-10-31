@@ -92,7 +92,8 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, seizeDisconnect } = useSeizeConnectContext();
+  const { address, isConnected, seizeDisconnectAndLogout } =
+    useSeizeConnectContext();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -159,6 +160,7 @@ export default function Auth({
     removeAuthJwt();
     invalidateAll();
     setActiveProfileProxy(null);
+    seizeDisconnectAndLogout();
   }
 
   useEffect(() => {
@@ -173,7 +175,7 @@ export default function Auth({
       }).then((isAuth) => {
         if (!isAuth) {
           reset();
-          setShowSignModal(true);
+          setShowSignModal(isConnected);
         }
       });
     }
@@ -345,8 +347,10 @@ export default function Auth({
           token: refreshToken,
           role,
         },
+      }).catch(() => {
+        return null;
       });
-      if (areEqualAddresses(wallet, redeemResponse.address)) {
+      if (redeemResponse && areEqualAddresses(wallet, redeemResponse.address)) {
         const walletRole = getWalletRole();
         const tokenRole = getRole({ jwt });
         //check if both not null and are equal or if both null
@@ -412,6 +416,7 @@ export default function Auth({
         signerAddress: address,
         role: activeProfileProxy?.created_by.id ?? null,
       });
+      seizeDisconnectAndLogout();
       invalidateAll();
     }
     const isSuccess = !!getAuthJwt();
@@ -550,7 +555,7 @@ export default function Auth({
             variant="danger"
             onClick={() => {
               setShowSignModal(false);
-              seizeDisconnect();
+              seizeDisconnectAndLogout();
             }}>
             Cancel
           </Button>
