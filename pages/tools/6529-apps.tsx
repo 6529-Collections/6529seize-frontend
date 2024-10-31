@@ -5,8 +5,6 @@ import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
 import yaml from "js-yaml";
 import { GetServerSideProps } from "next";
