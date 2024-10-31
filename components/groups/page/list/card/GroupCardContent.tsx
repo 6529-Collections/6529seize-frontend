@@ -1,8 +1,8 @@
 import { useContext } from "react";
+import { AuthContext } from "../../../../auth/Auth";
 import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import { GroupCardState } from "./GroupCard";
 import GroupCardConfigs from "./GroupCardConfigs";
-import { AuthContext } from "../../../../auth/Auth";
 
 export default function GroupCardContent({
   group,

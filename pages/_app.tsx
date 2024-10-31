@@ -250,6 +250,7 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 10000,
       refetchOnWindowFocus: false,
+      gcTime: 1000 * 60 * 60 * 24,
     },
   },
 });
@@ -264,12 +265,12 @@ type AppPropsWithLayout = AppProps & {
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
-  const getLayout = Component.getLayout ?? ((page) => page);
 
+  const getLayout = Component.getLayout ?? ((page) => page);
   const capacitor = useCapacitor();
 
   const router = useRouter();
-  const hideFooter = ["/waves", "/my-stream", "/deeplink"].some((path) =>
+  const hideFooter = ["/waves", "/my-stream"].some((path) =>
     router.pathname.startsWith(path)
   );
 

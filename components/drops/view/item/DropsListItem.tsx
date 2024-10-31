@@ -149,13 +149,13 @@ export default function DropsListItem({
     <div
       className={`${
         !isReply && "tw-rounded-xl tw-overflow-hidden"
-      }  tw-relative tw-bg-iron-900 ${
+      }  tw-relative tw-bg-iron-950 ${
         dropReplyDepth < 2 && ""
-      }  tw-transition tw-duration-300 tw-ease-out`}
+      }  tw-transition tw-duration-300 tw-ease-out tw-ring-1 tw-ring-inset tw-ring-iron-800`}
     >
       <div className={`${dropReplyDepth === 0 && "tw-pb-2 tw-pt-2"}`}>
         {replyProps && dropReplyDepth === 0 && (
-          <div className="tw-mb-1.5">
+          <div className="tw-my-1.5">
             <div className="tw-relative tw-flex tw-justify-end">
               <div className="tw-h-6 tw-absolute tw-top-2.5 tw-left-8 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"></div>
             </div>

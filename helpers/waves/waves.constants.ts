@@ -164,8 +164,8 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
   [CreateWaveGroupConfigType.CAN_VIEW]: "Anyone",
   [CreateWaveGroupConfigType.CAN_DROP]: "Anyone",
   [CreateWaveGroupConfigType.CAN_VOTE]: "Anyone",
-  [CreateWaveGroupConfigType.ADMIN]: "Only me",
   [CreateWaveGroupConfigType.CAN_CHAT]: "Anyone",
+  [CreateWaveGroupConfigType.ADMIN]: "Only me",
 };
 
 export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {

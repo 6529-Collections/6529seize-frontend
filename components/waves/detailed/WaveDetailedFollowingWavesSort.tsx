@@ -92,7 +92,7 @@ const WaveDetailedFollowingWavesSort: React.FC<
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="tw-absolute tw-z-20 tw-w-56 tw-right-0 tw-bottom-full tw-mb-1 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-lg tw-shadow-lg tw-shadow-iron-950/50"
+              className="tw-absolute tw-z-20 tw-w-56 tw-left-0 lg:tw-right-0 tw-top-full tw-mb-1 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-rounded-lg tw-shadow-lg tw-shadow-iron-950/50"
             >
               <div className="tw-py-2 tw-px-2 tw-space-y-1.5">
                 {ORDER.map((option) => (

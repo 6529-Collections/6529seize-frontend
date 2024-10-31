@@ -322,7 +322,7 @@ export const getWaveDrops = async ({
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {
-  const authCookie = req?.req?.cookies["x-6529-auth"] ?? null;
+  const authCookie = req?.req.cookies["x-6529-auth"] ?? null;
   const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
   return {
     ...(authCookie ? { "x-6529-auth": authCookie } : {}),

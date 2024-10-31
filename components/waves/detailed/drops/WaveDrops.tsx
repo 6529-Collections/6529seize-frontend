@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../WaveDetailedContent";
 import DropsList from "../../../drops/view/DropsList";
@@ -21,7 +20,7 @@ import CircleLoader, {
 import { useRouter } from "next/router";
 
 interface WaveDropsProps {
-  readonly wave: ApiWave;
+  readonly waveId: string;
   readonly onReply: ({
     drop,
     partId,
@@ -41,7 +40,7 @@ interface WaveDropsProps {
 }
 
 export default function WaveDrops({
-  wave,
+  waveId,
   onReply,
   onQuote,
   activeDrop,
@@ -58,7 +57,7 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDrops(wave, connectedProfile?.profile?.handle);
+  } = useWaveDrops(waveId, connectedProfile?.profile?.handle, true);
 
   const {
     scrollContainerRef,
@@ -178,13 +177,13 @@ export default function WaveDrops({
 
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
-      if (drop.wave.id !== wave.id) {
+      if (drop.wave.id !== waveId) {
         router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
       } else {
         setSerialNo(drop.serial_no);
       }
     },
-    [router, wave.id, setSerialNo]
+    [router, waveId, setSerialNo]
   );
 
   const memoizedDrops = useMemo(() => drops, [drops]);
@@ -225,7 +224,7 @@ export default function WaveDrops({
         <>
           <div className="tw-absolute tw-inset-0 tw-bg-iron-900 tw-bg-opacity-50 tw-z-10" />
           <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-z-20">
-            <div className="tw-bg-iron-800 tw-rounded-full tw-p-4">
+            <div className="tw-rounded-full tw-p-4">
               <CircleLoader size={CircleLoaderSize.XXLARGE} />
             </div>
           </div>

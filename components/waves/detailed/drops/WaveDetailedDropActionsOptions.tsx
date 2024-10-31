@@ -41,7 +41,7 @@ const WaveDetailedDropActionsOptions: React.FC<
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-40 tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none"
+            className="tw-absolute tw-right-0 tw-z-10 tw-mt-1 tw-w-40 tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-focus:tw-outline-none"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="options-menu-0-button"

@@ -14,7 +14,7 @@ export default function WaveHeaderFollowers({
       className="tw-p-0 tw-bg-transparent tw-border-none tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
       <svg
-        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         aria-hidden="true"
@@ -29,7 +29,7 @@ export default function WaveHeaderFollowers({
         ></path>
       </svg>
       <span>
-        <span className="tw-font-medium">
+        <span className="tw-font-normal">
           {numberWithCommas(wave.metrics.subscribers_count)}
         </span>{" "}
         <span className="tw-text-iron-400">

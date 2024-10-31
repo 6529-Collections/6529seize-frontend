@@ -4,12 +4,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import WaveDetailedDrop from "../drops/WaveDetailedDrop";
+import { WaveHeaderPinnedSide } from "./WaveHeader";
 
 interface WaveHeaderPinnedProps {
   readonly wave: ApiWave;
+  readonly side: WaveHeaderPinnedSide;
 }
 
-const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
+
+
+const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({
+  wave,
+  side,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -79,8 +86,12 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave }) => {
                   : {
                       top: buttonRef.current?.getBoundingClientRect().top ?? 0,
                       left:
-                        (buttonRef.current?.getBoundingClientRect().right ??
-                          0) + 8,
+                        side === WaveHeaderPinnedSide.RIGHT
+                          ? (buttonRef.current?.getBoundingClientRect().right ??
+                              0) + 8
+                          : undefined,
+                      right:
+                        side === WaveHeaderPinnedSide.LEFT ? 56 : undefined,
                     }),
               }}
               className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 ${

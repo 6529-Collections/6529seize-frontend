@@ -30,8 +30,8 @@ export interface WaveGroupsConfig {
   readonly canView: string | null;
   readonly canDrop: string | null;
   readonly canVote: string | null;
-  readonly admin: string | null;
   readonly canChat: string | null;
+  readonly admin: string | null;
 }
 
 export interface CreateWaveDropsRequiredMetadata {
@@ -137,4 +137,5 @@ export interface WavesOverviewParams {
   limit: number;
   offset: number;
   type: ApiWavesOverviewType;
+  only_waves_followed_by_authenticated_user?: boolean;
 }

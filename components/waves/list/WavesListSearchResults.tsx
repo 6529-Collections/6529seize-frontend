@@ -1,23 +1,9 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { useContext, useEffect, useState } from "react";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { AuthContext } from "../../auth/Auth";
 import WaveItem from "./WaveItem";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { useDebounce } from "react-use";
-
-export interface SearchWavesParams {
-  readonly author?: string;
-  readonly name?: string;
-  readonly limit: number;
-  readonly serial_no_less_than?: number;
-  readonly group_id?: string;
-}
+import { useWaves } from "../../../hooks/useWaves";
 
 export default function WavesListSearchResults({
   identity,
@@ -26,142 +12,26 @@ export default function WavesListSearchResults({
   readonly identity: string | null;
   readonly waveName: string | null;
 }) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-
-  const getUsePublicWaves = () =>
-    !connectedProfile?.profile?.handle || !!activeProfileProxy;
-  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
-  useEffect(
-    () => setUsePublicWaves(getUsePublicWaves()),
-    [connectedProfile, activeProfileProxy]
-  );
-
-  const getParams = (): SearchWavesParams => {
-    return {
-      author: identity ?? undefined,
-      name: waveName ?? undefined,
-      limit: 20,
-    };
-  };
-
-  const [params, setParams] = useState<SearchWavesParams>(getParams());
-  useEffect(() => setParams(getParams()), [identity, waveName]);
-
-  const [debouncedParams, setDebouncedParams] =
-    useState<SearchWavesParams>(params);
-
-  useDebounce(() => setDebouncedParams(params), 200, [params]);
-
   const {
-    data: wavesAuth,
-    fetchNextPage: fetchNextPageAuth,
-    hasNextPage: hasNextPageAuth,
-    isFetching: isFetchingAuth,
-    isFetchingNextPage: isFetchingNextPageAuth,
-    status: statusAuth,
-  } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES, debouncedParams],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const queryParams: Record<string, string> = {};
-      if (pageParam) {
-        queryParams.serial_no_less_than = `${pageParam}`;
-      }
-
-      if (debouncedParams.author) {
-        queryParams.author = debouncedParams.author;
-      }
-
-      if (debouncedParams.name) {
-        queryParams.name = debouncedParams.name;
-      }
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: `waves`,
-        params: queryParams,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: !usePublicWaves,
-  });
-
-  const {
-    data: wavesPublic,
-    fetchNextPage: fetchNextPagePublic,
-    hasNextPage: hasNextPagePublic,
-    isFetching: isFetchingPublic,
-    isFetchingNextPage: isFetchingNextPagePublic,
-    status: statusPublic,
-  } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_PUBLIC, debouncedParams],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const queryParams: Record<string, string> = {};
-      if (pageParam) {
-        queryParams.serial_no_less_than = `${pageParam}`;
-      }
-
-      if (debouncedParams.author) {
-        queryParams.author = debouncedParams.author;
-      }
-
-      if (debouncedParams.name) {
-        queryParams.name = debouncedParams.name;
-      }
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: `waves-public`,
-        params: queryParams,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: usePublicWaves,
-  });
-
-  const getWaves = (): ApiWave[] => {
-    if (usePublicWaves) {
-      return wavesPublic?.pages.flat() ?? [];
-    }
-    return wavesAuth?.pages.flat() ?? [];
-  };
-
-  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(
-    () => setWaves(getWaves()),
-    [wavesAuth, wavesPublic, usePublicWaves]
-  );
+    waves,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    status,
+  } = useWaves({ identity, waveName });
 
   const onBottomIntersection = (state: boolean) => {
-    if (!state) {
+    if (
+      !state ||
+      status === "pending" ||
+      isFetching ||
+      isFetchingNextPage ||
+      !hasNextPage
+    ) {
       return;
     }
-    if (usePublicWaves) {
-      if (statusPublic === "pending") {
-        return;
-      }
-      if (isFetchingPublic) {
-        return;
-      }
-      if (isFetchingNextPagePublic) {
-        return;
-      }
-      if (!hasNextPagePublic) {
-        return;
-      }
-      fetchNextPagePublic();
-      return;
-    }
-    if (statusAuth === "pending") {
-      return;
-    }
-    if (isFetchingAuth) {
-      return;
-    }
-    if (isFetchingNextPageAuth) {
-      return;
-    }
-    if (!hasNextPageAuth) {
-      return;
-    }
-    fetchNextPageAuth();
+    fetchNextPage();
   };
 
   return (
@@ -170,7 +40,7 @@ export default function WavesListSearchResults({
         <span className="tw-tracking-tight tw-text-xl tw-font-medium tw-text-iron-50">
           Search
         </span>
-        {waves.length === 0 && !isFetchingAuth && !isFetchingPublic && (
+        {waves.length === 0 && !isFetching && (
           <p className="tw-mt-2 tw-block tw-mb-0 tw-text-sm tw-italic tw-text-iron-500">
             No results found. Please try a different keyword or create a new
             wave.
@@ -183,7 +53,7 @@ export default function WavesListSearchResults({
             <WaveItem key={`waves-${wave.id}`} wave={wave} />
           ))}
         </div>
-        {(isFetchingAuth || isFetchingPublic) && (
+        {isFetching && (
           <div className="tw-w-full tw-text-center tw-mt-8">
             <CircleLoader size={CircleLoaderSize.XXLARGE} />
           </div>

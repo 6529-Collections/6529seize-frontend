@@ -6,8 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import WaveSpecs from "./specs/WaveSpecs";
 import WaveRequiredTypes from "./types/WaveRequiredTypes";
 import WaveRequiredMetadata from "./metadata/WaveRequiredMetadata";
-import WaveLeaderboard from "./leaderboard/WaveLeaderboard";
-import WaveOutcomes from "./outcome/WaveOutcomes";
 import WaveDetailedFollowingWaves from "./WaveDetailedFollowingWaves";
 import WaveGroups from "./groups/WaveGroups";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -100,12 +98,6 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
               <WaveGroups wave={wave} />
               {showRequiredMetadata && <WaveRequiredMetadata wave={wave} />}
               {showRequiredTypes && <WaveRequiredTypes wave={wave} />}
-              {false && (
-                <>
-                  <WaveLeaderboard wave={wave} />
-                  <WaveOutcomes wave={wave} />
-                </>
-              )}
             </div>
           </motion.div>
         )}
