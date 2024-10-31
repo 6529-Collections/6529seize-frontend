@@ -1,7 +1,7 @@
 import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { NFT } from "../../entities/INFT";
 import { fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";

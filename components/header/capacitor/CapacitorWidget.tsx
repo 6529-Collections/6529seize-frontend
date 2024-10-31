@@ -112,8 +112,7 @@ export default function CapacitorWidget() {
 
       switch (scope) {
         case DeepLinkScope.NAVIGATE:
-          const path = pathParts.join("/");
-          doNavigation(`/${path}`, queryParams);
+          doNavigation(`/${pathParts.join("/")}`, queryParams);
           break;
         case DeepLinkScope.SHARE_CONNECTION:
           doNavigation("/accept-connection-sharing", queryParams);

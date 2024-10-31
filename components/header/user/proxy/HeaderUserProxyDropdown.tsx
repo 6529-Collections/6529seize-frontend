@@ -11,7 +11,6 @@ import {
   faRepeat,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import { removeAuthJwt } from "../../../../services/auth/auth.utils";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 
 export default function HeaderUserProxyDropdown({
