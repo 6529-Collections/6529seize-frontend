@@ -122,28 +122,22 @@ export function HeaderQRModal({
 
   useEffect(() => {
     if (show) {
-      handleShow();
-    } else {
-      const timer = handleHide();
-      return () => clearTimeout(timer);
+      generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
     }
   }, [show]);
 
-  function handleShow() {
-    generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
-  }
-
-  function handleHide() {
-    const timer = setTimeout(() => {
-      setNavigateBrowserSrc("");
-      setNavigateAppSrc("");
-      setShareConnectionSrc("");
-      setActiveTab(Mode.NAVIGATE);
-      setActiveSubTab(SubMode.BROWSER);
-    }, 150);
-
-    return timer;
-  }
+  useEffect(() => {
+    if (!show) {
+      const timer = setTimeout(() => {
+        setNavigateBrowserSrc("");
+        setNavigateAppSrc("");
+        setShareConnectionSrc("");
+        setActiveTab(Mode.NAVIGATE);
+        setActiveSubTab(SubMode.BROWSER);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [show]);
 
   function printImage() {
     let url = "";
