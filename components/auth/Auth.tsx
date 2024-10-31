@@ -31,7 +31,6 @@ import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
-import { areEqualAddresses } from "../../helpers/Helpers";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
 import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
