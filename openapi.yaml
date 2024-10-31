@@ -4607,8 +4607,11 @@ components:
     ApiRedeemRefreshTokenRequest:
       type: object
       required:
+        - address
         - token
       properties:
+        address:
+          type: string
         token:
           type: string
         role:

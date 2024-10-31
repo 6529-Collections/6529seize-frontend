@@ -346,13 +346,14 @@ export default function Auth({
       >({
         endpoint: "auth/redeem-refresh-token",
         body: {
+          address: walletAddress,
           token: refreshToken,
           role: role ?? undefined,
         },
       }).catch(() => {
         return null;
       });
-      if (redeemResponse && areEqualAddresses(wallet, redeemResponse.address)) {
+      if (redeemResponse) {
         const walletRole = getWalletRole();
         const tokenRole = getRole({ jwt });
         if (

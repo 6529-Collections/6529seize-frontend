@@ -12,6 +12,8 @@ import { setAuthJwt } from "../services/auth/auth.utils";
 import { commonApiPost } from "../services/api/common-api";
 import { Spinner } from "../components/dotLoader/DotLoader";
 import { useSeizeConnectContext } from "../components/auth/SeizeConnectContext";
+import { ApiRedeemRefreshTokenRequest } from "../generated/models/ApiRedeemRefreshTokenRequest";
+import { ApiRedeemRefreshTokenResponse } from "../generated/models/ApiRedeemRefreshTokenResponse";
 
 const Header = dynamic(() => import("../components/header/Header"), {
   ssr: false,
@@ -50,11 +52,12 @@ export default function AcceptConnectionSharing() {
   const acceptConnection = async () => {
     try {
       const redeemResponse = await commonApiPost<
-        { token: string },
-        { address: string; token: string }
+        ApiRedeemRefreshTokenRequest,
+        ApiRedeemRefreshTokenResponse
       >({
         endpoint: "auth/redeem-refresh-token",
         body: {
+          address,
           token,
         },
       });

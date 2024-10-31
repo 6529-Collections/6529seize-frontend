@@ -13,12 +13,19 @@
 import { HttpFile } from '../http/http';
 
 export class ApiRedeemRefreshTokenRequest {
+    'address': string;
     'token': string;
     'role'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "address",
+            "baseName": "address",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "token",
             "baseName": "token",
