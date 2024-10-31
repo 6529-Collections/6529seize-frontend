@@ -104,6 +104,8 @@ export * from '../models/ApiQuotedDropResponse';
 export * from '../models/ApiRateMatter';
 export * from '../models/ApiRatingWithProfileInfoAndLevel';
 export * from '../models/ApiRatingWithProfileInfoAndLevelPage';
+export * from '../models/ApiRedeemRefreshTokenRequest';
+export * from '../models/ApiRedeemRefreshTokenResponse';
 export * from '../models/ApiRegisterPushNotificationTokenRequest';
 export * from '../models/ApiRepRating';
 export * from '../models/ApiReplyToDrop';
@@ -248,6 +250,8 @@ import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
 import { ApiRateMatter } from '../models/ApiRateMatter';
 import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
 import { ApiRatingWithProfileInfoAndLevelPage } from '../models/ApiRatingWithProfileInfoAndLevelPage';
+import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
+import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
 import { ApiRegisterPushNotificationTokenRequest } from '../models/ApiRegisterPushNotificationTokenRequest';
 import { ApiRepRating } from '../models/ApiRepRating';
 import { ApiReplyToDrop } from '../models/ApiReplyToDrop';
@@ -422,6 +426,8 @@ let typeMap: {[index: string]: any} = {
     "ApiQuotedDropResponse": ApiQuotedDropResponse,
     "ApiRatingWithProfileInfoAndLevel": ApiRatingWithProfileInfoAndLevel,
     "ApiRatingWithProfileInfoAndLevelPage": ApiRatingWithProfileInfoAndLevelPage,
+    "ApiRedeemRefreshTokenRequest": ApiRedeemRefreshTokenRequest,
+    "ApiRedeemRefreshTokenResponse": ApiRedeemRefreshTokenResponse,
     "ApiRegisterPushNotificationTokenRequest": ApiRegisterPushNotificationTokenRequest,
     "ApiRepRating": ApiRepRating,
     "ApiReplyToDrop": ApiReplyToDrop,

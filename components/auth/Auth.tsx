@@ -33,6 +33,8 @@ import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
+import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
+import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -339,13 +341,13 @@ export default function Auth({
         return false;
       }
       const redeemResponse = await commonApiPost<
-        { token: string; role: string | null },
-        { address: string; token: string }
+        ApiRedeemRefreshTokenRequest,
+        ApiRedeemRefreshTokenResponse
       >({
         endpoint: "auth/redeem-refresh-token",
         body: {
           token: refreshToken,
-          role,
+          role: role ?? undefined,
         },
       }).catch(() => {
         return null;
@@ -353,7 +355,6 @@ export default function Auth({
       if (redeemResponse && areEqualAddresses(wallet, redeemResponse.address)) {
         const walletRole = getWalletRole();
         const tokenRole = getRole({ jwt });
-        //check if both not null and are equal or if both null
         if (
           (walletRole && tokenRole && tokenRole === walletRole) ||
           (!walletRole && !tokenRole)
