@@ -90,7 +90,7 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
       <Tippy content="Go to wave">
         <Link
           href={`/waves/${wave.id}`}
-          className={`tw-mt-1.5 tw-no-underline tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 tw-size-6`}
+          className="tw-mt-1.5 tw-no-underline tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 tw-size-6"
         >
           <svg
             className="tw-size-4 tw-flex-shrink-0"
