@@ -42,7 +42,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
             {!!wave && <span>{wave.name}</span>}{" "}
             <span className="tw-text-iron-400">Stream</span>
           </h2>
-          <div className="tw-flex-1 tw-h-px tw-bg-iron-800" />
+          <div className="tw-flex-1 tw-h-px tw-bg-iron-900" />
         </div>
         <div>{children}</div>
       </div>

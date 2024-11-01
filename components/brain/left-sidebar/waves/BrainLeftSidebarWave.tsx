@@ -93,7 +93,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
         </div>
       </Link>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-flex tw-items-center tw-gap-x-4 md:tw-gap-x-2">
         <Tippy
           content={<span className="tw-text-xs">Stream</span>}
           disabled={isMobile}
@@ -103,7 +103,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               resetWaveCount(wave.id);
               router.push(getHref(wave.id), undefined, { shallow: true });
             }}
-            className="tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           >
             <svg
               width="24"
@@ -153,7 +153,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         >
           <Link
             href={`/waves/${wave.id}`}
-            className="tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
