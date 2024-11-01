@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { useAccount, useConnections, useDisconnect } from "wagmi";
 import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import {
   getWalletAddress,
   removeAuthJwt,
