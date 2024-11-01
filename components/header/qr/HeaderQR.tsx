@@ -1,5 +1,5 @@
 import styles from "./HeaderQR.module.scss";
-import { faQrcode } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faQrcode } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -13,6 +13,7 @@ import {
   getWalletRole,
 } from "../../../services/auth/auth.utils";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
+import Tippy from "@tippyjs/react";
 
 const QRCode = require("qrcode");
 
@@ -59,6 +60,8 @@ export function HeaderQRModal({
 }) {
   const router = useRouter();
 
+  const isMobile = useIsMobileDevice();
+
   const [activeTab, setActiveTab] = useState<Mode>(Mode.SHARE);
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.BROWSER);
 
@@ -69,6 +72,8 @@ export function HeaderQRModal({
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
+
+  const [urlCopied, setUrlCopied] = useState<boolean>(false);
 
   function generateSources(
     refreshToken: string | null,
@@ -173,7 +178,23 @@ export function HeaderQRModal({
             border: "20px solid #000",
           }}
         />
-        <div className={styles.url}>{url}</div>
+        <div className="d-flex align-items-center gap-2 mt-2">
+          <div className={styles.url}>{url}</div>
+          <Tippy
+            placement="top"
+            content={urlCopied ? "Copied!" : "Copy URL"}
+            hideOnClick={isMobile}>
+            <FontAwesomeIcon
+              icon={faCopy}
+              className={`${styles.urlCopy} ${urlCopied ? styles.copied : ""}`}
+              onClick={() => {
+                navigator.clipboard.writeText(url);
+                setUrlCopied(true);
+                setTimeout(() => setUrlCopied(false), 500);
+              }}
+            />
+          </Tippy>
+        </div>
       </>
     );
   }

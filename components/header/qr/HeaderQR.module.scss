@@ -9,10 +9,24 @@
 }
 
 .url {
-  margin-top: 10px;
   font-size: smaller;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: $lighter-grey;
+  color: $lightest-grey;
+  max-width: calc(100% - 25px);
+}
+
+.urlCopy {
+  height: 16px;
+  cursor: pointer;
+  color: $lightest-grey;
+
+  &:hover {
+    color: $off-white;
+  }
+
+  &.copied {
+    color: green;
+  }
 }
