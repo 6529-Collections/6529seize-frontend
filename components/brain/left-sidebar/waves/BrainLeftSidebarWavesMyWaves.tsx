@@ -31,6 +31,9 @@ const BrainLeftSidebarWavesMyWaves: React.FC<
   );
 
   const memoizedWaves = useMemo(() => waves || [], [waves]);
+
+  if (memoizedWaves.length === 0) return null;
+
   return (
     <div className="tw-mt-4 tw-mb-3">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-5">
