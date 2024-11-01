@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { useAccount, useConnections, useDisconnect } from "wagmi";
 import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import {
   getWalletAddress,
   removeAuthJwt,
@@ -36,7 +35,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { disconnect } = useDisconnect();
   const { open: onConnect } = useWeb3Modal();
   const { open } = useWeb3ModalState();
-  const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
   const account = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<string | null>(
@@ -57,34 +55,28 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         connector: connection.connector,
       });
     }
-    invalidateAll();
-  }, [connections, disconnect, invalidateAll]);
+  }, [connections, disconnect]);
 
   const seizeDisconnectAndLogout = useCallback(
     async (reconnect?: boolean) => {
       for (const connection of connections) {
-        await disconnect({
+        disconnect({
           connector: connection.connector,
         });
       }
       removeAuthJwt();
       setConnectedAddress(null);
-      invalidateAll();
 
       if (reconnect) {
         seizeConnect();
       }
     },
-    [connections, disconnect, seizeConnect, invalidateAll]
+    [connections, disconnect, seizeConnect]
   );
 
-  const seizeAcceptConnection = useCallback(
-    (address: string) => {
-      setConnectedAddress(address);
-      invalidateAll();
-    },
-    [invalidateAll]
-  );
+  const seizeAcceptConnection = (address: string) => {
+    setConnectedAddress(address);
+  };
 
   const contextValue = useMemo(() => {
     return {

@@ -175,8 +175,13 @@ export default function Auth({
         role: activeProfileProxy?.created_by.id ?? null,
       }).then((isAuth) => {
         if (!isAuth) {
-          reset();
-          setShowSignModal(isConnected);
+          if (!isConnected) {
+            reset();
+          } else {
+            removeAuthJwt();
+            invalidateAll();
+            setShowSignModal(true);
+          }
         }
       });
     }
@@ -417,7 +422,6 @@ export default function Auth({
         signerAddress: address,
         role: activeProfileProxy?.created_by.id ?? null,
       });
-      seizeDisconnectAndLogout();
       invalidateAll();
     }
     const isSuccess = !!getAuthJwt();
