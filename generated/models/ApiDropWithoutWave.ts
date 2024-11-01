@@ -29,6 +29,7 @@ export class ApiDropWithoutWave {
     */
     'serial_no': number;
     'drop_type': ApiDropType;
+    'rank': number | null;
     'reply_to'?: ApiReplyToDropResponse;
     'author': ApiProfileMin;
     /**
@@ -74,6 +75,12 @@ export class ApiDropWithoutWave {
             "baseName": "drop_type",
             "type": "ApiDropType",
             "format": ""
+        },
+        {
+            "name": "rank",
+            "baseName": "rank",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "reply_to",

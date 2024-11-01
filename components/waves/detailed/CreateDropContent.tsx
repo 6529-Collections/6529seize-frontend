@@ -391,6 +391,7 @@ const getOptimisticDrop = (
     context_profile_context: null,
     subscribed_actions: [],
     drop_type: dropType,
+    rank: null,
   };
 };
 

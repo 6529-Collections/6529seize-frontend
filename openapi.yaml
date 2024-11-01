@@ -2174,6 +2174,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/leaderboard:
+    get:
+      tags:
+        - Waves
+      summary: Get waves leaderboard
+      operationId: getWaveLeaderboard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is ASC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          description: Default is rank
+          required: false
+          schema:
+            type: string
+            enum:
+              - RANK
+              - CREATION_TIME
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropsLeaderboardPage"
   /waves/{id}/subscriptions:
     post:
       tags:
@@ -3216,6 +3270,7 @@ components:
         - title
         - context_profile_context
         - subscribed_actions
+        - rank
       properties:
         id:
           type: string
@@ -3225,6 +3280,10 @@ components:
           format: int64
         drop_type:
           $ref: "#/components/schemas/ApiDropType"
+        rank:
+          type: number
+          format: int64
+          nullable: true
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
         reply_to:
@@ -3449,6 +3508,20 @@ components:
         - FIND_OLDER
         - FIND_NEWER
         - FIND_BOTH
+    ApiDropsLeaderboardPage:
+      type: object
+      required:
+        - drops
+        - wave
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropWithoutWave"
+        wave:
+          $ref: "#/components/schemas/ApiWave"
     ApiDropsPage:
       type: object
       required:
@@ -3524,6 +3597,7 @@ components:
         - title
         - subscribed_actions
         - context_profile_context
+        - rank
       properties:
         id:
           type: string
@@ -3533,6 +3607,10 @@ components:
           format: int64
         drop_type:
           $ref: "#/components/schemas/ApiDropType"
+        rank:
+          type: number
+          format: int64
+          nullable: true
         reply_to:
           $ref: "#/components/schemas/ApiReplyToDropResponse"
         author:

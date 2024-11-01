@@ -19,7 +19,7 @@ import CircleLoader, {
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
 
-interface WaveDropsProps {
+export interface WaveDropsProps {
   readonly waveId: string;
   readonly onReply: ({
     drop,

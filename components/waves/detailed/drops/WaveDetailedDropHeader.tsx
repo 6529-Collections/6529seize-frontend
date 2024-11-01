@@ -12,7 +12,6 @@ interface WaveDetailedDropHeaderProps {
   readonly currentPartIndex: number;
   readonly partsCount: number;
   readonly showWaveInfo: boolean;
-  readonly rank: number | null;
 }
 
 const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
@@ -21,7 +20,6 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
   currentPartIndex,
   partsCount,
   showWaveInfo,
-  rank,
 }) => {
   const cicType = cicToType(drop.author.cic);
 
@@ -51,7 +49,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
             {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
-        {rank && <WaveDetailedDropHeaderRank rank={rank} />}
+        {drop.rank && <WaveDetailedDropHeaderRank rank={drop.rank} />}
       </div>
       <div className="tw-mt-0.5">
         {showWaveInfo && (
