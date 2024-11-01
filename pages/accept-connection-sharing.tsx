@@ -20,7 +20,15 @@ const Header = dynamic(() => import("../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function AcceptConnectionSharing() {
+interface AcceptConnectionSharingProps {
+  token: string;
+  address: string;
+  role?: string;
+}
+
+export default function AcceptConnectionSharing(props: {
+  pageProps: AcceptConnectionSharingProps;
+}) {
   const { setTitle, title, setToast } = useContext(AuthContext);
   const {
     address: connectedAddress,
@@ -35,13 +43,9 @@ export default function AcceptConnectionSharing() {
 
   const router = useRouter();
 
-  const [acceptingConnection, setAcceptingConnection] = useState(false);
+  const { token, address, role } = props.pageProps;
 
-  const { token, address, role } = router.query as {
-    token: string;
-    address: string;
-    role?: string;
-  };
+  const [acceptingConnection, setAcceptingConnection] = useState(false);
 
   useEffect(() => {
     setTitle({
@@ -172,4 +176,19 @@ export default function AcceptConnectionSharing() {
       </main>
     </>
   );
+}
+
+export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
+  const { token, address, role } = req.query;
+
+  const props: AcceptConnectionSharingProps = {
+    token,
+    address,
+  };
+  if (role) {
+    props.role = role;
+  }
+  return {
+    props,
+  };
 }
