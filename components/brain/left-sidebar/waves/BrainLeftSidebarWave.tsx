@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import Tippy from "@tippyjs/react";
+import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: ApiWave;
@@ -19,6 +20,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
+  const isMobile = useIsMobileDevice();
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -42,19 +44,19 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-px-5 tw-transition-colors tw-duration-200 tw-ease-in-out hover:tw-bg-iron-900">
+    <div className="tw-flex tw-px-5">
       <Link
         href={getHref(wave.id)}
         onMouseEnter={() => onHover(wave.id)}
         onClick={onLinkClick}
-        className={`tw-flex tw-relative tw-items-center tw-flex-1 tw-space-x-3 tw-no-underline tw-py-2 tw-transition-colors tw-duration-200 tw-ease-in-out hover:tw-bg-iron-900 ${
+        className={`tw-flex tw-relative tw-items-center tw-flex-1 tw-space-x-3 tw-no-underline tw-py-2 tw-group ${
           isActive
             ? "tw-text-primary-400 hover:tw-text-primary-400"
-            : "tw-text-iron-200 hover:tw-text-iron-50"
+            : "tw-text-iron-200 hover:tw-text-iron-300"
         } `}
       >
         <div
-          className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden ${
+          className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden tw-transition tw-duration-300 group-hover:tw-brightness-110 desktop-hover:group-hover:tw-ring-2 desktop-hover:group-hover:tw-ring-primary-400 ${
             isActive
               ? "tw-ring-2 tw-ring-primary-400"
               : "tw-ring-1 tw-ring-iron-700"
@@ -80,17 +82,17 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             {wave.name}
           </div>
           <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
-            <span className="tw-pr-1">Last drop</span>
+            <span className="tw-pr-1">Last drop:</span>
             <span className="tw-text-iron-400">
               {getTimeAgoShort(wave.metrics.latest_drop_timestamp)}
             </span>
           </div>
         </div>
       </Link>
-      <Tippy content="Go to wave">
+      <Tippy content="Go to wave" disabled={isMobile}>
         <Link
           href={`/waves/${wave.id}`}
-          className="tw-mt-1.5 tw-size-7 sm:tw-size-6 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-rounded-full tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+          className="tw-z-10 tw-mt-1.5 tw-size-7 tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-flex-shrink-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           aria-label="Open chat"
         >
           <svg
@@ -100,7 +102,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             strokeWidth="1.5"
             stroke="currentColor"
             aria-hidden="true"
-            className="tw-size-5 sm:tw-size-4 tw-flex-shrink-0"
+            className="tw-size-4 tw-flex-shrink-0"
           >
             <path
               strokeLinecap="round"
