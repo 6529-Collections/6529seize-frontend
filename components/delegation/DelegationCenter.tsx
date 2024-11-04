@@ -14,8 +14,7 @@ import {
   GRADIENT_CONTRACT,
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
-import { useSeizeConnect } from "../../hooks/useSeizeConnect";
-
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 interface Props {
   setSection(section: DelegationCenterSection): any;
 }
@@ -23,7 +22,7 @@ interface Props {
 export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const accountResolution = useAccount();
-  const { seizeConnect, seizeConnectOpen } = useSeizeConnect();
+  const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
   const [openConnect, setOpenConnect] = useState(false);
 
   useEffect(() => {

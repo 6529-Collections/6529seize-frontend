@@ -116,6 +116,7 @@ import useCapacitor from "../hooks/useCapacitor";
 import { NotificationsProvider } from "../components/notifications/NotificationsContext";
 import Footer from "../components/footer/Footer";
 import { useRouter } from "next/router";
+import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
 
 library.add(
   faArrowUp,
@@ -292,14 +293,16 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         )}
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
-            <Auth>
-              <NotificationsProvider>
-                <CookieConsentProvider>
-                  {getLayout(<Component {...props} />)}
-                  <CookiesBanner />
-                </CookieConsentProvider>
-              </NotificationsProvider>
-            </Auth>
+            <SeizeConnectProvider>
+              <Auth>
+                <NotificationsProvider>
+                  <CookieConsentProvider>
+                    {getLayout(<Component {...props} />)}
+                    <CookiesBanner />
+                  </CookieConsentProvider>
+                </NotificationsProvider>
+              </Auth>
+            </SeizeConnectProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}
         </WagmiProvider>

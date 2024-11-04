@@ -882,8 +882,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             {isParticipatory && (
               <Tippy
                 content={<span className="tw-text-xs">Drop Mode</span>}
-                placement="top"
-              >
+                placement="top">
                 <button
                   type="button"
                   onClick={() => setIsDropMode(!isDropMode)}
@@ -891,14 +890,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                     isDropMode
                       ? "tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
                       : "tw-bg-iron-800 tw-backdrop-blur-sm tw-text-iron-500 desktop-hover:hover:tw-bg-iron-700 active:tw-bg-iron-700/90 focus-visible:tw-outline-iron-700 tw-ring-1 tw-ring-iron-700/50"
-                  }`}
-                >
+                  }`}>
                   <svg
                     className="tw-size-4 tw-flex-shrink-0"
                     viewBox="0 0 24 24"
                     fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                    xmlns="http://www.w3.org/2000/svg">
                     <path
                       d="M8.62826 7.89684C8.62826 7.60735 8.62826 6.72633 7.11906 4.34441C6.41025 3.22565 5.71213 2.3144 5.68274 2.27615L5.12514 1.55005L4.56755 2.27615C4.53816 2.3144 3.84008 3.2257 3.13123 4.34441C1.62207 6.72633 1.62207 7.60735 1.62207 7.89684C1.62207 9.82846 3.19352 11.3999 5.12514 11.3999C7.05676 11.3999 8.62826 9.82846 8.62826 7.89684Z"
                       fill="currentColor"
@@ -919,15 +916,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               onClicked={onDrop}
               loading={submitting}
               disabled={!canSubmit}
-              padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5"
-            >
+              padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5">
               <span className="tw-hidden lg:tw-inline">Drop</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="tw-size-5 lg:tw-hidden"
-              >
+                className="tw-size-5 lg:tw-hidden">
                 <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
               </svg>
             </PrimaryButton>
@@ -949,8 +944,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+            transition={{ duration: 0.3 }}>
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

@@ -208,6 +208,27 @@ paths:
                 $ref: "#/components/schemas/ApiLoginResponse"
         "400":
           description: Invalid request
+  /auth/redeem-refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Redeem refresh token
+      operationId: redeemRefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRedeemRefreshTokenRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRedeemRefreshTokenResponse"
+        "400":
+          description: Invalid request
   /drops:
     get:
       tags:
@@ -3880,8 +3901,11 @@ components:
       type: object
       required:
         - token
+        - refresh_token
       properties:
         token:
+          type: string
+        refresh_token:
           type: string
     ApiNft:
       type: object
@@ -4580,6 +4604,28 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiRatingWithProfileInfoAndLevel"
+    ApiRedeemRefreshTokenRequest:
+      type: object
+      required:
+        - address
+        - token
+      properties:
+        address:
+          type: string
+        token:
+          type: string
+        role:
+          type: string
+    ApiRedeemRefreshTokenResponse:
+      type: object
+      required:
+        - address
+        - token
+      properties:
+        address:
+          type: string
+        token:
+          type: string
     ApiRegisterPushNotificationTokenRequest:
       type: object
       required:

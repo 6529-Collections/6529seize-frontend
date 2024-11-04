@@ -13,6 +13,7 @@ env:
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
   BASE_ENDPOINT: "https://seize.io"
   NEXTGEN_CHAIN_ID: "1"
+  MOBILE_APP_SCHEME: "mobile6529"
 
 jobs:
   build-upload-deploy:

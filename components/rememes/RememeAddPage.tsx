@@ -1,7 +1,7 @@
 import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { NFT } from "../../entities/INFT";
 import { fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
@@ -10,10 +10,10 @@ import { DBResponse } from "../../entities/IDBResponse";
 import { ConsolidatedTDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AuthContext } from "../auth/Auth";
+import { useAuth } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ApiSeizeSettings } from "../../generated/models/ApiSeizeSettings";
-import { useSeizeConnect } from "../../hooks/useSeizeConnect";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 interface CheckList {
   status: boolean;
@@ -22,8 +22,8 @@ interface CheckList {
 
 export default function RememeAddPage() {
   const accountResolution = useAccount();
-  const { connectedProfile } = useContext(AuthContext);
-  const { seizeConnect, seizeConnectOpen } = useSeizeConnect();
+  const { connectedProfile } = useAuth();
+  const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
 
   const [seizeSettings, setSeizeSettings] = useState<ApiSeizeSettings>();
 
