@@ -26,9 +26,11 @@ interface AcceptConnectionSharingProps {
   role?: string;
 }
 
-export default function AcceptConnectionSharing(props: {
-  pageProps: Readonly<AcceptConnectionSharingProps>;
-}) {
+export default function AcceptConnectionSharing(
+  props: Readonly<{
+    pageProps: AcceptConnectionSharingProps;
+  }>
+) {
   const { setTitle, title, setToast } = useContext(AuthContext);
   const {
     address: connectedAddress,
