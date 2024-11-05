@@ -2,9 +2,12 @@ import styles from "./Auth.module.scss";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 import {
   getAuthJwt,
+  getRefreshToken,
+  getWalletAddress,
+  getWalletRole,
   removeAuthJwt,
   setAuthJwt,
 } from "../../services/auth/auth.utils";
@@ -28,7 +31,9 @@ import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
-import { useSeizeConnect } from "../../hooks/useSeizeConnect";
+import { useSeizeConnectContext } from "./SeizeConnectContext";
+import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
+import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -88,9 +93,9 @@ export default function Auth({
   readonly children: React.ReactNode;
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
-  const { address } = useAccount();
 
-  const { seizeDisconnect } = useSeizeConnect();
+  const { address, isConnected, seizeDisconnectAndLogout } =
+    useSeizeConnectContext();
 
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
@@ -157,6 +162,7 @@ export default function Auth({
     removeAuthJwt();
     invalidateAll();
     setActiveProfileProxy(null);
+    seizeDisconnectAndLogout();
   }
 
   useEffect(() => {
@@ -164,15 +170,21 @@ export default function Auth({
       reset();
       return;
     } else {
-      const isAuth = validateJwt({
+      validateJwt({
         jwt: getAuthJwt(),
         wallet: address,
         role: activeProfileProxy?.created_by.id ?? null,
+      }).then((isAuth) => {
+        if (!isAuth) {
+          if (!isConnected) {
+            reset();
+          } else {
+            removeAuthJwt();
+            invalidateAll();
+            setShowSignModal(true);
+          }
+        }
       });
-      if (!isAuth) {
-        reset();
-        setShowSignModal(true);
-      }
     }
   }, [address, activeProfileProxy]);
 
@@ -287,7 +299,12 @@ export default function Auth({
           role: role ?? undefined,
         },
       });
-      setAuthJwt(tokenResponse.token);
+      setAuthJwt(
+        signerAddress,
+        tokenResponse.token,
+        tokenResponse.refresh_token,
+        role ?? undefined
+      );
       return { success: true };
     } catch {
       setToast({
@@ -311,7 +328,58 @@ export default function Auth({
     return decodedJwt.role;
   };
 
-  const validateJwt = ({
+  const validateJwt = async ({
+    jwt,
+    wallet,
+    role,
+  }: {
+    jwt: string | null;
+    wallet: string;
+    role: string | null;
+  }): Promise<boolean> => {
+    const isValid = doJWTValidation({ jwt, wallet, role });
+
+    if (!isValid) {
+      const refreshToken = getRefreshToken();
+      const walletAddress = getWalletAddress();
+      if (!refreshToken || !walletAddress) {
+        return false;
+      }
+      const redeemResponse = await commonApiPost<
+        ApiRedeemRefreshTokenRequest,
+        ApiRedeemRefreshTokenResponse
+      >({
+        endpoint: "auth/redeem-refresh-token",
+        body: {
+          address: walletAddress,
+          token: refreshToken,
+          role: role ?? undefined,
+        },
+      }).catch(() => {
+        return null;
+      });
+      if (redeemResponse) {
+        const walletRole = getWalletRole();
+        const tokenRole = getRole({ jwt });
+        if (
+          (walletRole && tokenRole && tokenRole === walletRole) ||
+          (!walletRole && !tokenRole)
+        ) {
+          setAuthJwt(
+            redeemResponse.address,
+            redeemResponse.token,
+            refreshToken,
+            walletRole ?? undefined
+          );
+          return true;
+        }
+      }
+    }
+
+    return isValid;
+  };
+
+  const doJWTValidation = ({
     jwt,
     wallet,
     role,
@@ -344,7 +412,7 @@ export default function Auth({
       invalidateAll();
       return { success: false };
     }
-    const isAuth = validateJwt({
+    const isAuth = await validateJwt({
       jwt: getAuthJwt(),
       wallet: address,
       role: activeProfileProxy?.created_by.id ?? null,
@@ -402,6 +470,7 @@ export default function Auth({
   const [showWaves, setShowWaves] = useState(getShowWaves());
 
   useEffect(() => {
+    console.log("i am getShowWaves", getShowWaves());
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
 
@@ -459,8 +528,7 @@ export default function Auth({
         setActiveProfileProxy: onActiveProfileProxy,
         setTitle,
         title: pageTitle,
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
       <Modal
@@ -468,8 +536,7 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered
-      >
+        centered>
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -494,16 +561,14 @@ export default function Auth({
             variant="danger"
             onClick={() => {
               setShowSignModal(false);
-              seizeDisconnect();
-            }}
-          >
+              seizeDisconnectAndLogout();
+            }}>
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}
-          >
+            disabled={signMessage.isPending}>
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />

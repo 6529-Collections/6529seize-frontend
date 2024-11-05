@@ -12,13 +12,20 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiLoginResponse {
+export class ApiRedeemRefreshTokenRequest {
+    'address': string;
     'token': string;
-    'refresh_token': string;
+    'role'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "address",
+            "baseName": "address",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "token",
             "baseName": "token",
@@ -26,14 +33,14 @@ export class ApiLoginResponse {
             "format": ""
         },
         {
-            "name": "refresh_token",
-            "baseName": "refresh_token",
+            "name": "role",
+            "baseName": "role",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiLoginResponse.attributeTypeMap;
+        return ApiRedeemRefreshTokenRequest.attributeTypeMap;
     }
 
     public constructor() {

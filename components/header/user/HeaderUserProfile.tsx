@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { AuthContext } from "../../auth/Auth";
-import { useAccount } from "wagmi";
+import { useAuth } from "../../auth/Auth";
 import Link from "next/link";
-
+import Tippy from "@tippyjs/react";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 interface UserContent {
   readonly label: string;
   readonly isProxy: boolean;
@@ -16,8 +16,8 @@ export default function HeaderUserProfile({
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { activeProfileProxy } = useContext(AuthContext);
-  const { address } = useAccount();
+  const { activeProfileProxy } = useAuth();
+  const { address, isConnected } = useSeizeConnectContext();
   const getLabel = (): string => {
     if (activeProfileProxy) {
       return `${activeProfileProxy.created_by.handle}`;
@@ -81,8 +81,7 @@ export default function HeaderUserProfile({
   return (
     <Link
       href={`${userContent.path}`}
-      className="tailwind-scope tw-relative tw-group tw-no-underline tw-px-3.5 lg:tw-px-3 xl:tw-px-3.5 tw-h-10 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-base lg:tw-text-sm xl:tw-text-base tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-border-0 tw-rounded-s-lg focus:!tw-outline focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400 tw-bg-iron-800 tw-text-white hover:tw-text-white hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
-    >
+      className="tailwind-scope tw-relative tw-group tw-no-underline tw-px-3.5 lg:tw-px-3 xl:tw-px-3.5 tw-h-10 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-base lg:tw-text-sm xl:tw-text-base tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-border-0 tw-rounded-s-lg focus:!tw-outline focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400 tw-bg-iron-800 tw-text-white hover:tw-text-white hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
       {userContent.pfpUrl ? (
         <img
           src={userContent.pfpUrl}
@@ -93,6 +92,25 @@ export default function HeaderUserProfile({
         <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 -tw-ml-1 tw-flex-none tw-rounded-md tw-bg-iron-700 group-hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"></div>
       )}
       <div className="tw-flex tw-gap-x-2 tw-items-center">
+        {isConnected ? (
+          <Tippy
+            content="Connected and Authenticated"
+            placement="top"
+            theme="light">
+            <div
+              className="tw-w-2 tw-h-2 tw-rounded-full tw-shadow-[0_0_12px_rgba(0,220,33,1)]"
+              style={{ backgroundColor: "rgb(0,220,33)" }}></div>
+          </Tippy>
+        ) : (
+          <Tippy
+            content="Authenticated (wallet not connected)"
+            placement="top"
+            theme="light">
+            <div
+              className="tw-w-2 tw-h-2 tw-rounded-full tw-shadow-[0_0_12px_rgba(255,159,0,1)]"
+              style={{ backgroundColor: "rgb(255,159,0)" }}></div>
+          </Tippy>
+        )}
         <span>{userContent.label}</span>
         {userContent.isProxy && (
           <span className="tw-text-sm tw-text-iron-300 tw-italic tw-font-normal">

@@ -340,8 +340,7 @@ export default function DropReplyInputWrapper({
         onEditorState={setEditorState}
         onMentionedUser={onMentionedUser}
         onReferencedNft={onReferencedNft}
-        onFileChange={setFile}
-      >
+        onFileChange={setFile}>
         <PrimaryButton onClick={onDrop} disabled={!canSubmit} loading={loading}>
           Reply
         </PrimaryButton>

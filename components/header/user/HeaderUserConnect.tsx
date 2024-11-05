@@ -1,7 +1,6 @@
-import { useSeizeConnect } from "../../../hooks/useSeizeConnect";
-
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 export default function HeaderUserConnect(props: Readonly<{}>) {
-  const { seizeConnect } = useSeizeConnect();
+  const { seizeConnect } = useSeizeConnectContext();
   return (
     <button
       onClick={() => seizeConnect()}

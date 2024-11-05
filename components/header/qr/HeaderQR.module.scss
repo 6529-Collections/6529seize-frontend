@@ -1,0 +1,32 @@
+@import "../../../styles/variables.scss";
+
+.disabledMenuBtn {
+  pointer-events: none;
+}
+
+.modalBody {
+  background-color: $very-dark-grey;
+}
+
+.url {
+  font-size: smaller;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $lightest-grey;
+  max-width: calc(100% - 20px);
+}
+
+.urlCopy {
+  height: 16px;
+  cursor: pointer;
+  color: $lightest-grey;
+
+  &:hover {
+    color: $off-white;
+  }
+
+  &.copied {
+    color: green;
+  }
+}
