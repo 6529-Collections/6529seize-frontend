@@ -1,7 +1,7 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 
-import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
+import WaveDetailedDrop, { DropLocation } from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
@@ -81,6 +81,7 @@ const DropsList = memo(function DropsList({
             activeDrop={activeDrop}
             onReply={handleReply}
             onQuote={handleQuote}
+            location={DropLocation.WAVE}
             showReplyAndQuote={showReplyAndQuote}
             onQuoteClick={onQuoteClick}
             parentContainerRef={parentContainerRef}

@@ -18,6 +18,11 @@ export interface DropInteractionParams {
   partId: number;
 }
 
+export enum DropLocation {
+  MY_STREAM = "MY_STREAM",
+  WAVE = "WAVE",
+}
+
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
@@ -69,10 +74,12 @@ const getRankClasses = ({
 const getDropClasses = (
   isActiveDrop: boolean,
   groupingClass: string,
-  border: boolean,
+  location: DropLocation,
   rank: number | null,
   isDrop: boolean
 ): string => {
+
+
   const baseClasses =
     "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
 
@@ -85,7 +92,10 @@ const getDropClasses = (
 
   return `${baseClasses} ${
     isActiveDrop ? activeClasses : inactiveClasses
-  } ${groupingClass} ${border ? borderClasses : ""} ${rankClasses}`.trim();
+  } ${groupingClass} ${
+    location === DropLocation.MY_STREAM ? borderClasses : ""
+  } ${rankClasses}`.trim();
+
 };
 
 interface WaveDetailedDropProps {
@@ -95,7 +105,7 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly border?: boolean;
+  readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
@@ -109,7 +119,7 @@ const WaveDetailedDrop = ({
   nextDrop,
   showWaveInfo,
   activeDrop,
-  border = false,
+  location,
   onReply,
   onQuote,
   onReplyClick,
@@ -206,7 +216,7 @@ const WaveDetailedDrop = ({
   const dropClasses = getDropClasses(
     isActiveDrop,
     groupingClass,
-    border,
+    location,
     drop.rank,
     isDrop
   );

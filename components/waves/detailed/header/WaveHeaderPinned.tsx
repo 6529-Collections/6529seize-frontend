@@ -3,7 +3,7 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
-import WaveDetailedDrop from "../drops/WaveDetailedDrop";
+import WaveDetailedDrop, { DropLocation } from "../drops/WaveDetailedDrop";
 import { WaveHeaderPinnedSide } from "./WaveHeader";
 
 interface WaveHeaderPinnedProps {
@@ -11,12 +11,7 @@ interface WaveHeaderPinnedProps {
   readonly side: WaveHeaderPinnedSide;
 }
 
-
-
-const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({
-  wave,
-  side,
-}) => {
+const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -110,6 +105,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({
                 activeDrop={null}
                 onReplyClick={() => {}}
                 showReplyAndQuote={false}
+                location={DropLocation.WAVE}
                 onReply={() => {}}
                 onQuote={() => {}}
                 previousDrop={null}
