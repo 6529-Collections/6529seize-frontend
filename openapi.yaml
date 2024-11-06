@@ -3167,7 +3167,6 @@ components:
       required:
         - scope
         - credit_type
-        - credit_scope
         - credit_category
         - signature_required
         - creditor_id
@@ -3542,7 +3541,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
         wave:
-          $ref: "#/components/schemas/ApiWave"
+          $ref: "#/components/schemas/ApiWaveMin"
     ApiDropsPage:
       type: object
       required:
@@ -5087,26 +5086,16 @@ components:
       description: >
         The scope of the credit. 
 
-        * WAVE - Credit is spendable across all drops in wave. 
-
-        * DROP - The amount of votes, voter can give to a drop is not affected
-        by votes spent on other drops. 
-
-        * PARTICIPANT: The amount of votes, voter can give to a drop by concrete
-        participant is only affected by voted given by same user to other drops
-        by the same participant.
+        * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
-        - DROP
-        - PARTICIPANT
     ApiWaveCreditType:
       type: string
       description: |
-        What will be counted as a credit. UNIQUE means each voter gets one vote.
+        What will be counted as a credit.
       enum:
         - TDH
         - REP
-        - UNIQUE
     ApiWaveDropsFeed:
       type: object
       required:
@@ -5320,7 +5309,6 @@ components:
       required:
         - scope
         - credit_type
-        - credit_scope
         - credit_category
         - signature_required
         - creditor
@@ -5330,8 +5318,6 @@ components:
           $ref: "#/components/schemas/ApiWaveScope"
         credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
-        credit_scope:
-          $ref: "#/components/schemas/ApiWaveCreditScope"
         credit_category:
           description: >-
             Only relevant when credit_type=REP. The REP category which is usable

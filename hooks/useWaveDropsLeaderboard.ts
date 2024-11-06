@@ -118,18 +118,7 @@ export function useWaveDropsLeaderboard(
       const newDrops = data?.pages
         ? mapToExtendedDrops(
             data.pages.map((page) => ({
-              wave: {
-                id: page.wave.id,
-                name: page.wave.name,
-                picture: page.wave.picture ?? "",
-                description_drop_id: page.wave.description_drop.id,
-                authenticated_user_eligible_to_vote:
-                  page.wave.voting.authenticated_user_eligible,
-                authenticated_user_eligible_to_participate:
-                  page.wave.participation.authenticated_user_eligible,
-                authenticated_user_eligible_to_chat:
-                  page.wave.chat.authenticated_user_eligible,
-              },
+              wave: page.wave,
               drops: page.drops,
             })),
             prev,

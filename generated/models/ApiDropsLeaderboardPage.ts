@@ -11,12 +11,12 @@
  */
 
 import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
-import { ApiWave } from '../models/ApiWave';
+import { ApiWaveMin } from '../models/ApiWaveMin';
 import { HttpFile } from '../http/http';
 
 export class ApiDropsLeaderboardPage {
     'drops': Array<ApiDropWithoutWave>;
-    'wave': ApiWave;
+    'wave': ApiWaveMin;
     'count': number;
     'page': number;
     'next': boolean;
@@ -33,7 +33,7 @@ export class ApiDropsLeaderboardPage {
         {
             "name": "wave",
             "baseName": "wave",
-            "type": "ApiWave",
+            "type": "ApiWaveMin",
             "format": ""
         },
         {

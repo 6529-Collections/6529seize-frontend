@@ -13,10 +13,9 @@
 import { HttpFile } from '../http/http';
 
 /**
-* What will be counted as a credit. UNIQUE means each voter gets one vote. 
+* What will be counted as a credit. 
 */
 export enum ApiWaveCreditType {
     Tdh = 'TDH',
-    Rep = 'REP',
-    Unique = 'UNIQUE'
+    Rep = 'REP'
 }
