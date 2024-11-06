@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { WaveDetailedDropsView } from "./WaveDetailed";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -21,6 +22,7 @@ export interface ActiveDropState {
 
 interface WaveDetailedContentProps {
   readonly wave: ApiWave;
+  readonly dropsView: WaveDetailedDropsView;
 }
 
 export default function WaveDetailedContent({

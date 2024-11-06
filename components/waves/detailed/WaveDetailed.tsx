@@ -9,6 +9,13 @@ export enum WaveDetailedView {
   FOLLOWERS = "FOLLOWERS",
 }
 
+
+export enum WaveDetailedDropsView {
+  ALL = "ALL",
+  DROPS = "DROPS",
+}
+
+
 interface WaveDetailedProps {
   readonly wave: ApiWave;
 }
@@ -19,6 +26,11 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
     WaveDetailedView.CONTENT
   );
+  
+  const [dropsView, setDropsView] = useState<WaveDetailedDropsView>(
+    WaveDetailedDropsView.ALL
+  );
+
 
   const [activeWave, setActiveWave] = useState(wave);
 
@@ -43,7 +55,9 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
     <WaveDetailedMobile
       wave={activeWave}
       view={activeView}
+      dropsView={dropsView}
       setView={setActiveView}
+      setDropsView={setDropsView}
       isLoading={isLoading}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
@@ -53,6 +67,8 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       wave={activeWave}
       view={activeView}
       setView={setActiveView}
+      dropsView={dropsView}
+      setDropsView={setDropsView}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
     />

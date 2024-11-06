@@ -4,15 +4,18 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
-import { WaveDetailedView } from "./WaveDetailed";
+import { WaveDetailedDropsView, WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
 import WaveDetailedRightSidebar from "./WaveDetailedRightSidebar";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import WaveDetailedDropsHeaderNav from "./WaveDetailedDropsHeaderNav";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
+  readonly dropsView: WaveDetailedDropsView;
   readonly setView: (view: WaveDetailedView) => void;
+  readonly setDropsView: (view: WaveDetailedDropsView) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
@@ -20,12 +23,15 @@ interface WaveDetailedDesktopProps {
 const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   wave,
   view,
+  dropsView,
   setView,
+  setDropsView,
   onWaveChange,
   setIsLoading,
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
+
 
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -68,6 +74,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
       <WaveDetailedContent
         key={`wave-detailed-content-${wave.id}`}
         wave={wave}
+        dropsView={dropsView}
       />
     ),
     [WaveDetailedView.FOLLOWERS]: (
@@ -78,7 +85,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     ),
   };
 
-  const showRightSidebar = wave.wave.type !== ApiWaveType.Chat;
+  const isNotChatWave = wave.wave.type !== ApiWaveType.Chat;
 
   if (!showWaves) {
     return null;
@@ -102,7 +109,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
           </div>
           <div
             className={`tw-flex-1 tw-ml-[21.5rem] ${
-              isSidebarOpen && showRightSidebar ? "tw-mr-[19.5rem]" : ""
+              isSidebarOpen && isNotChatWave ? "tw-mr-[19.5rem]" : ""
             } tw-transition-all tw-duration-300`}
           >
             <div
@@ -117,22 +124,18 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {showRightSidebar && (
-                    <div className="tw-flex tw-space-x-2 tw-px-4 tw-py-1.5 tw-bg-iron-950/70 tw-backdrop-blur-md tw-border-solid tw-border-b tw-border-iron-800 tw-border-x-0 tw-border-t-0 tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-z-10">
-                      <button className="tw-px-3 tw-py-1.5 tw-border-0 tw-rounded-full tw-text-xs tw-font-medium tw-bg-primary-400 tw-text-white tw-shadow-sm hover:tw-bg-primary-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 tw-transition-colors">
-                        All
-                      </button>
-                      <button className="tw-px-3 tw-py-1.5 tw-border-0 tw-rounded-full tw-text-xs tw-font-medium tw-bg-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 tw-transition-colors">
-                        Drops
-                      </button>
-                    </div>
+                  {isNotChatWave && (
+                    <WaveDetailedDropsHeaderNav
+                      dropsView={dropsView}
+                      setDropsView={setDropsView}
+                    />
                   )}
                   {components[view]}
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
-          {showRightSidebar && (
+          {isNotChatWave && (
             <WaveDetailedRightSidebar
               isOpen={isSidebarOpen}
               wave={wave}
